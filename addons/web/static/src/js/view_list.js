@@ -1007,6 +1007,13 @@ instance.web.ListView.List = instance.web.Class.extend( /** @lends instance.web.
                     if (!self.dataset.select_id(row_id)) {
                         throw new Error(_t("Could not find id in dataset"));
                     }
+                    // FIX: xal @ 2013-04-24: When clicking on a row,
+                    //      also update view dataset index - as 'editable
+                    //      list' are using only this one, we end up build
+                    //      a context with a wrong 'active_id'
+                    if (!self.view.dataset.select_id(row_id)) {
+                        throw new Error(_t("Could not find id in dataset"));                        
+                    }
                     self.row_clicked(e);
                 }
             });
