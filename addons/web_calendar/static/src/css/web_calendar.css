@@ -19,8 +19,22 @@
   display: none; }
 .openerp .oe_calendar .dhx_cal_navline, .openerp .oe_calendar .dhx_cal_header {
   z-index: auto; }
+.openerp .oe_calendar .dhx_cal_event_line, .openerp .oe_calendar .dhx_cal_event_clear {
+  font-size: 13px;
+  font-family: "Lucida Grande", Helvetica, Verdana, Arial, sans-serif;
+  height: 17px; }
+.openerp .oe_calendar .dhx_cal_event_clear {
+  height: auto; }
+.openerp .oe_calendar .dhx_cal_event .dhx_footer {
+  background: url(../../lib/dhtmlxScheduler/codebase/imgs_dhx_terrace/resizing.png) no-repeat center center !important; }
+.openerp .oe_calendar .dhx_event_move {
+  cursor: pointer; }
 .openerp .oe_calendar.oe_cal_month .dhx_cal_data table tr td:last-child div.dhx_month_body {
   padding-right: 5px; }
 .openerp .oe_calendar_mini .dhx_year_event {
   background-color: white;
   font-weight: bold; }
+.openerp .oe_calendar_mini .dhx_calendar_click.dhx_year_event {
+  background-color: #c2d5fc; }
+.openerp .oe_calendar_mini .dhx_now .dhx_year_event {
+  background-color: #fff3a1; }

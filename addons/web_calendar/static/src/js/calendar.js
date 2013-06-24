@@ -23,6 +23,30 @@
                 scheduler.setCurrentView( scheduler.date.date_part(new Date()) );
             }
         };
+
+        // Fix color of timed (i.e != allday) event on month view
+        // Those should be displayed in non-inverted colors
+        var old_scheduler_render_hbar = scheduler.render_event_bar;
+        scheduler.render_event_bar = function (ev) {
+            old_scheduler_render_hbar.apply(this, arguments);
+            if (ev._timed) {
+                // Fix color for month event - needed by terrace dhx theme
+                $(this._rendered[this._rendered.length - 1])
+                    .css('background-color', '')
+                    .css('color', ev.color);
+            }
+        };
+
+        // Fix vertical event to allow used to drag'n'drop it by clicking
+        // anywere on the event, not only on the header (this make it more
+        // difficul to select it)
+        var old_render_vbar = scheduler._render_v_bar;
+        scheduler._render_v_bar = function (id, x, y, w, h, style, contentA, contentB, bottom) {
+            var container = old_render_vbar.apply(this, arguments);
+            var event_body = $('.dhx_body', container);
+            event_body.attr('class', 'dhx_event_move '+event_body.attr('class'));
+            return container;
+        };
     }
 }());
 
@@ -148,6 +172,7 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         scheduler.config.mark_now = true;
         scheduler.config.day_date = '%l %j';
         scheduler.config.details_on_create = false;
+        scheduler.xy.bar_height = 20;
 
         scheduler.locale = {
             date:{

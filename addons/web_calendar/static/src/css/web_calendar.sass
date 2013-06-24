@@ -33,6 +33,20 @@
             // dropdown menus and I want to avoid a z-index war.
             z-index: auto
 
+        .dhx_cal_event_line, .dhx_cal_event_clear
+            font-size: 13px
+            font-family: "Lucida Grande", Helvetica, Verdana, Arial, sans-serif
+            height: 17px
+            //line-height: 15px
+        .dhx_cal_event_clear
+            height: auto
+        .dhx_cal_event .dhx_footer
+            background: url(../../lib/dhtmlxScheduler/codebase/imgs_dhx_terrace/resizing.png) no-repeat center center !important
+
+        .dhx_event_move
+            cursor: pointer
+
+
         &.oe_cal_month .dhx_cal_data
 
             table tr td:last-child div.dhx_month_body
@@ -42,6 +56,13 @@
         .dhx_year_event
             background-color: white
             font-weight: bold
+        .dhx_calendar_click.dhx_year_event
+            background-color: #C2D5FC
+
+        .dhx_now
+            .dhx_year_event
+                background-color: #FFF3A1
+
 
 // au BufWritePost,FileWritePost *.sass :!sass --style expanded --line-numbers <afile> > "%:p:r.css"
 // vim:tabstop=4:shiftwidth=4:softtabstop=4:fdm=marker:
