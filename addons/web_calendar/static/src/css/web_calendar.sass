@@ -46,6 +46,11 @@
         .dhx_event_move
             cursor: pointer
 
+        .dhx_cal_quick_info
+            background: none repeat scroll 0 0 rgba(255, 255, 255, 1)
+        .dhx_cal_qi_title
+            color: #000000
+
 
         &.oe_cal_month .dhx_cal_data
 
@@ -62,6 +67,13 @@
         .dhx_now
             .dhx_year_event
                 background-color: #FFF3A1
+
+    // Font override for display of event on calendar view
+    .dhx_cal_container
+        font-family: "Lucida Grande",Helvetica,Verdana,Arial,sans-serif
+    .dhx_cal_event_line
+        font-family: "Lucida Grande",Helvetica,Verdana,Arial,sans-serif
+
 
 
 // au BufWritePost,FileWritePost *.sass :!sass --style expanded --line-numbers <afile> > "%:p:r.css"

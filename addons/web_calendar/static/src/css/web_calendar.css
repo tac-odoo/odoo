@@ -29,6 +29,10 @@
   background: url(../../lib/dhtmlxScheduler/codebase/imgs_dhx_terrace/resizing.png) no-repeat center center !important; }
 .openerp .oe_calendar .dhx_event_move {
   cursor: pointer; }
+.openerp .oe_calendar .dhx_cal_quick_info {
+  background: none repeat scroll 0 0 white; }
+.openerp .oe_calendar .dhx_cal_qi_title {
+  color: black; }
 .openerp .oe_calendar.oe_cal_month .dhx_cal_data table tr td:last-child div.dhx_month_body {
   padding-right: 5px; }
 .openerp .oe_calendar_mini .dhx_year_event {
@@ -38,3 +42,7 @@
   background-color: #c2d5fc; }
 .openerp .oe_calendar_mini .dhx_now .dhx_year_event {
   background-color: #fff3a1; }
+.openerp .dhx_cal_container {
+  font-family: "Lucida Grande", Helvetica, Verdana, Arial, sans-serif; }
+.openerp .dhx_cal_event_line {
+  font-family: "Lucida Grande", Helvetica, Verdana, Arial, sans-serif; }

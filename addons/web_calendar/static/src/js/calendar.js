@@ -164,6 +164,7 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         }
         scheduler.config.api_date = "%Y-%m-%d %H:%i";
         scheduler.config.multi_day = true; //Multi day events are not rendered in daily and weekly views
+        scheduler.config.mark_now = true;
         scheduler.config.start_on_monday = Date.CultureInfo.firstDayOfWeek !== 0; //Sunday = Sunday, Others = Monday
         scheduler.config.time_step = 30;
         scheduler.config.scroll_hour = 8;
@@ -171,7 +172,10 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         scheduler.config.drag_create = true;
         scheduler.config.mark_now = true;
         scheduler.config.day_date = '%l %j';
-        scheduler.config.details_on_create = false;
+        scheduler.config.details_on_create = true;
+        scheduler.config.details_on_dblclick = true;
+        scheduler.config.check_limits = false;
+        scheduler.config.quick_info_detached = true;
         scheduler.xy.bar_height = 20;
 
         scheduler.locale = {
@@ -226,11 +230,7 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
             self[fn].apply(self, arguments);
         });
         this.scheduler_attachEvent('onClick', function(event_id, mouse_event) {
-            if (!self.$el.find('.dhx_cal_editor').length && self.current_mode() === 'month') {
-                self.open_event(event_id);
-            } else {
-                return true;
-            }
+            return true;
         });
         this.scheduler_attachEvent('onDblClick', function(event_id, mouse_event) {
             if (!self.$el.find('.dhx_cal_editor').length) {
@@ -542,6 +542,8 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
             scheduler.changeEventId(event_id, id);
             self.reload_event(id);
         });
+        // Hide quick-info if any displayed
+        scheduler.hideQuickInfo();
     },
     open_event: function(event_id) {
         var self = this;
@@ -570,6 +572,8 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
             pop.on('write_completed', self, function(){
                 self.reload_event(id_from_dataset);
             });
+            // Hide quick-info if any displayed
+            scheduler.hideQuickInfo();
         }
     },
     delete_event: function(event_id, event_obj) {
