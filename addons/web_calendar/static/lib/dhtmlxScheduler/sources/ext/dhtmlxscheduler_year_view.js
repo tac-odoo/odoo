@@ -76,10 +76,9 @@ scheduler.templates.year_tooltip = function(s, e, ev) {
 			this._tooltip.innerHTML = "";
 		} else {
 			var t = this._tooltip = document.createElement("DIV");
-			t.className = "dhx_tooltip";
+			t.className = "dhx_year_tooltip";
 			document.body.appendChild(t);
 			t.onclick = scheduler._click.dhx_cal_data;
-
 		}
 		var evs = this.getEvents(date, this.date.add(date, 1, "day"));
 		var html = "";
@@ -222,7 +221,7 @@ scheduler.templates.year_tooltip = function(s, e, ev) {
 		var summ = dx - 11;
 		var left = 0;
 		var week_template = document.createElement("div");
-		var dummy_date = this.date.week_start(new Date());
+		var dummy_date = this.date.week_start(scheduler._currentDate());
 		for (var i = 0; i < 7; i++) {
 			this._cols[i] = Math.floor(summ / (7 - i));
 			this._render_x_header(i, left, dummy_date, week_template);

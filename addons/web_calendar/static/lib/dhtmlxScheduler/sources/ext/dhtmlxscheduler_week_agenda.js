@@ -165,8 +165,8 @@ scheduler.attachEvent("onTemplatesReady", function() {
 			scheduler._els['dhx_cal_date'][0].innerHTML = "";
 
 			// 1 to make navline to be over data
-			scheduler._els['dhx_cal_data'][0].style.top = (parseInt(scheduler._els['dhx_cal_data'][0].style.top) - scheduler.xy.bar_height - 1) + 'px';
-			scheduler._els['dhx_cal_data'][0].style.height = (parseInt(scheduler._els['dhx_cal_data'][0].style.height) + scheduler.xy.bar_height + 1) + 'px';
+			scheduler._els['dhx_cal_data'][0].style.top = (parseInt(scheduler._els['dhx_cal_data'][0].style.top) - 20 - 1) + 'px';
+			scheduler._els['dhx_cal_data'][0].style.height = (parseInt(scheduler._els['dhx_cal_data'][0].style.height) + 20 + 1) + 'px';
 
 			scheduler._els['dhx_cal_header'][0].style.display = 'none';
 			fillWeekAgendaTab();
@@ -178,8 +178,8 @@ scheduler.attachEvent("onTemplatesReady", function() {
 				scheduler._els['dhx_cal_data'][0].style.borderTop = scheduler._wa._prev_data_border;
 
 			scheduler._els['dhx_cal_data'][0].style.overflowY = 'auto';
-			scheduler._els['dhx_cal_data'][0].style.top = (parseInt(scheduler._els['dhx_cal_data'][0].style.top) + scheduler.xy.bar_height) + 'px';
-			scheduler._els['dhx_cal_data'][0].style.height = (parseInt(scheduler._els['dhx_cal_data'][0].style.height) - scheduler.xy.bar_height) + 'px';
+			scheduler._els['dhx_cal_data'][0].style.top = (parseInt(scheduler._els['dhx_cal_data'][0].style.top) + 20) + 'px';
+			scheduler._els['dhx_cal_data'][0].style.height = (parseInt(scheduler._els['dhx_cal_data'][0].style.height) - 20) + 'px';
 			scheduler._els['dhx_cal_header'][0].style.display = 'block';
 		}
 	};

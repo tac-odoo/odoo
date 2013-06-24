@@ -39,4 +39,19 @@ to use it in non-GPL project. Please contact sales@dhtmlx.com for details
 		setCookie("scheduler_settings","expires=Sun, 31 Jan 9999 22:00:00 GMT",text);
 		return true;
 	});
+
+
+	// As we are blocking first render above there could be a problem in case of dynamic loading ('from' won't be defined)
+	var old_load = scheduler._load;
+	scheduler._load = function() {
+		var args = arguments;
+		if (!scheduler._date && scheduler._load_mode) {
+			var that = this;
+			window.setTimeout(function() {
+				old_load.apply(that, args);
+			},1);
+		} else {
+			old_load.apply(this, args);
+		}
+	}
 })();

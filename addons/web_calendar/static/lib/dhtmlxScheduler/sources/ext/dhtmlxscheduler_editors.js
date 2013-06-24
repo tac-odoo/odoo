@@ -11,22 +11,35 @@ scheduler.form_blocks['combo']={
 		return res;
 	},
 	set_value:function(node,value,ev,config){
-		if(node._combo) {
-			node._combo.destructor();
-		}  
+		(function(){
+			resetCombo();
+			var id = scheduler.attachEvent("onAfterLightbox",function(){
+				// otherwise destructor will never be called after form reset(e.g. in readonly event mode)
+				resetCombo();
+				scheduler.detachEvent(id);
+			});
+			function resetCombo(){
+				if(node._combo && node._combo.DOMParent) {
+					node._combo.destructor();
+				}
+			}
+		})();
 		window.dhx_globalImgPath = config.image_path||'/';
 		node._combo = new dhtmlXCombo(node, config.name, node.offsetWidth-8);
 		if (config.options_height)
 			node._combo.setOptionHeight(config.options_height);
 		var combo = node._combo;
-		combo.enableFilteringMode(!!config.filtering, config.script_path||null, !!config.cache);
+		combo.enableFilteringMode(config.filtering, config.script_path||null, !!config.cache);
 		
 		if (!config.script_path) { // script-side filtration is used
 			var all_options = [];
 			for (var i = 0; i < config.options.length; i++) {
-				var single_option = [];
-				single_option.push(config.options[i].key);
-				single_option.push(config.options[i].label);
+				var option = config.options[i];
+				var single_option = [
+					option.key,
+					option.label,
+					option.css
+				];
 				all_options.push(single_option);
 			}
 			combo.addOption(all_options);
@@ -54,7 +67,7 @@ scheduler.form_blocks['combo']={
 					});
 				}
 			} else {
-				combo.setComboValue(null);
+				combo.setComboValue("");
 			}
 		}
 	},

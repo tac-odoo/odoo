@@ -25,15 +25,26 @@ scheduler.createUnitsView=function(name,property,list,size,step,skip_incorrect){
 	scheduler.templates[name+"_date"] = function(date){
 		return scheduler.templates.day_date(date);
 	};
-	
-	scheduler.templates[name+"_scale_date"] = function(date){
-		var list = scheduler._props[name].options;
+
+	scheduler._get_unit_index = function(unit_view, date) {
+		var original_position = unit_view.position || 0;
+		var date_position = Math.floor((scheduler._correct_shift(+date, 1) - +scheduler._min_date) / (60 * 60 * 24 * 1000));
+		return original_position + date_position;
+	};
+	scheduler.templates[name + "_scale_text"] = function(id, label, option) {
+		if (option.css) {
+			return "<span class='" + option.css + "'>" + label + "</span>";
+		} else {
+			return label;
+		}
+	};
+	scheduler.templates[name+"_scale_date"] = function(date) {
+		var unit_view = scheduler._props[name];
+		var list = unit_view.options;
 		if (!list.length) return "";
-		var index = (scheduler._props[name].position||0)+Math.floor((scheduler._correct_shift(date.valueOf(),1)-scheduler._min_date.valueOf())/(60*60*24*1000));
-		if (list[index].css) 
-			return "<span class='"+list[index].css+"'>"+list[index].label+"</span>";
-		else
-			return list[index].label;
+		var index = scheduler._get_unit_index(unit_view, date);
+		var option = list[index];
+		return scheduler.templates[name + "_scale_text"](option.key, option.label, option);
 	};
 
 	scheduler.date["add_"+name]=function(date,inc){ return scheduler.date.add(date,inc,"day"); };
@@ -192,6 +203,7 @@ scheduler.scrollUnit=function(step){
 			pos.section = ev[key]=pr.options[unit_ind].key;
 			pos.x = 0;
 		}
+		pos.force_redraw = true;
 		return pos;
 	};
 	var o = scheduler._time_order;

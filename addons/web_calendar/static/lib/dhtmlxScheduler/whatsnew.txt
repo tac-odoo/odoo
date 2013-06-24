@@ -1,3 +1,14 @@
+3.7
+	Touch support ( tablets and touch monitors )
+	Romanian locale added
+
+3.6
+	Windows8 edition added
+	Extended date format configuration for lightbox form
+	Sub-day navigation in timeline view
+	Ability to define custom sorting in timeline view
+	Multi-page export to PDF
+
 3.5
 	Ability to show multiple scheduler's per page (PRO version only)
 	Supports loading JSON directly from Connectors
@@ -28,9 +39,6 @@
 	Configurable work-time bounds 
 	API to access lightbox values 
 	
-	build 120111:
-	- updated dhtmlxscheduker_mobile.js
-	
 
 
 2.3 
@@ -45,4 +53,3 @@
 	Checkbox, combo, radio - sections for details form 
 	Api of mini-calendar extension extended 
 	Custom form implementation simplified
-

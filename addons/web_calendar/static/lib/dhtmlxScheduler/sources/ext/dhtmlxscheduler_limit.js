@@ -79,6 +79,8 @@ scheduler.config.display_marked_timespans = true;
 		var res = true;
 		for (var p=0; p<evs.length; p++) {
 			var ev = evs[p];
+			// Event could have old _timed property (e.g. we are creating event with DND on timeline view and crossed day)
+			ev._timed = scheduler.is_one_day_event(ev);
 
 			res = (c.limit_start && c.limit_end) ? (ev.start_date.valueOf() >= c.limit_start.valueOf() && ev.end_date.valueOf() <= c.limit_end.valueOf()) : true;
 			if (res){
@@ -114,16 +116,20 @@ scheduler.config.display_marked_timespans = true;
 					}
 					// now need to add day blocks
 					var block_days = timespans.global;
-					var blocked_day_zones = get_relevant_blocked_zones(day_index, day_value, block_days)
+					var blocked_day_zones = get_relevant_blocked_zones(day_index, day_value, block_days);
 					for (var i=0; i<blocked_day_zones.length; i++) {
 						zones = scheduler._add_timespan_zones(zones, blocked_day_zones[i].zones);
 					}
 
-					var sm = scheduler._get_zone_minutes(temp_start_date);
-					var em = ( ev.end_date>temp_end_date || ev.end_date.getDate() != temp_start_date.getDate() ) ? 1440 : scheduler._get_zone_minutes(ev.end_date);
+
 
 					if (zones){
-						for (var i = 0; i < zones.length; i+=2){
+						for (var i = 0; i < zones.length; i+=2) {
+
+							// they may change for new event if it passes limit zone
+							var sm = scheduler._get_zone_minutes(temp_start_date);
+							var em = ( ev.end_date>temp_end_date || ev.end_date.getDate() != temp_start_date.getDate() ) ? 1440 : scheduler._get_zone_minutes(ev.end_date);
+
 							var sz = zones[i];
 							var ez = zones[i+1];
 							if (sz<em && ez>sm) {
@@ -253,7 +259,7 @@ scheduler.config.display_marked_timespans = true;
 		if (!this._els[dhx_now_time]) {
 			this._els[dhx_now_time] = [];
 		}
-		var now = scheduler.config.now_date || new Date();
+		var now = scheduler._currentDate();
 		var cfg = this.config;
 		scheduler._remove_mark_now(); // delete previous marks if they exist
 		if (!hide && cfg.mark_now && now < this._max_date && now > this._min_date && now.getHours() >= cfg.first_hour && now.getHours()<cfg.last_hour) {
@@ -437,8 +443,8 @@ scheduler.config.display_marked_timespans = true;
 	};
 	scheduler._get_dates_by_index = function(index, start, end) {
 		var dates = [];
-		start = start||scheduler._min_date;
-		end = end||scheduler._max_date;
+		start = scheduler.date.date_part(new Date(start||scheduler._min_date));
+		end = new Date(end||scheduler._max_date);
 		var start_day = start.getDay();
 		var delta = (index-start_day >= 0) ? (index-start_day) : (7-start.getDay()+index);
 		var t_date = scheduler.date.add(start, delta, "day");
@@ -477,7 +483,8 @@ scheduler.config.display_marked_timespans = true;
 		if (!c.display_marked_timespans)
 			return blocks;
 
-		if (!day && day !== 0) { // in case of markTimespan
+		// in case of markTimespan
+		if (!day && day !== 0) {
 			if (options.days < 7)
 				day = options.days;
 			else {
@@ -488,11 +495,15 @@ scheduler.config.display_marked_timespans = true;
 				if ( !(+max_date >= +date_to_display && +min_date <= +date_to_display) )
 					return blocks;
 
-				var day_index = date_to_display.getDay();
-				if (scheduler.config.start_on_monday) {
-					day = (day_index == 0) ? 6 : day_index-1;
-				} else
-					day = day_index;
+				day = date_to_display.getDay();
+			}
+
+			// convert day default index (Sun - 0, Sat - 6) to index of hourscales (depends on week_start and config.start_on_monday)
+			var min_day = min_date.getDay();
+			if (min_day > day) {
+				day = 7 - (min_day-day);
+			} else {
+				day = day - min_day;
 			}
 		}
 		var zones = options.zones;
@@ -546,19 +557,34 @@ scheduler.config.display_marked_timespans = true;
 				}
 			}
 		} else {
-			area = area ? area : scheduler.locate_holder(day);
+			var index = day;
+			if (this._props && this._props[this._mode] && options.sections && options.sections[this._mode]) {
+				var view = this._props[this._mode];
+				index = view.order[options.sections[this._mode]];
+				if (view.size && (index > view.position+view.size)) {
+					index = 0;
+				}
+			}
+			area = area ? area : scheduler.locate_holder(index);
 
 			for (var i = 0; i < zones.length; i+=2){
 				var start = Math.max(zones[i], c.first_hour*60);
 				var end = Math.min(zones[i+1], c.last_hour*60);
-				if (end <= start)
-					return [];
+				if (end <= start) {
+					if (i+2 < zones.length)
+						continue;
+					else
+						return [];
+				}
 
 				var block = scheduler._get_block_by_config(options);
 				block.className = css_classes;
 
-				block.style.top = (Math.round((start*60*1000-this.config.first_hour*60*60*1000)*this.config.hour_size_px/(60*60*1000)))%(this.config.hour_size_px*24)+"px";
-				block.style.lineHeight = block.style.height = Math.max((Math.round(((end-start-1)*60*1000)*this.config.hour_size_px/(60*60*1000)))%(this.config.hour_size_px*24), 1)+"px";
+				// +1 for working with section which really takes up whole height (as % would be == 0)
+				var all_hours_height = this.config.hour_size_px*24 + 1;
+				var hour_ms = 60*60*1000;
+				block.style.top = (Math.round((start*60*1000-this.config.first_hour*hour_ms)*this.config.hour_size_px/hour_ms) % all_hours_height) + "px";
+				block.style.lineHeight = block.style.height = Math.max((Math.round(((end-start)*60*1000)*this.config.hour_size_px/hour_ms)) % all_hours_height, 1)+"px";
 
 				area.appendChild(block);
 				blocks.push(block);
@@ -586,7 +612,10 @@ scheduler.config.display_marked_timespans = true;
 			return;
 		for (var i=0; i<divs.length; i++) {
 			var div = divs[i];
-			div.parentNode.removeChild(div);
+			// parent may no longer be present if we switched views, navigated
+			if (div.parentNode) {
+				div.parentNode.removeChild(div);
+			}
 		}
 	};
 
@@ -612,6 +641,7 @@ scheduler.config.display_marked_timespans = true;
 			var css = config.css;
 			var sections = config.sections;
 			var type = config.type; // default or specified
+			config.id = id;
 
 			if (sections) {
 				for (var view_key in sections) {
@@ -763,8 +793,12 @@ scheduler.config.display_marked_timespans = true;
 		}
 	};
 	scheduler.deleteMarkedTimespan = function(configuration) {
-		if (!arguments.length) // delete everything
-			scheduler._marked_timespans = { global: {} }; 
+		// delete everything
+		if (!arguments.length) {
+			scheduler._marked_timespans = { global: {} };
+			scheduler._marked_timespans_ids = {};
+		}
+
 		if (typeof configuration != "object") { // id was passed
 			scheduler._delete_marked_timespan_by_id(configuration);
 		} else { // normal configuration was passed
@@ -806,7 +840,7 @@ scheduler.config.display_marked_timespans = true;
 		if (this._props && this._props[mode]) { // we are in the units view and need to draw it's sections as well
 			var view = this._props[mode]; // units view object
 			var units = view.options;
-			var index = (view.position||0)+Math.floor((this._correct_shift(day.valueOf(),1)-this._min_date.valueOf())/(60*60*24*1000)); // user index
+			var index = scheduler._get_unit_index(view, day);
 			var unit = units[index]; // key, label
 			day = scheduler.date.date_part(new Date(this._date)); // for units view actually only 1 day is displayed yet the day variable will change, need to use this._date for all calls
 			day_index = day.getDay();

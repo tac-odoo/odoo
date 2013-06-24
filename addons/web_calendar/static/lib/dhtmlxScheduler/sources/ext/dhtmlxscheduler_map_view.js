@@ -257,8 +257,8 @@ scheduler.attachEvent("onSchedulerReady", function() {
 		var gmap = scheduler._els.dhx_gmap[0];
 		scheduler._els.dhx_cal_data[0].style.width = (scheduler.xy.map_date_width + scheduler.xy.map_description_width + 1) + 'px';
 
-		scheduler._min_date = scheduler.config.map_start || (new Date());
-		scheduler._max_date = scheduler.config.map_end || scheduler.date.add(new Date(), 1, "year");
+		scheduler._min_date = scheduler.config.map_start || (scheduler._currentDate());
+		scheduler._max_date = scheduler.config.map_end || scheduler.date.add(scheduler._currentDate(), 1, "year");
 
 		scheduler._table_view = true;
 		set_full_view(mode);

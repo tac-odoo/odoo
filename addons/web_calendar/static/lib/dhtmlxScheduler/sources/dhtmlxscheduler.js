@@ -1918,15 +1918,15 @@ dhtmlxError.catchError("LoadXML",function(a,b,c){
     }
 });
 
-window.dhtmlXScheduler = window.scheduler = { version: "3.5.0" };
+window.dhtmlXScheduler = window.scheduler = { version: "3.7.0" };
 dhtmlxEventable(scheduler);
 
 scheduler.init=function(id,date,mode){
-	date=date||(new Date());
+	date=date||(scheduler._currentDate());
 	mode=mode||"week";
 
 	scheduler.date.init();
-	
+
 	this._obj=(typeof id == "string")?document.getElementById(id):id;
 	this._els=[];
 	this._scroll=true;
@@ -1945,10 +1945,13 @@ scheduler.init=function(id,date,mode){
 			}
 		}, 100);
 	});
+
+	this._init_touch_events();
 	this.set_sizes();
 	scheduler.callEvent('onSchedulerReady', []);
 	this.setCurrentView(date,mode);
 };
+
 scheduler.xy={
 	nav_height:22,
 	min_event_height:40,
@@ -2013,13 +2016,16 @@ scheduler.set_actions=function(){
 				this._els[a][i].onclick=scheduler._click[a];
 	this._obj.onselectstart=function(e){ return false; };
 	this._obj.onmousemove=function(e){
-		scheduler._on_mouse_move(e||event);
+		if (!scheduler._temp_touch_block)
+			scheduler._on_mouse_move(e||event);
 	};
 	this._obj.onmousedown=function(e){
-		scheduler._on_mouse_down(e||event);
+		if (!scheduler._ignore_next_click)
+			scheduler._on_mouse_down(e||event);
 	};
 	this._obj.onmouseup=function(e){
-		scheduler._on_mouse_up(e||event);
+		if (!scheduler._ignore_next_click)
+			scheduler._on_mouse_up(e||event);
 	};
 	this._obj.ondblclick=function(e){
 		scheduler._on_dbl_click(e||event);
@@ -2061,6 +2067,14 @@ scheduler.getState=function(){
 };
 scheduler._click={
 	dhx_cal_data:function(e){
+		//in case of touch disable click processing
+		if (scheduler._ignore_next_click){
+			if (e.preventDefault)
+				e.preventDefault();
+			e.cancelBubble = true;
+			return scheduler._ignore_next_click = false;
+		}
+
 		var trg = e?e.target:event.srcElement;
 		var id = scheduler._locate_event(trg);
 		
@@ -2089,7 +2103,9 @@ scheduler._click={
 			scheduler.date[scheduler._mode+"_start"](scheduler._date),(step||1),scheduler._mode));
 	},
 	dhx_cal_today_button:function(){
-		scheduler.setCurrentView(new Date());
+		if (scheduler.callEvent("onBeforeTodayDisplayed", [])) {
+			scheduler.setCurrentView(scheduler._currentDate());
+		}
 	},
 	dhx_cal_tab:function(){
 		var name = this.getAttribute("name");
@@ -2129,7 +2145,7 @@ scheduler.addEventNow=function(start,end,e){
 	}
 	
 	var d = (this.config.event_duration||this.config.time_step)*60000;
-	if (!start) start = Math.round((new Date()).valueOf()/d)*d;
+	if (!start) start = base.start_date||Math.round((scheduler._currentDate()).valueOf()/d)*d;
 	var start_date = new Date(start);
 	if (!end){
 		var start_hour = this.config.first_hour;
@@ -2256,7 +2272,7 @@ scheduler._correct_shift=function(start, back){
 scheduler._on_mouse_move=function(e){
 	if (this._drag_mode){
 		var pos=this._mouse_coords(e);
-		if (!this._drag_pos || pos.custom || this._drag_pos.x!=pos.x || this._drag_pos.y!=pos.y){
+		if (!this._drag_pos || pos.force_redraw || this._drag_pos.x!=pos.x || this._drag_pos.y!=pos.y ){
 			var start, end;
 			if (this._edit_id!=this._drag_id)
 				this._close_not_saved();
@@ -2273,14 +2289,25 @@ scheduler._on_mouse_move=function(e){
 				if (!res)
 					return;
 
-				if (!this._drag_start){
-					this._drag_start=start; return; 
+				if (!this._drag_start) {
+					this._drag_start=start;
+					return;
 				}
+
 				end = start;
-				if (end==this._drag_start) return;
+				if (end == this._drag_start) {
+				}
+
+				var start_date = new Date(this._drag_start);
+				var end_date = new Date(end);
+				if ( (this._mode == "day" || this._mode == "week")
+						&& (start_date.getHours() == end_date.getHours() && start_date.getMinutes() == end_date.getMinutes()) ) {
+			   	    end_date = new Date(this._drag_start+1000);
+				}
+
 				
 				this._drag_id=this.uid();
-				this.addEvent(new Date(this._drag_start), new Date(end),this.locale.labels.new_event,this._drag_id, pos.fields);
+				this.addEvent(start_date, end_date, this.locale.labels.new_event, this._drag_id, pos.fields);
 				
 				this.callEvent("onEventCreated",[this._drag_id,e]);
 				this._loading=false;
@@ -2291,7 +2318,7 @@ scheduler._on_mouse_move=function(e){
 			var ev=this.getEvent(this._drag_id);
 
 			if (this._drag_mode=="move"){
-				start = this._min_date.valueOf()+(pos.y*this.config.time_step+pos.x*24*60)*60000;
+				start = this._min_date.valueOf()+(pos.y*this.config.time_step+pos.x*24*60 -(scheduler._move_pos_shift||0) )*60000;
 				if (!pos.custom && this._table_view) start+=this.date.time_part(ev.start_date)*1000;
 				start = this._correct_shift(start);
 				end = ev.end_date.valueOf()-(ev.start_date.valueOf()-start);
@@ -2348,16 +2375,21 @@ scheduler._on_mouse_move=function(e){
 		}
 	}  else {
 		if (scheduler.checkEvent("onMouseMove")){
-			
 			var id = this._locate_event(e.target||e.srcElement);
 			this.callEvent("onMouseMove",[id,e]);
 		}
 	}
 };
-scheduler._on_mouse_down=function(e,src){
+scheduler._on_mouse_down=function(e,src) {
+	// on Mac we do not get onmouseup event when clicking right mouse button leaving us in dnd state
+	// let's ignore right mouse button then
+	if (e.button == 2)
+		return;
+
 	if (this.config.readonly || this._drag_mode) return;
 	src = src||(e.target||e.srcElement);
 	var classname = src.className && src.className.split(" ")[0];
+
 	switch (classname) {
 		case "dhx_cal_event_line":
 		case "dhx_cal_event_clear":
@@ -2450,7 +2482,6 @@ scheduler.update_view=function(){
 scheduler.updateView = function(date, mode) {
 	date = date || this._date;
 	mode = mode || this._mode;
-
 	var dhx_cal_data = 'dhx_cal_data';
 
 	if (!this._mode)
@@ -2477,14 +2508,15 @@ scheduler.updateView = function(date, mode) {
 	this._table_view = (this._mode == "month");
 
 	var tabs = this._els["dhx_cal_tab"];
-	for (var i = 0; i < tabs.length; i++) {
-		var name = tabs[i].className;
-		name = name.replace(/ active/g, "");
-		if (tabs[i].getAttribute("name") == this._mode + "_tab")
-			name = name + " active";
-		tabs[i].className = name;
+	if(tabs){//calendar can work without view tabs
+		for (var i = 0; i < tabs.length; i++) {
+			var name = tabs[i].className;
+			name = name.replace(/ active/g, "");
+			if (tabs[i].getAttribute("name") == this._mode + "_tab")
+				name = name + " active";
+			tabs[i].className = name;
+		}
 	}
-
 	//show new view
 	var view = this[this._mode + "_view"];
 	view ? view(true) : this.update_view();
@@ -2499,8 +2531,15 @@ scheduler.setCurrentView = function(date, mode) {
 };
 scheduler._render_x_header = function(i,left,d,h){
 	//header scale	
-	var head=document.createElement("DIV"); head.className="dhx_scale_bar";
-	this.set_xy(head,this._cols[i]-1,this.xy.scale_height-2,left,0);//-1 for border
+	var head=document.createElement("DIV");
+	head.className = "dhx_scale_bar";
+	var width = this._cols[i]-1;
+
+	if (this._mode == "month" && i === 0 && this.config.left_border) {
+		head.className += " dhx_scale_bar_border";
+		left = left+1;
+	}
+	this.set_xy(head, width, this.xy.scale_height-2, left, 0);//-1 for border
 	head.innerHTML=this.templates[this._mode+"_scale_date"](d,this._mode); //TODO - move in separate method
 	h.appendChild(head);
 };
@@ -2532,7 +2571,7 @@ scheduler._reset_scale=function(){
 	var d,dd,sd,today;
 	dd=this.date[this._mode+"_start"](new Date(this._date.valueOf()));
 	d=sd=this._table_view?scheduler.date.week_start(dd):dd;
-	today=this.date.date_part(new Date());
+	today=this.date.date_part( scheduler._currentDate());
 
 	//reset date in header
 	var ed=scheduler.date.add(dd,1,this._mode);
@@ -2546,7 +2585,7 @@ scheduler._reset_scale=function(){
 	
 	this._min_date=d;
 	this._els["dhx_cal_date"][0].innerHTML=this.templates[this._mode+"_date"](dd,ed,this._mode);
-	
+
 	for (var i=0; i<count; i++){ 
 		this._cols[i]=Math.floor(summ/(count-i));
 	
@@ -2569,7 +2608,7 @@ scheduler._reset_scale=function(){
 	}
 	this._max_date=d;
 	this._colsS[count]=this._cols[count-1]+this._colsS[count-1];
-	
+
 	if (this._table_view) // month view
 		this._reset_month_scale(b,dd,sd);
 	else{
@@ -2611,7 +2650,12 @@ scheduler._reset_hours_scale=function(b,dd,sd){
 		var cc=document.createElement("DIV");
 		cc.className="dhx_scale_hour";
 		cc.style.height=this.config.hour_size_px-(this._quirks?0:1)+"px";
-		cc.style.width=this.xy.scale_width+"px";
+		var width = this.xy.scale_width;
+		if (this.config.left_border) {
+			width = width - 1;
+			cc.className += " dhx_scale_hour_border";
+		}
+		cc.style.width = width + "px";
 		cc.innerHTML=scheduler.templates.hour_scale(date);
 		
 		c.appendChild(cc);
@@ -2621,11 +2665,19 @@ scheduler._reset_hours_scale=function(b,dd,sd){
 	if (this.config.scroll_hour)
 		b.scrollTop = this.config.hour_size_px*(this.config.scroll_hour-this.config.first_hour);
 };
+
+scheduler._currentDate = function(){
+	if(scheduler.config.now_date){
+		return new Date(scheduler.config.now_date);
+	}
+	return new Date();
+};
+
 scheduler._reset_month_scale=function(b,dd,sd){
 	var ed=scheduler.date.add(dd,1,"month");
 	
 	//trim time part for comparation reasons
-	var cd=new Date();
+	var cd = scheduler._currentDate();
 	this.date.date_part(cd);
 	this.date.date_part(sd);
 
@@ -2635,10 +2687,15 @@ scheduler._reset_month_scale=function(b,dd,sd){
 	
 	this._colsS.height=height+22;
 	var h = this._colsS.heights = [];
-	for (var i=0; i<=7; i++)
-		tdcss[i]=" style='height:"+height+"px; width:"+((this._cols[i]||0)-1)+"px;' ";
+	for (var i=0; i<=7; i++) {
+		var cell_width = ((this._cols[i]||0)-1);
+		if (i === 0 && this.config.left_border) {
+			cell_width = cell_width - 1;
+		}
+		tdcss[i]=" style='height:"+height+"px; width:"+cell_width+"px;' ";
+	}
 
-	
+
 	
 	var cellheight = 0;
 	this._min_date=sd;
@@ -2646,20 +2703,28 @@ scheduler._reset_month_scale=function(b,dd,sd){
 	var rendered_dates = [];
 	for (var i=0; i<rows; i++){
 		html+="<tr>";
-			for (var j=0; j<7; j++){
-				html+="<td";
-				var cls = "";
-				if (sd<dd)
-					cls='dhx_before';
-				else if (sd>=ed)
-					cls='dhx_after';
-				else if (sd.valueOf()==cd.valueOf())
-					cls='dhx_now';
-				html+=" class='"+cls+" "+this.templates.month_date_class(sd,cd)+"' ";
-				html+="><div class='dhx_month_head'>"+this.templates.month_day(sd)+"</div><div class='dhx_month_body' "+tdcss[j]+"></div></td>";
-				rendered_dates.push(sd);
-				sd=this.date.add(sd,1,"day");
+
+		for (var j=0; j<7; j++) {
+			html+="<td";
+			var cls = "";
+			if (sd<dd)
+				cls='dhx_before';
+			else if (sd>=ed)
+				cls='dhx_after';
+			else if (sd.valueOf()==cd.valueOf())
+				cls='dhx_now';
+			html+=" class='"+cls+" "+this.templates.month_date_class(sd,cd)+"' >";
+			var body_class = "dhx_month_body";
+			var head_class = "dhx_month_head";
+			if (j === 0 && this.config.left_border) {
+				body_class += " dhx_month_body_border";
+				head_class += " dhx_month_head_border";
 			}
+			html+="<div class='"+head_class+"'>"+this.templates.month_day(sd)+"</div>";
+			html+="<div class='"+body_class+"' "+tdcss[j]+"></div></td>";
+			rendered_dates.push(sd);
+			sd=this.date.add(sd,1,"day");
+		}
 		html+="</tr>";
 		h[i] = cellheight;
 		cellheight+=this._colsS.height;
@@ -2750,7 +2815,18 @@ scheduler.getActionData = function(n_ev) {
 		section:pos.section
 	};
 };
-
+scheduler._focus = function(node, select){
+	if (node && node.focus){
+		if (this.config.touch){
+			window.setTimeout(function(){ 
+				node.focus();
+			},100);
+		} else {
+			if (select && node.select) node.select();
+			node.focus();
+		}
+	}
+}
 scheduler.date={
 	init:function(){
 		var s = scheduler.locale.date.month_short;
@@ -2804,17 +2880,7 @@ scheduler.date={
 				if (!date.getHours() && ndate.getHours()) //shift to yesterday
 					ndate.setTime(ndate.getTime() + 60 * 60 * 1000 * (24 - ndate.getHours()));
 				break;
-			case "month":
-				var new_month = ndate.getMonth()+inc;
-				var t_ndate = new Date(ndate);
-				ndate.setMonth(new_month);
-				if (ndate.getMonth() != new_month && ndate.getMonth() != (new_month % 12)) { // 31 March +1 Month = 1 May, need to make 30 April
-					t_ndate.setDate(1);
-					t_ndate.setMonth(new_month);
-					t_ndate.setDate(new Date(t_ndate.getFullYear(),new_month+1,0).getDate());
-					ndate = t_ndate;
-				}
-				break;
+			case "month": ndate.setMonth(ndate.getMonth()+inc); break;
 			case "year": ndate.setYear(ndate.getFullYear()+inc); break;
 			case "hour": ndate.setHours(ndate.getHours()+inc); break;
 			case "minute": ndate.setMinutes(ndate.getMinutes()+inc); break;
@@ -2963,7 +3029,9 @@ scheduler.locale = {
 		week_agenda_tab: "Agenda",
 
 		/*grid view extension*/
-		grid_tab: "Grid"
+		grid_tab: "Grid",
+		drag_to_create:"Drag to create",
+		drag_to_move:"Drag to move"
 	}
 };
 
@@ -3009,14 +3077,22 @@ scheduler.config={
 	edit_on_create: 1,
 	details_on_create: 0,
 	click_form_details: 0,
+
 	cascade_event_display: false,
 	cascade_event_count: 4,
 	cascade_event_margin: 30,
+
+	multi_day_height_limit: 0,
+
 	drag_lightbox: true,
 	preserve_scroll: true,
 	select: true,
 
 	server_utc: false,
+	touch:true,
+	touch_tip:true,
+	touch_drag:500,
+	quick_info_detached:true,
 
 	positive_closing: false,
 
@@ -3032,7 +3108,9 @@ scheduler.config={
 	},
 	highlight_displayed_event: true,
 	displayed_event_color: "#ffc5ab",
-	displayed_event_text_color: "#7e2727"
+	displayed_event_text_color: "#7e2727",
+
+	left_border: false
 };
 scheduler.templates={};
 scheduler.init_templates=function(){
@@ -3101,6 +3179,7 @@ scheduler.clearAll = function() {
 	this._events = {};
 	this._loaded = {};
 	this.clear_view();
+	this.callEvent("onClearAll", []);
 };
 scheduler.addEvent = function(start_date, end_date, text, id, extra_data) {
 	if (!arguments.length)
@@ -3305,7 +3384,7 @@ scheduler._pre_render_events = function(evs, hold) {
 					h[i] = (h[i - 1] || 0) + evl.rows[i].cells[0].offsetHeight;
 				}
 				h.unshift(0);
-				if (evl.parentNode.offsetHeight < evl.parentNode.scrollHeight && !evl._h_fix) {
+				if (evl.parentNode.offsetHeight < evl.parentNode.scrollHeight && !evl._h_fix && scheduler.xy.scroll_width) {
 					//we have v-scroll, decrease last day cell
 					for (var i = 0; i < evl.rows.length; i++) {
 						var cell = evl.rows[i].cells[6].childNodes[0];
@@ -3321,18 +3400,42 @@ scheduler._pre_render_events = function(evs, hold) {
 				if (evs.length || h[0] == -1) {
 					//shift days to have space for multiday events
 					var childs = evl.parentNode.childNodes;
-					var dh = ((h[0] + 1) * hb + 1) + "px"; // +1 so multiday events would have 2px from top and 2px from bottom by default
-					data.style.top = (this._els["dhx_cal_navline"][0].offsetHeight + this._els["dhx_cal_header"][0].offsetHeight + parseInt(dh, 10)) + 'px';
+
+					// +1 so multiday events would have 2px from top and 2px from bottom by default
+					var full_multi_day_height = (h[0] + 1) * hb + 1;
+
+					var used_multi_day_height = full_multi_day_height;
+					var used_multi_day_height_css = full_multi_day_height + "px";
+					if (this.config.multi_day_height_limit) {
+						used_multi_day_height = Math.min(full_multi_day_height, this.config.multi_day_height_limit) ;
+						used_multi_day_height_css = used_multi_day_height + "px";
+					}
+
+					data.style.top = (this._els["dhx_cal_navline"][0].offsetHeight + this._els["dhx_cal_header"][0].offsetHeight + used_multi_day_height ) + 'px';
 					data.style.height = (this._obj.offsetHeight - parseInt(data.style.top, 10) - (this.xy.margin_top || 0)) + 'px';
-					var last = this._els["dhx_multi_day"][0];
-					last.style.height = dh;
-					last.style.visibility = (h[0] == -1 ? "hidden" : "visible");
-					last = this._els["dhx_multi_day"][1];
-					last.style.height = dh;
-					last.style.visibility = (h[0] == -1 ? "hidden" : "visible");
-					last.className = h[0] ? "dhx_multi_day_icon" : "dhx_multi_day_icon_small";
+
+					var multi_day_section = this._els["dhx_multi_day"][0];
+					multi_day_section.style.height = used_multi_day_height_css;
+					multi_day_section.style.visibility = (h[0] == -1 ? "hidden" : "visible");
+
+					// icon
+					var multi_day_icon = this._els["dhx_multi_day"][1];
+					multi_day_icon.style.height = used_multi_day_height_css;
+					multi_day_icon.style.visibility = (h[0] == -1 ? "hidden" : "visible");
+					multi_day_icon.className = h[0] ? "dhx_multi_day_icon" : "dhx_multi_day_icon_small";
 					this._dy_shift = (h[0] + 1) * hb;
 					h[0] = 0;
+
+					if (used_multi_day_height != full_multi_day_height) {
+						data.style.top = (parseInt(data.style.top) + 2) + "px";
+
+						multi_day_section.style.overflowY = "auto";
+						multi_day_section.style.width = (parseInt(multi_day_section.style.width) - 2) + "px";
+
+						multi_day_icon.style.position = "fixed";
+						multi_day_icon.style.top = "";
+						multi_day_icon.style.left = "";
+					}
 				}
 			}
 		}
@@ -3627,6 +3730,7 @@ scheduler.clear_event = function(id) {
 };
 scheduler.render_event = function(ev) {
 	var menu = scheduler.xy.menu_width;
+	var menu_offset = (this.config.use_select_menu_space) ? 0 : menu;
 	if (ev._sday < 0) return; //can occur in case of recurring event during time shift
 	var parent = scheduler.locate_holder(ev._sday);
 	if (!parent) return; //attempt to render non-visible event
@@ -3636,7 +3740,7 @@ scheduler.render_event = function(ev) {
 	var ev_sorder = ev._sorder || 0;
 	var top = (Math.round((sm * 60 * 1000 - this.config.first_hour * 60 * 60 * 1000) * this.config.hour_size_px / (60 * 60 * 1000))) % (this.config.hour_size_px * 24); //42px/hour
 	var height = Math.max(scheduler.xy.min_event_height, (em - sm) * this.config.hour_size_px / 60); //42px/hour
-	var width = Math.floor((parent.clientWidth - menu) / ev_count);
+	var width = Math.floor((parent.clientWidth - menu_offset) / ev_count);
 	var left = ev_sorder * width + 1;
 	if (!ev._inner) width = width * (ev_count - ev_sorder);
 	if (this.config.cascade_event_display) {
@@ -3644,15 +3748,15 @@ scheduler.render_event = function(ev) {
 		var margin = this.config.cascade_event_margin;
 		left = ev_sorder % limit * margin;
 		var right = (ev._inner) ? (ev_count - ev_sorder - 1) % limit * margin / 2 : 0;
-		width = Math.floor(parent.clientWidth - menu - left - right);
+		width = Math.floor(parent.clientWidth - menu_offset - left - right);
 	}
 
-	var d = this._render_v_bar(ev.id, menu + left, top, width, height, ev._text_style, scheduler.templates.event_header(ev.start_date, ev.end_date, ev), scheduler.templates.event_text(ev.start_date, ev.end_date, ev));
+	var d = this._render_v_bar(ev.id, menu_offset + left, top, width, height, ev._text_style, scheduler.templates.event_header(ev.start_date, ev.end_date, ev), scheduler.templates.event_text(ev.start_date, ev.end_date, ev));
 
 	this._rendered.push(d);
 	parent.appendChild(d);
 
-	left = left + parseInt(parent.style.left, 10) + menu;
+	left = left + parseInt(parent.style.left, 10) + menu_offset;
 
 	if (this._edit_id == ev.id) {
 
@@ -3683,11 +3787,9 @@ scheduler.render_event = function(ev) {
 		this._editor.onselectstart = function (e) {
 			return (e || event).cancelBubble = true;
 		};
-		d2.firstChild.focus();
+		scheduler._focus(d2.firstChild, true);
 		//IE and opera can add x-scroll during focusing
 		this._els["dhx_cal_data"][0].scrollLeft = 0;
-		d2.firstChild.select();
-
 	}
 	if (this.xy.menu_width !== 0 && this._select_id == ev.id) {
 		if (this.config.cascade_event_display && this._drag_mode)
@@ -3759,7 +3861,8 @@ scheduler.render_event_bar = function (ev) {
 	if (x2 == x) x2 = this._colsS[ev._eday + 1];
 	var hb = this.xy.bar_height;
 
-	var y = this._colsS.heights[ev._sweek] + (this._colsS.height ? (this.xy.month_scale_height + 2) : 2 ) + (ev._sorder * hb);
+	var y_event_offset = (ev.id == this._drag_id) ? 0 : ev._sorder * hb;
+	var y = this._colsS.heights[ev._sweek] + (this._colsS.height ? (this.xy.month_scale_height + 2) : 2 ) + y_event_offset;
 
 	var d = document.createElement("DIV");
 	var cs = "dhx_cal_event_clear";
@@ -3880,85 +3983,91 @@ scheduler.showEvent = function(id, mode) {
 	scheduler.config.preserve_scroll = preserve_scroll;
 
 	if (scheduler.matrix && scheduler.matrix[mode]) {
-		scheduler._els["dhx_cal_data"][0].scrollTop = getAbsoluteTop(scheduler.getRenderedEvent(ev.id));
+		scheduler._els.dhx_cal_data[0].scrollTop = getAbsoluteTop(scheduler.getRenderedEvent(ev.id)) - getAbsoluteTop(scheduler._els.dhx_cal_data[0]) - 20;
 	}
 
 	scheduler.callEvent("onAfterEventDisplay", [ev, mode]);
 };
-scheduler._loaded={};
-scheduler._load=function(url,from){
-	url=url||this._load_url;
-	url+=(url.indexOf("?")==-1?"?":"&")+"timeshift="+(new Date()).getTimezoneOffset();
-	if (this.config.prevent_cache)	url+="&uid="+this.uid();
+
+scheduler._loaded = {};
+scheduler._load = function(url, from) {
+	url = url || this._load_url;
+	url += (url.indexOf("?") == -1 ? "?" : "&") + "timeshift=" + (new Date()).getTimezoneOffset();
+	if (this.config.prevent_cache)    url += "&uid=" + this.uid();
 	var to;
-	from=from||this._date;
-	
-	if (this._load_mode){
+	from = from || this._date;
+
+	if (this._load_mode) {
 		var lf = this.templates.load_format;
-		
-		from = this.date[this._load_mode+"_start"](new Date(from.valueOf()));
-		while (from>this._min_date) from=this.date.add(from,-1,this._load_mode);
+
+		from = this.date[this._load_mode + "_start"](new Date(from.valueOf()));
+		while (from > this._min_date) from = this.date.add(from, -1, this._load_mode);
 		to = from;
-		
+
 		var cache_line = true;
-		while (to<this._max_date){
-			to=this.date.add(to,1,this._load_mode);	
-			if (this._loaded[lf(from)] && cache_line) 
-				from=this.date.add(from,1,this._load_mode);	
-			else cache_line = false;
+		while (to < this._max_date) {
+			to = this.date.add(to, 1, this._load_mode);
+			if (this._loaded[lf(from)] && cache_line)
+				from = this.date.add(from, 1, this._load_mode); else cache_line = false;
 		}
-		
-		var temp_to=to;
+
+		var temp_to = to;
 		do {
 			to = temp_to;
-			temp_to=this.date.add(to,-1,this._load_mode);
-		} while (temp_to>from && this._loaded[lf(temp_to)]);
-			
-		if (to<=from) 
+			temp_to = this.date.add(to, -1, this._load_mode);
+		} while (temp_to > from && this._loaded[lf(temp_to)]);
+
+		if (to <= from)
 			return false; //already loaded
-		dhtmlxAjax.get(url+"&from="+lf(from)+"&to="+lf(to),function(l){scheduler.on_load(l);});
-		while(from<to){
-			this._loaded[lf(from)]=true;
-			from=this.date.add(from,1,this._load_mode);	
+		dhtmlxAjax.get(url + "&from=" + lf(from) + "&to=" + lf(to), function(l) {scheduler.on_load(l);});
+		while (from < to) {
+			this._loaded[lf(from)] = true;
+			from = this.date.add(from, 1, this._load_mode);
 		}
 	} else
-		dhtmlxAjax.get(url,function(l){scheduler.on_load(l);});
-	this.callEvent("onXLS",[]);
+		dhtmlxAjax.get(url, function(l) {scheduler.on_load(l);});
+	this.callEvent("onXLS", []);
 	return true;
 };
-scheduler.on_load=function(loader){
-    var evs;
-	if (this._process)
-		evs=this[this._process].parse(loader.xmlDoc.responseText);
-	else
-		evs=this._magic_parser(loader);
+scheduler.on_load = function(loader) {
+	var evs;
+	if (this._process) {
+		evs = this[this._process].parse(loader.xmlDoc.responseText);
+	} else {
+		evs = this._magic_parser(loader);
+	}
 
 	scheduler._process_loading(evs);
 
-	this.callEvent("onXLE",[]);
+	this.callEvent("onXLE", []);
 };
-scheduler._process_loading = function(evs){
-	this._loading=true;
-	this._not_render=true;
-	for (var i=0; i<evs.length; i++){
-		if (!this.callEvent("onEventLoading",[evs[i]])) continue;
+scheduler._process_loading = function(evs) {
+	this._loading = true;
+	this._not_render = true;
+	for (var i = 0; i < evs.length; i++) {
+		if (!this.callEvent("onEventLoading", [evs[i]])) continue;
 		this.addEvent(evs[i]);
 	}
-	this._not_render=false;
+	this._not_render = false;
 	if (this._render_wait) this.render_view_data();
 
-    this._loading=false;
+	this._loading = false;
 	if (this._after_call) this._after_call();
-	this._after_call=null;
+	this._after_call = null;
 };
-scheduler.json={};
-scheduler.json.parse = function(data){
+scheduler._init_event = function(event) {
+	event.text = (event.text || event._tagvalue) || "";
+	event.start_date = (event.start_date) ? scheduler.templates.xml_date(event.start_date) : null;
+	event.end_date = (event.end_date) ? scheduler.templates.xml_date(event.end_date) : null;
+};
+scheduler.json = {};
+scheduler.json.parse = function(data) {
 	if (typeof data == "string") {
-		scheduler._temp = eval( "("+data+")" );
-		data = (scheduler._temp) ? scheduler._temp.data||scheduler._temp : [];
+		scheduler._temp = eval("(" + data + ")");
+		data = (scheduler._temp) ? scheduler._temp.data || scheduler._temp : [];
 	}
 
-	if (data.dhx_security) 
+	if (data.dhx_security)
 		dhtmlx.security_key = data.dhx_security;
 
 	var collections = (scheduler._temp && scheduler._temp.collections) ? scheduler._temp.collections : {};
@@ -3970,7 +4079,7 @@ scheduler.json.parse = function(data){
 			var arr = scheduler.serverList[key];
 			if (!arr) continue;
 			arr.splice(0, arr.length); //clear old options
-			for (var j=0; j < collection.length; j++) {
+			for (var j = 0; j < collection.length; j++) {
 				var option = collection[j];
 				var obj = { key: option.value, label: option.label }; // resulting option object
 				for (var option_key in option) {
@@ -3985,79 +4094,79 @@ scheduler.json.parse = function(data){
 		}
 	}
 	if (collections_loaded)
-	    scheduler.callEvent("onOptionsLoad",[]);
+		scheduler.callEvent("onOptionsLoad", []);
 
 	var evs = [];
-	for (var i=0; i < data.length; i++){
-		data[i].start_date = scheduler.templates.xml_date(data[i].start_date);
-		data[i].end_date = scheduler.templates.xml_date(data[i].end_date);
-		evs.push(data[i]);
+	for (var i = 0; i < data.length; i++) {
+		var event = data[i];
+		scheduler._init_event(event);
+		evs.push(event);
 	}
 	return evs;
 };
-scheduler.parse=function(data,type){
-	this._process=type;
-	this.on_load({xmlDoc:{responseText:data}});
+scheduler.parse = function(data, type) {
+	this._process = type;
+	this.on_load({xmlDoc: {responseText: data}});
 };
-scheduler.load=function(url,call){
-	if (typeof call == "string"){
-		this._process=call;
+scheduler.load = function(url, call) {
+	if (typeof call == "string") {
+		this._process = call;
 		call = arguments[2];
 	}
-	
-	this._load_url=url;
-	this._after_call=call;
-	this._load(url,this._date);
+
+	this._load_url = url;
+	this._after_call = call;
+	this._load(url, this._date);
 };
 //possible values - day,week,month,year,all
-scheduler.setLoadMode=function(mode){
-	if (mode=="all") mode="";
-	this._load_mode=mode;
+scheduler.setLoadMode = function(mode) {
+	if (mode == "all") mode = "";
+	this._load_mode = mode;
 };
 
 //current view by default, or all data if "true" as parameter provided
-scheduler.refresh=function(refresh_all){
+scheduler.refresh = function(refresh_all) {
 	alert("not implemented");
 	/*
-	this._loaded={};
-	this._load();
-	*/
+	 this._loaded={};
+	 this._load();
+	 */
 };
-scheduler.serverList=function(name, array){
-	if(array) {
+scheduler.serverList = function(name, array) {
+	if (array) {
 		return this.serverList[name] = array.slice(0);
 	}
-	return this.serverList[name] = (this.serverList[name]||[]);
+	return this.serverList[name] = (this.serverList[name] || []);
 };
-scheduler._userdata={};
-scheduler._magic_parser=function(loader){
-    var xml;
-	if (!loader.getXMLTopNode){ //from a string
+scheduler._userdata = {};
+scheduler._magic_parser = function(loader) {
+	var xml;
+	if (!loader.getXMLTopNode) { //from a string
 		var xml_string = loader.xmlDoc.responseText;
-		loader = new dtmlXMLLoaderObject(function(){});
+		loader = new dtmlXMLLoaderObject(function() {});
 		loader.loadXMLString(xml_string);
 	}
-	
-	xml=loader.getXMLTopNode("data");
-	if (xml.tagName!="data") return [];//not an xml
+
+	xml = loader.getXMLTopNode("data");
+	if (xml.tagName != "data") return [];//not an xml
 	var skey = xml.getAttribute("dhx_security");
-	if (skey) 
+	if (skey)
 		dhtmlx.security_key = skey;
-	
+
 	var opts = loader.doXPath("//coll_options");
-	for (var i=0; i < opts.length; i++) {
+	for (var i = 0; i < opts.length; i++) {
 		var bind = opts[i].getAttribute("for");
 		var arr = this.serverList[bind];
 		if (!arr) continue;
-		arr.splice(0,arr.length);	//clear old options
-		var itms = loader.doXPath(".//item",opts[i]);
-		for (var j=0; j < itms.length; j++) {
+		arr.splice(0, arr.length);	//clear old options
+		var itms = loader.doXPath(".//item", opts[i]);
+		for (var j = 0; j < itms.length; j++) {
 			var itm = itms[j];
 			var attrs = itm.attributes;
-			var obj = { key:itms[j].getAttribute("value"), label:itms[j].getAttribute("label")};
+			var obj = { key: itms[j].getAttribute("value"), label: itms[j].getAttribute("label")};
 			for (var k = 0; k < attrs.length; k++) {
 				var attr = attrs[k];
-				if(attr.nodeName == "value" || attr.nodeName == "label")
+				if (attr.nodeName == "value" || attr.nodeName == "label")
 					continue;
 				obj[attr.nodeName] = attr.nodeValue;
 			}
@@ -4065,59 +4174,55 @@ scheduler._magic_parser=function(loader){
 		}
 	}
 	if (opts.length)
-		scheduler.callEvent("onOptionsLoad",[]);
-	
-	var ud=loader.doXPath("//userdata");	
-	for (var i=0; i < ud.length; i++) {
+		scheduler.callEvent("onOptionsLoad", []);
+
+	var ud = loader.doXPath("//userdata");
+	for (var i = 0; i < ud.length; i++) {
 		var udx = this.xmlNodeToJSON(ud[i]);
-		this._userdata[udx.name]=udx.text;
+		this._userdata[udx.name] = udx.text;
 	}
-	
-	var evs=[];
-	xml=loader.doXPath("//event");
-	
-	
-	for (var i=0; i < xml.length; i++) {
-		evs[i]=this.xmlNodeToJSON(xml[i]);
-		
-		evs[i].text=evs[i].text||evs[i]._tagvalue;
-		evs[i].start_date=this.templates.xml_date(evs[i].start_date);
-		evs[i].end_date=this.templates.xml_date(evs[i].end_date);
+
+	var evs = [];
+	xml = loader.doXPath("//event");
+
+	for (var i = 0; i < xml.length; i++) {
+		var ev = evs[i] = this.xmlNodeToJSON(xml[i]);
+		scheduler._init_event(ev);
 	}
 	return evs;
 };
-scheduler.xmlNodeToJSON = function(node){
-        var t={};
-        for (var i=0; i<node.attributes.length; i++)
-            t[node.attributes[i].name]=node.attributes[i].value;
-        
-        for (var i=0; i<node.childNodes.length; i++){
-        	var child=node.childNodes[i];
-            if (child.nodeType==1)
-                t[child.tagName]=child.firstChild?child.firstChild.nodeValue:"";
-        }
-                 
-        if (!t.text) t.text=node.firstChild?node.firstChild.nodeValue:"";
-        
-        return t;
+scheduler.xmlNodeToJSON = function(node) {
+	var t = {};
+	for (var i = 0; i < node.attributes.length; i++)
+		t[node.attributes[i].name] = node.attributes[i].value;
+
+	for (var i = 0; i < node.childNodes.length; i++) {
+		var child = node.childNodes[i];
+		if (child.nodeType == 1)
+			t[child.tagName] = child.firstChild ? child.firstChild.nodeValue : "";
+	}
+
+	if (!t.text) t.text = node.firstChild ? node.firstChild.nodeValue : "";
+
+	return t;
 };
-scheduler.attachEvent("onXLS",function(){
-	if (this.config.show_loading===true){
+scheduler.attachEvent("onXLS", function() {
+	if (this.config.show_loading === true) {
 		var t;
-		t=this.config.show_loading=document.createElement("DIV");
-		t.className='dhx_loading';
-		t.style.left = Math.round((this._x-128)/2)+"px";
-		t.style.top = Math.round((this._y-15)/2)+"px";
+		t = this.config.show_loading = document.createElement("DIV");
+		t.className = 'dhx_loading';
+		t.style.left = Math.round((this._x - 128) / 2) + "px";
+		t.style.top = Math.round((this._y - 15) / 2) + "px";
 		this._obj.appendChild(t);
 	}
 });
-scheduler.attachEvent("onXLE",function(){
+scheduler.attachEvent("onXLE", function() {
 	var t;
-	if (t=this.config.show_loading)
-		if (typeof t == "object"){
-		this._obj.removeChild(t);
-		this.config.show_loading=true;
-	}
+	if (t = this.config.show_loading)
+		if (typeof t == "object") {
+			this._obj.removeChild(t);
+			this.config.show_loading = true;
+		}
 });
 
 /*
@@ -4257,7 +4362,7 @@ scheduler.form_blocks={
 			return node.firstChild.value;
 		},
 		focus:function(node){
-			var a=node.firstChild; a.select(); a.focus(); 
+			var a=node.firstChild; scheduler._focus(a, true) 
 		}
 	},
 	select:{
@@ -4283,58 +4388,90 @@ scheduler.form_blocks={
 			return node.firstChild.value;
 		},
 		focus:function(node){
-			var a=node.firstChild; if (a.select) a.select(); a.focus(); 
+			var a=node.firstChild; scheduler._focus(a, true); 
 		}
 	},
 	time:{
-		render:function(sns){
-			//hours
+		render:function(sns) {
+			if (!sns.time_format) {
+				// default order
+				sns.time_format = ["%H:%i", "%d", "%m", "%Y"];
+			}
+			// map: default order => real one
+			sns._time_format_order = {};
+			var time_format = sns.time_format;
+
 			var cfg = scheduler.config;
-			var dt = this.date.date_part(new Date());
+			var dt = this.date.date_part(scheduler._currentDate());
 			var last = 24*60, first = 0;
 			if(scheduler.config.limit_time_select){
 				last = 60*cfg.last_hour+1;
 				first = 60*cfg.first_hour;
 				dt.setHours(cfg.first_hour);
 			}
+			var html = "";
 
-			var html="<select>";
-			var i = first;
-			var tdate = dt.getDate();
-			sns._time_values = [];
+			for (var p = 0; p < time_format.length; p++) {
+				var time_option = time_format[p];
 
-			while(i<last){
-				var time=this.templates.time_picker(dt);
-				html+="<option value='"+i+"'>"+time+"</option>";
-				sns._time_values.push(i);
-				dt.setTime(dt.valueOf()+this.config.time_step*60*1000);
-				var diff = (dt.getDate()!=tdate)?1:0; // moved or not to the next day
-				i=diff*24*60+dt.getHours()*60+dt.getMinutes();
+				// adding spaces between selects
+				if (p > 0) {
+					html += " ";
+				}
+
+				switch (time_option) {
+					case "%Y":
+						sns._time_format_order[3] = p;
+						//year
+						html+="<select>";
+						var year = dt.getFullYear()-5; //maybe take from config?
+						for (var i=0; i < 10; i++)
+							html+="<option value='"+(year+i)+"'>"+(year+i)+"</option>";
+						html+="</select> ";
+						break;
+					case "%m":
+						sns._time_format_order[2] = p;
+						//month
+						html+="<select>";
+						for (var i=0; i < 12; i++)
+							html+="<option value='"+i+"'>"+this.locale.date.month_full[i]+"</option>";
+						html += "</select>";
+						break;
+					case "%d":
+						sns._time_format_order[1] = p;
+						//days
+						html+="<select>";
+						for (var i=1; i < 32; i++)
+							html+="<option value='"+i+"'>"+i+"</option>";
+						html += "</select>";
+						break;
+					case "%H:%i":
+						sns._time_format_order[0] = p;
+						//hours
+						html += "<select>";
+						var i = first;
+						var tdate = dt.getDate();
+						sns._time_values = [];
+
+						while(i<last){
+							var time=this.templates.time_picker(dt);
+							html+="<option value='"+i+"'>"+time+"</option>";
+							sns._time_values.push(i);
+							dt.setTime(dt.valueOf()+this.config.time_step*60*1000);
+							var diff = (dt.getDate()!=tdate)?1:0; // moved or not to the next day
+							i=diff*24*60+dt.getHours()*60+dt.getMinutes();
+						}
+						html += "</select>";
+						break;
+				}
 			}
 
-			//days
-			html+="</select> <select>";
-			for (var i=1; i < 32; i++) 
-				html+="<option value='"+i+"'>"+i+"</option>";
-
-			//month
-			html+="</select> <select>";
-			for (var i=0; i < 12; i++) 
-				html+="<option value='"+i+"'>"+this.locale.date.month_full[i]+"</option>";
-
-			//year
-			html+="</select> <select>";
-			dt = dt.getFullYear()-5; //maybe take from config?
-			for (var i=0; i < 10; i++) 
-				html+="<option value='"+(dt+i)+"'>"+(dt+i)+"</option>";
-			html+="</select> ";
-
-			return "<div style='height:30px;padding-top:0px;font-size:inherit;' class='dhx_section_time'>"+html+"<span style='font-weight:normal; font-size:10pt;'> &nbsp;&ndash;&nbsp; </span>"+html+"</div>";			
-
+			return "<div style='height:30px;padding-top:0px;font-size:inherit;' class='dhx_section_time'>"+html+"<span style='font-weight:normal; font-size:10pt;'> &nbsp;&ndash;&nbsp; </span>"+html+"</div>";
 		},
 		set_value:function(node,value,ev,config){
 			var cfg = scheduler.config;
 			var s=node.getElementsByTagName("select");
+			var map = config._time_format_order;
 
 			if(cfg.full_day) {
 				if (!node._full_day){
@@ -4347,13 +4484,13 @@ scheduler.form_blocks={
 				var input=node.previousSibling.getElementsByTagName("input")[0];
 				input.checked = (scheduler.date.time_part(ev.start_date)===0 && scheduler.date.time_part(ev.end_date)===0);
 
-				s[0].disabled=input.checked;
-				s[ s.length/2 ].disabled=input.checked;
+				s[map[0]].disabled=input.checked;
+				s[ map[0] + s.length/2 ].disabled=input.checked;
 
 				input.onclick = function(){ 
 					if(input.checked) {
 						var obj = {};
-						scheduler.form_blocks.time.get_value(node,obj);
+						scheduler.form_blocks.time.get_value(node,obj,config);
 
 						var start_date = scheduler.date.date_part(obj.start_date);
 						var end_date = scheduler.date.date_part(obj.end_date);
@@ -4362,8 +4499,8 @@ scheduler.form_blocks={
 							end_date = scheduler.date.add(end_date, 1, "day");
 					}
 
-					s[0].disabled=input.checked;
-					s[ s.length/2 ].disabled=input.checked;
+					s[map[0]].disabled=input.checked;
+					s[ map[0] + s.length/2 ].disabled=input.checked;
 					
 					_fill_lightbox_select(s,0,start_date||ev.start_date);
 					_fill_lightbox_select(s,4,end_date||ev.end_date);
@@ -4372,7 +4509,7 @@ scheduler.form_blocks={
 			
 			if(cfg.auto_end_date && cfg.event_duration) {
 				function _update_lightbox_select() {
-					var start_date = new Date(s[3].value,s[2].value,s[1].value,0,s[0].value);
+					var start_date = new Date(s[map[3]].value,s[map[2]].value,s[map[1]].value,0,s[map[0]].value);
 					var end_date = new Date(start_date.getTime() + (scheduler.config.event_duration * 60 * 1000));
 					_fill_lightbox_select(s, 4, end_date);
 				}
@@ -4396,19 +4533,25 @@ scheduler.form_blocks={
 						fixed_value = t_v;
 				}
 
-				s[i+0].value=(value_found)?direct_value:fixed_value;
-				s[i+1].value=d.getDate();
-				s[i+2].value=d.getMonth();
-				s[i+3].value=d.getFullYear();
+				s[i+map[0]].value=(value_found)?direct_value:fixed_value;
+				if(!(value_found || fixed_value)){
+					s[i+map[0]].selectedIndex = -1;//show empty select in FF
+				}
+				s[i+map[1]].value=d.getDate();
+				s[i+map[2]].value=d.getMonth();
+				s[i+map[3]].value=d.getFullYear();
 			}
 
 			_fill_lightbox_select(s,0,ev.start_date);
 			_fill_lightbox_select(s,4,ev.end_date);
 		},
-		get_value:function(node,ev){
+		get_value:function(node, ev, config) {
 			s=node.getElementsByTagName("select");
-			ev.start_date=new Date(s[3].value,s[2].value,s[1].value,0,s[0].value);
-			ev.end_date=new Date(s[7].value,s[6].value,s[5].value,0,s[4].value);
+			var map = config._time_format_order;
+
+			ev.start_date=new Date(s[map[3]].value,s[map[2]].value,s[map[1]].value,0,s[map[0]].value);
+			ev.end_date=new Date(s[map[3]+4].value,s[map[2]+4].value,s[map[1]+4].value,0,s[map[0]+4].value);
+
 			if (ev.end_date<=ev.start_date) 
 				ev.end_date=scheduler.date.add(ev.start_date,scheduler.config.time_step,"minute");
 			return {
@@ -4417,7 +4560,7 @@ scheduler.form_blocks={
 			};
 		},
 		focus:function(node){
-			node.getElementsByTagName("select")[0].focus(); 
+			scheduler._focus(node.getElementsByTagName("select")[0]); 
 		}
 	}
 };
@@ -4533,7 +4676,8 @@ scheduler.save_lightbox=function(){
 	this.hide_lightbox();
 };
 scheduler.startLightbox = function(id, box){
-	this._lightbox_id=id;
+	this._lightbox_id = id;
+	this._custom_lightbox = true;
 	this._lightbox = box;
 	this.showCover(box);
 };
@@ -4545,7 +4689,7 @@ scheduler.endLightbox = function(mode, box){
 	this._lightbox_id = null; // in case of custom lightbox user only calls endLightbox so we need to reset _lightbox_id
 };
 scheduler.resetLightbox = function(){
-	if (scheduler._lightbox) 
+	if (scheduler._lightbox && !scheduler._custom_lightbox)
 		scheduler._lightbox.parentNode.removeChild(scheduler._lightbox);
 	scheduler._lightbox = null;
 };
@@ -4725,6 +4869,230 @@ scheduler.getLightbox=function(){ //scheduler.config.wide_form=true;
 	return this._lightbox;
 };
 scheduler._lightbox_template="<div class='dhx_cal_ltitle'><span class='dhx_mark'>&nbsp;</span><span class='dhx_time'></span><span class='dhx_title'></span></div><div class='dhx_cal_larea'></div>";
+
+scheduler._init_touch_events = function(){
+	if (this.config.touch != "force")
+		this.config.touch = this.config.touch 
+			&& (   (navigator.userAgent.indexOf("Mobile")!=-1)
+				|| (navigator.userAgent.indexOf("iPad")!=-1)
+				|| (navigator.userAgent.indexOf("Android")!=-1)
+				|| (navigator.userAgent.indexOf("Touch")!=-1));
+
+	if (this.config.touch){
+		this.xy.scroll_width = 0;
+		if (window.navigator.msPointerEnabled){
+			this._touch_events(["MSPointerMove", "MSPointerDown", "MSPointerUp"], function(ev){
+				if (ev.pointerType == ev.MSPOINTER_TYPE_MOUSE ) return null;
+				return ev;
+			}, function(ev){
+				return (!ev || ev.pointerType == ev.MSPOINTER_TYPE_MOUSE);
+			});
+		} else
+			this._touch_events(["touchmove", "touchstart", "touchend"], function(ev){
+				if (ev.touches && ev.touches.length > 1) return null;
+				if (ev.touches[0])
+					return { target:ev.target, pageX:ev.touches[0].pageX, pageY:ev.touches[0].pageY };
+				else 
+					return ev;
+			}, function(){ return false; });
+	}
+};
+
+scheduler._touch_events = function(names, accessor, ignore){
+	//webkit on android need to be handled separately
+	var a_webkit = (navigator.userAgent.indexOf("Android")!=-1) && (navigator.userAgent.indexOf("WebKit")!=-1);
+	var source, tracker, timer, drag_mode, scroll_mode, action_mode;
+	var dblclicktime = 0;
+
+	function check_direction_swipe(s_ev, e_ev, step){
+		if (!s_ev || !e_ev) return;
+
+		var dy = Math.abs(s_ev.pageY - e_ev.pageY);
+		var dx = Math.abs(s_ev.pageX - e_ev.pageX);
+		if (dx>step && (!dy || (dx/dy > 3))){
+			if (s_ev.pageX > e_ev.pageX)
+				scheduler._click.dhx_cal_next_button();
+			else
+				scheduler._click.dhx_cal_prev_button();
+		}
+	};
+	dhtmlxEvent(document.body, names[0], function(e){
+		if (ignore(e)) return;
+
+		if (drag_mode){
+			scheduler._on_mouse_move(accessor(e));
+			scheduler._update_global_tip();
+			if (e.preventDefault)	
+				e.preventDefault();
+			e.cancelBubble = true;
+			return false;
+		}
+
+		if (tracker && a_webkit){
+			check_direction_swipe(tracker, accessor(e), 0);
+		}
+
+		tracker = accessor(e);
+		//ignore common and scrolling moves
+		if (!action_mode) return;
+
+		//multitouch		
+		if (!tracker){
+			scroll_mode = true;
+			return;
+		}
+
+		//target changed - probably in scroll mode
+
+		if (source.target != tracker.target || (Math.abs(source.pageX - tracker.pageX) > 5) || (Math.abs(source.pageY - tracker.pageY) > 5)){
+			scroll_mode = true;
+			clearTimeout(timer);
+		}
+
+	});
+
+	dhtmlxEvent(this._els["dhx_cal_data"][0], "scroll", drag_cancel);
+	dhtmlxEvent(this._els["dhx_cal_data"][0], "touchcancel", drag_cancel);
+	dhtmlxEvent(this._els["dhx_cal_data"][0], "contextmenu", function(e){
+		if (action_mode){
+			if (e && e.preventDefault)
+				e.preventDefault();
+			(e||event).cancelBubble = true;
+			return false;
+		}
+	});
+	dhtmlxEvent(this._els["dhx_cal_data"][0], names[1], function(e){
+		if (ignore(e)) return;
+
+		drag_mode = scroll_mode = tracker = false;
+		action_mode = true;
+		scheduler._temp_touch_block = true;
+
+		var fake_event = tracker = accessor(e);
+		if (!fake_event){
+			scroll_mode = true;
+			return;
+		}
+
+		//dbl click
+		var now = new Date();
+
+		if (!scroll_mode && !drag_mode && now - dblclicktime < 250){
+			scheduler._click.dhx_cal_data(fake_event);
+			window.setTimeout(function(){
+				scheduler._on_dbl_click(fake_event);
+			}, 50);
+			
+			if (e.preventDefault)
+				e.preventDefault();
+			e.cancelBubble = true;
+			scheduler._block_next_stop = true;
+			return false;
+		}
+		dblclicktime = now;
+
+		//drag
+		
+		if (scroll_mode || drag_mode || !scheduler.config.touch_drag)
+			return;
+
+		//there is no target
+		timer = setTimeout(function(){
+			drag_mode = true;
+			var target = source.target;
+			if (target && target.className && target.className.indexOf("dhx_body") != -1)
+				target = target.previousSibling;
+
+			scheduler._on_mouse_down(source, target);
+			if (scheduler._drag_mode && scheduler._drag_mode != "create"){
+				var pos = -1;
+				scheduler.for_rendered(scheduler._drag_id, function(node, i) {
+					pos = node.getBoundingClientRect().top;
+					node.style.display='none';
+					scheduler._rendered.splice(i, 1);
+				});
+				if (pos>=0){
+					var step = scheduler.config.time_step;
+					scheduler._move_pos_shift = step* Math.round((fake_event.pageY - pos)*60/(scheduler.config.hour_size_px*step));
+				}
+			}
+
+			if (scheduler.config.touch_tip)
+				scheduler._show_global_tip();
+			scheduler._on_mouse_move(source);
+		},scheduler.config.touch_drag);
+
+		source = fake_event;
+	});
+	function drag_cancel(e){
+		if (ignore(e)) return;
+		scheduler._hide_global_tip();
+		if (drag_mode){
+			scheduler._on_mouse_up( accessor(e||event) );
+			scheduler._temp_touch_block = false;
+		}
+		scheduler._drag_id = null;
+		scheduler._drag_mode=null;
+		scheduler._drag_pos=null;
+		
+		clearTimeout(timer);
+		drag_mode = scroll_mode = action_mode = false;
+	}
+	dhtmlxEvent(this._els["dhx_cal_data"][0], names[2], function(e){
+		if (ignore(e)) return;
+
+		if (!drag_mode)
+			check_direction_swipe(source, tracker, 200);
+		
+		if (drag_mode)
+			scheduler._ignore_next_click = true;
+
+		drag_cancel(e);
+		if (scheduler._block_next_stop){
+			scheduler._block_next_stop = false;
+			if (e.preventDefault)
+				e.preventDefault();
+			e.cancelBubble = true;
+			return false;	
+		}
+	});	
+
+	dhtmlxEvent(document.body, names[2], drag_cancel);
+};
+
+scheduler._show_global_tip = function(){
+	scheduler._hide_global_tip();
+
+	var toptip = scheduler._global_tip = document.createElement("DIV");
+	toptip.className='dhx_global_tip';
+
+	scheduler._update_global_tip(1);
+
+	document.body.appendChild(toptip);
+};
+scheduler._update_global_tip = function(init){
+	var toptip = scheduler._global_tip;
+	if (toptip){
+		var time = "";
+		if (scheduler._drag_id && !init){
+			var ev = scheduler.getEvent(scheduler._drag_id);
+			if (ev)
+				time = "<div>" + (ev._timed ? scheduler.templates.event_header(ev.start_date, ev.end_date, ev):scheduler.templates.day_date(ev.start_date, ev.end_date, ev)) + "</div>";
+		}
+		
+		if (scheduler._drag_mode == "create" || scheduler._drag_mode == "new-size")
+			toptip.innerHTML = (scheduler.locale.drag_to_create || "Drag to create")+time;
+		else
+			toptip.innerHTML = (scheduler.locale.drag_to_move || "Drag to move")+time;
+	}
+};
+scheduler._hide_global_tip = function(){
+	var toptip = scheduler._global_tip;
+	if (toptip && toptip.parentNode){
+		toptip.parentNode.removeChild(toptip);
+		scheduler._global_tip = 0;
+	}
+};
 
 scheduler._dp_init=function(dp){
 	dp._methods=["setEventTextStyle","","changeEventId","deleteEvent"];

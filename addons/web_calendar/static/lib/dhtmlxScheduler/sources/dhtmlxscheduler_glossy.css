@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /*
 This software is allowed to use under GPL or you need to obtain Commercial or Enterise License
 to use it in non-GPL project. Please contact sales@dhtmlx.com for details
@@ -287,13 +288,22 @@ div.dhx_modal_cover {
 	color:#2F3A48;
 }
 .dhx_cal_data{
+	-webkit-tap-highlight-color:transparent;
 	border-top:1px dotted #8894A3;
 	position:absolute;
 	top:44px;
 	width:600px;
 	overflow-y:auto;
 	overflow-x:hidden;
+	-webkit-overflow-scrolling: touch;
 }
+.dhx_cal_data{
+	-ms-touch-action: pan-y;
+}
+.dhx_cal_event, .dhx_cal_event_line, .dhx_cal_event_clear {
+	-ms-touch-action: none;
+}
+
 .dhx_scale_bar{
 	position:absolute;	
 	text-align:center;
@@ -324,11 +334,11 @@ div.dhx_modal_cover {
 .dhx_month_head{
 	background-color:#EBEFF4;
 	color:#2F3A48;	
-	border-right:1px dotted #586A7E;
 	height:18px;
 	padding-right:5px;
 	padding-top:3px;
 	text-align:right;
+	border-right:1px dotted #586A7E;
 }
 .dhx_month_body{
 	border-right:1px dotted #586A7E;
@@ -390,6 +400,12 @@ div.dhx_modal_cover {
 .dhtmlxLayoutPolyContainer_dhx_skyblue 	.dhx_cal_container {
 	background-color: #d0e5ff;
 }
+
+/* left border config option support */
+.dhx_scale_hour_border, .dhx_month_body_border, .dhx_scale_bar_border, .dhx_month_head_border {
+	border-left: 1px dotted #8894A3;
+}
+
 .dhx_cal_event .dhx_header, .dhx_cal_event .dhx_title, .dhx_cal_event .dhx_body, .dhx_cal_event .dhx_footer {
 	background-color:#FFE763;
 	border:1px solid #B7A543;
@@ -426,9 +442,11 @@ div.dhx_modal_cover {
 	border-width:0 1px 1px 1px;
 	padding:5px;
 }
-.dhx_resize_denied {
+.dhx_resize_denied, .dhx_resize_denied .dhx_event_resize {
 	cursor:default !important;
 }
+
+
 .dhx_cal_event .dhx_event_resize {
 	cursor:s-resize;
 }
@@ -470,13 +488,13 @@ div.dhx_cal_editor{
 	position:absolute;
 	overflow:hidden;
 }
-textarea.dhx_cal_editor{
-	width:100%; 
-	height:100%;
-	border:0px solid black;
-	margin:none;
-	padding:none;
-	overflow:auto;
+textarea.dhx_cal_editor {
+	width: 100%;
+	height: 100%;
+	border: 0 solid black;
+	margin: 0;
+	padding: 0;
+	overflow: auto;
 }
 div.dhx_menu_head{
 	background-image:url(imgs/controls.gif);
@@ -508,12 +526,34 @@ div.icon_cancel{
 div.icon_delete{
 	background-position: -42px 0px;
 }
+.dhx_global_tip{
+	font-family:Tahoma, Helvetica;
+	text-align:center;
+	font-size:20px;
+	position:fixed;
+	top:60px; right:20px;
+	background-color: rgba(255,255,255,0.7);
+	color:#000;
+	z-index:10000;
+	padding:20px 30px; width:190px;
+}
+.dhx_global_tip div{
+	font-size:30px;
+}
+
+@media (-moz-touch-enabled) { 
+	.dhx_cal_container{
+		user-select:none;
+		-moz-user-select:none;
+	}
+}
 .dhx_unselectable, .dhx_unselectable div{
     -webkit-user-select:none;
     -moz-user-select:none;
     -moz-user-select:-moz-none;
 }
 .dhx_cal_light{
+    -webkit-tap-highlight-color:transparent;
     background-color:#FFE763;
     border-radius:5px;
     font-family:Tahoma;
@@ -836,7 +876,7 @@ div.icon_delete{
 .dhx_year_body .dhx_before .dhx_month_head, .dhx_year_body .dhx_after .dhx_month_head{
 	cursor: default;
 }
-.dhx_tooltip{
+.dhx_year_tooltip{
   border:1px solid #BBBBBB;
   background-image:url(./imgs/databg.png);
   position:absolute;
@@ -1073,6 +1113,8 @@ div.icon_delete{
 	padding:10px;
 	position:absolute;
 	z-index:500;
+	font-family: Tahoma;
+	font-size: 8pt;
 }
 /* dhtmlXTooltip end */
 
@@ -1291,6 +1333,77 @@ div.icon_delete{
 }
 
 
+
+/* Quick info */
+.dhx_cal_quick_info{
+	border: 2px solid #888;
+	border-radius: 5px;
+	position: absolute;
+	z-index: 300;
+	
+	background-color: rgba(98,107,127,0.5);
+	padding-left: 7px;
+	width:300px;
+
+	transition: left 0.5s ease, right 0.5s;
+	-moz-transition: left 0.5s ease, right 0.5s;
+	-webkit-transition: left 0.5s ease, right 0.5s;
+	-o-transition: left 0.5s ease, right 0.5s;
+}
+.dhx_cal_quick_info.dhx_qi_left .dhx_qi_big_icon{
+	float:right;
+}
+.dhx_cal_qi_title{
+	padding: 5px 0px 10px 5px;
+	color: #FFF;
+	letter-spacing:1px;
+}
+.dhx_cal_qi_tdate{
+	font-size:14px;
+}
+.dhx_cal_qi_tcontent{
+	font-size:18px;
+	font-weight:bold;
+}
+.dhx_cal_qi_content{
+	border: 1px solid #888;
+	background-color: #fefefe;
+	padding: 16px 8px;
+	
+	font-size:14px;
+
+	color:#444;
+	width:275px;
+	overflow: hidden;
+}
+
+.dhx_qi_big_icon{
+	border-radius: 3px;
+	color:#444;
+	
+	margin:5px 9px 5px 0px;
+	min-width:60px;
+	line-height:20px;
+	vertical-align:middle;
+	padding: 5px 10px 5px 5px;
+	cursor:pointer;
+	background-color:#fefefe;
+
+	border-bottom:1px solid #666;
+	border-right:1px solid #666;
+
+	float:left;
+}
+
+.dhx_cal_qi_controls div{
+	float: left;
+	height: 20px;
+	text-align: center;
+	line-height:20px;
+}
+.dhx_qi_big_icon .dhx_menu_icon{
+	margin: 0 8px 0 0px;
+}
 /*IE*/
 div.dhx_form_repeat input.radio 	{ margin:-4px 0 0 -4px !ie; }
 div.dhx_form_repeat input.checkbox 	{ margin:0 0 0 -4px !ie; }
@@ -1640,7 +1753,7 @@ div.dhx_cal_editor{
 .dhx_cal_lsection .dhx_readonly{
 	color:#000000;
 }
-.dhx_tooltip{
+.dhx_year_tooltip{
 	-moz-box-shadow:2px 2px 2px #888; /*Doesn't work in IE*/
 	-khtml-box-shadow: 2px 2px 2px #888;
 }
@@ -1712,4 +1825,9 @@ div.dhx_cal_editor{
 .dhx_cal_light_wide .dhx_cal_lsection {
 	font-size: 14px;
 	padding-right:10px;
+}
+
+/* left border config option support */
+.dhx_scale_hour_border, .dhx_month_body_border, .dhx_scale_bar_border, .dhx_month_head_border {
+	border-left: 1px solid #A4BED4;
 }

@@ -35,7 +35,7 @@ scheduler.attachEvent("onBeforeLightbox",function(id){
 scheduler.attachEvent("onEventChanged",function(id){
 	if (!id) return true;
 	var ev = scheduler.getEvent(id);
-	if (!collision_check(ev)){
+	if (!scheduler.checkCollision(ev)){
 		if (!before) return false;
 		ev.start_date = before[0];
 		ev.end_date = before[1];
@@ -44,19 +44,24 @@ scheduler.attachEvent("onEventChanged",function(id){
 	return true;
 });
 scheduler.attachEvent("onBeforeEventChanged",function(ev,e,is_new){
-	return collision_check(ev);
+	return scheduler.checkCollision(ev);
+});
+scheduler.attachEvent("onEventAdded",function(id,ev) {
+	var result = scheduler.checkCollision(ev);
+	if (!result)
+		scheduler.deleteEvent(id);
 });
 scheduler.attachEvent("onEventSave",function(id, edited_ev, is_new){
 	edited_ev = scheduler._lame_clone(edited_ev);
 	edited_ev.id = id;
 
 	if(edited_ev.rec_type){
-		scheduler._roll_back_dates(data_copy);
+		scheduler._roll_back_dates(edited_ev);
 	}
-	return collision_check(edited_ev); // in case user creates event on one date but then edited it another
+	return scheduler.checkCollision(edited_ev); // in case user creates event on one date but then edited it another
 });
 
-function collision_check(ev){
+scheduler.checkCollision = function(ev) {
 	var evs = [];
 	var collision_limit = scheduler.config.collision_limit;
 	if (ev.rec_type) {

@@ -11,7 +11,7 @@ scheduler.config.minicalendar = {
 scheduler._synced_minicalendars = [];
 scheduler.renderCalendar = function(obj, _prev, is_refresh) {
 	var cal = null;
-	var date = obj.date || (new Date());
+	var date = obj.date || (scheduler._currentDate());
 	if (typeof date == "string")
 		date = this.templates.api_date(date);
 
@@ -123,7 +123,7 @@ scheduler._week_template = function(width) {
 	var left = 0;
 
 	var week_template = document.createElement("div");
-	var dummy_date = this.date.week_start(new Date());
+	var dummy_date = this.date.week_start(scheduler._currentDate());
 	for (var i = 0; i < 7; i++) {
 		this._cols[i] = Math.floor(summ / (7 - i));
 		this._render_x_header(i, left, dummy_date, week_template);
@@ -264,7 +264,7 @@ scheduler.form_blocks.calendar_time = {
 		var html = "<input class='dhx_readonly' type='text' readonly='true'>";
 
 		var cfg = scheduler.config;
-		var dt = this.date.date_part(new Date());
+		var dt = this.date.date_part(scheduler._currentDate());
 
 		var last = 24 * 60, first = 0;
 		if (cfg.limit_time_select) {

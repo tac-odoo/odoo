@@ -22,10 +22,15 @@ scheduler.attachEvent("onTimelineCreated", function (obj){
 				node.innerHTML = '';
 				var temp_select = document.createElement('select');
 				node.appendChild(temp_select);
-				
+
 				var select = node.getElementsByTagName('select')[0];
-				
-				for(var i=0; i<options.length; i++) {
+
+				if (!select._dhx_onchange && config.onchange) {
+					select.onchange = config.onchange;
+					select._dhx_onchange = true;
+				}
+
+				for (var i = 0; i < options.length; i++) {
 					var temp_option = document.createElement('option');
 					temp_option.value = options[i].key;
 					if(temp_option.value == ev[scheduler.matrix[config.type].y_property])
@@ -33,10 +38,9 @@ scheduler.attachEvent("onTimelineCreated", function (obj){
 					temp_option.innerHTML = options[i].label;
 					select.appendChild(temp_option);
 				}
-				
 			},
 			get_value:function(node,ev,config){
-				return  node.firstChild.value;
+				return node.firstChild.value;
 			},
 			focus:function(node){
 			}
@@ -176,9 +180,13 @@ scheduler._toggleFolderDisplay = function(key, status, all_sections){ // used fo
 			}
 		}
 	};
-	toggleElement(key,scheduler.matrix[scheduler._mode].y_unit_original, status, all_sections);
-	scheduler.matrix[scheduler._mode].y_unit = scheduler._getArrayToDisplay(scheduler.matrix[scheduler._mode].y_unit_original);
-	scheduler.callEvent("onOptionsLoad",[]);
+	var section = scheduler.getSection(key);
+	if (scheduler.callEvent("onBeforeFolderToggle", [section, status, all_sections])) {
+		toggleElement(key,scheduler.matrix[scheduler._mode].y_unit_original, status, all_sections);
+		scheduler.matrix[scheduler._mode].y_unit = scheduler._getArrayToDisplay(scheduler.matrix[scheduler._mode].y_unit_original);
+		scheduler.callEvent("onOptionsLoad",[]);
+		scheduler.callEvent("onAfterFolderToggle", [section, status, all_sections]);
+	}
 };
 
 scheduler.attachEvent("onCellClick", function (x, y, a, b, event){
@@ -230,9 +238,9 @@ scheduler.deleteSection = function(id){
 					deleteElement(key,array[i].children);
 			}
 		};
-		deleteElement(id, scheduler.matrix[scheduler._mode].y_unit_original);	
+		deleteElement(id, scheduler.matrix[scheduler._mode].y_unit_original);
 		scheduler.matrix[scheduler._mode].y_unit = scheduler._getArrayToDisplay(scheduler.matrix[scheduler._mode].y_unit_original);
-		scheduler.callEvent("onOptionsLoad",[]);	
+		scheduler.callEvent("onOptionsLoad",[]);
 		return result;
 	}	
 };

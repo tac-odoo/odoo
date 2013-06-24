@@ -86,7 +86,20 @@ scheduler.attachEvent("onTemplatesReady", function() {
 
 	var old = scheduler._fill_lightbox;
 	scheduler._fill_lightbox = function() {
+
+		var lb = this.getLightbox();
+		if (this.config.readonly_active) {
+			lb.style.visibility = 'hidden';
+			// lightbox should have actual sizes before rendering controls
+			// currently only matters for dhtmlxCombo
+			lb.style.display = 'block';
+		}
 		var res = old.apply(this, arguments);
+		if (this.config.readonly_active) {
+			//reset visibility and display
+			lb.style.visibility = '';
+			lb.style.display = 'none';
+		}
 
 		if (this.config.readonly_active) {
 
@@ -109,7 +122,6 @@ scheduler.attachEvent("onTemplatesReady", function() {
 				scheduler._lightbox.parentNode.removeChild(scheduler._lightbox);
 			this._lightbox = n;
 			this.setLightboxSize();
-			this._lightbox = null;
 			n.onclick = function(e) {
 				var src = e ? e.target : event.srcElement;
 				if (!src.className) src = src.previousSibling;
@@ -136,7 +148,7 @@ scheduler.attachEvent("onTemplatesReady", function() {
 	scheduler.hide_lightbox = function() {
 		if (this._lightbox_r) {
 			this._lightbox_r.parentNode.removeChild(this._lightbox_r);
-			this._lightbox_r = null;
+			this._lightbox_r = this._lightbox = null;
 		}
 
 		return hold.apply(this, arguments);

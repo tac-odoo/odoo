@@ -3,6 +3,9 @@ This software is allowed to use under GPL or you need to obtain Commercial or En
 to use it in non-GPL project. Please contact sales@dhtmlx.com for details
 */
 (function(){
+
+
+
 scheduler.matrix = {};
 scheduler._merge=function(a,b){
 	for (var c in b)
@@ -31,33 +34,37 @@ scheduler.createTimelineView=function(obj){
 		event_min_dy: scheduler.xy.bar_height-5,
 		resize_events: true,
 		fit_events: true,
+		show_unassigned: false,
 		second_scale: false,
+		round_position: false,
 		_logic: function(render_name, y_unit, timeline) {
 			var res = {};
-			if(scheduler.checkEvent("onBeforeViewRender")) { 
+			if(scheduler.checkEvent("onBeforeViewRender")) {
 				res = scheduler.callEvent("onBeforeViewRender", [render_name, y_unit, timeline]);
 			}
 			return res;
 		}
 	});
+	obj._original_x_start = obj.x_start;
 
-	if (scheduler.checkEvent("onTimelineCreated")) { 
+	if (scheduler.checkEvent("onTimelineCreated")) {
 		scheduler.callEvent("onTimelineCreated", [obj]);
 	}
 
 	var old = scheduler.render_data;
-	scheduler.render_data=function(evs, mode){
-
-		if (this._mode == obj.name){
-			if (mode)	//repaint single event, precision is not necessary
-				for (var i=0; i < evs.length; i++) {
+	scheduler.render_data = function(evs, mode) {
+		if (this._mode == obj.name) {
+			//repaint single event, precision is not necessary
+			if (mode && !obj.show_unassigned && obj.render != "cell") {
+				for (var i = 0; i < evs.length; i++) {
 					this.clear_event(evs[i]);
 					this.render_timeline_event.call(this.matrix[this._mode], evs[i], true);
 				}
-			else
+			} else {
 				scheduler.renderMatrix.call(obj, true, true);
+			}
 		} else
-			return old.apply(this,arguments);
+			return old.apply(this, arguments);
 	};
 
 	scheduler.matrix[obj.name]=obj;
@@ -70,19 +77,43 @@ scheduler.createTimelineView=function(obj){
 	scheduler.templates[obj.name+"_scale_label"] = function(section_id, section_label, section_options){ return section_label; };
 
 	scheduler.templates[obj.name+"_tooltip"] = function(a,b,e){ return e.text; };
-	scheduler.templates[obj.name+"_date"] = function(datea, dateb){ 
-		if (datea.getDay()==dateb.getDay() && dateb-datea<(24*60*60*1000))
+	scheduler.templates[obj.name+"_date"] = function(datea, dateb){
+		if ( (datea.getDay()==dateb.getDay() && dateb-datea < (24*60*60*1000))
+			|| +datea == +scheduler.date.date_part(new Date(dateb))
+			|| (+scheduler.date.add(datea, 1, "day") == +dateb && dateb.getHours() == 0 && dateb.getMinutes() == 0) )
 			return scheduler.templates.day_date(datea);
-		return scheduler.templates.week_date(datea, dateb); 
+		if ( (datea.getDay() != dateb.getDay() && dateb-datea < (24*60*60*1000)) ) {
+			return scheduler.templates.day_date(datea)+" &ndash; "+scheduler.templates.day_date(dateb);
+		}
+		return scheduler.templates.week_date(datea, dateb);
 	};
 
 	scheduler.templates[obj.name+"_scale_date"] = scheduler.date.date_to_str(obj.x_date||scheduler.config.hour_date);
 	scheduler.templates[obj.name+"_second_scale_date"] = scheduler.date.date_to_str((obj.second_scale && obj.second_scale.x_date)?obj.second_scale.x_date:scheduler.config.hour_date);
 
-	scheduler.date["add_"+obj.name]=function(a, b, c){
-		return scheduler.date.add(a, (obj.x_length||obj.x_size)*b*obj.x_step, obj.x_unit);
+	scheduler.date["add_" + obj.name] = function(date, step, c) {
+		var resulting_date = scheduler.date.add(date, (obj.x_length || obj.x_size) * step * obj.x_step, obj.x_unit);
+		if ( (obj.x_unit == "minute" || obj.x_unit == "hour") && !obj.x_length ) {
+			if ( +scheduler.date.date_part(new Date(date)) == +scheduler.date.date_part(new Date(resulting_date )) ) {
+				obj.x_start += step*obj.x_size;
+			} else {
+				var converted_step = (obj.x_unit == "hour") ? obj.x_step*60 : obj.x_step;
+				// total steps starting from 0
+				var total_steps = ( (24 * 60) / (obj.x_size * converted_step) ) - 1;
+				if (step > 0) {
+					obj.x_start = obj.x_start - (total_steps * obj.x_size);
+				} else {
+					obj.x_start = (total_steps * obj.x_size) + obj.x_start;
+				}
+			}
+		}
+		return resulting_date;
 	};
 
+	scheduler.attachEvent("onBeforeTodayDisplayed", function() {
+		obj.x_start = obj._original_x_start;
+		return true;
+	});
 	scheduler.date[obj.name+"_start"] = function(date) {
 		var func = scheduler.date[obj.x_unit+"_start"] || scheduler.date.day_start;
 		var start_date = func.call(scheduler.date, date);
@@ -104,9 +135,9 @@ scheduler.createTimelineView=function(obj){
 		for(var i=0; i<obj.y_unit.length;i++)
 			obj.order[obj.y_unit[i].key]=i;
 		scheduler.callEvent('onOptionsLoadFinal', []);
-		if (scheduler._date && obj.name == scheduler._mode) 
+		if (scheduler._date && obj.name == scheduler._mode)
 				scheduler.setCurrentView(scheduler._date, scheduler._mode);
-	});	
+	});
 	scheduler.callEvent("onOptionsLoad",[obj]);
 
 	//init custom wrappers
@@ -133,15 +164,15 @@ scheduler.createTimelineView=function(obj){
 			summ += column_width;
 			if (summ>pos.x){ //index of section
 				var ratio = (pos.x-(summ-column_width))/column_width;
-				ratio = (ratio < 0) ? 0: ratio;
+				ratio = (ratio < 0) ? 0 : ratio;
 				break;
 			}
 		}
 
 		summ = 0;
 		for (yind; yind < this._colsS.heights.length; yind++) {
-			summ+=this._colsS.heights[yind];
-			if (summ>pos.y)
+			summ += this._colsS.heights[yind];
+			if (summ > pos.y)
 				break;
 		}
 
@@ -158,9 +189,12 @@ scheduler.createTimelineView=function(obj){
 		}
 
 		pos.x =  0;
+		pos.force_redraw = true;
+		pos.custom = true;
 
 		var end_date;
-		if(xind >= obj._trace_x.length) { // if our event is at the end of the view
+		// if our event is at the end of the view
+		if(xind >= obj._trace_x.length) {
 			end_date = scheduler.date.add(obj._trace_x[obj._trace_x.length-1], obj.x_step, obj.x_unit);
 		} else {
 			var max_date = (obj._trace_x[xind+1]) ? obj._trace_x[xind+1] : scheduler.date.add(obj._trace_x[obj._trace_x.length-1], obj.x_step, obj.x_unit);
@@ -168,14 +202,17 @@ scheduler.createTimelineView=function(obj){
 			end_date = new Date(+obj._trace_x[xind]+timestamp_diff);
 		}
 
-		if (this._drag_mode == "move" && this._drag_id && this._drag_event) { // as we can simply be calling _locate_cell_timeline
+		// as we can simply be calling _locate_cell_timeline
+		if (this._drag_mode == "move" && this._drag_id && this._drag_event) {
 			var ev = this.getEvent(this._drag_id);
 			var drag_event = this._drag_event;
+
 
 			if (!drag_event._move_delta) {
 				drag_event._move_delta = (ev.start_date-end_date)/60000;
 			}
 
+			// converting basically to start_date
 			end_date = scheduler.date.add(end_date, drag_event._move_delta, "minute");
 		}
 
@@ -183,20 +220,43 @@ scheduler.createTimelineView=function(obj){
 			pos.resize_from_start = !!(Math.abs(ev.start_date-end_date) < Math.abs(ev.end_date-end_date));
 		}
 
+		if (obj.round_position) {
+			switch(this._drag_mode) {
+				case "move":
+					end_date = get_rounded_date.call(obj, end_date, false);
+					// to preserve original start and end dates
+					if(obj.x_unit == "day")//only make sense for whole-day cells
+						pos.custom = false;
+					break;
+				case "resize":
+					if(this._drag_event){
+						// will save and use resize position only once
+						if (this._drag_event._resize_from_start == null) {
+							this._drag_event._resize_from_start = pos.resize_from_start;
+						}
+						pos.resize_from_start = this._drag_event._resize_from_start;
+						end_date = get_rounded_date.call(obj, end_date, !this._drag_event._resize_from_start);
+					}
+					break;
+			}
+		}
+
 		pos.y = Math.round((end_date-this._min_date)/(1000*60*this.config.time_step));
-		pos.custom = true;
-		pos.shift = this.config.time_step //step_diff;
+		pos.shift = this.config.time_step; //step_diff;
+
 		return pos;
 	}
 };
 
 scheduler.render_timeline_event = function(ev, attach){
 	var section = ev[this.y_property]; // section id
+	if (!section)
+		return ""; // as we may await html
 
 	var sorder = ev._sorder;
 
-	var x_start = _getX(ev, false, this._step);
-	var x_end = _getX(ev, true, this._step);
+	var x_start = _getX(ev, false, this);
+	var x_end = _getX(ev, true, this);
 
 	var event_height = this.event_dy;
 	if (this.event_dy == "full") {
@@ -234,7 +294,7 @@ scheduler.render_timeline_event = function(ev, attach){
 	var text = scheduler.templates.event_bar_text(ev.start_date,ev.end_date,ev);
 
 	var html='<div event_id="'+ev.id+'" class="'+cs+'" style="'+bg_color+''+color+'position:absolute; top:'+y+'px; height: '+hb+'px; left:'+x_start+'px; width:'+Math.max(0,x_end-x_start)+'px;'+(ev._text_style||"")+'">';
-	if (scheduler.config.drag_resize){
+	if (scheduler.config.drag_resize && !scheduler.config.readonly) {
 		var dhx_event_resize = 'dhx_event_resize';
 		html += ("<div class='"+dhx_event_resize+" "+dhx_event_resize+"_start' style='height: "+hb+"px;'></div><div class='"+dhx_event_resize+" "+dhx_event_resize+"_end' style='height: "+hb+"px;'></div>");
 	}
@@ -276,34 +336,67 @@ function trace_events(){
 	}
 	return matrix;
 }
-
+function get_date_index(date) {
+	var index = 0;
+	var trace_x = this._trace_x;
+	while (index < trace_x.length-1 && +date >= +trace_x[index+1]) {
+		index++;
+	}
+	return index;
+}
 // function used to get X (both start and end) coordinates for timeline bar view
-function _getX(ev, isEndPoint, step) {
+function _getX(ev, isEndPoint, config) {
 	var x = 0;
+	var step = config._step;
+	var round_position = config.round_position;
+
+	var column_offset = 0;
 	var date = (isEndPoint) ? ev.end_date : ev.start_date;
+
 	if(date.valueOf()>scheduler._max_date.valueOf())
 		date = scheduler._max_date;
 	var delta = date - scheduler._min_date_timeline;
-	if (delta<0) {
-		column_offset = 0;
-	} else {
-		var index = Math.round( delta/(step*scheduler._cols[0]) ); // results varies ~0.9 - ~24.17, e.g. that way we get 1 and 24
-		if(index>scheduler._cols.length) // if columns really small it's possible to get incorrect index
-			index = scheduler._cols.length;
-		for (var k=0; k<index; k++) {
-			x += scheduler._cols[k];
+
+	if (delta > 0) {
+		var index = get_date_index.call(config, date);
+		for (var i = 0; i < index; i++) {
+			x += scheduler._cols[i];
 		}
+
 		var column_date = scheduler.date.add(scheduler._min_date_timeline, scheduler.matrix[scheduler._mode].x_step*index, scheduler.matrix[scheduler._mode].x_unit);
-		delta = date - column_date;
-		var column_offset = Math.floor(delta/step);
+		if (!round_position) {
+			delta = date - column_date;
+			column_offset = Math.round(delta/step);
+		} else {
+			if (+date > +column_date && isEndPoint) {
+				column_offset = scheduler._cols[index];
+			}
+		}
 	}
-	x += (isEndPoint) ? column_offset-14 : column_offset+1;
+	if (isEndPoint) {
+		// special handling for "round" dates which match columns and usual ones
+		if (delta != 0 && !round_position) {
+			x += column_offset-12;
+		} else {
+			x += column_offset-14;
+		}
+	} else {
+		x += column_offset+1;
+	}
 	return x;
+}
+function get_rounded_date(date, isEndDate) {
+	var index = get_date_index.call(this, date);
+	var rounded_date = this._trace_x[index];
+	if (isEndDate && (+date != +this._trace_x[index])) {
+		rounded_date = (this._trace_x[index+1]) ? this._trace_x[index+1] : scheduler.date.add(this._trace_x[index], this.x_step, this.x_unit);
+	}
+	return new Date(rounded_date);
 }
 function get_events_html(evs) {
 	var html = "";
 	if (evs && this.render != "cell"){
-		evs.sort(function(a,b){
+		evs.sort(this.sort || function(a,b){
 			if(a.start_date.valueOf()==b.start_date.valueOf())
 				return a.id>b.id?1:-1;
 			return a.start_date>b.start_date?1:-1;
@@ -315,9 +408,13 @@ function get_events_html(evs) {
 			var ev = evs[j];
 			ev._inner = false;
 
+			var ev_start_date = (this.round_position) ? get_rounded_date.apply(this, [ev.start_date, false]) : ev.start_date;
+			var ev_end_date = (this.round_position) ? get_rounded_date.apply(this, [ev.end_date, true]) : ev.end_date;
+
 			// cutting stack from the last -> first event side
 			while (stack.length) {
-				if (stack[stack.length-1].end_date.valueOf() <= ev.start_date.valueOf()) {
+				var stack_ev = stack[stack.length-1];
+				if (stack_ev.end_date.valueOf() <= ev_start_date.valueOf()) {
 					stack.splice(stack.length-1,1);
 				} else {
 					break;
@@ -328,7 +425,7 @@ function get_events_html(evs) {
 			var sorderSet = false;
 			for(var p=0; p<stack.length; p++){
 				var t_ev = stack[p];
-				if(t_ev.end_date.valueOf()<=ev.start_date.valueOf()){
+				if(t_ev.end_date.valueOf() <= ev_start_date.valueOf()){
 					sorderSet = true;
 					ev._sorder=t_ev._sorder;
 					stack.splice(p,1);
@@ -408,10 +505,28 @@ function y_scale(d) {
 		evs = trace_events.call(this);
 	else {
 		var tevs = scheduler.get_visible_events();
-		for (var j=0; j<tevs.length; j++){
-			var ind =  this.order[ tevs[j][this.y_property] ];
-			if (!evs[ind]) evs[ind] = [];
-			evs[ind].push(tevs[j]);
+		var order = this.order;
+
+		for (var j = 0; j < tevs.length; j++) {
+			var tev = tevs[j];
+			var tev_section = tev[this.y_property];
+			var index = this.order[ tev_section ];
+
+			if (this.show_unassigned && !tev_section) {
+				for (var key in order) {
+					if (order.hasOwnProperty(key)) {
+						index = order[key];
+						if (!evs[index]) evs[index] = [];
+						var clone = scheduler._lame_copy({}, tev);
+						clone[this.y_property] = key;
+						evs[index].push(clone);
+					}
+				}
+			} else {
+				// required as we could have index of not displayed section or "undefined"
+				if (!evs[index]) evs[index] = [];
+				evs[index].push(tev);
+			}
 		}
 	}
 
@@ -616,7 +731,8 @@ function is_new_interval(mode, date, control_date){ // mode, date to check, cont
 function set_full_view(mode){
 	if (mode){
 		scheduler.set_sizes();
-		_init_matrix_tooltip();
+		_init_matrix_tooltip()
+
 		//we need to have day-rounded scales for navigation
 		//in same time, during rendering scales may be shifted
 		var temp = scheduler._min_date;
@@ -624,7 +740,13 @@ function set_full_view(mode){
 		y_scale.call(this,scheduler._els["dhx_cal_data"][0]);
 		scheduler._min_date = temp;
 		scheduler._els["dhx_cal_date"][0].innerHTML=scheduler.templates[this.name+"_date"](scheduler._min_date, scheduler._max_date);
+		if (scheduler.markNow) {
+			scheduler.markNow();
+		}
 	}
+
+	// hide tooltip if it is displayed
+	hideToolTip();
 }
 
 
@@ -648,7 +770,7 @@ function showToolTip(obj,pos,offset){
 		scheduler._tooltip.innerHTML="";
 	} else {
 		var t = scheduler._tooltip = document.createElement("DIV");
-		t.className = "dhx_tooltip";
+		t.className = "dhx_year_tooltip";
 		document.body.appendChild(t);
 		t.onclick = scheduler._click.dhx_cal_data;
 	}
@@ -747,16 +869,27 @@ scheduler._locate_cell_timeline = function(e){
 	var pos = scheduler.getActionData(e);
 
 	for (var xind = 0; xind < view._trace_x.length-1; xind++) {
-		if (+pos.date <= view._trace_x[xind+1]) // | 8:00, 8:30 | 8:15 should be checked against 8:30
+		// | 8:00, 8:30 | 8:15 should be checked against 8:30
+		// clicking at the most left part of the cell, say 8:30 should create event in that cell, not previous one
+		if (+pos.date < view._trace_x[xind+1])
 			break;
 	}
 
 	res.x = xind;
 	res.y = view.order[pos.section];
 	var diff = scheduler._isRender('cell') ? 1 : 0;
-	res.src = view._scales[pos.section].getElementsByTagName('td')[xind+diff];
+	res.src = view._scales[pos.section] ? view._scales[pos.section].getElementsByTagName('td')[xind+diff] : null;
 
-	if (trg.className.split(" ")[0] == "dhx_matrix_scell") { // Y scale
+	var isScale = false;
+	while (res.x == 0 && trg.className != "dhx_cal_data" && trg.parentNode) {
+		if (trg.className.split(" ")[0] == "dhx_matrix_scell") {
+			isScale = true;
+			break;
+		} else {
+			trg = trg.parentNode;
+		}
+	}
+	if (isScale) { // Y scale
 		res.x = -1;
 		res.src = trg;
 		res.scale = true;
@@ -806,9 +939,9 @@ scheduler.attachEvent("onCellDblClick", function (x, y, a, b, event){
 	
 	var obj = scheduler.matrix[scheduler._mode];
 	var event_options = {};
-	event_options['start_date'] = obj._trace_x[x];
-	event_options['end_date'] = (obj._trace_x[x+1]) ? obj._trace_x[x+1] : scheduler.date.add(obj._trace_x[x], obj.x_step, obj.x_unit);
-	event_options[scheduler.matrix[scheduler._mode].y_property] = obj.y_unit[y].key;
+	event_options.start_date = obj._trace_x[x];
+	event_options.end_date = (obj._trace_x[x+1]) ? obj._trace_x[x+1] : scheduler.date.add(obj._trace_x[x], obj.x_step, obj.x_unit);
+	event_options[obj.y_property] = obj.y_unit[y].key;
 	scheduler.addEventNow(event_options, null, event);
 });	
 
@@ -878,9 +1011,9 @@ scheduler._render_marked_timespan = function(options, area, unit_id) {
 					var block = scheduler._get_block_by_config(options);
 					block.className = css_classes;
 
-					var start_pos = _getX({start_date: start_date}, false, view_opts._step)-1;
-					var end_pos = _getX({start_date: end_date}, false, view_opts._step)-1;
-					var width = end_pos - start_pos-1;
+					var start_pos = _getX({start_date: start_date}, false, view_opts)-1;
+					var end_pos = _getX({start_date: end_date}, false, view_opts)-1;
+					var width = Math.max(1, end_pos - start_pos - 1);
 					var height = view_opts._section_height[unit_id]-1;
 
 					block.style.cssText = "height: "+height+"px; left: "+start_pos+"px; width: "+width+"px; top: 0;";
@@ -899,9 +1032,9 @@ scheduler._render_marked_timespan = function(options, area, unit_id) {
 };
 
 var old_append_mark_now = scheduler._append_mark_now;
-scheduler._append_mark_now = function(day_index) {
+scheduler._append_mark_now = function(day_index, now) {
 	if (scheduler.matrix && scheduler.matrix[scheduler._mode]) {
-		var n_date = new Date();
+		var n_date = scheduler._currentDate();
 		var zone_start = scheduler._get_zone_minutes(n_date);
 		var options = {
 			days: +scheduler.date.date_part(n_date),
@@ -911,16 +1044,9 @@ scheduler._append_mark_now = function(day_index) {
 		};
 		return scheduler._render_marked_timespan(options);
 	} else {
-		return old_append_mark_now.apply(scheduler, [day_index]);
+		return old_append_mark_now.apply(scheduler, [day_index, now]);
 	}
 };
-scheduler.attachEvent("onViewChange", function(date, mode) {
-	if (scheduler.matrix && scheduler.matrix[mode]) {
-		if (scheduler.markNow) {
-			scheduler.markNow();
-		}
-	}
-});
 
 scheduler.attachEvent("onScaleAdd", function(scale, unit_key) {
 	var timespans = scheduler._marked_timespans;

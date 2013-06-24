@@ -63,12 +63,17 @@ dhtmlxEvent(document,(_isOpera?"keypress":"keydown"),function(e){
 				}
 				else { // cut operation
 					var copy = scheduler._lame_copy({}, ev);
-					ev.start_date = new Date(date);
-					ev.end_date = new Date(ev.start_date.valueOf() + event_duration);
-					scheduler.render_view_data(); // need to redraw all events
+					copy.start_date = new Date(date);
+					copy.end_date = new Date(copy.start_date.valueOf() + event_duration);
+					var res = scheduler.callEvent("onBeforeEventChanged",[copy, e, false, scheduler._drag_event]);
+					if (res) {
+						ev.start_date = new Date(copy.start_date);
+						ev.end_date = new Date(copy.end_date);
+						scheduler.render_view_data(); // need to redraw all events
 
-					scheduler.callEvent("onEventPasted", [isCopy, ev, copy]);
-					isCopy = true; // switch to copy after first paste operation
+						scheduler.callEvent("onEventPasted", [isCopy, ev, copy]);
+						isCopy = true; // switch to copy after first paste operation
+					}
 				}
 			}
 			return true;

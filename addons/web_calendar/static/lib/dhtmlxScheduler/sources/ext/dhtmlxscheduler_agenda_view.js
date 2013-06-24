@@ -17,7 +17,7 @@ scheduler.templates.agenda_text = function(start,end,event){
 };
 scheduler.templates.agenda_date = function(){ return ""; };
 
-scheduler.date.agenda_start=function(){ return scheduler.date.date_part(new Date()); };
+scheduler.date.agenda_start=function(){ return scheduler.date.date_part(scheduler._currentDate()); };
 
 scheduler.attachEvent("onTemplatesReady",function() {
 	var old_dblclick_dhx_cal_data = scheduler.dblclick_dhx_cal_data;
