@@ -567,7 +567,28 @@ instance.web_calendar.Sidebar = instance.web.Widget.extend({
             navigation: true,
             date: scheduler._date,
             handler: function(date, calendar) {
-                scheduler.setCurrentView(date, 'day');
+                var mode = scheduler._mode;
+                if (scheduler._mode == 'month') {
+                    mode = 'week';
+                }
+                else if (scheduler._mode == 'week') {
+                    // switch to day mode if user choose a day within the current range
+                    // or stay in week mode if user choose a day outside the current range
+                    var week_start = scheduler._date.clone().clearTime();
+                    if (week_start.getDay() != Date.CultureInfo.firstDayOfWeek)
+                        week_start.moveToDayOfWeek(Date.CultureInfo.firstDayOfWeek, -1);
+                    var week_end = week_start.clone().addWeeks(1);
+                    if (date.between(week_start, week_end)) {
+                        mode = 'day';
+                    }
+                }
+                else if (scheduler._mode == 'day') {
+                    // switch back to week mode if user click a 2nd time on the same day
+                    if (date.clone().clearTime().equals(scheduler._date.clone().clearTime())) {
+                        mode = 'week';
+                    }
+                }
+                scheduler.setCurrentView(date, mode);
             }
         });
         scheduler.linkCalendar(this.mini_calendar);
