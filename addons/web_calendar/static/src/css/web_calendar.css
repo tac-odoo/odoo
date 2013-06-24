@@ -1,26 +1,23 @@
-@charset "utf-8";
 .openerp .oe_view_manager_view_calendar {
-  position: relative;
-}
+  position: relative; }
 
 .openerp .oe_calendar_sidebar {
   width: 200px;
-  padding: 5px;
-}
+  padding: 5px; }
+.openerp .oe_calendar_sidebar .oe_calendar_responsible .oe_calendar_color {
+  display: inline-block;
+  border: 1px solid silver;
+  width: 13px;
+  height: 13px; }
 .openerp .oe_calendar {
   background-color: white;
   min-height: 600px;
-  border-right: 1px solid #eeeeee;
-}
+  border-right: 1px solid #eeeeee; }
 .openerp .oe_calendar .oe_calendar_filter {
-  padding: 0 10px;
-}
+  padding: 0 10px; }
 .openerp .oe_calendar .dhx_cal_select_menu .dhx_menu_icon.icon_edit {
-  display: none;
-}
+  display: none; }
 .openerp .oe_calendar .dhx_cal_navline, .openerp .oe_calendar .dhx_cal_header {
-  z-index: auto;
-}
+  z-index: auto; }
 .openerp .oe_calendar.oe_cal_month .dhx_cal_data table tr td:last-child div.dhx_month_body {
-  padding-right: 5px;
-}
+  padding-right: 5px; }
