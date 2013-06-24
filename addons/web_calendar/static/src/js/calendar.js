@@ -221,6 +221,26 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
             }
         };
 
+        scheduler.locale.labels.timeline_tab = "Timeline";
+        scheduler.locale.labels.section_custom = "Section";
+        var sections = [
+            {key: undefined, label: _t('Undefined')},
+        ];
+        scheduler.createTimelineView({
+            name:   "timeline",
+            x_unit: "minute",
+            x_date: "%H:%i",
+            x_step: 30,
+            x_size: 24,
+            x_start: 16,
+            x_length:   48,
+            y_unit: sections,
+            y_property: "section_id",
+            dy: 80,
+            render:"bar",
+            show_unassigned: true,
+        });
+
         scheduler.init(this.$el.find('.oe_calendar')[0], null, this.mode || 'month');
         this.scheduler_attachEvent('onViewChange', this.proxy('view_changed'));
         this.scheduler_attachEvent('onEventChanged', this.proxy('quick_save'));
