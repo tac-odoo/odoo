@@ -58,12 +58,14 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         this.update_range_dates(Date.today());
         this.selected_filters = [];
         this.is_slow_open = false;
+        this.scheduler_events = [];
     },
     view_loading: function(r) {
         return this.load_calendar(r);
     },
     destroy: function() {
         scheduler.clearAll();
+        this.scheduler_detachAllEvents();
         this._super();
     },
     load_calendar: function(data) {
@@ -191,27 +193,26 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         };
 
         scheduler.init(this.$el.find('.oe_calendar')[0], null, this.mode || 'month');
-        scheduler.detachAllEvents();
-        scheduler.attachEvent('onViewChange', this.proxy('view_changed'));
-        scheduler.attachEvent('onEventChanged', this.proxy('quick_save'));
-        scheduler.attachEvent('onEventDeleted', this.proxy('delete_event'));
-        scheduler.attachEvent('onEventAdded', function(event_id, event_obj) {
+        this.scheduler_attachEvent('onViewChange', this.proxy('view_changed'));
+        this.scheduler_attachEvent('onEventChanged', this.proxy('quick_save'));
+        this.scheduler_attachEvent('onEventDeleted', this.proxy('delete_event'));
+        this.scheduler_attachEvent('onEventAdded', function(event_id, event_obj) {
             var fn = event_obj._force_slow_create ? 'slow_create' : 'quick_create';
             self[fn].apply(self, arguments);
         });
-        scheduler.attachEvent('onClick', function(event_id, mouse_event) {
+        this.scheduler_attachEvent('onClick', function(event_id, mouse_event) {
             if (!self.$el.find('.dhx_cal_editor').length && self.current_mode() === 'month') {
                 self.open_event(event_id);
             } else {
                 return true;
             }
         });
-        scheduler.attachEvent('onDblClick', function(event_id, mouse_event) {
+        this.scheduler_attachEvent('onDblClick', function(event_id, mouse_event) {
             if (!self.$el.find('.dhx_cal_editor').length) {
                 self.open_event(event_id);
             }
         });
-        scheduler.attachEvent('onEmptyClick', function(start_date, mouse_event) {
+        this.scheduler_attachEvent('onEmptyClick', function(start_date, mouse_event) {
             scheduler._loading = false; // Dirty workaround for a dhtmleditor bug I couln't track
             if (!self.$el.find('.dhx_cal_editor').length) {
                 var end_date = new Date(start_date);
@@ -223,7 +224,7 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
                 });
             }
         });
-        scheduler.attachEvent("onBeforeLightbox", function (event_id) {
+        this.scheduler_attachEvent("onBeforeLightbox", function (event_id) {
             var index = self.dataset.get_id_index(event_id);
             if (index !== null) {
                 self.open_event(self.dataset.ids[index]);
@@ -240,6 +241,16 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         instance.web.bus.on('resize',this,function(){
             self.$el.find(".dhx_cal_navline").removeAttr('style');
         });
+    },
+    scheduler_attachEvent: function(name, catcher, callObj) {
+        var event_id = scheduler.attachEvent(name, catcher, callObj);
+        this.scheduler_events.push(event_id);
+    },
+    scheduler_detachAllEvents: function () {
+        _.each(this.scheduler_events, function (event_id) {
+            scheduler.detachEvent(event_id);
+        })
+        this.scheduler_events = [];
     },
     view_changed: function(mode, date) {
         this.$el.find('.oe_calendar').removeClass('oe_cal_day oe_cal_week oe_cal_month').addClass('oe_cal_' + mode);
