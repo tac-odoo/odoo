@@ -47,6 +47,23 @@
             event_body.attr('class', 'dhx_event_move '+event_body.attr('class'));
             return container;
         };
+
+        var old_init_quick_info = scheduler._init_quick_info;
+        scheduler._init_quick_info = function() {
+            var qi_box = old_init_quick_info();
+            var $qi_box = $(qi_box);
+            if (!$qi_box.attr('tabindex')) {
+                $qi_box.attr('tabindex', -1).focusout(function() {
+                    scheduler.hideQuickInfo();
+                })
+            }
+            return qi_box;
+        };
+        var old_show_quick_info = scheduler._show_quick_info;
+        scheduler._show_quick_info = function (pos) {
+            old_show_quick_info(pos);
+            $(scheduler._quick_info_box).focus();
+        };
     }
 }());
 
