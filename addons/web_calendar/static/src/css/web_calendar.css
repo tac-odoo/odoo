@@ -30,7 +30,12 @@
 .openerp .oe_calendar .dhx_event_move {
   cursor: pointer; }
 .openerp .oe_calendar .dhx_cal_quick_info {
-  background: none repeat scroll 0 0 white; }
+  background: none repeat scroll 0 0 white;
+  -webkit-transition: none;
+  -moz-transition: none;
+  -ms-transition: none;
+  -o-transition: none;
+  transition: none; }
 .openerp .oe_calendar .dhx_cal_qi_title {
   color: black; }
 .openerp .oe_calendar .dhx_scale_hour_main {

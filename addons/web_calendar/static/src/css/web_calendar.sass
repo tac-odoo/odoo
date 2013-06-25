@@ -1,5 +1,12 @@
 @charset "utf-8"
 
+@mixin transition($transval: (border linear 0.2s, box-shadow linear 0.2s))
+    -webkit-transition: $transval
+    -moz-transition: $transval
+    -ms-transition: $transval
+    -o-transition: $transval
+    transition: $transval
+
 .openerp
     .oe_view_manager_view_calendar
         position: relative
@@ -48,6 +55,7 @@
 
         .dhx_cal_quick_info
             background: none repeat scroll 0 0 rgba(255, 255, 255, 1)
+            @include transition(none)
         .dhx_cal_qi_title
             color: #000000
 
