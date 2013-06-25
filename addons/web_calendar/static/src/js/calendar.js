@@ -38,23 +38,44 @@
         };
 
         // Fix vertical event to allow used to drag'n'drop it by clicking
-        // anywere on the event, not only on the header (this make it more
-        // difficul to select it)
-        var old_render_vbar = scheduler._render_v_bar;
+        // anywere on the event. By default you could only drag event by
+        // clicking on the header - but as the zone can be really small, this
+        // was to difficult to select it
+        var old_scheduler_render_vbar = scheduler._render_v_bar;
         scheduler._render_v_bar = function (id, x, y, w, h, style, contentA, contentB, bottom) {
-            var container = old_render_vbar.apply(this, arguments);
+            var container = old_scheduler_render_vbar.apply(this, arguments);
             var event_body = $('.dhx_body', container);
+            // Note: dhx_event_move class has to be first, otherwise dnd will not work
             event_body.attr('class', 'dhx_event_move '+event_body.attr('class'));
             return container;
         };
+        var old_scheduler_on_mouse_down = scheduler._on_mouse_down;
+        scheduler._on_mouse_down = function(e,src) {
+            var result = old_scheduler_on_mouse_down.apply(this, arguments);
+            this._drag_sstamp = this._drag_mode ? e.timeStamp : null;
+            return result;
+        };
+        var old_scheduler_on_mouse_move = scheduler._on_mouse_move;
+        scheduler._on_mouse_move = function(e) {
+            if (this._drag_mode && this._drag_sstamp && e.timeStamp - this._drag_sstamp < 150) {
+                // less that 150ms between drag start and move, propably an unwanted drag - ignore it
+                return;
+            }
+            return old_scheduler_on_mouse_move.apply(this, arguments);
+        };
 
+
+        // Ensure quick-info is correctly hidden when clicking outside of it
         var old_init_quick_info = scheduler._init_quick_info;
         scheduler._init_quick_info = function() {
             var qi_box = old_init_quick_info();
             var $qi_box = $(qi_box);
             if (!$qi_box.attr('tabindex')) {
                 $qi_box.attr('tabindex', -1).focusout(function() {
-                    scheduler.hideQuickInfo();
+                    var qi = scheduler._quick_info_box;
+                    if (qi && qi.parentNode) {
+                        scheduler.hideQuickInfo();
+                    }
                 })
             }
             return qi_box;
@@ -63,6 +84,15 @@
         scheduler._show_quick_info = function (pos) {
             old_show_quick_info(pos);
             $(scheduler._quick_info_box).focus();
+        };
+        var old_hide_quick_info = scheduler.hideQuickInfo;
+        scheduler.hideQuickInfo = function(forced) {
+            if (!this._quick_info_box_id) {
+                // prevent hidding quick-info if it's already hidden
+                // this will crash under chrome (DOM element not found)
+                return
+            }
+            return old_hide_quick_info.apply(this, arguments);
         };
 
         // Tune display of vertical hour scale
