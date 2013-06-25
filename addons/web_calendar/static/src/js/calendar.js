@@ -64,6 +64,16 @@
             old_show_quick_info(pos);
             $(scheduler._quick_info_box).focus();
         };
+
+        // Tune display of vertical hour scale
+        scheduler.templates.hour_scale = function(date) {
+            var section_width = Math.floor(scheduler.xy.scale_width/2);
+            var minute_height = Math.floor(scheduler.config.hour_size_px/2);
+            var html = "<div class='dhx_scale_hour_main' style='width: %spx; line-height: %spx'>%s</div>"
+                      +"<div class='dhx_scale_hour_minute' style='line-height: %spx;'><sup>00</sup></div>"
+            return _.str.sprintf(html, section_width, minute_height, date.getHours(),
+                                       minute_height);
+        };
     }
 }());
 
