@@ -154,6 +154,16 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         this.trigger('calendar_view_loaded', data);
         return this.has_been_loaded.resolve();
     },
+    get_calendar_userconfig: function() {
+        return {
+            day_starts_on: 8, // starts on 08:00
+            day_ends_on: 18, // ends on 18:00
+            day_time_step: 15, // the interval to snap the event on the calendar - rounding time (in minutes)
+            default_event_length: 60, // the default event duration (in minutes),
+            show_n_hours_at_a_time: 12,  // only applies to Timeline view,
+            show_current_time_mark: true,
+        }
+    },
     init_scheduler: function() {
         var self = this;
         scheduler.clearAll();
@@ -162,12 +172,15 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         } else {
             scheduler.config.xml_date = "%Y-%m-%d %H:%i";
         }
+
+        var calendar_config = self.get_calendar_userconfig();
+
         scheduler.config.api_date = "%Y-%m-%d %H:%i";
         scheduler.config.multi_day = true; //Multi day events are not rendered in daily and weekly views
-        scheduler.config.mark_now = true;
+        scheduler.config.mark_now = calendar_config.show_current_time_mark;
         scheduler.config.start_on_monday = Date.CultureInfo.firstDayOfWeek !== 0; //Sunday = Sunday, Others = Monday
-        scheduler.config.time_step = 30;
-        scheduler.config.scroll_hour = 8;
+        scheduler.config.time_step = calendar_config.day_time_step;
+        scheduler.config.scroll_hour = calendar_config.day_starts_on;
         scheduler.config.drag_resize = true;
         scheduler.config.drag_create = true;
         scheduler.config.mark_now = true;
@@ -226,20 +239,46 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         var sections = [
             {key: undefined, label: _t('Undefined')},
         ];
+
+        // Show working hours
         scheduler.createTimelineView({
             name:   "timeline",
-            x_unit: "minute",
+            x_unit: "hour",
             x_date: "%H:%i",
-            x_step: 30,
-            x_size: 24,
-            x_start: 16,
-            x_length:   48,
+            x_step: 1,
+            x_size: calendar_config.show_n_hours_at_a_time,
+            x_start: calendar_config.day_starts_on,
+            // x_length: 24,
+            second_scale: {
+                x_unit: "day",
+                x_date: "%F %d",
+            },
             y_unit: sections,
             y_property: "section_id",
             dy: 80,
-            render:"bar",
+            render: "bar",
             show_unassigned: true,
+            round_position: false,
         });
+
+        // // Show weeks
+        // scheduler.createTimelineView({
+        //     name:   "timeline",
+        //     x_unit: "hour",
+        //     x_date: "%H:%i",
+        //     x_step: 4,
+        //     x_size: 6*7, // display 7 days
+        //     x_start: 0,
+        //     x_length:   6*7, // display 7 days
+        //     y_unit: sections,
+        //     y_property: "section_id",
+        //     render:"bar",
+        //     second_scale: {
+        //         x_unit: "day", // unit which should be used for second scale
+        //         x_date: "%F %d" // date format which should be used for second scale, "July 01"
+        //     },
+        //     show_unassigned: true,
+        // });
 
         scheduler.init(this.$el.find('.oe_calendar')[0], null, this.mode || 'month');
         this.scheduler_attachEvent('onViewChange', this.proxy('view_changed'));
