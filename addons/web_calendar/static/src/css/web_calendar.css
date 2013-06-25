@@ -17,6 +17,8 @@
   padding: 0 10px; }
 .openerp .oe_calendar .dhx_cal_select_menu .dhx_menu_icon.icon_edit {
   display: none; }
+.openerp .oe_calendar .dhx_cal_navline, .openerp .oe_calendar .dhx_cal_header {
+  z-index: 0; }
 .openerp .oe_calendar .dhx_cal_event_line, .openerp .oe_calendar .dhx_cal_event_clear {
   font-size: 13px;
   font-family: "Lucida Grande", Helvetica, Verdana, Arial, sans-serif;
