@@ -145,8 +145,7 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         return this.load_calendar(r);
     },
     destroy: function() {
-        scheduler.clearAll();
-        this.scheduler_detachAllEvents();
+        this.destroy_scheduler();
         this._super();
     },
     load_calendar: function(data) {
@@ -220,6 +219,11 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
             show_n_hours_at_a_time: 12,  // only applies to Timeline view,
             show_current_time_mark: true,
         }
+    },
+    destroy_scheduler: function() {
+        scheduler.clearAll();
+        this.scheduler_detachAllEvents();
+        delete scheduler.matrix['timeline'];
     },
     init_scheduler: function() {
         var self = this;
