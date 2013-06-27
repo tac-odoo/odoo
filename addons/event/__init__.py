@@ -20,8 +20,11 @@
 ##############################################################################
 
 import event
+import event_seance
+import event_course
 import wizard
 import report
 import res_partner
+import resource
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

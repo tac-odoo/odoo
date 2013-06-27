@@ -25,6 +25,92 @@
 
     <record id="event_type_4" model="event.type">
         <field name="name">Training</field>
+        <field name="default_seance_mode">per_event_calendar</field>
+    </record>
+
+    <!-- Demo Event Hours -->
+    <record model="resource.calendar" id="event_resource_cal1">
+        <field name="name">Training Week</field>
+    </record>
+
+    <record model="resource.calendar.attendance" id="event_resource_cal1_att1">
+        <field name="calendar_id" ref="event_resource_cal1"/>
+        <field name="name">Monday morning</field>
+        <field name="dayofweek">0</field>
+        <field name="hour_from">8.0</field>
+        <field name="hour_to">12.0</field>
+    </record>
+
+    <record model="resource.calendar.attendance" id="event_resource_cal1_att2">
+        <field name="calendar_id" ref="event_resource_cal1"/>
+        <field name="name">Monday afternoon</field>
+        <field name="dayofweek">0</field>
+        <field name="hour_from">13.0</field>
+        <field name="hour_to">17.0</field>
+    </record>
+
+    <record model="resource.calendar.attendance" id="event_resource_cal1_att3">
+        <field name="calendar_id" ref="event_resource_cal1"/>
+        <field name="name">Tuesday morning</field>
+        <field name="dayofweek">1</field>
+        <field name="hour_from">8.0</field>
+        <field name="hour_to">12.0</field>
+    </record>
+
+    <record model="resource.calendar.attendance" id="event_resource_cal1_att4">
+        <field name="calendar_id" ref="event_resource_cal1"/>
+        <field name="name">Tuesday afternoon</field>
+        <field name="dayofweek">1</field>
+        <field name="hour_from">13.0</field>
+        <field name="hour_to">17.0</field>
+    </record>
+
+    <record model="resource.calendar.attendance" id="event_resource_cal1_att5">
+        <field name="calendar_id" ref="event_resource_cal1"/>
+        <field name="name">Wednesday morning</field>
+        <field name="dayofweek">2</field>
+        <field name="hour_from">8.0</field>
+        <field name="hour_to">12.0</field>
+    </record>
+
+    <record model="resource.calendar.attendance" id="event_resource_cal1_att6">
+        <field name="calendar_id" ref="event_resource_cal1"/>
+        <field name="name">Wednesday afternoon</field>
+        <field name="dayofweek">2</field>
+        <field name="hour_from">13.0</field>
+        <field name="hour_to">17.0</field>
+    </record>
+
+    <record model="resource.calendar.attendance" id="event_resource_cal1_att7">
+        <field name="calendar_id" ref="event_resource_cal1"/>
+        <field name="name">Tursday morning</field>
+        <field name="dayofweek">3</field>
+        <field name="hour_from">8.0</field>
+        <field name="hour_to">12.0</field>
+    </record>
+
+    <record model="resource.calendar.attendance" id="event_resource_cal1_att8">
+        <field name="calendar_id" ref="event_resource_cal1"/>
+        <field name="name">Tursday afternoon</field>
+        <field name="dayofweek">3</field>
+        <field name="hour_from">13.0</field>
+        <field name="hour_to">17.0</field>
+    </record>
+
+    <record model="resource.calendar.attendance" id="event_resource_cal1_att9">
+        <field name="calendar_id" ref="event_resource_cal1"/>
+        <field name="name">Friday morning</field>
+        <field name="dayofweek">4</field>
+        <field name="hour_from">8.0</field>
+        <field name="hour_to">12.0</field>
+    </record>
+
+    <record model="resource.calendar.attendance" id="event_resource_cal1_att9">
+        <field name="calendar_id" ref="event_resource_cal1"/>
+        <field name="name">Friday afternoon</field>
+        <field name="dayofweek">4</field>
+        <field name="hour_from">13.0</field>
+        <field name="hour_to">17.0</field>
     </record>
 
 <!-- Demo data for Event -->
@@ -80,6 +166,40 @@
         <field name="event_id" ref="event_2"/>
         <field name="partner_id" ref="base.res_partner_12"/>
         <field name="nb_register">5</field>
+    </record>
+
+    <record id="course_subject_math" model="event.course.subject">
+        <field name="name">Mathematics</field>
+        <field name="color">7</field>
+    </record>
+
+    <record id="course_subject_language" model="event.course.subject">
+        <field name="name">Language</field>
+        <field name="color">3</field>
+    </record>
+
+    <record id="course_algebra" model="event.course">
+        <field name="name">Algebra</field>
+        <field name="subject_id" ref="course_subject_math"/>
+        <field name="color">7</field>
+    </record>
+
+    <record id="course_geometry" model="event.course">
+        <field name="name">Geometry</field>
+        <field name="subject_id" ref="course_subject_math"/>
+        <field name="color">7</field>
+    </record>
+
+    <record id="course_english_vocabulary" model="event.course">
+        <field name="name">English - Vocabulary</field>
+        <field name="subject_id" ref="course_subject_language"/>
+        <field name="color">3</field>
+    </record>
+
+    <record id="course_english_grammar" model="event.course">
+        <field name="name">English - Grammar</field>
+        <field name="subject_id" ref="course_subject_language"/>
+        <field name="color">3</field>
     </record>
 
     </data>

@@ -23,16 +23,19 @@ from datetime import datetime, timedelta
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
 from openerp import SUPERUSER_ID
+from openerp.addons.base.res.res_partner import _tz_get
+
 
 class event_type(osv.osv):
     """ Event Type """
     _name = 'event.type'
     _description = __doc__
+
     _columns = {
         'name': fields.char('Event Type', size=64, required=True),
         'default_reply_to': fields.char('Default Reply-To', size=64,help="The email address of the organizer which is put in the 'Reply-To' of all emails sent automatically at event or registrations confirmation. You can also put your email address of your mail gateway if you use one." ),
-        'default_email_event': fields.many2one('email.template','Event Confirmation Email', help="It will select this default confirmation event mail value when you choose this event"),
-        'default_email_registration': fields.many2one('email.template','Registration Confirmation Email', help="It will select this default confirmation registration mail value when you choose this event"),
+        'default_email_registration_id': fields.many2one('email.template','Registration Confirmation Email', help="It will select this default confirmation registration mail value when you choose this event"),
+        'default_email_confirmation_id': fields.many2one('email.template','Event Confirmation Email', help="It will select this default confirmation event mail value when you choose this event"),
         'default_registration_min': fields.integer('Default Minimum Registration', help="It will select this default minimum value when you choose this event"),
         'default_registration_max': fields.integer('Default Maximum Registration', help="It will select this default maximum value when you choose this event"),
     }
@@ -42,6 +45,32 @@ class event_type(osv.osv):
     }
 
 event_type()
+
+
+class EventLevel(osv.Model):
+    """ Event Level """
+    _name = 'event.level'
+    _description = __doc__
+    _columns = {
+        'name': fields.char('Event Level', size=64, required=True),
+    }
+
+
+class EventContent(osv.Model):
+    """ Event Content """
+    _name = 'event.content'
+    _description = __doc__
+    _columns = {
+        'event_id': fields.many2one('event.event', 'Event', required=True, ondelete='cascade'),
+        'sequence': fields.integer('Sequence', required=True),
+        'name': fields.char('Content', size=128, required=True),
+        'duration': fields.float('Duration', required=True),
+    }
+    _defaults = {
+        'duration': 1,
+        'sequence': 0,
+    }
+
 
 class event_event(osv.osv):
     """Event"""
@@ -75,6 +104,7 @@ class event_event(osv.osv):
         default.update({
             'state': 'draft',
             'registration_ids': False,
+            'content_ids': False,
         })
         return super(event_event, self).copy(cr, uid, id, default=default, context=context)
 
@@ -173,16 +203,22 @@ class event_event(osv.osv):
                         continue
         return res
 
+    RO_IF_DONE = dict(readonly=False, done=[('readonly', True)])
+
     _columns = {
         'name': fields.char('Name', size=64, required=True, translate=True, readonly=False, states={'done': [('readonly', True)]}),
         'user_id': fields.many2one('res.users', 'Responsible User', readonly=False, states={'done': [('readonly', True)]}),
         'type': fields.many2one('event.type', 'Type of Event', readonly=False, states={'done': [('readonly', True)]}),
+        'lang_id': fields.many2one('res.lang', 'Language', states={'done': [('readonly', True)]}),
+        'level_id': fields.many2one('event.level', 'Level', states={'done': [('readonly', True)]},
+                                    help='Indicate the difficulty or pre-requisite level of this event'),
+        'reference': fields.char('Internal Reference', size=32),
         'register_max': fields.integer('Maximum Registrations', help="You can for each event define a maximum registration level. If you have too much registrations you are not able to confirm your event. (put 0 to ignore this rule )", readonly=True, states={'draft': [('readonly', False)]}),
         'register_min': fields.integer('Minimum Registrations', help="You can for each event define a minimum registration level. If you do not enough registrations you are not able to confirm your event. (put 0 to ignore this rule )", readonly=True, states={'draft': [('readonly', False)]}),
-        'register_current': fields.function(_get_register, string='Confirmed Registrations', multi='register_numbers'),
-        'register_avail': fields.function(_get_register, string='Available Registrations', multi='register_numbers',type='integer'),
-        'register_prospect': fields.function(_get_register, string='Unconfirmed Registrations', multi='register_numbers'),
-        'register_attended': fields.function(_get_register, string='# of Participations', multi='register_numbers'),
+        'register_current': fields.function(_get_register, string='Confirmed Registrations', type='integer', multi='register_numbers'),
+        'register_avail': fields.function(_get_register, string='Available Registrations', type='integer', multi='register_numbers'),
+        'register_prospect': fields.function(_get_register, string='Unconfirmed Registrations', type='integer', multi='register_numbers'),
+        'register_attended': fields.function(_get_register, string='# of Participations', type='integer', multi='register_numbers'),
         'registration_ids': fields.one2many('event.registration', 'event_id', 'Registrations', readonly=False, states={'done': [('readonly', True)]}),
         'date_begin': fields.datetime('Start Date', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'date_end': fields.datetime('End Date', required=True, readonly=True, states={'draft': [('readonly', False)]}),
@@ -199,17 +235,13 @@ class event_event(osv.osv):
         'reply_to': fields.char('Reply-To Email', size=64, readonly=False, states={'done': [('readonly', True)]}, help="The email address of the organizer is likely to be put here, with the effect to be in the 'Reply-To' of the mails sent automatically at event or registrations confirmation. You can also put the email address of your mail gateway if you use one."),
         'main_speaker_id': fields.many2one('res.partner','Main Speaker', readonly=False, states={'done': [('readonly', True)]}, help="Speaker who will be giving speech at the event."),
         'address_id': fields.many2one('res.partner','Location Address', readonly=False, states={'done': [('readonly', True)]}),
-        'street': fields.related('address_id','street',type='char',string='Street'),
-        'street2': fields.related('address_id','street2',type='char',string='Street2'),
-        'state_id': fields.related('address_id','state_id',type='many2one', relation="res.country.state", string='State'),
-        'zip': fields.related('address_id','zip',type='char',string='zip'),
-        'city': fields.related('address_id','city',type='char',string='city'),
         'speaker_confirmed': fields.boolean('Speaker Confirmed', readonly=False, states={'done': [('readonly', True)]}),
-        'country_id': fields.related('address_id', 'country_id',
-                    type='many2one', relation='res.country', string='Country', readonly=False, states={'done': [('readonly', True)]}),
         'note': fields.text('Description', readonly=False, states={'done': [('readonly', True)]}),
         'company_id': fields.many2one('res.company', 'Company', required=False, change_default=True, readonly=False, states={'done': [('readonly', True)]}),
         'is_subscribed' : fields.function(_subscribe_fnc, type="boolean", string='Subscribed'),
+        'content_ids': fields.one2many('event.content', 'event_id', 'Contents'),
+        'calendar_id': fields.many2one('resource.calendar', 'Hours'),
+        'tz': fields.selection(_tz_get, size=64, string='Timezone'),
     }
     _defaults = {
         'state': 'draft',
@@ -250,31 +282,20 @@ class event_event(osv.osv):
     def onchange_event_type(self, cr, uid, ids, type_event, context=None):
         values = {}
         if type_event:
-            type_info =  self.pool.get('event.type').browse(cr,uid,type_event,context)
-            dic ={
-              'reply_to': type_info.default_reply_to,
-              'email_registration_id': type_info.default_email_registration.id,
-              'email_confirmation_id': type_info.default_email_event.id,
-              'register_min': type_info.default_registration_min,
-              'register_max': type_info.default_registration_max,
-            }
-            values.update(dic)
-        return values
+            Type = self.pool.get('event.type')
+            type_info = Type.browse(cr, uid, type_event, context)
+            values.update(
+                reply_to=type_info.default_reply_to,
+                register_min=type_info.default_registration_min,
+                register_max=type_info.default_registration_max,
+                email_registration_id=type_info.default_email_registration_id.id,
+                email_confirmation_id=type_info.default_email_confirmation_id.id,
+            )
+        return {'value': values}
 
-    def on_change_address_id(self, cr, uid, ids, address_id, context=None):
+    def onchange_address_id(self, cr, uid, ids, address_id, context=None):
         values = {}
-        if not address_id:
-            return values
-        address = self.pool.get('res.partner').browse(cr, uid, address_id, context=context)
-        values.update({
-            'street' : address.street,
-            'street2' : address.street2,
-            'city' : address.city,
-            'country_id' : address.country_id and address.country_id.id or False,
-            'state_id' : address.state_id and address.state_id.id or False,
-            'zip' : address.zip,
-        })
-        return {'value' : values}
+        return {'value': values}
 
     def onchange_start_date(self, cr, uid, ids, date_begin=False, date_end=False, context=None):
         res = {'value':{}}

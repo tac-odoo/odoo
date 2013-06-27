@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+    <record id="view_event_course_tree" model="ir.ui.view">
+        <field name="name">event.course.tree</field>
+        <field name="model">event.course</field>
+        <field name="arch" type="xml">
+            <tree string="Courses">
+                <field name="name"/>
+                <field name="lang_id"/>
+                <field name="duration"/>
+                <field name="subject_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_event_course_form" model="ir.ui.view">
+        <field name="name">event.course.form</field>
+        <field name="model">event.course</field>
+        <field name="arch" type="xml">
+            <form string="Course" version="7.0">
+                <header>
+                    <span groups="base.group_user">
+                        <button string="Validate Course" name="button_validate" states="draft" type="object" class="oe_highlight"/>
+                        <button string="Mark as Deprecated" name="button_deprecate" states="validated" type="object"/>
+                        <button string="Mark as Unreviewed" name="button_draft" states="deprecated" type="object"/>
+                    </span>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,validated"/>
+                </header>
+                <sheet>
+                    <div class="oe_title oe_left">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <div class="oe_left" style="width: 100%%">
+                        <h2>
+                            In <field name="lang_id" class="oe_inline" options='{"no_open": true}'/> during <field name="duration" class="oe_inline" widget="float_time"/> hour(s)
+                        </h2>
+                    </div>
+                        <notebook>
+                            <page string="Information">
+                                <group>
+                                    <field name="subject_id" on_change="onchange_subject(subject_id)"/>
+                                    <!-- FIXME: <field name="category_ids" widget="many2many_tags" placeholder="Categories..."/> -->
+                                </group>
+                                <group>
+                                    <div>
+                                        <field name="description" placeholder="Type the course content description here..."/>
+                                    </div>
+                                </group>
+                                <separator string="Material"/>
+                                <field name="material_ids" context="{'from_event_course': True}">
+                                    <tree string="Materials">
+                                        <field name="name"/>
+                                        <field name="type"/>
+                                        <field name="datas"/>
+                                    </tree>
+                                </field>
+                                <field name="material_note"/>
+                            </page>
+                            <page string="Settings">
+                                <label for="active"/>
+                                <field name="active"/>
+                            </page>
+                        </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread" placeholder="Share a note..."/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="act_event_course_2_course_material" model="ir.actions.act_window">
+        <field name="name">Course Materials</field>
+        <field name="res_model">event.course.material</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_course_id': active_id}</field>
+        <field name="groups_id" eval="[(4, ref('base.group_sale_salesman'))]"/>
+        <field name="help" type="html">
+          <p class="oe_view_nocontent_create">
+            Click to create a new material for this course.
+          </p>
+        </field>
+    </record>
+
+    <record id="view_event_course_kanban" model="ir.ui.view">
+        <field name="name">event.course.kanban</field>
+        <field name="model">event.course</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="color"/>
+                <field name="lang_id"/>
+                <field name="duration" widget="float_time"/>
+                <field name="subject_id"/>
+                <field name="material_ids"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click oe_semantic_html_override" style="width: 200px !important">
+                            <div class="oe_dropdown_toggle oe_dropdown_kanban" groups="base.group_user">
+                                <span class="oe_e">i</span>
+                                <ul class="oe_dropdown_menu">
+                                    <t t-if="widget.view.is_action_enabled('edit')"><li><a type="edit">Edit...</a></li></t>
+                                    <t t-if="widget.view.is_action_enabled('delete')"><li><a type="delete">Delete</a></li></t>
+                                    <li><ul class="oe_kanban_colorpicker" data-field="color"/></li>
+                                </ul>
+                            </div>
+                            <div class="oe_kanban_content">
+                                <div>
+                                    <b><field name="name"/></b> <br/>
+                                    <t t-if="record.subject_id.raw_value and widget.view.group_by != 'subject_id'">
+                                        <i><field name="subject_id"/></i><br/>
+                                    </t>
+                                    <span><field name="lang_id"/> / <field name="duration" widget="float_time"/> hour(s)</span><br/>
+                                    <a name="%(event.act_event_course_2_course_material)d" type="action" t-if="record.material_ids.raw_value.length>0">
+                                        <t t-esc="record.material_ids.raw_value.length"/> Material(s)
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="oe_clear"></div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_event_course_search" model="ir.ui.view">
+        <field name="name">event.course.search</field>
+        <field name="model">event.course</field>
+        <field name="arch" type="xml">
+            <search string="Courses">
+                <filter name="current" string="Current" domain="[('state','!=','deprecated')]" context="{}" help="Display all courses which are not obsolete"/>
+                <field name="name" string="Course Name"/>
+                <field name="lang_id"/>
+                <field name="subject_id" filter_domain="[('subject_id','child_of',[self])]"/>
+                <!-- FIXME: <field name="category_ids"/> -->
+                <group expand="0" string="Group By...">
+                    <filter name="groupby_lang_id" string="Language" domain="[]" context="{'group_by': 'lang_id'}"/>
+                    <filter name="groupby_subject" string="Subject" domain="[]" context="{'group_by': 'subject_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_event_course" model="ir.actions.act_window">
+        <field name="name">Courses</field>
+        <field name="res_model">event.course</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">kanban,form,tree</field>
+        <field name="context">{'search_default_current': 1}</field>
+    </record>
+
+    <menuitem id="menu_event_course"
+                parent="menu_event_library_root"
+                action="action_event_course"/>
+
+    <record id="view_event_course_material_tree" model="ir.ui.view">
+        <field name="name">event.course.material.tree</field>
+        <field name="model">event.course.material</field>
+        <field name="arch" type="xml">
+            <tree string="Course Materials">
+                <field name="name"/>
+                <field name="course_id"/>
+                <field name="type"/>
+                <field name="datas"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_event_course_material_form" model="ir.ui.view">
+        <field name="name">event.course.material.form</field>
+        <field name="model">event.course.material</field>
+        <field name="arch" type="xml">
+            <form string="Course Materials" version="7.0">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Material Name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <div>
+                        <notebook>
+                            <page string="Attachment">
+                                <group>
+                                    <group string="Data">
+                                        <field name="type"/>
+                                        <field name="datas" filename="datas_fname" attrs="{'invisible':[('type','=','url')]}"/>
+                                        <field name="datas_fname" invisible="1" attrs="{'invisible':[('type','=','url')]}" class="oe_inline oe_right"/>
+                                        <field name="url" widget="url" attrs="{'invisible':[('type','=','binary')]}"/>
+                                    </group>
+                                    <group string="Attached To">
+                                        <field name="course_id" invisible="context.get('from_event_course')"/>
+                                        <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+                                    </group>
+                                    <group groups="base.group_no_one" string="Created">
+                                        <field name="create_uid"/>
+                                        <field name="create_date"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Notes">
+                                <field name="description"/>
+                            </page>
+                        </notebook>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_event_course_material_search" model="ir.ui.view">
+        <field name="name">event.course.material.search</field>
+        <field name="model">event.course.material</field>
+        <field name="arch" type="xml">
+            <search string="Course Materials">
+                <filter name="current" string="Current" domain="[('state','!=','deprecated')]" context="{}" help="Display all material which are not obsolete"/>
+                <field name="name" string="Material Name"/>
+                <field name="course_id"/>
+                <group expand="0" string="Group By...">
+                    <filter string="Courses" domain="[]" context="{'group_by': 'course_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_event_course_material" model="ir.actions.act_window">
+        <field name="name">Course Materials</field>
+        <field name="res_model">event.course.material</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_current': 1, 'search_default_group_by': 'subject_id'}</field>
+    </record>
+
+    <menuitem id="menu_event_course_material"
+                parent="menu_event_library_root"
+                action="action_event_course_material"/>
+
+
+    <record id="view_event_course_subject_tree" model="ir.ui.view">
+        <field name="name">event.course.subject.tree</field>
+        <field name="model">event.course.subject</field>
+        <field name="arch" type="xml">
+            <tree string="Course Subject">
+                <field name="name"/>
+                <field name="parent_id"/>
+                <field name="color"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_event_course_subject_form" model="ir.ui.view">
+        <field name="name">event.course.subject.form</field>
+        <field name="model">event.course.subject</field>
+        <field name="arch" type="xml">
+            <form string="Course Subject" version="7.0">
+                <div class="oe_title">
+                    <label for="name" class="oe_edit_only"/>
+                    <h1><field name="name"/></h1>
+                </div>
+                <div>
+                    <group class="oe_left" col="4">
+                        <field name="parent_id"/>
+                        <field name="color"/>
+                    </group>
+                    <separator string="Description"/>
+                    <field name="description"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_event_course_subject" model="ir.actions.act_window">
+        <field name="name">Course Subjects</field>
+        <field name="res_model">event.course.subject</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_event_config_course_subject" parent="base.menu_marketing_config_root"
+                action="action_event_course_subject" groups="base.group_no_one"/>
+
+
+    <record id="view_event_event_form_course" model="ir.ui.view">
+        <field name="name">event.event.form.course</field>
+        <field name="model">event.event</field>
+        <field name="inherit_id" ref="event.view_event_form"/>
+        <field name="arch" type="xml">
+            <field name="tz" position="after">
+                <field name="subject_id"/>
+                <field name="course_id"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_event_content_form_course" model="ir.ui.view">
+        <field name="name">event.content.form.course</field>
+        <field name="model">event.content</field>
+        <field name="inherit_id" ref="event.view_event_content_form"/>
+        <field name="arch" type="xml">
+            <field name="duration" position="before">
+                <field name="course_id" on_change="onchange_content_course(course_id, context)"/>
+                <newline/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_event_event_search_course" model="ir.ui.view">
+        <field name="name">event.event.search.course</field>
+        <field name="model">event.event</field>
+        <field name="inherit_id" ref="event.view_event_search"/>
+        <field name="arch" type="xml">
+            <filter string="Event Type" position="after">
+                <filter name="group_course" string="Course" context="{'group_by': 'course_id'}"/>
+            </filter>
+        </field>
+    </record>
+
+    </data>
+</openerp>

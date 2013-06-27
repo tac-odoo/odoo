@@ -51,3 +51,9 @@
    display: inline;
  }
 
+.oe_field_nospace_if_empty {
+  display: block !important;
+  padding: 0 0 0 0 !important;
+}
+
+

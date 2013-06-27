@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="view_event_type_form_seance" model="ir.ui.view">
+            <field name="name">event.type.form.seance</field>
+            <field name="model">event.type</field>
+            <field name="inherit_id" ref="event.view_event_type_form"/>
+            <field name="arch" type="xml">
+                <field name="default_registration_min" position="before">
+                    <field name="default_seance_mode"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_event_form_seance" model="ir.ui.view">
+            <field name="name">event.event.form.seance</field>
+            <field name="model">event.event</field>
+            <field name="inherit_id" ref="event.view_event_form"/>
+            <field name="arch" type="xml">
+                <field name="tz" position="before">
+                    <field name="seance_mode"/>
+                </field>
+                <field name="calendar_id" position="attributes">
+                    <field name="attrs">{'required': [('seance_mode', 'in', ['per_event_calendar', 'preplanning'])]}</field>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_event_seance_type_tree" model="ir.ui.view">
+            <field name="name">event.seance.type.tree</field>
+            <field name="model">event.seance.type</field>
+            <field name="arch" type="xml">
+                <tree string="Seance Types">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_event_seance_type_form" model="ir.ui.view">
+            <field name="name">event.seance.type.form</field>
+            <field name="model">event.seance.type</field>
+            <field name="arch" type="xml">
+                <form string="Seance Type" version="7.0">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name"/></h1>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_event_seance_type_search" model="ir.ui.view">
+            <field name="name">event.seance.type.search</field>
+            <field name="model">event.seance.type</field>
+            <field name="arch" type="xml">
+                <search string="Seance Types">
+                    <field name="name"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_event_seance_type" model="ir.actions.act_window">
+            <field name="name">Type of Seances</field>
+            <field name="res_model">event.seance.type</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_event_seance_type_search"/>
+        </record>
+
+        <menuitem id="menu_event_seance_type" parent="base.menu_marketing_config_root"
+                  action="action_event_seance_type" groups="base.group_no_one"/>
+
+
+        <record id="view_event_seance_tree" model="ir.ui.view">
+            <field name="name">event.seance.tree</field>
+            <field name="model">event.seance</field>
+            <field name="arch" type="xml">
+                <tree string="Seances">
+                    <field name="name"/>
+                    <field name="date_begin"/>
+                    <field name="duration"/>
+                    <field name="address_id"/>
+                    <field name="main_speaker_id"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_event_seance_form" model="ir.ui.view">
+            <field name="name">event.seance.form</field>
+            <field name="model">event.seance</field>
+            <field name="arch" type="xml">
+                <form string="Seance" version="7.0">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name"/></h1>
+                        </div>
+                        <notebook>
+                            <page string="Information">
+                                <group>
+                                    <group>
+                                        <field name="type" options="{'no_open': True}"/>
+                                        <field name="date_begin"/>
+                                        <field name="date_end"/>
+                                        <field name="duration"/>
+                                    </group>
+                                    <group>
+                                        <field name="main_speaker_id" context="{'default_speaker': 1}"/>
+                                        <field name="address_id" context="{'show_address: 1}" options="{'always_reload': True}"/>
+                                        <field name="event_ids" widget="many2many_tags" string="Related Events"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Participant">
+                                <group>
+                                    <group>
+                                        <field name="participant_min"/>
+                                        <field name="participant_max"/>
+                                    </group>
+                                    <group>
+                                    </group>
+                                </group>
+                                <field name="participant_ids">
+                                    <tree string="Participants">
+                                        <field name="partner_id"/>
+                                        <field name="registration_id"/>
+                                        <field name="presence"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Configuration" groups="event.group_event_manager">
+                                <separator string="Link to Events"/>
+                                <field name="event_link_ids">
+                                    <tree string="Event Link" editable="bottom">
+                                        <field name="event_id"/>
+                                        <field name="content_id"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_event_seance_search" model="ir.ui.view">
+            <field name="name">event.seance.search</field>
+            <field name="model">event.seance</field>
+            <field name="arch" type="xml">
+                <search string="Event Seances">
+                    <field name="name"/>
+                    <field name="event_ids"/>
+                    <field name="type"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_event_seance" model="ir.actions.act_window">
+            <field name="name">Seances</field>
+            <field name="res_model">event.seance</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_event_seance_search"/>
+        </record>
+
+        <menuitem id="menu_event_seance" parent="menu_event_management_root"
+                  action="action_event_seance"/>
+
+        <record id="view_event_participant_tree" model="ir.ui.view">
+            <field name="name">event.participant.tree</field>
+            <field name="model">event.participant</field>
+            <field name="arch" type="xml">
+                <tree string="Participants">
+                    <field name="name"/>
+                    <field name="partner_id"/>
+                    <field name="seance_id"/>
+                    <field name="registration_id"/>
+                    <field name="presence"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_event_participant_form" model="ir.ui.view">
+            <field name="name">event.participant.form</field>
+            <field name="model">event.participant</field>
+            <field name="arch" type="xml">
+                <form string="Participant" version="7.0">
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <notebook>
+                        <page string="Information">
+                            <group>
+                                <group>
+                                    <field name="seance_id"/>
+                                    <field name="partner_id"/>
+                                    <field name="registration_id"/>
+                                </group>
+                                <group>
+                                    <field name="presence"/>
+                                    <field name="arrival_time"/>
+                                    <field name="departure_time"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_event_participant_search" model="ir.ui.view">
+            <field name="name">event.participant.search</field>
+            <field name="model">event.participant</field>
+            <field name="arch" type="xml">
+                <search string="Participants">
+                    <field name="name"/>
+                    <field name="partner_id"/>
+                    <field name="seance_id"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_event_participant" model="ir.actions.act_window">
+            <field name="name">Participants</field>
+            <field name="res_model">event.participant</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_event_participant_search"/>
+        </record>
+
+        <menuitem id="menu_event_participant" parent="menu_event_management_root"
+                  action="action_event_participant"/>
+
+    </data>
+</openerp>
