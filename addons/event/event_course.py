@@ -73,6 +73,7 @@ class EventCourse(osv.Model):
         'description': fields.text('Description', help='Some notes on the course'),
         # 'category_ids': fields.many2many('event.category', string='Categories', id1='course_id', id2='category_id'),
         'subject_id': fields.many2one('event.course.subject', 'Subject'),
+        'level_id': fields.many2one('event.level', 'Level'),
         'material_ids': fields.one2many('event.course.material', 'course_id', 'Materials'),
         'material_note': fields.text('Note on Material', help='Some notes on the course materials'),
         'color': fields.integer('Color Index'),
@@ -98,7 +99,12 @@ class EventCourse(osv.Model):
     }
 
     def onchange_subject(self, cr, uid, ids, subject_id, context=None):
-        return {}
+        values = {}
+        if subject_id:
+            Subject = self.pool.get('event.course.subject')
+            subj = Subject.browse(cr, uid, subject_id, context=context)
+            values.update(color=subj.color)
+        return {'value': values}
 
     def button_draft(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'draft'}, context=context)
@@ -157,3 +163,13 @@ class EventContent(osv.Model):
             course = self.pool.get('event.course').browse(cr, uid, course_id, context=context)
             values.update(name=course.name, duration=course.duration)
         return {'value': values}
+
+
+class EventSeance(osv.Model):
+    _inherit = 'event.seance'
+    _columns = {
+        'course_id': fields.many2one('event.course', 'Course'),
+        'subject_id': fields.related('course_id', 'subject_id', type='many2one',
+                                     relation='event.course.subject',
+                                     string='Subject', readonly=True),
+    }

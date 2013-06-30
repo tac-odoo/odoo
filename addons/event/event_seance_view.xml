@@ -2,15 +2,86 @@
 <openerp>
     <data>
 
+        <!-- EVENTS CONTENT -->
+        <record model="ir.ui.view" id="view_event_content_tree">
+            <field name="name">event.content.tree</field>
+            <field name="model">event.content</field>
+            <field name="arch" type="xml">
+                <tree string="Contents">
+                    <field name="sequence" widget="handle"/>
+                    <field name="name"/>
+                    <field name="type_id"/>
+                    <field name="duration" sum="Duration" widget="float_time"/>
+                    <field name="slot_info"/>
+                    <field name="is_divided" invisible="1"/>
+                    <button type="object" name="button_open_group_registration_dispatch"
+                            icon="terp-personal"
+                            string="Dispatch registration between groups"
+                            attrs="{'invisible': [('is_divided','=',False)]}"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_event_content_form">
+            <field name="name">event.content.form</field>
+            <field name="model">event.content</field>
+            <field name="arch" type="xml">
+                <form string="Content" version="7.0">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name"/>
+                            <h2><field name="name"/></h2>
+                        </div>
+                        <notebook>
+                            <page string="Content &amp; Planning">
+                                <group>
+                                    <group>
+                                          <label for="duration"/>
+                                          <div>
+                                            <!-- slot_count x slot_duration = duration -->
+                                            <field name="slot_count" class="oe_inline oe_offer_content_duration" readonly="0" on_change="onchange_duration('slot_count', slot_count, slot_duration, duration, context)"/> x <field name="slot_duration" class="oe_inline oe_offer_content_duration" widget="float_time" on_change="onchange_duration('slot_duration', slot_count, slot_duration, duration, context)"/> = <field name="duration" class="oe_inline oe_offer_content_duration" widget="float_time" on_change="onchange_duration('duration', slot_count, slot_duration, duration, context)"/>
+                                          </div>
+                                        </group>
+                                    <group>
+                                        <field name="sequence" invisible="1"/>
+                                        <field name="type_id"/>
+                                        <field name="is_divided"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Groups" attrs="{'invisible': [('is_divided','=',False)]}">
+                                <field name="group_ids" context="{'current_group_ids': group_ids}">
+                                    <tree string="Groups" editable="bottom">
+                                        <field name="name"/>
+                                        <field name="is_default"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
         <record id="view_event_type_form_seance" model="ir.ui.view">
             <field name="name">event.type.form.seance</field>
             <field name="model">event.type</field>
             <field name="inherit_id" ref="event.view_event_type_form"/>
             <field name="arch" type="xml">
                 <field name="default_registration_min" position="before">
-                    <field name="default_seance_mode"/>
+                    <field name="default_has_program"/>
+                    <field name="default_content_planification" attrs="{'readonly': [('default_has_program','=',False)]}"/>
                 </field>
             </field>
+        </record>
+
+        <record id="action_event_2_seance_link" model="ir.actions.act_window">
+            <field name="name">Seances</field>
+            <field name="res_model">event.seance</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">calendar,tree,form</field>
+            <field name="context">{'search_default_event_ids': active_id}</field>
+            <field name="domain">[]</field>
         </record>
 
         <record id="view_event_form_seance" model="ir.ui.view">
@@ -18,12 +89,36 @@
             <field name="model">event.event</field>
             <field name="inherit_id" ref="event.view_event_form"/>
             <field name="arch" type="xml">
-                <field name="tz" position="before">
-                    <field name="seance_mode"/>
-                </field>
-                <field name="calendar_id" position="attributes">
-                    <field name="attrs">{'required': [('seance_mode', 'in', ['per_event_calendar', 'preplanning'])]}</field>
-                </field>
+                <xpath expr="//div[@class='options_active']" position="inside">
+                    <field name="has_program"/><label for="has_program"/>
+                </xpath>
+                <page string="Information" position="after">
+                    <page string="Program &amp; Hours" attrs="{'invisible': [('has_program','=',False)]}">
+                        <group>
+                            <group>
+                                <label for="calendar_id"/>
+                                <div>
+                                    <field name="calendar_id" context="{'show_week_hours': 1}" options="{'always_reload': True}"/>
+                                    <span attrs="{'invisible': [('calendar_id','!=',False)]}" groups="base.group_user">No hours specified, OpenERP will consider 24/24 7/7 hours</span>
+                                </div>
+                            </group>
+                            <group>
+                                <label for="content_planification"/>
+                                <div>
+                                    <field name="content_planification" class="oe_inline"/>
+                                    <button type="object" name="recompute_seances" class="oe_link" string="(recompute seances)"
+                                            attrs="{'invisible': [('content_planification', '!=', 'linear')]}"/>
+                                    <button type="object" name="open_preplanning" class="oe_link" string="(=> open preplanning)"
+                                            attrs="{'invisible': [('content_planification', '!=', 'preplanning')]}"/>
+                                </div>
+                            </group>
+                        </group>
+                        <field name="content_ids" widget="one2many"/>
+                    </page>
+                </page>
+                <xpath expr="//div[contains(@class, 'oe_button_box')]" position="inside">
+                    <button type="action" name="%(action_event_2_seance_link)d" string="Seances"/>
+                </xpath>
             </field>
         </record>
 
@@ -74,18 +169,51 @@
                   action="action_event_seance_type" groups="base.group_no_one"/>
 
 
+        <record id="action_seance_2_participant_link" model="ir.actions.act_window">
+            <field name="name">Participants</field>
+            <field name="res_model">event.participant</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_seance_id': active_id}</field>
+            <field name="domain">[]</field>
+        </record>
+
         <record id="view_event_seance_tree" model="ir.ui.view">
             <field name="name">event.seance.tree</field>
             <field name="model">event.seance</field>
             <field name="arch" type="xml">
                 <tree string="Seances">
                     <field name="name"/>
+                    <field name="type_id"/>
                     <field name="date_begin"/>
-                    <field name="duration"/>
+                    <field name="duration" widget="float_time"/>
                     <field name="address_id"/>
                     <field name="main_speaker_id"/>
                     <field name="state"/>
                 </tree>
+            </field>
+        </record>
+
+        <record id="view_event_seance_kanban" model="ir.ui.view">
+            <field name="name">event.seance.kanban</field>
+            <field name="model">event.seance</field>
+            <field name="arch" type="xml">
+                <kanban string="Seances" version="7.0">
+                    <field name="name"/>
+                    <field name="event_ids"/>
+                    <field name="participant_ids"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div calss="oe_kanban_card oe_kanban_global_click">
+                                <div><b><field name="name"/></b></div>
+                                <div>
+                                    <field name="event_ids" widget="many2many_tags"/>
+                                </div>
+                                <span><span class="oe_i">x</span><t t-expr="#{record.participant_ids.length}"/></span>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
             </field>
         </record>
 
@@ -94,7 +222,14 @@
             <field name="model">event.seance</field>
             <field name="arch" type="xml">
                 <form string="Seance" version="7.0">
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
+                    </header>
                     <sheet>
+                        <div class="oe_right oe_button_box">
+                            <button type="action" name="%(event.action_seance_2_participant_link)d"
+                                    string="Participants"/>
+                        </div>
                         <div class="oe_title">
                             <label for="name" class="oe_edit_only"/>
                             <h1><field name="name"/></h1>
@@ -103,14 +238,13 @@
                             <page string="Information">
                                 <group>
                                     <group>
-                                        <field name="type" options="{'no_open': True}"/>
+                                        <field name="type_id" options="{'no_open': True}"/>
                                         <field name="date_begin"/>
-                                        <field name="date_end"/>
-                                        <field name="duration"/>
+                                        <field name="duration" widget="float_time"/>
                                     </group>
                                     <group>
                                         <field name="main_speaker_id" context="{'default_speaker': 1}"/>
-                                        <field name="address_id" context="{'show_address: 1}" options="{'always_reload': True}"/>
+                                        <field name="address_id" context="{'show_address': 1}" options="{'always_reload': True}"/>
                                         <field name="event_ids" widget="many2many_tags" string="Related Events"/>
                                     </group>
                                 </group>
@@ -133,13 +267,14 @@
                                 </field>
                             </page>
                             <page string="Configuration" groups="event.group_event_manager">
-                                <separator string="Link to Events"/>
-                                <field name="event_link_ids">
-                                    <tree string="Event Link" editable="bottom">
-                                        <field name="event_id"/>
+                                <group>
+                                    <group>
                                         <field name="content_id"/>
-                                    </tree>
-                                </field>
+                                        <field name="group_id"/>
+                                    </group>
+                                    <group>
+                                    </group>
+                                </group>
                             </page>
                         </notebook>
                     </sheet>
@@ -158,8 +293,19 @@
                 <search string="Event Seances">
                     <field name="name"/>
                     <field name="event_ids"/>
-                    <field name="type"/>
+                    <field name="type_id"/>
                 </search>
+            </field>
+        </record>
+
+        <record id="view_event_seance_calendar" model="ir.ui.view">
+            <field name="name">event.seance.calendar</field>
+            <field name="model">event.seance</field>
+            <field name="arch" type="xml">
+                <calendar string="Seances" date_start="date_begin" date_delay="duration" color="type_id" mode="week">
+                    <field name="name"/>
+                    <field name="type_id"/>
+                </calendar>
             </field>
         </record>
 
@@ -167,7 +313,7 @@
             <field name="name">Seances</field>
             <field name="res_model">event.seance</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">tree,form,kanban,calendar</field>
             <field name="search_view_id" ref="view_event_seance_search"/>
         </record>
 
@@ -183,7 +329,21 @@
                     <field name="partner_id"/>
                     <field name="seance_id"/>
                     <field name="registration_id"/>
-                    <field name="presence"/>
+                    <field name="presence" invisible="1"/>
+                    <field name="presence_summary"/>
+                    <button name="button_take_presence" type="object"
+                            string="Mark as Present" icon="kanban-apply"
+                            attrs="{'invisible': ['|',('state','!=','draft'),('presence','=','present')]}"
+                            context="{'presence': 'present'}"/>
+                    <button name="button_take_presence_2" type="object"
+                            string="Mark as Absent" icon="kanban-stop"
+                            attrs="{'invisible': ['|', ('state','!=','draft'),('presence','=','absent')]}"
+                            context="{'presence': 'absent'}"/>
+                    <button name="%(action_event_participant_take_presence_wizard)d" type="action"
+                            string="Mark as Late" icon="kanban-pause"
+                            attrs="{'invisible': ['|',('state','!=','draft'),('presence','=','late')]}"
+                            context="{'default_status': 'late'}"/>
+                    <field name="state"/>
                 </tree>
             </field>
         </record>
@@ -193,26 +353,50 @@
             <field name="model">event.participant</field>
             <field name="arch" type="xml">
                 <form string="Participant" version="7.0">
-                    <div class="oe_title">
-                        <label for="name" class="oe_edit_only"/>
-                        <h1><field name="name"/></h1>
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_right oe_button_box">
+                            <button name="button_take_presence" type="object"
+                                    string="Mark as Present" icon="kanban-apply"
+                                    attrs="{'invisible': ['|',('state','!=','draft'),('presence','=','present')]}"
+                                    context="{'presence': 'present'}"/>
+                            <button name="button_take_presence" type="object"
+                                    string="Mark as Absent" icon="kanban-stop"
+                                    attrs="{'invisible': ['|', ('state','!=','draft'),('presence','=','absent')]}"
+                                    context="{'presence': 'absent'}"/>
+                            <button name="%(action_event_participant_take_presence_wizard)d" type="action"
+                                    string="Mark as Late" icon="kanban-pause"
+                                    attrs="{'invisible': ['|',('state','!=','draft'),('presence','=','late')]}"
+                                    context="{'default_status': 'late'}"/>
+                        </div>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name"/></h1>
+                        </div>
+                        <notebook>
+                            <page string="Information">
+                                <group>
+                                    <group>
+                                        <field name="seance_id"/>
+                                        <field name="registration_id" on_change="onchange_registration(registration_id)"/>
+                                        <field name="partner_id"/>
+                                    </group>
+                                    <group>
+                                        <field name="presence" invisible="1"/>
+                                        <field name="presence_summary"/>
+                                        <field name="arrival_time"/>
+                                        <field name="departure_time"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
                     </div>
-                    <notebook>
-                        <page string="Information">
-                            <group>
-                                <group>
-                                    <field name="seance_id"/>
-                                    <field name="partner_id"/>
-                                    <field name="registration_id"/>
-                                </group>
-                                <group>
-                                    <field name="presence"/>
-                                    <field name="arrival_time"/>
-                                    <field name="departure_time"/>
-                                </group>
-                            </group>
-                        </page>
-                    </notebook>
                 </form>
             </field>
         </record>
@@ -239,6 +423,50 @@
 
         <menuitem id="menu_event_participant" parent="menu_event_management_root"
                   action="action_event_participant"/>
+
+        <record model="ir.ui.view" id="view_event_participant_group_tree">
+            <field name="name">event.participant.group.tree</field>
+            <field name="model">event.participant.group</field>
+            <field name="arch" type="xml">
+                <tree string="Groups">
+                    <field name="name"/>
+                    <field name="participant_count"/>
+                    <field name="is_default"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_event_participant_group_form">
+            <field name="name">event.participant.group.form</field>
+            <field name="model">event.participant.group</field>
+            <field name="arch" type="xml">
+                <form string="Group" version="7.0">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h2><field name="name"/></h2>
+                        </div>
+                        <group>
+                            <field name="is_default"/>
+                        </group>
+                        <field name="registration_ids" colspan="4"/>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_event_registration_form_seance">
+            <field name="name">event.registration.form.seance</field>
+            <field name="model">event.registration</field>
+            <field name="inherit_id" ref="event.view_event_registration_form"/>
+            <field name="arch" type="xml">
+                <field name="date_closed" position="after">
+                    <field name="group_ids" widget="many2many_tags" attrs="{'readonly': [('state','!=','draft')]}"
+                            domain="[('event_content_id.event_ids','in',[event_id])]"
+                            on_change="onchange_group_ids(event_id, group_ids)"/>
+                </field>
+            </field>
+        </record>
 
     </data>
 </openerp>

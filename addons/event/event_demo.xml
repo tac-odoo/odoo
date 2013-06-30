@@ -25,7 +25,8 @@
 
     <record id="event_type_4" model="event.type">
         <field name="name">Training</field>
-        <field name="default_seance_mode">per_event_calendar</field>
+        <field name="default_has_program" eval="True"/>
+        <field name="default_content_planification">linear</field>
     </record>
 
     <!-- Demo Event Hours -->

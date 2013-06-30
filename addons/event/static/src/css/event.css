@@ -20,7 +20,7 @@
   color: #8A89BA;
   -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   background-color: #FFFFFF;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);  
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 .oe_event_month_year{
   border-bottom-left-radius:3px;
@@ -37,7 +37,7 @@
 }
 
 .oe_mapbox
-{ 
+{
     position: relative;
     float: right;
     height:200px;
@@ -56,4 +56,125 @@
   padding: 0 0 0 0 !important;
 }
 
+.oe_offer_content_duration > input {
+  width: 3em !important;
+}
+
+td[data-field="button_open_group_registration_dispatch"] {
+  width: 24px;
+}
+
+th.oe_list_header_float_time {
+  text-align: right;
+}
+
+
+/*
+ * Preplanning
+ */
+
+.openerp .oe_preplanning table {
+  /*border-collapse: collapse;*/
+}
+
+.openerp .oe_preplanning td {
+  border-width: 1px;
+  border-style: solid;
+}
+
+.openerp .oe_preplanning .fixedContainer .fixedHead > table {
+  border-collapse: collapse;
+  margin-left: -1px;
+}
+
+.openerp .oe_preplanning .fixedContainer .fixedTable > table {
+  margin-left: -1px;
+  margin-top: -1px;
+}
+
+.openerp .oe_preplanning .fixedColumn .fixedTable > table {
+  margin-top: -1px;
+}
+
+.openerp .oe_preplanning .fixedColumn .fixedTable tr td:last-child {
+  /*border-right: 2px solid black;*/
+  padding-right: 3px;
+  margin-right: 2px;
+}
+
+.openerp .oe_preplanning .oe_preplanning_week {
+}
+
+.openerp .oe_preplanning .oe_preplanning_week_count {
+  text-align: center;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
+.openerp .oe_preplanning .oe_preplanning_content_count {
+  text-align: right;
+  vertical-align: middle;
+  padding-left: 3px;
+  padding-right: 5px;
+  line-height: 1.5em;
+  font-weight: bold;
+}
+
+.openerp .oe_preplanning .oe_preplanning_content {
+  white-space: nowrap;
+  line-height: 1.5em;
+}
+
+.openerp .oe_preplanning td.oe_preplanning_cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.openerp .oe_preplanning .oe_preplanning_cell > input {
+  padding: 0;
+  margin: -4px;   /* compensate cell border-width */
+  text-align: center;
+}
+
+/*
+.openerp .oe_preplanning input.oe_preplanning_cell {
+  width: 0.5em;
+}
+*/
+td.oe_preplanning_rotate {
+  vertical-align: bottom;
+}
+
+div.oe_preplanning_rotate {
+  height: 80px;
+  min-height: 80px;
+  display: table-cell;
+  vertical-align: bottom;
+}
+
+span.oe_preplanning_rotate {
+  text-align: center;
+  width: 1.5em;
+  padding: 5px;
+  display: block;
+
+  vertical-align: middle;
+  white-space: nowrap;
+
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+
+  // also accepts left, right, top, bottom coordinates; not required, but a good idea for styling
+  -webkit-transform-origin: 50% 50%;
+  -moz-transform-origin: 50% 50%;
+  -ms-transform-origin: 50% 50%;
+  -o-transform-origin: 50% 50%;
+  transform-origin: 50% 50%;
+
+  // Should be unset in IE9+ I think.
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+}
 

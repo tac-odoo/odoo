@@ -56,22 +56,6 @@ class EventLevel(osv.Model):
     }
 
 
-class EventContent(osv.Model):
-    """ Event Content """
-    _name = 'event.content'
-    _description = __doc__
-    _columns = {
-        'event_id': fields.many2one('event.event', 'Event', required=True, ondelete='cascade'),
-        'sequence': fields.integer('Sequence', required=True),
-        'name': fields.char('Content', size=128, required=True),
-        'duration': fields.float('Duration', required=True),
-    }
-    _defaults = {
-        'duration': 1,
-        'sequence': 0,
-    }
-
-
 class event_event(osv.osv):
     """Event"""
     _name = 'event.event'
@@ -99,12 +83,11 @@ class event_event(osv.osv):
     def copy(self, cr, uid, id, default=None, context=None):
         """ Reset the state and the registrations while copying an event
         """
-        if not default:
+        if default is None:
             default = {}
         default.update({
             'state': 'draft',
             'registration_ids': False,
-            'content_ids': False,
         })
         return super(event_event, self).copy(cr, uid, id, default=default, context=context)
 
@@ -239,14 +222,19 @@ class event_event(osv.osv):
         'note': fields.text('Description', readonly=False, states={'done': [('readonly', True)]}),
         'company_id': fields.many2one('res.company', 'Company', required=False, change_default=True, readonly=False, states={'done': [('readonly', True)]}),
         'is_subscribed' : fields.function(_subscribe_fnc, type="boolean", string='Subscribed'),
-        'content_ids': fields.one2many('event.content', 'event_id', 'Contents'),
-        'calendar_id': fields.many2one('resource.calendar', 'Hours'),
         'tz': fields.selection(_tz_get, size=64, string='Timezone'),
     }
+
+    def _get_default_tz(self, cr, uid, context=None):
+        if context is not None:
+            return context.get('tz', '')
+        return ''
+
     _defaults = {
         'state': 'draft',
         'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'event.event', context=c),
         'user_id': lambda obj, cr, uid, context: uid,
+        'tz': _get_default_tz,
     }
 
     def subscribe_to_event(self, cr, uid, ids, context=None):
@@ -403,6 +391,9 @@ class event_registration(osv.osv):
             if template_id:
                 mail_message = self.pool.get('email.template').send_mail(cr,uid,template_id,registration.id)
         return True
+
+    def onchange_event_id(self, cr, uid, ids, event_id, context=None):
+        return {}
 
     def onchange_contact_id(self, cr, uid, ids, contact, partner, context=None):
         if not contact:

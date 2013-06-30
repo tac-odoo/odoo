@@ -44,6 +44,8 @@ Key Features
         'security/event_security.xml',
         'security/ir.model.access.csv',
         'wizard/event_confirm_view.xml',
+        'wizard/event_participant_take_presence_view.xml',
+        'preplanning_view.xml',
         'event_view.xml',
         'event_seance_view.xml',
         'event_course_view.xml',
@@ -55,7 +57,18 @@ Key Features
     ],
     'demo': ['event_demo.xml'],
     'test': ['test/process/event_draft2done.yml'],
-    'css': ['static/src/css/event.css'],
+    'css': [
+        'static/src/css/event.css',
+        'static/lib/fixed-header-table/css/defaultTheme.css',
+    ],
+    'qweb': ['static/src/xml/*.xml'],
+    'js': [
+        'static/lib/jquery.jeditable/jquery.jeditable.js',
+        'static/lib/jquery.fixedtable/jquery.fixedtable.js',
+        'static/lib/fixed-header-table/lib/jquery.mousewheel.js',
+        'static/lib/fixed-header-table/jquery.fixedheadertable.js',
+        'static/src/js/*.js'
+    ],
     'installable': True,
     'application': True,
     'auto_install': False,

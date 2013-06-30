@@ -91,6 +91,8 @@
                             <label for="type" class="oe_edit_only"/>
                             <h2><field name="type" class="oe_field_nospace_if_empty"
                                        on_change="onchange_event_type(type,context)" options="{'no_open': True}"/></h2>
+                            <div class="options_active" groups="base.group_user">
+                            </div>
                         </div>
                         <notebook>
                             <page string="Information">
@@ -111,17 +113,6 @@
                                     </group>
                                 </group>
                                 <field name="note" placeholder="Describe here the event..."/>
-                            </page>
-                            <page string="Program &amp; Hours">
-                                <group>
-                                    <group>
-                                        <field name="calendar_id" context="{'show_week_hours': 1}" options="{'always_reload': True}"/>
-                                    </group>
-                                    <group>
-                                        <field name="tz"/>
-                                    </group>
-                                </group>
-                                <field name="content_ids"/>
                             </page>
                             <page string="Registrations">
                                 <group>
@@ -180,6 +171,7 @@
                                     </group>
                                     <group>
                                         <field name="user_id"/>
+                                        <field name="tz"/>
                                     </group>
                                 </group>
                             </page>
@@ -357,40 +349,7 @@
 
         <menuitem name="Events" id="menu_event_event" action="action_event_view" parent="base.menu_event_main" />
 
-        <!-- EVENTS CONTENT -->
-        <record model="ir.ui.view" id="view_event_content_tree">
-            <field name="name">event.content.tree</field>
-            <field name="model">event.content</field>
-            <field name="arch" type="xml">
-                <tree string="Contents">
-                    <field name="sequence" widget="handle"/>
-                    <field name="name"/>
-                    <field name="duration" sum="Duration" widget="float_time"/>
-                </tree>
-            </field>
-        </record>
-
-        <record model="ir.ui.view" id="view_event_content_form">
-            <field name="name">event.content.form</field>
-            <field name="model">event.content</field>
-            <field name="arch" type="xml">
-                <form string="Content" version="7.0">
-                    <sheet>
-                        <div class="oe_title">
-                            <label for="name"/>
-                            <h2><field name="name"/></h2>
-                        </div>
-                        <group colspan="4">
-                            <field name="sequence"/>
-                            <field name="duration" widget="float_time"/>
-                        </group>
-                    </sheet>
-                </form>
-            </field>
-        </record>
-
         <!-- EVENTS/REGISTRATIONS/EVENTS  -->
-
 
         <record model="ir.ui.view" id="view_event_registration_tree">
             <field name="name">event.registration.tree</field>
@@ -414,6 +373,34 @@
             </field>
         </record>
 
+        <record model="ir.ui.view" id="view_event_registration_kanban">
+            <field name="name">event.registration.kanban</field>
+            <field name="model">event.registration</field>
+            <field name="arch" type="xml">
+                <kanban string="Event Registration" version="7.0" quick_create="false">
+                    <field name="name"/>
+                    <field name="event_id"/>
+                    <field name="nb_register"/>
+                    <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="oe_kanban_content">
+                                <div><b><field name="name"/></b></div>
+                                <div>
+                                    <field name="event_id"/><br/>
+                                </div>
+                                <div>
+                                    <span><span class="oe_i">x</span><field name="nb_register"/></span>
+                                    <span><span class="oe_i">@</span><field name="email" widget="email"/></span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
         <record model="ir.ui.view" id="view_event_registration_form">
             <field name="name">event.registration.form</field>
             <field name="model">event.registration</field>
@@ -429,7 +416,8 @@
                     <sheet string="Registration">
                         <label for="event_id" class="oe_edit_only"/>
                         <h1>
-                            <field name="event_id" domain="[('state','in',('draft','confirm'))]"/>
+                            <field name="event_id" domain="[('state','in',('draft','confirm'))]"
+                                   on_change="onchange_event_id(event_id)"/>
                         </h1>
                         <group>
                             <group>
@@ -510,7 +498,7 @@
           <field name="res_model">event.registration</field>
           <field name="view_type">form</field>
           <field name="domain"></field>
-          <field name="view_mode">tree,form,calendar,graph</field>
+          <field name="view_mode">tree,form,calendar,graph,kanban</field>
           <field name="context">{}</field>
           <field name="search_view_id" ref="view_registration_search"/>
         </record>

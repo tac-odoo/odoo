@@ -11,6 +11,7 @@
                 <field name="lang_id"/>
                 <field name="duration"/>
                 <field name="subject_id"/>
+                <field name="level_id"/>
                 <field name="state"/>
             </tree>
         </field>
@@ -43,6 +44,7 @@
                             <page string="Information">
                                 <group>
                                     <field name="subject_id" on_change="onchange_subject(subject_id)"/>
+                                    <field name="level_id"/>
                                     <!-- FIXME: <field name="category_ids" widget="many2many_tags" placeholder="Categories..."/> -->
                                 </group>
                                 <group>
@@ -61,8 +63,14 @@
                                 <field name="material_note"/>
                             </page>
                             <page string="Settings">
-                                <label for="active"/>
-                                <field name="active"/>
+                                <group>
+                                    <group>
+                                        <field name="active"/>
+                                        <field name="color"/>
+                                    </group>
+                                    <group>
+                                    </group>
+                                </group>
                             </page>
                         </notebook>
                 </sheet>
@@ -139,10 +147,12 @@
                 <field name="name" string="Course Name"/>
                 <field name="lang_id"/>
                 <field name="subject_id" filter_domain="[('subject_id','child_of',[self])]"/>
+                <field name="level_id"/>
                 <!-- FIXME: <field name="category_ids"/> -->
                 <group expand="0" string="Group By...">
                     <filter name="groupby_lang_id" string="Language" domain="[]" context="{'group_by': 'lang_id'}"/>
                     <filter name="groupby_subject" string="Subject" domain="[]" context="{'group_by': 'subject_id'}"/>
+                    <filter name="groupby_level" string="Level" domain="[]" context="{'group_by': 'level_id'}"/>
                 </group>
             </search>
         </field>
@@ -285,27 +295,29 @@
                 action="action_event_course_subject" groups="base.group_no_one"/>
 
 
+    <!-- FIXME: reactive this view correctly
     <record id="view_event_event_form_course" model="ir.ui.view">
         <field name="name">event.event.form.course</field>
         <field name="model">event.event</field>
         <field name="inherit_id" ref="event.view_event_form"/>
         <field name="arch" type="xml">
-            <field name="tz" position="after">
+            <xpath expr="//page[@string='Program &amp; Hours']/group[1]/group[2]" position="inside">
                 <field name="subject_id"/>
                 <field name="course_id"/>
-            </field>
+            </xpath>
         </field>
     </record>
+    -->
 
     <record id="view_event_content_form_course" model="ir.ui.view">
         <field name="name">event.content.form.course</field>
         <field name="model">event.content</field>
         <field name="inherit_id" ref="event.view_event_content_form"/>
         <field name="arch" type="xml">
-            <field name="duration" position="before">
+            <xpath expr="//page[@string='Content &amp; Planning']/group[1]/group[1]/*[1]" position="before">
                 <field name="course_id" on_change="onchange_content_course(course_id, context)"/>
                 <newline/>
-            </field>
+            </xpath>
         </field>
     </record>
 
