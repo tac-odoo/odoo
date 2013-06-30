@@ -379,6 +379,14 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
            return false;
         });
 
+        // Reset scroll hour
+        // - this is needed when switching between menu, scrollTop is not
+        //   correctly preserved (xal - 2013-06-30)
+        var scheduler_scrollTop = scheduler.config.hour_size_px *
+                (scheduler.config.scroll_hour - scheduler.config.first_hour);
+        scheduler._els['dhx_cal_data'][0].scrollTop  = scheduler_scrollTop;
+
+        // Refresh scheduler (displaying events)
         this.refresh_scheduler();
 
         // Remove hard coded style attributes from dhtmlx scheduler
