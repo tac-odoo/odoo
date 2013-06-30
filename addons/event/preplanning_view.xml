@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record model="ir.ui.view" id="view_event_preplanning_form">
+            <field name="name">Preplanning</field>
+            <field name="model">event.event.preplanning</field>
+            <field name="priority">100</field>
+            <field name="arch" type="xml">
+                <form string="Preplanning" version="7.0">
+                    <div name="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                        <field name="date_begin" class="oe_inline" readonly="1"/> => <field name="date_end" class="oe_inline"/>
+                        <field name="event_id" invisible="1"/>
+                    </div>
+                    <div class="oe_clear">
+                        <widget type="event_preplanning"/>
+                        <field name="children_ids" invisible="1">
+                            <tree string="Seances">
+                                <field name="name"/>
+                                <field name="date_begin"/>
+                                <field name="duration"/>
+                                <field name="planned_week"/>
+                                <field name="content_id"/>
+                                <field name="group_id"/>
+                                <field name="state"/>
+                            </tree>
+                        </field>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+
+    </data>
+</openerp>
