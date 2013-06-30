@@ -224,6 +224,10 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         scheduler.clearAll();
         this.scheduler_detachAllEvents();
         delete scheduler.matrix['timeline'];
+        if (scheduler._mark_now_timer) {
+            window.clearInterval(scheduler._mark_now_timer);
+            scheduler._mark_now_timer = undefined;
+        }
     },
     init_scheduler: function() {
         var self = this;
