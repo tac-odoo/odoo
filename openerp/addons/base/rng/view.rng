@@ -654,6 +654,14 @@
             <rng:zeroOrMore>
                 <rng:ref name="html"/>
             </rng:zeroOrMore>
+            <rng:zeroOrMore>
+                <rng:element name="templates">
+                    <rng:zeroOrMore>
+                        <rng:ref name="any"/>
+                    </rng:zeroOrMore>
+                </rng:element>
+            </rng:zeroOrMore>
+
         </rng:element>
     </rng:define>
 
