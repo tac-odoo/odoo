@@ -19,14 +19,8 @@
 #
 ##############################################################################
 
-import pytz
-import logging
-from datetime import datetime
 from collections import defaultdict
-from dateutil.relativedelta import relativedelta, MO, SU
 from openerp.osv import osv, fields
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
-from timeline import Timeline, Availibility, WorkingHoursPeriodEmiter, GenericEventPeriodEmiter
 
 
 def float_to_hm(hours):
@@ -34,102 +28,6 @@ def float_to_hm(hours):
     #return (int(v // 1), int(round((v % 1) * 60, 1)))
     minutes = int(round(hours * 60))
     return divmod(minutes, 60)
-
-
-class ResourceTimeline(osv.TransientModel):
-    _name = 'resource.timeline'
-
-    LAYERS = set([
-        'working_hours',
-        'leaves',
-        'event',  # calendar event (can be an event, a task, ...)
-    ])
-
-    def _get_resource_working_hours(self, cr, uid, ids, context=None):
-        # weekday: 0: Monday, ..., 6: Saturday, 7: Sunday
-        return [(wday, 0, 24) for wday in xrange(7)]
-
-    def _get_resource_leaves(self, cr, uid, ids, date_from=None, date_to=None, context=None):
-        return []
-
-    def _get_resource_events(self, cr, uid, ids, date_from=None, date_to=None, context=None):
-        return []
-
-    def _get_resource_timezone(self, cr, uid, ids, context=None):
-        if 'tz' in self._all_columns:
-            result = {}
-            for record in self.browse(cr, uid, ids, context=context):
-                result[record.id] = record.tz or 'UTC'
-        else:
-            result = dict.fromkeys(ids, 'UTC')
-        return result
-
-    def _get_resource_timeline(self, cr, uid, ids, layers=None, date_from=None, date_to=None, context=None):
-        if not ids:
-            return False
-        record_ids = ids
-        if isinstance(ids, (int, long)):
-            record_ids = [ids]
-        if isinstance(date_from, basestring):
-            date_from = datetime.strptime(date_from, DT_FMT)
-        if isinstance(date_to, basestring):
-            date_to = datetime.strptime(date_to, DT_FMT)
-
-        if layers is None:
-            timeline_layers = self.LAYERS
-        else:
-            timeline_layers = [l for l in self.LAYERS if l in layers]
-
-        result = {}
-        for record in self.browse(cr, uid, record_ids, context=context):
-
-            tz = self._get_resource_timezone(cr, uid, [record.id], context=context)[record.id]
-            # NOTE: All datetime passed to Timeline should be naive date in the resource "local timezone" !!!
-            tz_resource = pytz.timezone(tz)
-            tz_utc = pytz.timezone('UTC')
-            date_from = Timeline.datetime_tz_convert(date_from, tz_utc, tz_resource)
-            date_to = Timeline.datetime_tz_convert(date_to, tz_utc, tz_resource)
-            timeline = Timeline(date_from, date_to, tz=tz, default=Availibility.AVAILABLE)
-
-            for layer in timeline_layers:
-                if layer == 'working_hours':
-
-                    if record.calendar_id:
-                        timeline.add_emiter(WorkingHoursPeriodEmiter([
-                            (int(att.dayofweek)+1, att.hour_from, att.hour_to)
-                            for att in record.calendar_id.attendance_ids
-                        ]))
-
-                elif layer == 'leaves':
-
-                    # add all leaves for this event
-                    leaves_emiter = GenericEventPeriodEmiter()
-                    timeline.add_emiter(leaves_emiter)
-                    Leave = self.pool.get('resource.calendar.leaves')
-                    # leave_domain = [
-                    #     '|',
-                    #         '&', ('applies_to', '=', 'company'), ('company_id', '=', record.company_id.id),
-                    #         '&', ('applies_to', '=', 'event'), ('event_id', '=', record.id),
-                    # ]
-                    # if record.calendar_id:
-                    #     leave_domain[:0] = ['|', '&', ('applies_to', '=', 'calendar'),
-                    #                                   ('calendar_id', '=', record.calendar_id.id)]
-                    # leave_ids = leave_obj.search(cr, uid, leave_domain, context=context)
-                    leave_ids = []  # FIXME: missing patches for general leaves stuff!
-                    for leave in Leave.browse(cr, uid, leave_ids, context=context):
-                        leave_from = timeline.datetime_from_str(leave.date_from, tz='UTC')
-                        leave_to = timeline.datetime_from_str(leave.date_to, tz='UTC')
-                        leaves_emiter.add_event(leave_from, leave_to, Availibility.UNAVAILABLE)
-
-                elif layer == 'events':
-                    # TODO: ...
-                    pass
-
-            result[record.id] = timeline
-
-        if isinstance(ids, (int, long)):
-            return result.values()[0]
-        return result
 
 
 class ResourceCalendar(osv.Model):

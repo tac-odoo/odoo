@@ -499,7 +499,7 @@ class EventType(osv.Model):
     }
 
     _defaults = {
-        'default_content_planification': 'none',
+        'default_content_planification': 'linear',
     }
 
 
