@@ -312,7 +312,6 @@
             <field name="arch" type="xml">
                 <calendar string="Seances" date_start="date_begin" date_delay="duration" color="type_id" mode="week">
                     <field name="name"/>
-                    <field name="type_id"/>
                 </calendar>
             </field>
         </record>
