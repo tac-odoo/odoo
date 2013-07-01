@@ -25,7 +25,7 @@
   height: 17px; }
 .openerp .oe_calendar .dhx_cal_event_clear {
   height: auto; }
-.openerp .oe_calendar .dhx_cal_event .dhx_footer {
+.openerp .oe_calendar .dhx_cal_event:hover .dhx_footer {
   background: url(../../lib/dhtmlxScheduler/codebase/imgs_dhx_terrace/resizing.png) no-repeat center center !important; }
 .openerp .oe_calendar .dhx_event_move {
   cursor: pointer; }
