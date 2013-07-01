@@ -182,10 +182,7 @@ class CoreCalendarResource(osv.TransientModel):
         result = {}
         Calendar = self.pool.get('core.calendar')
         CalEvent = self.pool.get('core.calendar.event')
-        from pprint import pprint
         for record in self.browse(cr, uid, ids, context=context):
-            if record.id == 3:
-                import pdb; pdb.set_trace()
             event_domain = [
                 ('attendee_id', '=', record.id),
                 ('state', '!=', 'cancel'),
@@ -195,7 +192,6 @@ class CoreCalendarResource(osv.TransientModel):
                           ('date_end', '<=', date_to.strftime(DT_FMT))
             ]
             result[record.id] = CalEvent.search(cr, uid, event_domain, context=context)
-            pprint("%s :: %s :: %s" % (record, result[record.id], event_domain,))
         return result
 
     def get_i18n_availibility_status(self, cr, uid, availibility_status, short=False, context=None):

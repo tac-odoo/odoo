@@ -120,7 +120,7 @@
                     <field name="main_speaker_id"/>
                     <field name="attendee_ids"/>
                     <templates>
-                        <t t-name="calendar-event">
+                        <t t-name="calendar-text-box">
                             <field name="name"/>
                             <t t-if="record.recurrent.raw_value">
                                 <span class="oe_i oe_calendar_event_attr">Q</span>
@@ -129,31 +129,19 @@
                                 <span class="oe_e oe_calendar_event_attr">U</span>
                             </t>
                         </t>
-                        <t t-name="calendar-event-bar">
-                            <field name="name" class="oe_inline"/>
-                            <t t-if="record.recurrent.raw_value">
-                                <span class="oe_i oe_calendar_event_attr">Q</span>
+                        <t t-name="calendar-info-box">
+                            <t t-if="record.organizer_id.raw_value">
+                                <span> Organizer: <field name="organizer_id"/></span><br/>
                             </t>
-                            <t t-if="record.state.raw_value == 'confirm'">
-                                <span class="oe_e oe_calendar_event_attr">U</span>
+                            <t t-if="record.location.raw_value">
+                                <span> Location: <field name="location"/></span><br/>
                             </t>
-                        </t>
-                        <t t-name="calendar-event-info-title">
-                            <field name="name"/>
-                            <div class="oe_calendar_event_attr_list">
-                                <t t-if="record.recurrent.raw_value">
-                                    <span class="oe_i oe_calendar_event_attr">Q</span>
-                                </t>
-                                <t t-if="record.state.raw_value == 'confirm'">
-                                    <span class="oe_e oe_calendar_event_attr">U</span>
-                                </t>
-                            </div>
-                        </t>
-                        <t t-name="calendar-event-info-content">
-                            <span> Responsible: <field name="organizer_id"/></span><br/>
-                            <span> Location: <field name="location"/></span><br/>
-                            <span> Speaker: <field name="main_speaker_id"/></span><br/>
-                            <!-- <span> Attendees: <field name="attendee_ids"/></span> -->
+                            <t t-if="record.attendee_ids.raw_value.length">
+                                <span> Participants: <t t-esc="record.attendee_ids.raw_value.length"/></span><br/>
+                            </t>
+                            <t t-if="!record.attendee_ids.raw_value.length">
+                                <span> No participant!</span><br/>
+                            </t>
                         </t>
                     </templates>
                 </calendar>
