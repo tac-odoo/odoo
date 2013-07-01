@@ -315,7 +315,7 @@
         <field name="inherit_id" ref="event.view_event_content_form"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@string='Content &amp; Planning']/group[1]/group[1]/*[1]" position="before">
-                <field name="course_id" on_change="onchange_content_course(course_id, context)"/>
+                <field name="course_id" on_change="onchange_content_course(course_id, slot_duration, context)"/>
                 <newline/>
             </xpath>
         </field>

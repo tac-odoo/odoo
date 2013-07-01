@@ -21,6 +21,10 @@
                             <button type="action"
                                     name="%(core_calendar.action_configure_system_calendars)d"
                                     string="Configure system calendars" class="oe_link"/>
+                            <br/>
+                            <button type="action"
+                                    name="%(core_calendar.action_company_leaves)d"
+                                    string="Configure company non-working days" class="oe_link"/>
                         </div>
                     </group>
                 </form>

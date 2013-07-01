@@ -32,7 +32,7 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as D_FMT
 from openerp.addons.base.res.res_partner import _tz_get
 from core_calendar.timeline import Timeline, Availibility
-from resource import float_to_hm
+from openerp.addons.core_calendar.resource import float_to_hm
 from openerp.tools import logged
 
 
@@ -650,6 +650,22 @@ class EventEvent(osv.Model):
                         #     period.start = event_end
 
         return True
+
+    def _get_resource_leaves(self, cr, uid, ids, date_from=None, date_to=None, context=None):
+        result = {}
+        Leave = self.pool.get('resource.calendar.leaves')
+        for record in self.browse(cr, uid, ids, context=context):
+            leave_domain = [
+                '|',
+                    '&', ('applies_to', '=', 'company'), ('company_id', '=', record.company_id.id),
+                    '&', ('applies_to', '=', 'event'), ('event_id', '=', record.id),
+            ]
+            if record.calendar_id:
+                leave_domain[:0] = ['|', '&', ('applies_to', '=', 'calendar'),
+                                              ('calendar_id', '=', record.calendar_id.id)]
+            result[record.id] = Leave.search(cr, uid, leave_domain, context=context)
+        print("Result: %s" % (result,))
+        return result
 
 
 class EventRegistration(osv.Model):

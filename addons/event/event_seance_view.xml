@@ -100,6 +100,8 @@
                                 <div>
                                     <field name="calendar_id" context="{'show_week_hours': 1}" options="{'always_reload': True}"/>
                                     <span attrs="{'invisible': [('calendar_id','!=',False)]}" groups="base.group_user">No hours specified, OpenERP will consider 24/24 7/7 hours</span>
+                                    <button type="action" name="%(event.action_event_leaves)d"
+                                            string="(configure event leaves)" class="oe_link"/>
                                 </div>
                             </group>
                             <group>

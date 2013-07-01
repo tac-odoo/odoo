@@ -13,5 +13,111 @@
             </field>
         </record>
 
+        <record id="view_resource_calendar_leaves_event_form" model="ir.ui.view">
+            <field name="name">resource.calendar.leaves.form.event</field>
+            <field name="model">resource.calendar.leaves</field>
+            <field name="inherit_id" ref="core_calendar.view_resource_calendar_leaves_form"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="event_id" attrs="{'invisible': [('applies_to','!=','event')]}"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_resource_calendar_leaves_event_tree" model="ir.ui.view">
+            <field name="name">resource.calendar.leaves.tree.event</field>
+            <field name="model">resource.calendar.leaves</field>
+            <field name="inherit_id" ref="core_calendar.view_resource_calendar_leaves_tree"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="event_id"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_resource_calendar_leaves_event_search" model="ir.ui.view">
+            <field name="name">resource.calendar.leaves.search.event</field>
+            <field name="model">resource.calendar.leaves</field>
+            <field name="inherit_id" ref="core_calendar.view_resource_calendar_leaves_search_corecalendar"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="event_id"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_resource_calendar_company_nonworkingdays_event_tree" model="ir.ui.view">
+            <field name="name">resource.calendar.leaves.company.nonworkingdays.tree.event</field>
+            <field name="model">resource.calendar.leaves</field>
+            <field name="inherit_id" ref="core_calendar.resource_calendar_company_nonworkingdays_tree"/>
+            <field name="arch" type="xml">
+                <field name="company_id" position="after">
+                    <field name="event_id" invisible="1"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="core_calendar.action_company_leaves" model="ir.actions.act_window">
+            <field name="domain">[('resource_id','=',False),('calendar_id','=',False),('event_id','=',False),('partner_id','=',False)]</field>
+        </record>
+
+        <record id="action_event_leaves" model="ir.actions.act_window">
+            <field name="name">Event non-working days</field>
+            <field name="res_model">resource.calendar.leaves</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="domain">[('event_id','=',active_id)]</field>
+            <field name="view_id" ref="core_calendar.resource_calendar_company_nonworkingdays_tree"/>
+        </record>
+
+        <record id="action_resource_calendar_form" model="ir.actions.act_window">
+            <field name="name">Calendars</field>
+            <field name="res_model">resource.calendar</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" eval="False"/>
+            <field name="search_view_id" ref="resource.view_resource_calendar_search"/>
+            <field name="help">Define working hours and time table that could be scheduled to your events</field>
+        </record>
+
+        <menuitem id="menu_event_config_calendars" parent="base.menu_marketing_config_root"
+                  action="action_resource_calendar_form" groups="base.group_no_one"
+                  string="Calendars"/>
+
+        <record id="action_resource_calendar_leaves_form" model="ir.actions.act_window">
+            <field name="name">All Calendar Leaves</field>
+            <field name="res_model">resource.calendar.leaves</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar</field>
+            <field name="view_id" eval="False"/>
+            <field name="search_view_id" ref="resource.view_resource_calendar_leaves_search"/>
+        </record>
+
+        <record id="view_action_resource_calendar_leaves_tree" model="ir.actions.act_window.view">
+            <field name="act_window_id" ref="action_resource_calendar_leaves_form"/>
+            <field name="sequence">10</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" eval="False"/>
+        </record>
+
+        <record id="view_action_resource_calendar_leaves_form" model="ir.actions.act_window.view">
+            <field name="act_window_id" ref="action_resource_calendar_leaves_form"/>
+            <field name="sequence">20</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="core_calendar.view_resource_calendar_leaves_form"/>
+        </record>
+
+        <record id="view_action_resource_calendar_leaves_calendar" model="ir.actions.act_window.view">
+            <field name="act_window_id" ref="action_resource_calendar_leaves_form"/>
+            <field name="sequence">30</field>
+            <field name="view_mode">calendar</field>
+            <field name="view_id" eval="False"/>
+        </record>
+
+        <menuitem id="menu_event_config_leaves" parent="base.menu_marketing_config_root"
+                   action="action_resource_calendar_leaves_form" groups="base.group_no_one"
+                   string="All Calendar Leaves"/>
+
+
     </data>
 </openerp>

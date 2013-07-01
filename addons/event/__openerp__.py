@@ -53,6 +53,7 @@ Key Features
         'report/report_event_registration_view.xml',
         'board_association_view.xml',
         'res_partner_view.xml',
+        'resource_view.xml',
         'email_template.xml',
     ],
     'demo': ['event_demo.xml'],

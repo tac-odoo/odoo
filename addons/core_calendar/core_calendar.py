@@ -107,7 +107,6 @@ class CoreCalendarTimeline(osv.TransientModel):
 
                     wkhours = self._get_resource_working_hours(cr, uid, [record.id], date_from=date_from,
                                                                date_to=date_to, context=context)[record.id]
-                    print("wkhours: %s" % (wkhours,))
                     timeline.add_emiter(WorkingHoursPeriodEmiter([
                         # 0: wday, 1: hour_from, 2: hour_to
                         (att[0], att[1], att[2]) for att in wkhours
@@ -124,7 +123,7 @@ class CoreCalendarTimeline(osv.TransientModel):
                     for leave in Leave.browse(cr, uid, leave_ids, context=context):
                         leave_from = timeline.datetime_from_str(leave.date_from, tz='UTC')
                         leave_to = timeline.datetime_from_str(leave.date_to, tz='UTC')
-                        leaves_emiter.add_event(leave_from, leave_to, Availibility.FREE)
+                        leaves_emiter.add_event(leave_from, leave_to, Availibility.BUSY)  # FIXME: implement OUT_OF_OFFICE level
 
                 elif layer == 'events':
 
@@ -168,16 +167,15 @@ class CoreCalendarResource(osv.TransientModel):
         result = {}
         Leave = self.pool.get('resource.calendar.leaves')
         for record in self.browse(cr, uid, ids, context=context):
-            # leave_domain = [
-            #     '|',
-            #         '&', ('applies_to', '=', 'company'), ('company_id', '=', record.company_id.id),
-            #         '&', ('applies_to', '=', 'resource'), ('partner_id', '=', record.id),
-            # ]
-            # if record.calendar_id:
-            #     leave_domain[:0] = ['|', '&', ('applies_to', '=', 'calendar'),
-            #                                   ('calendar_id', '=', record.calendar_id.id)]
-            # result[record.id] = Leave.search(cr, uid, leave_domain, context=context)
-            result[record.id] = []
+            leave_domain = [
+                '|',
+                    '&', ('applies_to', '=', 'company'), ('company_id', '=', record.company_id.id),
+                    '&', ('applies_to', '=', 'resource'), ('partner_id', '=', record.id),
+            ]
+            if record.calendar_id:
+                leave_domain[:0] = ['|', '&', ('applies_to', '=', 'calendar'),
+                                              ('calendar_id', '=', record.calendar_id.id)]
+            result[record.id] = Leave.search(cr, uid, leave_domain, context=context)
         return result
 
     def _get_resource_events(self, cr, uid, ids, date_from=None, date_to=None, context=None):

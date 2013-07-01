@@ -11,10 +11,17 @@
                     <page string="Calendar">
                         <group>
                             <group>
-                                <field name="attendee_type"/>
-                                <field name="attendee_external"/>
+                                <field name="tz"/>
+                                <label for="calendar_id"/>
+                                <div>
+                                    <field name="calendar_id"/>
+                                    <button type="action" name="%(core_calendar.action_partner_leaves)d"
+                                            string="(=> configure leaves/holidays)" class="oe_link"/>
+                                </div>
                             </group>
                             <group>
+                                <field name="attendee_type"/>
+                                <field name="attendee_external"/>
                             </group>
                         </group>
                     </page>

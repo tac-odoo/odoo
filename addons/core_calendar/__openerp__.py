@@ -43,6 +43,7 @@ If you need to manage:
     'website': 'http://www.openerp.com',
     'demo': [],
     'data': [
+        'resource_view.xml',
         'core_calendar_view.xml',
         'res_partner_view.xml',
     ],

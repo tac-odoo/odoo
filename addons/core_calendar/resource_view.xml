@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="view_resource_calendar_leaves_form" model="ir.ui.view">
+            <field name="name">resource.calendar.leaves.form.core_calendar</field>
+            <field name="model">resource.calendar.leaves</field>
+            <field name="inherit_id" eval="False"/>
+            <field name="arch" type="xml">
+                <form string="Leave Detail" version="7.0">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h2><field name="name"/></h2>
+                        </div>
+                        <div class="oe_clear">
+                            <group>
+                               <group>
+                                 <label for="date_from" string="Duration"/>
+                                 <div>
+                                   <field name="date_from" class="oe_inline"/> - 
+                                   <field name="date_to" class="oe_inline"/>
+                                 </div>
+                               </group>
+                            </group>
+                            <group>
+                                <group>
+                                    <field name="applies_to" on_change="onchange_applies_to(applies_to)" required="1"/>
+                                    <field name="resource_id" on_change="onchange_resource(resource_id)"
+                                           attrs="{'invisible': [('applies_to','!=','resource')]}"/>
+                                    <field name="partner_id"
+                                           attrs="{'invisible': [('applies_to','!=','resource')]}"/>
+                                </group>
+                                <group>
+                                    <field name="calendar_id"
+                                           attrs="{'invisible': [('applies_to','=','company')]}"/>
+                                    <field name="company_id" widget="selection" groups="base.group_multi_company"
+                                           attrs="{'readonly': [('applies_to', '!=', 'company')]}"/>
+                                </group>
+                            </group>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_resource_calendar_leaves_tree" model="ir.ui.view">
+            <field name="name">resource.calendar.leaves.tree.core_calendar</field>
+            <field name="model">resource.calendar.leaves</field>
+            <field name="inherit_id" ref="resource.resource_calendar_leave_tree"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="applies_to"/>
+                </field>
+                <field name="resource_id" position="after">
+                    <field name="partner_id"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_resource_calendar_leaves_search" model="ir.ui.view">
+            <field name="name">resource.calendar.leaves.search.core_calendar</field>
+            <field name="model">resource.calendar.leaves</field>
+            <field name="inherit_id" ref="resource.view_resource_calendar_leaves_search"/>
+            <field name="arch" type="xml">
+                <field name="calendar_id" position="after">
+                    <field name="applies_to"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_resource_calendar_leaves_search_corecalendar" model="ir.ui.view">
+            <field name="name">resource.calendar.leaves.search.core_calendar</field>
+            <field name="model">resource.calendar.leaves</field>
+            <field name="inherit_id" ref="resource.view_resource_calendar_leaves_search"/>
+            <field name="arch" type="xml">
+                <field name="calendar_id" position="after">
+                    <field name="partner_id" string="Partner"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="resource_calendar_company_nonworkingdays_tree" model="ir.ui.view">
+            <field name="name">resource.calendar.leaves.company.nonworkingdays.tree</field>
+            <field name="model">resource.calendar.leaves</field>
+            <field name="priority">20</field>
+            <field name="arch" type="xml">
+                <tree string="Non-working days" editable="bottom">
+                    <field name="calendar_id" invisible="1"/>
+                    <field name="name" string="Reason"/>
+                    <field name="date_from" />
+                    <field name="date_to" />
+                    <field name="company_id" invisible="1"/>
+                    <field name="partner_id" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_company_leaves" model="ir.actions.act_window">
+            <field name="name">Company non-working days</field>
+            <field name="res_model">resource.calendar.leaves</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="resource_calendar_company_nonworkingdays_tree"/>
+            <field name="domain">[('resource_id','=',False),('calendar_id','=',False),('partner_id','=',False)]</field>
+            <field name="context">{}</field>
+        </record>
+
+        <record id="action_partner_leaves" model="ir.actions.act_window">
+            <field name="name">Contact non-working days</field>
+            <field name="res_model">resource.calendar.leaves</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="domain">['|',('partner_id','=',active_id),('resource_id.user_id.partner_id','=',active_id)]</field>
+            <field name="view_id" ref="resource_calendar_company_nonworkingdays_tree"/>
+        </record>
+
+    </data>
+</openerp>

@@ -19,52 +19,53 @@
 #
 ##############################################################################
 
-from collections import defaultdict
 from openerp.osv import osv, fields
+from openerp.tools.translate import _
 
 
-def float_to_hm(hours):
-    """ convert a number of hours (float) into a tuple like (hour, minute) """
-    #return (int(v // 1), int(round((v % 1) * 60, 1)))
-    minutes = int(round(hours * 60))
-    return divmod(minutes, 60)
+class resource_calendar_leaves(osv.Model):
+    _inherit = "resource.calendar.leaves"
 
-
-class ResourceCalendar(osv.Model):
-    _inherit = 'resource.calendar'
-    _columns = {
-        'slot_duration': fields.integer('Slot duration'),
-    }
-    _defaults = {
-        'slot_duration': 4,
-    }
-
-    def name_get(self, cr, user, ids, context=None):
-        if not ids:
-            return []
-        if isinstance(ids, (int, long)):
-            ids = [ids]
-        if context is None:
-            context = {}
-        result = super(ResourceCalendar, self).name_get(cr, user, ids, context=context)
-        if context.get('show_week_hours'):
-            Attendance = self.pool.get('resource.calendar.attendance')
-            resdict = dict(result)
-            weekdaynames = dict(Attendance.fields_get(cr, user, ['dayofweek'], context=context)['dayofweek']['selection'])
-            for calendar in self.browse(cr, user, ids, context=context):
-                hours_by_wday = defaultdict(list)
-                # Group attendance per "week day"
-                # then merge them together (1 weekday per line)
-                for attendance in calendar.attendance_ids:
-                    wday = attendance.dayofweek
-                    hours = '%d:%02d - %d:%02d' % (
-                        float_to_hm(attendance.hour_from)
-                        + float_to_hm(attendance.hour_to)
-                    )
-                    hours_by_wday[wday].append(hours)
-                hours_text = '\n'.join(('%s: %s' % (weekdaynames[wday],
-                                                    ', '.join(hours_by_wday[wday]))
-                                        for wday in sorted(hours_by_wday)))
-                resdict[calendar.id] += u'\n' + hours_text
-            result = [(_id, resdict[_id]) for _id in ids]
+    def _get_applies_to(self, cr, uid, ids, field_name, args, context=None):
+        result = {}
+        for leave in self.browse(cr, uid, ids, context=context):
+            if leave.partner_id or leave.resource_id:
+                result[leave.id] = 'resource'
+            elif leave.event_id:
+                result[leave.id] = 'event'
+            elif leave.calendar_id:
+                result[leave.id] = 'calendar'
+            else:
+                result[leave.id] = 'company'
         return result
+
+    _columns = {
+        'event_id': fields.many2one('event.event', 'Event'),
+        'applies_to': fields.function(_get_applies_to, type='selection', string='Applies to',
+                                      selection=lambda s, *a, **kw: s._get_applies_to_selection(*a, **kw),
+                                      store=True, fnct_inv=lambda *a: True),
+    }
+
+    def _get_applies_to_selection(self, cr, uid, context=None):
+        result = super(resource_calendar_leaves, self)._get_applies_to_selection(cr, uid, context=context)
+        result.append(('event', _('This event')))
+        return result
+
+    def _get_applies_to(self, cr, uid, ids, field_name, args, context=None):
+        result = {}
+        for leave in self.browse(cr, uid, ids, context=context):
+            if leave.partner_id or leave.resource_id:
+                result[leave.id] = 'resource'
+            # elif leave.event_id:
+            #     result[leave.id] = 'event'
+            elif leave.calendar_id:
+                result[leave.id] = 'calendar'
+            else:
+                result[leave.id] = 'company'
+        return result
+
+    def onchange_applies_to(self, cr, uid, ids, applies_to, context=None):
+        ocv = super(resource_calendar_leaves, self).onchange_applies_to(cr, uid, ids, applies_to, context=context)
+        if applies_to == 'event':
+            ocv['value'].update(resource_id=False, partner_id=False)
+        return ocv
