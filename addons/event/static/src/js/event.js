@@ -259,7 +259,7 @@ var commands = {
 
             self.setting = true;
             this.$el.find('td[data-content='+content.id+'].oe_preplanning_content_count').html(_.str.sprintf('%d/%d', content.slot_used, content.slot_count));
-            this.$el.find('td[data-week='+week.id+'].oe_preplanning_week_count').html(_.str.sprintf('%d/%d', week.slot_used, week.slot_count));
+            this.$el.find('th[data-week='+week.id+'].oe_preplanning_week_count').html(_.str.sprintf('%d/%d', week.slot_used, week.slot_count));
             var o2m_value = self.generate_o2m_value();
             self.updating = true;
             self.field_manager.set_values({children_ids: o2m_value}).done(function() {
