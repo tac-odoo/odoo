@@ -104,6 +104,32 @@
             return _.str.sprintf(html, section_width, minute_height, date.getHours(),
                                        minute_height);
         };
+
+        // Add specific templates to allow user-defined rendering
+        scheduler.templates.event_text = function(start_date, end_date, ev) {
+            if (ev.oe_view && ev.oe_view.render_has_template('calendar-text-box')) {
+                return ev.oe_view.render_event(ev, 'calendar-text-box');
+            }
+            return ev.text;
+        };
+        scheduler.templates.event_bar_text = function(start_date, end_date, ev) {
+            if (ev.oe_view && ev.oe_view.render_has_template('calendar-text-box')) {
+                return ev.oe_view.render_event(ev, 'calendar-text-box');
+            }
+            return ev.text;
+        };
+        scheduler.templates.quick_info_title = function(start_date, end_date, ev) {
+            if (ev.oe_view && ev.oe_view.render_has_template('calendar-text-box')) {
+                return ev.oe_view.render_event(ev, 'calendar-text-box');
+            }
+             return ev.text.substr(0,50);
+        };
+        scheduler.templates.quick_info_content = function(start_date, end_date, ev) {
+            if (ev.oe_view && ev.oe_view.render_has_template('calendar-info-box')) {
+                return ev.oe_view.render_event(ev, 'calendar-info-box');
+            }
+            return ev.details || ev.text;
+        };
     }
 }());
 
@@ -140,6 +166,13 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         this.selected_filters = [];
         this.is_slow_open = false;
         this.scheduler_events = [];
+
+        /* TODO: add postprocess for m2m fields
+           - currently none of them are displayed */
+        this.many2manys = [];
+        this.qweb = new QWeb2.Engine();
+        this.qweb.debug = instance.session.debug;
+        this.qweb.default_dict = _.clone(QWeb.default_dict);
     },
     view_loading: function(r) {
         return this.load_calendar(r);
@@ -150,6 +183,7 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
     },
     load_calendar: function(data) {
         this.fields_view = data;
+        this.add_qweb_template();
         this.$el.addClass(this.fields_view.arch.attrs['class']);
         this.calendar_fields = {};
         this.ids = this.dataset.ids;
@@ -209,6 +243,102 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         }
         this.trigger('calendar_view_loaded', data);
         return this.has_been_loaded.resolve();
+    },
+    /*  add_qweb_template
+    *   select the nodes into the xml and send to extract_aggregates the nodes with TagName="field"
+    */
+    add_qweb_template: function() {
+        for (var i=0, ii=this.fields_view.arch.children.length; i < ii; i++) {
+            var child = this.fields_view.arch.children[i];
+            if (child.tag === "templates") {
+                this.transform_qweb_template(child);
+                this.qweb.add_template(instance.web.json_node_to_xml(child));
+                break;
+            }
+        }
+    },
+    transform_qweb_template: function(node) {
+        var qweb_add_if = function(node, condition) {
+            if (node.attrs[QWeb.prefix + '-if']) {
+                condition = _.str.sprintf("(%s) and (%s)", node.attrs[QWeb.prefix + '-if'], condition);
+            }
+            node.attrs[QWeb.prefix + '-if'] = condition;
+        };
+        // Process modifiers
+        if (node.tag && node.attrs.modifiers) {
+            var modifiers = JSON.parse(node.attrs.modifiers || '{}');
+            if (modifiers.invisible) {
+                qweb_add_if(node, _.str.sprintf("!calendar_compute_domain(%s)", JSON.stringify(modifiers.invisible)));
+            }
+        }
+        switch (node.tag) {
+            case 'field':
+                if (this.fields_view.fields[node.attrs.name].type === 'many2many') {
+                    if (_.indexOf(this.many2manys, node.attrs.name) < 0) {
+                        this.many2manys.push(node.attrs.name);
+                    }
+                    node.tag = 'div';
+                    node.attrs['class'] = (node.attrs['class'] || '') + ' oe_form_field oe_tags';
+                } else {
+                    node.tag = QWeb.prefix;
+                    node.attrs[QWeb.prefix + '-esc'] = 'record.' + node.attrs['name'] + '.value';
+                }
+                break;
+        }
+        if (node.children) {
+            for (var i = 0, ii = node.children.length; i < ii; i++) {
+                this.transform_qweb_template(node.children[i]);
+            }
+        }
+    },
+    transform_record: function(record) {
+        var self = this,
+            new_record = {},
+            calendar_field_names = _(this.calendar_fields).chain()
+                                        .values().pluck('name').value(),
+            fields = _.uniq(_.keys(self.fields_view.fields)
+                            .concat(calendar_field_names));
+        _.each(record, function(value, name) {
+            if (_.indexOf(fields, name) === -1) {
+                return;
+            }
+            var r = _.clone(self.fields_view.fields[name] || {});
+            if ((r.type === 'date' || r.type === 'datetime') && value) {
+                r.raw_value = instance.web.auto_str_to_date(value);
+            } else {
+                r.raw_value = value;
+            }
+            r.value = instance.web.format_value(value, r);
+            new_record[name] = r;
+        });
+        return new_record;
+    },
+    render_has_template: function(template_name) {
+        return !!this.qweb.templates[template_name]
+    },
+    render_event: function(ev, template_name) {
+        if (!ev.render_cache) {
+            ev.render_cache = {};
+        }
+        // Return cache version if available
+        if (ev.render_cache[template_name]) {
+            return ev.render_cache[template_name];
+        }
+
+        this.qweb_context = {
+            instance: instance,
+            record: ev.record,
+            widget: this,
+            read_only_mode: this.options.read_only_mode,
+        };
+        for (var p in this) {
+            if (_.str.startsWith(p, 'calendar_') && _.isFunction(this[p])) {
+                this.qweb_context[p] = _.bind(this[p], this);
+            }
+        }
+        var result = this.qweb.render(template_name, this.qweb_context);
+        ev.render_cache[template_name] = result;
+        return result
     },
     get_calendar_userconfig: function() {
         return {
@@ -518,8 +648,15 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
             'start_date': date_start.toString('yyyy-MM-dd HH:mm:ss'),
             'end_date': date_stop.toString('yyyy-MM-dd HH:mm:ss'),
             'text': res_text.join(', '),
-            'id': evt.id
+            'id': evt.id,
+            'section_key': undefined,
+            'oe_view': this,
+            'record': this.transform_record(evt),
         };
+                r.section_key = undefined;
+        r.record = this.transform_record(evt);
+        r.oe_view = this;
+
         if (evt.color) {
             r.color = evt.color;
         }
@@ -716,6 +853,9 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         if (index !== null) {
             this.dataset.unlink(this.dataset.ids[index]);
         }
+    },
+    calendar_compute_domain: function(domain) {
+        return instance.web.form.compute_domain(domain, this.values);
     },
 });
 
