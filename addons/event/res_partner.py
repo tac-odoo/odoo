@@ -20,17 +20,45 @@
 ##############################################################################
 
 from openerp.osv import fields, osv
+from openerp.tools.translate import _
 
-class res_partner(osv.osv):
+
+class ResPartner(osv.osv):
     _inherit = 'res.partner'
 
     _columns = {
         'speaker': fields.boolean('Speaker', help="Check this box if this contact is a speaker."),
-        'event_ids': fields.one2many('event.event','main_speaker_id', readonly=True),
-        'event_registration_ids': fields.one2many('event.registration','partner_id', readonly=True),
+        'event_ids': fields.one2many('event.event', 'main_speaker_id', readonly=True),
+        'event_registration_ids': fields.one2many('event.registration', 'partner_id', readonly=True),
     }
-    
 
-res_partner()
+    def open_registrations(self, cr, uid, ids, context=None):
+        """ Utility method used to add an "Open Registrations" button in partner views """
+        partner = self.browse(cr, uid, ids[0], context=context)
+        if partner.customer:
+            return {'type': 'ir.actions.act_window',
+                    'name': _('Registrations'),
+                    'res_model': 'event.registration',
+                    'view_type': 'form',
+                    'view_mode': 'tree,form,calendar,graph',
+                    'context': "{'search_default_partner_id': active_id}"}
+        return {}
+
+    def open_events(self, cr, uid, ids, context=None):
+        """ Utility method used to add an "Open Events" button in partner views """
+        partner = self.browse(cr, uid, ids[0], context=context)
+        partner_domain = [
+            '|', '|',
+            ('registration_ids.partner_id', '=', partner.id),
+            ('main_speaker_id', '=', partner.id),
+            ('address_id', '=', partner.id),
+        ]
+        return {'type': 'ir.actions.act_window',
+                'name': _('Events'),
+                'res_model': 'event.event',
+                'view_type': 'form',
+                'view_mode': 'tree,form,calendar,graph',
+                'domain': partner_domain}
+
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
