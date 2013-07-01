@@ -1,0 +1,54 @@
+<templates>
+
+<t t-name="FieldColorpicker">
+    <span t-att-class="'oe_form_field oe_form_field_with_button '+widget.widget_class" t-att-style="widget.node.attrs.style">
+        <t t-if="!widget.get('effective_readonly')">
+            <input t-att-type="widget.password ? 'password' : 'text'"
+                t-att-id="widget.id_for_label"
+                t-att-tabindex="widget.node.attrs.tabindex"
+                t-att-autofocus="widget.node.attrs.autofocus"
+                t-att-placeholder="widget.node.attrs.placeholder"
+                t-att-maxlength="widget.field.size"
+            /><img class="oe_field_translate oe_input_icon" t-if="widget.field.translate" t-att-src='_s + "/web/static/src/img/icons/terp-translate.png"' width="16" height="16" border="0"/>
+        </t>
+        <t t-if="widget.get('effective_readonly')">
+            <span class="oe_form_char_content"></span>
+        </t>
+    </span>
+</t>
+
+<t t-name="AgendaView.sidebar.calendar">
+    <div t-foreach="filters" class="oe_calendar_responsible">
+        <input type="checkbox" name="selection" t-att-value="filters_value.value" checked="checked"/>
+        <div class="oe_calendar_color" t-attf-style="background: #{filters_value.color};"> </div>
+        <span><t t-esc="filters_value.label"/></span>
+    </div>
+</t>
+
+<t t-name="SelectOptionFormPopup.render">
+    <div>
+        <div class="oe_popup_form" style="width:100%"></div>
+    </div>
+</t>
+<t t-name="SelectOptionFormPopup.buttons">
+    <a class="oe_button oe_selectoptionformpopup-form-cancel oe_bold oe_form_button_cancel" href="javascript:void(0)">
+        Cancel
+    </a>
+</t>
+
+<t t-name="SelectSubsribedCalendar.render">
+    <div t-foreach="options" style="text-align: center; margin-top: 10px">
+        <button type="button" t-att-index="options_index" width="100%" class="oe_button"><t t-esc="options_value.label"/></button>
+    </div>
+</t>
+
+<t t-name="SelectRecurrentActionMode.render">
+    <div t-foreach="options" style="text-align: center; margin-top: 10px">
+        <button type="button" t-att-index="options_index"
+                class="oe_button">
+                <t t-esc="options_value.label"/>
+        </button>
+    </div>
+</t>
+
+</templates>

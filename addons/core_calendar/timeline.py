@@ -11,7 +11,7 @@
 import pytz
 from functools import partial
 from datetime import datetime, timedelta
-from collections import deque
+from collections import deque, namedtuple, defaultdict
 
 D_FMT = '%Y-%m-%d'
 T_FMT = '%H:%M:%S'
@@ -19,15 +19,17 @@ DT_FMT = '{0} {1}'.format(D_FMT, T_FMT)
 
 
 class Availibility:
-    UNKNOWN, AVAILABLE, UNAVAILABLE = range(3)
-    values = [UNKNOWN, AVAILABLE, UNAVAILABLE]
+    UNKNOWN, UNAVAILABLE, FREE, BUSY_TENTATIVE, BUSY = range(5)
+    values = [UNKNOWN, UNAVAILABLE, FREE, BUSY_TENTATIVE, BUSY]
 
     @staticmethod
     def get_availability_value(value):
         return {
             Availibility.UNKNOWN: 'UNKNOWN',
-            Availibility.AVAILABLE: 'AVAILABLE',
             Availibility.UNAVAILABLE: 'UNAVAILABLE',
+            Availibility.FREE: 'FREE',
+            Availibility.BUSY_TENTATIVE: 'BUSY_TENTATIVE',
+            Availibility.BUSY: 'BUSY',
         }[value]
 
 
@@ -233,9 +235,9 @@ class WorkingHoursPeriodEmiter(PeriodEmiter):
     """Emit availibility for each working hours"""
     def __init__(self, working_hours, default=Availibility.UNAVAILABLE):
         self.default = default
-        self.wrkhours_per_isoweekday = {}
+        self.wrkhours_per_isoweekday = defaultdict(list)
         for (isoweekday, hour_from, hour_to) in working_hours:
-            self.wrkhours_per_isoweekday.setdefault(isoweekday, []).append((hour_from, hour_to))
+            self.wrkhours_per_isoweekday[isoweekday].append((hour_from, hour_to))
         self.wrkhours_flatten = self.get_flatten_working_hours()
 
     def get_flatten_working_hours(self):
@@ -252,11 +254,11 @@ class WorkingHoursPeriodEmiter(PeriodEmiter):
                         raise Exception('overlapping working hours')
                     if abs(hfrom - prev) > 0.01:
                         xflat.append((isoweekday, prev, hfrom, self.default))
-                    xflat.append((isoweekday, hfrom, hto, Availibility.AVAILABLE))
+                    xflat.append((isoweekday, hfrom, hto, Availibility.FREE))
                     prev = hto
                 if abs(24. - xflat[-1][2]) > 0.01:
                     xflat.append((isoweekday, prev, 24., self.default))
-            wkhours_list.extend(xflat)
+                wkhours_list.extend(xflat)
         return wkhours_list
 
     def find_workhours(self, date):
@@ -430,6 +432,14 @@ class Timeline(object):
             tz_from = pytz.timezone(tz_from)
         if isinstance(tz_to, basestring):
             tz_to = pytz.timezone(tz_to)
+        if isinstance(dt, basestring):
+            try:
+                dt = datetime.strptime(dt, DT_FMT)
+            except ValueError:
+                dt = datetime.strptime(dt, D_FMT)
+        print("DT: %s, TZ: %s -> %s" % (dt, tz_from, tz_to,))
+        if dt is None:
+            import pdb; pdb.set_trace()
         if tz_from == tz_to:
             return dt
         d = tz_from.localize(dt).astimezone(tz_to)
@@ -441,7 +451,7 @@ class Timeline(object):
         """Convert a string into a datetime object
 
         :param tz: used to determine the source timezone of datetime string
-                   if provided the date is converted from this timezone to internal "local timezone"
+                   if provided the date is converted from this timezone to  timeline internal "local timezone"
         :return: datetime instance represented by string (in naive timezone)
         """
         if tz is None:
@@ -467,7 +477,7 @@ class Timeline(object):
             tzhandler = partial(self.tz_adaptor, tz_from=self.tz_local_info, tz_to=as_tz_info)
 
         for periods in self.emit_periods(by=by):
-            # fit period with TimeLine start/end range
+            # fit period with Timeline start/end range
             periods = [p for p in periods
                        if p.stop > self.start and p.start <= self.end]
             for p in periods:
@@ -500,7 +510,7 @@ class Timeline(object):
 
 if __name__ == '__main__':
     start, end = datetime(2013, 1, 1, 8, 0, 0), datetime(2013, 1, 8, 20, 0, 0)
-    tp = TimeLine(start, end, tz='Europe/Paris')
+    tp = Timeline(start, end, tz='Europe/Paris')
     tp.add_emiter(
         WorkingHoursPeriodEmiter([
             (1, 8., 12.), (1, 13., 17.),
@@ -514,7 +524,7 @@ if __name__ == '__main__':
     leaves_emiter = GenericEventPeriodEmiter()
     leaves_emiter.add_events([
         # New year's day
-        (datetime(2013, 1, 1, 0, 0, 0), datetime(2013, 1, 2, 0, 0), Availibility.UNAVAILABLE),
+        (datetime(2013, 1, 1, 0, 0, 0), datetime(2013, 1, 2, 0, 0), Availibility.UNAVAILABLE, 'Community Days Workshop'),
     ])
     tp.add_emiter(leaves_emiter)
 

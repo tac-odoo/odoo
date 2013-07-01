@@ -223,6 +223,12 @@
             <field name="arch" type="xml">
                 <form string="Seance" version="7.0">
                     <header>
+                        <button type="object" name="button_set_draft" states="cancel,done,planned" string="Set Draft"/>
+                        <button type="object" name="button_set_planned" states="draft" string="Set Planned"/>
+                        <button type="object" name="button_set_confirm" states="draft,planned" string="Confirm"/>
+                        <button type="object" name="button_set_inprogress" states="confirm" string="Start seance"/>
+                        <button type="object" name="button_set_closed" states="inprogress" string="Stop seance"/>
+                        <button type="object" name="button_set_done" states="confirm,inprogress,closed" string="Done"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
                     </header>
                     <sheet>
@@ -239,12 +245,12 @@
                                 <group>
                                     <group>
                                         <field name="type_id" options="{'no_open': True}"/>
-                                        <field name="date_begin"/>
-                                        <field name="duration" widget="float_time"/>
+                                        <field name="main_speaker_id" context="{'default_speaker': 1, 'fb_from': date_begin, 'fb_duration': duration}"/>
+                                        <field name="address_id" context="{'show_address': 1, 'fb_from': date_begin, 'fb_duration': duration}" options="{'always_reload': True}"/>
                                     </group>
                                     <group>
-                                        <field name="main_speaker_id" context="{'default_speaker': 1}"/>
-                                        <field name="address_id" context="{'show_address': 1}" options="{'always_reload': True}"/>
+                                        <field name="date_begin"/>
+                                        <field name="duration" widget="float_time"/>
                                         <field name="event_ids" widget="many2many_tags" string="Related Events"/>
                                     </group>
                                 </group>

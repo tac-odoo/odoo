@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record model="ir.actions.act_window" id="action_configure_system_calendars">
+            <field name="name">System Calendars</field>
+            <field name="res_model">core.calendar</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <record model="ir.ui.view" id="view_general_configuration_base_calendar">
+            <field name="name">General Settings (base_calendar)</field>
+            <field name="model">base.config.settings</field>
+            <field name="inherit_id" ref="base_setup.view_general_configuration"/>
+            <field name="arch" type="xml">
+                <form position="inside">
+                    <group>
+                        <label for="id" string="Calendar"/>
+                        <div>
+                            <button type="action"
+                                    name="%(core_calendar.action_configure_system_calendars)d"
+                                    string="Configure system calendars" class="oe_link"/>
+                        </div>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_core_calendare_tree">
+            <field name="name">System Calendars</field>
+            <field name="model">core.calendar</field>
+            <field name="arch" type="xml">
+                <tree string="System Calendars">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_core_calendar_form">
+            <field name="name">System Calendars</field>
+            <field name="model">core.calendar</field>
+            <field name="arch" type="xml">
+                <form string="System Calendars" version="7.0">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name"/></h1>
+                        </div>
+                        <div class="oe_clear">
+                            <group>
+                                <group string="Options">
+                                    <field name="type" invisible="1"/>
+                                    <field name="model" on_change="onchange_model_id(model)"/>
+                                    <field name="date_mode"/>
+                                    <field name="action_id"/>
+                                    <field name="color" widget="colorpicker"/>
+                                </group>
+                                <group string="Fields">
+                                    <field name="field_name" domain="[('model_id','=',model),('ttype','=','char')]"/>
+                                    <field name="field_date_start" domain="[('model_id','=',model),('ttype','=','datetime')]"/>
+                                    <field name="field_date_end" domain="[('model_id','=',model),('ttype','=','datetime')]"
+                                           attrs="{'required': [('date_mode','=','end')], 'invisible': [('date_mode','!=','end')]}"/>
+                                    <field name="field_duration" domain="[('model_id','=',model),('ttype','=','float')]"
+                                           attrs="{'required': [('date_mode','=','duration')], 'invisible': [('date_mode','!=','duration')]}"/>
+                                    <field name="field_recurrent" domain="[('model_id','=',model),('ttype','=','boolean')]"/>
+                                    <field name="field_state" domain="[('model_id','=',model),('ttype','=','selection')]"/>
+                                    <field name="field_organizer_id" domain="[('model_id','=',model),('ttype','=','many2one'),('relation','=','res.users')]"/>
+                                    <field name="field_location" domain="[('model_id','=',model),'|',('ttype','=','char'),'&amp;',('ttype','=','many2one'),('relation','=','res.partner')]"/>
+                                    <field name="field_attendee_ids" domain="[('model_id','=',model),('ttype','in',('many2many','many2one')),('relation','=','res.partner')]" widget="many2many_tags"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Filtering/State">
+                                    <field name="filter_expr"/>
+                                    <field name="states_tentative" attrs="{'invisible': [('field_state','=',False)]}"/>
+                                    <field name="states_confirm" attrs="{'invisible': [('field_state','=',False)]}"/>
+                                    <field name="states_cancel" attrs="{'invisible': [('field_state','=',False)]}"/>
+                                </group>
+                                <group>
+                                </group>
+                            </group>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_core_calendar_event_tree">
+            <field name="name">core.calendar.event.tree</field>
+            <field name="model">core.calendar.event</field>
+            <field name="arch" type="xml">
+                <tree string="Agenda">
+                    <field name="name"/>
+                    <!-- <field name="organizer_id"/> -->
+                    <field name="location"/>
+                    <field name="main_speaker_id"/>
+                    <field name="date_start"/>
+                    <field name="date_end"/>
+                    <field name="duration"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_core_calendar_event_calendar">
+            <field name="name">core.calendar.event.calendar</field>
+            <field name="model">core.calendar.event</field>
+            <field name="arch" type="xml">
+                <calendar string="Agenda" date_start="date_start" color="calendar_id" date_stop="date_end" mode="week">
+                    <field name="name"/>
+                    <field name="organizer_id"/>
+                    <field name="recurrent" options="{'calendar_recurrent_field': true}"/>
+                    <field name="state"/>
+                    <field name="location"/>
+                    <field name="main_speaker_id"/>
+                    <field name="attendee_ids"/>
+                    <templates>
+                        <t t-name="calendar-event">
+                            <field name="name"/>
+                            <t t-if="record.recurrent.raw_value">
+                                <span class="oe_i oe_calendar_event_attr">Q</span>
+                            </t>
+                            <t t-if="record.state.raw_value == 'confirm'">
+                                <span class="oe_e oe_calendar_event_attr">U</span>
+                            </t>
+                        </t>
+                        <t t-name="calendar-event-bar">
+                            <field name="name" class="oe_inline"/>
+                            <t t-if="record.recurrent.raw_value">
+                                <span class="oe_i oe_calendar_event_attr">Q</span>
+                            </t>
+                            <t t-if="record.state.raw_value == 'confirm'">
+                                <span class="oe_e oe_calendar_event_attr">U</span>
+                            </t>
+                        </t>
+                        <t t-name="calendar-event-info-title">
+                            <field name="name"/>
+                            <div class="oe_calendar_event_attr_list">
+                                <t t-if="record.recurrent.raw_value">
+                                    <span class="oe_i oe_calendar_event_attr">Q</span>
+                                </t>
+                                <t t-if="record.state.raw_value == 'confirm'">
+                                    <span class="oe_e oe_calendar_event_attr">U</span>
+                                </t>
+                            </div>
+                        </t>
+                        <t t-name="calendar-event-info-content">
+                            <span> Responsible: <field name="organizer_id"/></span><br/>
+                            <span> Location: <field name="location"/></span><br/>
+                            <span> Speaker: <field name="main_speaker_id"/></span><br/>
+                            <!-- <span> Attendees: <field name="attendee_ids"/></span> -->
+                        </t>
+                    </templates>
+                </calendar>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_core_calendar_event_search">
+            <field name="name">core.calendar.event.search</field>
+            <field name="model">core.calendar.event</field>
+            <field name="arch" type="xml">
+                <search string="Agenda">
+                    <field name="name"/>
+                    <field name="location"/>
+                    <field name="attendee_id"/>
+                    <field name="attendee_tags"/>
+                    <!-- <field name="attendee_ids"/> -->
+                    <group string="Group By...">
+                        <filter string="Organizer" domain="[]" context="{'group_by': 'organizer_id'}"/>
+                        <filter string="Speaker" domain="[]" context="{'group_by': 'main_speaker_id'}"/>
+                        <filter string="Location" domain="[]" context="{'group_by': 'location'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_agenda">
+            <field name="name">Agenda</field>
+            <field name="res_model">core.calendar.event</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">calendar,tree</field>
+            <field name="view_id" ref="view_core_calendar_event_calendar"/>
+            <field name="search_view_id" ref="view_core_calendar_event_search"/>
+            <field name="context">{}</field>
+        </record>
+
+        <menuitem name="Agenda" sequence="13"
+                  action="action_agenda"/>
+
+        <record id="view_partner_tree_availibility" model="ir.ui.view">
+            <field name="name">res.partner.tree.availibility</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_tree"/>
+            <field name="arch" type="xml">
+                <field name="parent_id" position="after">
+                    <field name="freebusy"
+                           invisible="not (context.get('fb_from') and (context.get('fb_to') or context.get('fb_duration')))"/>
+                </field>
+            </field>
+        </record>
+
+    </data>
+</openerp>

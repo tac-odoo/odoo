@@ -22,36 +22,45 @@
 {
     'name': 'Calendar',
     'version': '1.0',
-    'depends': ['base', 'base_status', 'mail', 'base_action_rule', 'core_calendar'],
-    'summary': 'Personal & Shared Calendar',
+    'depends': ['base_setup', 'web_calendar'],
+    'summary': 'Multi-Object Calendar System',
     'description': """
-This is a full-featured calendar system.
-========================================
+This is a full-featured multi-object calendar system.
+=====================================================
 
 It supports:
 ------------
     - Calendar of events
     - Recurring events
+    - Multiple calendar from different OpenERP objects.
 
-If you need to manage your meetings, you should install the CRM module.
+If you need to manage:
+    - meetings, you should install the CRM module.
+    - events, you should install the Event module.
     """,
     'author': 'OpenERP SA',
     'category': 'Hidden/Dependency',
     'website': 'http://www.openerp.com',
-    'demo': ['crm_meeting_demo.xml'],
+    'demo': [],
     'data': [
-        'security/calendar_security.xml',
-        'security/ir.model.access.csv',
-        'base_calendar_view.xml',
-        'crm_meeting_view.xml',
-        'base_calendar_data.xml',
-        'crm_meeting_data.xml',
+        'core_calendar_view.xml',
+        'res_partner_view.xml',
     ],
-    'test' : ['test/base_calendar_test.yml'],
+    'js': [
+        'static/lib/colorpicker/js/evol.colorpicker.js',
+        'static/src/js/*.js',
+    ],
+    'css': [
+        'static/lib/colorpicker/css/evol.colorpicker.css',
+    ],
+    'qweb': [
+        'static/src/xml/*.xml',
+    ],
+    'test': [],
     'installable': True,
     'application': True,
     'auto_install': False,
-    'images': ['images/base_calendar1.jpeg','images/base_calendar2.jpeg','images/base_calendar3.jpeg','images/base_calendar4.jpeg',],
+    'images': [],
 }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

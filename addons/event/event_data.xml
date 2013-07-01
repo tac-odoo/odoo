@@ -1,5 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
+    <data>
+
+        <record model="core.calendar" id="core_calendar_event_seance">
+            <field name="name">Event seances</field>
+            <field name="type">vevent</field>
+            <field name="date_mode">duration</field>
+            <field name="color">#4f81bd</field>
+            <field name="model" ref="event.model_event_seance"/>
+            <field name="action_id" ref="event.action_event_seance"/>
+            <field name="field_name" ref="event.field_event_seance_name"/>
+            <field name="field_date_start" ref="event.field_event_seance_date_begin"/>
+            <field name="field_date_end" eval="False"/>
+            <field name="field_duration" ref="event.field_event_seance_duration"/>
+            <field name="field_organizer_id" eval="False"/>
+            <field name="field_location" ref="event.field_event_seance_address_id"/>
+            <field name="field_attendee_ids" eval="[(6, 0, [ref('event.field_event_seance_main_speaker_id'),ref('event.field_event_seance_address_id')])]"/>
+            <field name="filter_expr"></field>
+            <field name="field_state" ref="event.field_event_seance_state"/>
+            <field name="states_tentative">draft</field>
+            <field name="states_confirm">confirm,done</field>
+            <field name="states_cancel">cancel</field>
+        </record>
+
+    </data>
     <data noupdate="1">
         <!-- After installation of the module, open the related menu -->
         <record id="action_client_event_menu" model="ir.actions.client">

@@ -31,7 +31,7 @@ from openerp.tools import float_is_zero
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as D_FMT
 from openerp.addons.base.res.res_partner import _tz_get
-from timeline import Timeline, Availibility
+from core_calendar.timeline import Timeline, Availibility
 from resource import float_to_hm
 from openerp.tools import logged
 
@@ -228,10 +228,16 @@ class EventSeance(osv.Model):
     #         result[seance.id] = start.date().strftime(D_FMT)
     #     return result
 
+    # Required except in draft state
+    RQ_EXCEPT_IN_DRAFT = dict(readonly=False,
+                              states=dict((st, [('required', True)])
+                                          for st, sn in SEANCE_STATES
+                                          if st != 'draft'))
+
     _columns = {
         'name': fields.char('Seance Name', required=True),
         'type_id': fields.many2one('event.seance.type', 'Type'),
-        'date_begin': fields.datetime('Begin date', required=True, states={'draft': [('required', False)]}),
+        'date_begin': fields.datetime('Begin date', **RQ_EXCEPT_IN_DRAFT),
         'duration': fields.float('Duration', required=True),
         # 'planned_week_date': fields.function(_get_planned_week_date, string='Planned Week date',
         #                                      type='date', readonly=True, store=True, groupby_range='week'),
@@ -242,7 +248,7 @@ class EventSeance(osv.Model):
         'participant_max': fields.integer('Participant Max'),
         'main_speaker_id': fields.many2one('res.partner', 'Main Speaker'),
         'address_id': fields.many2one('res.partner', 'Address'),
-        'content_id': fields.many2one('event.content', 'Content'),
+        'content_id': fields.many2one('event.content', 'Content', required=True),
         'content_divided': fields.related('content_id', 'is_divided', type='boolean',
                                           string='Divided'),
         'group_id': fields.many2one('event.participant.group', 'Group'),
@@ -266,6 +272,11 @@ class EventSeance(osv.Model):
 
     _constraints = [
         (_check_content_group_ref, 'You have to specify a group for divided content', ['group_id']),
+    ]
+
+    _sql_constraints = [
+        ('date_begin_notnull', "CHECK(CASE WHEN state != 'draft' THEN date_begin IS NOT NULL ELSE True END)",
+            'You have to specify a begin date when leaving the draft state'),
     ]
 
     def onchange_content_id(self, cr, uid, ids, content_id, context=None):
@@ -334,7 +345,7 @@ class EventParticipant(osv.Model):
     _columns = {
         'name': fields.char('Participant Name', size=128, required=True),
         'partner_id': fields.many2one('res.partner', 'Participant', required=True),
-        'seance_id': fields.many2one('event.seance', 'Seance', required=True),
+        'seance_id': fields.many2one('event.seance', 'Seance', required=True, ondelete='cascade'),
         'registration_id': fields.many2one('event.registration', 'Registration', required=True),
         'state': fields.selection(STATES, 'State', readonly=True, required=True),
         # Presence Information
@@ -494,7 +505,7 @@ class EventType(osv.Model):
 
 class EventEvent(osv.Model):
     _name = 'event.event'
-    _inherit = ['event.event', 'resource.timeline']
+    _inherit = ['event.event', 'core.calendar.timeline']
 
     def _get_seance_ids(self, cr, uid, ids, fieldname, args, context=None):
         Seance = self.pool.get('event.seance')
@@ -587,7 +598,7 @@ class EventEvent(osv.Model):
             print(">>> event '%d': creating linear children events" % (event.id,))
             # content_total_duration = sum(c.duration for c in event.content_ids)
             event_begin = datetime.strptime(event.date_begin, DT_FMT)
-            event_end = event_begin + timedelta(days=20) # TODO: add estimated end date
+            event_end = event_begin + timedelta(days=3650) # TODO: add estimated end date
             # event_end = datetime.strptime(event.date_end, DT_FMT)  # FIXME: add support for no end date (=None)
 
             if not event.content_ids:
@@ -603,13 +614,13 @@ class EventEvent(osv.Model):
                                                        context=context)
                 # iter on each timeline change, and eat all "available" time
                 available_periods = (p for p in timeline.iter(by='change', as_tz='UTC')
-                                     if p.status == Availibility.AVAILABLE).__iter__()
+                                     if p.status == Availibility.FREE).__iter__()
                 ###
                 create_content = partial(Content.create_seances_from_content, cr, uid, context=context)
 
                 period = None
                 for content in event.content_ids:
-                    logger.info('creating for content %s (%.2f hours' % (content.name, content.duration,))
+                    logger.info('creating for content %s (%.2f hours)' % (content.name, content.duration,))
                     remaining_duration = content.duration
                     while remaining_duration > 0:
                         try:
