@@ -36,6 +36,11 @@ from openerp.addons.core_calendar.resource import float_to_hm
 from openerp.tools import logged
 
 
+class list_counted(list):
+    def __init__(self, expected=0):
+        self.expected = expected
+
+
 class EventSeanceType(osv.Model):
     _name = 'event.seance.type'
     _columns = {
@@ -217,6 +222,12 @@ class EventSeance(osv.Model):
         ('done', 'Done'),
     ]
 
+    # Required except in draft state
+    RQ_EXCEPT_IN_DRAFT = dict(readonly=False,
+                              states=dict((st, [('required', True)])
+                                          for st, sn in SEANCE_STATES
+                                          if st != 'draft'))
+
     # def _get_planned_week_date(self, cr, uid, ids, fieldname, args, context=None):
     #     result = {}
     #     week_start_day = MO
@@ -228,11 +239,39 @@ class EventSeance(osv.Model):
     #         result[seance.id] = start.date().strftime(D_FMT)
     #     return result
 
-    # Required except in draft state
-    RQ_EXCEPT_IN_DRAFT = dict(readonly=False,
-                              states=dict((st, [('required', True)])
-                                          for st, sn in SEANCE_STATES
-                                          if st != 'draft'))
+    def _get_participant_count(self, cr, uid, ids, field_name, args, context=None):
+        # force a refresh just before computation
+        self._refresh_participations(cr, uid, ids, context=context)
+        # return number of participants
+        return dict((seance.id, len(seance.participant_ids))
+                    for seance in self.browse(cr, uid, ids, context=context))
+
+    def _store_get_seances_from_seances(self, cr, uid, ids, context=None):
+        """return list on seances for participant count refresh"""
+        return ids
+
+    def _store_get_seances_from_registrations(self, cr, uid, ids, context=None):
+        """retrun list of seances for participant count refresh"""
+        event_ids = []
+        Registration = self.pool.get('event.registration')
+        ids = Registration.search(cr, uid, [('id', 'in', ids), ('state', '!=', 'draft')], context=context)
+        for registration in Registration.browse(cr, uid, ids, context=context):
+            event_ids.extend(s.id for s in registration.event_id.seance_ids)
+        return list(set(event_ids))
+
+    def _store_get_seances_from_groups(self, cr, uid, ids, context=None):
+        """return list of seances for participant count refresh"""
+        registration_ids = []
+        Event = self.pool.get('event.event')
+        ParticipantGroup = self.pool.get('event.participant.group')
+        for group in ParticipantGroup.browse(cr, uid, ids, context=context):
+            registration_ids.extend(r.id for r in group.registration_ids)
+        return Event._store_get_seances_from_registrations(cr, uid, registration_ids, context=context)
+
+    def _store_get_seances_from_content(self, cr, uid, ids, context=None):
+        """return list of seances related to specified contents"""
+        Seance = self.pool.get('event.seance')
+        return Seance.search(cr, uid, [('content_id', '=', ids)], context=context)
 
     _columns = {
         'name': fields.char('Seance Name', required=True),
@@ -256,6 +295,13 @@ class EventSeance(osv.Model):
                                     relation='event.event', string='Events',
                                     readonly=True),
         'participant_ids': fields.one2many('event.participant', 'seance_id', 'Participants'),
+        'participant_count': fields.function(_get_participant_count, type='integer', string='# of participants',
+                                             store={
+                                                 'event.seance': (_store_get_seances_from_seances, ['content_id', 'group_id'], 10),
+                                                 'event.registration': (_store_get_seances_from_registrations, ['group_ids', 'state'], 10),
+                                                 'event.participant.group': (_store_get_seances_from_groups, ['registration_ids'], 10),
+                                                 'event.content': (_store_get_seances_from_content, ['is_divided'], 10),
+                                             }),
         'state': fields.selection(SEANCE_STATES, 'State', readonly=True, required=True),
     }
 
@@ -306,7 +352,67 @@ class EventSeance(osv.Model):
         return self.write(cr, uid, ids, {'state': 'closed'}, context=context)
 
     def button_set_done(self, cr, uid, ids, context=None):
-        return self.write(cr, uid, ids, {'state': 'doen'}, context=context)
+        return self.write(cr, uid, ids, {'state': 'done'}, context=context)
+
+    def _refresh_participations(self, cr, uid, ids, context=None):
+        Participant = self.pool.get('event.participant')
+        # Registration = self.pool.get('event.registration')
+        p_to_unlink = []  # participation ids to unlink
+
+        for seance in self.browse(cr, uid, ids, context=context):
+            # print(">>> refreshing participation for seance '%s' [%d]" % (seance.name, seance.id,))
+            # registrations = Registration.browse(cr, uid, regids_cache[seance.id], context=context)
+            registrations = []
+            for event in seance.content_id.event_ids:
+                if seance.state == 'done':
+                    # done seance have to keep all participation for history tracking
+                    registrations.extend(r for r in event.registration_ids)
+                    continue
+                for reg in event.registration_ids:
+                    if reg.state in ('open', 'done'):
+                        if seance.group_id:
+                            if seance.group_id in reg.group_ids:
+                                registrations.append(reg)
+                        else:
+                            registrations.append(reg)
+
+            partset = {}  # { (registration, contact): list_counted([p1, p2, ...]), ...}
+            # build participation set on expected values
+            for reg in registrations:
+                # TODO: re-add support for named contact ids ('contact_ids' field)
+                anon_count = reg.nb_register
+                partset[(reg, False)] = list_counted(expected=anon_count)
+            # populate set with existing participation values
+            for part in seance.participant_ids:
+                x = (part.registration_id, False)
+                partset.setdefault(x, list_counted(expected=0)).append(part)
+            # iterate over the set and compare result (expected vs real)
+            for k, v in sorted(partset.iteritems()):
+                reg, contact = k
+                found, expected = len(v), v.expected
+                # print(">>> %s" % (k,))
+                # print("--- found %d/%d: %s" % (found, expected, v,))
+                if found > expected:
+                    if seance.state != 'done':
+                        p_to_unlink.extend(p.id for p in v[-found-expected:])
+                elif found < expected:
+                    for i in xrange(1, 1+expected-found):
+                        if contact:
+                            part_name = contact.name
+                        elif expected == 1:
+                            part_name = '%s' % (reg.partner_id.name,)
+                        else:
+                            part_name = '%s #%d' % (reg.partner_id.name, i)
+                        Participant.create(cr, uid, {
+                            'name': part_name,
+                            'partner_id': reg.partner_id.id,
+                            # 'contact_id': contact.id if contact else False,
+                            'seance_id': seance.id,
+                            'registration_id': reg.id,
+                        }, context=context)
+        if p_to_unlink:
+            Participant.unlink(cr, uid, p_to_unlink, context=context)
+        return True
 
 
 class EventParticipant(osv.Model):
