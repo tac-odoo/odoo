@@ -58,18 +58,13 @@ class EventContent(osv.Model):
         if not ids:
             return result
 
-        Event = self.pool.get('event.event')
-        content_related_domain = [('event_link_ids.content_id', 'in', ids), ('state', '!=', 'cancel')]
-        content_related_event_ids = Event.search(cr, uid, content_related_domain, context=context)
-        content_related_events = defaultdict(list)
-        for event in Event.browse(cr, uid, content_related_event_ids, context=context):
-            for content_link in event.event_link_ids:
-                content_id = content_link.content_id.id
-                if content_id in ids:
-                    content_related_events[content_id].append(event)
-
         for content in self.browse(cr, uid, ids, context=context):
-            scheduled_duration = sum((e.duration for e in content_related_events.get(content.id, [])) or [0])
+            scheduled_duration = 0.
+            for seance in content.seance_ids:
+                if seance.state == 'cancel':
+                    continue
+                # TODO: what is seance is not planned
+                scheduled_duration += seance.duration
             result[content.id] = content.duration - scheduled_duration
 
         return result
@@ -220,6 +215,7 @@ class EventSeance(osv.Model):
         ('inprogress', 'In Progress'),
         ('closed', 'Closed'),
         ('done', 'Done'),
+        ('cancel', 'Cancel'),
     ]
 
     # Required except in draft state
@@ -287,7 +283,7 @@ class EventSeance(osv.Model):
         'participant_max': fields.integer('Participant Max'),
         'main_speaker_id': fields.many2one('res.partner', 'Main Speaker'),
         'address_id': fields.many2one('res.partner', 'Address'),
-        'content_id': fields.many2one('event.content', 'Content', required=True),
+        'content_id': fields.many2one('event.content', 'Content', required=True, ondelete='cascade'),
         'content_divided': fields.related('content_id', 'is_divided', type='boolean',
                                           string='Divided'),
         'group_id': fields.many2one('event.participant.group', 'Group'),

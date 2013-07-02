@@ -67,6 +67,13 @@
         <menuitem name="Configuration" id="base.menu_marketing_config_root" parent="event_main_menu" sequence="30"/>
         <menuitem name="Types of Events" id="menu_event_type" action="action_event_type" parent="base.menu_marketing_config_root" groups="base.group_no_one"/>
 
+        <menuitem id="menu_event_config_calendars" parent="base.menu_marketing_config_root"
+                  action="action_resource_calendar_form" groups="base.group_no_one"
+                  string="Calendars"/>
+        <menuitem id="menu_event_config_leaves" parent="base.menu_marketing_config_root"
+                   action="action_resource_calendar_leaves_form" groups="base.group_no_one"
+                   string="All Calendar Leaves"/>
+
         <!-- Events Organisation/CONFIGURATION/EVENTS -->
 
         <record model="ir.ui.view" id="view_event_form">

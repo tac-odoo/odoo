@@ -80,9 +80,6 @@
             <field name="help">Define working hours and time table that could be scheduled to your events</field>
         </record>
 
-        <menuitem id="menu_event_config_calendars" parent="base.menu_marketing_config_root"
-                  action="action_resource_calendar_form" groups="base.group_no_one"
-                  string="Calendars"/>
 
         <record id="action_resource_calendar_leaves_form" model="ir.actions.act_window">
             <field name="name">All Calendar Leaves</field>
@@ -113,11 +110,6 @@
             <field name="view_mode">calendar</field>
             <field name="view_id" eval="False"/>
         </record>
-
-        <menuitem id="menu_event_config_leaves" parent="base.menu_marketing_config_root"
-                   action="action_resource_calendar_leaves_form" groups="base.group_no_one"
-                   string="All Calendar Leaves"/>
-
 
     </data>
 </openerp>

@@ -1,207 +1,390 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-    <record id="base.user_demo" model="res.users">
-             <field name="groups_id" eval="[(4, ref('event.group_event_user'))]"/>
-     </record>
+
+        <record id="base.user_demo" model="res.users">
+                 <field name="groups_id" eval="[(4, ref('event.group_event_user'))]"/>
+         </record>
 
 
-<!-- Demo Data for Event Type -->
-    <record id="event_type_0" model="event.type">
-        <field name="name">Seminar</field>
-    </record>
+    <!-- Demo Data for Event Type -->
+        <record id="event_type_0" model="event.type">
+            <field name="name">Seminar</field>
+        </record>
 
-    <record id="event_type_1" model="event.type">
-        <field name="name">Exhibition</field>
-    </record>
+        <record id="event_type_1" model="event.type">
+            <field name="name">Exhibition</field>
+        </record>
 
-    <record id="event_type_2" model="event.type">
-        <field name="name">Conference</field>
-    </record>
+        <record id="event_type_2" model="event.type">
+            <field name="name">Conference</field>
+        </record>
 
-    <record id="event_type_3" model="event.type">
-        <field name="name">Show</field>
-    </record>
+        <record id="event_type_3" model="event.type">
+            <field name="name">Show</field>
+        </record>
 
-    <record id="event_type_4" model="event.type">
-        <field name="name">Training</field>
-        <field name="default_has_program" eval="True"/>
-        <field name="default_content_planification">linear</field>
-    </record>
+        <record id="event_type_4" model="event.type">
+            <field name="name">Training</field>
+            <field name="default_has_program" eval="True"/>
+            <field name="default_content_planification">linear</field>
+        </record>
 
-    <!-- Demo Event Hours -->
-    <record model="resource.calendar" id="event_resource_cal1">
-        <field name="name">Training Week</field>
-    </record>
+        <!-- EVENT LEVELS -->
+        <record model="event.level" id="event_level_basic_2">
+            <field name="name">Basic</field>
+        </record>
+        <record model="event.level" id="event_level_advanced_1">
+            <field name="name">Advanced</field>
+        </record>
 
-    <record model="resource.calendar.attendance" id="event_resource_cal1_att1">
-        <field name="calendar_id" ref="event_resource_cal1"/>
-        <field name="name">Monday morning</field>
-        <field name="dayofweek">0</field>
-        <field name="hour_from">8.0</field>
-        <field name="hour_to">12.0</field>
-    </record>
+        <!-- Demo Event Hours -->
+        <record model="resource.calendar" id="event_resource_cal1">
+            <field name="name">Training Week</field>
+        </record>
 
-    <record model="resource.calendar.attendance" id="event_resource_cal1_att2">
-        <field name="calendar_id" ref="event_resource_cal1"/>
-        <field name="name">Monday afternoon</field>
-        <field name="dayofweek">0</field>
-        <field name="hour_from">13.0</field>
-        <field name="hour_to">17.0</field>
-    </record>
+        <record model="resource.calendar.attendance" id="event_resource_cal1_att1">
+            <field name="calendar_id" ref="event_resource_cal1"/>
+            <field name="name">Monday morning</field>
+            <field name="dayofweek">0</field>
+            <field name="hour_from">8.0</field>
+            <field name="hour_to">12.0</field>
+        </record>
 
-    <record model="resource.calendar.attendance" id="event_resource_cal1_att3">
-        <field name="calendar_id" ref="event_resource_cal1"/>
-        <field name="name">Tuesday morning</field>
-        <field name="dayofweek">1</field>
-        <field name="hour_from">8.0</field>
-        <field name="hour_to">12.0</field>
-    </record>
+        <record model="resource.calendar.attendance" id="event_resource_cal1_att2">
+            <field name="calendar_id" ref="event_resource_cal1"/>
+            <field name="name">Monday afternoon</field>
+            <field name="dayofweek">0</field>
+            <field name="hour_from">13.0</field>
+            <field name="hour_to">17.0</field>
+        </record>
 
-    <record model="resource.calendar.attendance" id="event_resource_cal1_att4">
-        <field name="calendar_id" ref="event_resource_cal1"/>
-        <field name="name">Tuesday afternoon</field>
-        <field name="dayofweek">1</field>
-        <field name="hour_from">13.0</field>
-        <field name="hour_to">17.0</field>
-    </record>
+        <record model="resource.calendar.attendance" id="event_resource_cal1_att3">
+            <field name="calendar_id" ref="event_resource_cal1"/>
+            <field name="name">Tuesday morning</field>
+            <field name="dayofweek">1</field>
+            <field name="hour_from">8.0</field>
+            <field name="hour_to">12.0</field>
+        </record>
 
-    <record model="resource.calendar.attendance" id="event_resource_cal1_att5">
-        <field name="calendar_id" ref="event_resource_cal1"/>
-        <field name="name">Wednesday morning</field>
-        <field name="dayofweek">2</field>
-        <field name="hour_from">8.0</field>
-        <field name="hour_to">12.0</field>
-    </record>
+        <record model="resource.calendar.attendance" id="event_resource_cal1_att4">
+            <field name="calendar_id" ref="event_resource_cal1"/>
+            <field name="name">Tuesday afternoon</field>
+            <field name="dayofweek">1</field>
+            <field name="hour_from">13.0</field>
+            <field name="hour_to">17.0</field>
+        </record>
 
-    <record model="resource.calendar.attendance" id="event_resource_cal1_att6">
-        <field name="calendar_id" ref="event_resource_cal1"/>
-        <field name="name">Wednesday afternoon</field>
-        <field name="dayofweek">2</field>
-        <field name="hour_from">13.0</field>
-        <field name="hour_to">17.0</field>
-    </record>
+        <record model="resource.calendar.attendance" id="event_resource_cal1_att5">
+            <field name="calendar_id" ref="event_resource_cal1"/>
+            <field name="name">Wednesday morning</field>
+            <field name="dayofweek">2</field>
+            <field name="hour_from">8.0</field>
+            <field name="hour_to">12.0</field>
+        </record>
 
-    <record model="resource.calendar.attendance" id="event_resource_cal1_att7">
-        <field name="calendar_id" ref="event_resource_cal1"/>
-        <field name="name">Tursday morning</field>
-        <field name="dayofweek">3</field>
-        <field name="hour_from">8.0</field>
-        <field name="hour_to">12.0</field>
-    </record>
+        <record model="resource.calendar.attendance" id="event_resource_cal1_att6">
+            <field name="calendar_id" ref="event_resource_cal1"/>
+            <field name="name">Wednesday afternoon</field>
+            <field name="dayofweek">2</field>
+            <field name="hour_from">13.0</field>
+            <field name="hour_to">17.0</field>
+        </record>
 
-    <record model="resource.calendar.attendance" id="event_resource_cal1_att8">
-        <field name="calendar_id" ref="event_resource_cal1"/>
-        <field name="name">Tursday afternoon</field>
-        <field name="dayofweek">3</field>
-        <field name="hour_from">13.0</field>
-        <field name="hour_to">17.0</field>
-    </record>
+        <record model="resource.calendar.attendance" id="event_resource_cal1_att7">
+            <field name="calendar_id" ref="event_resource_cal1"/>
+            <field name="name">Tursday morning</field>
+            <field name="dayofweek">3</field>
+            <field name="hour_from">8.0</field>
+            <field name="hour_to">12.0</field>
+        </record>
 
-    <record model="resource.calendar.attendance" id="event_resource_cal1_att9">
-        <field name="calendar_id" ref="event_resource_cal1"/>
-        <field name="name">Friday morning</field>
-        <field name="dayofweek">4</field>
-        <field name="hour_from">8.0</field>
-        <field name="hour_to">12.0</field>
-    </record>
+        <record model="resource.calendar.attendance" id="event_resource_cal1_att8">
+            <field name="calendar_id" ref="event_resource_cal1"/>
+            <field name="name">Tursday afternoon</field>
+            <field name="dayofweek">3</field>
+            <field name="hour_from">13.0</field>
+            <field name="hour_to">17.0</field>
+        </record>
 
-    <record model="resource.calendar.attendance" id="event_resource_cal1_att9">
-        <field name="calendar_id" ref="event_resource_cal1"/>
-        <field name="name">Friday afternoon</field>
-        <field name="dayofweek">4</field>
-        <field name="hour_from">13.0</field>
-        <field name="hour_to">17.0</field>
-    </record>
+        <record model="resource.calendar.attendance" id="event_resource_cal1_att9">
+            <field name="calendar_id" ref="event_resource_cal1"/>
+            <field name="name">Friday morning</field>
+            <field name="dayofweek">4</field>
+            <field name="hour_from">8.0</field>
+            <field name="hour_to">12.0</field>
+        </record>
 
-<!-- Demo data for Event -->
-    <record id="event_0" model="event.event">
-        <field name="name">Concert of Bon Jovi</field>
-        <field eval="time.strftime('%Y-%m-01 19:05:15')" name="date_begin"/>
-        <field eval="time.strftime('%Y-%m-01 23:05:15')" name="date_end"/>
-        <field name="register_max">500</field>
-        <field name="type" ref="event_type_1"/>
-    </record>
+        <record model="resource.calendar.attendance" id="event_resource_cal1_att9">
+            <field name="calendar_id" ref="event_resource_cal1"/>
+            <field name="name">Friday afternoon</field>
+            <field name="dayofweek">4</field>
+            <field name="hour_from">13.0</field>
+            <field name="hour_to">17.0</field>
+        </record>
 
-    <record id="event_1" model="event.event">
-        <field name="name">Opera of Verdi</field>
-        <field eval="(DateTime.today()+ timedelta(days=1)).strftime('%Y-%m-%d 18:00:00')" name="date_begin"/>
-        <field eval="(DateTime.today()+ timedelta(days=2)).strftime('%Y-%m-%d 21:00:00')" name="date_end"/>
-        <field name="type" ref="event_type_1"/>
-        <field name="register_min">50</field>
-        <field name="register_max">350</field>
-    </record>
-    <record id="event_2" model="event.event">
-        <field name="name">Conference on ERP Business</field>
-        <field eval="(DateTime.today()+ timedelta(days=2)).strftime('%Y-%m-%d 14:00:00')" name="date_begin"/>
-        <field eval="(DateTime.today()+ timedelta(days=2)).strftime('%Y-%m-%d 16:30:00')" name="date_end"/>
-        <field name="type" ref="event_type_2"/>
-        <field name="register_max">200</field>
-    </record>
-    <function model="event.event" name="button_confirm" eval="[ref('event_2')]"/>
-    <function model="event.event" name="button_confirm" eval="[ref('event_2')]"/>
+    <!-- Demo data for Event -->
+        <record id="event_0" model="event.event">
+            <field name="name">Concert of Bon Jovi</field>
+            <field eval="time.strftime('%Y-%m-01 19:05:15')" name="date_begin"/>
+            <field eval="time.strftime('%Y-%m-01 23:05:15')" name="date_end"/>
+            <field name="register_max">500</field>
+            <field name="type" ref="event_type_1"/>
+        </record>
 
-<!-- Demo data for Event Registration-->
-    <record id="reg_1_1" model="event.registration">
-        <field name="name">Agrolait</field>
-        <field name="email">s.l@agrolait.be</field>
-        <field name="phone">003281588558</field>
-        <field name="event_id" ref="event_1"/>
-        <field name="partner_id" ref="base.res_partner_2"/>
-        <field name="nb_register">5</field>
-    </record>
+        <record id="event_1" model="event.event">
+            <field name="name">Opera of Verdi</field>
+            <field eval="(DateTime.today()+ timedelta(days=1)).strftime('%Y-%m-%d 18:00:00')" name="date_begin"/>
+            <field eval="(DateTime.today()+ timedelta(days=2)).strftime('%Y-%m-%d 21:00:00')" name="date_end"/>
+            <field name="type" ref="event_type_1"/>
+            <field name="register_min">50</field>
+            <field name="register_max">350</field>
+        </record>
+        <record id="event_2" model="event.event">
+            <field name="name">Conference on ERP Business</field>
+            <field eval="(DateTime.today()+ timedelta(days=2)).strftime('%Y-%m-%d 14:00:00')" name="date_begin"/>
+            <field eval="(DateTime.today()+ timedelta(days=2)).strftime('%Y-%m-%d 16:30:00')" name="date_end"/>
+            <field name="type" ref="event_type_2"/>
+            <field name="register_max">200</field>
+        </record>
+        <function model="event.event" name="button_confirm" eval="[ref('event_2')]"/>
+        <function model="event.event" name="button_confirm" eval="[ref('event_2')]"/>
 
-    <record id="reg_1_2" model="event.registration">
-        <field name="name">ASUStek</field>
-        <field name="email">info@asustek.com</field>
-        <field name="phone">+ 1 64 61 04 01</field>
-        <field name="partner_id" ref="base.res_partner_1"/>
-        <field name="event_id" ref="event_1"/>
-        <field name="nb_register">10</field>
-    </record>
+    <!-- Demo data for Event Registration-->
+        <record id="reg_1_1" model="event.registration">
+            <field name="name">Agrolait</field>
+            <field name="email">s.l@agrolait.be</field>
+            <field name="phone">003281588558</field>
+            <field name="event_id" ref="event_1"/>
+            <field name="partner_id" ref="base.res_partner_2"/>
+            <field name="nb_register">5</field>
+        </record>
 
-    <record id="reg_0_2" model="event.registration">
-        <field name="name">Camptocamp</field>
-        <field name="email">openerp@camptocamp.com</field>
-        <field name="phone">+41 21 619 10 04 </field>
-        <field name="event_id" ref="event_2"/>
-        <field name="partner_id" ref="base.res_partner_12"/>
-        <field name="nb_register">5</field>
-    </record>
+        <record id="reg_1_2" model="event.registration">
+            <field name="name">ASUStek</field>
+            <field name="email">info@asustek.com</field>
+            <field name="phone">+ 1 64 61 04 01</field>
+            <field name="partner_id" ref="base.res_partner_1"/>
+            <field name="event_id" ref="event_1"/>
+            <field name="nb_register">10</field>
+        </record>
 
-    <record id="course_subject_math" model="event.course.subject">
-        <field name="name">Mathematics</field>
-        <field name="color">7</field>
-    </record>
+        <record id="reg_0_2" model="event.registration">
+            <field name="name">Camptocamp</field>
+            <field name="email">openerp@camptocamp.com</field>
+            <field name="phone">+41 21 619 10 04 </field>
+            <field name="event_id" ref="event_2"/>
+            <field name="partner_id" ref="base.res_partner_12"/>
+            <field name="nb_register">5</field>
+        </record>
 
-    <record id="course_subject_language" model="event.course.subject">
-        <field name="name">Language</field>
-        <field name="color">3</field>
-    </record>
+        <!-- COURSE SUBJECT -->
+        <record id="course_subject_math" model="event.course.subject">
+            <field name="name">Mathematics</field>
+            <field name="color">7</field>
+        </record>
 
-    <record id="course_algebra" model="event.course">
-        <field name="name">Algebra</field>
-        <field name="subject_id" ref="course_subject_math"/>
-        <field name="color">7</field>
-    </record>
+        <record id="course_subject_language" model="event.course.subject">
+            <field name="name">Language</field>
+            <field name="color">3</field>
+        </record>
 
-    <record id="course_geometry" model="event.course">
-        <field name="name">Geometry</field>
-        <field name="subject_id" ref="course_subject_math"/>
-        <field name="color">7</field>
-    </record>
+        <record model="event.course.subject" id="event_course_subject_3_3">
+            <field name="name">Technical IT</field>
+            <field name="description">We can help develop the skills of your IT team through the most effective IT skills training and certification programmes available anywhere.
 
-    <record id="course_english_vocabulary" model="event.course">
-        <field name="name">English - Vocabulary</field>
-        <field name="subject_id" ref="course_subject_language"/>
-        <field name="color">3</field>
-    </record>
+    Latest IT innovation including  virtualisation and Cloud IT
+    Authorised training from major vendors, including Microsoft, Oracle, Cisco and VMware
+    Highly practical learning with full IT labs facilities</field>
+        </record>
 
-    <record id="course_english_grammar" model="event.course">
-        <field name="name">English - Grammar</field>
-        <field name="subject_id" ref="course_subject_language"/>
-        <field name="color">3</field>
-    </record>
+        <!-- COURSES -->
+
+        <record model="event.course" id="course_algebra">
+            <field name="color">7</field>
+            <field name="state">draft</field>
+            <field name="active" eval="1"/>
+            <field name="name">Algebra</field>
+            <field name="subject_id" ref="course_subject_math"/>
+            <field name="lang_id" ref="base.lang_en"/>
+            <field name="level_id" ref="event_level_basic_2"/>
+        </record>
+
+        <record model="event.course" id="course_geometry">
+            <field name="color">7</field>
+            <field name="state">draft</field>
+            <field name="active" eval="1"/>
+            <field name="name">Geometry</field>
+            <field name="subject_id" ref="course_subject_math"/>
+            <field name="lang_id" ref="base.lang_en"/>
+            <field name="level_id" ref="event_level_basic_2"/>
+        </record>
+
+        <record model="event.course" id="course_english_vocabulary">
+            <field name="color">3</field>
+            <field name="state">draft</field>
+            <field name="active" eval="1"/>
+            <field name="name">English - Vocabulary</field>
+            <field name="subject_id" ref="course_subject_language"/>
+            <field name="lang_id" ref="base.lang_en"/>
+            <field name="level_id" ref="event_level_basic_2"/>
+        </record>
+
+        <record model="event.course" id="course_english_grammar">
+            <field name="color">3</field>
+            <field name="state">draft</field>
+            <field name="active" eval="1"/>
+            <field name="name">English - Grammar</field>
+            <field name="subject_id" ref="course_subject_language"/>
+            <field name="lang_id" ref="base.lang_en"/>
+            <field name="level_id" ref="event_level_basic_2"/>
+        </record>
+
+        <record model="event.course" id="event_course_essentials_of_linux_administration_8">
+            <field name="description">Overview
+
+    Many institutions have been adding Linux machines to their existing infrastructure: perhaps to give developers a platform of their choice, to provide an alternative to a network server, or perhaps to introduce an additional piece to the security jigsaw.
+    Linux systems are also being introduced as part of virtualisation environments (for example, with the use of VMware or XEN, KVM or VPC), allowing access to a mixture of operating systems from a single workstation or server. This course will give the delegates the skill set preparing them for a successful future with Linux technology, by discussing a hybrid of topics that span user and administrator tasks and activities.
+
+    The course is aimed at existing IT professionals with little or no UNIX/Linux experience, who require a quick start in a Linux environment, enabling them to control a Linux system swiftly, efficiently and with full understanding of the underlying principles. Typical candidates would be current users of Windows, Mac OS, or other professionals (such as software developers, system or network administrators) who need to gain a solid understanding of the environment of LInux, and facilities provided by it
+
+    Prerequisites
+
+    Typically, delegate skills will include a good working knowledge of other contemporary operating system, and familiarity with working at the command line. This course is aimed at existing IT professionals with little UNIX or Linux experience, who require a quick start in a Linux environment, enabling them to control a Linux system swiftly and efficiently.
+
+    Whilst no particular Linux knowledge is expected, without a doubt the best results are achieved if the delegates have experienced the system they will be expected to use or administer.</field>
+            <field name="color">1</field>
+            <field name="state">draft</field>
+            <field name="active" eval="1"/>
+            <field name="name">Essentials of Linux Administration</field>
+            <field name="subject_id" ref="event_course_subject_3_3"/>
+            <field name="lang_id" ref="base.lang_en"/>
+            <field name="level_id" ref="event_level_basic_2"/>
+        </record>
+
+        <record model="event.course" id="event_course_advanced_linux_administration_5">
+            <field name="description">Overview
+
+    Linux administration involves a fair amount of interaction with system hardware and the kernel, as well as using proliferation of front end tools. This course provides a hands-on approach to these and other advanced administrative tasks that are unique to Linux, concentrating on CLI-based methods.
+    With its distinctive design approach, this course is also suitable as a Unix to Linux conversion for existing Unix administrators. It is a fast-paced skills-building event, full of practical exercises and troubleshooting.
+    The course platform will be one of the Red Hat derivatives, such as CentOS or ScientificLinux. However, the discussions and material address every major Linux strand, and wherever specific tool, technique or method is relevant, SUSE, Debian and Ubuntu specifics are covered. For example, we discuss the unique approach adopted by various systems in the areas such as system start-up and software management.
+
+    Target audience
+
+    All existing administrators, developers, analysts, indeed, all users who find themselves looking after a Linux box. Also, experienced Unix Administrators who need to port their skills to Linux.</field>
+            <field name="color">1</field>
+            <field name="state">draft</field>
+            <field name="active" eval="1"/>
+            <field name="name">Advanced Linux Administration</field>
+            <field name="subject_id" ref="event_course_subject_3_3"/>
+            <field name="lang_id" ref="base.lang_en"/>
+            <field name="level_id" ref="event_level_advanced_1"/>
+        </record>
+
+        <record model="event.course" id="event_course_building_a_linux_server_6">
+            <field name="description">Overview
+
+    For all the incredible progress that Linux has been making in the desktop arena, the biggest impact of Linux is in the server marketplace, where it has been competing with both Windows and UNIX products. For many years now, several vendors have been providing a professional maintenance and support contracts for Linux, and this facilitated a reliable deployment of Linux machines in high availability 'mission critical' enterprise installations.
+    This course will guide the delegates through the complete process of building a Linux server. We will start by installing a very basic, minimal system. As we progress through the course, we will continue building an effective server machine, by adding and configuring most commonly used server applications, tools and programs. Many third-party applications will be referred to. Some will be installed and discussed with fair amount of detail, some will be mentioned and given only a brief recognition.
+
+    The course platform will be a distribution best lending itself to the smallest initial footprint. However, the discussions, material and exercises address every major Linux strand, and wherever specific tool, technique or method is relevant, Red Hat and other distribution specifics will be pointed out.
+
+    Target audience
+
+    All existing Linux administrators, analysts, or system architects responsible for building, deploying and maintaining servers based on a Linux operating system. Also, experienced UNIX or network administrators who need to port their skills to Linux.</field>
+            <field name="color">1</field>
+            <field name="state">draft</field>
+            <field name="active" eval="1"/>
+            <field name="name">Building a Linux Server</field>
+            <field name="subject_id" ref="event_course_subject_3_3"/>
+            <field name="lang_id" ref="base.lang_en"/>
+            <field name="level_id" ref="event_level_advanced_1"/>
+        </record>
+
+        <record model="event.course" id="event_course_programming_foundations_7">
+            <field name="description">Overview
+
+    Basic programming skills are a fundamental requirement for many IT professionals. An entry-level programmer can have difficulty with jargon, and knowing where to start. Learning language syntax can be an uphill struggle when it cannot be put into context.
+
+    As scripting languages become more powerful and available traditional tasks of a programmer are invading other IT functions. System administrators may have to write complex scripts which impact on mission critical systems, often with no programming experience or training.
+
+    Support staff often have to communicate with development staff, and misunderstandings easily arise from cultural differences.
+
+    This course gives a basic understanding of how computer systems work from a programmer's perspective, and how to use this knowledge to produce good code. It also enables technical staff who are not programmers to gain a perspective of software development.
+
+
+    Who should attend :
+
+    System Administrators and support staff who require a technical knowledge of programming, to help them produce better code, to understand programming concepts, or as a precursor to further training. The course is also suitable for trainee programmers who have little or no in-dept knowledge of programming. It can act as a primer for delegates new to programming who are looking to train on languages such as C languages, Perl, Python, C# and Visual Basic.</field>
+            <field name="color">1</field>
+            <field name="state">draft</field>
+            <field name="active" eval="1"/>
+            <field name="name">Programming Foundations</field>
+            <field name="subject_id" ref="event_course_subject_3_3"/>
+            <field name="lang_id" ref="base.lang_en"/>
+            <field name="level_id" ref="event_level_basic_2"/>
+        </record>
+
+        <record model="event.event" id="event_event_linux_administration_(2013-07-08_-_2013-07-15)_4">
+            <field name="register_max">8</field>
+            <field name="register_min">4</field>
+            <field name="state">draft</field>
+            <field name="has_program" eval="1"/>
+            <field name="visibility">private</field>
+            <field name="register_avail">8</field>
+            <field name="tz">Europe/Brussels</field>
+            <field name="name">Linux Administration</field>
+            <field name="content_planification">linear</field>
+            <field name="calendar_id" ref="event_resource_cal1"/>
+            <field name="level_id" ref="event_level_advanced_1"/>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="lang_id" ref="base.lang_en"/>
+            <field name="type" ref="event_type_4"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="date_begin" eval="time.strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="date_end" eval="(DateTime.now()+timedelta(days=5)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+        <record model="event.content" id="event_content_building_a_linux_server_3">
+            <field name="name">Building a Linux Server</field>
+            <field name="sequence">1</field>
+            <field name="slot_count">8</field>
+            <field name="slot_duration">4</field>
+            <field name="duration">32</field>
+            <field name="course_id" ref="event_course_building_a_linux_server_6"/>
+            <field name="event_ids" eval="[(6,0,[ref('event_event_linux_administration_(2013-07-08_-_2013-07-15)_4')])]"/>
+        </record>
+
+        <record model="event.content" id="event_content_essentials_of_linux_administration_1">
+            <field name="name">Essentials of Linux Administration</field>
+            <field name="sequence">1</field>
+            <field name="slot_count">10</field>
+            <field name="slot_duration">4</field>
+            <field name="duration">40</field>
+            <field name="course_id" ref="event_course_essentials_of_linux_administration_8"/>
+            <field name="event_ids" eval="[(6,0,[ref('event_event_linux_administration_(2013-07-08_-_2013-07-15)_4')])]"/>
+        </record>
+
+        <record model="event.content" id="event_content_advanced_linux_administration_2">
+            <field name="name">Advanced Linux Administration</field>
+            <field name="sequence">2</field>
+            <field name="slot_count">8</field>
+            <field name="slot_duration">4</field>
+            <field name="duration">32</field>
+            <field name="course_id" ref="event_course_advanced_linux_administration_5"/>
+            <field name="event_ids" eval="[(6,0,[ref('event_event_linux_administration_(2013-07-08_-_2013-07-15)_4')])]"/>
+        </record>
+
+
+        <record model="event.content" id="event_content_programming_foundations_4">
+            <field name="name">Programming Foundations</field>
+            <field name="sequence">3</field>
+            <field name="slot_count">6</field>
+            <field name="slot_duration">4</field>
+            <field name="duration">24</field>
+            <field name="course_id" ref="event_course_programming_foundations_7"/>
+            <field name="event_ids" eval="[(6,0,[ref('event_event_linux_administration_(2013-07-08_-_2013-07-15)_4')])]"/>
+        </record>
 
     </data>
 </openerp>
