@@ -258,11 +258,11 @@ class EventSeance(osv.Model):
     def _store_get_seances_from_groups(self, cr, uid, ids, context=None):
         """return list of seances for participant count refresh"""
         registration_ids = []
-        Event = self.pool.get('event.event')
+        Seance = self.pool.get('event.seance')
         ParticipantGroup = self.pool.get('event.participant.group')
         for group in ParticipantGroup.browse(cr, uid, ids, context=context):
             registration_ids.extend(r.id for r in group.registration_ids)
-        return Event._store_get_seances_from_registrations(cr, uid, registration_ids, context=context)
+        return Seance._store_get_seances_from_registrations(cr, uid, registration_ids, context=context)
 
     def _store_get_seances_from_content(self, cr, uid, ids, context=None):
         """return list of seances related to specified contents"""
@@ -567,7 +567,7 @@ class EventParticipantGroup(osv.Model):
 
     def unlink(self, cr, uid, ids, context=None):
         for group in self.browse(cr, uid, ids, context=context):
-            if group.event_content_id.event_id.state != 'draft':
+            if all(e.state != 'draft' for e in group.event_content_id.event_ids):
                 raise osv.except_osv(_('Error'), _('You can only remove a new content group on draft events'))
         return super(EventParticipantGroup, self).unlink(cr, uid, ids, context=context)
 

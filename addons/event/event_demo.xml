@@ -256,6 +256,7 @@
             <field name="color">1</field>
             <field name="state">draft</field>
             <field name="active" eval="1"/>
+            <field name="duration">40</field>
             <field name="name">Essentials of Linux Administration</field>
             <field name="subject_id" ref="event_course_subject_3_3"/>
             <field name="lang_id" ref="base.lang_en"/>
@@ -275,6 +276,7 @@
             <field name="color">1</field>
             <field name="state">draft</field>
             <field name="active" eval="1"/>
+            <field name="duration">32</field>
             <field name="name">Advanced Linux Administration</field>
             <field name="subject_id" ref="event_course_subject_3_3"/>
             <field name="lang_id" ref="base.lang_en"/>
@@ -292,6 +294,7 @@
     Target audience
 
     All existing Linux administrators, analysts, or system architects responsible for building, deploying and maintaining servers based on a Linux operating system. Also, experienced UNIX or network administrators who need to port their skills to Linux.</field>
+            <field name="duration">32</field>
             <field name="color">1</field>
             <field name="state">draft</field>
             <field name="active" eval="1"/>
@@ -319,6 +322,7 @@
             <field name="color">1</field>
             <field name="state">draft</field>
             <field name="active" eval="1"/>
+            <field name="duration">24</field>
             <field name="name">Programming Foundations</field>
             <field name="subject_id" ref="event_course_subject_3_3"/>
             <field name="lang_id" ref="base.lang_en"/>
@@ -341,19 +345,10 @@
             <field name="lang_id" ref="base.lang_en"/>
             <field name="type" ref="event_type_4"/>
             <field name="user_id" ref="base.user_root"/>
-            <field name="date_begin" eval="time.strftime('%Y-%m-%d %H:%M:%S')"/>
-            <field name="date_end" eval="(DateTime.now()+timedelta(days=5)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="date_begin" eval="time.strftime('%Y-%m-%d 06:00:00')"/>
+            <field name="date_end" eval="(DateTime.now()+timedelta(days=30)).replace(hour=15, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')"/>
         </record>
 
-        <record model="event.content" id="event_content_building_a_linux_server_3">
-            <field name="name">Building a Linux Server</field>
-            <field name="sequence">1</field>
-            <field name="slot_count">8</field>
-            <field name="slot_duration">4</field>
-            <field name="duration">32</field>
-            <field name="course_id" ref="event_course_building_a_linux_server_6"/>
-            <field name="event_ids" eval="[(6,0,[ref('event_event_linux_administration_(2013-07-08_-_2013-07-15)_4')])]"/>
-        </record>
 
         <record model="event.content" id="event_content_essentials_of_linux_administration_1">
             <field name="name">Essentials of Linux Administration</field>
@@ -375,10 +370,19 @@
             <field name="event_ids" eval="[(6,0,[ref('event_event_linux_administration_(2013-07-08_-_2013-07-15)_4')])]"/>
         </record>
 
+        <record model="event.content" id="event_content_building_a_linux_server_3">
+            <field name="name">Building a Linux Server</field>
+            <field name="sequence">3</field>
+            <field name="slot_count">8</field>
+            <field name="slot_duration">4</field>
+            <field name="duration">32</field>
+            <field name="course_id" ref="event_course_building_a_linux_server_6"/>
+            <field name="event_ids" eval="[(6,0,[ref('event_event_linux_administration_(2013-07-08_-_2013-07-15)_4')])]"/>
+        </record>
 
         <record model="event.content" id="event_content_programming_foundations_4">
             <field name="name">Programming Foundations</field>
-            <field name="sequence">3</field>
+            <field name="sequence">4</field>
             <field name="slot_count">6</field>
             <field name="slot_duration">4</field>
             <field name="duration">24</field>

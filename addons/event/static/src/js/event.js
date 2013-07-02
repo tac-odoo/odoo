@@ -176,6 +176,9 @@ var commands = {
                 var ev_group_id = event.group_id.length ? event.group_id[0] : false;
                 var week = _.find(self.weeks, function(w) { return event_startdate >= w.start && event_startdate <= w.stop});
                 var content = self.contents_map[ev_content_id];
+                if (!week || !content) {
+                    return;
+                }
 
                 var cell = m[content.id][week.id];
                 try {
