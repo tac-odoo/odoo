@@ -235,12 +235,29 @@ class EventSeance(osv.Model):
     #         result[seance.id] = start.date().strftime(D_FMT)
     #     return result
 
+    def name_get(self, cr, uid, ids, context=None):
+        result = []
+        for seance in self.browse(cr, uid, ids, context=context):
+            repr = '%s (%s, %s)' % (
+                seance.name, seance.date_begin,
+                '%d:%02d' % float_to_hm(seance.duration))
+            result.append((seance.id, repr))
+        return result
+
     def _get_participant_count(self, cr, uid, ids, field_name, args, context=None):
         # force a refresh just before computation
         self._refresh_participations(cr, uid, ids, context=context)
         # return number of participants
         return dict((seance.id, len(seance.participant_ids))
                     for seance in self.browse(cr, uid, ids, context=context))
+
+    def _get_date_end(self, cr, uid, ids, fieldname, args, context=None):
+        result = {}
+        for seance in self.browse(cr, uid, ids, context=context):
+            start = datetime.strptime(seance.date_begin, DT_FMT)
+            end = start + timedelta(hours=seance.duration)
+            result[seance.id] = end.strftime(DT_FMT)
+        return result
 
     def _store_get_seances_from_seances(self, cr, uid, ids, context=None):
         """return list on seances for participant count refresh"""
@@ -273,6 +290,7 @@ class EventSeance(osv.Model):
         'name': fields.char('Seance Name', required=True),
         'type_id': fields.many2one('event.seance.type', 'Type'),
         'date_begin': fields.datetime('Begin date', **RQ_EXCEPT_IN_DRAFT),
+        'date_end': fields.function(_get_date_end, type='datetime', string='Duration'),
         'duration': fields.float('Duration', required=True),
         # 'planned_week_date': fields.function(_get_planned_week_date, string='Planned Week date',
         #                                      type='date', readonly=True, store=True, groupby_range='week'),
@@ -448,6 +466,8 @@ class EventParticipant(osv.Model):
         'name': fields.char('Participant Name', size=128, required=True),
         'partner_id': fields.many2one('res.partner', 'Participant'),
         'seance_id': fields.many2one('event.seance', 'Seance', required=True, ondelete='cascade'),
+        'date': fields.related('seance_id', 'date_begin', type='datetime', string='Date', readonly=True),
+        'duration': fields.related('seance_id', 'duration', type='float', string='Duration', readonly=True),
         'registration_id': fields.many2one('event.registration', 'Registration', required=True),
         'state': fields.selection(STATES, 'State', readonly=True, required=True),
         # Presence Information

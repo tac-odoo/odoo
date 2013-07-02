@@ -71,7 +71,7 @@
         </record>
 
         <record id="action_resource_calendar_form" model="ir.actions.act_window">
-            <field name="name">Calendars</field>
+            <field name="name">Schedules</field>
             <field name="res_model">resource.calendar</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
@@ -82,7 +82,7 @@
 
 
         <record id="action_resource_calendar_leaves_form" model="ir.actions.act_window">
-            <field name="name">All Calendar Leaves</field>
+            <field name="name">All Schedules - Leaves</field>
             <field name="res_model">resource.calendar.leaves</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,calendar</field>

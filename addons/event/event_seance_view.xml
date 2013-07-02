@@ -316,6 +316,25 @@
             <field name="arch" type="xml">
                 <calendar string="Seances" date_start="date_begin" date_delay="duration" color="type_id" mode="week">
                     <field name="name"/>
+                    <field name="group_id"/>
+                    <field name="main_speaker_id"/>
+                    <field name="participant_ids"/>
+                    <templates>
+                        <t t-name="calendar-text-box">
+                            <field name="name"/>
+                        </t>
+                        <t t-name="calendar-info-box">
+                            <div>
+                                <t t-if="record.group_id.raw_value">
+                                    <span>Group: <field name="group_id"/></span><br/>
+                                </t>
+                                <t t-if="record.main_speaker_id.raw_value">
+                                    <span>Speaker: <field name="main_speaker_id"/></span><br/>
+                                </t>
+                                <span>Participant(s): <t t-esc="record.participant_ids.raw_value.length"/></span><br/>
+                            </div>
+                        </t>
+                    </templates>
                 </calendar>
             </field>
         </record>
