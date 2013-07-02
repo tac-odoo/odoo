@@ -195,6 +195,7 @@ class CoreCalendarResource(osv.TransientModel):
         return result
 
     def get_i18n_availibility_status(self, cr, uid, availibility_status, short=False, context=None):
+        short = False
         return {
             Availibility.UNKNOWN: _('?') if short else _('Unknown'),
             Availibility.UNAVAILABLE: _('U') if short else _('Unavailable'),

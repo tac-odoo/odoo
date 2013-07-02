@@ -30,6 +30,7 @@ class ResPartner(osv.osv):
         'speaker': fields.boolean('Speaker', help="Check this box if this contact is a speaker."),
         'event_ids': fields.one2many('event.event', 'main_speaker_id', readonly=True),
         'event_registration_ids': fields.one2many('event.registration', 'partner_id', readonly=True),
+        'speakerinfo_ids': fields.one2many('event.course.speakerinfo', 'course_id', 'Speaker Infos'),
     }
 
     def open_registrations(self, cr, uid, ids, context=None):
@@ -59,6 +60,27 @@ class ResPartner(osv.osv):
                 'view_type': 'form',
                 'view_mode': 'tree,form,calendar,graph',
                 'domain': partner_domain}
+
+    def open_courses(self, cr, uid, ids, context=None):
+        """ Utility method used to add an "Open Courses" button in partner views """
+        partner = self.browse(cr, uid, ids[0], context=context)
+        if partner.speaker:
+            return {
+                'name': _('Courses'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'event.course',
+                'view_type': 'form',
+                'view_mode': 'kanban,form,tree',
+                'context': "{'search_default_speaker_id': active_id}",
+            }
+        return {}
+
+    def onchange_speaker(self, cr, uid, ids, speaker, context=None):
+        values = {}
+        values = {
+            'attendee_type': 'speaker' if speaker else 'person',
+        }
+        return {'value': values}
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

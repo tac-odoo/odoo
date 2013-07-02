@@ -97,7 +97,7 @@
                                              'required': [('has_program','=',False)]}</attribute>
                 </field>
                 <page string="Information" position="after">
-                    <page string="Program &amp; Hours" attrs="{'invisible': [('has_program','=',False)]}">
+                    <page string="Program &amp; Schedule" attrs="{'invisible': [('has_program','=',False)]}">
                         <group>
                             <group>
                                 <label for="calendar_id" string="Schedule"/>
@@ -105,7 +105,7 @@
                                     <field name="calendar_id" context="{'show_week_hours': 1}" options="{'always_reload': True}"/>
                                     <span attrs="{'invisible': [('calendar_id','!=',False)]}" groups="base.group_user">No hours specified, OpenERP will consider 24/24 7/7 hours</span>
                                     <button type="action" name="%(event.action_event_leaves)d"
-                                            string="(configure event leaves)" class="oe_link"/>
+                                            string="(configure event vacations)" class="oe_link"/>
                                 </div>
                             </group>
                             <group>
@@ -123,7 +123,8 @@
                     </page>
                 </page>
                 <xpath expr="//div[contains(@class, 'oe_button_box')]" position="inside">
-                    <button type="action" name="%(action_event_2_seance_link)d" string="Seances"/>
+                    <button type="action" name="%(action_event_2_seance_link)d" string="Seances"
+                            attrs="{'invisible': [('has_program','=',False)]}"/>
                 </xpath>
             </field>
         </record>

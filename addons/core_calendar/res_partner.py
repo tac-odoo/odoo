@@ -21,14 +21,16 @@
 
 from openerp.osv import osv, fields
 
-class res_partner(osv.osv):
+
+class ResPartner(osv.osv):
     _inherit = 'res.partner'
 
     def _get_attendee_types(self, cr, uid, context=None):
         return [
-            ('none', 'No Information'),
+            ('person', 'Person'),
             ('speaker', 'Speaker'),
             ('resource', 'Resource'),
+            ('room', 'Room'),
         ]
     # indirection to avoir rewriting field
     _attendee_types = lambda self, *args, **kwargs: self._get_attendee_types(*args, **kwargs)
@@ -40,5 +42,5 @@ class res_partner(osv.osv):
     }
 
     _defaults = {
-        'attendee_type': 'none',
+        'attendee_type': 'person',
     }

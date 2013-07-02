@@ -19,8 +19,10 @@
 #
 ##############################################################################
 
+import re
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
+import openerp.addons.decimal_precision as dp
 
 
 class EventCourseSubject(osv.Model):
@@ -65,6 +67,40 @@ class EventCourse(osv.Model):
         ('deprecated', 'Deprecated'),
     ]
 
+    def _compute_price(self, cr, uid, ids, name, args, context=None):
+        if context is None:
+            context = {}
+        partner_id = context.get('partner_id')
+        partner = self.pool.get('res.partner').browse(cr, uid, partner_id, context=context) if partner_id else False
+        speakerinfo = self.pool.get('event.course.speakerinfo')
+
+        result = dict.fromkeys(ids, 0.0)
+        for course in self.browse(cr, uid, ids, context=context):
+            price = course.standard_price
+            if partner and partner.speaker:
+                custom_price_domain = [('course_id', '=', course.id),
+                                       ('speaker_id', '=', partner.id)]
+                custom_price_ids = speakerinfo.search(cr, uid, custom_price_domain, context=context)
+                if custom_price_ids:
+                    price = speakerinfo.browse(cr, uid, custom_price_ids[0], context=context).price
+            result[course.id] = price
+        return result
+
+    def _get_speaker_id(self, cr, uid, ids, fieldname, args, context=None):
+        return dict.fromkeys(ids, False)
+
+    def _search_speaker_id(self, cr, uid, model, fieldname, args, context=None):
+        search_op, search_value = None, None
+        for a in args:
+            if isinstance(a, (list, tuple)) and len(a) == 3 and a[0] == 'speaker_id':
+                search_op = a[1]
+                search_value = a[2]
+                break
+        if search_op is not None:
+            if search_op == '=':
+                return [('speakerinfo_ids.speaker_id', 'in', [search_value])]
+        return []
+
     _columns = {
         'name': fields.char('Course Name', size=64, required=True),
         'lang_id': fields.many2one('res.lang', 'Language', required=True),
@@ -78,6 +114,12 @@ class EventCourse(osv.Model):
         'material_note': fields.text('Note on Material', help='Some notes on the course materials'),
         'color': fields.integer('Color Index'),
         'state': fields.selection(_course_states, 'State', readonly=True),
+        'standard_price': fields.float('Cost', digits_compute=dp.get_precision('Product Price')),
+        'price': fields.function(_compute_price, type='float', string='Purchase Price',
+                                 digits_compute=dp.get_precision('Product Price')),
+        'speakerinfo_ids': fields.one2many('event.course.speakerinfo', 'course_id', 'Speaker Infos'),
+        'speaker_id': fields.function(_get_speaker_id, type='many2one', relation='res.partner',
+                                      fnct_search=_search_speaker_id, string="Speaker"),
     }
 
     def _default_lang_id(self, cr, uid, context=None):
@@ -114,6 +156,81 @@ class EventCourse(osv.Model):
 
     def button_deprecate(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'deprecated'}, context=context)
+
+    def create(self, cr, uid, values, context=None):
+        if context is None:
+            context = {}
+        subject_id = values.get('subject_id') or context.get('default_subject_id')
+        if subject_id and not values.get('color'):
+            Subject = self.pool.get('event.course.subject')
+            subj = Subject.browse(cr, uid, subject_id, context=context)
+            values['color'] = subj.color
+        return super(EventCourse, self).create(cr, uid, values, context=context)
+
+    def write(self, cr, uid, ids, values, context=None):
+        if values.get('subject_id') and not values.get('color'):
+            Subject = self.pool.get('event.course.subject')
+            subj = Subject.browse(cr, uid, values['subject_id'], context=context)
+            values['color'] = subj.color
+        return super(EventCourse, self).write(cr, uid, ids, values, context=context)
+
+    def name_create(self, cr, uid, name, context=None):
+        name = name or ''
+        parts = []
+        hours_re = re.compile('\W*(\d+:\d+)\W*')
+        duration = None
+        for n in name.split():
+            match = hours_re.match(n)
+            if match:
+                h, m = [int(x) for x in match.groups()[0].split(':')]
+                duration = h + m / 60.
+            else:
+                parts.append(n)
+        values = {'name': ','.join(parts)}
+        if duration is not None:
+            values['duration'] = duration
+        print("values: %s" % (values,))
+        rec_id = self.create(cr, uid, values, context)
+        return self.name_get(cr, uid, [rec_id], context)[0]
+
+
+class EventCourseSpeakerInfo(osv.Model):
+    _name = 'event.course.speakerinfo'
+
+    _prices_from_selection = [
+        ('course', 'Course Price'),
+        ('custom', 'Custom Price'),
+    ]
+
+    def _get_price(self, cr, uid, ids, name, args, context=None):
+        result = {}
+        for speakerinfo in self.browse(cr, uid, ids, context=context):
+            if speakerinfo.price_from == 'course':
+                result[speakerinfo.id] = speakerinfo.course_id.standard_price
+            else:
+                result[speakerinfo.id] = speakerinfo.standard_price
+        return result
+
+    def _set_price(self, cr, uid, id, name, value, args, context=None):
+        speakerinfo = self.browse(cr, uid, id, context=context)
+        if speakerinfo.price_from == 'custom':
+            self.write(cr, uid, [id], {'standard_price': value}, context=context)
+
+    _columns = {
+        'course_id': fields.many2one('event.course', 'Course', required=True),
+        'speaker_id': fields.many2one('res.partner', 'Speaker', required=True, domain=[('speaker', '=', True)]),
+        'price_from': fields.selection(_prices_from_selection, 'Price From', required=True),
+        'standard_price': fields.float('Custom Cost', digits_compute=dp.get_precision('Product Price')),
+        'price': fields.function(_get_price, type='float', digits_compute=dp.get_precision('Product Price'),
+                                 fnct_inv=_set_price, string='Price'),
+    }
+    _defaults = {
+        'price_from': 'course',
+    }
+
+    _sql_constraints = [
+        ('uniq_course_speaker', 'UNIQUE(course_id, speaker_id)', 'Couple course/speaker must be unique'),
+    ]
 
 
 class EventCourseMaterial(osv.Model):

@@ -195,6 +195,7 @@ class EventContent(osv.Model):
         event_ids = [e.id for e in content.event_ids]
         return {
             'type': 'ir.actions.act_window',
+            'name': _('Groups of %s') % content.name,
             'res_model': 'event.registration',
             'view_type': 'form',
             'view_mode': 'kanban,tree,form',
@@ -237,6 +238,8 @@ class EventSeance(osv.Model):
 
     def name_get(self, cr, uid, ids, context=None):
         result = []
+        if isinstance(ids, (int, long)):
+            ids = [ids]
         for seance in self.browse(cr, uid, ids, context=context):
             repr = '%s (%s, %s)' % (
                 seance.name, seance.date_begin,
@@ -556,7 +559,8 @@ class EventParticipantGroup(osv.Model):
     def name_get(self, cr, uid, ids, context=None):
         result = []
         for group in self.browse(cr, uid, ids, context=context):
-            repr_name = '%s / %s' % (group.event_content_id.name, group.name)
+            # repr_name = '%s / %s' % (group.event_content_id.name, group.name)
+            repr_name = group.name
             result.append((group.id, repr_name,))
         return result
 

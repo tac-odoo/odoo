@@ -62,6 +62,18 @@
                                 </field>
                                 <field name="material_note"/>
                             </page>
+                            <page string="Speakers">
+                                <group colspan="2">
+                                    <field name="standard_price"/>
+                                </group>
+                                <field name="speakerinfo_ids" colspan="4">
+                                    <tree string="Speakers" editable="bottom">
+                                        <field name="speaker_id" domain="[('speaker','=',True)]"/>
+                                        <field name="price_from"/>
+                                        <field name="price" attrs="{'readonly': [('price_from','!=','custom')]}"/>
+                                    </tree>
+                                </field>
+                            </page>
                             <page string="Settings">
                                 <group>
                                     <group>
@@ -100,7 +112,7 @@
         <field name="name">event.course.kanban</field>
         <field name="model">event.course</field>
         <field name="arch" type="xml">
-            <kanban>
+            <kanban default_group_by="subject_id">
                 <field name="name"/>
                 <field name="color"/>
                 <field name="lang_id"/>
@@ -148,6 +160,7 @@
                 <field name="lang_id"/>
                 <field name="subject_id" filter_domain="[('subject_id','child_of',[self])]"/>
                 <field name="level_id"/>
+                <field name="speaker_id"/>
                 <!-- FIXME: <field name="category_ids"/> -->
                 <group expand="0" string="Group By...">
                     <filter name="groupby_lang_id" string="Language" domain="[]" context="{'group_by': 'lang_id'}"/>
