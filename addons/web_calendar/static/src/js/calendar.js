@@ -63,6 +63,34 @@
             }
             return old_scheduler_on_mouse_move.apply(this, arguments);
         };
+        scheduler._lame_clone = function(object, cache) {
+            var i, t, result; // iterator, types array, result
+
+            cache = cache || [];
+
+            for (i=0; i<cache.length; i+=2)
+                if(object === cache[i])
+                    return cache[i+1];
+
+            if (object && typeof object == "object") {
+                result = {};
+                t = [Array,Date,Number,String,Boolean];
+                for (i=0; i<t.length; i++) {
+                    if (object instanceof t[i])
+                        result = i ? new t[i](object) : new t[i](); // first one is array
+                }
+                cache.push(object, result);
+                for (i in object) {
+                    if (i == 'oe_view' || i == 'record') {
+                        continue;
+                    }
+                    if (Object.prototype.hasOwnProperty.apply(object, [i]))
+                        result[i] = scheduler._lame_clone(object[i], cache)
+                }
+            }
+            return result || object;
+        };
+
 
 
         // Ensure quick-info is correctly hidden when clicking outside of it
