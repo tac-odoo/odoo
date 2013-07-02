@@ -22,4 +22,6 @@
 
 import event_confirm
 import event_participant_take_presence
+import event_estimate_end_date
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

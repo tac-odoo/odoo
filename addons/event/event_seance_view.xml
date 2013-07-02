@@ -90,13 +90,17 @@
             <field name="inherit_id" ref="event.view_event_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//div[@class='options_active']" position="inside">
-                    <field name="has_program"/><label for="has_program"/>
+                    <field name="has_program" on_change="onchange_has_program(has_program, date_begin, content_ids, context)"/><label for="has_program"/>
                 </xpath>
+                <field name="date_end" position="attributes">
+                    <attribute name="attrs">{'readonly': ['|',('state','!=','draft'),('has_program','=',True)],
+                                             'required': [('has_program','=',False)]}</attribute>
+                </field>
                 <page string="Information" position="after">
                     <page string="Program &amp; Hours" attrs="{'invisible': [('has_program','=',False)]}">
                         <group>
                             <group>
-                                <label for="calendar_id"/>
+                                <label for="calendar_id" string="Schedule"/>
                                 <div>
                                     <field name="calendar_id" context="{'show_week_hours': 1}" options="{'always_reload': True}"/>
                                     <span attrs="{'invisible': [('calendar_id','!=',False)]}" groups="base.group_user">No hours specified, OpenERP will consider 24/24 7/7 hours</span>
@@ -105,7 +109,7 @@
                                 </div>
                             </group>
                             <group>
-                                <label for="content_planification"/>
+                                <label for="content_planification" string="Schedule mode"/>
                                 <div>
                                     <field name="content_planification" class="oe_inline"/>
                                     <button type="object" name="recompute_seances" class="oe_link" string="(recompute seances)"
@@ -468,7 +472,7 @@
             <field name="inherit_id" ref="event.view_event_registration_form"/>
             <field name="arch" type="xml">
                 <field name="date_closed" position="after">
-                    <field name="group_ids" widget="many2many_tags" attrs="{'readonly': [('state','!=','draft')]}"
+                    <field name="group_ids" widget="many2many_tags" attrs="{'readonly': [('state','=','done')]}"
                             domain="[('event_content_id.event_ids','in',[event_id])]"
                             on_change="onchange_group_ids(event_id, group_ids)"/>
                 </field>

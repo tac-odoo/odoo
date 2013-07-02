@@ -157,7 +157,7 @@ class EventContent(osv.Model):
         'course_id': fields.many2one('event.course', 'Course'),
     }
 
-    def onchange_content_course(self, cr, uid, ids, course_id, context=None):
+    def onchange_content_course(self, cr, uid, ids, course_id, slot_duration, context=None):
         values = {}
         if course_id:
             course = self.pool.get('event.course').browse(cr, uid, course_id, context=context)

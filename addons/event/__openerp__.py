@@ -45,6 +45,7 @@ Key Features
         'security/ir.model.access.csv',
         'wizard/event_confirm_view.xml',
         'wizard/event_participant_take_presence_view.xml',
+        'wizard/event_estimate_end_date_view.xml',
         'resource_view.xml',
         'preplanning_view.xml',
         'event_view.xml',

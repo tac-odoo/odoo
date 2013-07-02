@@ -264,7 +264,7 @@ class event_event(osv.osv):
         return True
 
     _constraints = [
-        (_check_closing_date, 'Error ! Closing Date cannot be set before Beginning Date.', ['date_end']),
+        (lambda s, *a, **kw: s._check_closing_date(*a, **kw), 'Error ! Closing Date cannot be set before Beginning Date.', ['date_end']),
     ]
 
     def onchange_event_type(self, cr, uid, ids, type_event, context=None):

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!-- Estimate End Date Wizard Form View -->
+        <record model="ir.ui.view" id="wizard_estimate_end_date">
+            <field name="name">Estimate End Date Wizard</field>
+            <field name="model">event.event.estimate_end_date.wizard</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form version="7.0" string="Estimate End Date Wizard">
+                    <group>
+                        <field name="event_id"/>
+                        <field name="date_start"/>
+                        <field name="date_end"/>
+                    </group>
+                    <footer>
+                        <button name="button_compute_date_end" type="object" class="oe_highlight" string="Compute End Date"/>
+                        or <button type="special" special="cancel" string="Close" class="oe_link"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Estimate End Date Wizard Action -->
+        <record model="ir.actions.act_window" id="action_estimate_end_date_wizard">
+            <field name="name">Estimate End Date Wizard</field>
+            <field name="res_model">event.event.estimate_end_date.wizard</field>
+            <field name="src_model"></field>
+            <field name="target">new</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="nodestroy" eval="True"/>
+        </record>
+
+        <record id="view_event_form_estimateenddate" model="ir.ui.view">
+            <field name="name">event.event.form.seance</field>
+            <field name="model">event.event</field>
+            <field name="inherit_id" ref="event.view_event_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header/button[@name='button_cancel']" position="after">
+                    <button type="action" name="%(action_estimate_end_date_wizard)d"
+                            string="Estimate end date"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</openerp>

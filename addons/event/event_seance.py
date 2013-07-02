@@ -446,7 +446,7 @@ class EventParticipant(osv.Model):
 
     _columns = {
         'name': fields.char('Participant Name', size=128, required=True),
-        'partner_id': fields.many2one('res.partner', 'Participant', required=True),
+        'partner_id': fields.many2one('res.partner', 'Participant'),
         'seance_id': fields.many2one('event.seance', 'Seance', required=True, ondelete='cascade'),
         'registration_id': fields.many2one('event.registration', 'Registration', required=True),
         'state': fields.selection(STATES, 'State', readonly=True, required=True),
@@ -621,6 +621,54 @@ class EventEvent(osv.Model):
                     result[event.id].append(seance.id)
         return result
 
+    def _get_date_end(self, cr, uid, ids, fieldname, args, context=None):
+        result = {}
+        if not ids:
+            return result
+
+        # Fetch stored value
+        cr.execute("""SELECT id, date_end
+                      FROM event_event WHERE id in %s""",
+                   (tuple(ids),))
+        stored_values = dict(cr.fetchall())
+
+        for event in self.browse(cr, uid, ids, context=context):
+            if event.has_program:
+                EstimateEndDate = self.pool.get('event.event.estimate_end_date.wizard')
+                ed = EstimateEndDate._compute_end_date(cr, uid, event.id,
+                                                       event.date_begin, context=context)
+            else:
+                ed = stored_values[event.id]
+            if not ed:
+                # fallback to ensure we have a correct date
+                ed = event.date_begin
+            result[event.id] = ed
+        return result
+
+    def _set_date_end(self, cr, uid, ids, fieldname, value, args, context=None):
+        if not ids:
+            return False
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        cr.execute("UPDATE event_event SET date_end = %s WHERE id IN %s",
+                   (value, tuple(ids),))
+        return True
+
+    def _store_get_events_from_events(self, cr, uid, ids, context=None):
+        return ids
+
+    def _store_get_events_from_contents(self, cr, uid, ids, context=None):
+        Event = self.pool.get('event.event')
+        content_domain = [('content_ids', 'in', ids)]
+        return Event.search(cr, uid, content_domain, context=context)
+
+    def _store_get_events_from_seances(self, cr, uid, ids, context=None):
+        Event = self.pool.get('event.event')
+        Seance = self.pool.get('event.seance')
+        content_ids = [s.content_id.id
+                       for s in Seance.browse(cr, uid, ids, context=context)]
+        return Event._store_get_events_from_contents(cr, uid, content_ids, context=context)
+
     _columns = {
         'calendar_id': fields.many2one('resource.calendar', 'Hours'),
         'has_program': fields.boolean('Program', help='This event has a program'),
@@ -635,11 +683,28 @@ class EventEvent(osv.Model):
         'seance_ids': fields.function(_get_seance_ids, type='many2many',
                                       relation='event.seance', readonly=True,
                                       string='Seances'),
+        'date_end': fields.function(_get_date_end, type='datetime', string='End Date',
+                                    required=False, readonly=True, states={'draft': [('readonly', False)]},
+                                    fnct_inv=_set_date_end, store={
+                                        'event.event': (_store_get_events_from_events, ['content_ids', 'has_program'], 10),
+                                        'event.content': (_store_get_events_from_contents, [], 10),
+                                        'event.seance': (_store_get_events_from_seances, [], 10),
+                                    }),
     }
 
     _defaults = {
         'content_planification': 'linear',
     }
+
+    def _check_closing_date(self, cr, uid, ids, context=None):
+        for event in self.browse(cr, uid, ids, context=context):
+            if event.has_program and not event.date_end:
+                # for program end date is allowed to be empty,
+                # because it will be computed later on by store function
+                continue
+            if event.date_end < event.date_begin:
+                return False
+        return True
 
     def copy(self, cr, uid, id, default=None, context=None):
         """ Reset the state and the registrations while copying an event
@@ -664,6 +729,15 @@ class EventEvent(osv.Model):
             if event.has_program and event.content_planification == 'linear':
                 self.create_linear_children_events(cr, uid, [event.id], context=context)
         return True
+
+    def onchange_has_program(self, cr, uid, ids, has_program, date_begin, content, context=None):
+        print("Has Program: %s, Date begin: %s, Content: %s, Context: %s" % (
+                has_program, date_begin, content, context))
+        values = {}
+        # if has_program:
+        #     EstimateEndDate = self.pool.get('event.event.estimate_end_date.wizard')
+        #     ed = EstimateEndDate._compute_end_date(self, cr, uid, )
+        return {'value': values}
 
     def open_preplanning(self, cr, uid, ids, context=None):
         if not ids:
@@ -799,9 +873,9 @@ class EventRegistration(osv.Model):
                 commands.append((4, new_group_id))
                 values['group_ids'] = commands
 
-            nondraft_reg_domain = [('id', 'in', ids), ('state', '!=', 'draft')]
-            if self.search(cr, uid, nondraft_reg_domain, context=context):
-                raise osv.except_osv(_('Error'), _('You can only change groups when registration is unconfirmed'))
+            done_reg_domain = [('id', 'in', ids), ('state', '=', 'done')]
+            if self.search(cr, uid, done_reg_domain, context=context):
+                raise osv.except_osv(_('Error'), _('You can only change groups when registration is not done'))
         return super(EventRegistration, self).write(cr, uid, ids, values, context=context)
 
     def onchange_event_id(self, cr, uid, ids, event_id, context=None):
