@@ -112,6 +112,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree</field>
             <field name="domain">['|',('partner_id','=',active_id),('resource_id.user_id.partner_id','=',active_id)]</field>
+            <field name="context">{'default_partner_id': active_id}</field>
             <field name="view_id" ref="resource_calendar_company_nonworkingdays_tree"/>
         </record>
 

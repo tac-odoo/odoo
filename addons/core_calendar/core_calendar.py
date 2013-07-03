@@ -179,8 +179,7 @@ class CoreCalendarTimeline(osv.TransientModel):
                                                             context=context)
                 for record_id, timeline in tlresult.iteritems():
                     for period in timeline.iter(by='change', as_tz='UTC'):
-
-                        if period.status != Availibility.UNAVAILABLE:
+                        if period.status == Availibility.FREE:
                             continue
 
                         unavails.append({
