@@ -416,7 +416,7 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         scheduler.config.details_on_dblclick = true;
         scheduler.xy.bar_height = 20;
         // Limit and marked zone
-        scheduler.config.check_limits = false;
+        scheduler.config.check_limits = true;
         // Quick info popup
         scheduler.config.quick_info_detached = true;
         // Group By support
@@ -593,7 +593,7 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         scheduler.config.sections = this.search_groups;
         scheduler.config.section_key = this.search_group_by_key;
         if (this.search_group_by_key) {
-            scheduler.config.display_marked_timespans = false;
+            scheduler.config.display_marked_timespans = true;
             scheduler.matrix.timeline.y_unit = this.search_groups;
         } else {
             scheduler.config.display_marked_timespans = true;

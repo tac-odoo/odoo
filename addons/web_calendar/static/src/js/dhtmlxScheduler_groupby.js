@@ -711,6 +711,21 @@ scheduler.attachEvent("onScaleAdd", function(area, day, section) {
 
 });
 
+var old_scheduler_render_marked_timespan = scheduler._render_marked_timespan;
+
+scheduler._render_marked_timespan = function(options, area, day) {
+    if (this.is_group_by_mode()) {
+        var old_hour_size = scheduler.config.hour_size_px;
+        scheduler.config.hour_size_px = scheduler.config.section_hour_size_px;
+    }
+    var rval = old_scheduler_render_marked_timespan.apply(this, arguments);
+    if (this.is_group_by_mode()) {
+        scheduler.config.hour_size_px = old_hour_size;
+    }
+    return rval;
+};
+
+
 // end-of-scheduler monkey-patch
 }
 

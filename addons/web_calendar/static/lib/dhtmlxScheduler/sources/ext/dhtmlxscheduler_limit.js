@@ -566,6 +566,9 @@ scheduler.config.display_marked_timespans = true;
 				}
 			}
 			area = area ? area : scheduler.locate_holder(index);
+			if (area == undefined) {
+				return blocks;
+			}
 
 			for (var i = 0; i < zones.length; i+=2){
 				var start = Math.max(zones[i], c.first_hour*60);
