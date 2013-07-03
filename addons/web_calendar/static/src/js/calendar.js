@@ -592,6 +592,15 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
     refresh_scheduler: function() {
         scheduler.config.sections = this.search_groups;
         scheduler.config.section_key = this.search_group_by_key;
+        if (this.search_group_by_key) {
+            scheduler.config.display_marked_timespans = false;
+            scheduler.matrix.timeline.y_unit = this.search_groups;
+        } else {
+            scheduler.config.display_marked_timespans = true;
+            scheduler.matrix.timeline.y_unit = [
+                {key: undefined, label: ''},
+            ];
+        }
         scheduler.setCurrentView(scheduler._date);
     },
     reload_event: function(id) {
