@@ -196,6 +196,8 @@
                     <field name="duration" widget="float_time"/>
                     <field name="address_id"/>
                     <field name="main_speaker_id"/>
+                    <field name="content_id" invisible="1"/>
+                    <field name="group_id" invisible="1"/>
                     <field name="state"/>
                 </tree>
             </field>
@@ -307,6 +309,13 @@
                     <field name="name"/>
                     <field name="event_ids"/>
                     <field name="type_id"/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Type" name="type" domain="[]" context="{'group_by': 'type_id'}"/>
+                        <filter string="Content" name="content" domain="[]" context="{'group_by': 'content_id'}"/>
+                        <filter string="Speaker" name="speaker" domain="[]" context="{'group_by': 'main_speaker_id'}"/>
+                        <filter string="Address" name="address" domain="[]" context="{'group_by': 'address_id'}"/>
+                        <filter string="Group" name="group" domain="[]" context="{'group_by': 'group_id'}"/>
+                    </group>
                 </search>
             </field>
         </record>
@@ -317,8 +326,10 @@
             <field name="arch" type="xml">
                 <calendar string="Seances" date_start="date_begin" date_delay="duration" color="type_id" mode="week">
                     <field name="name"/>
+                    <field name="content_id"/>
                     <field name="group_id"/>
                     <field name="main_speaker_id"/>
+                    <field name="address_id"/>
                     <field name="participant_ids"/>
                     <templates>
                         <t t-name="calendar-text-box">
