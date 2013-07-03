@@ -195,6 +195,10 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         this.is_slow_open = false;
         this.scheduler_events = [];
 
+        // for rgroup_by support
+        this.search_group_by_key = null;
+        this.search_groups = [];
+
         /* TODO: add postprocess for m2m fields
            - currently none of them are displayed */
         this.many2manys = [];
@@ -410,9 +414,15 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         scheduler.config.day_date = '%l %j';
         scheduler.config.details_on_create = true;
         scheduler.config.details_on_dblclick = true;
-        scheduler.config.check_limits = false;
-        scheduler.config.quick_info_detached = true;
         scheduler.xy.bar_height = 20;
+        // Limit and marked zone
+        scheduler.config.check_limits = false;
+        // Quick info popup
+        scheduler.config.quick_info_detached = true;
+        // Group By support
+        scheduler.config.search_group_by_key = this.search_group_by_key;
+        scheduler.config.section_hour_size_px = 22;
+        scheduler.config.section_width = 150;
 
         scheduler.locale = {
             date:{
@@ -460,7 +470,7 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         scheduler.locale.labels.timeline_tab = "Timeline";
         scheduler.locale.labels.section_custom = "Section";
         var sections = [
-            {key: undefined, label: _t('Undefined')},
+            {key: undefined, label: ''},
         ];
 
         // Show working hours
@@ -580,6 +590,8 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         this.range_stop = this.range_start.clone().addMonths(1).addSeconds(-1);
     },
     refresh_scheduler: function() {
+        scheduler.config.sections = this.search_groups;
+        scheduler.config.section_key = this.search_group_by_key;
         scheduler.setCurrentView(scheduler._date);
     },
     reload_event: function(id) {
@@ -681,9 +693,31 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
             'oe_view': this,
             'record': this.transform_record(evt),
         };
-                r.section_key = undefined;
         r.record = this.transform_record(evt);
         r.oe_view = this;
+
+        if (this.search_group_by_key) {
+            var group_value = evt[this.search_group_by_key];
+            if (!(group_value instanceof Array)) {
+                group_value = {'key': group_value, 'label':  group_value};
+            } else {
+                group_value = {'key': group_value[0], 'label': group_value[1]}
+            }
+            r.section_key = group_value.key;
+
+            var group_value_idx = -1;
+            for (i=0; i < this.search_groups.length; i++) {
+                if (this.search_groups[i].key == group_value.key
+                    && this.search_groups[i].label == group_value.label) {
+                    group_value_idx = i;
+                    break;
+                }
+            }
+            if (group_value_idx == -1) {
+                group_value_idx = this.search_groups.length;
+                this.search_groups.unshift(group_value);
+            }
+        }
 
         if (evt.color) {
             r.color = evt.color;
@@ -712,6 +746,9 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
         return data;
     },
     do_search: function(domain, context, group_by) {
+        this.search_groups = [];
+        this.search_group_by_key = (group_by && group_by.length) ? group_by[0] : null;
+        console.log('do_search groupby_key', this.search_group_by_key);
         this.last_search = arguments;
         this.ranged_search();
     },

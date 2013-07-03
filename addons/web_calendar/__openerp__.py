@@ -15,6 +15,7 @@ OpenERP Web Calendar view.
         'static/lib/dhtmlxScheduler/sources/ext/dhtmlxscheduler_limit.js',
         'static/lib/dhtmlxScheduler/sources/ext/dhtmlxscheduler_timeline.js',
         'static/lib/dhtmlxScheduler/sources/ext/dhtmlxscheduler_quick_info.js',
+        'static/src/js/dhtmlxScheduler_groupby.js',
         'static/src/js/calendar.js',
     ],
     'css': [
