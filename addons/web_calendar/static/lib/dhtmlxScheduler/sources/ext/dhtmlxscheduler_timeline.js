@@ -963,6 +963,10 @@ scheduler._render_marked_timespan = function(options, area, unit_id) {
 		var view_opts = scheduler.matrix[scheduler._mode];
 		var blocks = [];
 
+        if (area == undefined) {
+                return blocks;
+        }
+
 		var units = [];
 		var areas = [];
 		if (!unit_id) {  // should draw for every unit

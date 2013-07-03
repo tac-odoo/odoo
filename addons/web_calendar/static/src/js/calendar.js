@@ -712,6 +712,9 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
             } else {
                 group_value = {'key': group_value[0], 'label': group_value[1]}
             }
+            if (group_value.key == false) {
+                group_value.label = '';
+            }
             r.section_key = group_value.key;
 
             var group_value_idx = -1;
