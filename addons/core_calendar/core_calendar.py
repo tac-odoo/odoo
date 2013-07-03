@@ -100,7 +100,7 @@ class CoreCalendarTimeline(osv.TransientModel):
             tz_utc = pytz.timezone('UTC')
             timeline_start_dt = Timeline.datetime_tz_convert(date_from, tz_utc, tz_resource)
             timeline_end_dt = Timeline.datetime_tz_convert(date_to, tz_utc, tz_resource)
-            timeline = Timeline(timeline_start_dt, timeline_end_dt, tz=tz, default=Availibility.UNAVAILABLE)
+            timeline = Timeline(timeline_start_dt, timeline_end_dt, tz=tz, default=Availibility.UNKNOWN)
 
             for layer in timeline_layers:
                 if layer == 'working_hours':
@@ -150,6 +150,49 @@ class CoreCalendarTimeline(osv.TransientModel):
         if isinstance(ids, (int, long)):
             return result.values()[0]
         return result
+
+    def get_resource_unavailibility(self, cr, uid, model, ids, date_from, date_to, group_by_field=None, context=None):
+        if not ids:
+            return False
+        res_ids = ids
+        if isinstance(ids, (int, long)):
+            res_ids = [ids]
+        unavails = []
+
+        model_obj = self.pool.get(model)
+        if group_by_field:
+            # model represent the base object on which we're doing the "group_by",
+            # we need to get the related model from the grouped field instead.
+            group_field = model_obj.fields_get(cr, uid, [group_by_field], context=context)[group_by_field]
+            if group_field['type'] != 'many2one':
+                # in grouped mode, only grouping by many2one field is supported
+                return False
+            # NOTE: in that case, "ids" already refer to group many2one relation
+            #res_ids = [int(_id) for _id in res_ids]
+            model_ids = [_id for _id in ids if _id is not False]
+            model_obj = self.pool.get(group_field['relation'])
+
+            if hasattr(model_obj, '_get_resource_timeline'):
+                tllayers = ['working_hours', 'leaves']
+                tlresult = model_obj._get_resource_timeline(cr, uid, model_ids, layers=tllayers,
+                                                            date_from=date_from, date_to=date_to,
+                                                            context=context)
+                for record_id, timeline in tlresult.iteritems():
+                    for period in timeline.iter(by='change', as_tz='UTC'):
+
+                        if period.status != Availibility.UNAVAILABLE:
+                            continue
+
+                        unavails.append({
+                            'start_date': period.start.strftime(DT_FMT),
+                            'end_date': period.stop.strftime(DT_FMT),
+                            'css': 'oe_marked_timespan',
+                            'sections': {
+                                'groupby': record_id,
+                            }
+                        })
+
+        return unavails
 
 
 class CoreCalendarResource(osv.TransientModel):

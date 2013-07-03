@@ -437,9 +437,9 @@ class Timeline(object):
                 dt = datetime.strptime(dt, DT_FMT)
             except ValueError:
                 dt = datetime.strptime(dt, D_FMT)
-        print("DT: %s, TZ: %s -> %s" % (dt, tz_from, tz_to,))
-        if dt is None:
-            import pdb; pdb.set_trace()
+        # print("DT: %s, TZ: %s -> %s" % (dt, tz_from, tz_to,))
+        # if dt is None:
+        #     import pdb; pdb.set_trace()
         if tz_from == tz_to:
             return dt
         d = tz_from.localize(dt).astimezone(tz_to)

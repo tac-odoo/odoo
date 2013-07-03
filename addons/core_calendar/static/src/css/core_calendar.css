@@ -1,0 +1,7 @@
+
+.oe_marked_timespan {
+    background-color: black;
+    filter:alpha(opacity=30);   /* Internet Explorer       */
+    -moz-opacity:0.3;           /* Mozilla 1.6 and below   */
+    opacity: 0.3;               /* newer Mozilla and CSS-3 */
+}

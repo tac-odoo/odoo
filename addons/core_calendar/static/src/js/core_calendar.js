@@ -150,6 +150,13 @@ instance.web_calendar.CalendarView = instance.web_calendar.CalendarView.extend({
                 }
             })
         }
+        // For Limit Handling
+        this.resource_model = new instance.web.Model('core.calendar.timeline');
+    },
+    init_scheduler: function() {
+        scheduler.config.check_limits = true; // required for display marked-spans
+        scheduler.config.display_marked_timespans = true;
+        this._super();
     },
     events_loaded: function(events, fn_filter, no_filter_reload) {
         if (this.model == 'core.calendar.event') {
@@ -383,6 +390,82 @@ instance.web_calendar.CalendarView = instance.web_calendar.CalendarView.extend({
             return data;
         }
         return this._super(event_obj);
+    },
+    refresh_scheduler: function() {
+        console.log('refresh scheduler', this.range_start, this.range_stop);
+        if (this.range_start || this.range_stop) {
+            this.refresh_resource_unavailibility();
+        }
+        // scheduler.addMarkedTimespan({
+        //     days: 0,
+        //     zones: [0, 60*24],
+        //     css: "oe_marked_timespan",
+        // })
+        return this._super();
+    },
+    refresh_resource_unavailibility: function() {
+        // clear all previous marked timespans
+        console.log('refresh resource unavailibility');
+        scheduler._marked_timespans = { global: {} };
+        scheduler._marked_timespans_ids = {};
+        var range_from = this.range_start;
+        if (range_from) {
+            if (!scheduler.config.start_on_monday) {
+                range_from = range_from.clone().addDays(-1);
+            }
+            range_from = instance.web.datetime_to_str(range_from);
+        }
+        var range_to = this.range_stop;
+        if (range_to) {
+            range_to = instance.web.datetime_to_str(range_to);
+        }
+        var self = this;
+        var resource_model = 'res.users'
+        var resource_ids = [instance.session.uid];
+        var getresource_kwargs = {};
+
+        if (!this.search_group_by_key) {
+            // actually only display availiblity infos if the calendar only
+            // represent a unique resource.
+            // This is always true in group_by mode, but not in standard filtered
+            // model. So currently we disable all availibility infos if we're not
+            // if a group_by mode
+            // FIXME: detected, based on domain info if filters represent only 1
+            //        resource
+            scheduler.updateView();
+            return;
+        }
+
+        if (this.search_group_by_key) {
+            resource_model = self.dataset.model;
+            resource_ids = _.pluck(self.search_groups, 'key');
+            getresource_kwargs['group_by_field'] = self.search_group_by_key;
+        }
+
+        this.resource_model.call('get_resource_unavailibility', [
+            resource_model,
+            resource_ids,
+            range_from,
+            range_to,
+        ],
+        _.extend(getresource_kwargs, {
+            context: this.dataset.get_context(),
+        })).done(function(unavails) {
+            if (unavails && unavails.length) {
+                _.each(unavails, function(c) {
+                    c.start_date = instance.web.str_to_datetime(c.start_date);
+                    c.end_date = instance.web.str_to_datetime(c.end_date);
+                    if (!self.search_group_by_key) {
+                        c.sections = null; // we are is non grouped mode - this must apply globally.
+                    }
+                    //console.log(c);
+                    // console.log('marked_timespan', c);
+                    scheduler.addMarkedTimespan(c);
+                })
+            }
+            scheduler.updateView();
+        })
+        return;
     },
 });
 

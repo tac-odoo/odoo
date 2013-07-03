@@ -53,6 +53,7 @@ If you need to manage:
     ],
     'css': [
         'static/lib/colorpicker/css/evol.colorpicker.css',
+        'static/src/css/*.css',
     ],
     'qweb': [
         'static/src/xml/*.xml',
