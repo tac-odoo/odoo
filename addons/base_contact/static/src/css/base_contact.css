@@ -1,0 +1,5 @@
+.openerp .oe_form div.oe_form_group_cell_label_contact {
+    border-right: 1px solid #DDDDDD;
+    padding: 2px 0;
+    font-weight: bold;
+}
