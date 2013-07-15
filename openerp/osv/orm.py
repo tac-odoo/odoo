@@ -588,9 +588,10 @@ def get_pg_type(f, type_override=None):
     """
     field_type = type_override or type(f)
 
-    if field_type in FIELDS_TO_PGTYPES:
-        pg_type =  (FIELDS_TO_PGTYPES[field_type], FIELDS_TO_PGTYPES[field_type])
-    elif issubclass(field_type, fields.float):
+    for default_field_type in FIELDS_TO_PGTYPES:
+        if issubclass(field_type, default_field_type):
+            return (FIELDS_TO_PGTYPES[default_field_type], FIELDS_TO_PGTYPES[default_field_type])
+    if issubclass(field_type, fields.float):
         if f.digits:
             pg_type = ('numeric', 'NUMERIC')
         else:
