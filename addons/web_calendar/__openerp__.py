@@ -10,7 +10,6 @@ OpenERP Web Calendar view.
     'depends': ['web'],
     'js': [
         'static/lib/dhtmlxScheduler/sources/dhtmlxscheduler.js',
-        'static/lib/dhtmlxScheduler/sources/ext/dhtmlxscheduler_dhx_terrace.js',
         'static/lib/dhtmlxScheduler/sources/ext/dhtmlxscheduler_minical.js',
         'static/lib/dhtmlxScheduler/sources/ext/dhtmlxscheduler_limit.js',
         'static/lib/dhtmlxScheduler/sources/ext/dhtmlxscheduler_timeline.js',
@@ -19,8 +18,7 @@ OpenERP Web Calendar view.
         'static/src/js/calendar.js',
     ],
     'css': [
-        #'static/lib/dhtmlxScheduler/codebase/dhtmlxscheduler.css',
-        'static/lib/dhtmlxScheduler/codebase/dhtmlxscheduler_dhx_terrace.css',
+        'static/lib/dhtmlxScheduler/codebase/dhtmlxscheduler.css',
         #'static/lib/dhtmlxScheduler/codebase/dhtmlxscheduler_glossy.css',
         'static/src/css/web_calendar.css'
     ],

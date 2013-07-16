@@ -9,10 +9,10 @@ scheduler.config.check_limits = true;
 scheduler.config.mark_now = true;
 scheduler.config.display_marked_timespans = true;
 
-(function(){
+(scheduler._temp_limit_scope = function(){
 	var before = null;
 	var dhx_time_block = "dhx_time_block";
-
+	var default_timespan_type = "default";
 	var fix_options = function(options, days, zones) {
 		if (days instanceof Date && zones instanceof Date) {
 			options.start_date = days;
@@ -55,19 +55,49 @@ scheduler.config.display_marked_timespans = true;
 		}
 		return true;
 	});
-	var get_relevant_blocked_zones = function(day_index, day_value, zones) {
-		var relevant_zones = (zones[day_value] && zones[day_value][dhx_time_block]) ? zones[day_value][dhx_time_block] :
-				(zones[day_index] && zones[day_index][dhx_time_block]) ? zones[day_index][dhx_time_block] : [];
-		return relevant_zones;
+	scheduler.checkInMarkedTimespan = function(ev, timespan_type, on_overlap){
+		timespan_type = timespan_type || default_timespan_type;
+
+		var res = true;
+		var temp_start_date = new Date(ev.start_date.valueOf());
+		var temp_end_date = scheduler.date.add(temp_start_date, 1, "day");
+		var timespans = scheduler._marked_timespans;
+		for (; temp_start_date < ev.end_date; temp_start_date = scheduler.date.date_part(temp_end_date), temp_end_date = scheduler.date.add(temp_start_date, 1, "day") ) {
+			var day_value = +scheduler.date.date_part( new Date(temp_start_date) ); // the first part of event not necessarily contains only date part
+			var day_index = temp_start_date.getDay();
+
+			var zones = getZones(ev, timespans, day_index, day_value, timespan_type);
+			if (zones){
+				for (var i = 0; i < zones.length; i+=2) {
+
+					// they may change for new event if it passes limit zone
+					var sm = scheduler._get_zone_minutes(temp_start_date);
+					var em = ( ev.end_date>temp_end_date || ev.end_date.getDate() != temp_start_date.getDate() ) ? 1440 : scheduler._get_zone_minutes(ev.end_date);
+
+					var sz = zones[i];
+					var ez = zones[i+1];
+					if (sz<em && ez>sm) {
+						if(on_overlap == "function"){
+							//handler allows to cancel overlapping
+							//actually needed only to keep default behavior of limits
+							res = on_overlap(ev, sm, em, sz, ez);//event object, event start/end minutes in 'zones' format, zone start/end minutes
+						}else{
+							res = false;
+						}
+						if(!res)
+							break;
+					}
+				}
+			}
+		}
+		return !res;
 	};
-	var blocker = function(event){
+	var blocker = scheduler.checkLimitViolation = function(event){
 		if(!event)
 			return true;
 		if (!scheduler.config.check_limits)
 			return true;
 		var s = scheduler;
-		var mode = s._mode;
-		var timespans = scheduler._marked_timespans;
 		var c = s.config;
 		var evs = [];
 		if (event.rec_type) {
@@ -76,100 +106,96 @@ scheduler.config.display_marked_timespans = true;
 			evs = [event];
 		}
 
-		var res = true;
+		var complete_res = true;
 		for (var p=0; p<evs.length; p++) {
+			var res = true;
 			var ev = evs[p];
 			// Event could have old _timed property (e.g. we are creating event with DND on timeline view and crossed day)
-			ev._timed = scheduler.is_one_day_event(ev);
+			ev._timed = scheduler.isOneDayEvent(ev);
 
 			res = (c.limit_start && c.limit_end) ? (ev.start_date.valueOf() >= c.limit_start.valueOf() && ev.end_date.valueOf() <= c.limit_end.valueOf()) : true;
 			if (res){
-				var temp_start_date = new Date(ev.start_date.valueOf());
-				var temp_end_date = scheduler.date.add(temp_start_date, 1, "day");
-
-				for (; temp_start_date < ev.end_date; temp_start_date = scheduler.date.date_part(temp_end_date), temp_end_date = s.date.add(temp_start_date, 1, "day") ) {
-					var day_value = +scheduler.date.date_part( new Date(temp_start_date) ); // the first part of event not necessarily contains only date part
-					var day_index = temp_start_date.getDay();
-
-					var zones = [];
-					if(s._props && s._props[mode]){
-						var view = s._props[mode];
-						var block_units = timespans[mode];
-						if(block_units && block_units[ev[view.map_to]]) {
-							var unit_zones = block_units[ev[view.map_to]];
-							var blocked_unit_zones = get_relevant_blocked_zones(day_index, day_value, unit_zones);
-							for (var i=0; i<blocked_unit_zones.length; i++) {
-								zones = scheduler._add_timespan_zones(zones, blocked_unit_zones[i].zones);
-							}
+				res = !scheduler.checkInMarkedTimespan(ev, dhx_time_block, function(ev, sm, em, sz, ez){
+					//try crop event to allow placing
+					var allow = true;
+					if (sm<=ez && sm >=sz){
+						if (ez == 24*60 || em<ez){
+							allow = false;
+						}
+						if(ev._timed && s._drag_id && s._drag_mode == "new-size"){
+							ev.start_date.setHours(0);
+							ev.start_date.setMinutes(ez);
+						}
+						else {
+							allow = false;
 						}
 					}
-					if (s.matrix && s.matrix[mode]) {
-						var timeline_options = s.matrix[mode];
-						var timeline_units = timespans[mode];
-						if (timeline_units && timeline_units[ev[timeline_options.y_property]]) {
-							var timeline_zones = timeline_units[ev[timeline_options.y_property]];
-							var blocked_timeline_zones = get_relevant_blocked_zones(day_index, day_value, timeline_zones);
-							for (var i=0; i<blocked_timeline_zones.length; i++) {
-								zones = scheduler._add_timespan_zones(zones, blocked_timeline_zones[i].zones);
-							}
+					if ((em>=sz && em<ez) || (sm < sz && em > ez)){
+						if(ev._timed && s._drag_id && s._drag_mode == "new-size"){
+							ev.end_date.setHours(0);
+							ev.end_date.setMinutes(sz);
+						}
+						else {
+							allow = false;
 						}
 					}
-					// now need to add day blocks
-					var block_days = timespans.global;
-					var blocked_day_zones = get_relevant_blocked_zones(day_index, day_value, block_days);
-					for (var i=0; i<blocked_day_zones.length; i++) {
-						zones = scheduler._add_timespan_zones(zones, blocked_day_zones[i].zones);
-					}
-
-
-
-					if (zones){
-						for (var i = 0; i < zones.length; i+=2) {
-
-							// they may change for new event if it passes limit zone
-							var sm = scheduler._get_zone_minutes(temp_start_date);
-							var em = ( ev.end_date>temp_end_date || ev.end_date.getDate() != temp_start_date.getDate() ) ? 1440 : scheduler._get_zone_minutes(ev.end_date);
-
-							var sz = zones[i];
-							var ez = zones[i+1];
-							if (sz<em && ez>sm) {
-								if (sm<=ez && sm >=sz){
-									if (ez == 24*60 || em<ez){
-										res = false;
-										break;
-									}
-									if(ev._timed && s._drag_id && s._drag_mode == "new-size"){
-										ev.start_date.setHours(0);
-										ev.start_date.setMinutes(ez);
-									}
-									else {
-										res = false;
-										break;
-									}
-								}
-								if ((em>=sz && em<ez) || (sm < sz && em > ez)){
-									if(ev._timed && s._drag_id && s._drag_mode == "new-size"){
-										ev.end_date.setHours(0);
-										ev.end_date.setMinutes(sz);
-									}
-									else {
-										res = false;
-										break;
-									}
-								}
-							}
-						}
-					}
-				}
+					return allow;
+				});
 			}
 			if (!res) {
 				s._drag_id = null;
 				s._drag_mode = null;
 				res = (s.checkEvent("onLimitViolation")) ? s.callEvent("onLimitViolation",[ev.id, ev]) : res;
 			}
+			complete_res = complete_res && res;
 		}
-		return res;
+		return complete_res;
+
+
 	};
+
+	function getZones(ev, timespans, day_index, day_value, timespan_type){
+		var s = scheduler;
+		//containers for 'unit' and 'timeline' views, and related 'section_id' properties
+		var zones = [];
+		var containers = {
+			'_props':'map_to',
+			'matrix':'y_property'};
+		//check blocked sections in all units and timelines
+		for(var container in containers){
+			var property = containers[container];
+			if(s[container]){
+				for(var view in s[container]){
+					var view_config = s[container][view];
+					var linker = view_config[property];
+					if(!ev[linker]) continue;
+					zones =  s._add_timespan_zones(zones,
+						getBlockedZones(timespans[view], ev[linker], day_index, day_value));
+				}
+			}
+		}
+		// now need to add day blocks
+		zones = s._add_timespan_zones(zones, getBlockedZones(timespans, 'global', day_index, day_value));
+		return zones;
+
+		function getBlockedZones(timespans, property, day_index, day_value){
+			var zones =[];
+			if (timespans && timespans[property]) {
+				var timeline_zones = timespans[property];
+				var blocked_timeline_zones = get_relevant_blocked_zones(day_index, day_value, timeline_zones);
+				for (var i=0; i<blocked_timeline_zones.length; i++) {
+					zones = s._add_timespan_zones(zones, blocked_timeline_zones[i].zones);
+				}
+			}
+			return zones;
+		}
+		function get_relevant_blocked_zones(day_index, day_value, zones) {
+			var relevant_zones = (zones[day_value] && zones[day_value][timespan_type]) ? zones[day_value][timespan_type] :
+				(zones[day_index] && zones[day_index][timespan_type]) ? zones[day_index][timespan_type] : [];
+			return relevant_zones;
+		};
+	}
+
 	scheduler.attachEvent("onMouseDown", function(classname) {
 		return !(classname = dhx_time_block);
 	});
@@ -187,10 +213,20 @@ scheduler.config.display_marked_timespans = true;
 		return blocker(ev);
 	});
 	scheduler.attachEvent("onEventSave", function(id, data, is_new_event) {
+
+		//lightbox may not have 'time' section
+		if(!(data.start_date && data.end_date)){
+			var ev = scheduler.getEvent(id);
+			data.start_date = new Date(ev.start_date);
+			data.end_date = new Date(ev.end_date);
+		}
+
 		if(data.rec_type){
+			//_roll_back_dates modifies start_date of recurring event, need to check limits after modification
+			// use a copy to keep original event unchanged
 			var data_copy = scheduler._lame_clone(data);
 			scheduler._roll_back_dates(data_copy);
-			return blocker(data);
+			return blocker(data_copy);
 		}
 		return blocker(data);
 	});
@@ -198,6 +234,7 @@ scheduler.config.display_marked_timespans = true;
 		if (!id) return true;
 		var ev = scheduler.getEvent(id);
 		if (!blocker(ev) && scheduler.config.limit_start && scheduler.config.limit_end) {
+			//if newly created event is outside of limited time - crop it, leaving only allowed time
 			if (ev.start_date < scheduler.config.limit_start) {
 				ev.start_date = new Date(scheduler.config.limit_start);
 			}
@@ -213,7 +250,7 @@ scheduler.config.display_marked_timespans = true;
 			if (ev.start_date.valueOf() >= ev.end_date.valueOf()) {
 				ev.end_date = this.date.add(ev.start_date, (this.config.event_duration||this.config.time_step), "minute");
 			}
-			ev._timed=this.is_one_day_event(ev);
+			ev._timed=this.isOneDayEvent(ev);
 		}
 		return true;
 	});
@@ -224,7 +261,7 @@ scheduler.config.display_marked_timespans = true;
 			if (!before) return false;
 			ev.start_date = before[0];
 			ev.end_date = before[1];
-			ev._timed=this.is_one_day_event(ev);
+			ev._timed=this.isOneDayEvent(ev);
 		}
 		return true;
 	});
@@ -242,18 +279,18 @@ scheduler.config.display_marked_timespans = true;
 	});
 
 	scheduler.attachEvent("onViewChange", function(){
-		scheduler.markNow();
+		scheduler._mark_now();
 	});
 	scheduler.attachEvent("onSchedulerResize", function(){
-		window.setTimeout(function(){ scheduler.markNow(); }, 1);
+		window.setTimeout(function(){ scheduler._mark_now(); }, 1);
 		return true;
 	});
 	scheduler.attachEvent("onTemplatesReady", function() {
 		scheduler._mark_now_timer = window.setInterval(function() {
-			scheduler.markNow();
+			scheduler._mark_now();
 		}, 60000);
 	});
-	scheduler.markNow = function(hide) {
+	scheduler._mark_now = function(hide) {
 		// day, week, units views
 		var dhx_now_time = 'dhx_now_time';
 		if (!this._els[dhx_now_time]) {
@@ -388,7 +425,7 @@ scheduler.config.display_marked_timespans = true;
 
 		config.id = scheduler.uid();
 		config.css = config.css||"";
-		config.type = config.type||"default";
+		config.type = config.type||default_timespan_type;
 
 		var sections = config.sections;
 		if (sections) {
@@ -566,9 +603,6 @@ scheduler.config.display_marked_timespans = true;
 				}
 			}
 			area = area ? area : scheduler.locate_holder(index);
-			if (area == undefined) {
-				return blocks;
-			}
 
 			for (var i = 0; i < zones.length; i+=2){
 				var start = Math.max(zones[i], c.first_hour*60);
@@ -657,8 +691,13 @@ scheduler.config.display_marked_timespans = true;
 							timespans_view[unit_id] = {};
 						if (!timespans_view[unit_id][day])
 							timespans_view[unit_id][day] = {};
-						if (!timespans_view[unit_id][day][type])
+						if (!timespans_view[unit_id][day][type]){
 							timespans_view[unit_id][day][type] = [];
+							if(!scheduler._marked_timespans_types)
+								scheduler._marked_timespans_types = {}
+							if(!scheduler._marked_timespans_types[type])
+								scheduler._marked_timespans_types[type] = true;
+						}
 						var day_configs = timespans_view[unit_id][day][type];
 						config._array = day_configs;
 						day_configs.push(config);
@@ -670,6 +709,13 @@ scheduler.config.display_marked_timespans = true;
 					timespans[global][day] = {};
 				if (!timespans[global][day][type])
 					timespans[global][day][type] = [];
+
+				if(!scheduler._marked_timespans_types)
+					scheduler._marked_timespans_types = {}
+				if(!scheduler._marked_timespans_types[type])
+					scheduler._marked_timespans_types[type] = true;
+
+
 				var day_configs = timespans[global][day][type];
 				config._array = day_configs;
 				day_configs.push(config);
@@ -762,7 +808,7 @@ scheduler.config.display_marked_timespans = true;
 		var timespans = scheduler._marked_timespans;
 		var sections = config.sections;
 		var day = config.days;
-		var type = config.type||"default";
+		var type = config.type||default_timespan_type;
 		var day_timespans = []; // array of timespans to subtract our config
 		if (sections) {
 			for (var view_key in sections) {
@@ -800,16 +846,43 @@ scheduler.config.display_marked_timespans = true;
 		if (!arguments.length) {
 			scheduler._marked_timespans = { global: {} };
 			scheduler._marked_timespans_ids = {};
+			scheduler._marked_timespans_types = {};
 		}
 
 		if (typeof configuration != "object") { // id was passed
 			scheduler._delete_marked_timespan_by_id(configuration);
 		} else { // normal configuration was passed
-			var configs = scheduler._prepare_timespan_options(configuration);
-			for (var i=0; i<configs.length; i++) {
-				var config = configs[i];
-				scheduler._delete_marked_timespan_by_config(configs[i]);
+
+			if(!(configuration.start_date && configuration.end_date)){
+				if(!configuration.days)
+					configuration.days = "fullweek";
+				if(!configuration.zones)
+					configuration.zones = "fullday";
 			}
+
+			var types = [];
+			if(!configuration.type){
+				//if type not specified - delete timespans of all types
+				for(var type in scheduler._marked_timespans_types){
+					types.push(type);
+				}
+			}else{
+				types.push(configuration.type);
+			}
+
+
+			var configs = scheduler._prepare_timespan_options(configuration);
+
+			for (var i=0; i<configs.length; i++) {
+
+				var config = configs[i];
+				for( var t=0; t < types.length; t++){
+					var typedConfig = scheduler._lame_clone(config);
+					typedConfig.type = types[t];
+					scheduler._delete_marked_timespan_by_config(typedConfig);
+				}
+			}
+
 		}
 	};
 	scheduler._get_types_to_render = function(common, specific) {

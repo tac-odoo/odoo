@@ -5,7 +5,6 @@ to use it in non-GPL project. Please contact sales@dhtmlx.com for details
 (function(){
 
 	scheduler.config.all_timed = "short";
-	scheduler.config.update_render = true;
 
 	var is_event_short = function (ev) {
 		return 	!((ev.end_date - ev.start_date)/(1000*60*60) >= 24);
@@ -19,69 +18,80 @@ to use it in non-GPL project. Please contact sales@dhtmlx.com for details
 		for (var i=0; i < evs.length; i++) {
 			var ev=evs[i];
 
-			if (!ev._timed) {
+			if (ev._timed)
+				continue;
 
-				if (this.config.all_timed == "short") {
-					if (!is_event_short(ev)) {
-						evs.splice(i--,1);
-						continue;
-					}
-				}
-
-				var ce = this._lame_copy({}, ev); // current event (event for one specific day) is copy of original with modified dates
-				
-				ce.start_date = new Date(ce.start_date); // as lame copy doesn't copy date objects
-
-				var next_day = scheduler.date.add(ev.start_date, 1, "day");
-				next_day = scheduler.date.date_part(next_day);
-
-				if (ev.end_date < next_day) {
-					ce.end_date = new Date(ev.end_date);
-				}
-				else {
-					ce.end_date = next_day;
-					if (this.config.last_hour != 24) { // if specific last_hour was set (e.g. 20)
-						ce.end_date = scheduler.date.date_part(new Date(ce.start_date));
-						ce.end_date.setHours(this.config.last_hour);
-					}
-				}
-
-				var event_changed = false;
-				if (ce.start_date < this._max_date && ce.end_date > this._min_date && ce.start_date < ce.end_date) {
-					evs[i] = ce; // adding another event in collection
-					event_changed = true;
-				}
-				if (ce.start_date > ce.end_date) {
+			if (this.config.all_timed == "short") {
+				if (!is_event_short(ev)) {
 					evs.splice(i--,1);
-				}
-
-				var re = this._lame_copy({}, ev); // remaining event, copy of original with modified start_date (making range more narrow)
-				re.end_date = new Date(re.end_date);
-				if (re.start_date < this._min_date)
-					re.start_date = new Date(this._min_date);
-				else
-					re.start_date = this.date.add(ev.start_date, 1, "day");
-
-				re.start_date.setHours(this.config.first_hour);
-				re.start_date.setMinutes(0); // as we are starting only with whole hours
-				if (re.start_date < this._max_date && re.start_date < re.end_date) {
-					if (event_changed)
-						evs.splice(i+1,0,re);
-					else {
-						evs[i--] = re;
-						continue;
-					}
+					continue;
 				}
 			}
+
+			var ce = this._lame_copy({}, ev); // current event (event for one specific day) is copy of original with modified dates
+
+			ce.start_date = new Date(ce.start_date); // as lame copy doesn't copy date objects
+
+			if (!isOvernightEvent(ev)) {
+				ce.end_date = new Date(ev.end_date);
+			}
+			else {
+				ce.end_date = getNextDay(ce.start_date);
+				if (this.config.last_hour != 24) { // if specific last_hour was set (e.g. 20)
+					ce.end_date = setDateTime(ce.start_date, this.config.last_hour);
+				}
+			}
+
+			var event_changed = false;
+			if (ce.start_date < this._max_date && ce.end_date > this._min_date && ce.start_date < ce.end_date) {
+				evs[i] = ce; // adding another event in collection
+				event_changed = true;
+			}
+		//	if (ce.start_date > ce.end_date) {
+		//		evs.splice(i--,1);
+		//	}
+
+			var re = this._lame_copy({}, ev); // remaining event, copy of original with modified start_date (making range more narrow)
+			re.end_date = new Date(re.end_date);
+			if (re.start_date < this._min_date)
+				re.start_date = setDateTime(this._min_date, this.config.first_hour);// as we are starting only with whole hours
+			else
+				re.start_date = setDateTime(getNextDay(ev.start_date), this.config.first_hour);
+
+			if (re.start_date < this._max_date && re.start_date < re.end_date) {
+				if (event_changed)
+					evs.splice(i+1,0,re);//insert part
+				else {
+					evs[i--] = re;
+					continue;
+				}
+			}
+
 		}
 		// in case of all_timed pre_render is not applied to the original event
 		// so we need to force redraw in case of dnd
 		var redraw = (this._drag_mode == 'move')?false:hold;
 		return old_prerender_events_line.call(this, evs, redraw);
+
+
+		function isOvernightEvent(ev){
+			var next_day = getNextDay(ev.start_date);
+			return (+ev.end_date > +next_day);
+		}
+		function getNextDay(date){
+			var next_day = scheduler.date.add(date, 1, "day");
+			next_day = scheduler.date.date_part(next_day);
+			return next_day;
+		}
+		function setDateTime(date, hours){
+			var val = scheduler.date.date_part(new Date(date));
+			val.setHours(hours);
+			return val;
+		}
 	};
 	var old_get_visible_events = scheduler.get_visible_events;
 	scheduler.get_visible_events = function(only_timed){
-		if (!this.config.all_timed)
+		if (!(this.config.all_timed && this.config.multi_day))
 			return old_get_visible_events.call(this, only_timed);	
 		return old_get_visible_events.call(this, false); // only timed = false
 	};
@@ -90,44 +100,24 @@ to use it in non-GPL project. Please contact sales@dhtmlx.com for details
 		return true;
 	});
 
-	scheduler.render_view_data=function(evs, hold){
-		if(!evs){
-			if (this._not_render) {
-				this._render_wait=true;
-				return;
-			}
-			this._render_wait=false;
-
-			this.clear_view();
-			evs=this.get_visible_events( !(this._table_view || this.config.multi_day) );
-		}
-
-		if (this.config.multi_day && !this._table_view){
-
-			var tvs = [];
-			var tvd = [];
-			for (var i=0; i < evs.length; i++){
-				if (evs[i]._timed || this.config.all_timed === true || (this.config.all_timed == "short" && is_event_short(evs[i])) )
-					tvs.push(evs[i]);
-				else
-					tvd.push(evs[i]);
-			}
-
-			// normal events
-			this._rendered_location = this._els['dhx_cal_data'][0];
-			this._table_view=false;
-			this.render_data(tvs, hold);
-
-			// multiday events
-			this._rendered_location = this._els['dhx_multi_day'][0];
-			this._table_view = true;
-			this.render_data(tvd, hold);
-			this._table_view=false;
-
-		} else {
-			this._rendered_location = this._els['dhx_cal_data'][0];
-			this.render_data(evs, hold);
-		}
+	scheduler._is_main_area_event = function(ev){
+		return !!(ev._timed || this.config.all_timed === true || (this.config.all_timed == "short" && is_event_short(ev)) );
 	};
 
+	var oldUpdate = scheduler.updateEvent;
+	scheduler.updateEvent = function(id){
+		// full redraw(update_render=true) messes events order while dnd.
+		// individual redraw(update_render=false) of multiday event, which happens on select/unselect, expands event to full width of the cell and can be fixes only with full redraw.
+		// so for now full redraw is always enabled for not-dnd updates
+		var fullRedrawNeeded = (scheduler.config.all_timed && !(scheduler.isOneDayEvent(scheduler._events[id]) || scheduler.getState().drag_id));
+		if(fullRedrawNeeded){
+			var initial = scheduler.config.update_render;
+			scheduler.config.update_render = true;
+		}
+		oldUpdate.apply(scheduler, arguments);
+
+		if(fullRedrawNeeded){
+			scheduler.config.update_render = initial;
+		}
+	};
 })();

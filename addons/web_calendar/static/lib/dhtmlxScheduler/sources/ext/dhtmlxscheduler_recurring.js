@@ -107,16 +107,31 @@ scheduler.form_blocks["recurring"] = {
 				code.push("");
 				var t = [];
 				var col = els["week_day"];
-				for (var i = 0; i < col.length; i++) {
-					if (col[i].checked) t.push(col[i].value);
+				var day = dates.start.getDay();
+				var start_exists = false;
+
+				for (var i = 0; i < col.length; i++){
+					if (col[i].checked) {
+						t.push(col[i].value);
+						start_exists = start_exists || col[i].value == day;
+					}
 				}
-				if (!t.length)
-					t.push(dates.start.getDay());
+				if (!t.length){
+					t.push(day);
+					start_exists = true;
+				}
+				t.sort();
 
-				dates.start = scheduler.date.week_start(dates.start);
-				dates._start = true;
 
-				code.push(t.sort().join(","));
+				if (!scheduler.config.repeat_precise){
+					dates.start = scheduler.date.week_start(dates.start);
+					dates._start = true;
+				} else if (!start_exists){
+					scheduler.transpose_day_week(dates.start, t, 1, 7);
+					dates._start = true;
+				}
+
+				code.push(t.join(","));
 			},
 			day:function(code) {
 				if (get_radio_value("day_type") == "d") {
@@ -442,7 +457,7 @@ scheduler._roll_back_dates = function(ev) {
 	}
 };
 
-scheduler.validId = function(id) {
+scheduler._validId = function(id) {
 	return id.toString().indexOf("#") == -1;
 };
 
@@ -518,8 +533,8 @@ scheduler.get_visible_events = function(only_timed) {
 
 
 (function() {
-	var old = scheduler.is_one_day_event;
-	scheduler.is_one_day_event = function(ev) {
+	var old = scheduler.isOneDayEvent;
+	scheduler.isOneDayEvent = function(ev) {
 		if (ev.rec_type) return true;
 		return old.call(this, ev);
 	};
@@ -571,8 +586,7 @@ scheduler.transpose_type = function(type) {
 				}
 			}
 
-
-			this.date[f] = function(nd, td) {
+			this.date[f] = function(nd, td) { 
 				var delta = Math.floor((td.valueOf() - nd.valueOf()) / (day * step));
 				if (delta > 0)
 					nd.setDate(nd.getDate() + delta * step);
@@ -637,7 +651,7 @@ scheduler.repeat_date = function(ev, stack, non_render, from, to) {
 
 			copy.end_date = scheduler._fix_daylight_saving_date(copy.start_date, copy.end_date, ev, td, copy.end_date);
 
-			copy._timed = this.is_one_day_event(copy);
+			copy._timed = this.isOneDayEvent(copy);
 
 			if (!copy._timed && !this._table_view && !this.config.multi_day) return;
 			stack.push(copy);

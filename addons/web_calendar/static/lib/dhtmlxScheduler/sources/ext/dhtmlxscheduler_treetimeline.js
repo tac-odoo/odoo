@@ -45,10 +45,12 @@ scheduler.attachEvent("onTimelineCreated", function (obj){
 			focus:function(node){
 			}
 		};
+
+
 	}
 });	
 
-scheduler.attachEvent("onBeforeViewRender", function (render_name, y_unit, timeline){
+scheduler.attachEvent("onBeforeSectionRender", function (render_name, y_unit, timeline){
 	var res = {};
 	if(render_name == "tree"){
 		var height;
@@ -73,7 +75,7 @@ scheduler.attachEvent("onBeforeViewRender", function (render_name, y_unit, timel
 			div_expand = '';
 			table_className = "dhx_data_table";
 		}
-		td_content = "<div class='dhx_scell_level"+y_unit.level+"'>"+div_expand+"<div class='dhx_scell_name'>"+(scheduler.templates[timeline.name+'_scale_label'](y_unit.key, y_unit.label, y_unit)||y_unit.label)+"</div></div>";
+		var td_content = "<div class='dhx_scell_level"+y_unit.level+"'>"+div_expand+"<div class='dhx_scell_name'>"+(scheduler.templates[timeline.name+'_scale_label'](y_unit.key, y_unit.label, y_unit)||y_unit.label)+"</div></div>";
 		
 		res = {
 			height: height,

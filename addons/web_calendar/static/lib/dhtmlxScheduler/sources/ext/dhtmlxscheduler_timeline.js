@@ -1,8 +1,8 @@
-/*
+ 	/*
 This software is allowed to use under GPL or you need to obtain Commercial or Enterise License
 to use it in non-GPL project. Please contact sales@dhtmlx.com for details
 */
-(function(){
+(scheduler._temp_matrix_scope = function(){
 
 
 
@@ -13,6 +13,7 @@ scheduler._merge=function(a,b){
 			a[c]=b[c];
 };
 scheduler.createTimelineView=function(obj){
+	scheduler._skin_init();
 
 	scheduler._merge(obj,{
 		section_autoheight: true,
@@ -39,13 +40,19 @@ scheduler.createTimelineView=function(obj){
 		round_position: false,
 		_logic: function(render_name, y_unit, timeline) {
 			var res = {};
-			if(scheduler.checkEvent("onBeforeViewRender")) {
-				res = scheduler.callEvent("onBeforeViewRender", [render_name, y_unit, timeline]);
+			if(scheduler.checkEvent("onBeforeSectionRender")) {
+				res = scheduler.callEvent("onBeforeSectionRender", [render_name, y_unit, timeline]);
 			}
 			return res;
 		}
 	});
 	obj._original_x_start = obj.x_start;
+
+	//first and last hours are applied only to day based timeline
+	if (obj.x_unit != "day") obj.first_hour = obj.last_hour = 0;
+	//correction for first and last hour
+	obj._start_correction = obj.first_hour?obj.first_hour*60*60*1000:0;
+	obj._end_correction = obj.last_hour?(24-obj.last_hour)*60*60*1000:0;
 
 	if (scheduler.checkEvent("onTimelineCreated")) {
 		scheduler.callEvent("onTimelineCreated", [obj]);
@@ -61,7 +68,7 @@ scheduler.createTimelineView=function(obj){
 					this.render_timeline_event.call(this.matrix[this._mode], evs[i], true);
 				}
 			} else {
-				scheduler.renderMatrix.call(obj, true, true);
+				scheduler._renderMatrix.call(obj, true, true);
 			}
 		} else
 			return old.apply(this, arguments);
@@ -123,7 +130,7 @@ scheduler.createTimelineView=function(obj){
 
 	scheduler.attachEvent("onSchedulerResize",function(){
 		if (this._mode == obj.name){
-			scheduler.renderMatrix.call(obj, true, true);
+			scheduler._renderMatrix.call(obj, true, true);
 			return false;
 		}
 		return true;
@@ -142,7 +149,7 @@ scheduler.createTimelineView=function(obj){
 
 	//init custom wrappers
 	scheduler[obj.name+"_view"]=function(){
-		scheduler.renderMatrix.apply(obj, arguments);
+		scheduler._renderMatrix.apply(obj, arguments);
 	};
 
 	//enable drag for non-cell modes
@@ -168,6 +175,15 @@ scheduler.createTimelineView=function(obj){
 				break;
 			}
 		}
+		//border cases
+		if (xind == 0 && this._ignores[0]) {
+			xind = 1; ratio = 0; 
+			while (this._ignores[xind]) xind++;
+		} else if ( xind == this._cols.length && this._ignores[xind-1]) {
+			xind = this._cols.length-1; ratio = 0; 
+			while (this._ignores[xind]) xind--;
+			xind++;
+		}
 
 		summ = 0;
 		for (yind; yind < this._colsS.heights.length; yind++) {
@@ -184,6 +200,10 @@ scheduler.createTimelineView=function(obj){
 		if (yind >= 0 && obj.y_unit[yind]) {
 			pos.section = pos.fields[obj.y_property] = obj.y_unit[yind].key;
 			if (ev) {
+				if(ev[obj.y_property] != pos.section){
+					var line_height = scheduler._get_timeline_event_height(ev, obj);
+					ev._sorder = scheduler._get_dnd_order(ev._sorder, line_height, obj._section_height[pos.section]);
+				}
 				ev[obj.y_property] = pos.section;
 			}
 		}
@@ -196,37 +216,62 @@ scheduler.createTimelineView=function(obj){
 		// if our event is at the end of the view
 		if(xind >= obj._trace_x.length) {
 			end_date = scheduler.date.add(obj._trace_x[obj._trace_x.length-1], obj.x_step, obj.x_unit);
+			if (obj._end_correction)
+				end_date = new Date(end_date-obj._end_correction);
 		} else {
-			var max_date = (obj._trace_x[xind+1]) ? obj._trace_x[xind+1] : scheduler.date.add(obj._trace_x[obj._trace_x.length-1], obj.x_step, obj.x_unit);
-			var timestamp_diff = Math.ceil(ratio*(max_date-obj._trace_x[xind]));
+			var timestamp_diff = ratio * column_width * obj._step + obj._start_correction;
 			end_date = new Date(+obj._trace_x[xind]+timestamp_diff);
 		}
 
 		// as we can simply be calling _locate_cell_timeline
-		if (this._drag_mode == "move" && this._drag_id && this._drag_event) {
+		if (this._drag_mode == "move" && this._drag_id && this._drag_event) { 
 			var ev = this.getEvent(this._drag_id);
 			var drag_event = this._drag_event;
 
-
+			pos._ignores = (this._ignores_detected || obj._start_correction || obj._end_correction);
 			if (!drag_event._move_delta) {
 				drag_event._move_delta = (ev.start_date-end_date)/60000;
+				if (this.config.preserve_length && pos._ignores){
+					drag_event._move_delta = this._get_real_event_length(ev.start_date,end_date, obj);
+					drag_event._event_length = this._get_real_event_length(ev.start_date,ev.end_date, obj);
+				}
 			}
 
-			// converting basically to start_date
-			end_date = scheduler.date.add(end_date, drag_event._move_delta, "minute");
+			
+			
+
+			//preserve visible size of event
+			if (this.config.preserve_length && pos._ignores){
+				var ev_length = drag_event._event_length;//this._get_real_event_length(ev.start_date, ev.end_date, obj);
+				var current_back_shift = this._get_fictional_event_length(end_date, drag_event._move_delta, obj, true);
+				end_date = new Date(end_date - current_back_shift);
+			} else {
+				// converting basically to start_date
+				end_date = scheduler.date.add(end_date, drag_event._move_delta, "minute");
+			}
 		}
 
-		if (this._drag_mode == "resize" && ev) {
-			pos.resize_from_start = !!(Math.abs(ev.start_date-end_date) < Math.abs(ev.end_date-end_date));
+		if (this._drag_mode == "resize" && ev){
+			var pos_check = !!(Math.abs(ev.start_date-end_date) < Math.abs(ev.end_date-end_date));
+			if (obj._start_correction || obj._end_correction){
+				var first_check = (!this._drag_event  || this._drag_event._resize_from_start == undefined);
+				if (first_check || Math.abs(ev.end_date - ev.start_date) <= (1000*60*this.config.time_step))
+					this._drag_event._resize_from_start = pos.resize_from_start = pos_check;
+				else
+					pos.resize_from_start = this._drag_event._resize_from_start;
+			} else
+				pos.resize_from_start = pos_check;
 		}
 
 		if (obj.round_position) {
 			switch(this._drag_mode) {
 				case "move":
-					end_date = get_rounded_date.call(obj, end_date, false);
-					// to preserve original start and end dates
-					if(obj.x_unit == "day")//only make sense for whole-day cells
-						pos.custom = false;
+				 	if (!this.config.preserve_length){
+						end_date = get_rounded_date.call(obj, end_date, false);
+						// to preserve original start and end dates
+						if(obj.x_unit == "day")//only make sense for whole-day cells
+							pos.custom = false;
+					}
 					break;
 				case "resize":
 					if(this._drag_event){
@@ -248,6 +293,31 @@ scheduler.createTimelineView=function(obj){
 	}
 };
 
+scheduler._get_timeline_event_height = function(ev, config){
+	var section = ev[config.y_property]; // section id
+	var event_height = config.event_dy;
+	if (config.event_dy == "full") {
+		if (config.section_autoheight) {
+			event_height = config._section_height[section] - 6;
+		} else {
+			event_height = config.dy - 3;
+		}
+	}
+
+	if (config.resize_events) {
+		event_height = Math.max(Math.floor(event_height / ev._count), config.event_min_dy);
+	}
+	return event_height;
+};
+scheduler._get_timeline_event_y = function(order, event_height){
+	var sorder = order;
+	var y = 2+sorder*event_height+(sorder?(sorder*2):0); // original top + number_of_events * event_dy + default event top/bottom borders
+	if (scheduler.config.cascade_event_display) {
+		y =2+sorder*scheduler.config.cascade_event_margin+(sorder?(sorder*2):0);
+	}
+	return y;
+};
+
 scheduler.render_timeline_event = function(ev, attach){
 	var section = ev[this.y_property]; // section id
 	if (!section)
@@ -258,28 +328,14 @@ scheduler.render_timeline_event = function(ev, attach){
 	var x_start = _getX(ev, false, this);
 	var x_end = _getX(ev, true, this);
 
-	var event_height = this.event_dy;
-	if (this.event_dy == "full") {
-		if (this.section_autoheight) {
-			event_height = this._section_height[section] - 6;
-		} else {
-			event_height = this.dy - 3;
-		}
-	}
-
-	if (this.resize_events) {
-		event_height = Math.max(Math.floor(event_height / ev._count), this.event_min_dy);
-	}
+	var event_height = scheduler._get_timeline_event_height(ev, this);
 
 	var hb = event_height - 2;// takes into account css sizes (border/padding)
 	if (!ev._inner && this.event_dy == "full") {
 		hb=(hb+2)*(ev._count-sorder)-2;
 	}
 
-	var y = 2+sorder*event_height+(sorder?(sorder*2):0); // original top + number_of_events * event_dy + default event top/bottom borders
-	if (scheduler.config.cascade_event_display) {
-		y =2+sorder*scheduler.config.cascade_event_margin+(sorder?(sorder*2):0);
-	}
+	var y = scheduler._get_timeline_event_y(ev._sorder, event_height);
 
 	var section_height = event_height+y+2;
 	if(!this._events_height[section] || (this._events_height[section] < section_height)){
@@ -336,14 +392,6 @@ function trace_events(){
 	}
 	return matrix;
 }
-function get_date_index(date) {
-	var index = 0;
-	var trace_x = this._trace_x;
-	while (index < trace_x.length-1 && +date >= +trace_x[index+1]) {
-		index++;
-	}
-	return index;
-}
 // function used to get X (both start and end) coordinates for timeline bar view
 function _getX(ev, isEndPoint, config) {
 	var x = 0;
@@ -357,8 +405,11 @@ function _getX(ev, isEndPoint, config) {
 		date = scheduler._max_date;
 	var delta = date - scheduler._min_date_timeline;
 
-	if (delta > 0) {
-		var index = get_date_index.call(config, date);
+	if (delta > 0){
+		var index = scheduler._get_date_index(config, date);
+		if (scheduler._ignores[index])
+			round_position=true;
+
 		for (var i = 0; i < index; i++) {
 			x += scheduler._cols[i];
 		}
@@ -366,7 +417,15 @@ function _getX(ev, isEndPoint, config) {
 		var column_date = scheduler.date.add(scheduler._min_date_timeline, scheduler.matrix[scheduler._mode].x_step*index, scheduler.matrix[scheduler._mode].x_unit);
 		if (!round_position) {
 			delta = date - column_date;
-			column_offset = Math.round(delta/step);
+			if (config.first_hour || config.last_hour){
+				delta = delta - config._start_correction;
+				if (delta < 0) delta = 0;
+				column_offset = Math.round(delta/step);
+				if (column_offset > scheduler._cols[index])
+					column_offset = scheduler._cols[index];
+			} else {
+				column_offset = Math.round(delta/step);
+			}
 		} else {
 			if (+date > +column_date && isEndPoint) {
 				column_offset = scheduler._cols[index];
@@ -386,7 +445,7 @@ function _getX(ev, isEndPoint, config) {
 	return x;
 }
 function get_rounded_date(date, isEndDate) {
-	var index = get_date_index.call(this, date);
+	var index = scheduler._get_date_index(this, date);
 	var rounded_date = this._trace_x[index];
 	if (isEndDate && (+date != +this._trace_x[index])) {
 		rounded_date = (this._trace_x[index+1]) ? this._trace_x[index+1] : scheduler.date.add(this._trace_x[index], this.x_step, this.x_unit);
@@ -535,8 +594,8 @@ function y_scale(d) {
 		summ+=scheduler._cols[i];
 
 	var step = new Date();
-	step = (scheduler.date.add(step, this.x_step*this.x_size, this.x_unit)-step)/summ;
-
+	var realcount = scheduler._cols.length-scheduler._ignores_detected;
+	step = ((scheduler.date.add(step, this.x_step*realcount, this.x_unit)-step)-(this._start_correction + this._end_correction)*realcount)/summ;
 	this._step = step;
 	this._summ = summ;
 
@@ -588,6 +647,9 @@ function y_scale(d) {
 
 		if (this.render == "cell"){
 			for (var j=0; j < scheduler._cols.length; j++) {
+				if (scheduler._ignores[j])
+					html+="<td></td>";
+				else
 					html+="<td class='dhx_matrix_cell "+scheduler.templates[this.name+"_cell_class"](evs[i][j],this._trace_x[j],this.y_unit[i])+"' style='width:"+(scheduler._cols[j]-1)+"px'><div style='width:"+(scheduler._cols[j]-1)+"px'>"+scheduler.templates[this.name+"_cell_value"](evs[i][j])+"</div></td>";
 			}
 		} else {
@@ -599,8 +661,12 @@ function y_scale(d) {
 
 			//section 3
 				html+="<table class='"+stats.table_className+"' cellpadding='0' cellspacing='0' style='"+stats.summ_width+" "+stats.style_height+"' >";
-			for (var j=0; j < scheduler._cols.length; j++)
-				html+="<td class='dhx_matrix_cell "+scheduler.templates[this.name+"_cell_class"](evs[i],this._trace_x[j],this.y_unit[i])+"' style='width:"+(scheduler._cols[j]-1)+"px'><div style='width:"+(scheduler._cols[j]-1)+"px'></div></td>";
+			for (var j=0; j < scheduler._cols.length; j++){
+				if (scheduler._ignores[j])
+					html+="<td></td>";
+				else
+					html+="<td class='dhx_matrix_cell "+scheduler.templates[this.name+"_cell_class"](evs[i],this._trace_x[j],this.y_unit[i])+"' style='width:"+(scheduler._cols[j]-1)+"px'><div style='width:"+(scheduler._cols[j]-1)+"px'></div></td>";
+			}
 			html+="</table>";
 			html+="</div></td>";
 		}
@@ -631,25 +697,38 @@ function x_scale(h){
 	scheduler._cols=[];	//store for data section, each column width
 	scheduler._colsS={height:0}; // heights of the y sections
 	this._trace_x =[]; // list of dates per cells
-	var summ = scheduler._x-this.dx-18; //border delta, whole width
+	var summ = scheduler._x - this.dx - scheduler.xy.scroll_width; //border delta, whole width
 	var left = [this.dx]; // left margins, initial left margin
 	var header = scheduler._els['dhx_cal_header'][0];
 	header.style.width = (left[0]+summ)+'px';
 
 	scheduler._min_date_timeline = scheduler._min_date;
 
+	var preserve = scheduler.config.preserve_scale_length;
 	var start = scheduler._min_date;
-	for (var k=0; k<this.x_size; k++){
+	scheduler._process_ignores(start, this.x_size, this.x_unit, this.x_step, preserve);
+
+	var size = this.x_size + (preserve ? scheduler._ignores_detected : 0);
+	if (size != this.x_size)
+		scheduler._max_date = scheduler.date.add(scheduler._min_date, size*this.x_step, this.x_unit);
+	
+	var realcount = size - scheduler._ignores_detected;
+	for (var k=0; k<size; k++){
 		// dates calculation
 		this._trace_x[k]=new Date(start);
 		start = scheduler.date.add(start, this.x_step, this.x_unit);
 
 		// position calculation
-		scheduler._cols[k]=Math.floor(summ/(this.x_size-k));
+		if (scheduler._ignores[k]){
+			scheduler._cols[k]=0;
+			realcount++;
+		} else {
+			scheduler._cols[k]=Math.floor(summ/(realcount-k));
+		}
+
 		summ -= scheduler._cols[k];
 		left[k+1] = left[k] + scheduler._cols[k];
 	}
-
 	h.innerHTML = "<div></div>";
 
 	if(this.second_scale){
@@ -692,6 +771,9 @@ function x_scale(h){
 	scheduler.xy.scale_height = original_sh; // fix for _render_x_header which uses current scale_height value
 	h = h.lastChild; // h - original scale
 	for (var i=0; i<this._trace_x.length; i++){
+		if (scheduler._ignores[i])
+			continue;
+
 		start = this._trace_x[i];
 		scheduler._render_x_header(i, left[i], start, h);
 		var cs = scheduler.templates[this.name+"_scalex_class"](start);
@@ -740,8 +822,8 @@ function set_full_view(mode){
 		y_scale.call(this,scheduler._els["dhx_cal_data"][0]);
 		scheduler._min_date = temp;
 		scheduler._els["dhx_cal_date"][0].innerHTML=scheduler.templates[this.name+"_date"](scheduler._min_date, scheduler._max_date);
-		if (scheduler.markNow) {
-			scheduler.markNow();
+		if (scheduler._mark_now) {
+			scheduler._mark_now();
 		}
 	}
 
@@ -820,7 +902,7 @@ function _init_matrix_tooltip() {
 	_init_matrix_tooltip=function(){};
 }
 
-scheduler.renderMatrix = function(mode, refresh) {
+scheduler._renderMatrix = function(mode, refresh) {
 	if (!refresh)
 		scheduler._els['dhx_cal_data'][0].scrollTop=0;
 
@@ -941,6 +1023,12 @@ scheduler.attachEvent("onCellDblClick", function (x, y, a, b, event){
 	var event_options = {};
 	event_options.start_date = obj._trace_x[x];
 	event_options.end_date = (obj._trace_x[x+1]) ? obj._trace_x[x+1] : scheduler.date.add(obj._trace_x[x], obj.x_step, obj.x_unit);
+
+	if (obj._start_correction)
+		event_options.start_date = new Date(event_options.start_date*1 + obj._start_correction);
+	if (obj._end_correction)
+		event_options.end_date = new Date(event_options.end_date - obj._end_correction);
+
 	event_options[obj.y_property] = obj.y_unit[y].key;
 	scheduler.addEventNow(event_options, null, event);
 });	
@@ -949,10 +1037,10 @@ scheduler.attachEvent("onBeforeDrag", function (event_id, mode, native_event_obj
 	return !scheduler._isRender("cell");
 });
 scheduler.attachEvent("onEventChanged", function(id, ev) {
-	ev._timed = this.is_one_day_event(ev);
+	ev._timed = this.isOneDayEvent(ev);
 });
 var old_render_marked_timespan = scheduler._render_marked_timespan;
-scheduler._render_marked_timespan = function(options, area, unit_id) {
+scheduler._render_marked_timespan = function(options, area, unit_id, min_date, max_date) {
 	if (!scheduler.config.display_marked_timespans)
 		return [];
 
@@ -960,12 +1048,10 @@ scheduler._render_marked_timespan = function(options, area, unit_id) {
 		if (scheduler._isRender('cell'))
 			return;
 
-		var view_opts = scheduler.matrix[scheduler._mode];
+		var view_opts = scheduler._lame_copy({}, scheduler.matrix[scheduler._mode]);
+		//timespans must always use actual position, not rounded
+		view_opts.round_position = false;
 		var blocks = [];
-
-        if (area == undefined) {
-                return blocks;
-        }
 
 		var units = [];
 		var areas = [];
@@ -982,8 +1068,8 @@ scheduler._render_marked_timespan = function(options, area, unit_id) {
 			units = [unit_id]
 		}
 
-		var min_date = scheduler._min_date;
-		var max_date = scheduler._max_date;
+		var min_date = min_date ? new Date(min_date) : scheduler._min_date;
+		var max_date = max_date ? new Date(max_date) : scheduler._max_date;
 		var dates = [];
 
 		if (options.days > 6) {
@@ -1009,7 +1095,7 @@ scheduler._render_marked_timespan = function(options, area, unit_id) {
 					var start_date = new Date(+date + zone_start*60*1000);
 					var end_date = new Date(+date + zone_end*60*1000);
 
-					if (!(scheduler._min_date < end_date && scheduler._max_date > start_date))
+					if (!(min_date < end_date && max_date > start_date))
 						continue;
 
 					var block = scheduler._get_block_by_config(options);
@@ -1071,8 +1157,11 @@ scheduler.attachEvent("onScaleAdd", function(scale, unit_key) {
 			r_configs.push.apply(r_configs, scheduler._get_configs_to_render(day_types));
 
 			if (timespans[mode] && timespans[mode][unit_key]) {
+				var z_config = [];
 				var unit_types = scheduler._get_types_to_render(timespans[mode][unit_key][day_index], timespans[mode][unit_key][day_value]);
-				r_configs.push.apply(r_configs, scheduler._get_configs_to_render(unit_types));
+				z_config.push.apply(z_config, scheduler._get_configs_to_render(unit_types));
+				if(z_config.length)
+					r_configs = z_config;
 			}
 
 			for (var i=0; i<r_configs.length; i++) {
@@ -1080,14 +1169,24 @@ scheduler.attachEvent("onScaleAdd", function(scale, unit_key) {
 				var day = config.days;
 				if (day < 7) {
 					day = day_value;
-					scheduler._render_marked_timespan(config, scale, unit_key);
+					//specify min/max timespan dates, otherwise it can be rendered multiple times in some configurations
+					scheduler._render_marked_timespan(config, scale, unit_key, t_date, scheduler.date.add(t_date, 1, "day"));
 					day = day_index;
 				} else {
-					scheduler._render_marked_timespan(config, scale, unit_key);
+					scheduler._render_marked_timespan(config, scale, unit_key, t_date, scheduler.date.add(t_date, 1, "day"));
 				}
 			}
 		}
 	}
 });
+
+scheduler._get_date_index=function(config, date) {
+	var index = 0;
+	var trace_x = config._trace_x;
+	while (index < trace_x.length-1 && +date >= +trace_x[index+1]) {
+		index++;
+	}
+	return index;
+};
 
 })();

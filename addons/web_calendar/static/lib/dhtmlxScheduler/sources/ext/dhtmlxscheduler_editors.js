@@ -26,6 +26,9 @@ scheduler.form_blocks['combo']={
 		})();
 		window.dhx_globalImgPath = config.image_path||'/';
 		node._combo = new dhtmlXCombo(node, config.name, node.offsetWidth-8);
+		if (config.onchange)
+			node._combo.attachEvent("onChange", config.onchange);
+
 		if (config.options_height)
 			node._combo.setOptionHeight(config.options_height);
 		var combo = node._combo;
@@ -121,7 +124,7 @@ scheduler.form_blocks['radio']={
 scheduler.form_blocks['checkbox']={
 	render:function(sns) {
 		if (scheduler.config.wide_form)
-			return '<div class="dhx_cal_wide_checkbox"></div>';
+			return '<div class="dhx_cal_wide_checkbox" '+(sns.height?("style='height:"+sns.height+"px;'"):"")+'></div>';
 		else
 			return '';
 	},

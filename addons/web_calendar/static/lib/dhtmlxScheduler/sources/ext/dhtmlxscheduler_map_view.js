@@ -56,106 +56,104 @@ scheduler.templates.map_date = function(dd, ed, mode) {
 scheduler._latLngUpdate = false; // flag for not displaying event second time in case of coordinates update
 
 scheduler.attachEvent("onSchedulerReady", function() {
+	scheduler._isMapPositionSet = false; // if user actual (geolocation) position was set on the map
 
-	(function() {
-		scheduler._isMapPositionSet = false; // if user actual (geolocation) position was set on the map
+	var gmap = document.createElement('div');
+	gmap.className = 'dhx_map';
+	gmap.id = 'dhx_gmap';
+	gmap.style.dispay = "none";
 
-		var gmap = document.createElement('div');
-		gmap.className = 'dhx_map';
-		gmap.id = 'dhx_gmap';
-		gmap.style.dispay = "none";
+	var node = scheduler._obj;
 
-		var node = scheduler._obj;
+	node.appendChild(gmap);
 
-		node.appendChild(gmap);
+	scheduler._els.dhx_gmap = [];
+	scheduler._els.dhx_gmap.push(gmap);
 
-		scheduler._els.dhx_gmap = [];
-		scheduler._els.dhx_gmap.push(gmap);
+	_setMapSize('dhx_gmap');
 
-		_setMapSize('dhx_gmap');
+	var mapOptions = {
+		zoom: scheduler.config.map_inital_zoom || 10,
+		center: scheduler.config.map_initial_position,
+		mapTypeId: scheduler.config.map_type || google.maps.MapTypeId.ROADMAP
+	};
+	var map = new google.maps.Map(document.getElementById('dhx_gmap'), mapOptions);
+	map.disableDefaultUI = false;
+	map.disableDoubleClickZoom = !scheduler.config.readonly;
 
-		var mapOptions = {
-			zoom: scheduler.config.map_inital_zoom || 10,
-			center: scheduler.config.map_initial_position,
-			mapTypeId: scheduler.config.map_type || google.maps.MapTypeId.ROADMAP
-		};
-		var map = new google.maps.Map(document.getElementById('dhx_gmap'), mapOptions);
-		map.disableDefaultUI = false;
-		map.disableDoubleClickZoom = !scheduler.config.readonly;
-
-		google.maps.event.addListener(map, "dblclick", function(event) {
-			if (!scheduler.config.readonly && scheduler.config.dblclick_create) {
-				var point = event.latLng;
-				geocoder.geocode(
-					{ 'latLng': point },
-					function(results, status) {
-						if (status == google.maps.GeocoderStatus.OK) {
-							point = results[0].geometry.location;
-							scheduler.addEventNow({
-								lat: point.lat(),
-								lng: point.lng(),
-								event_location: results[0].formatted_address,
-								start_date: scheduler._date,
-								end_date: scheduler.date.add(scheduler._date, scheduler.config.time_step, "minute")
-							});
-						}
+	google.maps.event.addListener(map, "dblclick", function(event) {
+		if (!scheduler.config.readonly && scheduler.config.dblclick_create) {
+			var point = event.latLng;
+			geocoder.geocode(
+				{ 'latLng': point },
+				function(results, status) {
+					if (status == google.maps.GeocoderStatus.OK) {
+						point = results[0].geometry.location;
+						scheduler.addEventNow({
+							lat: point.lat(),
+							lng: point.lng(),
+							event_location: results[0].formatted_address,
+							start_date: scheduler._date,
+							end_date: scheduler.date.add(scheduler._date, scheduler.config.time_step, "minute")
+						});
 					}
-				);
-			}
-		});
-
-		var infoWindowOptions = {
-			content: ''
-		};
-
-		if (scheduler.config.map_infowindow_max_width) {
-			infoWindowOptions.maxWidth = scheduler.config.map_infowindow_max_width;
-		}
-
-		scheduler.map = {
-			_points: [],
-			_markers: [],
-			_infowindow: new google.maps.InfoWindow(infoWindowOptions),
-			_infowindows_content: [],
-			_initialization_count: -1,
-			_obj: map
-		};
-
-		geocoder = new google.maps.Geocoder();
-
-		if (scheduler.config.map_resolve_user_location) {
-			if (navigator.geolocation) {
-				if (!scheduler._isMapPositionSet) {
-					navigator.geolocation.getCurrentPosition(function(position) {
-						var _userLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-						map.setCenter(_userLocation);
-						map.setZoom(scheduler.config.map_zoom_after_resolve || 10);
-						scheduler.map._infowindow.setContent(scheduler.locale.labels.marker_geo_success);
-						scheduler.map._infowindow.position = map.getCenter();
-						scheduler.map._infowindow.open(map);
-
-						scheduler._isMapPositionSet = true;
-					},
-							function() {
-								scheduler.map._infowindow.setContent(scheduler.locale.labels.marker_geo_fail);
-								scheduler.map._infowindow.setPosition(map.getCenter());
-								scheduler.map._infowindow.open(map);
-								scheduler._isMapPositionSet = true;
-							});
 				}
+			);
+		}
+	});
+
+	var infoWindowOptions = {
+		content: ''
+	};
+
+	if (scheduler.config.map_infowindow_max_width) {
+		infoWindowOptions.maxWidth = scheduler.config.map_infowindow_max_width;
+	}
+
+	scheduler.map = {
+		_points: [],
+		_markers: [],
+		_infowindow: new google.maps.InfoWindow(infoWindowOptions),
+		_infowindows_content: [],
+		_initialization_count: -1,
+		_obj: map
+	};
+
+	geocoder = new google.maps.Geocoder();
+
+	if (scheduler.config.map_resolve_user_location) {
+		if (navigator.geolocation) {
+			if (!scheduler._isMapPositionSet) {
+				navigator.geolocation.getCurrentPosition(function(position) {
+					var _userLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+					map.setCenter(_userLocation);
+					map.setZoom(scheduler.config.map_zoom_after_resolve || 10);
+					scheduler.map._infowindow.setContent(scheduler.locale.labels.marker_geo_success);
+					scheduler.map._infowindow.position = map.getCenter();
+					scheduler.map._infowindow.open(map);
+
+					scheduler._isMapPositionSet = true;
+				},
+						function() {
+							scheduler.map._infowindow.setContent(scheduler.locale.labels.marker_geo_fail);
+							scheduler.map._infowindow.setPosition(map.getCenter());
+							scheduler.map._infowindow.open(map);
+							scheduler._isMapPositionSet = true;
+						});
 			}
 		}
-		google.maps.event.addListener(map, "resize", function(event) {
-			gmap.style.zIndex = '5';
-			map.setZoom(map.getZoom());
+	}
+	google.maps.event.addListener(map, "resize", function(event) {
+		gmap.style.zIndex = '5';
+		map.setZoom(map.getZoom());
 
-		});
-		google.maps.event.addListener(map, "tilesloaded", function(event) {
-			gmap.style.zIndex = '5';
-		});
+	});
+	google.maps.event.addListener(map, "tilesloaded", function(event) {
+		gmap.style.zIndex = '5';
+	});
 
-		gmap.style.display = 'none'; // property was changed after attaching map
-	})();
+	gmap.style.display = 'none'; // property was changed after attaching map
+
 
 	scheduler.attachEvent("onSchedulerResize", function() {
 		if (this._mode == "map") {

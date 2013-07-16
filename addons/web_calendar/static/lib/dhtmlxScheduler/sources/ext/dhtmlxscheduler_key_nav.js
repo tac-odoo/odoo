@@ -3,7 +3,7 @@ This software is allowed to use under GPL or you need to obtain Commercial or En
 to use it in non-GPL project. Please contact sales@dhtmlx.com for details
 */
 //Initial idea and implementation by Steve MC
-(function (){
+(scheduler._temp_key_scope = function (){
 
 var isLightboxOpen = false;
 var date; // used for copy and paste operations
@@ -15,6 +15,11 @@ scheduler.attachEvent("onAfterLightbox",function(){ isLightboxOpen = false; retu
 scheduler.attachEvent("onMouseMove", function(id,e){
 	date = scheduler.getActionData(e).date;
 });
+
+function clear_event_after(ev){
+	delete ev.rec_type; delete ev.rec_pattern;
+	delete ev.event_pid; delete ev.event_length;
+}
 
 dhtmlxEvent(document,(_isOpera?"keypress":"keydown"),function(e){
 	e=e||event;
@@ -55,6 +60,7 @@ dhtmlxEvent(document,(_isOpera?"keypress":"keydown"),function(e){
 				var event_duration = ev.end_date-ev.start_date;
 				if (isCopy) {
 					var new_ev = scheduler._lame_clone(ev);
+					clear_event_after(new_ev);
 					new_ev.id = scheduler.uid();
 					new_ev.start_date = new Date(date);
 					new_ev.end_date = new Date(new_ev.start_date.valueOf() + event_duration);
@@ -63,9 +69,10 @@ dhtmlxEvent(document,(_isOpera?"keypress":"keydown"),function(e){
 				}
 				else { // cut operation
 					var copy = scheduler._lame_copy({}, ev);
+					clear_event_after(copy);
 					copy.start_date = new Date(date);
 					copy.end_date = new Date(copy.start_date.valueOf() + event_duration);
-					var res = scheduler.callEvent("onBeforeEventChanged",[copy, e, false, scheduler._drag_event]);
+					var res = scheduler.callEvent("onBeforeEventChanged",[copy, e, false]);
 					if (res) {
 						ev.start_date = new Date(copy.start_date);
 						ev.end_date = new Date(copy.end_date);

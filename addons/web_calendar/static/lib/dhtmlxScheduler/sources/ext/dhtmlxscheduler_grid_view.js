@@ -3,7 +3,7 @@ This software is allowed to use under GPL or you need to obtain Commercial or En
 to use it in non-GPL project. Please contact sales@dhtmlx.com for details
 */
 (function(){
-	scheduler.grid = {
+	scheduler._grid = {
 		sort_rules:{
 			"int":function(a,b, getVal){ return getVal(a)*1 < getVal(b)*1?1:-1},
 			"str":function(a,b, getVal){ return getVal(a) < getVal(b)?1:-1},
@@ -38,7 +38,7 @@ obj={
 scheduler.createGridView=function(obj){
 
 	var name = obj.name || 'grid';
-	var objName = scheduler.grid._getObjName(name);
+	var objName = scheduler._grid._getObjName(name);
 
 	scheduler.config[name + '_start'] = obj.from ||(new Date(0));
 	scheduler.config[name + '_end'] = obj.to || (new Date(9999,1,1));
@@ -76,20 +76,21 @@ scheduler.createGridView=function(obj){
 
 	scheduler.templates[name+"_date"] = function(start, end){
 		return scheduler.templates.day_date(start)+" - "+scheduler.templates.day_date(end)
-	}
+	};
+	scheduler.templates[name + '_full_date'] = function(start,end,ev){
+		if (scheduler.isOneDayEvent(ev))
+			return this[name + '_single_date'](start);
+		else
+			return scheduler.templates.day_date(start)+" &ndash; "+scheduler.templates.day_date(end);
+	};
+	scheduler.templates[name + '_single_date'] = function(date){
+		return scheduler.templates.day_date(date)+" "+this.event_date(date);
+	};
+	scheduler.templates[name + '_field'] = function(field_name, event){
+		return event[field_name];
+	};
 
 	scheduler.attachEvent("onTemplatesReady",function(){
-
-		scheduler.templates[name + '_full_date'] = function(start,end,ev){
-			if (ev._timed)
-				return this.day_date(ev.start_date, ev.end_date, ev)+" "+this.event_date(start);
-			else
-				return scheduler.templates.day_date(start)+" &ndash; "+scheduler.templates.day_date(end);
-		};
-		scheduler.templates[name + '_single_date'] = function(date){
-			return scheduler.templates.day_date(date)+" "+this.event_date(date);
-		}
-
 
 		scheduler.attachEvent("onDblClick",function(event_id, native_event_object){
 			if(this._mode == name){
@@ -101,17 +102,12 @@ scheduler.createGridView=function(obj){
 
 		scheduler.attachEvent("onClick",function(event_id, native_event_object){
 			if(this._mode == name && scheduler[objName].select ){
-				scheduler.grid.unselectEvent('', name);
-				scheduler.grid.selectEvent(event_id, name, native_event_object);
+				scheduler._grid.unselectEvent('', name);
+				scheduler._grid.selectEvent(event_id, name, native_event_object);
 				return false;
 			}
 			return true;
 		});
-
-
-		scheduler.templates[name + '_field'] = function(field_name, event){
-			return event[field_name];
-		};
 
 		scheduler.attachEvent("onSchedulerResize", function() {
 			if (this._mode == name) {
@@ -130,7 +126,7 @@ scheduler.createGridView=function(obj){
 		var old = scheduler.render_data;
 		scheduler.render_data=function(evs){
 			if (this._mode == name)
-				scheduler.grid._fill_grid_tab(objName);
+				scheduler._grid._fill_grid_tab(objName);
 			else
 				return old.apply(this,arguments);
 		};
@@ -138,7 +134,7 @@ scheduler.createGridView=function(obj){
 		var old_render_view_data = scheduler.render_view_data;
 		scheduler.render_view_data=function(){
 			if(this._mode == name) {
-				scheduler.grid._gridScrollTop = scheduler._els["dhx_cal_data"][0].childNodes[0].scrollTop;
+				scheduler._grid._gridScrollTop = scheduler._els["dhx_cal_data"][0].childNodes[0].scrollTop;
 				scheduler._els["dhx_cal_data"][0].childNodes[0].scrollTop = 0;
 				scheduler._els["dhx_cal_data"][0].style.overflowY = 'auto';
 			}
@@ -155,17 +151,17 @@ scheduler.createGridView=function(obj){
 			scheduler._min_date = scheduler[objName].paging ? scheduler.date[name+'_start'](new Date(scheduler._date)) : scheduler.config[name + '_start'];
 			scheduler._max_date = scheduler[objName].paging ? scheduler.date.add(scheduler._min_date, 1, name) : scheduler.config[name + '_end'];
 
-			scheduler.grid.set_full_view(objName);
+			scheduler._grid.set_full_view(objName);
 			if(scheduler._min_date > new Date(0) && scheduler._max_date < (new Date(9999,1,1)))
 				scheduler._els["dhx_cal_date"][0].innerHTML=scheduler.templates[name+"_date"](scheduler._min_date,scheduler._max_date);
 			else
 				scheduler._els["dhx_cal_date"][0].innerHTML="";
 
 			//grid tab activated
-			scheduler.grid._fill_grid_tab(objName);
+			scheduler._grid._fill_grid_tab(objName);
 			scheduler._gridView = objName;
 		} else {
-			scheduler.grid._sort_marker = null;
+			scheduler._grid._sort_marker = null;
 			delete scheduler._gridView;
 			scheduler._rendered=[];
 			scheduler[objName]._selected_divs = [];
@@ -188,20 +184,20 @@ if(scheduler._click.dhx_cal_header){
 scheduler._click.dhx_cal_header=function(e){
 	if(scheduler._gridView){
 		var event = e||window.event;
-		var params = scheduler.grid.get_sort_params(event, scheduler._gridView);
+		var params = scheduler._grid.get_sort_params(event, scheduler._gridView);
 
-		scheduler.grid.draw_sort_marker(event.originalTarget || event.srcElement, params.dir);
+		scheduler._grid.draw_sort_marker(event.originalTarget || event.srcElement, params.dir);
 
 		scheduler.clear_view();
-		scheduler.grid._fill_grid_tab(scheduler._gridView, params);
+		scheduler._grid._fill_grid_tab(scheduler._gridView, params);
 	}
 	else if(scheduler._old_header_click)
 		return scheduler._old_header_click.apply(this,arguments);
 };
 
-scheduler.grid.selectEvent = function(id, view_name, native_event_object){
+scheduler._grid.selectEvent = function(id, view_name, native_event_object){
 	if(scheduler.callEvent("onBeforeRowSelect",[id,native_event_object])){
-		var objName = scheduler.grid._getObjName(view_name);
+		var objName = scheduler._grid._getObjName(view_name);
 
 		scheduler.for_rendered(id, function(event_div){
 			event_div.className += " dhx_grid_event_selected";
@@ -211,24 +207,24 @@ scheduler.grid.selectEvent = function(id, view_name, native_event_object){
 	}
 };
 
-scheduler.grid._unselectDiv= function(div){
+scheduler._grid._unselectDiv= function(div){
 	div.className = div.className.replace(/ dhx_grid_event_selected/,'');
 }
-scheduler.grid.unselectEvent = function(id, view_name){
-	var objName = scheduler.grid._getObjName(view_name);
+scheduler._grid.unselectEvent = function(id, view_name){
+	var objName = scheduler._grid._getObjName(view_name);
 	if(!objName || !scheduler[objName]._selected_divs)
 		return;
 
 	if(!id){
 		for(var i=0; i<scheduler[objName]._selected_divs.length; i++)
-			scheduler.grid._unselectDiv(scheduler[objName]._selected_divs[i]);
+			scheduler._grid._unselectDiv(scheduler[objName]._selected_divs[i]);
 
 		scheduler[objName]._selected_divs = [];
 
 	}else{
 		for(var i=0; i<scheduler[objName]._selected_divs.length; i++)
 			if(scheduler[objName]._selected_divs[i].getAttribute('event_id') == id){
-				scheduler.grid._unselectDiv(scheduler[objName]._selected_divs[i]);
+				scheduler._grid._unselectDiv(scheduler[objName]._selected_divs[i]);
 				scheduler[objName]._selected_divs.slice(i,1);
 				break;
 			}
@@ -236,7 +232,7 @@ scheduler.grid.unselectEvent = function(id, view_name){
 	}
 };
 
-scheduler.grid.get_sort_params = function(event, objName){
+scheduler._grid.get_sort_params = function(event, objName){
 	var targ = event.originalTarget || event.srcElement;
 	if(targ.className == 'dhx_grid_view_sort')
 		targ = targ.parentNode;
@@ -271,31 +267,31 @@ scheduler.grid.get_sort_params = function(event, objName){
 	var rule = scheduler[objName].columns[index].sort;
 
 	if(typeof rule != 'function'){
-		rule = scheduler.grid.sort_rules[rule] || scheduler.grid.sort_rules['str'];
+		rule = scheduler._grid.sort_rules[rule] || scheduler._grid.sort_rules['str'];
 	}
 
 	return {dir:direction, value:value, rule:rule};
 };
 
-scheduler.grid.draw_sort_marker = function(node, direction){
+scheduler._grid.draw_sort_marker = function(node, direction){
 	if(node.className == 'dhx_grid_view_sort')
 		node = node.parentNode;
 
-	if(scheduler.grid._sort_marker){
-		scheduler.grid._sort_marker.className = scheduler.grid._sort_marker.className.replace(/( )?dhx_grid_sort_(asc|desc)/, '');
-		scheduler.grid._sort_marker.removeChild(scheduler.grid._sort_marker.lastChild);
+	if(scheduler._grid._sort_marker){
+		scheduler._grid._sort_marker.className = scheduler._grid._sort_marker.className.replace(/( )?dhx_grid_sort_(asc|desc)/, '');
+		scheduler._grid._sort_marker.removeChild(scheduler._grid._sort_marker.lastChild);
 	}
 
 	node.className += " dhx_grid_sort_"+direction;
-	scheduler.grid._sort_marker = node;
+	scheduler._grid._sort_marker = node;
 	var html = "<div class='dhx_grid_view_sort' style='left:"+(+node.style.width.replace('px','') -15+node.offsetLeft)+"px'>&nbsp;</div>";
 	node.innerHTML += html;
 
 };
 
-scheduler.grid.sort_grid=function(sort){
+scheduler._grid.sort_grid=function(sort){
 
-	var sort = sort || {dir:'desc', value:function(ev){return ev.start_date;}, rule:scheduler.grid.sort_rules['date']};
+	var sort = sort || {dir:'desc', value:function(ev){return ev.start_date;}, rule:scheduler._grid.sort_rules['date']};
 
 	var events = scheduler.get_visible_events();
 
@@ -308,23 +304,23 @@ scheduler.grid.sort_grid=function(sort){
 
 
 
-scheduler.grid.set_full_view = function(mode){
+scheduler._grid.set_full_view = function(mode){
 	if (mode){
 		var l = scheduler.locale.labels;
-		var html =scheduler.grid._print_grid_header(mode);
+		var html =scheduler._grid._print_grid_header(mode);
 
 		scheduler._els["dhx_cal_header"][0].innerHTML= html;
 		scheduler._table_view=true;
 		scheduler.set_sizes();
 	}
 };
-scheduler.grid._calcPadding = function(column, parent){
+scheduler._grid._calcPadding = function(column, parent){
 	var padding = (column.paddingLeft !== undefined ? 1*column.paddingLeft : scheduler[parent].defPadding)
 				+ (column.paddingRight !== undefined ? 1*column.paddingRight : scheduler[parent].defPadding);
 	return padding;
 };
 
-scheduler.grid._getStyles = function(column, items){
+scheduler._grid._getStyles = function(column, items){
 	var cell_style = [], style = "";
 	for(var i=0; items[i]; i++ ){
 		style = items[i] + ":";
@@ -341,7 +337,7 @@ scheduler.grid._getStyles = function(column, items){
 				if(column.paddingLeft != undefined)
 					cell_style.push(style+(column.paddingLeft||'0') + "px");
 				break;
-			case "padding-left":
+			case "padding-right":
 				if(column.paddingRight != undefined)
 					cell_style.push(style+(column.paddingRight||'0') + "px");
 				break;
@@ -350,11 +346,11 @@ scheduler.grid._getStyles = function(column, items){
 	return cell_style;
 };
 
-scheduler.grid._fill_grid_tab = function(objName, sort){
+scheduler._grid._fill_grid_tab = function(objName, sort){
 	//get current date
 	var date = scheduler._date;
 	//select events for which data need to be printed
-	var events = scheduler.grid.sort_grid(sort)
+	var events = scheduler._grid.sort_grid(sort)
 
 	//generate html for the view
 	var columns = scheduler[objName].columns;
@@ -362,7 +358,7 @@ scheduler.grid._fill_grid_tab = function(objName, sort){
 	var html = "<div>";
 	var left = -2;//column borders at the same pos as header borders...
 	for(var i=0; i < columns.length; i++){
-		var padding = scheduler.grid._calcPadding(columns[i], objName);
+		var padding = scheduler._grid._calcPadding(columns[i], objName);
 		left +=columns[i].width + padding ;//
 		if(i < columns.length - 1)
 			html += "<div class='dhx_grid_v_border' style='left:"+(left)+"px'></div>";
@@ -371,13 +367,13 @@ scheduler.grid._fill_grid_tab = function(objName, sort){
 	html +="<div class='dhx_grid_area'><table>";
 
 	for (var i=0; i<events.length; i++){
-		html += scheduler.grid._print_event_row(events[i], objName);
+		html += scheduler._grid._print_event_row(events[i], objName);
 	}
 
 	html +="</table></div>";
 	//render html
 	scheduler._els["dhx_cal_data"][0].innerHTML = html;
-	scheduler._els["dhx_cal_data"][0].scrollTop = scheduler.grid._gridScrollTop||0;
+	scheduler._els["dhx_cal_data"][0].scrollTop = scheduler._grid._gridScrollTop||0;
 
 	var t=scheduler._els["dhx_cal_data"][0].getElementsByTagName("tr");
 
@@ -387,7 +383,7 @@ scheduler.grid._fill_grid_tab = function(objName, sort){
 	}
 
 };
-scheduler.grid._print_event_row = function(ev, objName){
+scheduler._grid._print_event_row = function(ev, objName){
 
 	var styles = [];
 	if(ev.color)
@@ -409,7 +405,7 @@ scheduler.grid._print_event_row = function(ev, objName){
 
 	var html ="<tr class='dhx_grid_event"+(ev_class? ' '+ev_class:'')+"' event_id='"+ev.id+"' " + style + ">";
 
-	var name = scheduler.grid._getViewName(objName);
+	var name = scheduler._grid._getViewName(objName);
 	var availStyles = ["text-align", "vertical-align", "padding-left","padding-right"];
 	for(var i =0; i < columns.length; i++){
 		var value;
@@ -423,7 +419,7 @@ scheduler.grid._print_event_row = function(ev, objName){
 			value = scheduler.templates[name + '_field'](columns[i].id, ev);
 		}
 
-		var cell_style = scheduler.grid._getStyles(columns[i], availStyles);
+		var cell_style = scheduler._grid._getStyles(columns[i], availStyles);
 
 		var className = columns[i].css ? (" class=\""+columns[i].css+"\"") : "";
 
@@ -435,7 +431,7 @@ scheduler.grid._print_event_row = function(ev, objName){
 	return html;
 };
 
-scheduler.grid._print_grid_header = function(objName){
+scheduler._grid._print_grid_header = function(objName){
 	var head = "<div class='dhx_grid_line'>";
 
 	var columns = scheduler[objName].columns;
@@ -460,8 +456,8 @@ scheduler.grid._print_grid_header = function(objName){
 	var availStyles = ["text-align",  "padding-left","padding-right"];
 	for(var i=0; i < columns.length; i++){
 		var column_width = !widths[i] ? unsized_width : widths[i];
-		columns[i].width = column_width - scheduler.grid._calcPadding(columns[i], objName);
-		var cell_style = scheduler.grid._getStyles(columns[i], availStyles);
+		columns[i].width = column_width - scheduler._grid._calcPadding(columns[i], objName);
+		var cell_style = scheduler._grid._getStyles(columns[i], availStyles);
 		head += "<div style='width:"+(columns[i].width -1)+"px;"+cell_style.join(";")+"'>" + (columns[i].label === undefined ? columns[i].id : columns[i].label) + "</div>";
 	}
 	head +="</div>";

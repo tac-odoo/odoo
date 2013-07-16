@@ -1,3 +1,12 @@
+4.0
+	Flexible time scales - some days, hours can be removed from time scale
+	Ability to show "more events" links in month view
+	jQuery integration
+	Backbone Integration
+	Default skin changed to "terrace", multi-day events are visible by default
+	Alternative start-date logic for recurring events
+	Documentation greatly improved
+
 3.7
 	Touch support ( tablets and touch monitors )
 	Romanian locale added

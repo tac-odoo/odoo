@@ -101,21 +101,39 @@ scheduler._get_def_cont = function(pos) {
 	return this._def_count;
 };
 scheduler._locateCalendar = function(cal, date) {
-	var table = cal.childNodes[2].childNodes[0];
 	if (typeof date == "string")
 		date = scheduler.templates.api_date(date);
 
-	var d = cal.week_start + date.getDate() - 1;
-	return table.rows[Math.floor(d / 7)].cells[d % 7].firstChild;
+	if(+date > +cal._max_date || +date < +cal._min_date)
+		return null;
+
+	var table = cal.childNodes[2].childNodes[0];
+
+	var weekNum = 0;
+	var dat = new Date(cal._min_date);
+	while(+this.date.add(dat, 1, "week") <= +date){
+		dat = this.date.add(dat, 1, "week");
+		weekNum++;
+	}
+
+	var sm = scheduler.config.start_on_monday;
+	var day = (date.getDay() || (sm ? 7 : 0)) - (sm ? 1 : 0);
+	return table.rows[weekNum].cells[day].firstChild;
 };
 scheduler.markCalendar = function(cal, date, css) {
-	this._locateCalendar(cal, date).className += " " + css;
+	var div = this._locateCalendar(cal, date);
+	if(!div)
+		return;
+
+	div.className += " " + css;
 };
 scheduler.unmarkCalendar = function(cal, date, css) {
 	date = date || cal._last_date;
 	css = css || "dhx_calendar_click";
 	if (!date) return;
 	var el = this._locateCalendar(cal, date);
+	if(!el)
+		return;
 	el.className = (el.className || "").replace(RegExp(css, "g"));
 };
 scheduler._week_template = function(width) {
@@ -155,7 +173,7 @@ scheduler._render_calendar = function(obj, sd, conf, previous) {
 	ts.month_day = ts.calendar_date;
 
 	sd = this.date.month_start(sd);
-	var week_template = this._week_template(obj.offsetWidth - 1);
+	var week_template = this._week_template(obj.offsetWidth - 1 - this.config.minicalendar.padding );
 
 	var d;
 	if (previous)
@@ -205,7 +223,9 @@ scheduler._render_calendar = function(obj, sd, conf, previous) {
 
 	d.week_start = (sd.getDay() - (this.config.start_on_monday ? 1 : 0) + 7) % 7;
 
-	var dd = this.date.week_start(sd);
+	var dd = d._min_date = this.date.week_start(sd);
+	d._max_date = this.date.add(d._min_date, 6, "week");
+
 	this._reset_month_scale(d.childNodes[2], sd, dd);
 
 	var r = d.childNodes[2].firstChild.rows;

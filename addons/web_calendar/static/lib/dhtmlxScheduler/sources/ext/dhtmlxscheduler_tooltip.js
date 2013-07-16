@@ -2,7 +2,7 @@
 This software is allowed to use under GPL or you need to obtain Commercial or Enterise License
 to use it in non-GPL project. Please contact sales@dhtmlx.com for details
 */
-window.dhtmlXTooltip = window.dhtmlxTooltip = {};
+window.dhtmlXTooltip = scheduler.dhtmlXTooltip = window.dhtmlxTooltip = {};
 
 dhtmlXTooltip.config = {
 	className: 'dhtmlXTooltip tooltip',

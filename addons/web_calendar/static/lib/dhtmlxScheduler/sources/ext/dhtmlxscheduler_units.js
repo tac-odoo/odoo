@@ -200,7 +200,7 @@ scheduler.scrollUnit=function(step){
 			}
 			var unit_ind = Math.min(pos.x+pr.position,pr.options.length-1);
 			var key = pr.map_to;
-			pos.section = ev[key]=pr.options[unit_ind].key;
+			pos.section = ev[key]=(pr.options[unit_ind]||{}).key;
 			pos.x = 0;
 		}
 		pos.force_redraw = true;

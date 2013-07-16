@@ -108,7 +108,12 @@ to use it in non-GPL project. Please contact sales@dhtmlx.com for details
 							height += 2;
 							checked_div.style.height = height + "px";
 						} else {
-							height = (scheduler.matrix[mode].y_unit.length * scheduler.matrix[mode].dy)+2;
+							height = 2;
+							var cfg = scheduler.matrix[mode];
+							var rows = cfg.y_unit;
+							for(var r=0; r < rows.length; r++){
+								height += !rows[r].children ? cfg.dy : (cfg.folder_dy||cfg.dy);
+							}
 						}
 					}
 					if (mode == "day" || mode == "week") {

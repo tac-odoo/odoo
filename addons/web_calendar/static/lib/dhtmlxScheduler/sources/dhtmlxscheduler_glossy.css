@@ -406,6 +406,23 @@ div.dhx_modal_cover {
 	border-left: 1px dotted #8894A3;
 }
 
+/* export to PDF and iCal buttons start */
+.dhx_cal_navline .dhx_cal_export{
+    width:18px;
+    height:18px;
+    margin:2px;
+    cursor:pointer;
+    top: 0px;
+}
+.dhx_cal_navline .dhx_cal_export.pdf{
+    left: 2px;
+    background-image:url('imgs/export_pdf.png');
+}
+.dhx_cal_navline .dhx_cal_export.ical{
+    left: 24px;
+    background-image:url('imgs/export_ical.png');
+}
+/* export to PDF and iCal buttons end */
 .dhx_cal_event .dhx_header, .dhx_cal_event .dhx_title, .dhx_cal_event .dhx_body, .dhx_cal_event .dhx_footer {
 	background-color:#FFE763;
 	border:1px solid #B7A543;
@@ -454,6 +471,7 @@ div.dhx_modal_cover {
 	height:1px; 
 	margin-left:2px; 
 	border-width:0px 1px 1px 1px;
+	position: relative;
 }
 .dhx_cal_event_line{
 	background-color:#FFE763;
@@ -525,6 +543,23 @@ div.icon_cancel{
 }
 div.icon_delete{
 	background-position: -42px 0px;
+}
+
+/*view more link in month view*/
+.dhx_month_link{
+	position: absolute;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	text-align: right;
+	
+	cursor: pointer;
+	padding-right: 10px;
+}
+.dhx_month_link a{
+	color: blue;
+}
+.dhx_month_link a:hover{
+	text-decoration: underline;
 }
 .dhx_global_tip{
 	font-family:Tahoma, Helvetica;
@@ -921,6 +956,10 @@ div.icon_delete{
 .dhx_mini_calendar{
 	-moz-box-shadow:5px 5px 5px #888;	/*Doesn't work in IE*/
 	-khtml-box-shadow: 5px 5px 5px #888;
+
+	-moz-user-select:-moz-none;
+	-webkit-user-select:none;   	
+	-user-select:none; 
 }
 
 .dhx_mini_calendar .dhx_month_head{
@@ -1340,7 +1379,8 @@ div.icon_delete{
 	border-radius: 5px;
 	position: absolute;
 	z-index: 300;
-	
+
+	background-color: rgb(142, 153, 174);
 	background-color: rgba(98,107,127,0.5);
 	padding-left: 7px;
 	width:300px;
@@ -1349,6 +1389,12 @@ div.icon_delete{
 	-moz-transition: left 0.5s ease, right 0.5s;
 	-webkit-transition: left 0.5s ease, right 0.5s;
 	-o-transition: left 0.5s ease, right 0.5s;
+}
+.dhx_no_animate{
+	transition: none;
+	-moz-transition: none;
+	-webkit-transition: none;
+	-o-transition: none;
 }
 .dhx_cal_quick_info.dhx_qi_left .dhx_qi_big_icon{
 	float:right;
@@ -1772,6 +1818,11 @@ div.dhx_cal_editor{
 .dhx_cal_light_wide .dhx_cal_lsection.dhx_cal_checkbox{
 	height:20px;
 }
+
+.dhx_cal_light_wide .dhx_combo_box {
+	width: 602px !important;
+	left: 0px;
+}
 .dhx_cal_checkbox label{
 	vertical-align:top;
 }
@@ -1831,3 +1882,21 @@ div.dhx_cal_editor{
 .dhx_scale_hour_border, .dhx_month_body_border, .dhx_scale_bar_border, .dhx_month_head_border {
 	border-left: 1px solid #A4BED4;
 }
+
+/* export to PDF and iCal buttons start */
+.dhx_cal_navline .dhx_cal_export{
+    width:18px;
+    height:18px;
+    margin:2px;
+    cursor:pointer;
+    top: 1px;
+}
+.dhx_cal_navline .dhx_cal_export.pdf{
+    left: 2px;
+    background-image:url('imgs_glossy/export_pdf.png');
+}
+.dhx_cal_navline .dhx_cal_export.ical{
+    left: 24px;
+    background-image:url('imgs_glossy/export_ical.png');
+}
+/* export to PDF and iCal buttons end */

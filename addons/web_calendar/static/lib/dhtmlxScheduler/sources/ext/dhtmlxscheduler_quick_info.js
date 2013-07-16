@@ -24,7 +24,7 @@ scheduler.attachEvent("onClick", function(id){
 scheduler.templates.quick_info_title = function(start, end, ev){ return ev.text.substr(0,50); };
 scheduler.templates.quick_info_content = function(start, end, ev){ return ev.details || ev.text; };
 scheduler.templates.quick_info_date = function(start, end, ev){
-	if (scheduler.is_one_day_event(ev))
+	if (scheduler.isOneDayEvent(ev))
 		return scheduler.templates.day_date(start, end, ev) + " " +scheduler.templates.event_header(start, end, ev);
 	else
 		return scheduler.templates.week_date(start, end, ev);
@@ -97,8 +97,6 @@ scheduler._show_quick_info = function(pos){
 		qi.className = qi.className.replace("dhx_qi_left","").replace("dhx_qi_left","")+" dhx_qi_"+(pos==1?"left":"right");
 		scheduler._obj.appendChild(qi);
 	}
-
-	
 };
 scheduler._init_quick_info = function(){
 	if (!this._quick_info_box){
@@ -106,6 +104,8 @@ scheduler._init_quick_info = function(){
 
 		var qi = this._quick_info_box = document.createElement("div");
 		qi.className = "dhx_cal_quick_info";
+		if (scheduler.$testmode)
+			qi.className += " dhx_no_animate";
 	//title
 		var html = "<div class=\"dhx_cal_qi_title\" style=\"height:"+sizes.quick_info_title+"px\">"
 			+ "<div class=\"dhx_cal_qi_tcontent\"></div><div  class=\"dhx_cal_qi_tdate\"></div>"

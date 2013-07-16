@@ -72,9 +72,12 @@ scheduler.attachEvent("onTemplatesReady", function() {
 		var txtt = n.getElementsByTagName(tag);
 		for (var i = txtt.length - 1; i >= 0; i--) {
 			var n = txtt[i];
-			if (!text)
+			if (!text){
 				n.disabled = true;
-			else {
+				//radio and checkboxes loses state after .cloneNode in IE
+				if(d.checked)
+					n.checked = true;
+			}else {
 				var t = document.createElement("SPAN");
 				t.className = "dhx_text_disabled";
 				t.innerHTML = text(txts[i]);
@@ -112,6 +115,7 @@ scheduler.attachEvent("onTemplatesReady", function() {
 			});
 			txt_replace("input", d, n, false);
 			txt_replace("select", d, n, function(a) {
+				if(!a.options.length) return "";
 				return a.options[Math.max((a.selectedIndex || 0), 0)].text;
 			});
 
@@ -121,6 +125,9 @@ scheduler.attachEvent("onTemplatesReady", function() {
 			if (scheduler._lightbox)
 				scheduler._lightbox.parentNode.removeChild(scheduler._lightbox);
 			this._lightbox = n;
+
+			if (scheduler.config.drag_lightbox)
+				n.firstChild.onmousedown = scheduler._ready_to_dnd;
 			this.setLightboxSize();
 			n.onclick = function(e) {
 				var src = e ? e.target : event.srcElement;

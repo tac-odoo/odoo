@@ -4,7 +4,6 @@ to use it in non-GPL project. Please contact sales@dhtmlx.com for details
 */
 scheduler.config.year_x = 4;
 scheduler.config.year_y = 3;
-scheduler.config.year_mode_name = "year";
 scheduler.xy.year_top = 0;
 
 scheduler.templates.year_date = function(date) {
@@ -18,7 +17,7 @@ scheduler.templates.year_tooltip = function(s, e, ev) {
 
 (function() {
 	var is_year_mode = function() {
-		return scheduler._mode == scheduler.config.year_mode_name;
+		return scheduler._mode == "year";
 	};
 
 	scheduler.dblclick_dhx_month_head = function(e) {
@@ -63,14 +62,14 @@ scheduler.templates.year_tooltip = function(s, e, ev) {
 		marked = {};
 	};
 
-	scheduler.hideToolTip = function() {
+	scheduler._hideToolTip = function() {
 		if (this._tooltip) {
 			this._tooltip.style.display = "none";
 			this._tooltip.date = new Date(9999, 1, 1);
 		}
 	};
 
-	scheduler.showToolTip = function(date, pos, e, src) {
+	scheduler._showToolTip = function(date, pos, e, src) {
 		if (this._tooltip) {
 			if (this._tooltip.date.valueOf() == date.valueOf()) return;
 			this._tooltip.innerHTML = "";
@@ -121,9 +120,9 @@ scheduler.templates.year_tooltip = function(s, e, ev) {
 			if (src.tagName.toLowerCase() == 'a') // fix for active links extension (it adds links to the date in the cell)
 				src = src.parentNode;
 			if ((src.className || "").indexOf("dhx_year_event") != -1)
-				scheduler.showToolTip(from_attr(src.getAttribute("date")), getOffset(src), e, src);
+				scheduler._showToolTip(from_attr(src.getAttribute("date")), getOffset(src), e, src);
 			else
-				scheduler.hideToolTip();
+				scheduler._hideToolTip();
 		});
 		this._init_year_tooltip = function() {
 		};
@@ -198,7 +197,7 @@ scheduler.templates.year_tooltip = function(s, e, ev) {
 			if (scheduler._load_mode && scheduler._load()) return scheduler._render_wait = true;
 			scheduler.render_view_data();
 		} else {
-			scheduler.hideToolTip();
+			scheduler._hideToolTip();
 		}
 	};
 	scheduler._reset_year_scale = function() {
@@ -270,6 +269,105 @@ scheduler.templates.year_tooltip = function(s, e, ev) {
 		week_starts._month = ssd.getMonth();
 		this._min_date = ssd;
 		this._max_date = sd;
+	};
+
+	var getActionData = scheduler.getActionData;
+	scheduler.getActionData = function(n_ev) {
+		if(!is_year_mode())
+			return getActionData.apply(scheduler, arguments);
+
+		var trg = n_ev?n_ev.target:event.srcElement;
+		var date = getMonthDate(trg);
+
+		var day = getMonthCell(trg);
+		var pos = getDayIndexes(day);
+
+		if(pos && date){
+			date = scheduler.date.add(date, pos.week, "week");
+			date = scheduler.date.add(date, pos.day, "day");
+		}else{
+			date = null;
+		}
+
+		return {
+			date:date,
+			section:null
+		};
+
+
+
+
+		function getMonthDate(node){
+			var node = getMonthRoot(node);
+			if(!node)
+				return null;
+
+			var date = node.getAttribute("date");
+			if(!date)
+				return null;
+
+			return scheduler.date.week_start(scheduler.templates.xml_date(date));
+		}
+		function getDayIndexes(targetCell){
+			var month = getMonthTable(targetCell);
+			if(!month)
+				return null;
+
+			var week = 0, day = 0;
+			for(var week = 0, weeks = month.rows.length; week < weeks;week ++){
+				var w = month.rows[week].getElementsByTagName("td");
+				for(var day = 0, days = w.length; day < days; day++){
+					if(w[day] == targetCell)
+						break;
+				}
+				if(day < days)
+					break;
+			}
+
+			if(week < weeks)
+				return {day:day, week:week};
+			else
+				return null;
+		}
+
+	};
+
+	var locateEvent = scheduler._locate_event;
+	scheduler._locate_event = function(node) {
+		if(!is_year_mode())
+			return locateEvent.apply(scheduler, arguments);
+
+		var day = getNode(node, function(n){
+			return n.className && n.className.indexOf("dhx_year_event") != -1 && n.hasAttribute && n.hasAttribute("date")
+		});
+
+		if(!day || !day.hasAttribute("date")) return null;
+
+		var dat = scheduler.templates.xml_date(day.getAttribute("date"));
+		var evs = scheduler.getEvents(dat, scheduler.date.add(dat, 1, "day"));
+		if(!evs.length) return null;
+
+		//can be multiple events in the cell, return any single one
+		return evs[0].id;
+	};
+
+
+	function getMonthCell(node){
+		return getNode(node, function(n){ return n.nodeName.toLowerCase() == "td" });
+	}
+
+	function getMonthTable(node){
+		return getNode(node, function(n){ return n.nodeName.toLowerCase() == "table" });
+	}
+	function getMonthRoot(node){
+		var node = getMonthTable(node);
+		return getNode(node, function(n){ return n.hasAttribute && n.hasAttribute("date")});
+	}
+	function getNode(node, condition){
+		while(node && !condition(node)){
+			node = node.parentNode;
+		}
+		return node;
 	}
 
 })();

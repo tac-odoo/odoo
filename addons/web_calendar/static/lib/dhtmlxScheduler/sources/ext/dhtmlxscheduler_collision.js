@@ -39,7 +39,7 @@ scheduler.attachEvent("onEventChanged",function(id){
 		if (!before) return false;
 		ev.start_date = before[0];
 		ev.end_date = before[1];
-		ev._timed=this.is_one_day_event(ev);
+		ev._timed=this.isOneDayEvent(ev);
 	}
 	return true;
 });
@@ -54,6 +54,13 @@ scheduler.attachEvent("onEventAdded",function(id,ev) {
 scheduler.attachEvent("onEventSave",function(id, edited_ev, is_new){
 	edited_ev = scheduler._lame_clone(edited_ev);
 	edited_ev.id = id;
+
+	//lightbox may not have 'time' section
+	if(!(edited_ev.start_date && edited_ev.end_date)){
+		var ev = scheduler.getEvent(id);
+		edited_ev.start_date = new Date(ev.start_date);
+		edited_ev.end_date = new Date(ev.end_date);
+	}
 
 	if(edited_ev.rec_type){
 		scheduler._roll_back_dates(edited_ev);
