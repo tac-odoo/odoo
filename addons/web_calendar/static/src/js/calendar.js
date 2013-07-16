@@ -91,6 +91,19 @@
             return result || object;
         };
 
+        // Fix incompatibility between timeline view (w/ second scale) and minical
+        var old_scheduler__render_calendar = scheduler._render_calendar;
+        scheduler._render_calendar = function(obj, sd, conf, previous) {
+            var mode = scheduler._mode;
+            if (scheduler.matrix[mode] && scheduler.matrix[mode]._header_resized) {
+                scheduler.xy.scale_height /= 2;
+            }
+            var d = old_scheduler__render_calendar.apply(this, arguments);
+            if (scheduler.matrix[mode] && scheduler.matrix[mode]._header_resized) {
+                scheduler.xy.scale_height *= 2;
+            }
+            return d;
+        };
 
 
         // Ensure quick-info is correctly hidden when clicking outside of it
