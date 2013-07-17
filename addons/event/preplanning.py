@@ -21,9 +21,11 @@
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta, MO
+from collections import defaultdict
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
+from openerp.addons.core_calendar.timeline import Availibility
 
 
 class EventPreplanning(osv.TransientModel):
@@ -111,15 +113,30 @@ class EventPreplanning(osv.TransientModel):
                 'slot_duration': content.slot_duration,
             })
 
+        tmlayers = ['working_hours', 'leaves']
+        timeline = event._get_resource_timeline(layers=tmlayers, date_from=date_begin,
+                                                date_to=date_end + relativedelta(days=30), context=context)[event.id]
+
+        # Compute available slot per weeks
+        slot_per_weeks = defaultdict(list)
+        for period in timeline.iter(by='change', as_tz='UTC'):
+            print(period)
+            if period.status == Availibility.FREE:
+                # period is always less than 24h, and it's related
+                # week is computed based on ISO standard week.
+                weeknum = period.start.isocalendar()[1]
+                slot_per_weeks[weeknum].append(period)
+
         wd = date_begin.replace()
         while wd <= date_end:
             wd_end = wd + relativedelta(weeks=1)
+            wd_weeknum = wd.isocalendar()[1]
             result['weeks'].append({
                 'id': wd.strftime('%Y%V'),  # ISO YEAR + ISO WEEK NUMBER
                 'name': wd.strftime(lang.date_format),
                 'start': wd.strftime(DT_FMT),
                 'stop': wd_end.strftime(DT_FMT),
-                'slot_count': 10,  # TODO: compute this using real calendar + unavailibility informations
+                'slot_count': len(slot_per_weeks[wd_weeknum]),
                 'slot_used': 0,
             })
             wd = wd_end
