@@ -52,6 +52,7 @@ class EventContent(osv.Model):
     """ Event Content """
     _name = 'event.content'
     _description = __doc__
+    _order = 'sequence, id'
 
     def _get_remaining_duration_to_schedule(self, cr, uid, ids, field_name, args, context=None):
         result = {}
