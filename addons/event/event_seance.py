@@ -417,9 +417,9 @@ class EventSeance(osv.Model):
                         if contact:
                             part_name = contact.name
                         elif expected == 1:
-                            part_name = '%s' % (reg.partner_id.name,)
+                            part_name = '%s' % (reg.name or reg.partner_id.name or '',)
                         else:
-                            part_name = '%s #%d' % (reg.partner_id.name, i)
+                            part_name = '%s #%d' % (reg.name or reg.partner_id.name or '', i)
                         Participant.create(cr, uid, {
                             'name': part_name,
                             'partner_id': reg.partner_id.id,

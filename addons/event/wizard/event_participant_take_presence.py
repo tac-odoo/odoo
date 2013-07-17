@@ -20,6 +20,7 @@
 ##############################################################################
 
 from openerp.osv import osv, fields
+from openerp.tools.translate import _
 
 
 class EventParticipantTakePresenceWizard(osv.TransientModel):
@@ -31,10 +32,27 @@ class EventParticipantTakePresenceWizard(osv.TransientModel):
         return fields['presence']['selection']
 
     _columns = {
+        'name': fields.char('Participant', required=True, readonly=True),
         'status': fields.selection(_states_selection, 'Status', required=True),
         'arrival_time': fields.datetime('Arrival Time'),
     }
+
+    def _default_name(self, cr, uid, context=None):
+        if context is None:
+            context = {}
+        Participation = self.pool.get('event.participant')
+        participation_ids = context.get('active_ids') or []
+        if context.get('active_model', '') != 'event.participant' \
+                or not participation_ids:
+            return _('Invalid participants')
+        if len(participation_ids) == 1:
+            # Take name for this specific participants
+            p = Participation.browse(cr, uid, participation_ids[0], context=context)
+            return p.name
+        return _('%d participants') % (len(participation_ids,))
+
     _defaults = {
+        'name': _default_name,
         'arrival_time': fields.datetime.now,
     }
 

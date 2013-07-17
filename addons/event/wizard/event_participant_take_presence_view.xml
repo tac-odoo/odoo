@@ -7,31 +7,36 @@
         <field name="model">event.participant.take.presence.wizard</field>
         <field name="arch" type="xml">
             <form string="Take Presence" version="7.0">
-                <div>
-                    <label for="status" string="Change status to:"/>
-                    <!-- force using br + oe_inline for status so it won't take that much space -->
-                    <br/><field name="status" class="oe_inline"/>
+                <div class="oe_title">
+                    <h1><field name="name"/></h1>
                 </div>
-                <div attrs="{'invisible': [('status','!=','late')]}">
-                    <label for="arrival_time" string="Arrived at"/>
-                    <field name="arrival_time" class="oe_inline" attrs="{'required': [('status','=','late')]}"/>
+                <div class="oe_clear">
+                    <div>
+                        <label for="status" string="Change status to:"/>
+                        <!-- force using br + oe_inline for status so it won't take that much space -->
+                        <br/><field name="status" class="oe_inline"/>
+                    </div>
+                    <div attrs="{'invisible': [('status','!=','late')]}">
+                        <label for="arrival_time" string="Arrived at"/>
+                        <field name="arrival_time" class="oe_inline" attrs="{'required': [('status','=','late')]}"/>
+                    </div>
                 </div>
                 <footer>
-                      <button name="update_presence" string="Update" type="object" class="oe_highlight"/>
-                      or
-                      <button string="Cancel" class="oe_link" special="cancel" />
-                  </footer>
+                    <button name="update_presence" string="Update" type="object" class="oe_highlight"/>
+                    or
+                    <button string="Cancel" class="oe_link" special="cancel" />
+                </footer>
             </form>
         </field>
     </record>
 
     <act_window name="Take Presence"
-             res_model="event.participant.take.presence.wizard"
-             src_model="event.participant"
-             view_mode="form"
-             target="new"
-             key2="client_action_multi"
-             id="action_event_participant_take_presence_wizard"/>
+            res_model="event.participant.take.presence.wizard"
+            src_model="event.participant"
+            view_mode="form"
+            target="new"
+            key2="client_action_multi"
+            id="action_event_participant_take_presence_wizard"/>
 
     </data>
 </openerp>
