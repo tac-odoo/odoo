@@ -183,6 +183,24 @@ def izip_notruncate(iterators, barrier_delta=None):
                      for i in iterators.itervalues())
             # XXX: fix that following ugly! code
             if ok:
+                t = []
+                for i in iterators.itervalues():
+                    if not i['alive']:
+                        t.extend(i['values'])
+                    else:
+                        for k in i['values']:
+                            if k.start < barrier_date:
+                                t.append(k)
+                max_yield_max = max(p.stop for p in t)
+                max_yield_ok = True
+                for i in iterators.itervalues():
+                    if i['alive'] and max(p.stop for p in i['values']) < max_yield_max:
+                        max_yield_ok = False
+                        break
+                if not max_yield_ok:
+                    # could not yield yet, not all iterator have reached max_yield_max
+                    continue
+
                 v = []
                 for i in iterators.itervalues():
                     if not i['alive']:
