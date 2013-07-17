@@ -118,20 +118,32 @@ class AvailibilityPeriod(object):
                 s.append(a)
 
         # Aggregate consecutive time
-        if aggregate:
-            sr = []
-            for a in s:
-                if a.status == Availibility.UNKNOWN:
-                    a.status = default  # unknown slots are consider unavailable
-                if not sr or (sr and sr[-1].status != a.status):
-                    sr.append(Period(a.start, a.stop, a.status))
-                    continue
-                sr[-1].stop = a.stop
-                sr[-1].status = a.status
-        else:
-            sr = s[:]
-        sr.sort(key=lambda o: o.start)
-        return sr
+        s.sort(key=lambda o: o.start)
+        if aggregate and s:
+            sorig = s[:]
+            sr = [sorig.pop(0)]
+            last = sr[-1]
+            for period in s:
+                td = period.start - last.stop
+                td_sec_diff = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10.**6
+                is_consecutive = (td_sec_diff < 1)
+
+                if is_consecutive:
+                    if period.status == last.status:
+                        # merge periods
+                        last.stop = period.stop
+                    else:
+                        # different periods, continue to next period
+                        sr.append(period)
+                        last = period
+                else:
+                    # periods not consecutive, fill the blank, continue to next period
+                    sr.append(AvailibilityPeriod(last.stop, period.start, default))
+                    sr.append(period)
+                    last = period
+
+            s = sr
+        return s
 
 
 def izip_notruncate(iterators, barrier_delta=None):
