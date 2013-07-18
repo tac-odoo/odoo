@@ -278,7 +278,10 @@ class EventContent(osv.Model):
         values = {}
         if course_id:
             course = self.pool.get('event.course').browse(cr, uid, course_id, context=context)
-            values.update(name=course.name, duration=course.duration)
+            default_slot_duration = self.default_get(cr, uid, ['slot_duration'], context=context)['slot_duration']
+            slot_duration = course.duration if course.duration < slot_duration else default_slot_duration
+            values.update(name=course.name, duration=course.duration,
+                          slot_duration=slot_duration)
         return {'value': values}
 
 

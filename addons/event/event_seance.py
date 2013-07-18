@@ -131,10 +131,18 @@ class EventContent(osv.Model):
         'group_ids': fields.one2many('event.participant.group', 'event_content_id'),
     }
 
+    def _default_slot_duration(self, cr, uid, context=None):
+        if context is None:
+            context = {}
+        if context.get('calendar_id'):
+            calendar = self.pool.get('resource.calendar').browse(cr, uid, context['calendar_id'], context=context)
+            return calendar.slot_duration
+        return 1
+
     _defaults = {
         'duration': 1,
         'sequence': 0,
-        'slot_duration': 1,
+        'slot_duration': _default_slot_duration,
         'slot_count': 1,
     }
 

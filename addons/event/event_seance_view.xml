@@ -119,7 +119,8 @@
                                 </div>
                             </group>
                         </group>
-                        <field name="content_ids" widget="one2many" attrs="{'readonly': [('state','!=','draft')]}"/>
+                        <field name="content_ids" widget="one2many" attrs="{'readonly': [('state','!=','draft')]}"
+                               context="{'calendar_id': calendar_id}"/>
                     </page>
                 </page>
                 <xpath expr="//div[contains(@class, 'oe_button_box')]" position="inside">
