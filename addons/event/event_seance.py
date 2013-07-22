@@ -48,6 +48,15 @@ class EventSeanceType(osv.Model):
     }
 
 
+class EventContentModule(osv.Model):
+    _name = 'event.content.module'
+    _order = 'sequence, name'
+    _columns = {
+        'name': fields.char('Module name', required=True),
+        'sequence': fields.integer('Sequence'),
+    }
+
+
 class EventContent(osv.Model):
     """ Event Content """
     _name = 'event.content'
@@ -129,6 +138,7 @@ class EventContent(osv.Model):
         'slot_info': fields.function(_get_slot_info, type='char', string='Info', store=True, multi='slot-info'),
         'is_divided': fields.boolean('Divided?'),
         'group_ids': fields.one2many('event.participant.group', 'event_content_id'),
+        'module_id': fields.many2one('event.content.module', 'Module'),
     }
 
     def _default_slot_duration(self, cr, uid, context=None):
@@ -705,6 +715,9 @@ class EventEvent(osv.Model):
     _columns = {
         'calendar_id': fields.many2one('resource.calendar', 'Hours'),
         'has_program': fields.boolean('Program', help='This event has a program'),
+        'module_ids': fields.many2many('event.content.module', 'event_content_module_link',
+                                       id1='event_id', id2='content_id',
+                                       string='Modules'),
         'content_ids': fields.many2many('event.content', 'event_content_link',
                                         id1='event_id', id2='content_id',
                                         string='Contents'),

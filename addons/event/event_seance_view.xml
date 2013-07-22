@@ -11,6 +11,7 @@
                     <field name="sequence" widget="handle"/>
                     <field name="name"/>
                     <field name="type_id"/>
+                    <field name="module_id"/>
                     <field name="duration" sum="Duration" widget="float_time"/>
                     <field name="slot_info"/>
                     <field name="is_divided" invisible="1"/>
@@ -45,6 +46,7 @@
                                     <group>
                                         <field name="sequence" invisible="1"/>
                                         <field name="type_id"/>
+                                        <field name="module_id" domain="[('id','in',context.get('module_ids',[]))]"/>
                                         <field name="is_divided"/>
                                     </group>
                                 </group>
@@ -59,6 +61,28 @@
                             </page>
                         </notebook>
                     </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_event_content_module_tree" model="ir.ui.view">
+            <field name="name">event.content.module.tree</field>
+            <field name="model">event.content.module</field>
+            <field name="arch" type="xml">
+                <tree string="Modules">
+                    <field name="sequence" widget="handle"/>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_event_content_module_form" model="ir.ui.view">
+            <field name="name">event.content.module.form</field>
+            <field name="model">event.content.module</field>
+            <field name="arch" type="xml">
+                <form string="Modules">
+                    <field name="name"/>
+                    <field name="sequence"/>
                 </form>
             </field>
         </record>
@@ -119,8 +143,9 @@
                                 </div>
                             </group>
                         </group>
+                        <field name="module_ids"/>
                         <field name="content_ids" widget="one2many" attrs="{'readonly': [('state','!=','draft')]}"
-                               context="{'calendar_id': calendar_id}"/>
+                               context="{'calendar_id': calendar_id, 'module_ids': module_ids[0][2]}"/>
                     </page>
                 </page>
                 <xpath expr="//div[contains(@class, 'oe_button_box')]" position="inside">
