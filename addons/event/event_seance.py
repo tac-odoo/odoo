@@ -50,10 +50,8 @@ class EventSeanceType(osv.Model):
 
 class EventContentModule(osv.Model):
     _name = 'event.content.module'
-    _order = 'sequence, name'
     _columns = {
         'name': fields.char('Module name', required=True),
-        'sequence': fields.integer('Sequence'),
     }
 
 
@@ -281,6 +279,12 @@ class EventSeance(osv.Model):
             result[seance.id] = end.strftime(DT_FMT)
         return result
 
+    def _get_module_id(self, cr, uid, ids, fieldname, args, context=None):
+        result = {}
+        for seance in self.browse(cr, uid, ids, context=context):
+            result[seance.id] = seance.content_id.module_id.id
+        return result
+
     def _store_get_seances_from_seances(self, cr, uid, ids, context=None):
         """return list on seances for participant count refresh"""
         return ids
@@ -330,6 +334,11 @@ class EventSeance(osv.Model):
         'event_ids': fields.related('content_id', 'event_ids', type='many2many',
                                     relation='event.event', string='Events',
                                     readonly=True),
+        'module_id': fields.function(_get_module_id, type='many2one',
+                                     relation='event.content.module',
+                                     store={
+                                         'event.content': (_store_get_seances_from_content, ['module_id'], 10),
+                                     }, readonly=True),
         'participant_ids': fields.one2many('event.participant', 'seance_id', 'Participants'),
         'participant_count': fields.function(_get_participant_count, type='integer', string='# of participants',
                                              store={
@@ -715,9 +724,6 @@ class EventEvent(osv.Model):
     _columns = {
         'calendar_id': fields.many2one('resource.calendar', 'Hours'),
         'has_program': fields.boolean('Program', help='This event has a program'),
-        'module_ids': fields.many2many('event.content.module', 'event_content_module_link',
-                                       id1='event_id', id2='content_id',
-                                       string='Modules'),
         'content_ids': fields.many2many('event.content', 'event_content_link',
                                         id1='event_id', id2='content_id',
                                         string='Contents'),
