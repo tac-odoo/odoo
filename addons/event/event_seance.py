@@ -171,6 +171,23 @@ class EventContent(osv.Model):
         (lambda self, *a, **kw: self._check_divided_groups(*a, **kw), _msg_divided_groups, ['group_ids']),
     ]
 
+    def create(self, cr, uid, values, context=None):
+        new_id = super(EventContent, self).create(cr, uid, values, context=context)
+        Registration = self.pool.get('event.registration')
+        if values.get('is_divided'):
+            content = self.browse(cr, uid, new_id, context=context)
+            registration_ids = Registration.search(cr, uid, [('event_id.content_ids', 'in', content.id), ('state', '!=', 'done')], context=context)
+            Registration._update_registration_groups(cr, uid, registration_ids, context=context)
+        return new_id
+
+    def write(self, cr, uid, ids, values, context=None):
+        rval = super(EventContent, self).write(cr, uid, ids, values, context=context)
+        if any(f in values for f in ['is_divided', 'group_ids']):
+            Registration = self.pool.get('event.registration')
+            registration_ids = Registration.search(cr, uid, [('event_id.content_ids', 'in', ids), ('state', '!=', 'done')], context=context)
+            Registration._update_registration_groups(cr, uid, registration_ids, context=context)
+        return rval
+
     def _prepare_seance_for_content(self, cr, uid, content, date_begin, date_end, group=None, context=None):
         if isinstance(date_begin, basestring):
             date_begin = datetime.strptime(date_begin, DT_FMT)
@@ -618,9 +635,15 @@ class EventParticipantGroup(osv.Model):
         return super(EventParticipantGroup, self).write(cr, uid, ids, values, context=context)
 
     def unlink(self, cr, uid, ids, context=None):
+        content_ids = []
         for group in self.browse(cr, uid, ids, context=context):
             if all(e.state != 'draft' for e in group.event_content_id.event_ids):
                 raise osv.except_osv(_('Error'), _('You can only remove a new content group on draft events'))
+            content_ids.append(group.event_content_id.id)
+        if content_ids:
+            Registration = self.pool.get('event.registration')
+            registration_ids = Registration.search(cr, uid, [('event_id.content_ids', 'in', content_ids), ('state', '!=', 'done')], context=context)
+            Registration._update_registration_groups(cr, uid, registration_ids, context=context)
         return super(EventParticipantGroup, self).unlink(cr, uid, ids, context=context)
 
     def default_get(self, cr, uid, fields_list, context=None):
@@ -930,6 +953,24 @@ class EventRegistration(osv.Model):
                 raise osv.except_osv(_('Error'), _('You can only change groups when registration is not done'))
         return super(EventRegistration, self).write(cr, uid, ids, values, context=context)
 
+    def _update_registration_groups(self, cr, uid, ids, context=None):
+        for registration in self.browse(cr, uid, ids, context=context):
+            event = registration.event_id
+            group_by_content = defaultdict(list)
+            for g in registration.group_ids:
+                group_by_content[g.event_content_id.id].append(g.id)
+            group_ops = []
+            for content in event.content_ids:
+                if content.is_divided and content.id not in group_by_content:
+                    # add default group
+                    group_ops.append((4, content.group_ids[0].id))
+                elif not content.is_divided and content.id in group_by_content:
+                    # remove groups
+                    group_ops.extend((3, content_id)
+                                     for content_id in group_by_content[content.id])
+            registration.write({'group_ids': group_ops})
+        return True
+
     def onchange_event_id(self, cr, uid, ids, event_id, context=None):
         ocv = super(EventRegistration, self).onchange_event_id(cr, uid, ids, event_id, context=context)
         if event_id:
@@ -937,7 +978,7 @@ class EventRegistration(osv.Model):
             Event = self.pool.get('event.event')
             event = Event.browse(cr, uid, event_id, context=context)
             for content in event.content_ids:
-                if content.group_ids:
+                if content.is_divided:
                     # take default group (ordered first) or 1st group available if not default
                     group_ids.append(content.group_ids[0].id)
             ocv.setdefault('value', {})
@@ -970,7 +1011,7 @@ class EventRegistration(osv.Model):
             for content in reg.event_id.content_ids:
                 group_count = len([g for g in content.group_ids
                                    if g.id in reg_group_ids])
-                if content.group_ids and group_count != 1:
+                if content.is_divided and group_count != 1:
                     if group_count < 1:
                         reg_errors.append(_("You have to choose one group for '%s'") % (content.name,))
                     elif group_count > 1:
@@ -985,7 +1026,7 @@ class EventRegistration(osv.Model):
             for content in reg.event_id.content_ids:
                 group_count = len([g for g in content.group_ids
                                    if g.id in reg_group_ids])
-                if content.group_ids and group_count != 1:
+                if content.is_divided and group_count != 1:
                     return False
         return True
 
