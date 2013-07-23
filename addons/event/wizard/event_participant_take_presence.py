@@ -23,12 +23,12 @@ from openerp.osv import osv, fields
 from openerp.tools.translate import _
 
 
-class EventParticipantTakePresenceWizard(osv.TransientModel):
-    _name = 'event.participant.take.presence.wizard'
+class EventParticipationTakePresenceWizard(osv.TransientModel):
+    _name = 'event.participation.take.presence.wizard'
 
     def _states_selection(self, cr, uid, context=None):
-        Participant = self.pool.get('event.participant')
-        fields = Participant.fields_get(cr, uid, ['presence'], context=context)
+        Participation = self.pool.get('event.participation')
+        fields = Participation.fields_get(cr, uid, ['presence'], context=context)
         return fields['presence']['selection']
 
     _columns = {
@@ -40,9 +40,9 @@ class EventParticipantTakePresenceWizard(osv.TransientModel):
     def _default_name(self, cr, uid, context=None):
         if context is None:
             context = {}
-        Participation = self.pool.get('event.participant')
+        Participation = self.pool.get('event.participation')
         participation_ids = context.get('active_ids') or []
-        if context.get('active_model', '') != 'event.participant' \
+        if context.get('active_model', '') != 'event.participation' \
                 or not participation_ids:
             return _('Invalid participants')
         if len(participation_ids) == 1:
@@ -63,11 +63,11 @@ class EventParticipantTakePresenceWizard(osv.TransientModel):
         if not participation_ids:
             return False
 
-        Participant = self.pool.get('event.participant')
+        Participation = self.pool.get('event.participation')
         w = self.browse(cr, uid, ids[0], context=context)
         arrival_time = w.arrival_time if w.status == 'late' else False
         ctx = dict(context,
                    presence_arrival_time=arrival_time,
                    presence_departure_time=False)
-        return Participant._take_presence(cr, uid, participation_ids,
-                                          w.status, context=ctx)
+        return Participation._take_presence(cr, uid, participation_ids,
+                                            w.status, context=ctx)

@@ -201,11 +201,11 @@
 
         <record id="action_seance_2_participant_link" model="ir.actions.act_window">
             <field name="name">Participants</field>
-            <field name="res_model">event.participant</field>
+            <field name="res_model">event.participation</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="context">{'search_default_seance_id': active_id}</field>
-            <field name="domain">[]</field>
+            <field name="domain">[('role', '=', 'participant')]</field>
         </record>
 
         <record id="view_event_seance_tree" model="ir.ui.view">
@@ -389,9 +389,9 @@
         <menuitem id="menu_event_seance" parent="menu_event_management_root"
                   action="action_event_seance"/>
 
-        <record id="view_event_participant_tree" model="ir.ui.view">
-            <field name="name">event.participant.tree</field>
-            <field name="model">event.participant</field>
+        <record id="view_event_participation_tree" model="ir.ui.view">
+            <field name="name">event.participation.tree</field>
+            <field name="model">event.participation</field>
             <field name="arch" type="xml">
                 <tree string="Participants">
                     <field name="name"/>
@@ -408,7 +408,7 @@
                             string="Mark as Absent" icon="kanban-stop"
                             attrs="{'invisible': ['|', ('state','!=','draft'),('presence','=','absent')]}"
                             context="{'presence': 'absent'}"/>
-                    <button name="%(action_event_participant_take_presence_wizard)d" type="action"
+                    <button name="%(action_event_participation_take_presence_wizard)d" type="action"
                             string="Mark as Late" icon="kanban-pause"
                             attrs="{'invisible': ['|',('state','!=','draft'),('presence','=','late')]}"
                             context="{'default_status': 'late'}"/>
@@ -417,9 +417,9 @@
             </field>
         </record>
 
-        <record id="view_event_participant_form" model="ir.ui.view">
-            <field name="name">event.participant.form</field>
-            <field name="model">event.participant</field>
+        <record id="view_event_participation_form" model="ir.ui.view">
+            <field name="name">event.participation.form</field>
+            <field name="model">event.participation</field>
             <field name="arch" type="xml">
                 <form string="Participant" version="7.0">
                     <header>
@@ -435,7 +435,7 @@
                                     string="Mark as Absent" icon="kanban-stop"
                                     attrs="{'invisible': ['|', ('state','!=','draft'),('presence','=','absent')]}"
                                     context="{'presence': 'absent'}"/>
-                            <button name="%(action_event_participant_take_presence_wizard)d" type="action"
+                            <button name="%(action_event_participation_take_presence_wizard)d" type="action"
                                     string="Mark as Late" icon="kanban-pause"
                                     attrs="{'invisible': ['|',('state','!=','draft'),('presence','=','late')]}"
                                     context="{'default_status': 'late'}"/>
@@ -470,9 +470,9 @@
             </field>
         </record>
 
-        <record id="view_event_participant_search" model="ir.ui.view">
-            <field name="name">event.participant.search</field>
-            <field name="model">event.participant</field>
+        <record id="view_event_participation_search" model="ir.ui.view">
+            <field name="name">event.participation.search</field>
+            <field name="model">event.participation</field>
             <field name="arch" type="xml">
                 <search string="Participants">
                     <field name="name"/>
@@ -484,18 +484,19 @@
 
         <record id="action_event_participant" model="ir.actions.act_window">
             <field name="name">Participants</field>
-            <field name="res_model">event.participant</field>
+            <field name="res_model">event.participation</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="search_view_id" ref="view_event_participant_search"/>
+            <field name="domain">[('role', '=', 'participant')]</field>
+            <field name="search_view_id" ref="view_event_participation_search"/>
         </record>
 
         <menuitem id="menu_event_participant" parent="menu_event_management_root"
                   action="action_event_participant"/>
 
-        <record model="ir.ui.view" id="view_event_participant_group_tree">
-            <field name="name">event.participant.group.tree</field>
-            <field name="model">event.participant.group</field>
+        <record model="ir.ui.view" id="view_event_participation_group_tree">
+            <field name="name">event.participation.group.tree</field>
+            <field name="model">event.participation.group</field>
             <field name="arch" type="xml">
                 <tree string="Groups">
                     <field name="name"/>
@@ -505,9 +506,9 @@
             </field>
         </record>
 
-        <record model="ir.ui.view" id="view_event_participant_group_form">
-            <field name="name">event.participant.group.form</field>
-            <field name="model">event.participant.group</field>
+        <record model="ir.ui.view" id="view_event_participation_group_form">
+            <field name="name">event.participation.group.form</field>
+            <field name="model">event.participation.group</field>
             <field name="arch" type="xml">
                 <form string="Group" version="7.0">
                     <sheet>

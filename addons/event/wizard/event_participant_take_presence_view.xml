@@ -2,9 +2,9 @@
 <openerp>
     <data>
 
-    <record model="ir.ui.view" id="view_event_participant_take_presence_wizard_form">
+    <record model="ir.ui.view" id="view_event_participation_take_presence_wizard_form">
         <field name="name">Participant Take Presence (wizard)</field>
-        <field name="model">event.participant.take.presence.wizard</field>
+        <field name="model">event.participation.take.presence.wizard</field>
         <field name="arch" type="xml">
             <form string="Take Presence" version="7.0">
                 <div class="oe_title">
@@ -31,12 +31,12 @@
     </record>
 
     <act_window name="Take Presence"
-            res_model="event.participant.take.presence.wizard"
-            src_model="event.participant"
+            res_model="event.participation.take.presence.wizard"
+            src_model="event.participation"
             view_mode="form"
             target="new"
             key2="client_action_multi"
-            id="action_event_participant_take_presence_wizard"/>
+            id="action_event_participation_take_presence_wizard"/>
 
     </data>
 </openerp>

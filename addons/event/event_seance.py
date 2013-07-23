@@ -135,7 +135,7 @@ class EventContent(osv.Model):
         'slot_count': fields.function(_get_slot_info, type='integer', string='Slot count', store=True, multi='slot-info'),
         'slot_info': fields.function(_get_slot_info, type='char', string='Info', store=True, multi='slot-info'),
         'is_divided': fields.boolean('Divided?'),
-        'group_ids': fields.one2many('event.participant.group', 'event_content_id'),
+        'group_ids': fields.one2many('event.participation.group', 'event_content_id'),
         'module_id': fields.many2one('event.content.module', 'Module'),
     }
 
@@ -319,8 +319,8 @@ class EventSeance(osv.Model):
         """return list of seances for participant count refresh"""
         registration_ids = []
         Seance = self.pool.get('event.seance')
-        ParticipantGroup = self.pool.get('event.participant.group')
-        for group in ParticipantGroup.browse(cr, uid, ids, context=context):
+        ParticipationGroup = self.pool.get('event.participation.group')
+        for group in ParticipationGroup.browse(cr, uid, ids, context=context):
             registration_ids.extend(r.id for r in group.registration_ids)
         return Seance._store_get_seances_from_registrations(cr, uid, registration_ids, context=context)
 
@@ -347,7 +347,7 @@ class EventSeance(osv.Model):
         'content_id': fields.many2one('event.content', 'Content', required=True, ondelete='cascade'),
         'content_divided': fields.related('content_id', 'is_divided', type='boolean',
                                           string='Divided'),
-        'group_id': fields.many2one('event.participant.group', 'Group'),
+        'group_id': fields.many2one('event.participation.group', 'Group'),
         'event_ids': fields.related('content_id', 'event_ids', type='many2many',
                                     relation='event.event', string='Events',
                                     readonly=True),
@@ -356,12 +356,15 @@ class EventSeance(osv.Model):
                                      store={
                                          'event.content': (_store_get_seances_from_content, ['module_id'], 10),
                                      }, readonly=True),
-        'participant_ids': fields.one2many('event.participant', 'seance_id', 'Participants'),
+        'resource_participation_ids': fields.one2many('event.participation', 'seance_id', 'Resource Participation',
+                                                      domain=[('role', '!=', 'participant')]),
+        'participant_ids': fields.one2many('event.participation', 'seance_id', 'Participants',
+                                           domain=[('role', '=', 'participant')]),
         'participant_count': fields.function(_get_participant_count, type='integer', string='# of participants',
                                              store={
                                                  'event.seance': (_store_get_seances_from_seances, ['content_id', 'group_id'], 10),
                                                  'event.registration': (_store_get_seances_from_registrations, ['group_ids', 'state'], 10),
-                                                 'event.participant.group': (_store_get_seances_from_groups, ['registration_ids'], 10),
+                                                 'event.participation.group': (_store_get_seances_from_groups, ['registration_ids'], 10),
                                                  'event.content': (_store_get_seances_from_content, ['is_divided'], 10),
                                              }),
         'state': fields.selection(SEANCE_STATES, 'State', readonly=True, required=True),
@@ -417,7 +420,7 @@ class EventSeance(osv.Model):
         return self.write(cr, uid, ids, {'state': 'done'}, context=context)
 
     def _refresh_participations(self, cr, uid, ids, context=None):
-        Participant = self.pool.get('event.participant')
+        Participation = self.pool.get('event.participation')
         # Registration = self.pool.get('event.registration')
         p_to_unlink = []  # participation ids to unlink
 
@@ -465,7 +468,7 @@ class EventSeance(osv.Model):
                             part_name = '%s' % (reg.name or reg.partner_id.name or '',)
                         else:
                             part_name = '%s #%d' % (reg.name or reg.partner_id.name or '', i)
-                        Participant.create(cr, uid, {
+                        Participation.create(cr, uid, {
                             'name': part_name,
                             'partner_id': reg.partner_id.id,
                             # 'contact_id': contact.id if contact else False,
@@ -473,13 +476,13 @@ class EventSeance(osv.Model):
                             'registration_id': reg.id,
                         }, context=context)
         if p_to_unlink:
-            Participant.unlink(cr, uid, p_to_unlink, context=context)
+            Participation.unlink(cr, uid, p_to_unlink, context=context)
         return True
 
 
-class EventParticipant(osv.Model):
-    """ Event Participant """
-    _name = 'event.participant'
+class EventParticipation(osv.Model):
+    """ Event Participation """
+    _name = 'event.participation'
     _description = __doc__
     _inherit = ['mail.thread', 'ir.needaction_mixin']
 
@@ -494,6 +497,13 @@ class EventParticipant(osv.Model):
         ('draft', 'Draft'),
         ('exception', 'Exception'),  # TODO: impl. when errors happens on participation
         ('done', 'Done'),
+    ]
+
+    ROLES = [
+        ('participant', 'Participant'),
+        ('speaker', 'Speaker'),
+        ('room', 'Room'),
+        ('equipment', 'Equipment'),
     ]
 
     def _get_presence_summary(self, cr, uid, ids, fieldname, args, context=None):
@@ -512,6 +522,7 @@ class EventParticipant(osv.Model):
 
     _columns = {
         'name': fields.char('Participant Name', size=128, required=True),
+        'role': fields.selection(ROLES, required=True),
         'partner_id': fields.many2one('res.partner', 'Participant'),
         'seance_id': fields.many2one('event.seance', 'Seance', required=True, ondelete='cascade'),
         'date': fields.related('seance_id', 'date_begin', type='datetime', string='Date', readonly=True),
@@ -529,6 +540,7 @@ class EventParticipant(osv.Model):
     _defaults = {
         'state': 'draft',
         'presence': 'none',
+        'role': 'participant',
     }
 
     def _take_presence(self, cr, uid, ids, presence, context=None):
@@ -588,8 +600,8 @@ class EventParticipant(osv.Model):
         return {'value': values}
 
 
-class EventParticipantGroup(osv.Model):
-    _name = 'event.participant.group'
+class EventParticipationGroup(osv.Model):
+    _name = 'event.participation.group'
     _order = 'is_default DESC, name'
 
     def _get_participant_count(self, cr, uid, ids, field_name, args, context=None):
@@ -625,14 +637,14 @@ class EventParticipantGroup(osv.Model):
             event_ids = content.event_ids
             if event_ids and any(e.state != 'draft' for e in event_ids):
                 raise osv.except_osv(_('Error'), _('You can only add new content group on draft events'))
-        return super(EventParticipantGroup, self).create(cr, uid, values, context=context)
+        return super(EventParticipationGroup, self).create(cr, uid, values, context=context)
 
     def write(self, cr, uid, ids, values, context=None):
         if 'registration_ids' in values:
             for group in self.browse(cr, uid, ids, context=context):
                 if group.event_content_id.event_id.state == 'done':
                     raise osv.except_osv(_('Error'), _('You cannot change content group subscription on done events'))
-        return super(EventParticipantGroup, self).write(cr, uid, ids, values, context=context)
+        return super(EventParticipationGroup, self).write(cr, uid, ids, values, context=context)
 
     def unlink(self, cr, uid, ids, context=None):
         content_ids = []
@@ -644,7 +656,7 @@ class EventParticipantGroup(osv.Model):
             Registration = self.pool.get('event.registration')
             registration_ids = Registration.search(cr, uid, [('event_id.content_ids', 'in', content_ids), ('state', '!=', 'done')], context=context)
             Registration._update_registration_groups(cr, uid, registration_ids, context=context)
-        return super(EventParticipantGroup, self).unlink(cr, uid, ids, context=context)
+        return super(EventParticipationGroup, self).unlink(cr, uid, ids, context=context)
 
     def default_get(self, cr, uid, fields_list, context=None):
         if context is None:
@@ -658,7 +670,7 @@ class EventParticipantGroup(osv.Model):
                                                                    fields=['is_default'], context=context)
             if not any(g['is_default'] for g in current_group_ids):
                 context = dict(context, default_is_default=True)
-        return super(EventParticipantGroup, self).default_get(cr, uid, fields_list, context=context)
+        return super(EventParticipationGroup, self).default_get(cr, uid, fields_list, context=context)
 
 
 class EventType(osv.Model):
@@ -922,7 +934,7 @@ class EventEvent(osv.Model):
 class EventRegistration(osv.Model):
     _inherit = 'event.registration'
     _columns = {
-        'group_ids': fields.many2many('event.participant.group', 'event_registration_participation_group_rel',
+        'group_ids': fields.many2many('event.participation.group', 'event_registration_participation_group_rel',
                                       string='Groups', id1='registration_id', id2='group_id'),
         'participation_ids': fields.one2many('event.participation', 'registration_id', 'Participations', readonly=True),
     }
@@ -989,7 +1001,7 @@ class EventRegistration(osv.Model):
         # filter groups to only keep the last group 'id' for each content
         # (this way we can simulte mutualy-exclusing groups)
         if group_ids and len(group_ids[0]) == 3 and group_ids[0][0] == 6:
-            group_obj = self.pool.get('event.participant.group')
+            group_obj = self.pool.get('event.participation.group')
             group_ids = group_ids[0][2]
             group_to_unset = []
             group_by_content = {}
@@ -1042,10 +1054,10 @@ class EventRegistration(osv.Model):
             context = {}
         result = []
         if context.get('group_for_content_id'):
-            ParticipantGroup = self.pool.get('event.participant.group')
+            ParticipationGroup = self.pool.get('event.participation.group')
             group_domain = [('event_content_id', '=', context['group_for_content_id'])]
-            group_ids = ParticipantGroup.search(cr, uid, group_domain, context=context)
-            result = ParticipantGroup.name_get(cr, uid, group_ids, context=context)
+            group_ids = ParticipationGroup.search(cr, uid, group_domain, context=context)
+            result = ParticipationGroup.name_get(cr, uid, group_ids, context=context)
         print("CONTEXT: %s" % (context,))
         return result, []
 
