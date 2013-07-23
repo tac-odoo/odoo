@@ -204,7 +204,7 @@ class EventContent(osv.Model):
         }
         return values
 
-    def create_seances_from_content(self, cr, uid, ids, date_begin, date_end, context=None):
+    def create_seances_from_content(self, cr, uid, ids, date_begin, date_end, o2m_commands=False, context=None):
         """Create seances associated with the requested content
         :return: list of created events id
         """
@@ -216,8 +216,11 @@ class EventContent(osv.Model):
         for content in self.browse(cr, uid, ids, context=context):
             for group in (content.group_ids or [None]):
                 values = prepare_seance(content, date_begin, date_end, group=group)
-                nsid = Seance.create(cr, uid, values, context=context)
-                new_seance_ids.append(nsid)
+                if o2m_commands:
+                    new_seance_ids.append((0, 0, values))
+                else:
+                    nsid = Seance.create(cr, uid, values, context=context)
+                    new_seance_ids.append(nsid)
         return new_seance_ids
 
     def button_open_group_registration_dispatch(self, cr, uid, ids, context=None):
@@ -543,6 +546,13 @@ class EventParticipation(osv.Model):
         'role': 'participant',
     }
 
+    def create(self, cr, uid, values, context=None):
+        if context is None:
+            context = {}
+        # Do not log participation creation or subscribe user who create the participation
+        context = dict(context, mail_create_nolog=True, mail_create_nosubscribe=True)
+        return super(EventParticipation, self).create(cr, uid, values, context=context)
+
     def _take_presence(self, cr, uid, ids, presence, context=None):
         if not ids:
             return False
@@ -861,7 +871,9 @@ class EventEvent(osv.Model):
             print(">>> event '%d': creating linear children events" % (event.id,))
             # content_total_duration = sum(c.duration for c in event.content_ids)
             event_begin = datetime.strptime(event.date_begin, DT_FMT)
-            event_end = event_begin + timedelta(days=3650) # TODO: add estimated end date
+            # 1 day before end of life - otherwise bigbang traceback
+            # with OverflowError cause of timezone computation ;-)
+            event_end = datetime.max - timedelta(days=1)
             # event_end = datetime.strptime(event.date_end, DT_FMT)  # FIXME: add support for no end date (=None)
 
             if not event.content_ids:
@@ -879,9 +891,10 @@ class EventEvent(osv.Model):
                 available_periods = (p for p in timeline.iter(by='change', as_tz='UTC')
                                      if p.status == Availibility.FREE).__iter__()
                 ###
-                create_content = partial(Content.create_seances_from_content, cr, uid, context=context)
+                create_content = partial(Content.create_seances_from_content, cr, uid, o2m_commands=True, context=context)
 
                 period = None
+                commands = []
                 for content in event.content_ids:
                     logger.info('creating for content %s (%.2f hours)' % (content.name, content.duration,))
                     remaining_duration = content.duration
@@ -899,7 +912,7 @@ class EventEvent(osv.Model):
                         alloc_duration = min(content.slot_duration, remaining_duration)
                         (s, e) = period.shift_hours(alloc_duration)
                         logger.info('allocated duration %.2f :: %s -> %s' % (alloc_duration, s, e))
-                        create_content(content.id, s, e)
+                        commands.extend(create_content(content.id, s, e))
                         remaining_duration -= alloc_duration
                         # period_duration = period.duration
                         # if period_duration <= remaining_duration:
@@ -911,6 +924,22 @@ class EventEvent(osv.Model):
                         #     create_content(content.id, period.start, period.stop)
                         #     remaining_duration = 0
                         #     period.start = event_end
+
+                Seance = self.pool.get('event.seance')
+                result = []
+                # Create all seances without stored fields
+                ctx = dict(context, no_store_function=True)
+                for cmd in commands:
+                    new_seance_id = Seance.create(cr, uid, cmd[2], context=ctx)
+                    result += Seance._store_get_values(cr, uid, [new_seance_id], cmd[2].keys(), ctx)
+                mresult = defaultdict(list)
+                # Computed stored fields in groups
+                for order, object, ids, fields2 in result:
+                    mresult[(order, object, tuple(fields2))] += ids
+                for k in sorted(mresult):
+                    (order, object, fields2) = k
+                    ids = list(set(mresult[k]))
+                    self.pool.get(object)._store_set_values(cr, uid, ids, fields2, context)
 
         return True
 

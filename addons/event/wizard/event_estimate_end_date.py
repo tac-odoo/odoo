@@ -85,8 +85,6 @@ class event_event_estimate_end_date_wizard(osv.osv_memory):
             performed='[%s]' % (', '.join(content_performed_dates,)),
             start=start,
         )
-        from pprint import pprint
-        pprint(task_args)
         return face_new_def('Task', component.id, **task_args)
 
     def _compute_end_date(self, cr, uid, event_id, date_start, context=None):
