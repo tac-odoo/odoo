@@ -28,6 +28,8 @@ class ResPartner(osv.osv):
 
     _columns = {
         'speaker': fields.boolean('Speaker', help="Check this box if this contact is a speaker."),
+        'room': fields.boolean('Room', help='Check this box if this contact address could be used as room location'),
+        'equipment': fields.boolean('Equipment', help='Check this box if this contact can be used as a event equipment (like a beamer, ...)'),
         'event_ids': fields.one2many('event.event', 'main_speaker_id', readonly=True),
         'event_registration_ids': fields.one2many('event.registration', 'partner_id', readonly=True),
         'speakerinfo_ids': fields.one2many('event.course.speakerinfo', 'course_id', 'Speaker Infos'),
@@ -75,11 +77,21 @@ class ResPartner(osv.osv):
             }
         return {}
 
-    def onchange_speaker(self, cr, uid, ids, speaker, context=None):
+    def onchange_event_role(self, cr, uid, ids, source, speaker, room, equipment, context=None):
+        roles = dict(speaker=speaker, room=room, equipment=equipment)
+        roles_update = dict(speaker=dict(attendee_type='speaker'),
+                            room=dict(attendee_type='room'),
+                            equipment=dict(attendee_type='resource'))
         values = {}
-        values = {
-            'attendee_type': 'speaker' if speaker else 'person',
-        }
+        if all(not v for v in roles.itervalues()):
+            values.update(attendee_type='person')
+            return {'value': values}
+        for field, value in roles.iteritems():
+            if value and source == field:
+                # update related fields and set other roles to False
+                values.update(roles_update.get(field, {}))
+                values.update(dict((r, False) for r in roles if r != field and roles[r]))
+                break
         return {'value': values}
 
 

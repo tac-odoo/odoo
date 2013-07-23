@@ -15,13 +15,19 @@
                     <button type="object" name="open_courses" string="Courses"
                             attrs="{'invisible': [('speaker','=',False)]}"/>
                 </div>
-                <xpath expr="//page[@string='Sales &amp; Purchases']//field[@name='supplier']" name="supplier" position="after">
-                    <field name="speaker" on_change="onchange_speaker(speaker)"/>
-                </xpath>
                 <xpath expr="//page[@string='Sales &amp; Purchases']" position="after">
-                    <page string="Event" attrs="{'invisible': [('speaker','=',False)]}">
-                        <separator string="Courses"/>
-                        <field name="speakerinfo_ids" colspan="4">
+                    <page string="Event">
+                        <group>
+                            <group>
+                                <field name="speaker" on_change="onchange_event_role('speaker', speaker, room, equipment)"/>
+                                <field name="room" on_change="onchange_event_role('room', speaker, room, equipment)"/>
+                                <field name="equipment" on_change="onchange_event_role('equipment', speaker, room, equipment)"/>
+                            </group>
+                            <group>
+                            </group>
+                        </group>
+                        <separator string="Courses" attrs="{'invisible': [('speaker','=',False)]}"/>
+                        <field name="speakerinfo_ids" colspan="4" attrs="{'invisible': [('speaker','=',False)]}">
                             <tree string="Courses" editable="bottom">
                                 <field name="course_id"/>
                                 <field name="price_from"/>
@@ -37,10 +43,13 @@
             <field name="name">res.partner.search.event</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_res_partner_filter"/>
+            <field name="priority" eval="20"/>
             <field name="arch" type="xml">
-                <filter name="supplier" position="after">
+                <filter name="supplier" string="Suppliers" position="after">
                     <filter string="Speakers" name="speaker" domain="[('speaker','=',1)]" help="Speaker Partners"
                             context="{'default_speaker': 1}"/>
+                    <filter string="Rooms" name="room" domain="[('room','=',1)]" help="Rooms"/>
+                    <filter string="Equipments" name="equipment" domain="[('equipment','=',1)]" help="Equipments"/>
                 </filter>
             </field>
         </record>
