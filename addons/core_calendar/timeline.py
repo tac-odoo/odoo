@@ -155,7 +155,8 @@ def izip_notruncate(iterators, barrier_delta=None):
     iterators = dict((n, {
         'it': iterator,
         'alive': True,
-        'values': deque()
+        'values': deque(),
+        'max': None,
     }) for n, iterator in enumerate(iterators))
 
     while sum(i['alive'] for i in iterators.itervalues()):
@@ -165,6 +166,7 @@ def izip_notruncate(iterators, barrier_delta=None):
                 try:
                     v = iterator['it'].next()
                     iterator['values'].append(v)
+                    iterator['max'] = v.stop
                 except StopIteration:
                     iterator['alive'] = False
         # collect values
@@ -175,11 +177,11 @@ def izip_notruncate(iterators, barrier_delta=None):
                     v.append(i['values'].popleft())
             yield v
         else:
-            min_date = min(v.start
+            min_date = min(i['values'][0].start
                            for i in iterators.itervalues()
-                           for v in i['values'] if i['values'])
+                           if i['values'])
             barrier_date = min_date + barrier_delta
-            ok = all(not i['alive'] or (i['values'] and max(v.start for v in i['values']) > barrier_date)
+            ok = all(not i['alive'] or (i['values'] and i['values'][-1].start > barrier_date)
                      for i in iterators.itervalues())
             # XXX: fix that following ugly! code
             if ok:
@@ -191,10 +193,11 @@ def izip_notruncate(iterators, barrier_delta=None):
                         for k in i['values']:
                             if k.start < barrier_date:
                                 t.append(k)
-                max_yield_max = max(p.stop for p in t)
+                t.sort(key=lambda o: o.stop)
+                max_yield_max = t[-1].stop
                 max_yield_ok = True
                 for i in iterators.itervalues():
-                    if i['alive'] and max(p.stop for p in i['values']) < max_yield_max:
+                    if i['alive'] and i['max'] < max_yield_max:
                         max_yield_ok = False
                         break
                 if not max_yield_ok:
@@ -396,29 +399,17 @@ class GenericEventPeriodEmiter(PeriodEmiter):
         events = EventPeriod.merge(self.events + [global_event_period])
         s = start.replace()
         if by == 'change':
-            event_idx = self.event_idx(events, start)
-            event_max = len(events)
-        else:
-            delta = self.get_default_delta(by)
+            by = 'day'
+        delta = self.get_default_delta('day')
         while s < end:
-            if by == 'change':
-                if event_idx is not None:
-                    current_event = events[event_idx]
-                    yield AvailibilityPeriod(current_event.start, current_event.stop,
-                                             current_event.status)
-                    event_idx += 1
-                    if event_idx >= event_max:
-                        break
-                    s = events[event_idx].start
+            e = min(s + delta, end)
+            range_events = self.events_range(events, s, e)
+            if not range_events:
+                range_avail = Availibility.UNKNOWN
             else:
-                e = min(s + delta, end)
-                range_events = self.events_range(events, s, e)
-                if not range_events:
-                    range_avail = Availibility.UNKNOWN
-                else:
-                    range_avail = max(e.status for e in range_events)
-                yield AvailibilityPeriod(s, e, range_avail)
-                s = e
+                range_avail = max(e.status for e in range_events)
+            yield AvailibilityPeriod(s, e, range_avail)
+            s = e
 
 
 class Timeline(object):
