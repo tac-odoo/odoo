@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+from functools import partial
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
 
@@ -32,11 +33,28 @@ class ResPartner(osv.osv):
         'equipment': fields.boolean('Equipment', help='Check this box if this contact can be used as a event equipment (like a beamer, ...)'),
         'event_ids': fields.one2many('event.event', 'main_speaker_id', readonly=True),
         'event_registration_ids': fields.one2many('event.registration', 'partner_id', readonly=True),
-        'speakerinfo_ids': fields.one2many('event.course.speakerinfo', 'course_id', 'Speaker Infos'),
+        'speakerinfo_ids': fields.one2many('event.course.speakerinfo', 'speaker_id', 'Speaker Infos'),
         'child_ids': fields.one2many('res.partner', 'parent_id', 'Contacts', domain=[('active', '=', True), ('room', '=', False), ('equipment', '=', False)]),  # force "active_test" domain to bypass _search() override
         'room_ids': fields.one2many('res.partner', 'parent_id', 'Rooms', domain=[('active', '=', True), ('room', '=', True)]),
         'equipment_ids': fields.one2many('res.partner', 'parent_id', 'Equipments', domain=[('active', '=', True), ('equipment', '=', True)]),
     }
+
+    def create(self, cr, uid, values, context=None):
+        if context is None:
+            context = {}
+
+        call_change_role = partial(self.onchange_event_role,
+                                   cr, uid, [], context=context)
+        for i, f in enumerate(['speaker', 'room', 'equipment']):
+            if values.get(f):
+                changes = call_change_role(f, *[True if j == i else False
+                                                for j in xrange(3)])
+                for k, v in changes.get('value', {}).iteritems():
+                    if k not in values:
+                        values[k] = v
+                break
+
+        return super(ResPartner, self).create(cr, uid, values, context=context)
 
     def open_registrations(self, cr, uid, ids, context=None):
         """ Utility method used to add an "Open Registrations" button in partner views """
