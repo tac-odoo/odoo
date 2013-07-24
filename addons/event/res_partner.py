@@ -33,6 +33,9 @@ class ResPartner(osv.osv):
         'event_ids': fields.one2many('event.event', 'main_speaker_id', readonly=True),
         'event_registration_ids': fields.one2many('event.registration', 'partner_id', readonly=True),
         'speakerinfo_ids': fields.one2many('event.course.speakerinfo', 'course_id', 'Speaker Infos'),
+        'child_ids': fields.one2many('res.partner', 'parent_id', 'Contacts', domain=[('active', '=', True), ('room', '=', False), ('equipment', '=', False)]),  # force "active_test" domain to bypass _search() override
+        'room_ids': fields.one2many('res.partner', 'parent_id', 'Rooms', domain=[('active', '=', True), ('room', '=', True)]),
+        'equipment_ids': fields.one2many('res.partner', 'parent_id', 'Equipments', domain=[('active', '=', True), ('equipment', '=', True)]),
     }
 
     def open_registrations(self, cr, uid, ids, context=None):
