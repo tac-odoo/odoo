@@ -3966,10 +3966,14 @@ instance.web.form.One2ManyListView = instance.web.ListView.extend({
                 return value.length;
             });
             if (!self.o2m.options.reload_on_button && !cached_records) {
-                self.handle_button(name, id, callback);
+                self.reload_mutex.exec(function() {
+                    self.handle_button(name, id, callback);
+                });
             }else {
-                self.handle_button(name, id, function(){
-                    self.o2m.view.reload();
+                self.reload_mutex.exec(function() {
+                    self.handle_button(name, id, function(){
+                        self.o2m.view.reload();
+                    });
                 });
             }
         });

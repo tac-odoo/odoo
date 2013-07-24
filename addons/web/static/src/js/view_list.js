@@ -66,6 +66,7 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
         this.columns = [];
 
         this.records = new Collection();
+        this.reload_mutex = new $.Mutex();
 
         this.set_groups(new (this.options.GroupsType)(this));
 
@@ -501,27 +502,29 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
      */
     reload_content: synchronized(function () {
         var self = this;
-        self.$el.find('.oe_list_record_selector').prop('checked', false);
-        this.records.reset();
-        var reloaded = $.Deferred();
-        this.$el.find('.oe_list_content').append(
-            this.groups.render(function () {
-                if (self.dataset.index == null) {
-                    if (self.records.length) {
+        return this.reload_mutex.exec(function() {
+            self.$el.find('.oe_list_record_selector').prop('checked', false);
+            this.records.reset();
+            var reloaded = $.Deferred();
+            this.$el.find('.oe_list_content').append(
+                this.groups.render(function () {
+                    if (self.dataset.index == null) {
+                        if (self.records.length) {
+                            self.dataset.index = 0;
+                        }
+                    } else if (self.dataset.index >= self.records.length) {
                         self.dataset.index = 0;
                     }
-                } else if (self.dataset.index >= self.records.length) {
-                    self.dataset.index = 0;
-                }
-
-                self.compute_aggregates();
-                reloaded.resolve();
-            }));
-        this.do_push_state({
-            page: this.page,
-            limit: this._limit
+    
+                    self.compute_aggregates();
+                    reloaded.resolve();
+                }));
+            this.do_push_state({
+                page: this.page,
+                limit: this._limit
+            });
+            return reloaded.promise();
         });
-        return reloaded.promise();
     }),
     reload: function () {
         return this.reload_content();
