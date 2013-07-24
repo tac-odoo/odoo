@@ -42,6 +42,8 @@
                                             <!-- slot_count x slot_duration = duration -->
                                             <field name="slot_count" class="oe_inline oe_offer_content_duration" readonly="0" on_change="onchange_duration('slot_count', slot_count, slot_duration, duration, context)"/> x <field name="slot_duration" class="oe_inline oe_offer_content_duration" widget="float_time" on_change="onchange_duration('slot_duration', slot_count, slot_duration, duration, context)"/> = <field name="duration" class="oe_inline oe_offer_content_duration" widget="float_time" on_change="onchange_duration('duration', slot_count, slot_duration, duration, context)"/>
                                           </div>
+                                          <field name="room_id" domain="[('room','=',1)]"/>
+                                          <field name="speaker_id" domain="[('speaker','=',1)]"/>
                                         </group>
                                     <group>
                                         <field name="sequence" invisible="1"/>

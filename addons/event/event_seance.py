@@ -137,6 +137,8 @@ class EventContent(osv.Model):
         'is_divided': fields.boolean('Divided?'),
         'group_ids': fields.one2many('event.participation.group', 'event_content_id'),
         'module_id': fields.many2one('event.content.module', 'Module'),
+        'room_id': fields.many2one('res.partner', 'Room', help='Default room assigned to created seances related to this content'),
+        'speaker_id': fields.many2one('res.partner', 'Speaker', help='Default speaker assigned to created seances related to this content'),
     }
 
     def _default_slot_duration(self, cr, uid, context=None):
@@ -202,6 +204,10 @@ class EventContent(osv.Model):
             'date_begin': date_begin,
             'duration': duration,
         }
+        if content.speaker_id:
+            values['main_speaker_id'] = content.speaker_id.id
+        if content.room_id:
+            values['address_id'] = content.room_id.id
         return values
 
     def create_seances_from_content(self, cr, uid, ids, date_begin, date_end, o2m_commands=False, context=None):
