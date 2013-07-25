@@ -274,7 +274,7 @@
                 </field>
                 <xpath expr="/kanban/templates/t[@t-name='kanban-box']/div/a/t[2]/t[2]" position="replace">
                     <t t-if="record.is_company.raw_value === false and record.room.raw_value === false and record.equipment.raw_value === false">
-                        <img t-att-src='_s + "/base/static/src/img/avatar.png"' class="oe_kanban_image oe_kanban_avatar_smallbox"/>
+                        <img t-att-src='_s + "/base/static/src/img/avatar.png"' class="oe_kanban_image"/>
                     </t>
                     <t t-if="record.is_company.raw_value === false and record.room.raw_value !== false">
                         <img t-att-src='_s + "/event/static/src/img/room.png"' class="oe_kanban_image"/>
