@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="report_event_resource_tree" model="ir.ui.view">
+            <field name="name">report.event.resource.tree</field>
+            <field name="model">report.event.resource</field>
+            <field name="arch" type="xml">
+                <tree string="Event Resource" create="false">
+                    <field name="resource_name"/>
+                    <field name="resource_type"/>
+                    <field name="company_id"/>
+                    <field name="calendar_id"/>
+                    <field name="working_hours" widget="float_time"/>
+                    <field name="leave_time" widget="float_time"/>
+                    <field name="reserved_time" widget="float_time"/>
+                    <field name="effective_time" widget="float_time"/>
+                    <field name="effective_rate"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="report_event_resource_graph" model="ir.ui.view">
+            <field name="name">report.event.resource.graph</field>
+            <field name="model">report.event.resource</field>
+            <field name="arch" type="xml">
+                <graph string="Event Resource" type="bar" orientation="horizontal">
+                    <field name="resource_id"/>
+                    <field name="effective_time" operator="+"/>
+                </graph>
+            </field>
+        </record>
+
+        <record id="report_event_resource_search" model="ir.ui.view">
+            <field name="name">report.event.resource.search</field>
+            <field name="model">report.event.resource</field>
+            <field name="arch" type="xml">
+                <search string="Event Resources">
+                    <field name="resource_id"/>
+                    <filter string="This Week" name="this_week" context="{'this_week': 1}"/>
+                    <filter string="This Month" name="this_month" context="{'this_month': 1}"/>
+                    <group string="Group By...">
+                        <filter string="Resource Type" context="{'group_by': 'resource_type'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_report_event_resource">
+            <field name="name">Events Resources</field>
+            <field name="res_model">report.event.resource</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,graph</field>
+            <field name="search_view_id" ref="report_event_resource_search"/>
+            <field name="context">{'search_default_this_week': 1}</field>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_report_event_resource_tree">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="report_event_resource_tree"/>
+            <field name="act_window_id" ref="action_report_event_resource"/>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_report_event_resource_graph">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">graph</field>
+            <field name="view_id" ref="report_event_resource_graph"/>
+            <field name="act_window_id" ref="action_report_event_resource"/>
+        </record>
+
+
+        <menuitem id="menu_report_event_resource"
+            parent="menu_reporting_events"
+            action="action_report_event_resource"
+            sequence="4"
+            groups="event.group_event_manager"/>
+
+    </data>
+</openerp>

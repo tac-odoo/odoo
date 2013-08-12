@@ -53,6 +53,8 @@ Key Features
         'event_course_view.xml',
         'event_data.xml',
         'report/report_event_registration_view.xml',
+        'report/report_event_resource_view.xml',
+        'report/report_event_seance_view.xml',
         'board_association_view.xml',
         'res_partner_view.xml',
         'email_template.xml',

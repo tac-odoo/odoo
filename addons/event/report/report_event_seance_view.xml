@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="report_event_seance_tree" model="ir.ui.view">
+            <field name="name">report.event.seance.tree</field>
+            <field name="model">report.event.seance</field>
+            <field name="arch" type="xml">
+                <tree string="Event Seance" create="false">
+                    <field name="seance_id"/>
+                    <field name="type_id"/>
+                    <field name="course_id"/>
+                    <field name="event_id" invisible="1"/>
+                    <field name="speaker_id" invisible="1"/>
+                    <field name="address_id" invisible="1"/>
+                    <field name="duration" widget="float_time"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="report_event_seance_graph" model="ir.ui.view">
+            <field name="name">report.event.seance.graph</field>
+            <field name="model">report.event.seance</field>
+            <field name="arch" type="xml">
+                <graph string="Event Seance" type="bar" orientation="horizontal">
+                    <field name="seance_id"/>
+                    <field name="duration" operator="+"/>
+                </graph>
+            </field>
+        </record>
+
+        <record id="report_event_seance_search" model="ir.ui.view">
+            <field name="name">report.event.seance.search</field>
+            <field name="model">report.event.seance</field>
+            <field name="arch" type="xml">
+                <search string="Event Seances">
+                    <field name="seance_id"/>
+                    <field name="event_id"/>
+                    <group string="Group By...">
+                        <filter string="Seance Type" name="group_type" context="{'group_by': 'type_id'}"/>
+                        <filter string="Course" name="group_course" context="{'group_by': 'course_id'}"/>
+                        <filter string="Content" name="group_content" context="{'group_by': 'content_id'}"/>
+                        <filter string="Event" name="group_event" context="{'group_by': 'event_id'}"/>
+                        <filter string="Speaker" name="group_speaker" context="{'group_by': 'speaker_id'}"/>
+                        <filter string="Location" name="group_location" context="{'group_by': 'address_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_report_event_seance">
+            <field name="name">Events Seances</field>
+            <field name="res_model">report.event.seance</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,graph</field>
+            <field name="search_view_id" ref="report_event_seance_search"/>
+            <field name="context">{'search_default_group_event': 1, 'group_by_no_leaf': 1}</field>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_report_event_seance_tree">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="report_event_seance_tree"/>
+            <field name="act_window_id" ref="action_report_event_seance"/>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_report_event_seance_graph">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">graph</field>
+            <field name="view_id" ref="report_event_seance_graph"/>
+            <field name="act_window_id" ref="action_report_event_seance"/>
+        </record>
+
+
+        <menuitem id="menu_report_event_seance"
+            parent="menu_reporting_events"
+            action="action_report_event_seance"
+            sequence="5"
+            groups="event.group_event_manager"/>
+
+    </data>
+</openerp>

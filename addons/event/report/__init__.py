@@ -20,5 +20,7 @@
 ##############################################################################
 
 import report_event_registration
+import report_event_resource
+import report_event_seance
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
