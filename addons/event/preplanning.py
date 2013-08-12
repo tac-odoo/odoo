@@ -85,9 +85,12 @@ class EventPreplanning(osv.TransientModel):
         event = self.pool.get('event.event').browse(cr, uid, event_id, context=context)
         week_start_day = MO
 
-        estimated_date_end = event.date_end  # TODO: need to compute estimated end date using get_estimated_end_date()
         date_begin = datetime.strptime(max(event.date_begin, date_begin), DT_FMT) + relativedelta(weekday=week_start_day(-1))
         date_begin = date_begin.replace(hour=0, minute=0, second=0)
+
+        # Event 'date_end' is now computed by both theoretical planning (est. w/ linear schedule)
+        # and last real seance date.
+        estimated_date_end = event.date_end
         date_end = datetime.strptime(max(event.date_end, estimated_date_end), DT_FMT) + relativedelta(weekday=week_start_day(+1))
         date_end = date_end.replace(hour=23, minute=59, second=59)
 
@@ -115,12 +118,11 @@ class EventPreplanning(osv.TransientModel):
 
         tmlayers = ['working_hours', 'leaves']
         timeline = event._get_resource_timeline(layers=tmlayers, date_from=date_begin,
-                                                date_to=date_end + relativedelta(days=30), context=context)[event.id]
+                                                date_to=date_end + relativedelta(weeks=3), context=context)[event.id]
 
         # Compute available slot per weeks
         slot_per_weeks = defaultdict(list)
         for period in timeline.iter(by='change', as_tz='UTC'):
-            print(period)
             if period.status == Availibility.FREE:
                 # period is always less than 24h, and it's related
                 # week is computed based on ISO standard week.

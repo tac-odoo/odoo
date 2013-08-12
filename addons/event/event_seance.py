@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+import time
 import math
 import logging
 from datetime import datetime, timedelta
@@ -724,6 +725,53 @@ class EventEvent(osv.Model):
                     result[event.id].append(seance.id)
         return result
 
+    def _estimate_end_date(self, cr, uid, start, contents, timeline=None, context=None):
+        """Estimated event duration based on start date and contents length
+        :param cr: database cursor
+        :param uid: current user id
+        :param start: start date (datetime or string representing a date)
+        :param contents: list of dict representing the content
+        :param timeline: a Timeline object
+        :param context: dict representing the current context
+        """
+        # adjust default start, end dates
+        if isinstance(start, basestring):
+            start = datetime.strptime(start, DT_FMT)
+        end = start.replace()
+
+        if not contents:
+            return end.strftime(DT_FMT)
+
+        # iter on each timeline change, and eat all "available" time
+        if not timeline:
+            raise NotImplementedError('No timeline specified, this is currently unsupported')
+        tlstart = start
+        tlend = datetime.max - timedelta(days=1)
+        available_periods = (p for p in timeline.iter(by='change', as_tz='UTC',
+                                                      start=tlstart, end=tlend)
+                             if p.status == Availibility.FREE).__iter__()
+
+        period = None
+        for content in contents:
+            remaining_duration = content['duration']
+            content_allow_splitting = True  # TODO: allow user to change
+            while remaining_duration > 0:
+                try:
+                    period = period or available_periods.next()
+                except StopIteration as e:
+                    import pdb; pdb.set_trace()
+                    raise osv.except_osv(_('Error!'),
+                                         _('No enough time to schedule all content "%s"') % (content.name,))
+                if period.duration < content.slot_duration and not content_allow_splitting:
+                    # remaining period is too small, get the next one
+                    period = None
+                    continue
+                alloc_duration = min(content.slot_duration, remaining_duration, period.duration)
+                (s, e) = period.shift_hours(alloc_duration)
+                remaining_duration -= alloc_duration
+                end = e
+        return end.strftime(DT_FMT)
+
     def _get_date_end(self, cr, uid, ids, fieldname, args, context=None):
         result = {}
         if not ids:
@@ -737,9 +785,33 @@ class EventEvent(osv.Model):
 
         for event in self.browse(cr, uid, ids, context=context):
             if event.has_program:
-                EstimateEndDate = self.pool.get('event.event.estimate_end_date.wizard')
-                ed = EstimateEndDate._compute_end_date(cr, uid, event.id,
-                                                       event.date_begin, context=context)
+                Seance = self.pool.get('event.seance')
+                event_begin = datetime.strptime(event.date_begin, DT_FMT)
+                event_end = datetime.max - timedelta(days=1)
+
+                ed = event.date_begin
+
+                timeline = None
+                if event.content_ids:
+                    tmlayers = ['working_hours', 'leaves']
+                    timeline = self._get_resource_timeline(cr, uid, event.id, layers=tmlayers,
+                                                           date_from=event_begin, date_to=event_end,
+                                                           context=context)
+
+                ed = self._estimate_end_date(cr, uid, event.date_begin, event.content_ids,
+                                             timeline=timeline, context=context)
+
+                # search max seance date
+                current_seance_filter = [
+                    ('content_id.event_ids', 'in', [event.id]),
+                    ('state', '!=', 'cancelled'),
+                ]
+                last_seance_ids = Seance.search(cr, uid, current_seance_filter,
+                                                order='date_begin DESC', limit=1)
+                if last_seance_ids:
+                    seance = Seance.browse(cr, uid, last_seance_ids[0], context=context)
+                    ed = max(ed, seance.date_end)
+
             else:
                 ed = stored_values[event.id]
             if not ed:
@@ -962,7 +1034,6 @@ class EventEvent(osv.Model):
                 leave_domain[:0] = ['|', '&', ('applies_to', '=', 'calendar'),
                                               ('calendar_id', '=', record.calendar_id.id)]
             result[record.id] = Leave.search(cr, uid, leave_domain, context=context)
-        print("Result: %s" % (result,))
         return result
 
 
@@ -1165,5 +1236,4 @@ class EventRegistration(osv.Model):
                                                    aggregated_fields, result, read_group_order=order,
                                                    context=context)
 
-        print("Result: %s" % (result,))
         return result
