@@ -34,8 +34,8 @@ def float_to_hm(hours):
 class ResourceCalendar(osv.Model):
     _inherit = 'resource.calendar'
     _columns = {
-        'slot_duration': fields.integer('Slot Duration',
-                                        help="Standard slot duration, used for planification purpuse"),
+        'slot_duration': fields.float('Slot Duration',
+                                      help="Standard slot duration, used for planification purpuse"),
         'company_leave_ids': fields.one2many('resource.calendar.leaves', 'calendar_id', 'Company non-working days',
                                              domain=[('resource_id', '=', False)]),
     }

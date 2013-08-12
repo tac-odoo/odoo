@@ -49,6 +49,11 @@ class AvailibilityPeriod(object):
             Availibility.get_availability_value(self.status),
         )
 
+    __repr__ = __str__
+
+    def __nonzero__(self):
+        return self.duration > 0
+
     def shift_hours(self, hours):
         new_start = self.start + timedelta(hours=hours)
         if new_start > self.stop:
@@ -159,69 +164,80 @@ def izip_notruncate(iterators, barrier_delta=None):
         'max': None,
     }) for n, iterator in enumerate(iterators))
 
-    while sum(i['alive'] for i in iterators.itervalues()):
-        v = []
-        for n, iterator in iterators.items():
-            if iterator['alive']:
-                try:
-                    v = iterator['it'].next()
-                    iterator['values'].append(v)
-                    iterator['max'] = v.stop
-                except StopIteration:
-                    iterator['alive'] = False
-        # collect values
-        if not barrier_delta:
+    try:
+        while sum(i['alive'] for i in iterators.itervalues()):
             v = []
-            for i in iterators.itervalues():
-                if i['values']:
-                    v.append(i['values'].popleft())
-            yield v
-        else:
-            min_date = min(i['values'][0].start
-                           for i in iterators.itervalues()
-                           if i['values'])
-            barrier_date = min_date + barrier_delta
-            ok = all(not i['alive'] or (i['values'] and i['values'][-1].start > barrier_date)
-                     for i in iterators.itervalues())
-            # XXX: fix that following ugly! code
-            if ok:
-                t = []
-                for i in iterators.itervalues():
-                    if not i['alive']:
-                        t.extend(i['values'])
-                    else:
-                        for k in i['values']:
-                            if k.start < barrier_date:
-                                t.append(k)
-                t.sort(key=lambda o: o.stop)
-                max_yield_max = t[-1].stop
-                max_yield_ok = True
-                for i in iterators.itervalues():
-                    if i['alive'] and i['max'] < max_yield_max:
-                        max_yield_ok = False
-                        break
-                if not max_yield_ok:
-                    # could not yield yet, not all iterator have reached max_yield_max
-                    continue
-
+            for n, iterator in iterators.items():
+                if iterator['alive']:
+                    try:
+                        v = iterator['it'].next()
+                        iterator['values'].append(v)
+                        iterator['max'] = v.stop
+                    except StopIteration:
+                        iterator['alive'] = False
+            # collect values
+            if not barrier_delta:
                 v = []
                 for i in iterators.itervalues():
-                    if not i['alive']:
-                        v.extend(i['values'])
-                        i['values'].clear()
-                    else:
-                        while i['values']:
-                            k = i['values'].popleft()
-                            if k.start < barrier_date:
-                                v.append(k)
-                            else:
-                                # push it back
-                                i['values'].appendleft(k)
-                                break
+                    if i['values']:
+                        v.append(i['values'].popleft())
                 yield v
+            else:
+                min_date = min(i['values'][0].start
+                               for i in iterators.itervalues()
+                               if i['values'])
+                barrier_date = min_date + barrier_delta
+                ok = all(not i['alive'] or (i['values'] and i['values'][-1].start > barrier_date)
+                         for i in iterators.itervalues())
+                # XXX: fix that following ugly! code
+                if ok:
+                    t = []
+                    for i in iterators.itervalues():
+                        if not i['alive']:
+                            t.extend(i['values'])
+                        else:
+                            for k in i['values']:
+                                if k.start < barrier_date:
+                                    t.append(k)
+                    t.sort(key=lambda o: o.stop)
+                    max_yield_max = t[-1].stop
+                    max_yield_ok = True
+                    for i in iterators.itervalues():
+                        if i['alive'] and i['max'] < max_yield_max:
+                            max_yield_ok = False
+                            break
+                    if not max_yield_ok:
+                        # could not yield yet, not all iterator have reached max_yield_max
+                        continue
+
+                    v = []
+                    for i in iterators.itervalues():
+                        if not i['alive']:
+                            v.extend(i['values'])
+                            i['values'].clear()
+                        else:
+                            while i['values']:
+                                k = i['values'].popleft()
+                                if k.start < barrier_date:
+                                    v.append(k)
+                                else:
+                                    # push it back
+                                    i['values'].appendleft(k)
+                                    break
+                    yield v
+    finally:
+        for i in iterators.itervalues():
+            if i['alive']:
+                i['it'].close()
+        del iterators
 
 
 class PeriodEmiter(object):
+    def __init__(self, name, default=Availibility.UNKNOWN):
+        assert default in Availibility.values
+        self.name = name
+        self.default = default
+
     def get_iterator(self, start, end, by='change', tz=None):
         raise NotImplementedError()
 
@@ -242,10 +258,6 @@ class GlobalPeriodEmiter(PeriodEmiter):
 
     :return: the default availability status defined for the period
     """
-    def __init__(self, default):
-        assert default in Availibility.values
-        self.default = default
-
     def get_iterator(self, start, end, by='change', tz=None):
         s = start.replace()
         if by == 'change':
@@ -254,20 +266,25 @@ class GlobalPeriodEmiter(PeriodEmiter):
         else:
             delta = self.get_default_delta(by)
         first = True
-        while s < end:
-            if by == 'change' and first:
-                e = min((s + delta).replace(hour=0, minute=0, second=0), end)
-                first = False
-            else:
-                e = min(s + delta, end)
-            yield AvailibilityPeriod(s, e, self.default)
-            s = e
+        try:
+            while s < end:
+                if by == 'change' and first:
+                    e = min((s + delta).replace(hour=0, minute=0, second=0), end)
+                    first = False
+                else:
+                    e = min(s + delta, end)
+                yield AvailibilityPeriod(s, e, self.default)
+                s = e
+        finally:
+            pass
 
 
 class WorkingHoursPeriodEmiter(PeriodEmiter):
     """Emit availibility for each working hours"""
-    def __init__(self, working_hours, default=Availibility.UNAVAILABLE):
-        self.default = default
+    def __init__(self, name, default=Availibility.UNAVAILABLE, working_hours=None):
+        super(WorkingHoursPeriodEmiter, self).__init__(name, default)
+        if working_hours is None:
+            working_hours = []
         self.wrkhours_per_isoweekday = defaultdict(list)
         for (isoweekday, hour_from, hour_to) in working_hours:
             self.wrkhours_per_isoweekday[isoweekday].append((hour_from, hour_to))
@@ -328,27 +345,30 @@ class WorkingHoursPeriodEmiter(PeriodEmiter):
             delta = timedelta(hours=1)
         elif by == 'day':
             delta = timedelta(days=1)
-        while s < end:
-            current_period_idx = self.find_workhours(s)
-            current_period = self.wrkhours_flatten[current_period_idx]
+        try:
+            while s < end:
+                current_period_idx = self.find_workhours(s)
+                current_period = self.wrkhours_flatten[current_period_idx]
 
-            if by == 'change':
-                e = min(datetime(s.year, s.month, s.day) + timedelta(hours=current_period[2]),
-                        end)
-                yield AvailibilityPeriod(s, e, current_period[3])
+                if by == 'change':
+                    e = min(datetime(s.year, s.month, s.day) + timedelta(hours=current_period[2]),
+                            end)
+                    yield AvailibilityPeriod(s, e, current_period[3])
 
-                next_period = self.wrkhours_flatten[(current_period_idx + 1) % len(self.wrkhours_flatten)]
-                if current_period[0] != next_period[0]:
-                    # shiffted days
-                    s = datetime(s.year, s.month, s.day) + timedelta(days=1, hours=next_period[1])
-                else:
-                    s = datetime(s.year, s.month, s.day) + timedelta(hours=next_period[1])
-            elif by in ('second', 'minute', 'hour', 'day'):
-                e = min(s + delta, end)
-                wkhours = self.find_workhours_in_range(s, e)
-                availibility = max(x[3] for x in wkhours)
-                yield AvailibilityPeriod(s, e, availibility)
-                s = e
+                    next_period = self.wrkhours_flatten[(current_period_idx + 1) % len(self.wrkhours_flatten)]
+                    if current_period[0] != next_period[0]:
+                        # shiffted days
+                        s = datetime(s.year, s.month, s.day) + timedelta(days=1, hours=next_period[1])
+                    else:
+                        s = datetime(s.year, s.month, s.day) + timedelta(hours=next_period[1])
+                elif by in ('second', 'minute', 'hour', 'day'):
+                    e = min(s + delta, end)
+                    wkhours = self.find_workhours_in_range(s, e)
+                    availibility = max(x[3] for x in wkhours)
+                    yield AvailibilityPeriod(s, e, availibility)
+                    s = e
+        finally:
+            pass
 
 
 class EventPeriod(AvailibilityPeriod):
@@ -360,12 +380,13 @@ class GenericEventPeriodEmiter(PeriodEmiter):
     """Emit period from a list of events
     :return: the default availability status defined for the period
     """
-    def __init__(self, default=Availibility.UNKNOWN):
-        assert default in Availibility.values
-        self.default = default
+    def __init__(self, name, default=Availibility.UNKNOWN):
+        super(GenericEventPeriodEmiter, self).__init__(name, default)
         self.events = []  # list of event period
 
-    def add_event(self, start, stop, status=Availibility.UNAVAILABLE):
+    def add_event(self, start, stop, status=None):
+        if status is None:
+            status = self.default
         self.events.append(EventPeriod(start, stop, status))
 
     def add_events(self, event_list):
@@ -383,10 +404,10 @@ class GenericEventPeriodEmiter(PeriodEmiter):
                 if event.start <= end <= event.stop:
                     stop_idx = i
                     break
-        else:
+        if start_idx is None or stop_idx is None:
             # either not start or not end date found
             return []
-        return self.events[start_idx:stop_idx+1]
+        return events[start_idx:stop_idx+1]
 
     def event_idx(self, events, date):
         for i, event in enumerate(events):
@@ -395,21 +416,25 @@ class GenericEventPeriodEmiter(PeriodEmiter):
         return None
 
     def get_iterator(self, start, end, by='change', tz=None):
-        global_event_period = EventPeriod(start, end, Availibility.UNKNOWN)
+        global_event_period = EventPeriod(start, end, self.default)
         events = EventPeriod.merge(self.events + [global_event_period])
         s = start.replace()
         if by == 'change':
             by = 'day'
-        delta = self.get_default_delta('day')
-        while s < end:
-            e = min(s + delta, end)
-            range_events = self.events_range(events, s, e)
-            if not range_events:
-                range_avail = Availibility.UNKNOWN
-            else:
-                range_avail = max(e.status for e in range_events)
-            yield AvailibilityPeriod(s, e, range_avail)
-            s = e
+        delta = self.get_default_delta(by)
+        try:
+            while s < end:
+                e = min(s + delta, end)
+                range_events = self.events_range(events, s, e)
+                if not range_events:
+                    range_avail = self.default
+                else:
+                    range_avail = max(e.status for e in range_events)
+                yield AvailibilityPeriod(s, e, range_avail)
+                s = e
+        finally:
+            del events
+            del global_event_period
 
 
 class Timeline(object):
@@ -426,18 +451,23 @@ class Timeline(object):
         self.setup_emiters()
 
     def setup_emiters(self):
-        self.emiters.append(GlobalPeriodEmiter(self.default))
+        self.emiters.append(GlobalPeriodEmiter('global', Availibility.UNKNOWN))
 
     def add_emiter(self, emiter):
         self.emiters.append(emiter)
 
-    def emit_periods(self, by='change'):
+    def emit_periods(self, by='change', start=None, end=None, layers=None):
         barrier_delta = None
         if by == 'change':
             barrier_delta = timedelta(days=1)
+        start = start or self.start
+        end = end or self.end
+        if layers is not None and 'global' not in layers:
+            layers.insert(0, 'global')
         return izip_notruncate([
-            emiter.get_iterator(self.start, self.end, by=by, tz=self.tz_local)
+            emiter.get_iterator(start, end, by=by, tz=self.tz_local)
             for emiter in self.emiters
+            if layers is None or emiter.name in layers
         ], barrier_delta=barrier_delta)
 
     def tz_adaptor(self, availibility, tz_from=None, tz_to=None):
@@ -482,7 +512,7 @@ class Timeline(object):
         dt = datetime.strptime(string, DT_FMT)
         return self.datetime_tz_convert(dt, tz, self.tz_local_info)
 
-    def iter(self, by='change', as_tz=None):
+    def iter(self, by='change', as_tz=None, start=None, end=None, layers=None):
         """iterate over time period by specified cycle
 
         :param by: represent availiblity period range
@@ -497,15 +527,18 @@ class Timeline(object):
             as_tz_info = pytz.timezone(as_tz)
             tzhandler = partial(self.tz_adaptor, tz_from=self.tz_local_info, tz_to=as_tz_info)
 
-        for periods in self.emit_periods(by=by):
+        start = start or self.start
+        end = end or self.end
+
+        for periods in self.emit_periods(by=by, start=start, end=end, layers=layers):
             # fit period with Timeline start/end range
             periods = [p for p in periods
-                       if p.stop > self.start and p.start <= self.end]
+                       if p.stop > start and p.start <= end]
             for p in periods:
-                if p.start < self.start:
-                    p.start = self.start
-                if p.stop > self.end:
-                    p.stop = self.end
+                if p.start < start:
+                    p.start = start
+                if p.stop > end:
+                    p.stop = end
 
             # merge periods availability
             if by in ('day', 'hour', 'minute', 'second'):
@@ -527,7 +560,6 @@ class Timeline(object):
         if by == 'change':
             for p in change_periods:
                 yield tzhandler(p)
-
 
 if __name__ == '__main__':
     start, end = datetime(2013, 1, 1, 8, 0, 0), datetime(2013, 1, 8, 20, 0, 0)

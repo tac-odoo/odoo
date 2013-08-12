@@ -50,7 +50,7 @@ class CoreCalendarTimeline(osv.TransientModel):
         result = {}
         for record in self.browse(cr, uid, ids, context=context):
             # dayofweek (=> iso weekday): 1: Monday, ..., 6: Saturday, 7: Sunday
-            if record.calendar_id:
+            if record.calendar_id and record.calendar_id.attendance_ids:
                 result[record.id] = [
                     (int(att.dayofweek)+1, att.hour_from, att.hour_to)
                     for att in record.calendar_id.attendance_ids
@@ -107,7 +107,7 @@ class CoreCalendarTimeline(osv.TransientModel):
 
                     wkhours = self._get_resource_working_hours(cr, uid, [record.id], date_from=date_from,
                                                                date_to=date_to, context=context)[record.id]
-                    timeline.add_emiter(WorkingHoursPeriodEmiter([
+                    timeline.add_emiter(WorkingHoursPeriodEmiter('working_hours', working_hours=[
                         # 0: wday, 1: hour_from, 2: hour_to
                         (att[0], att[1], att[2]) for att in wkhours
                     ]))
@@ -115,7 +115,7 @@ class CoreCalendarTimeline(osv.TransientModel):
                 elif layer == 'leaves':
 
                     # add all leaves for this event
-                    leaves_emiter = GenericEventPeriodEmiter()
+                    leaves_emiter = GenericEventPeriodEmiter('leaves')
                     timeline.add_emiter(leaves_emiter)
                     Leave = self.pool.get('resource.calendar.leaves')
                     leave_ids = self._get_resource_leaves(cr, uid, [record.id], date_from=date_from,
@@ -127,7 +127,7 @@ class CoreCalendarTimeline(osv.TransientModel):
 
                 elif layer == 'events':
 
-                    event_emiter = GenericEventPeriodEmiter()
+                    event_emiter = GenericEventPeriodEmiter('events')
                     timeline.add_emiter(event_emiter)
                     CalEvent = self.pool.get('core.calendar.event')
                     event_ids = self._get_resource_events(cr, uid, [record.id], date_from=date_from,
