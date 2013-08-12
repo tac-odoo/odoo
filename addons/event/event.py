@@ -80,6 +80,19 @@ class event_event(osv.osv):
             res.append((record['id'], display_name))
         return res
 
+    def name_search(self, cr, user, name='', args=None, operator='ilike', context=None, limit=100):
+        if args is None:
+            args = []
+        if context is None:
+            context = {}
+        args = args[:]
+        if not (name == '' and operator == 'ilike'):
+            args += ['|', ('name', operator, name),
+                          ('reference', operator, name)]
+        ids = self.search(cr, user, args, limit=limit, context=context)
+        res = self.name_get(cr, user, ids, context)
+        return res
+
     def copy(self, cr, uid, id, default=None, context=None):
         """ Reset the state and the registrations while copying an event
         """
@@ -310,6 +323,7 @@ class event_registration(osv.osv):
         'create_date': fields.datetime('Creation Date' , readonly=True),
         'date_closed': fields.datetime('Attended Date', readonly=True),
         'date_open': fields.datetime('Registration Date', readonly=True),
+        'date_cancel': fields.datetime('Cancellation Date', readonly=True),
         'reply_to': fields.related('event_id','reply_to',string='Reply-to Email', type='char', size=128, readonly=True,),
         'log_ids': fields.one2many('mail.message', 'res_id', 'Logs', domain=[('model','=',_name)]),
         'event_end_date': fields.related('event_id','date_end', type='datetime', string="Event End Date", readonly=True),
