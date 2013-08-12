@@ -337,7 +337,7 @@ class EventSeance(osv.Model):
     def _store_get_seances_from_content(self, cr, uid, ids, context=None):
         """return list of seances related to specified contents"""
         Seance = self.pool.get('event.seance')
-        return Seance.search(cr, uid, [('content_id', '=', ids)], context=context)
+        return Seance.search(cr, uid, [('content_id', 'in', ids)], context=context)
 
     _columns = {
         'name': fields.char('Seance Name', required=True),
@@ -349,6 +349,7 @@ class EventSeance(osv.Model):
         #                                      type='date', readonly=True, store=True, groupby_range='week'),
         'planned_week': fields.date('Planned Week Date', readonly=True, groupby_range='week'),
         'tz': fields.selection(_tz_get, size=64, string='Timezone'),
+        'lang_id': fields.many2one('res.lang', 'Language'),
         # TODO: add planned_period, planned_period_date
         'participant_min': fields.integer('Participant Min'),
         'participant_max': fields.integer('Participant Max'),
@@ -363,6 +364,7 @@ class EventSeance(osv.Model):
                                     readonly=True),
         'module_id': fields.function(_get_module_id, type='many2one',
                                      relation='event.content.module',
+                                     string='Module',
                                      store={
                                          'event.content': (_store_get_seances_from_content, ['module_id'], 10),
                                      }, readonly=True),
@@ -471,13 +473,13 @@ class EventSeance(osv.Model):
                     if seance.state != 'done':
                         p_to_unlink.extend(p.id for p in v[-found-expected:])
                 elif found < expected:
-                    for i in xrange(1, 1+expected-found):
+                    for i in xrange(expected-found):
                         if contact:
                             part_name = contact.name
                         elif expected == 1:
                             part_name = '%s' % (reg.name or reg.partner_id.name or '',)
                         else:
-                            part_name = '%s #%d' % (reg.name or reg.partner_id.name or '', i)
+                            part_name = '%s #%d' % (reg.name or reg.partner_id.name or '', i+1)
                         Participation.create(cr, uid, {
                             'name': part_name,
                             'partner_id': reg.partner_id.id,

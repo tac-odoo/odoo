@@ -18,7 +18,7 @@
             <field name="field_attendee_ids" eval="[(6, 0, [ref('event.field_event_seance_main_speaker_id'),ref('event.field_event_seance_address_id')])]"/>
             <field name="filter_expr"></field>
             <field name="field_state" ref="event.field_event_seance_state"/>
-            <field name="states_tentative">draft</field>
+            <field name="states_tentative">draft,planned</field>
             <field name="states_confirm">confirm,done</field>
             <field name="states_cancel">cancel</field>
         </record>

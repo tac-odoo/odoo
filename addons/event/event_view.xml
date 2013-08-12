@@ -303,7 +303,7 @@
             <field name="model">event.event</field>
             <field name="arch" type="xml">
                 <search string="Events">
-                    <field name="name" string="Events"/>
+                    <field name="name" string="Events" filter_domain="['|', ('name', 'ilike', self),('reference', 'ilike', self)]"/>
                     <filter icon="terp-mail-message-new" string="Unread Messages" name="message_unread" domain="[('message_unread','=',True)]"/>
                     <separator/>
                     <filter icon="terp-check" string="Unconfirmed" name="draft" domain="[('state','=','draft')]" help="Events in New state"/>
@@ -311,6 +311,7 @@
                     <separator/>
                     <filter icon="terp-personal" string="My Events" help="My Events" domain="[('user_id','=',uid)]"/>
                     <separator/>
+                    <filter icon="terp-go-today" string="Current" name="current" domain="[('date_end', '&gt;=', time.strftime('%%Y-%%m-%%d 00:00:00'))]" help="Events still in progress as of today"/>
                     <filter icon="terp-go-today" string="Upcoming" name="upcoming" domain="[('date_begin','&gt;=', time.strftime('%%Y-%%m-%%d 00:00:00'))]" help="Upcoming events from today" />
                     <field name="type"/>
                     <field name="user_id"/>
@@ -332,7 +333,7 @@
            <field name="res_model">event.event</field>
            <field name="view_type">form</field>
            <field name="view_mode">kanban,calendar,tree,form</field>
-           <field name="context">{"search_default_upcoming":1}</field>
+           <field name="context">{"search_default_upcoming":1, 'search_default_current': 1}</field>
            <field name="search_view_id" ref="view_event_search"/>
            <field name="help" type="html">
              <p class="oe_view_nocontent_create">
@@ -513,6 +514,10 @@
         <menuitem name="Registrations"
             id="menu_action_registration" parent="base.menu_event_main"
             action="action_registration" groups="event.group_event_manager,event.group_event_user"/>
+
+        <menuitem name="Customers"
+            id="menu_action_event_customer" parent="base.menu_event_main"
+            action="base.action_partner_form" groups="event.group_event_manager,event.group_event_user"/>
 
         <menuitem name="Reporting" id="base.menu_report_association" parent="event_main_menu" sequence="20"/>
 

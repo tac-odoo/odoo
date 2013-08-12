@@ -335,6 +335,8 @@
                 <search string="Event Seances">
                     <field name="name"/>
                     <field name="event_ids"/>
+                    <field name="main_speaker_id"/>
+                    <field name="address_id"/>
                     <field name="type_id"/>
                     <field name="module_id"/>
                     <group expand="0" string="Group By...">
@@ -384,7 +386,7 @@
             <field name="name">Seances</field>
             <field name="res_model">event.seance</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar</field>
+            <field name="view_mode">calendar,tree,form</field>
             <field name="search_view_id" ref="view_event_seance_search"/>
         </record>
 
@@ -428,7 +430,7 @@
                         <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
                     </header>
                     <sheet>
-                        <div class="oe_right oe_button_box">
+                        <div class="oe_right oe_button_box" name="buttons">
                             <button name="button_take_presence" type="object"
                                     string="Mark as Present" icon="kanban-apply"
                                     attrs="{'invisible': ['|',('state','!=','draft'),('presence','=','present')]}"
