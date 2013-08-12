@@ -22,8 +22,10 @@
                                 <field name="speaker" on_change="onchange_event_role('speaker', speaker, room, equipment)"/>
                                 <field name="room" on_change="onchange_event_role('room', speaker, room, equipment)"/>
                                 <field name="equipment" on_change="onchange_event_role('equipment', speaker, room, equipment)"/>
+                                <field name="external"/>
                             </group>
                             <group>
+                                <field name="room_max_seats" attrs="{'invisible': [('room','=',False)]}"/>
                             </group>
                         </group>
                         <separator string="Courses" attrs="{'invisible': [('speaker','=',False)]}"/>
@@ -299,6 +301,7 @@
                             context="{'default_speaker': 1}"/>
                     <filter string="Rooms" name="room" domain="[('room','=',1)]" help="Rooms"/>
                     <filter string="Equipments" name="equipment" domain="[('equipment','=',1)]" help="Equipments"/>
+                    <filter string="External Resources" name="external" domain="[('external','=',1)]" help="External Resources.."/>
                 </filter>
             </field>
         </record>
@@ -313,7 +316,8 @@
 
         <menuitem id="menu_event_library_resource"
                     parent="menu_event_library_root"
-                    action="action_event_library_resource"/>
+                    action="action_event_library_resource"
+                    sequence="100"/>
 
    </data>
 </openerp>

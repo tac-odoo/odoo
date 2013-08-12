@@ -30,6 +30,7 @@ class ResPartner(osv.osv):
     _columns = {
         'speaker': fields.boolean('Speaker', help="Check this box if this contact is a speaker."),
         'room': fields.boolean('Room', help='Check this box if this contact address could be used as room location'),
+        'room_max_seats': fields.integer('Max seats', help='Max seats available in the room. Use 0 for unlimited seats'),
         'equipment': fields.boolean('Equipment', help='Check this box if this contact can be used as a event equipment (like a beamer, ...)'),
         'event_ids': fields.one2many('event.event', 'main_speaker_id', readonly=True),
         'event_registration_ids': fields.one2many('event.registration', 'partner_id', readonly=True),
@@ -37,6 +38,7 @@ class ResPartner(osv.osv):
         'child_ids': fields.one2many('res.partner', 'parent_id', 'Contacts', domain=[('active', '=', True), ('room', '=', False), ('equipment', '=', False)]),  # force "active_test" domain to bypass _search() override
         'room_ids': fields.one2many('res.partner', 'parent_id', 'Rooms', domain=[('active', '=', True), ('room', '=', True)]),
         'equipment_ids': fields.one2many('res.partner', 'parent_id', 'Equipments', domain=[('active', '=', True), ('equipment', '=', True)]),
+        'external': fields.boolean('External', help='This resource is an external resource'),
     }
 
     def create(self, cr, uid, values, context=None):
