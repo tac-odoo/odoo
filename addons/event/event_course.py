@@ -103,6 +103,7 @@ class EventCourse(osv.Model):
 
     _columns = {
         'name': fields.char('Course Name', size=64, required=True),
+        'code': fields.char('Internal reference', size=16),
         'lang_id': fields.many2one('res.lang', 'Language', required=True),
         'duration': fields.float('Duration'),
         'active': fields.boolean('Active'),
@@ -120,6 +121,12 @@ class EventCourse(osv.Model):
         'speakerinfo_ids': fields.one2many('event.course.speakerinfo', 'course_id', 'Speaker Infos'),
         'speaker_id': fields.function(_get_speaker_id, type='many2one', relation='res.partner',
                                       fnct_search=_search_speaker_id, string="Speaker"),
+
+        # Planification preferences
+        'split_by': fields.float('Split by', help=(
+            'Split the course by the specified duration. '
+            'Use 0 to automatically split following calendar slot')),
+        'room_category_ids': fields.many2many('res.partner.category', id1='course_id', id2='room_category_id', string='Prefered room types'),
     }
 
     def _default_lang_id(self, cr, uid, context=None):

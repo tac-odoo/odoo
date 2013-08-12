@@ -43,8 +43,13 @@
                         <notebook>
                             <page string="Information">
                                 <group>
-                                    <field name="subject_id" on_change="onchange_subject(subject_id)"/>
-                                    <field name="level_id"/>
+                                    <group>
+                                        <field name="subject_id" on_change="onchange_subject(subject_id)"/>
+                                        <field name="level_id"/>
+                                    </group>
+                                    <group>
+                                        <field name="code"/>
+                                    </group>
                                     <!-- FIXME: <field name="category_ids" widget="many2many_tags" placeholder="Categories..."/> -->
                                 </group>
                                 <group>
@@ -62,7 +67,16 @@
                                 </field>
                                 <field name="material_note"/>
                             </page>
-                            <page string="Speakers">
+                            <page string="Resources/Planification">
+                                <group>
+                                    <group>
+                                        <field name="split_by" widget="float_time"/>
+                                    </group>
+                                    <group>
+                                        <field name="room_category_ids" widget="many2many_tags"/>
+                                    </group>
+                                </group>
+                                <separator string="Speakers"/>
                                 <group colspan="2">
                                     <field name="standard_price"/>
                                 </group>
