@@ -28,6 +28,19 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
 from openerp.addons.core_calendar.timeline import Availibility
 
 
+class AutofetchRecordDict(defaultdict):
+    def __init__(self, fetching_func, *a, **kw):
+        self.fetching_func = fetching_func
+        return super(AutofetchRecordDict, self).__init__(None, *a, **kw)
+
+    def __missing__(self, key):
+        try:
+            dval = self.fetching_func(key)
+            return dval
+        except Exception:
+            raise KeyError
+
+
 class EventPreplanning(osv.TransientModel):
     _name = 'event.event.preplanning'
 
@@ -45,12 +58,22 @@ class EventPreplanning(osv.TransientModel):
         result = []
         if not values:
             return result
-        from pprint import pprint
         Seance = self.pool.get('event.seance')
+        Content = self.pool.get('event.content')
+        Group = self.pool.get('event.content.group')
+
+        contents = AutofetchRecordDict(lambda _id: Content.browse(cr, uid, _id, context=context))
+        groups = AutofetchRecordDict(lambda _id: Group.browse(cr, uid, _id, context=context))
+
         for val in values:
             if val[0] == 0:
-                pprint(val[2])
-                id_new = Seance.create(cr, uid, val[2], context=context)
+                content = contents[val[2]['content_id']]
+                group = groups[val[2]['group_id']] if val[2]['group_id'] else None
+                date_begin = datetime.strptime(val[2]['date_begin'], DT_FMT)
+                date_end = date_begin + relativedelta(hours=val[2]['duration'])
+                values = Content._prepare_seance_for_content(cr, uid, content, date_begin, date_end, group=group, context=context)
+
+                id_new = Seance.create(cr, uid, values, context=context)
                 result += Seance._store_get_values(cr, uid, [id_new], val[2].keys(), context)
             elif val[0] == 2:
                 Seance.unlink(cr, uid, [val[1]], context=context)
