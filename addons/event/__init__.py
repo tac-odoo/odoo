@@ -24,9 +24,9 @@ import resource
 import preplanning
 import event_seance
 import event_course
-import wizard
-import report
 import res_partner
 import res_company
+import wizard
+import report
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 
