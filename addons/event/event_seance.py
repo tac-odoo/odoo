@@ -413,6 +413,10 @@ class EventSeance(osv.Model):
         ocv['value']['group_id'] = False
         return ocv
 
+    def onchange_seance_type(self, cr, uid, ids, type_id, context=None):
+        values = {}
+        return {'value': values}
+
     def button_set_draft(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'draft'}, context=context)
 
@@ -480,16 +484,28 @@ class EventSeance(osv.Model):
                             part_name = '%s' % (reg.name or reg.partner_id.name or '',)
                         else:
                             part_name = '%s #%d' % (reg.name or reg.partner_id.name or '', i+1)
-                        Participation.create(cr, uid, {
-                            'name': part_name,
-                            'partner_id': reg.partner_id.id,
-                            # 'contact_id': contact.id if contact else False,
-                            'seance_id': seance.id,
-                            'registration_id': reg.id,
-                        }, context=context)
+                        part_values = self._prepare_participation_for_seance(cr, uid, name, seance,
+                                                                             registration, context=context)
+                        Participation.create(cr, uid, part_values, context=context)
         if p_to_unlink:
             Participation.unlink(cr, uid, p_to_unlink, context=context)
         return True
+
+    def _prepare_participation_for_seance(self, cr, uid, name, seance, registration, context=None):
+        """Prepare participation dict suitable for create
+        :param cr: database cursor
+        :param uid: current user id
+        :param name: string used for participant name
+        :param seance: browse_record instance of event.seance object
+        :param registration: browse_record instance of event.registration object
+        :param context: dict representing current context
+        """
+        return {
+            'name': name,
+            'partner_id': reg.partner_id.id,
+            'seance_id': seance.id,
+            'registration_id': reg.id,
+        }
 
 
 class EventParticipation(osv.Model):
@@ -616,6 +632,10 @@ class EventParticipation(osv.Model):
             Registration = self.pool.get('event.registration')
             reg = Registration.browse(cr, uid, registration_id, context=context)
             values.update(partner_id=reg.partner_id.id)
+        return {'value': values}
+
+    def onchange_seance(self, cr, uid, ids, seance_id, context=None):
+        values = {}
         return {'value': values}
 
 

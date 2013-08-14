@@ -452,7 +452,7 @@
                             <page string="Information">
                                 <group>
                                     <group>
-                                        <field name="seance_id"/>
+                                        <field name="seance_id" on_change="onchange_seance(seance_id, context)"/>
                                         <field name="registration_id" on_change="onchange_registration(registration_id)"/>
                                         <field name="partner_id"/>
                                     </group>
@@ -462,6 +462,12 @@
                                         <field name="arrival_time"/>
                                         <field name="departure_time"/>
                                     </group>
+                                </group>
+                            </page>
+                            <page string="Configuration" groups="base.group_no_one">
+                                <group>
+                                    <group></group>
+                                    <group></group>
                                 </group>
                             </page>
                         </notebook>
