@@ -151,7 +151,7 @@ class AvailibilityPeriod(object):
         return s
 
 
-def izip_notruncate(iterators, barrier_delta=None):
+def izip_notruncate(iterators, barrier_delta=None, debug=False):
     """like izip but do not truncate to shortest length
 
         :return: list of iterators values (variable length)
@@ -419,18 +419,26 @@ class GenericEventPeriodEmiter(PeriodEmiter):
         global_event_period = EventPeriod(start, end, self.default)
         events = EventPeriod.merge(self.events + [global_event_period])
         s = start.replace()
-        if by == 'change':
-            by = 'day'
-        delta = self.get_default_delta(by)
+        by_delta = by
+        if by_delta == 'change':
+            by_delta = 'day'
+        delta = self.get_default_delta(by_delta)
         try:
             while s < end:
                 e = min(s + delta, end)
                 range_events = self.events_range(events, s, e)
+                range_events.sort(key=lambda x: x.start)
                 if not range_events:
-                    range_avail = self.default
+                    yield AvailibilityPeriod(s, e, self.default)
+                elif by == 'change':
+                    # yield each min period individually
+                    for p in range_events:
+                        pstart = p.start if p.start >= s else s
+                        pstop = p.stop if p.stop <= e else e
+                        yield AvailibilityPeriod(pstart, pstop, p.status)
                 else:
-                    range_avail = max(e.status for e in range_events)
-                yield AvailibilityPeriod(s, e, range_avail)
+                    period_max_status = max(e.status for e in range_events)
+                    yield AvailibilityPeriod(s, e, period_max_status)
                 s = e
         finally:
             del events
