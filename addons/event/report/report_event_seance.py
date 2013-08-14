@@ -60,8 +60,10 @@ class report_event_seance(osv.Model):
                 content.id AS content_id
 
             FROM event_seance seance
+            LEFT JOIN event_seance_type seancetype ON (seance.type_id = seancetype.id)
             LEFT JOIN event_content content ON seance.content_id = content.id
             LEFT JOIN event_content_link eclink ON eclink.content_id = content.id
             LEFT JOIN event_event event ON eclink.event_id = event.id
+            WHERE seancetype.included_into_analysis = true
         )
         """)

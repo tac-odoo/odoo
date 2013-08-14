@@ -174,6 +174,13 @@
                             <label for="name" class="oe_edit_only"/>
                             <h1><field name="name"/></h1>
                         </div>
+                        <group>
+                            <group>
+                                <field name="included_into_analysis"/>
+                            </group>
+                            <group>
+                            </group>
+                        </group>
                     </sheet>
                 </form>
             </field>

@@ -46,6 +46,11 @@ class EventSeanceType(osv.Model):
     _name = 'event.seance.type'
     _columns = {
         'name': fields.char('Seance Type', size=64, required=True),
+        'included_into_analysis': fields.boolean('Included into Analysis',
+                help="Does this type of seance be included into 'Event Seance Report'?"),
+    }
+    _defaults = {
+        'included_into_analysis': True,
     }
 
 
