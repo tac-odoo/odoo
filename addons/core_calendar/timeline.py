@@ -35,6 +35,7 @@ class Availibility:
 
 class AvailibilityPeriod(object):
     name = 'Availability'
+    __slots__ = ('start', 'stop', 'status', 'splitable')
 
     def __init__(self, start, stop, status, splitable=True):
         assert status in Availibility.values
@@ -80,6 +81,7 @@ class AvailibilityPeriod(object):
         Period = cls
         if not avails:
             return []
+        avails = [a for a in avails if a.duration] # skip period of 0s.
         avails.sort(key=lambda o: o.start)
         s = [avails.pop(0)]
         dm = lambda m: timedelta(minutes=m)
@@ -165,7 +167,7 @@ def izip_notruncate(iterators, barrier_delta=None, debug=False):
     }) for n, iterator in enumerate(iterators))
 
     try:
-        while sum(i['alive'] for i in iterators.itervalues()):
+        while any(i['alive'] for i in iterators.itervalues()):
             v = []
             for n, iterator in iterators.items():
                 if iterator['alive']:
@@ -175,6 +177,10 @@ def izip_notruncate(iterators, barrier_delta=None, debug=False):
                         iterator['max'] = v.stop
                     except StopIteration:
                         iterator['alive'] = False
+            if not any(i['alive'] or i['values']
+                       for i in iterators.itervalues()):
+                # no more value to return
+                continue
             # collect values
             if not barrier_delta:
                 v = []

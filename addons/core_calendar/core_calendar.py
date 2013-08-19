@@ -132,7 +132,6 @@ class CoreCalendarTimeline(osv.TransientModel):
                     CalEvent = self.pool.get('core.calendar.event')
                     event_ids = self._get_resource_events(cr, uid, [record.id], date_from=date_from,
                                                           date_to=date_to, context=context)[record.id]
-                    print("[%s :: %d] Events: %s" % (record._name, record.id, event_ids,))
                     for event in CalEvent.read(cr, uid, event_ids, ['date_start', 'date_end', 'state'], context=context):
                         event_start = timeline.datetime_from_str(event['date_start'], tz='UTC')
                         event_end = timeline.datetime_from_str(event['date_end'], tz='UTC')
