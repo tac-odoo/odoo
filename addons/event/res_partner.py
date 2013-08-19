@@ -117,5 +117,10 @@ class ResPartner(osv.osv):
                 break
         return {'value': values}
 
+    def onchange_external(self, cr, uid, ids, external, context=None):
+        values = {
+            'attendee_external': bool(external),
+        }
+        return {'value': values}
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
