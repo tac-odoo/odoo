@@ -19,12 +19,15 @@
 #
 ##############################################################################
 
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta, MO
 from collections import defaultdict
 from openerp.osv import osv, fields
 from openerp import tools
 from openerp.addons.core_calendar.timeline import Availibility
+from openerp.tools.translate import _
+
 
 class report_event_resource(osv.Model):
     _name = 'report.event.resource'
@@ -37,8 +40,81 @@ class report_event_resource(osv.Model):
         ('equipment', 'Equipment'),
     ]
 
+    def _compute_resource_hours(self, cr, uid, partner_id, timeline, start, end, context=None):
+        # Working Hours
+        sum_wkhours = sum(p.duration
+                          for p in timeline.iter(by='change', as_tz='UTC',
+                                                 start=start, end=end, layers=['working_hours'])
+                          if p.status == Availibility.FREE)
+
+        # Leaves
+        sum_leaves = sum(p.duration
+                         for p in timeline.iter(by='change', as_tz='UTC',
+                                                start=start, end=end, layers=['leaves'])
+                         if p.status >= Availibility.BUSY_TENTATIVE)
+
+        # Effective Time (Busy events times)
+        sum_events = sum(p.duration
+                         for p in timeline.iter(by='change', as_tz='UTC',
+                                                start=start, end=end, layers=['events'])
+                         if p.status >= Availibility.BUSY_TENTATIVE)
+
+        # Effective Rate
+        eff_rate = sum_events / ((sum_wkhours - sum_leaves) or 1.0)
+
+        return {
+            'working_hours': sum_wkhours,
+            'effective_time': sum_events,
+            'effective_rate': eff_rate,
+            'leave_time': sum_leaves,
+            'reserved_time': 0.0,  # TODO: compute reserved time based on calendar preferences
+        }
+
+    def _get_user_dates_format(self, cr, uid, lang, context=None):
+        formats = [
+            '%Y-%m-%d %H:%M:%S',
+            '%Y-%m-%d',
+        ]
+        Lang = self.pool.get('res.lang')
+        lang_ids = Lang.search(cr, uid, [('code', '=', lang)], context=context)
+        if lang_ids:
+            lang_record = Lang.browse(cr, uid, lang_ids[0], context=context)
+            formats[:0] = [
+                '%s %s' % (lang_record.date_format, lang_record.time_format),
+                lang_record.date_format,
+            ]
+            # TODO
+        return formats
+
+    def _parse_user_dates_interval(self, cr, uid, dates_interval, context=None):
+        if context is None:
+            context = {}
+        formats = []
+        User = self.pool.get('res.users')
+        lang = context.get('lang') or User.context_get(cr, uid)['lang']
+        formats = self._get_user_dates_format(cr, uid, lang, context=context)
+
+        def try_parse(value, formats):
+            for f in formats:
+                try:
+                    return datetime.strptime(value, f)
+                except ValueError:
+                    pass
+            raise ValueError('Unable to parse date "%s"' % (value,))
+
+        di = (dates_interval or '').strip()
+        if di:
+            diparts = [x.strip() for x in di.split(' - ', 2)]
+            start = try_parse(diparts[0], formats).replace(hour=0, minute=0, second=0, microsecond=0)
+            if len(diparts) > 1:
+                stop = try_parse(diparts[1], formats)
+            else:
+                stop = start + timedelta(days=1)
+            return start, stop
+        raise osv.except_osv(_('Error!'), _('Invalid date interval provided'))
+
     def _get_resource_hours(self, cr, uid, ids, fieldnames, args, context=None):
-        if any(context.get(f) for f in ['this_week', 'this_month', 'this_year']):
+        if any(context.get(f) for f in ['this_week', 'this_month', 'this_year', 'this_dates']):
             Partner = self.pool.get('res.partner')
 
             today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -51,6 +127,8 @@ class report_event_resource(osv.Model):
             elif context.get('this_year'):
                 start = today.replace(day=1, month=1)
                 end = start + relativedelta(years=1)
+            elif context.get('this_dates'):
+                start, end = self._parse_user_dates_interval(cr, uid, context['this_dates'], context=context)
 
             result = {}
             for partner in Partner.browse(cr, uid, ids, context=context):
@@ -58,37 +136,13 @@ class report_event_resource(osv.Model):
                 for f in fieldnames:
                     result[partner.id].setdefault(f, 0.0)
 
-            timelines = Partner._get_resource_timeline(cr, uid, ids,
-                                                       date_from=start, date_to=end,
-                                                       context=context)
-            for partner_id, p_timeline in timelines.iteritems():
-                # Working Hours
-                sum_wkhours = sum(p.duration
-                                  for p in p_timeline.iter(by='change', as_tz='UTC',
-                                                           start=start, end=end, layers=['working_hours'])
-                                  if p.status == Availibility.FREE)
-
-                # Leaves
-                sum_leaves = sum(p.duration
-                                 for p in p_timeline.iter(by='change', as_tz='UTC',
-                                                          start=start, end=end, layers=['leaves'])
-                                 if p.status >= Availibility.BUSY_TENTATIVE)
-
-                # Effective Time (Busy events times)
-                sum_events = sum(p.duration
-                                 for p in p_timeline.iter(by='change', as_tz='UTC',
-                                                          start=start, end=end, layers=['events'])
-                                 if p.status >= Availibility.BUSY_TENTATIVE)
-
-                # Effective Rate
-                eff_rate = sum_events / ((sum_wkhours - sum_leaves) or 1.0)
-
-                result[partner_id].update(working_hours=sum_wkhours,
-                                          effective_time=sum_events,
-                                          effective_rate=eff_rate,
-                                          leave_time=sum_leaves,
-                                          reserved_time=0.0)  # TODO: compute reserved time based on calendar preferences
-
+            get_timelines = Partner._get_resource_timeline
+            get_hours = self._compute_resource_hours
+            for partner_id, timeline in get_timelines(cr, uid, ids,
+                                                      date_from=start, date_to=end,
+                                                      context=context).iteritems():
+                result[partner_id] = get_hours(cr, uid, partner_id, timeline,
+                                               start, end, context=context)
             return result
 
         return defaultdict(lambda: defaultdict(float))

@@ -39,6 +39,8 @@
                     <field name="resource_id"/>
                     <filter string="This Week" name="this_week" context="{'this_week': 1}"/>
                     <filter string="This Month" name="this_month" context="{'this_month': 1}"/>
+                    <filter string="This Year" name="this_year" context="{'this_year': 1}"/>
+                    <field name="resource_name" string="Between Dates" filter_domain="[]" context="{'this_dates': self}"/>
                     <group string="Group By...">
                         <filter string="Resource Type" context="{'group_by': 'resource_type'}"/>
                     </group>
