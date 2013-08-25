@@ -79,10 +79,10 @@ class AvailibilityPeriod(object):
     def merge(cls, avails, default=Availibility.UNKNOWN, aggregate=True):
         """Return list of merged availiblity periods"""
         Period = cls
-        if not avails:
-            return []
         avails = [a for a in avails if a.duration] # skip period of 0s.
         avails.sort(key=lambda o: o.start)
+        if not avails:
+            return []
         s = [avails.pop(0)]
         dm = lambda m: timedelta(minutes=m)
         ds = lambda m: timedelta(seconds=m)
@@ -319,7 +319,7 @@ class WorkingHoursPeriodEmiter(PeriodEmiter):
 
     def find_workhours(self, date):
         date_wday = date.isoweekday()
-        date_time = date.hour + (date.second / 60.)
+        date_time = date.hour + (date.minute / 60.)
         for i, (wday, hour_from, hour_to, _) in enumerate(self.wrkhours_flatten):
             if wday == date_wday and hour_from <= date_time < hour_to:
                 return i
