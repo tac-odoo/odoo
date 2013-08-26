@@ -489,8 +489,8 @@ class EventSeance(osv.Model):
                             part_name = '%s' % (reg.name or reg.partner_id.name or '',)
                         else:
                             part_name = '%s #%d' % (reg.name or reg.partner_id.name or '', i+1)
-                        part_values = self._prepare_participation_for_seance(cr, uid, name, seance,
-                                                                             registration, context=context)
+                        part_values = self._prepare_participation_for_seance(cr, uid, part_name, seance,
+                                                                             reg, context=context)
                         Participation.create(cr, uid, part_values, context=context)
         if p_to_unlink:
             Participation.unlink(cr, uid, p_to_unlink, context=context)
@@ -507,9 +507,9 @@ class EventSeance(osv.Model):
         """
         return {
             'name': name,
-            'partner_id': reg.partner_id.id,
+            'partner_id': registration.partner_id.id,
             'seance_id': seance.id,
-            'registration_id': reg.id,
+            'registration_id': registration.id,
         }
 
 
