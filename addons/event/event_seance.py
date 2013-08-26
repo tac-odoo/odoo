@@ -774,8 +774,8 @@ class EventEvent(osv.Model):
             raise NotImplementedError('No timeline specified, this is currently unsupported')
         tlstart = start
         tlend = datetime.max - timedelta(days=1)
-        available_periods = (p for p in timeline.iter(by='change', as_tz='UTC',
-                                                      start=tlstart, end=tlend)
+        available_periods = (p for p in timeline.iterperiods(as_tz='UTC',
+                                                             start=tlstart, end=tlend)
                              if p.status == Availibility.FREE).__iter__()
 
         period = None
@@ -786,7 +786,6 @@ class EventEvent(osv.Model):
                 try:
                     period = period or available_periods.next()
                 except StopIteration as e:
-                    import pdb; pdb.set_trace()
                     raise osv.except_osv(_('Error!'),
                                          _('No enough time to schedule all content "%s"') % (content.name,))
                 if period.duration < content.slot_duration and not content_allow_splitting:
@@ -993,7 +992,7 @@ class EventEvent(osv.Model):
                                                        date_from=event_begin, date_to=event_end,
                                                        context=context)
                 # iter on each timeline change, and eat all "available" time
-                available_periods = (p for p in timeline.iter(by='change', as_tz='UTC')
+                available_periods = (p for p in timeline.iterperiods(as_tz='UTC')
                                      if p.status == Availibility.FREE).__iter__()
                 ###
                 create_content = partial(Content.create_seances_from_content, cr, uid, o2m_commands=True, context=context)

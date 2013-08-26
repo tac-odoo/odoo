@@ -177,7 +177,7 @@ class CoreCalendarTimeline(osv.TransientModel):
                                                             date_from=date_from, date_to=date_to,
                                                             context=context)
                 for record_id, timeline in tlresult.iteritems():
-                    for period in timeline.iter(by='change', as_tz='UTC'):
+                    for period in timeline.iterperiods(as_tz='UTC'):
                         if period.status == Availibility.FREE:
                             continue
 
@@ -271,7 +271,7 @@ class CoreCalendarResource(osv.TransientModel):
                                                    date_from=sdate,
                                                    date_to=edate, context=context)
             avails = []
-            for period in timeline.iter(by='change'):
+            for period in timeline.iterperiods():
                 # print("-- %s" % (period,))
                 avails.append(period.status)
             result[record.id] = self.get_i18n_availibility_status(cr, uid, max(avails), short=fb_short_status, context=context)

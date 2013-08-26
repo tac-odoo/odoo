@@ -43,19 +43,19 @@ class report_event_resource(osv.Model):
     def _compute_resource_hours(self, cr, uid, partner_id, timeline, start, end, context=None):
         # Working Hours
         sum_wkhours = sum(p.duration
-                          for p in timeline.iter(by='change', as_tz='UTC',
+                          for p in timeline.iterperiods(as_tz='UTC',
                                                  start=start, end=end, layers=['working_hours'])
                           if p.status == Availibility.FREE)
 
         # Leaves
         sum_leaves = sum(p.duration
-                         for p in timeline.iter(by='change', as_tz='UTC',
+                         for p in timeline.iterperiods(as_tz='UTC',
                                                 start=start, end=end, layers=['leaves'])
                          if p.status >= Availibility.BUSY_TENTATIVE)
 
         # Effective Time (Busy events times)
         sum_events = sum(p.duration
-                         for p in timeline.iter(by='change', as_tz='UTC',
+                         for p in timeline.iterperiods(as_tz='UTC',
                                                 start=start, end=end, layers=['events'])
                          if p.status >= Availibility.BUSY_TENTATIVE)
 

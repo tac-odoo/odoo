@@ -145,7 +145,7 @@ class EventPreplanning(osv.TransientModel):
 
         # Compute available slot per weeks
         slot_per_weeks = defaultdict(list)
-        for period in timeline.iter(by='change', as_tz='UTC'):
+        for period in timeline.iterperiods(as_tz='UTC'):
             if period.status == Availibility.FREE:
                 # period is always less than 24h, and it's related
                 # week is computed based on ISO standard week.
