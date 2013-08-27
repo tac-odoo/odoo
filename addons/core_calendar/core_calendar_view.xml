@@ -157,6 +157,7 @@
                     <field name="location"/>
                     <field name="attendee_id"/>
                     <field name="attendee_tags"/>
+                    <filter name="my_agenda" string="My Agenda" domain="[('attendee_ids.user_ids','in',[uid])]" context="{}"/>
                     <!-- <field name="attendee_ids"/> -->
                     <group string="Group By...">
                         <filter string="Organizer" domain="[]" context="{'group_by': 'organizer_id'}"/>
@@ -174,7 +175,7 @@
             <field name="view_mode">calendar,tree</field>
             <field name="view_id" ref="view_core_calendar_event_calendar"/>
             <field name="search_view_id" ref="view_core_calendar_event_search"/>
-            <field name="context">{}</field>
+            <field name="context">{'search_default_my_agenda': 1}</field>
         </record>
 
         <menuitem name="Agenda" sequence="13"
