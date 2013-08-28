@@ -20,6 +20,7 @@
 ##############################################################################
 
 import pytz
+import copy
 from datetime import datetime, timedelta
 from collections import defaultdict
 from openerp.osv import osv, fields, expression
@@ -28,6 +29,7 @@ from openerp.tools.misc import logged, flatten
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
 from openerp.tools.safe_eval import safe_eval
 from openerp.tools.translate import _
+from openerp.tools.misc import flatten
 from openerp.addons.base.res.res_partner import _tz_get
 from timeline import Timeline, Availibility, WorkingHoursPeriodEmiter, GenericEventPeriodEmiter
 
@@ -380,8 +382,9 @@ class CoreCalendar(osv.Model):
         return ['attendee_ids', 'attendee_id', 'state']
 
     @tools.ormcache()
-    def _get_calendar_info(self, cr, uid, calendar_id):
-        calendar = self.browse(cr, uid, calendar_id)
+    def _get_calendar_info(self, cr, uid, calendar_id, lang=None):
+        context = {'lang': lang}
+        calendar = self.browse(cr, uid, calendar_id, context=context)
         fields = {}
         fields_type = {}
         for fieldname in calendar._all_columns:
@@ -402,12 +405,20 @@ class CoreCalendar(osv.Model):
                                      _('Unsupported virtual field "%s" using "%s" type of field') % (fieldname, column._type))
 
         states = {}
+        states_reversed = {}
         for state in ['tentative', 'confirm', 'cancel']:
             cval = calendar['states_'+state] or ''
-            states[state] = [v.strip() for v in cval.split(',') if v.strip()]
+            source_states = [v.strip() for v in cval.split(',') if v.strip()]
+            states[state] = source_states
+            for s in source_states:
+                states_reversed[s] = state
 
         return {
-            'states': states,
+            'name': calendar.name,
+            'model': calendar.model.model,
+            'date_mode': calendar.date_mode,
+            'states': states,  # map core.calendar.event state to model states
+            'states_reserved': states,  # map model states to core.calendar.event state
             'fields': fields,
             'fields_type': fields_type,
             'filter_expr': calendar.filter_expr,
@@ -419,12 +430,20 @@ class CoreCalendar(osv.Model):
 
     @tools.ormcache()
     def get_subscribed_ids(self, cr, uid):
+        ModelAccess = self.pool.get('ir.model.access')
         # TODO: really filter on subscribed calendars
         # TODO: when implemented per calendar subscription - do not forget to invalidate this cache!
-        return self.search(cr, uid, [])
+        available_calendar_ids = self.search(cr, uid, [])
+        user_calendar_ids = []
+        for calendar in self.browse(cr, uid, available_calendar_ids):
+            model = calendar.model
+            if ModelAccess.check(cr, uid, model, 'read', False):
+                user_calendar_ids.append(calendar.id)
+        return user_calendar_ids
 
     @logged
     def get_subscribed(self, cr, uid, context=None):
+        ModelAccess = self.pool.get('ir.model.access')
         # TODO:
         # - checked: user-preference to store is we should display events from this calendar by default or not
         calendar_ids = self.get_subscribed_ids(cr, uid)
@@ -432,18 +451,13 @@ class CoreCalendar(osv.Model):
         result = self.read(cr, uid, calendar_ids, calendar_fields, context=context)
         for r in result:
             calinfo = self._get_calendar_info(cr, uid, r['id'])
+            calendar_model = r['action_res_model']
             r['fields'] = calinfo['fields']
             r['fields_type'] = calinfo['fields_type']
+            r['access'] = {}
+            for mode in ['read', 'write', 'create', 'unlink']:
+                r['access'][mode] = ModelAccess.check(cr, uid, calendar_model, mode, False)
         return result
-
-    def get_states_map(self, cr, uid, ids, context=None):
-        calendar = self.browse(cr, uid, ids[0], context=context)
-        states_map = {'': ''}
-        for state_name in ['tentative', 'confirm', 'cancel']:
-            for v in (getattr(calendar, 'states_'+state_name, None) or '').split(','):
-                if v.strip():
-                    states_map[v.strip()] = state_name
-        return states_map
 
     def _merge_m2m_search_args(self, cr, uid, args, context=None):
         if not args:
@@ -637,12 +651,19 @@ class CoreCalendarEvent(osv.Model):
     _name = 'core.calendar.event'
     _auto = True
 
-    def _get_attendee_ids(self, cr, uid, ids, field_name, args, context=None):
+    def _get_attendees(self, cr, uid, ids, field_name, args, context=None):
+        return self._compute_attendees(cr, uid, ids, field_name, args, context=context)
+
+    def _compute_attendees(self, cr, uid, ids, field_name, args, context=None):
         ids_by_calendar = self._group_ids_by_calendar(cr, uid, ids, context=context)
         result = {}
         for id in ids:
-            result[id] = []
+            result[id] = {
+                'attendee_ids': [],
+                'main_speaker_id': False,
+            }
 
+        all_attendee_ids = set()
         calendar_ids = self.get_calendars(cr, uid, ids_by_calendar.keys(), context=context)
         for calendar in self.pool.get('core.calendar').browse(cr, uid, calendar_ids, context=context):
             calendar_model = self.pool.get(calendar.model.model)
@@ -662,7 +683,22 @@ class CoreCalendarEvent(osv.Model):
                     elif ftype == 'many2many':
                         for _id in record[fname]:
                             attendee_ids.add(_id)
-                result['%s-%s' % (calendar.id, record['id'])] = list(attendee_ids)
+                result['%s-%s' % (calendar.id, record['id'])]['attendee_ids'] = list(attendee_ids)
+                all_attendee_ids |= attendee_ids
+
+        # Filter attendee which are speakers
+        Partner = self.pool.get('res.partner')
+        speaker_domain = [
+            ('attendee_type', '=', 'speaker'),
+            ('id', 'in', list(all_attendee_ids))
+        ]
+        speaker_ids = Partner.search(cr, uid, speaker_domain, context=context)
+        speaker_names = dict(Partner.name_get(cr, uid, speaker_ids, context=context))
+        speaker_ids = set(speaker_ids)
+        for _id in ids:
+            spks = [x for x in result[_id]['attendee_ids'] if x in speaker_ids]
+            if spks:
+                result[_id]['main_speaker_id'] = (spks[0], speaker_names[spks[0]])
 
         return result
 
@@ -705,6 +741,7 @@ class CoreCalendarEvent(osv.Model):
     ]
 
     _columns = {
+        'id': fields.char('Id', size=None),
         'calendar_id': fields.many2one('core.calendar', 'Calendar', required=True),
 #        'partner_id': fields.many2one('res.partner', 'Resource'),
         'name': fields.char('Event Name', required=True),
@@ -716,10 +753,10 @@ class CoreCalendarEvent(osv.Model):
                                           help='Organized and/or Responsible person for this event'),
         'location': fields.char('Location', size=254, readonly=True,
                                  help="Location of this event"),
-        'attendee_ids': fields.function(_get_attendee_ids, type='many2many', relation='res.partner',
-                                        string='Attendees'),
-        'main_speaker_id': fields.function(_get_main_speaker_id, type='many2one', relation='res.partner',
-                                           string='Speaker'),
+        'attendee_ids': fields.function(_get_attendees, type='many2many', relation='res.partner',
+                                        string='Attendees', multi='attendees'),
+        'main_speaker_id': fields.function(_get_attendees, type='many2one', relation='res.partner',
+                                           string='Speaker', multi='attendees'),
         'state': fields.selection(_state_selection, 'State', readonly=True),
         'attendee_id': fields.function(_get_attendee_id, type='many2one', relation='res.partner',
                                        fnct_search=_search_attendee_id, string='Attendee'),
@@ -730,6 +767,21 @@ class CoreCalendarEvent(osv.Model):
                                         relation='res.partner.category', string='Attendee Tags'),
     }
 
+    def default_get(self, cr, uid, fields_list, context=None):
+        defaults = super(CoreCalendarEvent, self).default_get(cr, uid, fields_list,  context=context)
+        # Compute automatic default values
+        for f in fields_list:
+            if f not in defaults:
+                _type = self._all_columns[f].column._type
+                if _type in ('char', 'text', 'html', 'selection', 'reference'):
+                    defaults[f] = ''
+                elif _type in ('integer',):
+                    defaults[f] = 0
+                elif _type in ('float',):
+                    defaults[f] = 0.0
+                elif _type in ('many2one', 'boolean', 'binary', 'date', 'datetime', 'many2many', 'one2many'):
+                    defaults[f] = False
+        return defaults
 
     def _group_ids_by_calendar(self, cr, uid, ids, context=None):
         if not isinstance(ids, (list, tuple)):
@@ -779,77 +831,127 @@ class CoreCalendarEvent(osv.Model):
         #                                               order=order, context=context, count=count)
 
     #@logged
-    def read(self, cr, user, ids, fields=None, context=None, load='_classic_read'):
-        ids_by_calendar = self._group_ids_by_calendar(cr, user, ids, context=context)
-        if fields is None or (isinstance(fields, (list, tuple)) and not fields):
-            fields = self._columns.keys()
+    def read(self, cr, user, ids, fields_to_read=None, context=None, load='_classic_read'):
+        Calendar = self.pool.get('core.calendar')
 
-        if 'attendee_ids' in fields:
-            attendee_ids = self._get_attendee_ids(cr, user, ids, 'attendee_ids', [], context=context)
+        if context is None:
+            context = {}
+        if fields_to_read is None or (isinstance(fields, (list, tuple)) and not fields):
+            fields_to_read = self._columns.keys()
 
-        if 'main_speaker_id' in fields:
-            speakers = self._get_main_speaker_id(cr, user, ids, 'main_speaker_id', [], context=context)
+        fields_pre = []
+        fields_post = []
+        for f in fields_to_read:
+            column = self._all_columns[f].column
+            if isinstance(column, fields.function):
+                fields_post.append(f)
+            else:
+                fields_pre.append(f)
+
+        date_fields_requested = any(f in fields_pre for f in ['date_start', 'date_end', 'duration'])
 
         result = []
-        calendar_ids = self.get_calendars(cr, user, ids_by_calendar.keys(), context=context)
-        for calendar in self.pool.get('core.calendar').browse(cr, user, calendar_ids, context=context):
-            cmap = {
-                'name': calendar.field_name.name,
-                'date_start': calendar.field_date_start.name,
-                'organizer_id': calendar.field_organizer_id.name if calendar.field_organizer_id else False,
-                'location': calendar.field_location.name if calendar.field_location else False,
-            }
-            cmap_defaults = {
-                'name': '',
-                'date_start': '',
-                'organizer_id': False,
-                'location': '',
-            }
-            byduration = calendar.date_mode == 'duration' and True or False
-            if byduration:
-                cmap['duration'] = calendar.field_duration.name
-                cmap_defaults['duration'] = '0.0'
-            else:
-                cmap['date_end'] = calendar.field_date_end.name
-                cmap_defaults['date_end'] = ''
-            if calendar.field_recurrent:
-                cmap['recurrent'] = calendar.field_recurrent.name
-                cmap_defaults['recurrent'] = False
-            if calendar.field_state and 'state' in fields:
-                cmap['state'] = calendar.field_state.name
-                cmap_defaults['state'] = ''
-                cmap_states = calendar.get_states_map()
+        record_defaults = self.default_get(cr, user, fields_to_read, context=context)
 
-            location_is_m2o = calendar.field_location and calendar.field_location.ttype == 'many2one' or False
+        for calendar_id, event_ids in self._group_ids_by_calendar(cr, user, ids, context=context).iteritems():
+            calendar_info = Calendar._get_calendar_info(cr, user, calendar_id, context.get('lang'))
+            calendar_model = self.pool.get(calendar_info['model'])
+            calendar_fields = calendar_info['fields']
+            byduration = True if calendar_info['date_mode'] == 'duration' else False
 
-            calendar_model = self.pool.get(calendar.model.model)
-            for val in calendar_model.read(cr, user, ids_by_calendar[calendar.id], fields=cmap.values(), context=context):
-                record = dict((f, val.get(cmap[f], cmap_defaults.get(f, False))) for f in cmap)
-                record_dt_start = datetime.strptime(record['date_start'], DT_FMT)
-                record['id'] = '%s-%s' % (calendar.id, val['id'])
-                if 'calendar_id' in fields:
-                    record['calendar_id'] = (calendar.id, calendar.name)
-                if 'recurrent' in fields and 'recurrent' not in cmap:
-                    record['recurrent'] = False
-                if 'attendee_ids' in fields:
-                    record['attendee_ids'] = attendee_ids[record['id']]
-                if 'main_speaker_id' in fields:
-                    record['main_speaker_id'] = speakers[record['id']]
-                if 'state' in fields:
-                    record['state'] = cmap_states[record['state']]
-                if 'location' in fields and location_is_m2o:
-                    record['location'] = record['location'] and record['location'][1] or ''
-                if byduration:
-                    duration = timedelta(hours=record['duration'])
-                    record['date_end'] = (record_dt_start + duration).strftime(DT_FMT)
-                else:
-                    record_dt_end = datetime.strptime(record['date_end'], DT_FMT)
-                    duration = (record_dt_end - record_dt_start)
-                    record['duration'] = duration.days * 24. + duration.seconds / 3600.
+            model_fields_pre = fields_pre[:]
+            if date_fields_requested:
+                # ensure we read date fields - this is needed if we need to compute
+                # automatically date_end / duration depending on calendar 'end date' mode
+                model_fields_pre = list(set(model_fields_pre + ['date_start', 'date_end', 'duration']))
+            calendar_fields_to_read = [x for x in flatten(calendar_fields.get(fld)
+                                                          for fld in model_fields_pre)
+                                       if x not in (None, False)]
+
+            for val in calendar_model.read(cr, user, event_ids, calendar_fields_to_read, context=context):
+                record = dict(record_defaults)
+                record['id'] = '%s-%s' % (calendar_id, val['id'])
+                # TODO: handle log_access columns read
+                if 'calendar_id' in fields_pre:
+                    record['calendar_id'] = (calendar_id, calendar_info['name'])
+                if 'state' in fields_pre:
+                    record['state'] = calendar_info['states_reversed'][record['state']] if record['state'] else False
+
+                for f in fields_pre:
+                    if f in ['id', 'calendar_id', 'state']:
+                        continue
+                    column = self._all_columns[f].column
+                    if column._type in ('many2many', 'one2many'):
+                        # multiple fields
+                        values = []
+                        if not isinstance(calendar_fields[f], (list, tuple)):
+                            fields_list = [calendar_info['fields'][f],
+                                           calendar_info['fields_type'][f]]
+                        else:
+                            fields_list = zip(calendar_info['fields'][f],
+                                              calendar_info['fields_type'][f])
+                        for field_name, field_type in fields_list:
+                            value = val[field_name]
+                            if value:
+                                if field_type in ('many2many',):
+                                    values.extend(value)
+                                elif field_type == 'many2one':
+                                    values.append(value[0])
+                                else:
+                                    values.append(value)
+                        record[f] = values
+                    else:
+                        field_name = calendar_info['fields'].get(f)
+                        field_type = calendar_info['fields_type'].get(f)
+                        if not field_name:
+                            continue
+                        value = val[field_name]
+                        if value:
+                            if field_type == 'many2one':
+                                if column._type in ('many2one', 'integer'):
+                                    value = value[0]  # keep only the ID
+                                else:
+                                    value = value[1]  # we want textual value
+                            record[f] = value
+
+                if date_fields_requested:
+                    record_dt_start = datetime.strptime(val[calendar_fields['date_start']], DT_FMT)
+                    if byduration and 'date_end' in fields_pre:
+                        duration = timedelta(hours=val[calendar_fields['duration']])
+                        record['date_end'] = (record_dt_start + duration).strftime(DT_FMT)
+                    elif not byduration and 'duration' in fields_pre:
+                        record_dt_end = datetime.strptime(val[calendar_fields['date_end']], DT_FMT)
+                        duration = (record_dt_end - record_dt_start)
+                        record['duration'] = duration.days * 24. + duration.seconds / 3600.
                 result.append(record)
-        # print("RESULT: %s" % (result,))
+
+        # Compute POST fields
+        todo = defaultdict(list)
+        for f in fields_post:
+            column = self._all_columns[f].column
+            todo[column._multi].append(f)
+        for key, val in todo.items():
+            if key:
+                res2 = self._columns[val[0]].get(cr, self, ids, val, user, context=context, values=result)
+                assert res2 is not None, \
+                    'The function field "%s" on the "%s" model returned None\n' \
+                    '(a dictionary was expected).' % (val[0], self._name)
+                for pos in val:
+                    for record in result:
+                        if isinstance(res2[record['id']], str): res2[record['id']] = eval(res2[record['id']]) #TOCHECK : why got string instend of dict in python2.6
+                        multi_fields = res2.get(record['id'], {})
+                        if multi_fields:
+                            record[pos] = multi_fields.get(pos, [])
+            else:
+                for f in val:
+                    res2 = self._columns[f].get(cr, self, ids, f, user, context=context, values=result)
+                    for record in result:
+                        if res2:
+                            record[f] = res2[record['id']]
+                        else:
+                            record[f] = []
+
         return result
-        # return super(res_calendar_event, self).read(cr, user, ids, fields=fields, context=context, load=load)
 
 
     @logged
