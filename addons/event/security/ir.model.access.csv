@@ -1,4 +1,17 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_event_type_professor,event.type,model_event_type,event.group_event_professor,1,0,0,0
+access_event_professor,event.event,model_event_event,event.group_event_professor,1,0,0,0
+access_event_seance_type_professor,event.seance.type,model_event_seance_type,event.group_event_professor,1,0,0,0
+access_event_seance_professor,event.seance,model_event_seance,event.group_event_professor,1,0,0,0
+access_event_participation_professor,event.participation,model_event_participation,event.group_event_professor,1,0,0,0
+access_event_content_professor,event.content,model_event_content,event.group_event_professor,1,0,0,0
+access_core_calendar_professor,core.calendar,core_calendar.model_core_calendar,event.group_event_professor,1,0,0,0
+access_core_calendar_event_professor,core.calendar.event,core_calendar.model_core_calendar_event,event.group_event_professor,1,0,0,0
+access_crm_meeting_event_professor,crm.meeting,base_calendar.model_crm_meeting,event.group_event_professor,1,1,1,1
+access_crm_meeting_type_professor,crm.meeting,base_calendar.model_crm_meeting_type,event.group_event_professor,1,0,0,0
+access_mail_message_professor,mail.message,mail.model_mail_message,event.group_event_professor,1,0,1,0
+access_calendar_alarm_professor,calendar.alarm,base_calendar.model_calendar_alarm,event.group_event_professor,1,0,1,0
+access_res_partner_professor,res.partner,base.model_res_partner,event.group_event_professor,1,0,0,0
 access_event_type,event.type,model_event_type,event.group_event_user,1,0,0,0
 access_event_type_manager,event.type manager,model_event_type,event.group_event_manager,1,1,1,1
 access_event_event,event.event,model_event_event,event.group_event_user,1,1,1,1
