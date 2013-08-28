@@ -322,12 +322,9 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
                     if (_.indexOf(this.many2manys, node.attrs.name) < 0) {
                         this.many2manys.push(node.attrs.name);
                     }
-                    node.tag = 'div';
-                    node.attrs['class'] = (node.attrs['class'] || '') + ' oe_form_field oe_tags';
-                } else {
-                    node.tag = QWeb.prefix;
-                    node.attrs[QWeb.prefix + '-esc'] = 'record.' + node.attrs['name'] + '.value';
                 }
+                node.tag = QWeb.prefix;
+                node.attrs[QWeb.prefix + '-esc'] = 'record.' + node.attrs['name'] + '.value';
                 break;
         }
         if (node.children) {
@@ -357,6 +354,57 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
             new_record[name] = r;
         });
         return new_record;
+    },
+    /*
+    *  postprocessing of fields type many2many
+    *  make the rpc request for all ids/model and insert value inside .oe_tags fields
+    */
+    postprocess_m2m_tags: function(events) {
+        var self = this;
+        if (!this.many2manys.length) {
+            return;
+        }
+        if (!events) {
+            events = self.events;
+        }
+        // Collect ids per relations
+        var relations = {};
+        events.forEach(function(event_item) {
+            self.many2manys.forEach(function(name) {
+                var field = event_item.record[name];
+                if (!relations[field.relation]) {
+                    relations[field.relation] = { ids: [], datas: [] };
+                }
+                var rel = relations[field.relation];
+                field.raw_value.forEach(function(id) {
+                    rel.ids.push(id);
+                });
+            });
+        });
+        // Fetch all items once per relation
+        _.each(relations, function(rel, rel_name) {
+            var dataset = new instance.web.DataSetSearch(self, rel_name, self.dataset.get_context());
+            dataset.name_get(_.uniq(rel.ids)).done(function(result) {
+                result.forEach(function(nameget) {
+                    relations[rel_name].datas[nameget[0]] = nameget[1];
+                });
+
+                events.forEach(function(event_item) {
+                    self.many2manys.forEach(function(name) {
+                        var field = event_item.record[name];
+                        if (field.relation !== rel_name) {
+                            return;
+                        }
+                        var names = [];
+                        field.raw_value.forEach(function(id) {
+                            console.log(name, id, field.relation, relations[field.relation], relations[field.relation].datas[id.toString()]);
+                            names.push(relations[field.relation].datas[id]);
+                        });
+                        event_item.record[name].value = names.join(', ');
+                    });
+                });
+            });
+        });
     },
     render_has_template: function(template_name) {
         return !!this.qweb.templates[template_name]
@@ -683,6 +731,7 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
             }
             res_events.push(this.convert_event(evt));
         }
+        this.postprocess_m2m_tags(res_events);
         scheduler.parse(res_events, 'json');
         this.refresh_scheduler();
         if (!no_filter_reload && this.sidebar) {
@@ -713,7 +762,6 @@ instance.web_calendar.CalendarView = instance.web.View.extend({
             'id': evt.id,
             'section_key': undefined,
             'oe_view': this,
-            'record': this.transform_record(evt),
         };
         r.record = this.transform_record(evt);
         r.oe_view = this;
