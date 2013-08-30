@@ -291,6 +291,12 @@ class EventContent(osv.Model):
                           slot_duration=slot_duration)
         return {'value': values}
 
+    def _prepare_seance_for_content(self, cr, uid, content, date_begin, date_end, group=None, context=None):
+        values = super(EventContent, self)._prepare_seance_for_content(cr, uid, content, date_begin, date_end, group=group, context=context)
+        if content.course_id:
+            values['course_id'] = content.course_id.id
+        return values
+
 
 class EventSeance(osv.Model):
     _inherit = 'event.seance'

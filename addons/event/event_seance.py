@@ -206,8 +206,9 @@ class EventContent(osv.Model):
         values = {
             'name': content.name,
             'content_id': content.id,
+            'type_id': content.type_id.id,
             'group_id': group.id if group else False,
-            'date_begin': date_begin,
+            'date_begin': date_begin.strftime(DT_FMT),
             'duration': duration,
         }
         if content.speaker_id:
