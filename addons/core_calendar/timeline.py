@@ -141,14 +141,12 @@ class WorkingHoursPeriodEmiter(PeriodEmiter):
         while s < end:
             h, m = to_hourmin(period[P_END][P_HOURMIN])
             end_weekday = period[P_END][P_WEEKDAY]
-            if (h, m) == (24, 0):
-                end_weekday += 1
-                if end_weekday > 7:
-                    end_weekday -= 7
-                h, m = (0, 0)
             e = s.replace()
             while e.isoweekday() != end_weekday:
                 e += timedelta(days=1)
+            if (h, m) == (24, 0):
+                e += timedelta(days=1)
+                h, m = (0, 0)
             e = min(e.replace(hour=h, minute=m, second=0, microsecond=0), end)
             yield AvailibilityPeriod(s, e, period[P_STATUS])
 
