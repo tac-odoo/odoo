@@ -418,7 +418,7 @@ class CoreCalendar(osv.Model):
             'model': calendar.model.model,
             'date_mode': calendar.date_mode,
             'states': states,  # map core.calendar.event state to model states
-            'states_reserved': states,  # map model states to core.calendar.event state
+            'states_reversed': states_reversed,  # map model states to core.calendar.event state
             'fields': fields,
             'fields_type': fields_type,
             'filter_expr': calendar.filter_expr,
@@ -875,7 +875,7 @@ class CoreCalendarEvent(osv.Model):
                 if 'calendar_id' in fields_pre:
                     record['calendar_id'] = (calendar_id, calendar_info['name'])
                 if 'state' in fields_pre:
-                    record['state'] = calendar_info['states_reversed'][record['state']] if record['state'] else False
+                    record['state'] = calendar_info['states_reversed'][val['state']] if val['state'] else False
 
                 for f in fields_pre:
                     if f in ['id', 'calendar_id', 'state']:
