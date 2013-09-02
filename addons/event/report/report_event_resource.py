@@ -27,6 +27,7 @@ from openerp.osv import osv, fields
 from openerp import tools
 from openerp.addons.core_calendar.timeline import Availibility
 from openerp.tools.translate import _
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
 
 
 class report_event_resource(osv.Model):
@@ -114,7 +115,7 @@ class report_event_resource(osv.Model):
         raise osv.except_osv(_('Error!'), _('Invalid date interval provided'))
 
     def _get_resource_hours(self, cr, uid, ids, fieldnames, args, context=None):
-        if any(context.get(f) for f in ['this_week', 'this_month', 'this_year', 'this_dates']):
+        if any(context.get(f) for f in ['this_week', 'this_month', 'this_year', 'this_dates', 'date_from']):
             Partner = self.pool.get('res.partner')
 
             today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -129,6 +130,12 @@ class report_event_resource(osv.Model):
                 end = start + relativedelta(years=1)
             elif context.get('this_dates'):
                 start, end = self._parse_user_dates_interval(cr, uid, context['this_dates'], context=context)
+            elif context.get('date_from'):
+                start = datetime.strptime(context['date_from'], DT_FMT)
+                if context.get('date_to'):
+                    end = datetime.strptime(context['date_to'], DT_FMT)
+                else:
+                    end = (start + relativedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
 
             result = {}
             for partner in Partner.browse(cr, uid, ids, context=context):

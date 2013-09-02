@@ -36,6 +36,7 @@
             <field name="model">report.event.resource</field>
             <field name="arch" type="xml">
                 <search string="Event Resources">
+                    <field name="resource_name"/>
                     <field name="resource_id"/>
                     <filter string="This Week" name="this_week" context="{'this_week': 1}"/>
                     <filter string="This Month" name="this_month" context="{'this_month': 1}"/>
