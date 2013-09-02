@@ -71,7 +71,7 @@
                                     <field name="field_state" domain="[('model_id','=',model),('ttype','=','selection')]"/>
                                     <field name="field_organizer_id" domain="[('model_id','=',model),('ttype','=','many2one'),('relation','=','res.users')]"/>
                                     <field name="field_location" domain="[('model_id','=',model),'|',('ttype','=','char'),'&amp;',('ttype','=','many2one'),('relation','=','res.partner')]"/>
-                                    <field name="field_attendee_ids" domain="[('model_id','=',model),('ttype','in',('many2many','many2one')),('relation','=','res.partner')]" widget="many2many_tags"/>
+                                    <field name="field_attendee_ids" domain="[('model_id','=',model),('ttype','in',('many2many','many2one')),('relation','in',['res.partner','res.users'])]" widget="many2many_tags"/>
                                 </group>
                             </group>
                             <group>

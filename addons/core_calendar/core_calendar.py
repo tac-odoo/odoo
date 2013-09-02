@@ -349,10 +349,13 @@ class CoreCalendar(osv.Model):
         'field_date_end': fields.many2one('ir.model.fields', 'End date'),
         'field_duration': fields.many2one('ir.model.fields', 'Duration'),
         'field_recurrent': fields.many2one('ir.model.fields', 'Recurrent', help='Field used to indicate if an event is recurrent'),
-        'field_organizer_id': fields.many2one('ir.model.fields', 'Organizer', help='Organizer/Responsible for that event'),
-        'field_location': fields.many2one('ir.model.fields', 'Location', help='Location of event'),
+        'field_organizer_id': fields.many2one('ir.model.fields', 'Organizer', help='Organizer/Responsible for that event',
+                                              target_relation='res.users'),
+        'field_location': fields.many2one('ir.model.fields', 'Location', help='Location of event',
+                                          target_relation='res.partner'),
         'field_attendee_ids': fields.many2many('ir.model.fields', 'core_calendar_attendee_fields_rel', id1='calendar_id', id2='field_id',
-                                               string='Attendees', help='Field representing list of attendee'),
+                                               string='Attendees', help='Field representing list of attendee',
+                                               target_relation='res.partner'),
         'field_state': fields.many2one('ir.model.fields', 'State'),
         'states_tentative': fields.char('States (Tentative)', size=256,
                                         help='Comma separated list of states which represent object as unlocked/draft'),
@@ -387,18 +390,29 @@ class CoreCalendar(osv.Model):
         calendar = self.browse(cr, uid, calendar_id, context=context)
         fields = {}
         fields_type = {}
+
+        def mapped_fieldname(field_record, dest_relation):
+            if not field_record:
+                return False
+            mapped_fieldname = field_record.name
+            if field_record.relation == 'res.users' and dest_relation == 'res.partner':
+                mapped_fieldname += '.partner_id'
+            return mapped_fieldname
+
         for fieldname in calendar._all_columns:
             if not fieldname.startswith('field_'):
                 continue
             short_fieldname = fieldname[6:]
             column = calendar._all_columns[fieldname].column
+            target_relation = getattr(column, 'target_relation', None)
 
             if column._type == 'many2one':
                 cval = calendar[fieldname]
-                fields[short_fieldname] = cval.name if cval else False
+                fields[short_fieldname] = mapped_fieldname(cval, target_relation)
                 fields_type[short_fieldname] = cval.ttype if cval else False
             elif column._type == 'many2many':
-                fields[short_fieldname] = [x.name for x in calendar[fieldname]]
+                fields[short_fieldname] = [mapped_fieldname(x, target_relation)
+                                           for x in calendar[fieldname]]
                 fields_type[short_fieldname] = [x.ttype for x in calendar[fieldname]]
             else:
                 raise osv.except_osv(_('Error!'),
@@ -595,6 +609,7 @@ class CoreCalendar(osv.Model):
                             return long(x)
                         return x
                     calendar_attendee_fields = calendar_info['fields']['attendee_ids']
+                    print("Attendee calendar fields: %s" % (calendar_attendee_fields,))
                     if calendar_attendee_fields:
                         domains = [[f + field_extra, arg[1], fix_id(arg[2])] for f in calendar_attendee_fields]
                         expr.extend([JOIN_OP] * (len(domains) - 1) + domains)
@@ -603,7 +618,7 @@ class CoreCalendar(osv.Model):
                 elif field_is_valid and field == 'id':
                     if isinstance(val, (tuple, list)):
                         # filter only id related to this calendar
-                        val = [v[len(calendar_id_filter):] 
+                        val = [v[len(calendar_id_filter):]
                                for v in val
                                if isinstance(v, basestring) and v.startswith(calendar_id_filter)]
                     elif isinstance(val, basestring):
@@ -669,20 +684,24 @@ class CoreCalendarEvent(osv.Model):
             calendar_model = self.pool.get(calendar.model.model)
             calendar_ids = ids_by_calendar[calendar.id]
 
-            fields = dict((x.name, x.ttype) for x in calendar.field_attendee_ids)
+            fields = dict((x.name, (x.ttype, x.relation)) for x in calendar.field_attendee_ids)
             if not fields:
                 continue
 
-            for record in calendar_model.read(cr, uid, calendar_ids, fields.keys(), context=context):
+            for record in calendar_model.browse(cr, uid, calendar_ids, context=context):
                 attendee_ids = set()
-                for fname, ftype in fields.iteritems():
+                for fname, (ftype, frelation) in fields.iteritems():
                     if ftype == 'many2one':
                         value = record[fname]
                         if value:
-                            attendee_ids.add(value[0])
+                            if frelation == 'res.users':
+                                value = value.partner_id
+                            attendee_ids.add(value.id)
                     elif ftype == 'many2many':
-                        for _id in record[fname]:
-                            attendee_ids.add(_id)
+                        for r in record[fname]:
+                            if frelation == 'res.users':
+                                r = r.partner_id
+                            attendee_ids.add(r.id)
                 result['%s-%s' % (calendar.id, record['id'])]['attendee_ids'] = list(attendee_ids)
                 all_attendee_ids |= attendee_ids
 
@@ -700,28 +719,6 @@ class CoreCalendarEvent(osv.Model):
             if spks:
                 result[_id]['main_speaker_id'] = (spks[0], speaker_names[spks[0]])
 
-        return result
-
-    def _get_main_speaker_id(self, cr, uid, ids, fielname, args, context=None):
-        result_attendee_ids = self._get_attendee_ids(cr, uid, ids, 'attendee_ids', args, context=context)
-        attendee_ids = []
-        for v in result_attendee_ids.itervalues():
-            attendee_ids += v
-        Partner = self.pool.get('res.partner')
-        speaker_domain = [
-            ('attendee_type', '=', 'speaker'),
-            ('id', 'in', attendee_ids),
-        ]
-        speaker_ids = Partner.search(cr, uid, speaker_domain, context=context)
-        speaker_vals = dict(Partner.name_get(cr, uid, speaker_ids, context=context))
-        speaker_ids = set(speaker_ids)
-        result = {}
-        for _id in ids:
-            spks = [x for x in (result_attendee_ids.get(_id) or []) if x in speaker_ids]
-            if spks:
-                result[_id] = (spks[0], speaker_vals[spks[0]])
-            else:
-                result[_id] = False
         return result
 
     def _get_attendee_id(self, cr, uid, ids, fieldname, args, context=None):
@@ -908,9 +905,9 @@ class CoreCalendarEvent(osv.Model):
                         value = val[field_name]
                         if value:
                             if field_type == 'many2one':
-                                if column._type in ('many2one', 'integer'):
+                                if column._type in 'integer':
                                     value = value[0]  # keep only the ID
-                                else:
+                                elif column._type != 'many2one':
                                     value = value[1]  # we want textual value
                             record[f] = value
 
