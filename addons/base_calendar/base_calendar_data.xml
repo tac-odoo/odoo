@@ -16,7 +16,7 @@
             <field name="field_recurrent" ref="base_calendar.field_crm_meeting_recurrency"/>
             <field name="field_organizer_id" ref="base_calendar.field_crm_meeting_user_id"/>
             <field name="field_location" ref="base_calendar.field_crm_meeting_location"/>
-            <field name="field_attendee_ids" eval="[(6, 0, [ref('base_calendar.field_crm_meeting_partner_ids')])]"/>
+            <field name="field_attendee_ids" eval="[(6, 0, [ref('base_calendar.field_crm_meeting_user_id'),ref('base_calendar.field_crm_meeting_partner_ids')])]"/>
             <field name="field_state" ref="base_calendar.field_crm_meeting_state"/>
             <field name="states_tentative">draft</field>
             <field name="states_confirm">open</field>
