@@ -109,8 +109,13 @@ def transfer_node_to_modifiers(node, modifiers, context=None, in_tree_view=False
 
     if node.get('states'):
         if 'invisible' in modifiers and isinstance(modifiers['invisible'], list):
-            # TODO combine with AND or OR, use implicit AND for now.
-            modifiers['invisible'].append(('state', 'not in', node.get('states').split(',')))
+            # When having <field name="field1" attrs="{'invisible': [('field1','=',True)]}"
+            #                                  states="draft"/>
+            # We want the field to be invisible when field1 is True or when
+            # states is different from draft - so we join existing attrs with "OR"
+            from expression import normalize_domain
+            modifiers['invisible'] = ['|', ('state', 'not in', node.get('states').split(','))] \
+                                        + normalize_domain(modifiers['invisible'])
         else:
             modifiers['invisible'] = [('state', 'not in', node.get('states').split(','))]
 
