@@ -58,6 +58,13 @@ instance.web_gantt.GanttView = instance.web.View.extend({
             });
         });
     },
+    do_show: function () {
+        var self = this;
+        $.when(this.has_been_loaded).done(function() {
+            self.$el.show();
+            self.do_push_state({});
+        });
+    },
     reload: function() {
         if (this.last_domains !== undefined)
             return this.do_search(this.last_domains, this.last_contexts, this.last_group_bys);
