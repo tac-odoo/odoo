@@ -95,8 +95,6 @@ class EventContent(osv.Model):
         return result
 
     def onchange_duration(self, cr, uid, ids, field_source, slot_count, slot_duration, tot_duration, context=None):
-        print("change:duration # %s | %s x %s = %s" % (field_source, slot_count, slot_duration, tot_duration))
-        print("==> context: %s" % (context,))
         values = {}
         company_id = context.get('company_id') or self.pool.get('res.users')._get_company(cr, uid, context=context)
         if company_id:
@@ -108,11 +106,6 @@ class EventContent(osv.Model):
                         '%02d:%02d' % tuple(a * b for a, b in zip(reversed(math.modf(slot_duration)), [1, 60])),
                         '%02d:%02d' % tuple(a * b for a, b in zip(reversed(math.modf(slot_time_unit)), [1, 60]))
                     ))
-        # fixed == 'slot_duration'
-
-        # slot_count => duration
-        # slot_duration => duration
-        # duration => slot_count
         if field_source in ('slot_duration', 'slot_count'):
             new_count = math.ceil(slot_count)
         else:
@@ -130,6 +123,7 @@ class EventContent(osv.Model):
         'name': fields.char('Content', size=128, required=True),
         'type_id': fields.many2one('event.seance.type', 'Type',
                                    help='Default type of seance'),
+        'lang_id': fields.many2one('res.lang', 'Language'),
         'event_ids': fields.many2many('event.event', 'event_content_link',
                                       id1='content_id', id2='event_id',
                                       string='Events', readonly=True),
@@ -146,6 +140,12 @@ class EventContent(osv.Model):
         'room_id': fields.many2one('res.partner', 'Room', help='Default room assigned to created seances related to this content'),
         'speaker_id': fields.many2one('res.partner', 'Speaker', help='Default speaker assigned to created seances related to this content'),
     }
+
+    def copy_data(self, cr, uid, id, default=None, context=None):
+        if default is None:
+            default = {}
+        default.update(seance_ids=None, event_ids=None)
+        return super(EventContent, self).copy_data(cr, uid, id, default=default, context=context)
 
     def _default_slot_duration(self, cr, uid, context=None):
         if context is None:
@@ -194,7 +194,16 @@ class EventContent(osv.Model):
             Registration = self.pool.get('event.registration')
             registration_ids = Registration.search(cr, uid, [('event_id.content_ids', 'in', ids), ('state', '!=', 'done')], context=context)
             Registration._update_registration_groups(cr, uid, registration_ids, context=context)
+        if 'event_ids' in values:
+            self.unlink_isolated_content(cr, uid, ids, context=context)
         return rval
+
+    def unlink_isolated_content(self, cr, uid, ids, context=None):
+        to_unlink = []
+        for content in self.read(cr, uid, ids, ['event_ids'], context=context):
+            if not content['event_ids']:
+                to_unlink.append(content['id'])
+        return self.unlink(cr, uid, to_unlink, context=context)
 
     def _prepare_seance_for_content(self, cr, uid, content, date_begin, date_end, group=None, context=None):
         if isinstance(date_begin, basestring):
@@ -207,6 +216,7 @@ class EventContent(osv.Model):
             'name': content.name,
             'content_id': content.id,
             'type_id': content.type_id.id,
+            'lang_id': content.lang_id.id,
             'group_id': group.id if group else False,
             'date_begin': date_begin.strftime(DT_FMT),
             'duration': duration,
@@ -652,8 +662,11 @@ class EventParticipationGroup(osv.Model):
     def _get_participant_count(self, cr, uid, ids, field_name, args, context=None):
         result = {}
         for group in self.browse(cr, uid, ids, context=context):
-            event = group.event_content_id.event_id
-            total = event.register_current + event.register_prospect
+            events = group.event_content_id.event_ids
+            total = 0
+            if events:
+                total = sum(event.register_current + event.register_prospect
+                            for event in events)
             count = sum([reg.nb_register for reg in group.registration_ids])
             result[group.id] = _('%d / %d') % (count, total)
         return result
@@ -675,13 +688,19 @@ class EventParticipationGroup(osv.Model):
                                              string='Registrations', id1='group_id', id2='registration_id'),
     }
 
+    def copy_data(self, cr, uid, id, default=None, context=None):
+        if default is None:
+            default = {}
+        default['registration_ids'] = None
+        return super(EventParticipationGroup, self).copy_data(cr, uid, id, default=default, context=context)
+
     def create(self, cr, uid, values, context=None):
         content_id = values.get('event_content_id')
         if content_id:
             content = self.pool.get('event.content').browse(cr, uid, content_id, context=context)
             event_ids = content.event_ids
-            if event_ids and any(e.state != 'draft' for e in event_ids):
-                raise osv.except_osv(_('Error'), _('You can only add new content group on draft events'))
+            if event_ids and any(e.state not in ['draft', 'template'] for e in event_ids):
+                raise osv.except_osv(_('Error'), _('You can only add new content group on template and draft events'))
         return super(EventParticipationGroup, self).create(cr, uid, values, context=context)
 
     def write(self, cr, uid, ids, values, context=None):
@@ -908,13 +927,36 @@ class EventEvent(osv.Model):
                 return False
         return True
 
-    def copy(self, cr, uid, id, default=None, context=None):
+    def copy_data(self, cr, uid, id, default=None, context=None):
         """ Reset the state and the registrations while copying an event
         """
         if default is None:
             default = {}
-        default.update(content_ids=False)
-        return super(EventEvent, self).copy(cr, uid, id, default=default, context=context)
+        default.update(content_ids=False, seance_ids=False)
+        return super(EventEvent, self).copy_data(cr, uid, id, default=default, context=context)
+
+    def write(self, cr, uid, ids, values, context=None):
+        content_ids_to_check = set()
+        if 'content_ids' in values:
+            for event in self.read(cr, uid, ids, ['content_ids'], context=context):
+                content_ids_to_check |= set(event['content_ids'])
+        result = super(EventEvent, self).write(cr, uid, ids, values, context=context)
+        if 'content_ids' in values:
+            for event in self.read(cr, uid, ids, ['content_ids'], context=context):
+                content_ids_to_check |= set(event['content_ids'])
+            Content = self.pool.get('event.content')
+            Content.unlink_isolated_content(cr, uid,content_ids_to_check , context=context)
+        return result
+
+    def unlink(self, cr, uid, ids, context=None):
+        content_ids_to_check = set()
+        for event in self.read(cr, uid, ids, ['content_ids'], context=context):
+            content_ids_to_check |= set(event['content_ids'])
+        result = super(EventEvent, self).unlink(cr, uid, ids, context=context)
+        if content_ids_to_check:
+            Content = self.pool.get('event.content')
+            Content.unlink_isolated_content(cr, uid, content_ids_to_check, context=context)
+        return result
 
     def onchange_event_type(self, cr, uid, ids, type_event, context=None):
         values = super(EventEvent, self).onchange_event_type(cr, uid, ids, type_event, context=context)
@@ -926,6 +968,34 @@ class EventEvent(osv.Model):
                 content_planification=type_info.default_content_planification)
         return values
 
+    def _duplicate_template(self, cr, uid, template_id, context=None):
+        Content = self.pool.get('event.content')
+        new_event_id = super(EventEvent, self)._duplicate_template(cr, uid, template_id, context=context)
+        template = self.browse(cr, uid, template_id, context=context)
+        new_event = self.browse(cr, uid, new_event_id, context=context)
+        if new_event.has_program:
+            contents = []
+            for content_template in template.content_ids:
+                data = Content.copy_data(cr, uid, content_template.id, context=context)
+                print("Content Template: %s, Data: %s" % (content_template.id, data,))
+                contents.append((0, 0, data))
+            new_event.write({'content_ids': contents})
+        # Recompute seances (content_planification == 'linear')
+        self.recompute_seances(cr, uid, [new_event_id], context=context)
+        return new_event_id
+
+    def button_set_template(self, cr, uid, ids, context=None):
+        for event in self.browse(cr, uid, ids, context=context):
+            has_shared_content = any(len(c.event_ids) > 1
+                                     for c in event.content_ids)
+            has_seances = len(event.seance_ids) > 0
+            if has_shared_content or has_seances:
+                raise osv.except_osv(
+                    _('Error!'),
+                    _('This event cannot be set as a template because it have '
+                      'shared contents or existing seances linked to it'))
+        return super(EventEvent, self).button_set_template(cr, uid, ids, context=context)
+
     def recompute_seances(self, cr, uid, ids, context=None):
         for event in self.browse(cr, uid, ids, context=context):
             if event.has_program and event.content_planification == 'linear':
@@ -933,8 +1003,6 @@ class EventEvent(osv.Model):
         return True
 
     def onchange_has_program(self, cr, uid, ids, has_program, date_begin, content, context=None):
-        print("Has Program: %s, Date begin: %s, Content: %s, Context: %s" % (
-                has_program, date_begin, content, context))
         values = {}
         # if has_program:
         #     EstimateEndDate = self.pool.get('event.event.estimate_end_date.wizard')

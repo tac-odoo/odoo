@@ -11,6 +11,7 @@
                     <field name="sequence" widget="handle"/>
                     <field name="name"/>
                     <field name="type_id"/>
+                    <field name="lang_id"/>
                     <field name="module_id"/>
                     <field name="duration" sum="Duration" widget="float_time"/>
                     <field name="slot_info"/>
@@ -30,7 +31,7 @@
                 <form string="Content" version="7.0">
                     <sheet>
                         <div class="oe_title">
-                            <label for="name"/>
+                            <label for="name" class="oe_edit_only"/>
                             <h2><field name="name"/></h2>
                         </div>
                         <notebook>
@@ -47,7 +48,9 @@
                                         </group>
                                     <group>
                                         <field name="sequence" invisible="1"/>
+                                        <field name="event_ids" widget="many2many_tags" readonly="1" invisible="context.get('from_event')"/>
                                         <field name="type_id"/>
+                                        <field name="lang_id"/>
                                         <field name="module_id"/>
                                         <field name="is_divided"/>
                                     </group>
@@ -113,6 +116,10 @@
             <field name="model">event.event</field>
             <field name="inherit_id" ref="event.view_event_form"/>
             <field name="arch" type="xml">
+                <xpath expr="//div[contains(@class, 'oe_button_box')]" position="inside">
+                    <button type="action" name="%(action_event_2_seance_link)d" string="Seances"
+                            attrs="{'invisible': [('has_program','=',False)]}" states="template,draft,confirm"/>
+                </xpath>
                 <xpath expr="//div[@class='options_active']" position="inside">
                     <field name="has_program" on_change="onchange_has_program(has_program, date_begin, content_ids, context)"/><label for="has_program"/>
                 </xpath>
@@ -129,7 +136,7 @@
                                     <field name="calendar_id" context="{'show_week_hours': 1}" options="{'always_reload': True}"/>
                                     <span attrs="{'invisible': [('calendar_id','!=',False)]}" groups="base.group_user">No hours specified, OpenERP will consider 24/24 7/7 hours</span>
                                     <button type="action" name="%(event.action_event_leaves)d"
-                                            string="(configure event vacations)" class="oe_link"/>
+                                            string="(configure event vacations)" class="oe_link" states="draft,confirm"/>
                                 </div>
                             </group>
                             <group>
@@ -137,20 +144,16 @@
                                 <div>
                                     <field name="content_planification" class="oe_inline"/>
                                     <button type="object" name="recompute_seances" class="oe_link" string="(recompute seances)"
-                                            attrs="{'invisible': [('content_planification', '!=', 'linear')]}"/>
+                                            attrs="{'invisible': [('content_planification', '!=', 'linear')]}" states="draft,confirm"/>
                                     <button type="object" name="open_preplanning" class="oe_link" string="(=> open preplanning)"
-                                            attrs="{'invisible': [('content_planification', '!=', 'preplanning')]}"/>
+                                            attrs="{'invisible': [('content_planification', '!=', 'preplanning')]}" states="draft,confirm,done"/>
                                 </div>
                             </group>
                         </group>
-                        <field name="content_ids" widget="one2many" attrs="{'readonly': [('state','!=','draft')]}"
-                               context="{'calendar_id': calendar_id}"/>
+                        <field name="content_ids" widget="one2many" attrs="{'readonly': [('state','not in',['template',  'draft'])]}"
+                               context="{'calendar_id': calendar_id, 'from_event': 1}"/>
                     </page>
                 </page>
-                <xpath expr="//div[contains(@class, 'oe_button_box')]" position="inside">
-                    <button type="action" name="%(action_event_2_seance_link)d" string="Seances"
-                            attrs="{'invisible': [('has_program','=',False)]}"/>
-                </xpath>
             </field>
         </record>
 
@@ -223,6 +226,7 @@
             <field name="arch" type="xml">
                 <tree string="Seances">
                     <field name="name"/>
+                    <field name="lang_id"/>
                     <field name="type_id"/>
                     <field name="date_begin"/>
                     <field name="duration" widget="float_time"/>
@@ -293,6 +297,7 @@
                                     <group>
                                         <field name="date_begin"/>
                                         <field name="duration" widget="float_time"/>
+                                        <field name="lang_id"/>
                                         <field name="event_ids" widget="many2many_tags" string="Related Events"/>
                                     </group>
                                 </group>

@@ -86,6 +86,9 @@
                         <button string="Finish Event" name="button_done" states="confirm" type="object" class="oe_highlight" groups="base.group_user"/>
                         <button string="Set To Draft" name="button_draft" states="cancel,done" type="object" groups="base.group_user"/>
                         <button string="Cancel Event" name="button_cancel" states="draft,confirm" type="object" groups="base.group_user"/>
+                        <button string="Set as Template" name="button_set_template" states="draft" type="object" groups="base.group_user"/>
+                        <button string="New Event based on Template" name="button_duplicate_template" states="template" type="object" groups="base.group_user"/>
+                        <button string="Reset as Event" name="button_reset_template" states="template" type="object" groups="base.group_user"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirm,done"/>
                     </header>
                     <sheet>
@@ -177,6 +180,7 @@
                                         <field name="email_confirmation_id"/>
                                     </group>
                                     <group>
+                                        <field name="template_id" attrs="{'invisible': [('state','=','template')]}"/>
                                         <field name="user_id"/>
                                         <field name="tz"/>
                                     </group>
@@ -235,12 +239,19 @@
                     <t t-name="kanban-box">
                       <div class="oe_module_vignette">
                         <a type="open" class="oe_module_icon">
-                            <div class="oe_event_date "><t t-esc="record.date_begin.raw_value.getDate()"/></div>
-                            <div class="oe_event_month_year">
-                                <t t-esc="record.date_begin.raw_value.toString('MMM')"/>
-                                <t t-esc="record.date_begin.raw_value.getFullYear()"/>
-                            </div>
-                            <div class="oe_event_time"><t t-esc="record.date_begin.raw_value.toString('hh:mm tt')"/></div>
+                            <t t-if="record.state.raw_value == 'template'">
+                                <div class="oe_event_date">T</div>
+                                <div class="oe_event_month_year">&#160;</div>
+                                <div class="oe_event_time">TEMPLATE</div>
+                            </t>
+                            <t t-if="record.state.raw_value != 'template'">
+                                <div class="oe_event_date "><t t-esc="record.date_begin.raw_value.getDate()"/></div>
+                                <div class="oe_event_month_year">
+                                    <t t-esc="record.date_begin.raw_value.toString('MMM')"/>
+                                    <t t-esc="record.date_begin.raw_value.getFullYear()"/>
+                                </div>
+                                <div class="oe_event_time"><t t-esc="record.date_begin.raw_value.toString('hh:mm tt')"/></div>
+                            </t>
                         </a>
                         <div class="oe_module_desc">
                             <h4><a type="open"><field name="name"/></a></h4>
@@ -308,14 +319,16 @@
                     <separator/>
                     <filter icon="terp-check" string="Unconfirmed" name="draft" domain="[('state','=','draft')]" help="Events in New state"/>
                     <filter icon="terp-camera_test" string="Confirmed" domain="[('state','=','confirm')]" help="Confirmed events"/>
+                    <filter string="Template" name="template" domain="[('state','=','template')]" context="{'search_template': 1}" help="Template of Events"/>
                     <separator/>
                     <filter icon="terp-personal" string="My Events" help="My Events" domain="[('user_id','=',uid)]"/>
                     <separator/>
-                    <filter icon="terp-go-today" string="Current" name="current" domain="[('date_end', '&gt;=', time.strftime('%%Y-%%m-%%d 00:00:00'))]" help="Events still in progress as of today"/>
-                    <filter icon="terp-go-today" string="Upcoming" name="upcoming" domain="[('date_begin','&gt;=', time.strftime('%%Y-%%m-%%d 00:00:00'))]" help="Upcoming events from today" />
+                    <filter icon="terp-go-today" string="Current" name="current" domain="[('date_end', '&gt;=', time.strftime('%%Y-%%m-%%d 00:00:00')),('state', 'in', ['draft','confirm'])]" help="Events still in progress as of today"/>
+                    <filter icon="terp-go-today" string="Upcoming" name="upcoming" domain="[('date_begin','&gt;=', time.strftime('%%Y-%%m-%%d 00:00:00')),('state', 'in', ['draft', 'confirm'])]" help="Upcoming events from today" />
                     <field name="type"/>
                     <field name="user_id"/>
                     <group expand="0" string="Group By...">
+                        <filter string="Template" context="{'group_by': 'template_id'}"/>
                         <filter string="Responsible"  icon="terp-personal" context="{'group_by': 'user_id'}"/>
                         <filter string="Event Type" icon="terp-crm"  context="{'group_by':'type'}"/>
                         <filter string="Status" icon="terp-stock_effects-object-colorize" context="{'group_by':'state'}"/>
@@ -333,7 +346,7 @@
            <field name="res_model">event.event</field>
            <field name="view_type">form</field>
            <field name="view_mode">kanban,calendar,tree,form</field>
-           <field name="context">{"search_default_upcoming":1, 'search_default_current': 1}</field>
+           <field name="context">{"search_default_upcoming":1, 'search_default_current': 1, 'search_template': 1}</field>
            <field name="search_view_id" ref="view_event_search"/>
            <field name="help" type="html">
              <p class="oe_view_nocontent_create">

@@ -22,8 +22,10 @@
 from datetime import datetime, timedelta
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
+from openerp.osv.expression import normalize_domain
 from openerp import SUPERUSER_ID
 from openerp.addons.base.res.res_partner import _tz_get
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
 
 
 class event_type(osv.osv):
@@ -72,11 +74,13 @@ class event_event(osv.osv):
 
         res = []
         for record in self.browse(cr, uid, ids, context=context):
-            date = record.date_begin.split(" ")[0]
-            date_end = record.date_end.split(" ")[0]
-            if date != date_end:
-                date += ' - ' + date_end
-            display_name = record.name + ' (' + date + ')'
+            display_name = record.name
+            if record.state != 'template':
+                date = record.date_begin.split(" ")[0]
+                date_end = record.date_end.split(" ")[0]
+                if date != date_end:
+                    date += ' - ' + date_end
+                display_name += ' (' + date + ')'
             res.append((record['id'], display_name))
         return res
 
@@ -93,7 +97,20 @@ class event_event(osv.osv):
         res = self.name_get(cr, user, ids, context)
         return res
 
-    def copy(self, cr, uid, id, default=None, context=None):
+    def _search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False, access_rights_uid=None):
+        # By default do not search for template, except if 'search_template' is in context and True
+        if context is None:
+            context = {}
+        if not context.get('search_template'):
+            args = normalize_domain(args)
+            filter_exclude_templates = [('state', '!=', 'template')]
+            if args:
+                filter_exclude_templates.insert(0, '&')
+            args = filter_exclude_templates + args
+        return super(event_event, self)._search(cr, user, args, offset=offset, limit=limit, order=order,
+                                                context=context, count=count, access_rights_uid=access_rights_uid)
+
+    def copy_data(self, cr, uid, id, default=None, context=None):
         """ Reset the state and the registrations while copying an event
         """
         if default is None:
@@ -102,7 +119,58 @@ class event_event(osv.osv):
             'state': 'draft',
             'registration_ids': False,
         })
-        return super(event_event, self).copy(cr, uid, id, default=default, context=context)
+        return super(event_event, self).copy_data(cr, uid, id, default=default, context=context)
+
+    def button_set_template(self, cr, uid, ids, context=None):
+        for event in self.browse(cr, uid, ids, context=context):
+            has_registration = len(event.registration_ids) > 0
+            if has_registration:
+                raise osv.except_osv(
+                    _('Error!'),
+                    _('This event cannot be set as a template as it have registrations'))
+        return self.write(cr, uid, ids, {'state': 'template'}, context=context)
+
+    def button_reset_template(self, cr, uid, ids, context=None):
+        used_as_template = bool(self.search(cr, uid, [('template_id', 'in', ids)], context=context))
+        if used_as_template:
+            raise osv.except_osv(
+                _('Error!'),
+                _("Event is already used as a template for other events, "
+                  "it can't be reset to a standard Event"))
+        return self.write(cr, uid, ids, {'state': 'draft'}, context=context)
+
+    def _duplicate_template(self, cr, uid, template_id, context=None):
+        template = self.browse(cr, uid, template_id, context=context)
+        if template.state != 'template':
+            raise osv.except_osv(
+                _('Error!'),
+                _('Trying to use a non-template event as template one'))
+        t_begin = datetime.strptime(template.date_begin, DT_FMT)
+        t_end = datetime.strptime(template.date_end, DT_FMT)
+        event_begin = datetime.now().replace(hour=t_begin.hour, minute=t_begin.minute,
+                                             second=t_begin.second, microsecond=t_begin.microsecond)
+        event_end = event_begin + (t_end - t_begin)
+        new_event_defaults = {
+            'date_begin': event_begin.strftime(DT_FMT),
+            'date_end': event_end.strftime(DT_FMT),
+            'template_id': template_id,
+        }
+        # TODO: get new reference, autoincrement?
+        return self.copy(cr, uid, template_id, new_event_defaults, context=context)
+
+    def button_duplicate_template(self, cr, uid, ids, context=None):
+        if not ids:
+            return False
+        new_event_id = self._duplicate_template(cr, uid, ids[0], context=context)
+        return {
+            'name': _('Events'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'event.event',
+            'view_type': 'form',
+            'view_mode': 'form,kanban,calendar,list',
+            'res_id': new_event_id,
+            'nodestroy': True,
+        }
 
     def button_draft(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'draft'}, context=context)
@@ -208,6 +276,7 @@ class event_event(osv.osv):
         'lang_id': fields.many2one('res.lang', 'Language', states={'done': [('readonly', True)]}),
         'level_id': fields.many2one('event.level', 'Level', states={'done': [('readonly', True)]},
                                     help='Indicate the difficulty or pre-requisite level of this event'),
+        'template_id': fields.many2one('event.event', 'Template', domain=[('state', '=', 'template')], ondelete='restrict'),
         'reference': fields.char('Internal Reference', size=32),
         'register_max': fields.integer('Maximum Registrations', help="You can for each event define a maximum registration level. If you have too much registrations you are not able to confirm your event. (put 0 to ignore this rule )", readonly=True, states={'draft': [('readonly', False)]}),
         'register_min': fields.integer('Minimum Registrations', help="You can for each event define a minimum registration level. If you do not enough registrations you are not able to confirm your event. (put 0 to ignore this rule )", readonly=True, states={'draft': [('readonly', False)]}),
@@ -219,6 +288,7 @@ class event_event(osv.osv):
         'date_begin': fields.datetime('Start Date', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'date_end': fields.datetime('End Date', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'state': fields.selection([
+            ('template', 'Template'),
             ('draft', 'Unconfirmed'),
             ('cancel', 'Cancelled'),
             ('confirm', 'Confirmed'),

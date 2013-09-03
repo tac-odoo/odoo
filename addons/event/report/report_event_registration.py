@@ -33,7 +33,8 @@ class report_event_registration(osv.osv):
             ('01','January'), ('02','February'), ('03','March'), ('04','April'),
             ('05','May'), ('06','June'), ('07','July'), ('08','August'),
             ('09','September'), ('10','October'), ('11','November'), ('12','December')], 'Month',readonly=True),
-        'event_id': fields.many2one('event.event', 'Event', required=True),
+        'event_id': fields.many2one('event.event', 'Event', readonly=True),
+        'template_id': fields.many2one('event.event', 'Template', domain=[('state', '=', 'template')], readonly=True),
         'draft_state': fields.integer(' # No of Draft Registrations', size=20),
         'confirm_state': fields.integer(' # No of Confirmed Registrations', size=20),
         'register_max': fields.integer('Maximum Registrations'),
@@ -60,6 +61,7 @@ class report_event_registration(osv.osv):
             SELECT
                 e.id::varchar || '/' || coalesce(r.id::varchar,'') AS id,
                 e.id AS event_id,
+                e.template_id AS template_id,
                 e.user_id AS user_id,
                 r.user_id AS user_id_registration,
                 r.name AS name_registration,
@@ -79,8 +81,12 @@ class report_event_registration(osv.osv):
                 event_event e
                 LEFT JOIN event_registration r ON (e.id=r.event_id)
 
+            WHERE
+                e.state != 'template'
+
             GROUP BY
                 event_id,
+                e.template_id,
                 user_id_registration,
                 r.id,
                 registration_state,
