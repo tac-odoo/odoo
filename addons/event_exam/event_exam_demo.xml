@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="event_scoring_passfail" model="event.scoring">
+            <field name="name">Pass/Fail</field>
+            <field name="mode">percentage</field>
+        </record>
+
+        <record id="event_scoring_passfail_level_fail" model="event.scoring.level">
+            <field name="scoring_id" ref="event_scoring_passfail"/>
+            <field name="name">Fail</field>
+            <field name="level">0.0</field>
+            <field name="pass" eval="False"/>
+        </record>
+
+        <record id="event_scoring_passfail_level_pass" model="event.scoring.level">
+            <field name="scoring_id" ref="event_scoring_passfail"/>
+            <field name="name">Pass</field>
+            <field name="level">49.5</field>
+            <field name="pass" eval="True"/>
+        </record>
+
+        <record id="event_seance_type_exam" model="event.seance.type">
+            <field name="name">Exam</field>
+            <field name="is_exam" eval="True"/>
+        </record>
+
+    </data>
+</openerp>

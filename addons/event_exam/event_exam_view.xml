@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="view_event_scoring_tree" model="ir.ui.view">
+            <field name="name">event.scoring.tree</field>
+            <field name="model">event.scoring</field>
+            <field name="arch" type="xml">
+                <tree string="Scorings">
+                    <field name="name"/>
+                    <field name="mode"/>
+                    <field name="level_ids"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_event_scoring_form" model="ir.ui.view">
+            <field name="name">event.scoring.form</field>
+            <field name="model">event.scoring</field>
+            <field name="arch" type="xml">
+                <form string="Scoring" version="7.0">
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <div class="oe_clear">
+                        <group>
+                            <group>
+                                <field name="mode"/>
+                            </group>
+                            <group></group>
+                        </group>
+                        <separator string="Levels"/>
+                        <field name="level_ids">
+                            <tree string="Levels" editable="top">
+                                <field name="name"/>
+                                <field name="level" string="Low Percentage/Min Score"/>
+                                <field name="pass"/>
+                            </tree>
+                        </field>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_event_scoring" model="ir.actions.act_window">
+            <field name="name">Scoring</field>
+            <field name="res_model">event.scoring</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="menu_event_config_scoring"
+            parent="base.menu_marketing_config_root"
+            action="action_event_scoring"
+            groups="base.group_no_one"
+            string="Scoring"/>
+
+        <!-- TODO: menuitem -->
+
+        <record id="view_event_questionnaire_tree" model="ir.ui.view">
+            <field name="name">event.questionnaire.tree</field>
+            <field name="model">event.questionnaire</field>
+            <field name="arch" type="xml">
+                <tree string="Questionnaires">
+                    <field name="name"/>
+                    <field name="lang_id"/>
+                    <field name="main_course_id"/>
+                    <field name="question_ids"/>
+                    <field name="version"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_event_questionnaire_form" model="ir.ui.view">
+            <field name="name">event.questionnaire.form</field>
+            <field name="model">event.questionnaire</field>
+            <field name="arch" type="xml">
+                <form string="Questionnaires" version="7.0">
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_right" name="buttons">
+
+                        </div>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name"/></h1>
+                        </div>
+                        <notebook>
+                            <page string="Information">
+                                <group>
+                                    <group>
+                                        <field name="main_course_id"/>
+                                        <label for="reference" string="Ref./Version"/>
+                                        <div>
+                                            <field name="reference" class="oe_inline" placeholder="QZ/..."/>
+                                            <span class="oe_edit_only">Version: </span>
+                                            <field name="version" class="oe_inline"/>
+                                        </div>
+                                    </group>
+                                    <group>
+                                        <field name="scoring_id"/>
+                                        <field name="lang_id"/>
+                                    </group>
+                                </group>
+                                <separator string="Questions/Lines"/>
+                                <field name="line_ids">
+                                    <tree string="Lines">
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="type"/>
+                                        <field name="question_id"/>
+                                        <field name="points"/>
+                                        <field name="points_no_answer"/>
+                                    </tree>
+                                    <form string="Lines">
+                                        <field name="type"/>
+                                        <field name="sequence"/>
+                                        <field name="question_id" attrs="{'invisible': [('type', '!=', 'question')], 'required': [('type', '=', 'question')]}"/>
+                                        <field name="body" attrs="{'invisible': [('type', '!=', 'text')]}"/>
+                                    </form>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_event_questionnaire" model="ir.actions.act_window">
+            <field name="name">Questionnaires</field>
+            <field name="res_model">event.questionnaire</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="menu_event_questionnaire"
+            parent="event.menu_event_library_root"
+            action="action_event_questionnaire"
+            sequence="12"/>
+
+        <record id="view_event_question_tree" model="ir.ui.view">
+            <field name="name">event.question.tree</field>
+            <field name="model">event.question</field>
+            <field name="arch" type="xml">
+                <tree string="Questions">
+                    <field name="name"/>
+                    <field name="lang_id"/>
+                    <field name="type"/>
+                    <field name="level"/>
+                    <field name="duration" widget="float_time"/>
+                    <field name="points"/>
+                    <field name="version"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_event_question_form" model="ir.ui.view">
+            <field name="name">event.question.form</field>
+            <field name="model">event.question</field>
+            <field name="arch" type="xml">
+                <form string="Question" version="7.0">
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_right" name="buttons">
+                        </div>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name"/></h1>
+                        </div>
+                        <notebook>
+                            <page string="Question">
+                                <group>
+                                    <group>
+                                        <field name="type"/>
+                                        <field name="level"/>
+                                        <field name="lang_id"/>
+                                        <label for="reference" string="Ref./Version"/>
+                                        <div>
+                                            <field name="reference" class="oe_inline"/>
+                                            <span class="oe_edit_only">Version: </span>
+                                            <field name="version" class="oe_inline"/>
+                                        </div>
+                                    </group>
+                                    <group>
+                                        <field name="duration" widget="float_time"/>
+                                        <field name="points"/>
+                                        <field name="points_no_answer"/>
+                                        <field name="text_free_lines_count" attrs="{'invisible': [('type', '!=', 'plain')]}"/>
+                                    </group>
+                                </group>
+                                <separator string="Question"/>
+                                <field name="text" placeholder="Type here the question title..."/>
+                                <separator string="Answers"/>
+                                <field name="answer_ids" context="{'points_from': points_from}" attrs="{'invisible': [('type','!=','plain')]}">
+                                    <tree string="Answers">
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="text"/>
+                                        <field name="is_solution"/>
+                                    </tree>
+                                    <form string="Answer" version="7.0">
+                                        <group>
+                                            <field name="is_solution"/>
+                                            <field name="sequence"/>
+                                            <field name="point_checked"/>
+                                            <field name="point_unchecked"/>
+                                        </group>
+                                        <field name="text" placeholder="Type here the answer text..."/>
+                                    </form>
+                                </field>
+                            </page>
+                            <page string="Options">
+                                <group>
+                                    <group>
+                                        <field name="points_from"/>
+                                        <field name="is_mandatory"/>
+                                        <field name="is_eliminatory"/>
+                                        <field name="has_image"/>
+                                    </group>
+                                    <group>
+                                        <field name="course_ids" widget="many2many_tags"/>
+                                        <field name="domain_ids" widget="many2many_tags"/>
+                                    </group>
+                                </group>
+                                <group string="Image" attrs="{'invisible': [('has_image', '!=', True)]}">
+                                    <field name="image_position"/>
+                                    <field name="image"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+    <record id="action_event_question" model="ir.actions.act_window">
+        <field name="name">Question</field>
+        <field name="res_model">event.question</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_event_question"
+        parent="event.menu_event_library_root"
+        action="action_event_question"
+        sequence="13"/>
+
+    <record id="view_event_question_domain_tree" model="ir.ui.view">
+        <field name="name">event.question.domain.tree</field>
+        <field name="model">event.question.domain</field>
+        <field name="arch" type="xml">
+            <tree string="Domains">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_event_question_domain_form" model="ir.ui.view">
+        <field name="name">event.question.domain.form</field>
+        <field name="model">event.question.domain</field>
+        <field name="arch" type="xml">
+            <form string="Domain" version="7.0">
+                <group>
+                    <field name="name"/>
+                    <field name="parent_id"/>
+                </group>
+                <field name="description" placeholder="Describe here the purpose / compentencies of this domain..."/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_event_question_domain" model="ir.actions.act_window">
+        <field name="name">Question's Domain</field>
+        <field name="res_model">event.question.domain</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_event_config_question_domain"
+        parent="base.menu_marketing_config_root"
+        action="action_event_question_domain"
+        groups="base.group_no_one"/>
+
+
+    <record id="view_event_degree_tree" model="ir.ui.view">
+        <field name="name">event.degree.tree</field>
+        <field name="model">event.degree</field>
+        <field name="arch" type="xml">
+            <tree string="Degrees">
+                <field name="name"/>
+                <field name="lang_id"/>
+                <field name="course_ids"/>
+                <field name="state"/>
+                <field name="active" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_event_degree_form" model="ir.ui.view">
+        <field name="name">event.degree.form</field>
+        <field name="model">event.degree</field>
+        <field name="arch" type="xml">
+            <form string="Degree" version="7.0">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_right" name="buttons">
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="lang_id"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="desired_count"/>
+                            <field name="eligible_count"/>
+                            <field name="acquired_count"/>
+                        </group>
+                    </group>
+                    <separator string="Courses"/>
+                    <field name="course_ids">
+                        <tree string="Courses">
+                            <field name="name"/>
+                        </tree>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_event_degree_kanban" model="ir.ui.view">
+        <field name="name">event.degree.kanban</field>
+        <field name="model">event.degree</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="desired_count"/>
+                <field name="eligible_count"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div>
+                            <field name="name"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="action_event_degree" model="ir.actions.act_window">
+        <field name="name">Degrees</field>
+        <field name="res_model">event.degree</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">kanban,tree,form</field>
+    </record>
+
+    <menuitem id="menu_event_degree"
+        parent="event.menu_event_library_root"
+        action="action_event_degree"
+        sequence="15"/>
+
+    <record id="view_event_degree_contact_tree" model="ir.ui.view">
+        <field name="name">event.degree.contact.tree</field>
+        <field name="model">event.degree.contact</field>
+        <field name="arch" type="xml">
+            <tree string="Degree Contacts">
+                <field name="name"/>
+                <field name="degree_id"/>
+                <field name="exam_todo_ids"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_event_degree_contact_form" model="ir.ui.view">
+        <field name="name">event.degree.contact.form</field>
+        <field name="model">event.degree.contact</field>
+        <field name="arch" type="xml">
+            <form string="Degree Contact" version="7.0">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                        <label for="degree_id" class="oe_edit_only"/>
+                        <h2><field name="degree_id"/></h2>
+                    </div>
+                    <field name="acquired_date" attrs="{'invisible': [('state', '!=', 'acquired_date')]}"/>
+                    <separator string="Exams Todo"/>
+                    <field name="exam_todo_ids">
+                        <tree string="Exam Todo">
+                            <field name="name"/>
+                        </tree>
+                    </field>
+                    <separator string="Exams Done"/>
+                    <field name="exam_done_ids">
+                        <tree string="Exam Done">
+                            <field name="name"/>
+                        </tree>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_event_degree_contact" model="ir.actions.act_window">
+        <field name="name">Degree Contact</field>
+        <field name="res_model">event.degree.contact</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_event_degree_contact"
+        parent="event.menu_event_management_root"
+        action="action_event_degree_contact"/>
+
+
+    <!-- SEANCE -->
+
+    <record id="view_event_seance_type_tree_exam" model="ir.ui.view">
+        <field name="name">event.seance.type.tree.exam</field>
+        <field name="model">event.seance.type</field>
+        <field name="inherit_id" ref="event.view_event_seance_type_tree"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="is_exam"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_event_seance_type_form_exam" model="ir.ui.view">
+        <field name="name">event.seance.type.form.exam</field>
+        <field name="model">event.seance.type</field>
+        <field name="inherit_id" ref="event.view_event_seance_type_form"/>
+        <field name="arch" type="xml">
+            <field name="included_into_analysis" position="after">
+                <field name="is_exam"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_event_seance_form_exam" model="ir.ui.view">
+        <field name="name">event.seance.form.exam</field>
+        <field name="model">event.seance</field>
+        <field name="inherit_id" ref="event.view_event_seance_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@class='oe_title']" position="inside">
+                <field name="is_exam"/><label for="is_exam"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <!-- PARTICIPATIONS -->
+    <record id="view_event_participation_tree_exam" model="ir.ui.view">
+        <field name="name">event.participation.tree.exam</field>
+        <field name="model">event.participation</field>
+        <field name="inherit_id" ref="event.view_event_participation_tree"/>
+        <field name="arch" type="xml">
+            <field name="registration_id" position="after">
+                <field name="exam_course_id"/>
+                <field name="exam_score_id"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_event_participation_form_exam" model="ir.ui.view">
+        <field name="name">event.participation.form.exam</field>
+        <field name="model">event.participation</field>
+        <field name="inherit_id" ref="event.view_event_participation_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@string='Information']" position="after">
+                <page string="Exam" attrs="{'invisible': [('is_exam','=',False)]}">
+                    <group>
+                        <group>
+                            <field name="exam_course_id"/>
+                            <field name="exam_questionnaire_id"/>
+                        </group>
+                        <group>
+                            <label for="exam_score_id"/>
+                            <div>
+                                <field name="exam_score_id" class="oe_inline"/> (<field name="exam_score_points" class="oe_inline"/>)
+                            </div>
+                            <field name="exam_succeeded"/>
+                        </group>
+                    </group>
+                    <separator string="Responses"/>
+                    <field name="exam_response_ids">
+                        <tree string="Responses">
+                            <field name="question_id"/>
+                            <field name="points"/>
+                            <field name="max_points"/>
+                            <field name="is_graded"/>
+                        </tree>
+                        <form string="Reponses">
+                            <field name="question_id" colspan="4"/>
+                            <field name="points"/>
+                            <field name="max_points"/>
+                            <field name="is_graded"/>
+                        </form>
+                    </field>
+                </page>
+            </xpath>
+            <xpath expr="//page[@string='Configuration']/group/group[1]" position="inside">
+                <field name="is_exam"/>
+            </xpath>
+        </field>
+    </record>
+
+    </data>
+</openerp>
