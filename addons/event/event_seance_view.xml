@@ -118,7 +118,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//div[contains(@class, 'oe_button_box')]" position="inside">
                     <button type="action" name="%(action_event_2_seance_link)d" string="Seances"
-                            attrs="{'invisible': [('has_program','=',False)]}" states="template,draft,confirm"/>
+                            attrs="{'invisible': [('has_program','=',False)]}" states="template,draft,confirm,done"/>
                 </xpath>
                 <xpath expr="//div[@class='options_active']" position="inside">
                     <field name="has_program" on_change="onchange_has_program(has_program, date_begin, content_ids, context)"/><label for="has_program"/>
@@ -226,6 +226,7 @@
             <field name="arch" type="xml">
                 <tree string="Seances">
                     <field name="name"/>
+                    <field name="event_ids"/>
                     <field name="lang_id"/>
                     <field name="type_id"/>
                     <field name="date_begin"/>
@@ -409,7 +410,7 @@
             <field name="name">event.participation.tree</field>
             <field name="model">event.participation</field>
             <field name="arch" type="xml">
-                <tree string="Participants">
+                <tree string="Participations">
                     <field name="name"/>
                     <field name="partner_id"/>
                     <field name="seance_id"/>
@@ -437,7 +438,7 @@
             <field name="name">event.participation.form</field>
             <field name="model">event.participation</field>
             <field name="arch" type="xml">
-                <form string="Participant" version="7.0">
+                <form string="Participation" version="7.0">
                     <header>
                         <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
                     </header>
@@ -496,16 +497,17 @@
             <field name="name">event.participation.search</field>
             <field name="model">event.participation</field>
             <field name="arch" type="xml">
-                <search string="Participants">
+                <search string="Participations">
                     <field name="name"/>
                     <field name="partner_id"/>
                     <field name="seance_id"/>
+                    <field name="registration_id"/>
                 </search>
             </field>
         </record>
 
-        <record id="action_event_participant" model="ir.actions.act_window">
-            <field name="name">Participants</field>
+        <record id="action_event_participation" model="ir.actions.act_window">
+            <field name="name">Participations</field>
             <field name="res_model">event.participation</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
@@ -514,7 +516,7 @@
         </record>
 
         <menuitem id="menu_event_participant" parent="menu_event_management_root"
-                  action="action_event_participant"/>
+                  action="action_event_participation"/>
 
         <record model="ir.ui.view" id="view_event_participation_group_tree">
             <field name="name">event.participation.group.tree</field>
@@ -547,6 +549,15 @@
             </field>
         </record>
 
+        <record id="action_registration_2_participation_link" model="ir.actions.act_window">
+            <field name="name">Participations</field>
+            <field name="res_model">event.participation</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_registration_id': active_id}</field>
+            <field name="domain">[]</field>
+        </record>
+
         <record model="ir.ui.view" id="view_event_registration_form_seance">
             <field name="name">event.registration.form.seance</field>
             <field name="model">event.registration</field>
@@ -555,8 +566,14 @@
                 <field name="date_closed" position="after">
                     <field name="group_ids" widget="many2many_tags" attrs="{'readonly': [('state','=','done')]}"
                             domain="[('event_content_id.event_ids','in',[event_id])]"
-                            on_change="onchange_group_ids(event_id, group_ids)"/>
+                            on_change="onchange_group_ids(event_id, group_ids)"
+                            context="{'show_content_name': 1}"/>
                 </field>
+                <xpath expr="//sheet/h1" position="before">
+                    <div class="oe_right oe_button_box">
+                        <button name="%(action_registration_2_participation_link)d" type="action" string="Participations"/>
+                    </div>
+                </xpath>
             </field>
         </record>
 

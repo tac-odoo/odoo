@@ -105,6 +105,7 @@ class EventCourse(osv.Model):
         'name': fields.char('Course Name', size=64, required=True),
         'code': fields.char('Internal reference', size=16),
         'lang_id': fields.many2one('res.lang', 'Language', required=True),
+        'user_id': fields.many2one('res.users', 'Responsible'),
         'duration': fields.float('Duration'),
         'active': fields.boolean('Active'),
         'description': fields.text('Description', help='Some notes on the course'),
@@ -224,8 +225,8 @@ class EventCourseSpeakerInfo(osv.Model):
             self.write(cr, uid, [id], {'standard_price': value}, context=context)
 
     _columns = {
-        'course_id': fields.many2one('event.course', 'Course', required=True),
-        'speaker_id': fields.many2one('res.partner', 'Speaker', required=True, domain=[('speaker', '=', True)]),
+        'course_id': fields.many2one('event.course', 'Course', required=True, ondelete='cascade'),
+        'speaker_id': fields.many2one('res.partner', 'Speaker', required=True, domain=[('speaker', '=', True)], ondelete='cascade'),
         'price_from': fields.selection(_prices_from_selection, 'Price From', required=True),
         'standard_price': fields.float('Custom Cost', digits_compute=dp.get_precision('Product Price')),
         'price': fields.function(_get_price, type='float', digits_compute=dp.get_precision('Product Price'),

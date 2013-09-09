@@ -47,10 +47,15 @@ class EventSeanceType(osv.Model):
     _columns = {
         'name': fields.char('Seance Type', size=64, required=True),
         'included_into_analysis': fields.boolean('Included into Analysis',
-                help="Does this type of seance be included into 'Event Seance Report'?"),
+                                                 help="Does this type of seance be included "
+                                                      "into 'Event Seance Report'?"),
+        'manual_participation': fields.boolean('Manual Participations',
+                                               help='Check if you want to manually create '
+                                                    'participations for this type of seances'),
     }
     _defaults = {
         'included_into_analysis': True,
+        'manual_participation': False,
     }
 
 
@@ -459,6 +464,8 @@ class EventSeance(osv.Model):
         for seance in self.browse(cr, uid, ids, context=context):
             # print(">>> refreshing participation for seance '%s' [%d]" % (seance.name, seance.id,))
             # registrations = Registration.browse(cr, uid, regids_cache[seance.id], context=context)
+            if seance.type_id and seance.type_id.manual_participation:
+                continue
             registrations = []
             for event in seance.content_id.event_ids:
                 if seance.state == 'done':
@@ -672,10 +679,15 @@ class EventParticipationGroup(osv.Model):
         return result
 
     def name_get(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
         result = []
+        show_content_name = bool(context.get('show_content_name'))
         for group in self.browse(cr, uid, ids, context=context):
-            # repr_name = '%s / %s' % (group.event_content_id.name, group.name)
-            repr_name = group.name
+            if show_content_name:
+                repr_name = '%s / %s' % (group.event_content_id.name, group.name)
+            else:
+                repr_name = group.name
             result.append((group.id, repr_name,))
         return result
 
