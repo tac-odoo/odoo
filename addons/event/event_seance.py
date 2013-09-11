@@ -649,6 +649,13 @@ class EventParticipation(osv.Model):
     # Workaround shitty bug in when client (taking context of 1st button with same name)
     button_take_presence_2 = button_take_presence
 
+    def onchange_partner(self, cr, uid, ids, partner_id, context=None):
+        values = {}
+        if partner_id:
+            Partner = self.pool.get('res.partner')
+            values['name'] = Partner.browse(cr, uid, partner_id, context=context).name
+        return {'value': values}
+
     def onchange_registration(self, cr, uid, ids, registration_id, context=None):
         values = {}
         if registration_id:
@@ -1220,10 +1227,46 @@ class HelperGroupByMany2Many(osv.AbstractModel):
 class EventRegistration(osv.Model):
     _name = 'event.registration'
     _inherit = ['event.registration', 'helper.groupby_many2many']
+
+    def _test_event_has_manual_participation(self, cr, uid, ids, context=None):
+        if not ids:
+            return {}
+        cr.execute("""
+            SELECT
+                event.id, count(1)
+            FROM event_event AS event
+            LEFT JOIN event_content_link cl ON (cl.event_id = event.id)
+            LEFT JOIN event_content AS content ON (cl.content_id = content.id)
+            LEFT JOIN event_seance seance ON (seance.content_id = content.id)
+            LEFT JOIN event_seance_type seance_type ON (seance.type_id = seance_type.id)
+            WHERE seance_type.manual_participation = true AND event.id IN %s
+            GROUP BY event.id;
+        """, (tuple(ids),))
+        event_having_manual_participation = set([event['id'] for event in cr.dictfetchall()])
+        result = {}
+        for _id in ids:
+            result[_id] = _id in event_having_manual_participation
+        return result
+
+    def _get_event_has_manual_participation(self, cr, uid, ids, fieldname, args, context=None):
+        if not ids:
+            return {}
+        registration2event = dict((r.id, r.event_id.id)
+                                  for r in self.browse(cr, uid, ids, context=context))
+        event_info = self._test_event_has_manual_participation(cr, uid,
+                            registration2event.values(), context=context)
+        result = {}
+        for reg_id, event_id in registration2event.iteritems():
+            result[reg_id] = event_info[event_id]
+        return result
+
     _columns = {
         'group_ids': fields.many2many('event.participation.group', 'event_registration_participation_group_rel',
                                       string='Groups', id1='registration_id', id2='group_id'),
         'participation_ids': fields.one2many('event.participation', 'registration_id', 'Participations', readonly=True),
+        'event_has_manual_participation': fields.function(_get_event_has_manual_participation, type='boolean'),
+        'manual_participation_ids': fields.one2many('event.participation', 'registration_id', 'Manual Participations',
+                                                    domain=[('seance_id.type_id.manual_participation','=',True)]),
     }
 
     def create(self, cr, uid, values, context=None):
@@ -1272,6 +1315,7 @@ class EventRegistration(osv.Model):
 
     def onchange_event_id(self, cr, uid, ids, event_id, context=None):
         ocv = super(EventRegistration, self).onchange_event_id(cr, uid, ids, event_id, context=context)
+        ocv.setdefault('value', {})
         if event_id:
             group_ids = []
             Event = self.pool.get('event.event')
@@ -1280,8 +1324,13 @@ class EventRegistration(osv.Model):
                 if content.is_divided:
                     # take default group (ordered first) or 1st group available if not default
                     group_ids.append(content.group_ids[0].id)
-            ocv.setdefault('value', {})
             ocv['value']['group_ids'] = [(6, 0, group_ids)]
+
+            # Check if event has manual participations
+            manualpart = self._test_event_has_manual_participation(cr, uid, [event_id], context=context)
+            ocv['value']['event_has_manual_participation'] = manualpart[event_id]
+        else:
+            ocv['value']['event_has_manual_participation'] = False
         return ocv
 
     def onchange_group_ids(self, cr, uid, ids, event_id, group_ids, context=None):

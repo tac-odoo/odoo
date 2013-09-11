@@ -163,6 +163,8 @@
             <field name="arch" type="xml">
                 <tree string="Seance Types">
                     <field name="name"/>
+                    <field name="included_into_analysis"/>
+                    <field name="manual_participation"/>
                 </tree>
             </field>
         </record>
@@ -180,6 +182,7 @@
                         <group>
                             <group>
                                 <field name="included_into_analysis"/>
+                                <field name="manual_participation"/>
                             </group>
                             <group>
                             </group>
@@ -281,7 +284,7 @@
                     <sheet>
                         <div class="oe_right oe_button_box">
                             <button type="action" name="%(event.action_seance_2_participant_link)d"
-                                    string="Participants"/>
+                                    string="Participations"/>
                         </div>
                         <div class="oe_title">
                             <label for="name" class="oe_edit_only"/>
@@ -500,7 +503,7 @@
                 <search string="Participations">
                     <field name="name"/>
                     <field name="partner_id"/>
-                    <field name="seance_id"/>
+                    <field name="name" filter_domain="[('seance_id.name', 'ilike', self)]" string="Seance Name"/>
                     <field name="registration_id"/>
                 </search>
             </field>
@@ -573,6 +576,19 @@
                     <div class="oe_right oe_button_box">
                         <button name="%(action_registration_2_participation_link)d" type="action" string="Participations"/>
                     </div>
+                </xpath>
+                <xpath expr="//sheet/group" position="after">
+                    <field name="event_has_manual_participation" invisible="1"/>
+                    <separator string="Manual Participations" attrs="{'invisible': [('event_has_manual_participation', '=', False)]}"/>
+                    <field name="manual_participation_ids" attrs="{'invisible': [('event_has_manual_participation', '=', False)]}" context="{'default_partner_id': partner_id}">
+                        <tree string="Manual Participations" editable="bottom">
+                            <field name="partner_id" on_change="onchange_partner(partner_id)" required="1"/>
+                            <field name="name" invisible="1"/>
+                            <field name="seance_id" domain="[('type_id.manual_participation','=',True)]"/>
+                            <field name="state"/>
+                            <field name="presence_summary"/>
+                        </tree>
+                    </field>
                 </xpath>
             </field>
         </record>
