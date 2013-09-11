@@ -296,6 +296,9 @@
             <field name="inherit_id" ref="base.view_res_partner_filter"/>
             <field name="priority" eval="20"/>
             <field name="arch" type="xml">
+                <filter name="type_person" position="attributes">
+                    <attribute name="domain">[('is_company','=',0),('room','=',False),('equipment','=',False)]</attribute>
+                </filter>
                 <filter name="supplier" string="Suppliers" position="after">
                     <filter string="Speakers" name="speaker" domain="[('speaker','=',1)]" help="Speaker Partners"
                             context="{'default_speaker': 1}"/>
