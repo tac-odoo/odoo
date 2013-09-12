@@ -322,9 +322,14 @@ class EventSeance(osv.Model):
     def _get_date_end(self, cr, uid, ids, fieldname, args, context=None):
         result = {}
         for seance in self.browse(cr, uid, ids, context=context):
-            start = datetime.strptime(seance.date_begin, DT_FMT)
-            end = start + timedelta(hours=seance.duration)
-            result[seance.id] = end.strftime(DT_FMT)
+            end = False
+            # seance date_begin will be null if generated from preplanning
+            # (i.e. we known the planned week, but seance have no fixed date, yet)
+            if seance.date_begin:
+                start = datetime.strptime(seance.date_begin, DT_FMT)
+                end = start + timedelta(hours=seance.duration)
+                end = end.strftime(DT_FMT)
+            result[seance.id] = end
         return result
 
     def _get_module_id(self, cr, uid, ids, fieldname, args, context=None):
@@ -368,7 +373,7 @@ class EventSeance(osv.Model):
         'duration': fields.float('Duration', required=True),
         # 'planned_week_date': fields.function(_get_planned_week_date, string='Planned Week date',
         #                                      type='date', readonly=True, store=True, groupby_range='week'),
-        'planned_week': fields.date('Planned Week Date', readonly=True, groupby_range='week'),
+        'planned_week_date': fields.date('Planned Week Date', readonly=True, groupby_range='week'),
         'tz': fields.selection(_tz_get, size=64, string='Timezone'),
         'lang_id': fields.many2one('res.lang', 'Language'),
         # TODO: add planned_period, planned_period_date
@@ -546,8 +551,10 @@ class EventParticipation(osv.Model):
 
     STATES = [
         ('draft', 'Draft'),
-        ('exception', 'Exception'),  # TODO: impl. when errors happens on participation
+        ('confirm', 'Confirm'),
+        ('except', 'Exception'),  # TODO: impl. when errors happens on participation
         ('done', 'Done'),
+        ('cancel', 'Cancel'),
     ]
 
     ROLES = [
@@ -578,7 +585,8 @@ class EventParticipation(osv.Model):
         'seance_id': fields.many2one('event.seance', 'Seance', required=True, ondelete='cascade'),
         'date': fields.related('seance_id', 'date_begin', type='datetime', string='Date', readonly=True),
         'duration': fields.related('seance_id', 'duration', type='float', string='Duration', readonly=True),
-        'registration_id': fields.many2one('event.registration', 'Registration', required=True),
+        'registration_id': fields.many2one('event.registration', 'Registration', required=False,
+                                           states=dict((s[0], [('required', True),('readonly', s[0] != 'draft')]) for s in STATES)),
         'state': fields.selection(STATES, 'State', readonly=True, required=True),
         # Presence Information
         'presence': fields.selection(PRESENCE_STATUS, 'Presence', required=True),
@@ -593,6 +601,12 @@ class EventParticipation(osv.Model):
         'presence': 'none',
         'role': 'participant',
     }
+
+    _sql_constraints = [
+        ('participant_registration_required',
+            "CHECK(CASE WHEN role = 'participant' THEN registration_id IS NOT NULL ELSE True END)",
+            "Registration is required for participant's participations"),
+    ]
 
     def create(self, cr, uid, values, context=None):
         if context is None:

@@ -80,7 +80,7 @@ var commands = {
             if (self.updating)
                 return;
             var commands = this.field_manager.get_field_value("children_ids");
-            var res_o2m_fields = ['date_begin', 'duration', 'content_id', 'group_id', 'state'];
+            var res_o2m_fields = ['date_begin', 'duration', 'planned_week_date', 'content_id', 'group_id', 'state'];
             this.res_o2m_drop.add(new instance.web.Model(this.view.model).call("resolve_2many_commands", ["children_ids", commands, res_o2m_fields, 
                     new instance.web.CompoundContext({'filter_event_id': self.get('event_id')})]))
                 .done(function(result) {
@@ -125,8 +125,8 @@ var commands = {
                 // console.log('initialize_content, final result', result);
                 self.weeks = result.weeks || [];
                 _.each(self.weeks, function (w, i) {
-                    self.weeks[i].start = instance.web.str_to_datetime(self.weeks[i].start);
-                    self.weeks[i].stop = instance.web.str_to_datetime(self.weeks[i].stop);
+                    self.weeks[i].start = instance.web.str_to_datetime(self.weeks[i].start).clearTime();
+                    self.weeks[i].stop = instance.web.str_to_datetime(self.weeks[i].stop).clearTime().addDays(1);
                 });
                 self.weeks_map = {};
                 _.each(self.weeks, function(week) {
@@ -171,10 +171,14 @@ var commands = {
             var event_id = self.get('event_id');
             var content_ids = _.pluck(contents, 'id');
             _.each(events, function(event) {
-                var event_startdate = instance.web.str_to_datetime(event.date_begin);
+                var event_startdate = event.date_begin ? instance.web.str_to_datetime(event.date_begin).clearTime()
+                                                       : instance.web.str_to_date(event.planned_week_date);
+                if (!event.date_begin) {
+                    console.log('seance without date_begin', event, event_startdate);
+                }
                 var ev_content_id = event.content_id.length ? event.content_id[0] : false;
                 var ev_group_id = event.group_id.length ? event.group_id[0] : false;
-                var week = _.find(self.weeks, function(w) { return event_startdate >= w.start && event_startdate <= w.stop});
+                var week = _.find(self.weeks, function(w) { return event_startdate >= w.start && event_startdate < w.stop});
                 var content = self.contents_map[ev_content_id];
                 if (!week || !content) {
                     return;

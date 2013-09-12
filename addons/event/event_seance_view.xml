@@ -503,8 +503,23 @@
                 <search string="Participations">
                     <field name="name"/>
                     <field name="partner_id"/>
+                    <field name="seance_id" invisible="1"/>
                     <field name="name" filter_domain="[('seance_id.name', 'ilike', self)]" string="Seance Name"/>
+                    <field name="state"/>
+                    <separator/>
+                    <filter name="state_draft" string="Draft" domain="[('state','=','draft')]"/>
+                    <filter name="state_confirm" string="Confirm" domain="[('state','=','confirm')]"/>
+                    <separator/>
+                    <filter name="role_participant" string="Participant" domain="[('role','=','participant')]"/>
+                    <filter name="role_speaker" string="Speaker" domain="[('role','=','speaker')]"/>
+                    <filter name="role_room" string="Room/Seat" domain="[('role','=', 'room')]"/>
+                    <filter name="role_equipment" string="Equipment" domain="[('role','=','equipment')]"/>
+                    <separator/>
                     <field name="registration_id"/>
+                    <group string="Group By...">
+                        <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
+                        <filter name="group_registration" string="Registration" context="{'group_by': 'registration_id'}"/>
+                    </group>
                 </search>
             </field>
         </record>

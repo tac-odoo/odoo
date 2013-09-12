@@ -20,7 +20,7 @@
                                 <field name="name"/>
                                 <field name="date_begin"/>
                                 <field name="duration"/>
-                                <field name="planned_week"/>
+                                <field name="planned_week_date"/>
                                 <field name="content_id"/>
                                 <field name="group_id"/>
                                 <field name="state"/>

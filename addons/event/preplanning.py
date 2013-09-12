@@ -25,6 +25,7 @@ from collections import defaultdict
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as D_FMT
 from openerp.addons.core_calendar.timeline import Availibility
 
 
@@ -73,6 +74,11 @@ class EventPreplanning(osv.TransientModel):
                 date_end = date_begin + relativedelta(hours=val[2]['duration'])
                 values = Content._prepare_seance_for_content(cr, uid, content, date_begin, date_end, group=group, context=context)
 
+                # preplanned seance should have planned_week + duration set (no date_begin as this should be determined by the user who will planify this)
+                values.pop('date_begin', None)
+                values['planned_week_date'] = date_begin.strftime(D_FMT)
+
+
                 id_new = Seance.create(cr, uid, values, context=context)
                 result += Seance._store_get_values(cr, uid, [id_new], val[2].keys(), context)
             elif val[0] == 2:
@@ -114,7 +120,8 @@ class EventPreplanning(osv.TransientModel):
         # Event 'date_end' is now computed by both theoretical planning (est. w/ linear schedule)
         # and last real seance date.
         estimated_date_end = event.date_end
-        date_end = datetime.strptime(max(event.date_end, estimated_date_end), DT_FMT) + relativedelta(weekday=week_start_day(+1))
+        requested_date_end = date_end
+        date_end = datetime.strptime(max(estimated_date_end, requested_date_end), DT_FMT) + relativedelta(weekday=week_start_day(+1))
         date_end = date_end.replace(hour=23, minute=59, second=59)
 
         lang_name = context.get('lang') or self.pool.get('res.users').context_get(cr, uid, uid)['lang']
