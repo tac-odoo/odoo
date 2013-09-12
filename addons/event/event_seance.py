@@ -730,6 +730,17 @@ class EventParticipationGroup(osv.Model):
         default['registration_ids'] = None
         return super(EventParticipationGroup, self).copy_data(cr, uid, id, default=default, context=context)
 
+    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+        if context is None:
+            context = {}
+        if context.get('group_for_content_id'):
+            group_for_content = [('event_content_id', '=', context['group_for_content_id'])]
+            if args:
+                group_for_content = ['&'] + group_for_content
+            args = group_for_content + args
+        return super(EventParticipationGroup, self).search(cr, user, args, offset=offset, limit=limit,
+                                                           order=order, context=context, count=count)
+
     def create(self, cr, uid, values, context=None):
         content_id = values.get('event_content_id')
         if content_id:
