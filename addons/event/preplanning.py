@@ -76,7 +76,7 @@ class EventPreplanning(osv.TransientModel):
 
                 # preplanned seance should have planned_week + duration set (no date_begin as this should be determined by the user who will planify this)
                 values.pop('date_begin', None)
-                values['planned_week_date'] = date_begin.strftime(D_FMT)
+                values['planned_week_date'] = fields.datetime.context_timestamp(cr, uid, date_begin, context=context).strftime(D_FMT)
 
                 id_new = Seance.create(cr, uid, values, context=context)
                 result += Seance._store_get_values(cr, uid, [id_new], val[2].keys(), context)
