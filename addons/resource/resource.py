@@ -35,15 +35,34 @@ from operator import itemgetter
 class resource_calendar(osv.osv):
     _name = "resource.calendar"
     _description = "Resource Calendar"
+
+    def _compute_attendance_hours(self, cr, uid, attendances, context=None):
+        return sum(x['hour_to'] - x['hour_from'] for x in attendances)
+
+    def _get_attendance_hours(self, cr, uid, ids, fieldname, args, context=None):
+        result = {}
+        for calendar in self.browse(cr, uid, ids, context=context):
+            result[calendar.id] = self._compute_attendance_hours(cr, uid, calendar.attendance_ids, context=context)
+        return result
+
     _columns = {
         'name' : fields.char("Name", size=64, required=True),
         'company_id' : fields.many2one('res.company', 'Company', required=False),
         'attendance_ids' : fields.one2many('resource.calendar.attendance', 'calendar_id', 'Working Time'),
         'manager' : fields.many2one('res.users', 'Workgroup Manager'),
+        'attendance_hours': fields.function(_get_attendance_hours, type='float', string='Total attendance hours'),
     }
     _defaults = {
         'company_id': lambda self, cr, uid, context: self.pool.get('res.company')._company_default_get(cr, uid, 'resource.calendar', context=context)
     }
+
+    def onchange_attendances(self, cr, uid, ids, attendances, context=None):
+        values = {}
+        if attendances:
+            atts = self.resolve_2many_commands(cr, uid, 'attendance_ids', attendances,
+                                               fields=['hour_to', 'hour_from'], context=context)
+            values['attendance_hours'] = self._compute_attendance_hours(cr, uid, atts, context=context)
+        return {'value': values}
 
     def working_hours_on_day(self, cr, uid, resource_calendar_id, day, context=None):
         """Calculates the  Working Total Hours based on Resource Calendar and

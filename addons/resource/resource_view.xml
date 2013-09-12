@@ -64,8 +64,9 @@
                         <field name="name"/>
                         <field name="manager"/>
                         <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="attendance_hours" widget="float_time" string="Total weekly hours"/>
                     </group>
-                    <field name="attendance_ids"/>
+                    <field name="attendance_ids" on_change="onchange_attendances(attendance_ids)"/>
                     </sheet>
                 </form>
             </field>
