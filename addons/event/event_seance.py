@@ -943,7 +943,7 @@ class EventEvent(osv.Model):
         'date_end': fields.function(_get_date_end, type='datetime', string='End Date',
                                     required=False, readonly=True, states={'draft': [('readonly', False)]},
                                     fnct_inv=_set_date_end, store={
-                                        'event.event': (_store_get_events_from_events, ['content_ids', 'has_program'], 10),
+                                        'event.event': (_store_get_events_from_events, ['date_begin', 'content_ids', 'has_program'], 10),
                                         'event.content': (_store_get_events_from_contents, [], 10),
                                         'event.seance': (_store_get_events_from_seances, [], 10),
                                     }),
@@ -955,9 +955,9 @@ class EventEvent(osv.Model):
 
     def _check_closing_date(self, cr, uid, ids, context=None):
         for event in self.browse(cr, uid, ids, context=context):
-            if event.has_program and not event.date_end:
-                # for program end date is allowed to be empty,
-                # because it will be computed later on by store function
+            if event.has_program:
+                # for program end date is computed automatically by a stored
+                # function fields - and ensure that date_end will be >= date_begin
                 continue
             if event.date_end < event.date_begin:
                 return False
@@ -981,7 +981,7 @@ class EventEvent(osv.Model):
             for event in self.read(cr, uid, ids, ['content_ids'], context=context):
                 content_ids_to_check |= set(event['content_ids'])
             Content = self.pool.get('event.content')
-            Content.unlink_isolated_content(cr, uid,content_ids_to_check , context=context)
+            Content.unlink_isolated_content(cr, uid, content_ids_to_check, context=context)
         return result
 
     def unlink(self, cr, uid, ids, context=None):
@@ -1013,7 +1013,6 @@ class EventEvent(osv.Model):
             contents = []
             for content_template in template.content_ids:
                 data = Content.copy_data(cr, uid, content_template.id, context=context)
-                print("Content Template: %s, Data: %s" % (content_template.id, data,))
                 contents.append((0, 0, data))
             new_event.write({'content_ids': contents})
         # Recompute seances (content_planification == 'linear')
