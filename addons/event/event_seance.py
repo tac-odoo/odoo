@@ -217,6 +217,9 @@ class EventContent(osv.Model):
             date_end = datetime.strptime(date_begin, DT_FMT)
         duration_delta = date_end - date_begin
         duration = duration_delta.days * 24 + (duration_delta.seconds / 3600.)
+
+        speaker_id = (group and group.speaker_id.id) or content.speaker_id.id or False
+        address_id = (group and group.room_id.id) or content.room_id.id or False
         values = {
             'name': content.name,
             'content_id': content.id,
@@ -225,11 +228,9 @@ class EventContent(osv.Model):
             'group_id': group.id if group else False,
             'date_begin': date_begin.strftime(DT_FMT),
             'duration': duration,
+            'main_speaker_id': speaker_id,
+            'address_id': address_id,
         }
-        if content.speaker_id:
-            values['main_speaker_id'] = content.speaker_id.id
-        if content.room_id:
-            values['address_id'] = content.room_id.id
         return values
 
     def create_seances_from_content(self, cr, uid, ids, date_begin, date_end, o2m_commands=False, context=None):
@@ -716,6 +717,8 @@ class EventParticipationGroup(osv.Model):
         'name': fields.char('Group name', required=True),
         'event_content_id': fields.many2one('event.content', 'Content', required=True, ondelete='cascade'),
         'is_default': fields.boolean('Is default?'),
+        'speaker_id': fields.many2one('res.partner', 'Speaker', help='Default speaker assigned to seances of this group'),
+        'room_id': fields.many2one('res.partner', 'Address', help='Default location assigned to seances of this group'),
         'participant_count': fields.function(_get_participant_count, type='char', string='# of participants'),
         'registration_ids': fields.many2many('event.registration', 'event_registration_participation_group_rel',
                                              string='Registrations', id1='group_id', id2='registration_id'),
