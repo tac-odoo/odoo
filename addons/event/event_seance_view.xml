@@ -603,7 +603,20 @@
                             <field name="name" invisible="1"/>
                             <field name="seance_id" domain="[('type_id.manual_participation','=',True),('event_ids', 'in', [parent.event_id])]"/>
                             <field name="state"/>
+                            <field name="presence" invisible="1"/>
                             <field name="presence_summary"/>
+                            <button name="button_take_presence" type="object"
+                                    string="Mark as Present" icon="kanban-apply"
+                                    attrs="{'invisible': ['|',('state','!=','draft'),('presence','=','present')]}"
+                                    context="{'presence': 'present'}"/>
+                            <button name="button_take_presence_2" type="object"
+                                    string="Mark as Absent" icon="kanban-stop"
+                                    attrs="{'invisible': ['|', ('state','!=','draft'),('presence','=','absent')]}"
+                                    context="{'presence': 'absent'}"/>
+                            <button name="%(action_event_participation_take_presence_wizard)d" type="action"
+                                    string="Mark as Late" icon="kanban-pause"
+                                    attrs="{'invisible': ['|',('state','!=','draft'),('presence','=','late')]}"
+                                    context="{'default_status': 'late'}"/>
                         </tree>
                     </field>
                 </xpath>
