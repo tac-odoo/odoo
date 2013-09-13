@@ -192,7 +192,6 @@ class GenericEventPeriodEmiter(PeriodEmiter):
         events.sort(key=lambda o: (o.start, o.stop))
         periods = [events.pop(0)]
         while events:
-            # print("Periods: %s, \nEvents: %s" % (periods, events,))
             last = periods[-1]
             stack = [events.pop(0)]
             while events and events[0].start == stack[0].start:
