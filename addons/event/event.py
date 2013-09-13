@@ -270,7 +270,7 @@ class event_event(osv.osv):
     RO_IF_DONE = dict(readonly=False, done=[('readonly', True)])
 
     _columns = {
-        'name': fields.char('Name', size=64, required=True, translate=True, readonly=False, states={'done': [('readonly', True)]}),
+        'name': fields.char('Name', size=64, required=True, translate=False, readonly=False, states={'done': [('readonly', True)]}),
         'user_id': fields.many2one('res.users', 'Responsible User', readonly=False, states={'done': [('readonly', True)]}),
         'type': fields.many2one('event.type', 'Type of Event', readonly=False, states={'done': [('readonly', True)]}),
         'lang_id': fields.many2one('res.lang', 'Language', states={'done': [('readonly', True)]}),
