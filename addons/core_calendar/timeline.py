@@ -186,7 +186,49 @@ class GenericEventPeriodEmiter(PeriodEmiter):
         return True
 
     def get_iterator(self, start, end, tz=None):
-        for e in self.events:
+        events = self.events[:]
+        if not events:
+            return
+        events.sort(key=lambda o: (o.start, o.stop))
+        periods = [events.pop(0)]
+        while events:
+            # print("Periods: %s, \nEvents: %s" % (periods, events,))
+            last = periods[-1]
+            stack = [events.pop(0)]
+            while events and events[0].start == stack[0].start:
+                stack.append(events.pop(0))
+            if len(stack) > 1:
+                # premerge all events starting on the exact same date
+                stack.sort(key=lambda o: o.stop)
+                # 1st item, we need to merge status of all stacked events
+                e = stack[0]
+                e.status = max(z.status for z in stack)
+                # For 2nd item and following we simply set new date start
+                # (= 1st item end date) and push it back to events and
+                # resort the list
+                for z in stack[1:]:
+                    z.start = e.stop
+                    events.insert(0, z)
+                events.sort(key=lambda o: (o.start, o.stop))
+            e = stack[0]
+
+            if last.start <= e.start < last.stop:
+                if last.start == e.start:
+                    periods.pop(-1)
+                intersect = EventPeriod(e.start, last.stop, max(last.status, e.status))
+                periods.append(intersect)
+                k = last.stop
+                last.stop = e.start
+                e.start = k
+                # push it back and sort list
+                events.insert(0, e)
+                events.sort(key=lambda o: (o.start, o.stop))
+            else:
+                # not overlapping
+                periods.append(e)
+                continue
+
+        for e in periods:
             yield AvailibilityPeriod(e.start, e.stop, e.status)
         return
 
