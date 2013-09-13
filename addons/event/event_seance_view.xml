@@ -601,7 +601,7 @@
                         <tree string="Manual Participations" editable="bottom">
                             <field name="partner_id" on_change="onchange_partner(partner_id)" required="1"/>
                             <field name="name" invisible="1"/>
-                            <field name="seance_id" domain="[('type_id.manual_participation','=',True)]"/>
+                            <field name="seance_id" domain="[('type_id.manual_participation','=',True),('event_ids', 'in', [parent.event_id])]"/>
                             <field name="state"/>
                             <field name="presence_summary"/>
                         </tree>
