@@ -561,7 +561,10 @@ class CoreCalendar(osv.Model):
                 rstack.append(leaf)
 
         # return args
-        return rstack[0].get_flatten()
+        final_leaf = rstack[0]
+        if not isinstance(final_leaf, RecrExpression):
+            final_leaf = RecrExpression('&', child=[final_leaf])
+        return final_leaf.get_flatten()
 
     # @logged
     def get_search_args(self, cr, uid, calendar_id, args, context=None):

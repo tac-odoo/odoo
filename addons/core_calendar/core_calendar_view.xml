@@ -133,6 +133,9 @@
                             <t t-if="record.organizer_id.raw_value">
                                 <span> Organizer: <field name="organizer_id"/></span><br/>
                             </t>
+                            <t t-if="record.main_speaker_id.raw_value">
+                                <span> Speaker: <field name="main_speaker_id"/></span><br/>
+                            </t>
                             <t t-if="record.location.raw_value">
                                 <span> Location: <field name="location"/></span><br/>
                             </t>
