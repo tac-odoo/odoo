@@ -34,7 +34,8 @@ from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as D_FMT
 from openerp.addons.base.res.res_partner import _tz_get
 from core_calendar.timeline import Timeline, Availibility
 from openerp.addons.core_calendar.resource import float_to_hm
-from openerp.tools import logged
+from openerp.tools import logged, flatten
+import openerp.addons.decimal_precision as dp
 
 
 class list_counted(list):
@@ -52,10 +53,18 @@ class EventSeanceType(osv.Model):
         'manual_participation': fields.boolean('Manual Participations',
                                                help='Check if you want to manually create '
                                                     'participations for this type of seances'),
+        'speaker_product_id': fields.many2one('product.product', "Speaker's Product"),
+        'room_product_id': fields.many2one('product.product', "Room's Product"),
+        'equipment_product_id': fields.many2one('product.product', "Equipement Product"),
+        'speaker_min_required': fields.integer('Minimum Speakers required'),
+        'room_required': fields.boolean('Room Required'),
     }
+
     _defaults = {
         'included_into_analysis': True,
         'manual_participation': False,
+        'speaker_min_required': 1,
+        'room_required': True,
     }
 
 
@@ -352,6 +361,13 @@ class EventSeance(osv.Model):
             event_ids.extend(s.id for s in registration.event_id.seance_ids)
         return list(set(event_ids))
 
+    def _store_get_seances_from_participations(self, cr, uid, ids, context=None):
+        """return list of seances for participant count refresh"""
+        Participation = self.pool.get('event.participation')
+        seance_ids = [p.seance_id.id
+                      for p in Participation.browse(cr, uid, ids, context=context)]
+        return list(set(seance_ids))
+
     def _store_get_seances_from_groups(self, cr, uid, ids, context=None):
         """return list of seances for participant count refresh"""
         registration_ids = []
@@ -366,6 +382,28 @@ class EventSeance(osv.Model):
         Seance = self.pool.get('event.seance')
         return Seance.search(cr, uid, [('content_id', 'in', ids)], context=context)
 
+    def _get_resources_ok(self, cr, uid, ids, fieldname, args, context=None):
+        result = {}
+        for seance in self.browse(cr, uid, ids, context=context):
+            result[seance.id] = r = {}
+            room_required = seance.type_id.room_required if seance.type_id else True
+            min_speaker = seance.type_id.speaker_min_required if seance.type_id else 1
+
+            # Room
+            room_confirmed_part = [p.id for p in seance.resource_participation_ids
+                                   if p.role == 'room' and p.state == 'confirm']
+            r['room_ok'] = len(room_confirmed_part) >= 1 if room_required else True
+
+            # Speakers
+            speaker_confirmed_part = [p.id for p in seance.resource_participation_ids
+                                      if p.role == 'speaker' and p.state == 'confirm']
+            r['speakers_ok'] = len(speaker_confirmed_part) >= min_speaker
+
+            # Equipment
+            # TODO: implement this (add fields on seance, etc...)
+            r['equipments_ok'] = True
+        return result
+
     _columns = {
         'name': fields.char('Seance Name', required=True),
         'type_id': fields.many2one('event.seance.type', 'Type'),
@@ -377,7 +415,6 @@ class EventSeance(osv.Model):
         'planned_week_date': fields.date('Planned Week Date', readonly=True, groupby_range='week'),
         'tz': fields.selection(_tz_get, size=64, string='Timezone'),
         'lang_id': fields.many2one('res.lang', 'Language'),
-        # TODO: add planned_period, planned_period_date
         'participant_min': fields.integer('Participant Min'),
         'participant_max': fields.integer('Participant Max'),
         'main_speaker_id': fields.many2one('res.partner', 'Main Speaker'),
@@ -402,10 +439,14 @@ class EventSeance(osv.Model):
         'participant_count': fields.function(_get_participant_count, type='integer', string='# of participants',
                                              store={
                                                  'event.seance': (_store_get_seances_from_seances, ['content_id', 'group_id'], 10),
+                                                 'event.participation': (_store_get_seances_from_participations, ['seance_id'], 10),
                                                  'event.registration': (_store_get_seances_from_registrations, ['group_ids', 'state'], 10),
                                                  'event.participation.group': (_store_get_seances_from_groups, ['registration_ids'], 10),
                                                  'event.content': (_store_get_seances_from_content, ['is_divided'], 10),
                                              }),
+        'speakers_ok': fields.function(_get_resources_ok, string='Speakers Confirmed', type='boolean', multi='resources-ok'),
+        'room_ok': fields.function(_get_resources_ok, string='Room Confirmed', type='boolean', multi='resources-ok'),
+        'equipments_ok': fields.function(_get_resources_ok, string='Equipment Confirmed', type='boolean', multi='resources-ok'),
         'state': fields.selection(SEANCE_STATES, 'State', readonly=True, required=True),
     }
 
@@ -428,6 +469,18 @@ class EventSeance(osv.Model):
         ('date_begin_notnull', "CHECK(CASE WHEN state != 'draft' THEN date_begin IS NOT NULL ELSE True END)",
             'You have to specify a begin date when leaving the draft state'),
     ]
+
+    def create(self, cr, uid, values, context=None):
+        new_record_id = super(EventSeance, self).create(cr, uid, values, context=context)
+        self._refresh_resource_participations(cr, uid, [new_record_id], context=context)
+        return new_record_id
+
+    def write(self, cr, uid, ids, values, context=None):
+        retval = super(EventSeance, self).write(cr, uid, ids, values, context=context)
+        resource_related_fields_set = set(self._get_resource_related_fields(cr, uid, context=context))
+        if resource_related_fields_set & set(values.keys()):
+            self._refresh_resource_participations(cr, uid, ids, context=context)
+        return retval
 
     def onchange_content_id(self, cr, uid, ids, content_id, context=None):
         ocv = super(EventSeance, self).onchange_content_id(cr, uid, ids, content_id, context=context)
@@ -461,6 +514,43 @@ class EventSeance(osv.Model):
 
     def button_set_done(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'done'}, context=context)
+
+    def _get_resource_related_fields(self, cr, uid, context=None):
+        return ['main_speaker_id', 'address_id']
+
+    def _refresh_resource_participations(self, cr, uid, ids, context=None):
+        print("Refresh Resource Participations: %s" % (ids,))
+        Paricipation = self.pool.get('event.participation')
+
+        for seance in self.browse(cr, uid, ids, context=context):
+            resources = set()
+            if seance.address_id:
+                resources.add(('room', seance.address_id))
+            if seance.main_speaker_id:
+                resources.add(('speaker', seance.main_speaker_id))
+
+            # computed diff from existing resource assignment
+            changes = []
+            for participation in seance.resource_participation_ids:
+                key = (participation.role, participation.partner_id)
+                if key in resources:
+                    # TODO: check that price & other values are in sync
+                    resources.remove(key)
+                else:
+                    # assignment not-need, remove it.
+                    changes.append((2, participation.id))
+
+            # create missing assignments
+            for role, partner in resources:
+                changes.append((0, 0, {
+                    'role': role,
+                    'partner_id': partner.id,
+                    'name': partner.name,
+                }))
+
+            if changes:
+                seance.write({'resource_participation_ids': changes})
+            pass
 
     def _refresh_participations(self, cr, uid, ids, context=None):
         Participation = self.pool.get('event.participation')
@@ -552,10 +642,9 @@ class EventParticipation(osv.Model):
 
     STATES = [
         ('draft', 'Draft'),
-        ('confirm', 'Confirm'),
-        ('except', 'Exception'),  # TODO: impl. when errors happens on participation
+        ('confirm', 'Confirmed'),
         ('done', 'Done'),
-        ('cancel', 'Cancel'),
+        ('cancel', 'Cancelled'),
     ]
 
     ROLES = [
@@ -579,9 +668,57 @@ class EventParticipation(osv.Model):
             result[participation.id] = summary
         return result
 
+    def _compute_purchase_price(self, cr, uid, ids, fieldname, args, context=None):
+        if not ids:
+            return {}
+        if context is None:
+            context = {}
+        Course = self.pool.get('event.course')
+        result = dict.fromkeys(ids, 0.0)
+        ids = self.search(cr, uid, [('id', 'in', ids), ('role', '!=', 'participant')], context=context)
+        # TODO: get and use cached speaker/course price
+        for p in self.browse(cr, uid, ids, context=context):
+            if p.purchase_product_id:
+                resource_price = p.purchase_product_id.standard_price
+                if p.seance_id.course_id:
+                    # speaker's course price have priority over product's puchase price (standard_price)
+                    ctx = dict(context, partner_id=p.partner_id.id)
+                    course = Course.browse(cr, uid, p.seance_id.course_id.id, context=ctx)
+                    resource_price = course.price
+                result[p.id] = resource_price
+        return result
+
+    def _compute_purchase_product(self, cr, uid, ids, fieldname, args, context=None):
+        if not ids:
+            return {}
+        if context is None:
+            context = {}
+        # TODO: get and use cached partner -> product mapping
+        Employee = self.pool.get('hr.employee')
+        get_product_from_employee_product = Employee and 'product_id' in Employee._all_columns
+
+        result = {}
+        ids = self.search(cr, uid, [('id', 'in', ids), ('role', '!=', 'participant')], context=context)
+        for p in self.browse(cr, uid, ids, context=context):
+            product_id = False
+            if p.partner_id.external:
+                if p.seance_id.type_id:
+                    seance_type_product = p.seance_id.type_id[p.role + '_product_id']
+                    if seance_type_product:
+                        product_id = seance_type_product.id
+            # try getting product from related employee (only for 'internal' resource)
+            elif get_product_from_employee_product and p.role == 'speaker':
+                for user in p.partner_id.user_ids:
+                    for employee in user.employee_ids:
+                        if employee.product_id:
+                            product_id = employee.product_id.id
+                            break
+            result[p.id] = product_id
+        return result
+
     _columns = {
         'name': fields.char('Participant Name', size=128, required=True),
-        'role': fields.selection(ROLES, required=True),
+        'role': fields.selection(ROLES, 'Role', required=True),
         'partner_id': fields.many2one('res.partner', 'Participant'),
         'seance_id': fields.many2one('event.seance', 'Seance', required=True, ondelete='cascade'),
         'date': fields.related('seance_id', 'date_begin', type='datetime', string='Date', readonly=True),
@@ -595,6 +732,10 @@ class EventParticipation(osv.Model):
                                             string='Presence Summary'),
         'arrival_time': fields.datetime('Arrival Time'),
         'departure_time': fields.datetime('Departure Time'),
+        'purchase_product_id': fields.function(_compute_purchase_product, string='Purchase Product',
+                                               type='many2one', relation='product.product'),
+        'purchase_price': fields.function(_compute_purchase_price, string='Purchase Price', type='float',
+                                          digits_compute=dp.get_precision('Account')),
     }
 
     _defaults = {
@@ -613,8 +754,38 @@ class EventParticipation(osv.Model):
         if context is None:
             context = {}
         # Do not log participation creation or subscribe user who create the participation
-        context = dict(context, mail_create_nolog=True, mail_create_nosubscribe=True)
-        return super(EventParticipation, self).create(cr, uid, values, context=context)
+        ctx = dict(context, mail_create_nolog=True, mail_create_nosubscribe=True)
+        new_participation_id = super(EventParticipation, self).create(cr, uid, values, context=ctx)
+        new_participation = self.browse(cr, uid, new_participation_id, context=context)
+        if new_participation.role == 'participant' \
+            or (new_participation.partner_id
+                and new_participation.partner_id.event_assignment_mode == 'automatic'):
+            self.button_set_confirm(cr, uid, [new_participation_id], context=context)
+        return new_participation_id
+
+    def unlink(self, cr, uid, ids, context=None):
+        # Automatically cancel
+        auto_cancel_participation_ids = self.search(cr, uid, [
+            '&', ('id', 'in', ids),
+            '&', ('state', '!=', 'cancel'),
+            '|', ('role', '=', 'participant'),
+                 '&', ('role', '!=', 'participant'),
+                      ('partner_id.event_assignment_mode', '=', 'automatic'),
+        ], context=context)
+        if auto_cancel_participation_ids:
+            self.button_set_cancel(cr, uid, auto_cancel_participation_ids, context=context)
+
+        participation_not_draft_not_cancel = self.search(cr, uid, [
+            ('id', 'in', ids),
+            ('state', 'not in', ['draft', 'cancel'])
+        ], context=context)
+        if participation_not_draft_not_cancel:
+            raise osv.except_osv(
+                _('Error!'),
+                _('Only draft and cancelled participation can be unlinked. '
+                  'Check that there is no manual resource assignment, that '
+                  'should be cancelled manually.'))
+        return super(EventParticipation, self).unlink(cr, uid, ids, context=context)
 
     def _take_presence(self, cr, uid, ids, presence, context=None):
         if not ids:
@@ -660,6 +831,26 @@ class EventParticipation(osv.Model):
             raise osv.except_osv(_('Error!'),
                                  _('No Presence Value Found'))
         return self._take_presence(cr, uid, ids, context['presence'], context=context)
+
+    def button_set_draft(self, cr, uid, ids, context=None):
+        return self.write(cr, uid, ids, {'state': 'draft'}, context=context)
+
+    def button_set_confirm(self, cr, uid, ids, context=None):
+        return self.write(cr, uid, ids, {'state': 'confirm'}, context=context)
+
+    def button_set_done(self, cr, uid, ids, context=None):
+        return self.write(cr, uid, ids, {'state': 'done'}, context=context)
+
+    def button_set_cancel(self, cr, uid, ids, context=None):
+        print("Cancel: %s" % (ids,))
+        import pdb; pdb.set_trace()
+        for p in self.browse(cr, uid, ids, context=context):
+            if p.seance_id.state == 'done':
+                print("%d: %s, %s %s" % (p.id, p.name, p.seance_id.name, p.seance_id.state,))
+                raise osv.except_osv(_('Error!'),
+                                     _('OpenERP can not delete participations which are related to a done seance'))
+        return self.write(cr, uid, ids, {'state': 'cancel'}, context=context)
+
 
     # Workaround shitty bug in when client (taking context of 1st button with same name)
     button_take_presence_2 = button_take_presence
@@ -1429,7 +1620,7 @@ class EventRegistration(osv.Model):
     }
 
 
-class EventSeance(osv.Model):
+class EventSeance2(osv.Model):
     _name = 'event.seance'
     _inherit = ['event.seance', 'helper.groupby_many2many']
     pass

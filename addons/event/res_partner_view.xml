@@ -25,6 +25,7 @@
                                 <field name="external" on_change="onchange_external(external)"/>
                             </group>
                             <group>
+                                <field name="event_assignment_mode"/>
                                 <field name="room_max_seats" attrs="{'invisible': [('room','=',False)]}"/>
                             </group>
                         </group>

@@ -27,6 +27,12 @@ from openerp.tools.translate import _
 class ResPartner(osv.osv):
     _inherit = 'res.partner'
 
+    def _get_event_resource_assignment_mode(self, cr, uid, context=None):
+        return [
+            ('automatic', 'Automatic'),
+            ('manual', 'Manual'),
+        ]
+
     _columns = {
         'speaker': fields.boolean('Speaker', help="Check this box if this contact is a speaker."),
         'room': fields.boolean('Room', help='Check this box if this contact address could be used as room location'),
@@ -39,6 +45,11 @@ class ResPartner(osv.osv):
         'room_ids': fields.one2many('res.partner', 'parent_id', 'Rooms', domain=[('active', '=', True), ('room', '=', True)]),
         'equipment_ids': fields.one2many('res.partner', 'parent_id', 'Equipments', domain=[('active', '=', True), ('equipment', '=', True)]),
         'external': fields.boolean('External', help='This resource is an external resource'),
+        'event_assignment_mode': fields.selection(_get_event_resource_assignment_mode, 'Assignment Mode', required=True),
+    }
+
+    _defaults = {
+        'event_assignment_mode': 'automatic',
     }
 
     def create(self, cr, uid, values, context=None):

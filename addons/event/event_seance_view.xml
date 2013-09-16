@@ -190,6 +190,17 @@
                             <group>
                             </group>
                         </group>
+                        <group>
+                            <group string="Purchase">
+                                <field name="speaker_product_id"/>
+                                <field name="room_product_id"/>
+                                <field name="equipment_product_id"/>
+                            </group>
+                            <group string="Limits">
+                                <field name="speaker_min_required"/>
+                                <field name="room_required"/>
+                            </group>
+                        </group>
                     </sheet>
                 </form>
             </field>
@@ -331,11 +342,32 @@
                                     <group>
                                         <field name="content_id"/>
                                         <field name="module_id"/>
-                                        <field name="group_id"/>
+                                        <field name="group_id" domain="[('event_content_id','=',content_id)]"/>
                                     </group>
                                     <group>
                                     </group>
                                 </group>
+                                <separator string="Resources Assignments"/>
+                                <field name="resource_participation_ids" options="{'reload_on_button': true}">
+                                    <tree string="Resource Assignments" create="0" delete="0">
+                                        <field name="role"/>
+                                        <field name="partner_id" on_change="onchange_partner(partner_id)"/>
+                                        <field name="name" invisible="1"/>
+                                        <field name="purchase_product_id"/>
+                                        <field name="purchase_price"/>
+                                        <field name="state"/>
+                                        <button name="button_set_draft"
+                                            states="confirm,cancel"
+                                            string="Set Draft" type="object"
+                                            icon="terp-crm"/>
+                                        <button name="button_set_confirm" string="Confirm"
+                                            states="draft,cancel"
+                                            type="object" icon="gtk-apply"/>
+                                        <button name="button_set_cancel" string="Cancel"
+                                            states="draft,confirm"
+                                            type="object" icon="gtk-cancel"/>
+                                    </tree>
+                                </field>
                             </page>
                         </notebook>
                     </sheet>
@@ -358,6 +390,7 @@
                     <field name="address_id"/>
                     <field name="type_id"/>
                     <field name="module_id"/>
+                    <filter string="Upcoming" name="upcoming" domain="[('date_begin','>=',current_date)]"/>
                     <group expand="0" string="Group By...">
                         <filter string="Type" name="type" domain="[]" context="{'group_by': 'type_id'}"/>
                         <filter string="Content" name="content" domain="[]" context="{'group_by': 'content_id'}"/>
@@ -407,6 +440,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">calendar,tree,form</field>
             <field name="search_view_id" ref="view_event_seance_search"/>
+            <field name="context">{'search_default_upcoming': 1}</field>
         </record>
 
         <menuitem id="menu_event_seance" parent="menu_event_management_root"
