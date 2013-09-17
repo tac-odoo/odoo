@@ -319,9 +319,9 @@
         </record>
 
         <menuitem id="menu_event_library_resource"
-                    parent="menu_event_library_root"
+                    parent="menu_event_resources_root"
                     action="action_event_library_resource"
-                    sequence="100"/>
+                    sequence="20"/>
 
    </data>
 </openerp>

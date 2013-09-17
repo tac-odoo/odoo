@@ -716,6 +716,18 @@ class EventParticipation(osv.Model):
             result[p.id] = product_id
         return result
 
+    def _compute_purchase_amount(self, cr, uid, ids, fieldname, args, context=None):
+        ModelData = self.pool.get('ir.model.data')
+        _m, hour_uom = ModelData.get_object_reference(cr, uid, 'product', 'product_uom_hour')
+
+        result = {}
+        for p in self.browse(cr, uid, ids, context=context):
+            result[p.id] = {
+                'purchase_qty': p.seance_id.duration,
+                'purchase_subtotal': p.purchase_price * p.seance_id.duration,
+            }
+        return result
+
     _columns = {
         'name': fields.char('Participant Name', size=128, required=True),
         'role': fields.selection(ROLES, 'Role', required=True),
@@ -735,7 +747,13 @@ class EventParticipation(osv.Model):
         'purchase_product_id': fields.function(_compute_purchase_product, string='Purchase Product',
                                                type='many2one', relation='product.product'),
         'purchase_price': fields.function(_compute_purchase_price, string='Purchase Price', type='float',
-                                          digits_compute=dp.get_precision('Account')),
+                                          digits_compute=dp.get_precision('Product Price')),
+        'purchase_qty': fields.function(_compute_purchase_amount, type='float',
+                                        string='Quantity', multi='purchase-amount',
+                                        digits_compute=dp.get_precision('Purchase Price')),
+        'purchase_subtotal': fields.function(_compute_purchase_amount, type='float',
+                                             string='Total', multi='purchase-amout',
+                                             digits_compute=dp.get_precision('Account')),
     }
 
     _defaults = {
@@ -833,17 +851,19 @@ class EventParticipation(osv.Model):
         return self._take_presence(cr, uid, ids, context['presence'], context=context)
 
     def button_set_draft(self, cr, uid, ids, context=None):
+        print("Set Draft %s" % ids)
         return self.write(cr, uid, ids, {'state': 'draft'}, context=context)
 
     def button_set_confirm(self, cr, uid, ids, context=None):
+        print("Set Confirm: %s" % ids)
         return self.write(cr, uid, ids, {'state': 'confirm'}, context=context)
 
     def button_set_done(self, cr, uid, ids, context=None):
+        print("Set Done: %s" % ids)
         return self.write(cr, uid, ids, {'state': 'done'}, context=context)
 
     def button_set_cancel(self, cr, uid, ids, context=None):
-        print("Cancel: %s" % (ids,))
-        import pdb; pdb.set_trace()
+        print("Set Cancel: %s" % ids)
         for p in self.browse(cr, uid, ids, context=context):
             if p.seance_id.state == 'done':
                 print("%d: %s, %s %s" % (p.id, p.name, p.seance_id.name, p.seance_id.state,))

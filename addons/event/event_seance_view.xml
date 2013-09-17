@@ -355,6 +355,8 @@
                                         <field name="name" invisible="1"/>
                                         <field name="purchase_product_id"/>
                                         <field name="purchase_price"/>
+                                        <field name="purchase_qty"/>
+                                        <field name="purchase_subtotal"/>
                                         <field name="state"/>
                                         <button name="button_set_draft"
                                             states="confirm,cancel"
@@ -390,7 +392,15 @@
                     <field name="address_id"/>
                     <field name="type_id"/>
                     <field name="module_id"/>
+                    <separator/>
                     <filter string="Upcoming" name="upcoming" domain="[('date_begin','>=',current_date)]"/>
+                    <separator/>
+                    <filter string="Draft" name="state_draft" domain="[('state','=','draft')]"/>
+                    <filter string="Confirm" name="state_confirm" domain="[('state','=','confirm')]"/>
+                    <filter string="Inprogress" name="state_inprogress" domain="[('state','=','inprogress')]"/>
+                    <filter string="Done" name="state_done" domain="[('state','=','done')]"/>
+                    <filter string="Cancelled" name="state_done" domain="[('state','=','cancelled')]"/>
+                    <separator/>
                     <group expand="0" string="Group By...">
                         <filter string="Type" name="type" domain="[]" context="{'group_by': 'type_id'}"/>
                         <filter string="Content" name="content" domain="[]" context="{'group_by': 'content_id'}"/>
@@ -572,6 +582,86 @@
 
         <menuitem id="menu_event_participant" parent="menu_event_management_root"
                   action="action_event_participation"/>
+
+
+        <record id="view_event_resource_participation_tree" model="ir.ui.view">
+            <field name="name">event.participation.resource.tree</field>
+            <field name="model">event.participation</field>
+            <field name="priority">100</field>
+            <field name="arch" type="xml">
+                <tree string="Participations" create="0" delete="0">
+                    <field name="role"/>
+                    <field name="partner_id" on_change="onchange_partner(partner_id)" required="1"/>
+                    <field name="name" invisible="1"/>
+                    <field name="purchase_product_id"/>
+                    <field name="purchase_price"/>
+                    <field name="purchase_qty"/>
+                    <field name="purchase_subtotal"/>
+                    <field name="state"/>
+                    <button name="button_set_draft"
+                        states="confirm,cancel"
+                        string="Set Draft" type="object"
+                        icon="terp-crm"/>
+                    <button name="button_set_confirm" string="Confirm"
+                        states="draft,cancel"
+                        type="object" icon="gtk-apply"/>
+                    <button name="button_set_cancel" string="Cancel"
+                        states="draft,confirm"
+                        type="object" icon="gtk-cancel"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_event_participation_resource_search" model="ir.ui.view">
+            <field name="name">event.participation.resource.search</field>
+            <field name="model">event.participation</field>
+            <field name="priority">100</field>
+            <field name="arch" type="xml">
+                <search string="Participations">
+                    <field name="partner_id"/>
+                    <field name="seance_id" invisible="1"/>
+                    <field name="name" filter_domain="[('seance_id.name', 'ilike', self)]" string="Seance Name"/>
+                    <field name="state"/>
+                    <separator/>
+                    <filter name="state_draft" string="Draft" domain="[('state','=','draft')]"/>
+                    <filter name="state_confirm" string="Confirm" domain="[('state','=','confirm')]"/>
+                    <separator/>
+                    <filter name="role_speaker" string="Speaker" domain="[('role','=','speaker')]"/>
+                    <filter name="role_room" string="Room/Seat" domain="[('role','=', 'room')]"/>
+                    <filter name="role_equipment" string="Equipment" domain="[('role','=','equipment')]"/>
+                    <separator/>
+                    <group string="Group By...">
+                        <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_event_resource_participation" model="ir.actions.act_window">
+            <field name="name">Participations</field>
+            <field name="res_model">event.participation</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('role', '!=', 'participant')]</field>
+            <field name="search_view_id" ref="view_event_participation_resource_search"/>
+        </record>
+
+        <record id="action_event_participation_tree" model="ir.actions.act_window.view">
+            <field name="act_window_id" ref="action_event_resource_participation"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_event_resource_participation_tree"/>
+        </record>
+
+        <record id="action_event_participation_form" model="ir.actions.act_window.view">
+            <field name="act_window_id" ref="action_event_resource_participation"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref=""/>
+        </record>
+
+        <menuitem id="menu_event_resource_participation"
+                    parent="menu_event_resources_root"
+                    action="action_event_resource_participation"
+                    sequence="30"/>
 
         <record model="ir.ui.view" id="view_event_participation_group_tree">
             <field name="name">event.participation.group.tree</field>

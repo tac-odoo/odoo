@@ -63,8 +63,9 @@
         <menuitem name="Event Management" id="menu_event_management_root" parent="event_main_menu" sequence="20"/>
 
         <menuitem name="Event Library" id="menu_event_library_root" parent="event_main_menu" sequence="25"/>
+        <menuitem name="Event Resources" id="menu_event_resources_root" parent="event_main_menu" sequence="30"/>
 
-        <menuitem name="Configuration" id="base.menu_marketing_config_root" parent="event_main_menu" sequence="30"/>
+        <menuitem name="Configuration" id="base.menu_marketing_config_root" parent="event_main_menu" sequence="35"/>
         <menuitem name="Types of Events" id="menu_event_type" action="action_event_type" parent="base.menu_marketing_config_root" groups="base.group_no_one"/>
 
         <menuitem id="menu_event_config_calendars" parent="base.menu_marketing_config_root"
