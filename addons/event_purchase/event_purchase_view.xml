@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="view_purchase_order_import_line_from_seance_form" model="ir.ui.view">
+            <field name="name">purchase.order.import.line.from.seance.form</field>
+            <field name="model">purchase.order.import.line.from.seance</field>
+            <field name="arch" type="xml">
+                <form string="Import from Event Seances" version="7.0">
+                    <group>
+                        <field name="order_id" readonly="1"/>
+                        <field name="partner_id" readonly="1"/>
+                    </group>
+                    <separator string="Seance's Participations"/>
+                    <field name="seance_ids"
+                            context="{'search_default_state_draft': 1,
+                                      'search_default_resource_id': partner_id,
+                                      'search_purchase_import_seance_partner_id': partner_id}"/>
+                    <footer>
+                        <button type="object" name="button_import_lines" string="Import Lines" class="oe_highlight"/>
+                        or <button type="special" special="cancel" string="Cancel" class="oe_link"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_purchase_order_import_line_from_seance" model="ir.actions.act_window">
+            <field name="name">Import from Event Seances</field>
+            <field name="res_model">purchase.order.import.line.from.seance</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+
+        <record id="view_event_resource_participation_tree_purchase" model="ir.ui.view">
+            <field name="name">event.participation.resource.tree.purchase</field>
+            <field name="model">event.participation</field>
+            <field name="priority">100</field>
+            <field name="inherit_id" ref="event.view_event_resource_participation_tree"/>
+            <field name="arch" type="xml">
+                <field name="purchase_product_id" position="before">
+                    <field name="purchase_order_id"/>
+                </field>
+                <xpath expr="//button[@name='button_set_draft']" position="attributes">
+                    <attribute name="attrs">{'invisible': [('purchase_order_id', '!=', False)]}</attribute>
+                </xpath>
+                <xpath expr="//button[@name='button_set_confirm']" position="attributes">
+                    <attribute name="attrs">{'invisible': [('purchase_order_id', '!=', False)]}</attribute>
+                </xpath>
+                <xpath expr="//button[@name='button_set_cancel']" position="attributes">
+                    <attribute name="attrs">{'invisible': [('purchase_order_id', '!=', False)]}</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_event_seance_form_purchase" model="ir.ui.view">
+            <field name="name">event.seance.form.purchase</field>
+            <field name="model">event.seance</field>
+            <field name="priority">100</field>
+            <field name="inherit_id" ref="event.view_event_seance_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='resource_participation_ids']/tree/field[@name='purchase_product_id']" position="before">
+                    <field name="purchase_order_id"/>
+                </xpath>
+                <xpath expr="//field[@name='resource_participation_ids']/tree/button[@name='button_set_draft']" position="attributes">
+                    <attribute name="attrs">{'invisible': [('purchase_order_id', '!=', False)]}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='resource_participation_ids']/tree/button[@name='button_set_confirm']" position="attributes">
+                    <attribute name="attrs">{'invisible': [('purchase_order_id', '!=', False)]}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='resource_participation_ids']/tree/button[@name='button_set_cancel']" position="attributes">
+                    <attribute name="attrs">{'invisible': [('purchase_order_id', '!=', False)]}</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_event_participation_resource_search_purchase" model="ir.ui.view">
+            <field name="name">event.participation.resource.search.purchase</field>
+            <field name="model">event.participation</field>
+            <field name="inherit_id" ref="event.view_event_participation_resource_search"/>
+            <field name="priority">100</field>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@string='Group By...']" position="before">
+                    <filter name="purchase_unassigned" string="Unassigned" domain="[('purchase_order_line_id','=',False)]"
+                            help="Participation not assigned to a purchase order"/>
+                    <separator/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_purchase_order_form_event" model="ir.ui.view">
+            <field name="name">purchase.order.form.event</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="/form/header/field[@name='state']" position="before">
+                    <button type="action" name="%(event_purchase.action_purchase_order_import_line_from_seance)d"
+                            string="Import line from Event Seances"
+                            context="{'default_order_id': active_id, 'default_partner_id': partner_id}"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_event_seance_search_purchase" model="ir.ui.view">
+            <field name="name">event.seance.form.purchase</field>
+            <field name="model">event.seance</field>
+            <field name="inherit_id" ref="event.view_event_seance_search"/>
+            <field name="arch" type="xml">
+                <field name="type_id" position="after">
+                    <field name="resource_id" invisible="1"/>
+                </field>
+                <filter name="upcoming" position="after">
+                    <filter string="Unassigned Resource" name="unassigned_resource" domain="[]" context="{'search_seance_unassigned_resource': 1}"/>
+                </filter>
+            </field>
+        </record>
+
+    </data>
+</openerp>
