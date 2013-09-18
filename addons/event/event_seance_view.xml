@@ -161,6 +161,26 @@
             </field>
         </record>
 
+        <record id="view_event_event_kanban_seance" model="ir.ui.view">
+            <field name="name">event.event.kanban.seance</field>
+            <field name="model">event.event</field>
+            <field name="inherit_id" ref="event.view_event_kanban"/>
+            <field name="arch" type="xml">
+                <field name="state" position="after">
+                    <field name="content_planification"/>
+                </field>
+                <xpath expr="//templates/t[@t-name='kanban-box']//div[@class='oe_module_desc']/h4" position="after">
+                    <p groups="base.group_user">
+                        <t t-if="record.content_planification.raw_value == 'preplanning' and ['draft', 'confirm', 'done'].indexOf(record.state.raw_value) != -1">
+                            <a type="object" name="open_preplanning" string="Open preplanning">
+                                <img src="/web/static/src/img/icons/terp-calendar.png"/>
+                            </a>
+                        </t>
+                    </p>
+                </xpath>
+            </field>
+        </record>
+
         <record id="view_event_seance_type_tree" model="ir.ui.view">
             <field name="name">event.seance.type.tree</field>
             <field name="model">event.seance.type</field>

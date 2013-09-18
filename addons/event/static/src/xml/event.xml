@@ -19,7 +19,7 @@
                             </t>
                         </tr>
                         <tr>
-                            <th class="oe_preplanning_content"></th>
+                            <th class="oe_preplanning_content"><a class="oe_preplanning_export_to_xls" href="javascript:void(0);">Export to XLS</a></th>
                             <th class="oe_preplanning_content_count">Total</th>
                             <t t-foreach="widget.weeks" t-as="week">
                                 <t t-if="week.start &lt;= widget.get('date_end')">

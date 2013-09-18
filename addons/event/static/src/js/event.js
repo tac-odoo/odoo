@@ -215,6 +215,10 @@ var commands = {
             //     'fixedColumns': 2,
             // })
 
+            self.$el.find('a.oe_preplanning_export_to_xls').on('click', function() {
+                self.preplanning_export_to_xls.apply(self, arguments);
+            });
+
             if (!self.get('effective_readonly')) {
                 self.$el.find('.oe_preplanning_cell').editable(function(value, settings) {
                         var $this = $(this);
@@ -323,6 +327,20 @@ var commands = {
             });
             return values;
         },
+        preplanning_export_to_xls: function() {
+            var self = this;
+            instance.web.blockUI();
+            this.session.get_file({
+                url: '/event/export/preplanning',
+                data: {data: JSON.stringify({
+                    event_id: self.get('event_id'),
+                    weeks: self.weeks,
+                    contents: self.contents,
+                    matrix: self.matrix
+                })},
+                complete: instance.web.unblockUI
+            });
+        }
     });
 
     instance.web.form.custom_widgets.add('event_preplanning', 'instance.event.EventPreplanning');
