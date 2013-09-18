@@ -327,8 +327,8 @@
                     <separator/>
                     <filter icon="terp-personal" string="My Events" help="My Events" domain="[('user_id','=',uid)]"/>
                     <separator/>
-                    <filter icon="terp-go-today" string="Current" name="current" domain="[('date_end', '&gt;=', time.strftime('%%Y-%%m-%%d 00:00:00')),('state', 'in', ['draft','confirm'])]" help="Events still in progress as of today"/>
-                    <filter icon="terp-go-today" string="Upcoming" name="upcoming" domain="[('date_begin','&gt;=', time.strftime('%%Y-%%m-%%d 00:00:00')),('state', 'in', ['draft', 'confirm'])]" help="Upcoming events from today" />
+                    <filter icon="terp-go-today" string="Current" name="current" domain="['&amp;',('date_end', '&gt;=', time.strftime('%%Y-%%m-%%d 00:00:00')),('state', 'in', ['draft','confirm'])]" help="Events still in progress as of today"/>
+                    <filter icon="terp-go-today" string="Upcoming" name="upcoming" domain="['&amp;', ('date_begin','&gt;=', time.strftime('%%Y-%%m-%%d 00:00:00')),('state', 'in', ['draft', 'confirm'])]" help="Upcoming events from today" />
                     <field name="type"/>
                     <field name="user_id"/>
                     <group expand="0" string="Group By...">
