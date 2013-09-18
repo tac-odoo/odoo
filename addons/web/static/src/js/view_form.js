@@ -4668,6 +4668,13 @@ instance.web.form.AbstractFormPopup = instance.web.Widget.extend({
                 self.trigger('write_completed saved', r);
             });
         };
+        this.dataset.call_button_function = function(method, args, sup) {
+            var fct = self.options.call_button_function || sup;
+            return fct.call(this, method, args).done(function(r) {
+                // on popup "call_button" act like write()
+                self.trigger('write_completed saved');
+            })
+        }
         this.dataset.parent_view = this.options.parent_view;
         this.dataset.child_name = this.options.child_name;
     },

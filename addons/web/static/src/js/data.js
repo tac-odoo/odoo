@@ -970,6 +970,7 @@ instance.web.ProxyDataSet = instance.web.DataSetSearch.extend({
         this.read_function = null;
         this.default_get_function = null;
         this.unlink_function = null;
+        this.call_button_function = null;
     },
     read_ids: function (ids, fields, options) {
         if (this.read_function) {
@@ -1006,6 +1007,13 @@ instance.web.ProxyDataSet = instance.web.DataSetSearch.extend({
             return this._super.apply(this, arguments);
         }
     },
+    call_button: function (method, args) {
+        if (this.call_button_function) {
+            return this.call_button_function(method, args, this._super);
+        } else {
+            return this._super.apply(this, arguments);
+        }
+    }
 });
 
 instance.web.CompoundContext = instance.web.Class.extend({
