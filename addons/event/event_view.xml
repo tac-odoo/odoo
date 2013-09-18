@@ -538,5 +538,81 @@
 
         <menuitem name="Reporting" id="base.menu_report_association" parent="event_main_menu" sequence="20"/>
 
+
+        <!-- EVENT CONSTRAINT -->
+        <record id="view_event_constraint_tree" model="ir.ui.view">
+            <field name="name">event.constraint.tree</field>
+            <field name="model">event.constraint</field>
+            <field name="arch" type="xml">
+                <tree string="Event Constraints">
+                    <field name="name"/>
+                    <field name="applies_to"/>
+                    <field name="type"/>
+                    <field name="mode"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_event_constraint_form" model="ir.ui.view">
+            <field name="name">event.constraint.form</field>
+            <field name="model">event.constraint</field>
+            <field name="arch" type="xml">
+                <form string="Event Constraint" version="7.0">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name"/></h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="type"/>
+                            </group>
+                            <group>
+                                <field name="applies_to"/>
+                                <field name="mode"/>
+                            </group>
+                        </group>
+                        <div attrs="{'invisible': [('type', '!=', 'category')]}">
+                            <separator string="Categories"/>
+                            <label for="category_mode" string="Resource must be part of"/> <field name="category_mode" class="oe_inline"/>
+                            <field name="category_ids"/>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_event_constraint_search" model="ir.ui.view">
+            <field name="name">event.constraint.search</field>
+            <field name="model">event.constraint</field>
+            <field name="arch" type="xml">
+                <search string="Event Constraints">
+                    <field name="name"/>
+                    <field name="type"/>
+                    <separator/>
+                    <filter name="appliesto_speaker" string="Speaker" domain="[('applies_to','=','speaker')]"/>
+                    <filter name="appliesto_room" string="Room" domain="[('applies_to', '=', 'room')]"/>
+                    <filter name="appliesto_equipment" string="Equipment" domain="[('applies_to', '=', 'equipment')]"/>
+                    <separator/>
+                    <filter name="type_soft" string="Soft" domain="[('mode','=','soft')]"/>
+                    <filter name="type_hard" string="Hard" domain="[('mode','=','hard')]"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_event_constraint" model="ir.actions.act_window">
+            <field name="name">Event Constraints</field>
+            <field name="res_model">event.constraint</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_event_constraint_search"/>
+        </record>
+
+        <menuitem id="menu_event_constraint"
+                  name="Events Constraint"
+                  action="action_event_constraint"
+                  parent="base.menu_marketing_config_root"
+                  groups="base.group_no_one"/>
+
     </data>
 </openerp>

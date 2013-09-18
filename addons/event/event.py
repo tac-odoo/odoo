@@ -501,4 +501,72 @@ class event_registration(osv.osv):
             data.update(d['value'])
         return {'value': data}
 
+
+class EventConstraint(osv.Model):
+    _name = 'event.constraint'
+
+    MODE_SELECTION = [
+        ('soft', 'Soft'),
+        ('hard', 'Hard'),
+    ]
+
+    APPLIES_TO_SELECTION = [
+        ('speaker', 'Speaker'),
+        ('room', 'Room'),
+        ('equipment', 'Equipment'),
+    ]
+
+    def _get_constraint_type(self, cr, uid, context=None):
+        return [
+            ('category', 'Part of Categories'),
+            ('int_resource', 'Internal Resource'),
+            ('ext_resource', 'External Resource'),
+        ]
+
+    _columns = {
+        'name': fields.char('Constraint Name', size=48, required=True),
+        'applies_to': fields.selection(APPLIES_TO_SELECTION, 'Applies To', required=True),
+        'mode': fields.selection(MODE_SELECTION, 'Mode', required=True),
+        'type': fields.selection(_get_constraint_type, 'Type', required=True),
+        'category_mode': fields.selection([('any', 'Any categories'), ('all', 'All categories')], 'Category Mode'),
+        'category_ids': fields.many2many('res.partner.category',
+                                         id1='constraint_id', id2='category_id',
+                                         string='Categories'),
+    }
+
+    _defaults = {
+        'applies_to': 'speaker',
+        'mode': 'soft',
+        'category_mode': 'any',
+    }
+
+    def name_get(self, cr, uid, ids, context=None):
+        result = []
+        mode_i18n_values = dict(self.fields_get(cr, uid, ['mode'], context=context)['mode']['selection'])
+
+        for constraint in self.browse(cr, uid, ids, context=context):
+            constraint_name = '%s (%s)' % (constraint.name, mode_i18n_values[constraint.mode])
+            result.append((constraint.id, constraint_name))
+        return result
+
+    def validate_constraint_category(self, cr, uid, constraint, record, context=None):
+        if constraint.type != 'category':
+            return False
+        constraint_categories = set(constraint.category_ids)
+        common_categories = constraint_categories & set(record.category_id)
+        if constraint.category_mode == 'any':
+            return True if len(common_categories) >= 1 else False
+        else:
+            return True if common_categories == constraint_categories else False
+
+    def validate_constraint_int_resource(self, cr, uid, constraint, record, context=None):
+        if constraint.type != 'int_resource':
+            return False
+        return True if not record.external else False
+
+    def validate_constraint_ext_resource(self, cr, uid, constraint, record, context=None):
+        if constraint.type != 'ext_resource':
+            return False
+        return True if record.external else False
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

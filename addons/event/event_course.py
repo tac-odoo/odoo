@@ -128,6 +128,7 @@ class EventCourse(osv.Model):
             'Split the course by the specified duration. '
             'Use 0 to automatically split following calendar slot')),
         'room_category_ids': fields.many2many('res.partner.category', id1='course_id', id2='room_category_id', string='Prefered room types'),
+        'constraint_ids': fields.many2many('event.constraint', id1='course_id', id2='constraint_id', string='Constraints'),
     }
 
     def _default_lang_id(self, cr, uid, context=None):

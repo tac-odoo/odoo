@@ -45,6 +45,7 @@
                                           </div>
                                           <field name="room_id" domain="[('room','=',1)]"/>
                                           <field name="speaker_id" domain="[('speaker','=',1)]"/>
+                                          <field name="constraint_ids" widget="many2many_tags"/>
                                         </group>
                                     <group>
                                         <field name="sequence" invisible="1"/>
@@ -345,6 +346,7 @@
                                         <field name="group_id" domain="[('event_content_id','=',content_id)]"/>
                                     </group>
                                     <group>
+                                        <field name="constraint_ids" widget="many2many_tags"/>
                                     </group>
                                 </group>
                                 <separator string="Resources Assignments"/>
@@ -490,21 +492,31 @@
             <field name="arch" type="xml">
                 <form string="Participation" version="7.0">
                     <header>
+                        <button name="button_set_draft"
+                            states="confirm,cancel"
+                            string="Set Draft" type="object"
+                            icon="terp-crm"/>
+                        <button name="button_set_confirm" string="Confirm"
+                            states="draft,cancel"
+                            type="object" icon="gtk-apply"/>
+                        <button name="button_set_cancel" string="Cancel"
+                            states="draft,confirm"
+                            type="object" icon="gtk-cancel"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
                     </header>
                     <sheet>
                         <div class="oe_right oe_button_box" name="buttons">
                             <button name="button_take_presence" type="object"
                                     string="Mark as Present" icon="kanban-apply"
-                                    attrs="{'invisible': ['|',('state','!=','draft'),('presence','=','present')]}"
+                                    attrs="{'invisible': ['|',('state','not in',['draft','confirm']),('presence','=','present')]}"
                                     context="{'presence': 'present'}"/>
                             <button name="button_take_presence" type="object"
                                     string="Mark as Absent" icon="kanban-stop"
-                                    attrs="{'invisible': ['|', ('state','!=','draft'),('presence','=','absent')]}"
+                                    attrs="{'invisible': ['|', ('state','not in',['draft','confirm']),('presence','=','absent')]}"
                                     context="{'presence': 'absent'}"/>
                             <button name="%(action_event_participation_take_presence_wizard)d" type="action"
                                     string="Mark as Late" icon="kanban-pause"
-                                    attrs="{'invisible': ['|',('state','!=','draft'),('presence','=','late')]}"
+                                    attrs="{'invisible': ['|',('state','not in',['draft','confirm']),('presence','=','late')]}"
                                     context="{'default_status': 'late'}"/>
                         </div>
                         <div class="oe_title">

@@ -23,6 +23,20 @@
             <field name="states_cancel">cancel</field>
         </record>
 
+        <record model="event.constraint" id="event_constraint_internal_speaker">
+            <field name="name">Internal Speaker</field>
+            <field name="type">int_resource</field>
+            <field name="applies_to">speaker</field>
+            <field name="mode">soft</field>
+        </record>
+
+        <record model="event.constraint" id="event_constraint_external_speaker">
+            <field name="name">External Speaker</field>
+            <field name="type">ext_resource</field>
+            <field name="applies_to">speaker</field>
+            <field name="mode">soft</field>
+        </record>
+
     </data>
     <data noupdate="1">
         <!-- After installation of the module, open the related menu -->

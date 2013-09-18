@@ -153,6 +153,7 @@ class EventContent(osv.Model):
         'module_id': fields.many2one('event.content.module', 'Module'),
         'room_id': fields.many2one('res.partner', 'Room', help='Default room assigned to created seances related to this content'),
         'speaker_id': fields.many2one('res.partner', 'Speaker', help='Default speaker assigned to created seances related to this content'),
+        'constraint_ids': fields.many2many('event.constraint', id1='content_id', id2='constraint_id', string='Constraints'),
     }
 
     def copy_data(self, cr, uid, id, default=None, context=None):
@@ -447,6 +448,7 @@ class EventSeance(osv.Model):
         'speakers_ok': fields.function(_get_resources_ok, string='Speakers Confirmed', type='boolean', multi='resources-ok'),
         'room_ok': fields.function(_get_resources_ok, string='Room Confirmed', type='boolean', multi='resources-ok'),
         'equipments_ok': fields.function(_get_resources_ok, string='Equipment Confirmed', type='boolean', multi='resources-ok'),
+        'constraint_ids': fields.many2many('event.constraint', id1='seance_id', id2='constraint_id', string='Constraints'),
         'state': fields.selection(SEANCE_STATES, 'State', readonly=True, required=True),
     }
 
@@ -519,7 +521,6 @@ class EventSeance(osv.Model):
         return ['main_speaker_id', 'address_id']
 
     def _refresh_resource_participations(self, cr, uid, ids, context=None):
-        print("Refresh Resource Participations: %s" % (ids,))
         Paricipation = self.pool.get('event.participation')
 
         for seance in self.browse(cr, uid, ids, context=context):
@@ -851,19 +852,15 @@ class EventParticipation(osv.Model):
         return self._take_presence(cr, uid, ids, context['presence'], context=context)
 
     def button_set_draft(self, cr, uid, ids, context=None):
-        print("Set Draft %s" % ids)
         return self.write(cr, uid, ids, {'state': 'draft'}, context=context)
 
     def button_set_confirm(self, cr, uid, ids, context=None):
-        print("Set Confirm: %s" % ids)
         return self.write(cr, uid, ids, {'state': 'confirm'}, context=context)
 
     def button_set_done(self, cr, uid, ids, context=None):
-        print("Set Done: %s" % ids)
         return self.write(cr, uid, ids, {'state': 'done'}, context=context)
 
     def button_set_cancel(self, cr, uid, ids, context=None):
-        print("Set Cancel: %s" % ids)
         for p in self.browse(cr, uid, ids, context=context):
             if p.seance_id.state == 'done':
                 print("%d: %s, %s %s" % (p.id, p.name, p.seance_id.name, p.seance_id.state,))

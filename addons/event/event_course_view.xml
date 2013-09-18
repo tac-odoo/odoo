@@ -74,6 +74,7 @@
                                         <field name="split_by" widget="float_time"/>
                                     </group>
                                     <group>
+                                        <field name="constraint_ids" widget="many2many_tags"/>
                                         <field name="room_category_ids" widget="many2many_tags"/>
                                     </group>
                                 </group>
@@ -190,7 +191,7 @@
         <field name="name">Courses</field>
         <field name="res_model">event.course</field>
         <field name="view_type">form</field>
-        <field name="view_mode">kanban,form,tree</field>
+        <field name="view_mode">tree,form,kanban</field>
         <field name="context">{'search_default_current': 1}</field>
     </record>
 
