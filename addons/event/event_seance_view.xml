@@ -102,6 +102,8 @@
             <field name="arch" type="xml">
                 <tree string="Modules">
                     <field name="name"/>
+                    <field name="date_begin" invisible="not context.get('event_id')"/>
+                    <field name="date_end" invisible="not context.get('event_id')"/>
                 </tree>
             </field>
         </record>
@@ -115,6 +117,15 @@
                 </form>
             </field>
         </record>
+
+        <act_window id="link_event_2_module"
+            name="Modules (summary)"
+            src_model="event.event"
+            res_model="event.content.module"
+            view_type="form"
+            view_mode="tree,form"
+            key2="client_action_relate"
+            context="{'event_id': active_id}"/>
 
         <record id="view_event_type_form_seance" model="ir.ui.view">
             <field name="name">event.type.form.seance</field>

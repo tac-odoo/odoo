@@ -70,9 +70,56 @@ class EventSeanceType(osv.Model):
 
 class EventContentModule(osv.Model):
     _name = 'event.content.module'
+
+    def _get_dates(self, cr, uid, ids, fieldnames, args, context=None):
+        if not ids:
+            return {}
+        if context is None:
+            context = {}
+        result = {}
+        for _id in ids:
+            result[_id] = {'date_begin': False, 'date_end': False}
+        if context.get('event_id'):
+            cr.execute("""
+                SELECT module.id,
+                       min(seance.date_begin),
+                       max(seance.date_begin + (INTERVAL '1 hour' * seance.duration))
+                FROM event_seance AS seance
+                LEFT JOIN event_content_module module ON (seance.module_id = module.id)
+                LEFT JOIN event_content AS content ON (seance.content_id = content.id)
+                LEFT JOIN event_content_link AS link ON (link.content_id = content.id)
+                LEFT JOIN event_event AS event ON (link.event_id = event.id)
+                WHERE seance.date_begin IS NOT NULL
+                  AND event_id = %s
+                GROUP BY module.id
+            """, (context['event_id'],))
+            for module_id, min_date, max_date in cr.fetchall():
+                result[module_id].update(date_begin=min_date, date_end=max_date)
+        return result
+
     _columns = {
         'name': fields.char('Module name', required=True),
+        'date_begin': fields.function(_get_dates, type='datetime', string='Begin date', multi='dates'),
+        'date_end': fields.function(_get_dates, type='datetime', string='End date', multi='dates'),
     }
+
+    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+        if context is None:
+            context = {}
+        if context.get('event_id'):
+            # Display only from used in the related "event"
+            Event = self.pool.get('event.event')
+            module_ids = set()
+            for content in Event.browse(cr, user, context['event_id'], context=context).content_ids:
+                if content.module_id:
+                    module_ids.add(content.module_id.id)
+            module_filter = [('id', 'in', list(module_ids))]
+            if args:
+                module_filter.insert(0, '&')
+            args = module_filter + args
+        return super(EventContentModule, self).search(cr, user, args, offset=offset,
+                                                      limit=limit, order=order,
+                                                      context=context, count=count)
 
 
 class EventContent(osv.Model):
