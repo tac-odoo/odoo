@@ -640,6 +640,9 @@
 
     <rng:define name="calendar">
         <rng:element name="calendar">
+            <rng:optional><rng:attribute name="create" /></rng:optional>
+            <rng:optional><rng:attribute name="delete" /></rng:optional>
+            <rng:optional><rng:attribute name="edit" /></rng:optional>
             <rng:optional><rng:attribute name="string" /></rng:optional>
             <rng:optional><rng:attribute name="color" /></rng:optional>
             <rng:optional><rng:attribute name="date_start" /></rng:optional>
