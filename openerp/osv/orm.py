@@ -1936,7 +1936,7 @@ class BaseModel(object):
             fields = self.fields_get(cr, user, None, context)
         fields_def = self.__view_look_dom(cr, user, node, view_id, False, fields, context=context)
         node = self._disable_workflow_buttons(cr, user, node)
-        if node.tag in ('kanban', 'tree', 'form', 'gantt'):
+        if node.tag in ('kanban', 'tree', 'form', 'gantt', 'calendar'):
             for action, operation in (('create', 'create'), ('delete', 'unlink'), ('edit', 'write')):
                 if not node.get(action) and not self.check_access_rights(cr, user, operation, raise_exception=False):
                     node.set(action, 'false')
