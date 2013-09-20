@@ -361,7 +361,8 @@
                             <page string="Configuration" groups="event.group_event_manager">
                                 <group>
                                     <group>
-                                        <field name="content_id"/>
+                                        <field name="content_id" domain="[('event_ids', 'in', event_ids[0][2])]"
+                                               on_change="onchange_content_id(content_id)" options="{'no_open': 1}"/>
                                         <field name="module_id"/>
                                         <field name="group_id" domain="[('event_content_id','=',content_id)]"/>
                                     </group>

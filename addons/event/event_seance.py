@@ -221,6 +221,8 @@ class EventContent(osv.Model):
         return self.unlink(cr, uid, to_unlink, context=context)
 
     def _prepare_seance_for_content(self, cr, uid, content, date_begin, date_end, group=None, context=None):
+        if context is None:
+            context = {}
         if isinstance(date_begin, basestring):
             date_begin = datetime.strptime(date_begin, DT_FMT)
         if isinstance(date_end, basestring):
@@ -485,14 +487,20 @@ class EventSeance(osv.Model):
         return retval
 
     def onchange_content_id(self, cr, uid, ids, content_id, context=None):
-        ocv = super(EventSeance, self).onchange_content_id(cr, uid, ids, content_id, context=context)
+        ocv = {}
         ocv.setdefault('value', {})
-        ocv.setdefault('domain', {})
         if content_id:
             content_obj = self.pool.get('event.content')
             content = content_obj.browse(cr, uid, content_id, context=context)
-            ocv['value']['content_divided'] = content.is_divided
-        ocv['value']['group_id'] = False
+            ocv['value'].update(
+                name=content.name,
+                type_id=content.type_id.id,
+                lang_id=content.lang_id.id,
+                content_divided=content.is_divided,
+                course_id=content.course_id.id,
+                group_id=content.group_ids[0].id if content.is_divided else False)
+        else:
+            ocv['value']['group_id'] = False
         return ocv
 
     def onchange_seance_type(self, cr, uid, ids, type_id, context=None):
