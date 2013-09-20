@@ -742,6 +742,7 @@ class EventParticipation(osv.Model):
         'role': fields.selection(ROLES, 'Role', required=True),
         'partner_id': fields.many2one('res.partner', 'Participant'),
         'seance_id': fields.many2one('event.seance', 'Seance', required=True, ondelete='cascade'),
+        'seance_event_ids': fields.related('seance_id', 'event_ids', type='many2many', relation='event.event', readonly=True, string='Events'),
         'date': fields.related('seance_id', 'date_begin', type='datetime', string='Date', readonly=True),
         'duration': fields.related('seance_id', 'duration', type='float', string='Duration', readonly=True),
         'registration_id': fields.many2one('event.registration', 'Registration', required=False,

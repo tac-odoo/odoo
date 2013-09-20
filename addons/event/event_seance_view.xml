@@ -649,6 +649,8 @@
                     <field name="role"/>
                     <field name="partner_id" on_change="onchange_partner(partner_id)" required="1"/>
                     <field name="name" invisible="1"/>
+                    <field name="seance_event_ids"/>
+                    <field name="seance_id"/>
                     <field name="purchase_product_id"/>
                     <field name="purchase_price"/>
                     <field name="purchase_qty"/>
