@@ -82,7 +82,7 @@
             <field name="priority">100</field>
             <field name="arch" type="xml">
                 <xpath expr="//group[@string='Group By...']" position="before">
-                    <filter name="purchase_unassigned" string="Unassigned" domain="[('purchase_order_line_id','=',False)]"
+                    <filter name="purchase_unassigned" string="Without Purchase Order" domain="[('purchase_order_line_id','=',False)]"
                             help="Participation not assigned to a purchase order"/>
                     <separator/>
                 </xpath>
