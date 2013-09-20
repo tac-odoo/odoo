@@ -16,6 +16,9 @@
                     <field name="duration" sum="Duration" widget="float_time"/>
                     <field name="slot_info"/>
                     <field name="is_divided" invisible="1"/>
+                    <field name="course_id" invisible="1"/>
+                    <field name="speaker_id" invisible="1"/>
+                    <field name="room_id" invisible="1"/>
                     <button type="object" name="button_open_group_registration_dispatch"
                             icon="terp-personal"
                             string="Dispatch registration between groups"
@@ -70,6 +73,26 @@
                         </notebook>
                     </sheet>
                 </form>
+            </field>
+        </record>
+
+        <record id="view_event_content_search" model="ir.ui.view">
+            <field name="name">event.content.search</field>
+            <field name="model">event.content</field>
+            <field name="arch" type="xml">
+                <search string="Contents">
+                    <field name="name"/>
+                    <field name="event_ids"/>
+                    <field name="course_id"/>
+                    <field name="speaker_id"/>
+                    <field name="room_id"/>
+                    <filter string="Divided" name="divided" domain="[('is_divided','=',True)]"/>
+                    <group string="Group By...">
+                        <filter string="Course" name="group_course" context="{'group_by': 'course_id'}"/>
+                        <filter string="Default Speaker" name="group_speaker" context="{'group_by': 'speaker_id'}"/>
+                        <filter string="Default room" name="group_room" context="{'group_by': 'room_id'}"/>
+                    </group>
+                </search>
             </field>
         </record>
 
