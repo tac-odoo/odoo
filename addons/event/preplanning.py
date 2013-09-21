@@ -155,19 +155,19 @@ class EventPreplanning(osv.TransientModel):
             if period.status == Availibility.FREE:
                 # period is always less than 24h, and it's related
                 # week is computed based on ISO standard week.
-                weeknum = period.start.isocalendar()[1]
-                slot_per_weeks[weeknum].append(period)
+                week_key = period.start.isocalendar()[:2]
+                slot_per_weeks[week_key].append(period)
 
         wd = date_begin.replace()
         while wd <= date_end:
             wd_end = wd + relativedelta(weeks=1)
-            wd_weeknum = wd.isocalendar()[1]
+            week_key = wd.isocalendar()[:2]
             result['weeks'].append({
                 'id': wd.strftime('%Y%V'),  # ISO YEAR + ISO WEEK NUMBER
                 'name': wd.strftime(lang.date_format),
                 'start': wd.strftime(DT_FMT),
                 'stop': wd_end.strftime(DT_FMT),
-                'slot_count': len(slot_per_weeks[wd_weeknum]),
+                'slot_count': len(slot_per_weeks[week_key]),
                 'slot_used': 0,
             })
             wd = wd_end
