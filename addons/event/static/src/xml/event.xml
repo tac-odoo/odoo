@@ -2,49 +2,8 @@
 <templates>
     <t t-name="event.EventPreplanning">
         <div class="oe_preplanning">
-            <div id="preplanning-grid" class="oe_preplanning_table grid4 height400">
-                <table id="preplanning-data" class="fancyTable">
-                    <thead>
-                        <tr>
-                            <th class="oe_preplanning_content"></th>
-                            <th class="oe_preplanning_content_count"></th>
-                            <t t-foreach="widget.weeks" t-as="week">
-                                <t t-if="week.start &lt;= widget.get('date_end')">
-                                    <th t-att-class="'oe_preplanning_week oe_preplanning_rotate'">
-                                        <div class="oe_preplanning_rotate">
-                                            <span class="oe_preplanning_rotate"><t t-esc="week.name"/></span>
-                                        </div>
-                                    </th>
-                                </t>
-                            </t>
-                        </tr>
-                        <tr>
-                            <th class="oe_preplanning_content"><a class="oe_preplanning_export_to_xls" href="javascript:void(0);">Export to XLS</a></th>
-                            <th class="oe_preplanning_content_count">Total</th>
-                            <t t-foreach="widget.weeks" t-as="week">
-                                <t t-if="week.start &lt;= widget.get('date_end')">
-                                    <th t-att-data-week="week.id" t-att-class="'oe_preplanning_week_count'"><t t-escf="#{week.slot_used}/#{week.slot_count}"/></th>
-                                </t>
-                            </t>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <t t-foreach="widget.contents" t-as="content">
-                            <tr>
-                                <td class="oe_preplanning_content">
-                                    <t t-esc="content.name"/>
-                                    <t t-if="content.groups.length > 1">(/<t t-esc="content.groups.length"/>)</t>
-                                </td>
-                                <td class="oe_preplanning_content_count" t-att-data-content="content.id"><t t-escf="#{content.slot_used}/#{content.slot_count}"/></td>
-                                <t t-foreach="widget.weeks" t-as="week">
-                                    <t t-if="week.start &lt;= widget.get('date_end')">
-                                        <td t-att-data-content="content.id" t-att-data-week="week.id" class="oe_preplanning_cell"><t t-esc="widget.matrix[content.id][week.id]['value']"/></td>
-                                    </t>
-                                </t>
-                            </tr>
-                        </t>
-                    </tbody>
-                </table>
+            <a class="oe_preplanning_export_to_xls" href="javascript:void(0);">Export to XLS</a>
+            <div id="preplanning-table">
             </div>
         </div>
     </t>

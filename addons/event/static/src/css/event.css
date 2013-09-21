@@ -77,82 +77,64 @@ th.oe_list_header_float_time {
   /*border-collapse: collapse;*/
 }
 
-.openerp .oe_preplanning td {
-  border-width: 1px;
-  border-style: solid;
-}
-
-.openerp .oe_preplanning .fixedContainer .fixedHead > table {
-  border-collapse: collapse;
-  margin-left: -1px;
-}
-
-.openerp .oe_preplanning .fixedContainer .fixedTable > table {
-  margin-left: -1px;
-  margin-top: -1px;
-}
-
-.openerp .oe_preplanning .fixedColumn .fixedTable > table {
-  margin-top: -1px;
-}
-
-.openerp .oe_preplanning .fixedColumn .fixedTable tr td:last-child {
-  /*border-right: 2px solid black;*/
-  padding-right: 3px;
-  margin-right: 2px;
-}
-
-.openerp .oe_preplanning .oe_preplanning_week {
-}
-
-.openerp .oe_preplanning .oe_preplanning_week_count {
-  text-align: center;
-  padding-right: 5px;
-  padding-left: 5px;
-}
-
-.openerp .oe_preplanning .oe_preplanning_content_count {
-  text-align: right;
-  vertical-align: middle;
-  padding-left: 3px;
-  padding-right: 5px;
-  line-height: 1.5em;
+/*.openerp .oe_preplanning .handsontable th {
+  font-style: normal;
   font-weight: bold;
-}
-
-.openerp .oe_preplanning .oe_preplanning_content {
-  white-space: nowrap;
-  line-height: 1.5em;
-}
-
-.openerp .oe_preplanning td.oe_preplanning_cell {
   text-align: center;
   vertical-align: middle;
 }
+*/
 
-.openerp .oe_preplanning .oe_preplanning_cell > input {
-  padding: 0;
-  margin: -4px;   /* compensate cell border-width */
+.openerp .oe_preplanning .handsontable colgroup .rowHeader {
+  width: 150px;
+}
+
+.openerp .oe_preplanning .handsontable tbody tr th:first-child {
+  text-align: left;
+}
+
+.openerp .oe_preplanning .handsontable tbody tr :nth-child(2) {
   text-align: center;
+  color: #000000;
+  background-color: #EEEEEE;
+}
+
+.openerp .oe_preplanning .handsontable tbody tr:first-child td {
+  text-align: center;
+  font-style: normal;
+  color: #000000;
+  background-color: #EEEEEE;
 }
 
 /*
-.openerp .oe_preplanning input.oe_preplanning_cell {
-  width: 0.5em;
+.openerp .oe_preplanning .handsontable tbody tr:first-child {
+  font-style: normal;
+  font-weight: bold;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.openerp .oe_preplanning .handsontable tbody > tr .htDimmed {
+  font-style: normal;
+  color: #000000;
 }
 */
-td.oe_preplanning_rotate {
+
+.openerp .oe_preplanning .handsontable thead th {
   vertical-align: bottom;
 }
 
-div.oe_preplanning_rotate {
+.openerp .oe_preplanning .handsontable thead th div.relative {
   height: 80px;
   min-height: 80px;
   display: table-cell;
   vertical-align: bottom;
+  /* from .handsontable .relative */
+  padding: 2px 4px;
+  position: relative;
 }
 
-span.oe_preplanning_rotate {
+.openerp .oe_preplanning .handsontable thead th span.colHeader {
   text-align: center;
   width: 1.5em;
   padding: 5px;

@@ -63,15 +63,12 @@ Key Features
     'demo': ['event_demo.xml'],
     'test': ['test/process/event_draft2done.yml'],
     'css': [
+        'static/lib/jquery-handsontable/jquery.handsontable.full.css',
         'static/src/css/event.css',
-        'static/lib/fixed-header-table/css/defaultTheme.css',
     ],
     'qweb': ['static/src/xml/*.xml'],
     'js': [
-        'static/lib/jquery.jeditable/jquery.jeditable.js',
-        'static/lib/jquery.fixedtable/jquery.fixedtable.js',
-        'static/lib/fixed-header-table/lib/jquery.mousewheel.js',
-        'static/lib/fixed-header-table/jquery.fixedheadertable.js',
+        'static/lib/jquery-handsontable/jquery.handsontable.full.js',
         'static/src/js/*.js'
     ],
     'installable': True,

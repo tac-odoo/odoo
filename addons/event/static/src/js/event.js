@@ -49,6 +49,10 @@ var commands = {
     }
 };
 
+    PreplanningCellValidator = function (value, callback) {
+        callback(/^-?\d*\.?\d*$/.test(value) && value >= 0);
+    };
+
     instance.event.EventPreplanning = instance.web.form.FormWidget.extend(instance.web.form.ReinitializeWidgetMixin, {
         init: function() {
             this._super.apply(this, arguments);
@@ -97,14 +101,26 @@ var commands = {
             self.on('change:date_end', self, self.initialize_content);
             self.on('change:event_id', self, self.initialize_content);
         },
+        resize_content: function() {
+            var $preplanning = this.$el.find('#preplanning-table');
+            if (!!$preplanning) {
+                var sizes = this.preplanning_recompute_size();
+                $preplanning.width(sizes[0]);
+                $preplanning.height(sizes[1]);
+                $preplanning.handsontable('render');
+            }
+        },
+        destroy_content: function() {
+            instance.web.bus.off('resize', this, this.resize_content);
+            this._super.apply(this, arguments);
+        },
         initialize_content: function() {
             var self = this;
             if (self.setting) {
-                console.log('initialize content skiped because still in settings...');
                 return;
             }
+            instance.web.bus.on('resize', this, this.resize_content);
             // don't render anything until we have date_begin, date_end and event_id
-            console.log('initialize_content', self.get('date_begin'), self.get('date_end'), self.get('event_id'));
             if (!self.get("date_begin") || !self.get("date_end") || !self.get('event_id') || self.get('events') === null)
                 return;
             this.destroy_content();
@@ -122,7 +138,6 @@ var commands = {
 
             ).then(function(result) {
                 // we put all the gathered data in self, then we render
-                // console.log('initialize_content, final result', result);
                 self.weeks = result.weeks || [];
                 _.each(self.weeks, function (w, i) {
                     self.weeks[i].start = instance.web.str_to_datetime(self.weeks[i].start).clearTime();
@@ -144,11 +159,12 @@ var commands = {
 
                 // Display data if events are ready
                 self.display_data();
+
+                self.resize_content();
             });
         },
         generate_matrix: function(contents, weeks, events) {
             var self = this;
-            console.log('content links', this.content_links);
             var m = {};
             // Initialize matrix
             for (var i=0; i < contents.length; i++)
@@ -199,81 +215,127 @@ var commands = {
             return m
         },
         destroy_content: function() {
-            // TODO
-            if (!this.get('effective_readonly')) {
-                this.$el.find('.oe_preplanning_cell').editable('destroy');
-            }
-            // TODO: how to destroy fixedTable ?
+            this.$el.find('#preplanning-table').handsontable('destroy');
+        },
+        preplanning_recompute_size: function() {
+            var $window = $(window),
+                $preplanning = this.$el.find('#preplanning-table'),
+                offset = $preplanning.offset();
+
+            availableWidth = $window.width() - offset.left + $window.scrollLeft();
+            availableHeight = $window.height() - offset.top + $window.scrollTop();
+            return [availableWidth - 16, availableHeight - 26];
         },
         display_data: function() {
             // TODO
             var self = this;
 
             self.$el.html(QWeb.render("event.EventPreplanning", {widget: self}));
-            // self.$el.find('#preplanning-data').fixedTable({
-            //     'height': 400,
-            //     'fixedColumns': 2,
-            // })
+
+            var data = [
+                [_t('Total')],
+            ];
+
+            var columnHeads = [''];
+            var columnSizes = [40];
+            _.each(self.weeks, function(week) {
+                columnHeads.push(week.name);
+                columnSizes.push(40);
+                data[0].push(_.str.sprintf('%d/%d', week.slot_used, week.slot_count));
+            });
+            var rowHeads = [''];
+            var rowCounts = [''];
+            _.each(self.contents, function(content, i) {
+                rowHeads.push(content.name);
+
+                var row_count = _.str.sprintf('%d/%d', content.slot_used, content.slot_count);
+                var row = [row_count];
+                _.each(self.weeks, function(week) {
+                    row.push(self.matrix[content.id][week.id]['value']);
+                });
+                data.push(row);
+            });
+
+            update_value = function(row, col, old_value, new_value) {
+                var content = self.contents[row - 1],
+                    week = self.weeks[col - 1],
+                    matrix_cell = self.matrix[content.id][week.id],
+                    delta = new_value - matrix_cell['value'];
+                week.slot_used += delta;
+                content.slot_used += delta;
+                matrix_cell['value'] = new_value;
+
+                var ht = self.$el.find('#preplanning-table').handsontable('getInstance');
+                ht.setDataAtCell(0, col, _.str.sprintf('%d/%d', week.slot_used, week.slot_count));
+                ht.setDataAtCell(row, 0, _.str.sprintf('%d/%d', content.slot_used, content.slot_count));
+
+                self.setting = true;
+                var o2m_value = self.generate_o2m_value();
+                self.updating = true;
+                self.field_manager.set_values({children_ids: o2m_value}).done(function() {
+                    self.updating = false;
+                });
+                self.setting = false;
+            };
+
+            self.$el.find('#preplanning-table').handsontable({
+                data: data,
+                colHeaders: columnHeads,
+                rowHeaders: rowHeads,
+                colWidths: columnSizes,
+                contextMenu: false,
+                fixedRowsTop: 1,
+                fixedColumnsLeft: 1,
+                cells: function(row, col, prop) {
+                    var cellprops = {};
+                    if (row === 0 || col === 0) {
+                        cellprops.readOnly = true;
+                    } else {
+                        cellprops.readOnly = self.get('effective_readonly');
+                        cellprops.type = 'numeric';
+                        cellprops.allowInvalid = true;
+                        cellprops.validator = PreplanningCellValidator;
+                    }
+                    return cellprops;
+                },
+                afterChange: function(changes, source) {
+                    var cell;
+                    var self = this;
+                    if (changes === null)
+                        return;
+                    _.each(changes, function(change) {
+                        cell = self.getCellMeta(change[0], change[1]);
+                        if (change[0] > 0 && change[1] > 0 && typeof change[3] === 'number') {
+                            update_value.apply(self, change);
+                        }
+                    });
+                },
+                afterValidate: function(isValid, value, row, col, source) {
+                    var cell = this.getCellMeta(row, col);
+                    if (!isValid || value === '') {
+                        // value is not an number, reject it
+                        cell.valid = false;
+                        return false;
+                    }
+                    var content = self.contents[row - 1];
+                        week = self.weeks[col - 1],
+                        matrix_cell = self.matrix[content.id][week.id],
+                        delta = value - matrix_cell['value'];
+
+                    if (content.slot_used + delta < 0 || content.slot_used + delta > content.slot_count ||
+                        week.slot_used + delta < 0 || week.slot_used + delta > week.slot_count) {
+                        // new value doesn't not fit within either week or content ranges
+                        cell.valid = false;
+                        return false;
+                    }
+                    cell.value = true;
+                    return true;
+                },
+            });
 
             self.$el.find('a.oe_preplanning_export_to_xls').on('click', function() {
                 self.preplanning_export_to_xls.apply(self, arguments);
             });
-
-            if (!self.get('effective_readonly')) {
-                self.$el.find('.oe_preplanning_cell').editable(function(value, settings) {
-                        var $this = $(this);
-                        var content_id = $(this).data('content');
-                        var content = self.contents_map[content_id];
-                        var week_id = $(this).data('week');
-                        var week = self.weeks_map[week_id];
-                        var old_value = self.matrix[content_id][week_id]['value'];
-                        try {
-                            var new_value = parseInt(value.replace(/\W/g, ''));
-                        } catch (err) {
-                            var new_value = old_value;
-                        };
-                        var delta = new_value - old_value;
-                        // Discard change if new value is not in allowed range
-                        // NOTE: we handle a special case allowing user to lower value if there is currently
-                        //       more used slot than it should (ex: events manually created)
-                        if (_.isNaN(new_value)
-                            || new_value === old_value
-                            || new_value < 0
-                            || (delta < 0 ? (content.slot_used + delta < 0) : (content.slot_used + delta > content.slot_count))
-                            || (delta < 0 ? (week.slot_used + delta < 0) : (week.slot_used + delta > week.slot_count))) {
-                            return old_value;
-                        }
-                        value = new_value.toString();
-                        content.slot_used = content.slot_used + delta;
-                        week.slot_used = week.slot_used + delta;
-                        self.matrix[content_id][week_id]['value'] = new_value;
-                        // update values
-                        self.sync(content, week);
-                        return value;
-                    }, {
-                        'onblur': 'submit',
-                        'cssclass': 'inherit',
-                        'select': true,
-                });
-            }
-            // TOOD: bind week and content to "open calendar on this week / content"
-            // self.$(".oe_timesheet_weekly_adding button").click(_.bind(this.init_add_account, this));
-        },
-        sync: function(content, week) {
-            // TODO
-            console.log('syncing sync_preplanning widget');
-            var self = this;
-            var value = this.matrix[content.id][week.id];
-
-            self.setting = true;
-            this.$el.find('td[data-content='+content.id+'].oe_preplanning_content_count').html(_.str.sprintf('%d/%d', content.slot_used, content.slot_count));
-            this.$el.find('th[data-week='+week.id+'].oe_preplanning_week_count').html(_.str.sprintf('%d/%d', week.slot_used, week.slot_count));
-            var o2m_value = self.generate_o2m_value();
-            self.updating = true;
-            self.field_manager.set_values({children_ids: o2m_value}).done(function() {
-                self.updating = false;
-            });
-            self.setting = false;
         },
         generate_o2m_value: function() {
             // TODO
