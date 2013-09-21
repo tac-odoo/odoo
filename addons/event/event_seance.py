@@ -84,12 +84,13 @@ class EventContentModule(osv.Model):
                 SELECT module.id,
                        min(seance.date_begin),
                        max(seance.date_begin + (INTERVAL '1 hour' * seance.duration))
-                FROM event_seance AS seance
-                LEFT JOIN event_content_module module ON (seance.module_id = module.id)
-                LEFT JOIN event_content AS content ON (seance.content_id = content.id)
-                LEFT JOIN event_content_link AS link ON (link.content_id = content.id)
-                LEFT JOIN event_event AS event ON (link.event_id = event.id)
+                FROM event_event AS event
+                LEFT JOIN event_content_link AS link ON (link.event_id = event.id)
+                LEFT JOIN event_content AS content ON (link.content_id = content.id)
+                LEFT JOIN event_content_module module ON (content.module_id = module.id)
+                LEFT JOIN event_seance AS seance ON (seance.content_id = content.id)
                 WHERE seance.date_begin IS NOT NULL
+                  AND content.module_id IS NOT NULL
                   AND event_id = %s
                 GROUP BY module.id
             """, (context['event_id'],))
