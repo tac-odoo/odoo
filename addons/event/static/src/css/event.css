@@ -68,6 +68,9 @@ th.oe_list_header_float_time {
   text-align: right;
 }
 
+.openerp div.oe_form_field_one2many .oe_view_manager .oe_list table.oe_list_content td[data-field="slot_info"] {
+  text-align: right;
+}
 
 /*
  * Preplanning
