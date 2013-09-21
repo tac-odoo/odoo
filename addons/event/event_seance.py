@@ -1529,8 +1529,7 @@ class EventRegistration(osv.Model):
             FROM event_event AS event
             LEFT JOIN event_content_link cl ON (cl.event_id = event.id)
             LEFT JOIN event_content AS content ON (cl.content_id = content.id)
-            LEFT JOIN event_seance seance ON (seance.content_id = content.id)
-            LEFT JOIN event_seance_type seance_type ON (seance.type_id = seance_type.id)
+            LEFT JOIN event_seance_type seance_type ON (content.type_id = seance_type.id)
             WHERE seance_type.manual_participation = true AND event.id IN %s
             GROUP BY event.id;
         """, (tuple(ids),))
