@@ -448,10 +448,11 @@ class EventParticipationExam(osv.Model):
         return ParticipationExam.search(cr, uid, [('participation_id', 'in', ids)], context=context)
 
     def _store_get_participation_exam_from_responses(self, cr, uid, ids, context=None):
+        Exam = self.pool.get('event.participation.exam')
         Response = self.pool.get('event.participation.response')
         participations_set = set(r.participation_id.id
                                  for r in Response.browse(cr, uid, ids, context=context))
-        return self._store_get_participation_exam_from_participation(cr, uid, list(participations_set), context=context)
+        return Exam._store_get_participation_exam_from_participation(cr, uid, list(participations_set), context=context)
 
     _columns = {
         'participation_id': fields.many2one('event.participation', 'Participation', required=True, ondelete='cascade'),
@@ -463,7 +464,7 @@ class EventParticipationExam(osv.Model):
                                         'event.participation.exam': (_store_get_participation_exam_self, ['score_points', 'questionnaire_id'], 20),
                                         'event.participation.response': (_store_get_participation_exam_from_responses, None, 10),
                                     }),
-        'succeeded': fields.related('exam_score_id', 'pass', type='boolean',
+        'succeeded': fields.related('score_id', 'pass', type='boolean',
                                     string='Succeeded', store=True, readonly=True),
         'score_points': fields.function(_get_score_points, type='float',
                                         string='Score (points)', store={
