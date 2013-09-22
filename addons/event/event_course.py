@@ -281,6 +281,8 @@ class EventContent(osv.Model):
     _inherit = 'event.content'
     _columns = {
         'course_id': fields.many2one('event.course', 'Course'),
+        'subject_id': fields.related('course_id', 'subject_id', type='many2one',
+                                     string='Subject', relation='event.course.subject'),
     }
 
     def onchange_content_course(self, cr, uid, ids, course_id, slot_duration, context=None):

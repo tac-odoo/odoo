@@ -53,7 +53,7 @@
                                     <group>
                                         <field name="sequence" invisible="1"/>
                                         <field name="event_ids" widget="many2many_tags" readonly="1" invisible="context.get('from_event')"/>
-                                        <field name="type_id"/>
+                                        <field name="type_id" on_change="onchange_type(type_id)"/>
                                         <field name="lang_id"/>
                                         <field name="module_id"/>
                                         <field name="is_divided"/>
@@ -201,6 +201,7 @@
             <field name="inherit_id" ref="event.view_event_kanban"/>
             <field name="arch" type="xml">
                 <field name="state" position="after">
+                    <field name="has_program"/>
                     <field name="content_planification"/>
                 </field>
                 <xpath expr="//templates/t[@t-name='kanban-box']//div[@class='oe_module_desc']/h4" position="after">
@@ -208,6 +209,11 @@
                         <t t-if="record.content_planification.raw_value == 'preplanning' and ['draft', 'confirm', 'done'].indexOf(record.state.raw_value) != -1">
                             <a type="object" name="open_preplanning" string="Open preplanning">
                                 <img src="/web/static/src/img/icons/terp-calendar.png"/>
+                            </a>
+                        </t>
+                        <t t-if="record.has_program.raw_value and ['draft', 'confirm', 'done'].indexOf(record.state.raw_value) != -1">
+                            <a type="action" name="%(action_event_2_seance_link)d" string="Seances">
+                                <img src="/web/static/src/img/icons/terp-go-week.png"/>
                             </a>
                         </t>
                     </p>
@@ -796,7 +802,7 @@
                         <tree string="Manual Participations" editable="bottom">
                             <field name="partner_id" on_change="onchange_partner(partner_id)" required="1"/>
                             <field name="name" invisible="1"/>
-                            <field name="seance_id" domain="[('type_id.manual_participation','=',True),('event_ids', 'in', [parent.event_id])]"/>
+                            <field name="seance_id" domain="[('type_id.manual_participation','=',True),('event_ids', 'in', [parent.event_id]),('date_begin','!=',False)]"/>
                             <field name="state"/>
                             <field name="presence" invisible="1"/>
                             <field name="presence_summary"/>

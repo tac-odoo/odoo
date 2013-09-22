@@ -68,13 +68,17 @@ class event_event(osv.osv):
     def name_get(self, cr, uid, ids, context=None):
         if not ids:
             return []
-
+        if context is None:
+            context = {}
         if isinstance(ids, (long, int)):
             ids = [ids]
 
         res = []
+        short_name = context.get('short_name')
         for record in self.browse(cr, uid, ids, context=context):
             display_name = record.name
+            if short_name:
+                display_name = record.reference or record.name
             if record.state != 'template':
                 date = record.date_begin.split(" ")[0]
                 date_end = record.date_end.split(" ")[0]

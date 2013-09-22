@@ -180,6 +180,9 @@ class EventContent(osv.Model):
 
         return {'value': values}
 
+    def onchange_type(self, cr, uid, ids, type_id, context=None):
+        return {'value': {}}
+
     _columns = {
         'sequence': fields.integer('Sequence', required=True),
         'name': fields.char('Content', size=128, required=True),
@@ -252,6 +255,7 @@ class EventContent(osv.Model):
         return new_id
 
     def write(self, cr, uid, ids, values, context=None):
+        print("Values: %s" % (values,))
         rval = super(EventContent, self).write(cr, uid, ids, values, context=context)
         if any(f in values for f in ['is_divided', 'group_ids']):
             Registration = self.pool.get('event.registration')
@@ -414,9 +418,12 @@ class EventSeance(osv.Model):
 
     def _store_get_seances_from_participations(self, cr, uid, ids, context=None):
         """return list of seances for participant count refresh"""
-        Participation = self.pool.get('event.participation')
-        seance_ids = [p.seance_id.id
-                      for p in Participation.browse(cr, uid, ids, context=context)]
+        cr.execute("""
+            SELECT seance_id
+            FROM event_participation
+            WHERE id IN %s
+        """, (tuple(ids),))
+        seance_ids = list(set(_x for (_x,) in cr.fetchall()))
         return list(set(seance_ids))
 
     def _store_get_seances_from_groups(self, cr, uid, ids, context=None):
@@ -1149,15 +1156,15 @@ class EventEvent(osv.Model):
 
                 ed = event.date_begin
 
-                timeline = None
-                if event.content_ids:
-                    tmlayers = ['working_hours', 'leaves']
-                    timeline = self._get_resource_timeline(cr, uid, event.id, layers=tmlayers,
-                                                           date_from=event_begin, date_to=event_end,
-                                                           context=context)
+                # timeline = None
+                # if event.content_ids:
+                #     tmlayers = ['working_hours', 'leaves']
+                #     timeline = self._get_resource_timeline(cr, uid, event.id, layers=tmlayers,
+                #                                            date_from=event_begin, date_to=event_end,
+                #                                            context=context)
 
-                ed = self._estimate_end_date(cr, uid, event.date_begin, event.content_ids,
-                                             timeline=timeline, context=context)
+                # ed = self._estimate_end_date(cr, uid, event.date_begin, event.content_ids,
+                #                              timeline=timeline, context=context)
 
                 # search max seance date
                 current_seance_filter = [
@@ -1197,9 +1204,12 @@ class EventEvent(osv.Model):
 
     def _store_get_events_from_seances(self, cr, uid, ids, context=None):
         Event = self.pool.get('event.event')
-        Seance = self.pool.get('event.seance')
-        content_ids = [s.content_id.id
-                       for s in Seance.browse(cr, uid, ids, context=context)]
+        cr.execute("""
+            SELECT content_id
+            FROM event_seance
+            WHERE id IN %s
+        """, (tuple(ids),))
+        content_ids = list(set(_x for (_x,) in cr.fetchall()))
         return Event._store_get_events_from_contents(cr, uid, content_ids, context=context)
 
     _columns = {
