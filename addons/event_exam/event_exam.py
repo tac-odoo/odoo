@@ -93,6 +93,33 @@ class EventQuestionnaire(osv.Model):
     }
 
 
+class EventContent(osv.Model):
+    _inherit = 'event.content'
+    _columns = {
+        'is_exam': fields.related('type_id', 'is_exam', type='boolean',
+                                  string='Is Exam', readonly=True),
+        'questionnaire_ids': fields.many2many('event.questionnaire', id1='content_id', id2='questionnaire_id',
+                                             string='Default questionnaires'),
+    }
+
+    def onchange_type(self, cr, uid, ids, type_id, context=None):
+        changes = super(EventContent, self).onchange_type(cr, uid, ids, type_id, context=context)
+        is_exam = False
+        if type_id:
+            SeanceType = self.pool.get('event.seance.type')
+            is_exam = SeanceType.browse(cr, uid, type_id, context=context).is_exam
+        changes['value']['is_exam'] = is_exam
+        return changes
+
+    def _prepare_seance_for_content(self, cr, uid, content, date_begin, date_end, group=None, context=None):
+        values = super(EventContent, self)._prepare_seance_for_content(cr, uid, content, date_begin, date_end,
+                                                                       group=group, context=context)
+        if content.type_id and content.type_id.is_exam:
+            values.update(is_exam=True,
+                          questionnaire_ids=[(6, 0, [q.id for q in content.questionnaire_ids])])
+        return values
+
+
 class EventQuestionnaireLine(osv.Model):
     _name = 'event.questionnaire.line'
     _order = 'questionnaire_id, sequence, id'
@@ -105,7 +132,7 @@ class EventQuestionnaireLine(osv.Model):
 
     _columns = {
         'sequence': fields.integer('Sequence'),
-        'questionnaire_id': fields.many2one('event.questionnaire', 'Questionnaire', required=True),
+        'questionnaire_id': fields.many2one('event.questionnaire', 'Questionnaire', required=True, ondelete='cascade'),
         'type': fields.selection(TYPES_SELECTION, 'Type', required=True),
         'question_id': fields.many2one('event.question', 'Question'),
         'points': fields.related('question_id', 'points', type='float', string='Points'),
@@ -365,7 +392,8 @@ class EventSeance(osv.Model):
     _inherit = 'event.seance'
     _columns = {
         'is_exam': fields.boolean('Exam'),
-        'questionnaire_id': fields.many2one('event.questionnaire', 'Default questionnaire'),
+        'questionnaire_ids': fields.many2many('event.questionnaire', id1='seance_id', id2='questionnaire_id',
+                                             string='Default questionnaires'),
     }
 
     def onchange_seance_type(self, cr, uid, ids, type_id, context=None):
@@ -380,6 +408,12 @@ class EventSeance(osv.Model):
 
     def _prepare_participation_for_seance(self, cr, uid, name, seance, registration, context=None):
         values = super(EventSeance, self)._prepare_participation_for_seance(cr, uid, name, seance, registration, context=context)
+        if seance.is_exam:
+            exams = []
+            for q in seance.questionnaire_ids:
+                exams.append((0, {'questionnaire_id': q.id}))
+            values.update(exam_course_id=seance.course_id.id,
+                          exam_ids=exams)
         return values
 
 
@@ -387,6 +421,7 @@ class EventParticipationReponse(osv.Model):
     _name = 'event.participation.response'
     _columns = {
         'participation_id': fields.many2one('event.participation', 'Participation', required=True),
+        'questionnaire_id': fields.many2one('event.questionnaire', 'Questionnaire', required=True),
         'question_id': fields.many2one('event.question', 'Question', required=True),
         'points': fields.float('Points'),
         'max_points': fields.related('question_id', 'points', type='float', string='Max Points', readonly=True),
@@ -394,42 +429,59 @@ class EventParticipationReponse(osv.Model):
     }
 
 
-class EventParticipation(osv.Model):
-    _inherit = 'event.participation'
+class EventParticipationExam(osv.Model):
+    _name = 'event.participation.exam'
 
-    def _get_exam_score_points(self, cr, uid, ids, fieldname, args, context=None):
+    def _get_score_points(self, cr, uid, ids, fieldname, args, context=None):
         # TODO: compute real score based on response line
         return dict.fromkeys(ids, 0.0)
 
-    def _get_exam_score_id(self, cr, uid, ids, fieldname, args, context=None):
+    def _get_score_id(self, cr, uid, ids, fieldname, args, context=None):
         # TODO: compute real score based on 'exam_score_points' + 'exam_questionnaire_id'
         return dict.fromkeys(ids, False)
 
-    def _store_get_participation_self(self, cr, uid, ids, context=None):
+    def _store_get_participation_exam_self(self, cr, uid, ids, context=None):
         return ids
 
-    def _store_get_participations_from_responses(self, cr, uid, ids, context=None):
+    def _store_get_participation_exam_from_participation(self, cr, uid, ids, context=None):
+        ParticipationExam = self.pool.get('event.participation.exam')
+        return ParticipationExam.search(cr, uid, [('participation_id', 'in', ids)], context=context)
+
+    def _store_get_participation_exam_from_responses(self, cr, uid, ids, context=None):
         Response = self.pool.get('event.participation.response')
         participations_set = set(r.participation_id.id
                                  for r in Response.browse(cr, uid, ids, context=context))
-        return list(participations_set)
+        return self._store_get_participation_exam_from_participation(cr, uid, list(participations_set), context=context)
+
+    _columns = {
+        'participation_id': fields.many2one('event.participation', 'Participation', required=True, ondelete='cascade'),
+        'course_id': fields.related('participation_id', 'course_id', type='many2one',
+                                    string='Course', relation='event.course'),
+        'questionnaire_id': fields.many2one('event.questionnaire', 'Questionnaire', required=True),
+        'score_id': fields.function(_get_score_id, type='many2one', relation='event.scoring.level',
+                                    string='Score', store={
+                                        'event.participation.exam': (_store_get_participation_exam_self, ['score_points', 'questionnaire_id'], 20),
+                                        'event.participation.response': (_store_get_participation_exam_from_responses, None, 10),
+                                    }),
+        'succeeded': fields.related('exam_score_id', 'pass', type='boolean',
+                                    string='Succeeded', store=True, readonly=True),
+        'score_points': fields.function(_get_score_points, type='float',
+                                        string='Score (points)', store={
+                                            'event.participation.exam': (_store_get_participation_exam_self, ['score_points', 'questionnaire_id'], 20),
+                                            'event.participation.response': (_store_get_participation_exam_from_responses, None, 10),
+                                        })
+    }
+
+
+class EventParticipation(osv.Model):
+    _inherit = 'event.participation'
 
     _columns = {
         'is_exam': fields.related('seance_id', 'is_exam', type='boolean', string='Exam',
                                   readonly=True,),
         'exam_course_id': fields.many2one('event.course', 'Exam Course'),
-        'exam_questionnaire_id': fields.many2one('event.questionnaire', 'Questionnaire'),
+        'exam_ids': fields.one2many('event.participation.exam', 'participation_id', 'Exams'),
         'exam_response_ids': fields.one2many('event.participation.response', 'participation_id', 'Responses'),
-        'exam_score_id': fields.function(_get_exam_score_id, type='many2one', relation='event.scoring.level',
-                                         string='Score', store={
-                                             'event.participation': (_store_get_participation_self, ['exam_score_points', 'exam_questionnaire_id'], 20),
-                                         }),
-        'exam_succeeded': fields.related('exam_score_id', 'pass', type='boolean',
-                                         string='Succeeded', store=True, readonly=True),
-        'exam_score_points': fields.function(_get_exam_score_points, type='float',
-                                             string='Score (points)', store={
-                                                 'event.participation.response': (_store_get_participations_from_responses, ['points'], 10),
-                                             })
     }
 
     def onchange_seance(self, cr, uid, ids, seance_id, context=None):
@@ -442,9 +494,12 @@ class EventParticipation(osv.Model):
             )
         return changes
 
-    def _prepare_participation_for_seance(self, cr, uid, name, seance, registration, context=None):
-        values = super(EventParticipation, self)._prepare_participation_for_seance(cr, uid, name, seance, registration, context=context)
-        if seance.is_exam:
-            values.update(exam_course_id=seance.course_id.id,
-                          exam_questionnaire_id=seance.questionnaire_id.id)
-        return values
+    def create(self, cr, uid, values, context=None):
+        seance_id = values.get('seance_id')
+        if seance_id:
+            Seance = self.pool.get('event.seance')
+            seance_record = Seance.browse(cr, uid, seance_id, context=context)
+            if seance_record.is_exam and seance_record.questionnaire_ids and not values.get('exam_ids'):
+                values['exam_ids'] = [(0, 0, {'questionnaire_id': q.id})
+                                      for q in seance_record.questionnaire_ids]
+        return super(EventParticipation, self).create(cr, uid, values, context=context)

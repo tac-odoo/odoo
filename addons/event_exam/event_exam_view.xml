@@ -459,6 +459,24 @@
             <xpath expr="//div[@class='oe_title']" position="inside">
                 <field name="is_exam"/><label for="is_exam"/>
             </xpath>
+            <field name="group_id" position="after">
+                <field name="questionnaire_ids" widget="many2many_tags"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_event_content_form_exam" model="ir.ui.view">
+        <field name="name">event.content.form.exam</field>
+        <field name="model">event.content</field>
+        <field name="inherit_id" ref="event.view_event_content_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@string='Content &amp; Planning']/group[1]" position="after">
+                <div attrs="{'invisible': [('is_exam','=',False)]}">
+                    <field name="is_exam" invisible="1"/>
+                    <separator string="Questionnaires"/>
+                    <field name="questionnaire_ids" domain="['|',('main_course_id','=',course_id),('main_course_id','=',False)]"/>
+                </div>
+            </xpath>
         </field>
     </record>
 
@@ -471,7 +489,6 @@
         <field name="arch" type="xml">
             <field name="registration_id" position="after">
                 <field name="exam_course_id"/>
-                <field name="exam_score_id"/>
             </field>
         </field>
     </record>
@@ -486,26 +503,31 @@
                     <group>
                         <group>
                             <field name="exam_course_id"/>
-                            <field name="exam_questionnaire_id"/>
                         </group>
                         <group>
-                            <label for="exam_score_id"/>
-                            <div>
-                                <field name="exam_score_id" class="oe_inline"/> (<field name="exam_score_points" class="oe_inline"/>)
-                            </div>
-                            <field name="exam_succeeded"/>
                         </group>
                     </group>
+                    <separator string="Exams"/>
+                    <field name="exam_ids">
+                        <tree string="Exams" editable="bottom">
+                            <field name="questionnaire_id"/>
+                            <field name="score_id"/>
+                            <field name="succeeded"/>
+                            <field name="score_points"/>
+                        </tree>
+                    </field>
                     <separator string="Responses"/>
                     <field name="exam_response_ids">
                         <tree string="Responses">
+                            <field name="questionnaire_id"/>
                             <field name="question_id"/>
                             <field name="points"/>
                             <field name="max_points"/>
                             <field name="is_graded"/>
                         </tree>
                         <form string="Reponses">
-                            <field name="question_id" colspan="4"/>
+                            <field name="questionnaire_id"/>
+                            <field name="question_id"/>
                             <field name="points"/>
                             <field name="max_points"/>
                             <field name="is_graded"/>
