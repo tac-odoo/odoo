@@ -1,0 +1,758 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* event_exam
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 7.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-09-23 15:04+0000\n"
+"PO-Revision-Date: 2013-09-23 15:04+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: event_exam
+#: field:event.questionnaire,scoring_id:0
+#: view:event.scoring:0
+#: field:event.scoring.level,scoring_id:0
+#: model:ir.actions.act_window,name:event_exam.action_event_scoring
+#: model:ir.ui.menu,name:event_exam.menu_event_config_scoring
+msgid "Scoring"
+msgstr ""
+
+#. module: event_exam
+#: field:event.degree,name:0
+msgid "Degree Name"
+msgstr ""
+
+#. module: event_exam
+#: view:event.content:0
+#: view:event.questionnaire:0
+#: model:ir.actions.act_window,name:event_exam.action_event_questionnaire
+#: model:ir.ui.menu,name:event_exam.menu_event_questionnaire
+msgid "Questionnaires"
+msgstr ""
+
+#. module: event_exam
+#: view:event.scoring:0
+msgid "Scorings"
+msgstr ""
+
+#. module: event_exam
+#: sql_constraint:event.questionnaire.line:0
+msgid "Question field is required for type 'Question'"
+msgstr ""
+
+#. module: event_exam
+#: view:event.questionnaire:0
+msgid "QZ/..."
+msgstr ""
+
+#. module: event_exam
+#: selection:event.degree.contact,state:0
+msgid "Desired"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question.domain,parent_id:0
+msgid "Parent Domain"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,text:0
+msgid "Question Text"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,text_free_lines_count:0
+msgid "Free lines count"
+msgstr ""
+
+#. module: event_exam
+#: view:event.questionnaire:0
+msgid "Questions/Lines"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,image_position:0
+msgid "Image Position"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,level:0
+#: field:event.scoring.level,level:0
+msgid "Level"
+msgstr ""
+
+#. module: event_exam
+#: field:event.degree.contact,is_favorite:0
+msgid "Favorite"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_question_domain
+msgid "event.question.domain"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,name:0
+msgid "Question Name"
+msgstr ""
+
+#. module: event_exam
+#: help:event.scoring.level,level:0
+msgid "Points of pourcentage representing the low score/pourcentage to reach this level"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.question,level:0
+msgid "Super easy"
+msgstr ""
+
+#. module: event_exam
+#: field:event.participation.exam,course_id:0
+msgid "Course"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,points_no_answer:0
+#: field:event.questionnaire.line,points_no_answer:0
+msgid "Points (No answer)"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.degree,state:0
+#: selection:event.question,state:0
+#: selection:event.questionnaire,state:0
+msgid "Draft"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question.domain,name:0
+msgid "Domain Name"
+msgstr ""
+
+#. module: event_exam
+#: field:event.content,questionnaire_ids:0
+#: field:event.seance,questionnaire_ids:0
+msgid "Default questionnaires"
+msgstr ""
+
+#. module: event_exam
+#: field:event.participation.response,question_id:0
+#: view:event.question:0
+#: selection:event.question,points_from:0
+#: field:event.question.answer,question_id:0
+#: field:event.questionnaire.line,question_id:0
+#: selection:event.questionnaire.line,type:0
+#: model:ir.actions.act_window,name:event_exam.action_event_question
+#: model:ir.ui.menu,name:event_exam.menu_event_question
+msgid "Question"
+msgstr ""
+
+#. module: event_exam
+#: view:event.degree.contact:0
+#: field:event.degree.contact,exam_todo_ids:0
+msgid "Exam Todo"
+msgstr ""
+
+#. module: event_exam
+#: view:event.degree.contact:0
+#: field:event.degree.contact,exam_done_ids:0
+msgid "Exam Done"
+msgstr ""
+
+#. module: event_exam
+#: field:event.degree,state:0
+#: field:event.question,state:0
+#: field:event.questionnaire,state:0
+msgid "State"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,version:0
+#: field:event.questionnaire,version:0
+msgid "Version"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.question,level:0
+msgid "Easy"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.scoring,mode:0
+msgid "Percentage"
+msgstr ""
+
+#. module: event_exam
+#: help:event.question,text_free_lines_count:0
+msgid "Number of free lines to display for response"
+msgstr ""
+
+#. module: event_exam
+#: field:event.content,is_exam:0
+msgid "Is Exam"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.question,type:0
+msgid "Unique choice"
+msgstr ""
+
+#. module: event_exam
+#: view:event.degree.contact:0
+msgid "Exams Todo"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_participation
+msgid " Event Participation "
+msgstr ""
+
+#. module: event_exam
+#: view:event.participation:0
+#: field:event.participation,exam_response_ids:0
+msgid "Responses"
+msgstr ""
+
+#. module: event_exam
+#: field:event.degree.contact,state:0
+msgid "unknown"
+msgstr ""
+
+#. module: event_exam
+#: view:event.question:0
+#: field:event.question,answer_ids:0
+#: selection:event.question,points_from:0
+msgid "Answers"
+msgstr ""
+
+#. module: event_exam
+#: help:event.question,points_no_answer:0
+msgid "Number of points to give if user did not answer this question. Use negative number to give penalities for not answering this question"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question.answer,point_checked:0
+msgid "Points (checked)"
+msgstr ""
+
+#. module: event_exam
+#: view:event.question.domain:0
+msgid "Describe here the purpose / compentencies of this domain..."
+msgstr ""
+
+#. module: event_exam
+#: field:event.degree.contact,exam_participation_ids:0
+msgid "Exam Participations"
+msgstr ""
+
+#. module: event_exam
+#: help:event.question,lang_id:0
+msgid "Language of the question"
+msgstr ""
+
+#. module: event_exam
+#: field:event.degree.contact,name:0
+msgid "Contact Name"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,image:0
+msgid "Image Data"
+msgstr ""
+
+#. module: event_exam
+#: view:event.question:0
+msgid "Type here the question title..."
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_degree
+msgid "event.degree"
+msgstr ""
+
+#. module: event_exam
+#: field:event.degree.contact,contact_id:0
+msgid "Contact"
+msgstr ""
+
+#. module: event_exam
+#: view:event.question:0
+msgid "Options"
+msgstr ""
+
+#. module: event_exam
+#: field:event.questionnaire.line,body:0
+msgid "Text Body"
+msgstr ""
+
+#. module: event_exam
+#: view:event.participation:0
+msgid "Reponses"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,is_eliminatory:0
+msgid "Eliminatory"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.scoring,mode:0
+msgid "Point"
+msgstr ""
+
+#. module: event_exam
+#: view:event.question:0
+#: field:event.question,has_image:0
+msgid "Image"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.question,level:0
+msgid "Hard"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_question_answer
+msgid "event.question.answer"
+msgstr ""
+
+#. module: event_exam
+#: view:event.question:0
+#: field:event.questionnaire,question_ids:0
+msgid "Questions"
+msgstr ""
+
+#. module: event_exam
+#: field:event.scoring.level,pass:0
+msgid "Pass"
+msgstr ""
+
+#. module: event_exam
+#: field:event.scoring,mode:0
+msgid "Mode"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.question,image_position:0
+msgid "After Question's Text"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question.answer,point_unchecked:0
+msgid "Points (unchecked)"
+msgstr ""
+
+#. module: event_exam
+#: field:event.degree,acquired_count:0
+msgid "# of acquired"
+msgstr ""
+
+#. module: event_exam
+#: field:event.degree,eligible_count:0
+msgid "# of eligible"
+msgstr ""
+
+#. module: event_exam
+#: view:event.degree:0
+#: model:ir.actions.act_window,name:event_exam.action_event_degree
+#: model:ir.ui.menu,name:event_exam.menu_event_degree
+msgid "Degrees"
+msgstr ""
+
+#. module: event_exam
+#: field:event.questionnaire,name:0
+msgid "Questionnaire Name"
+msgstr ""
+
+#. module: event_exam
+#: view:event.question:0
+msgid "Answer"
+msgstr ""
+
+#. module: event_exam
+#: help:event.degree.contact,is_favorite:0
+msgid "User has marked this degree as a desired/favorite one"
+msgstr ""
+
+#. module: event_exam
+#: view:event.participation:0
+#: field:event.participation,is_exam:0
+#: field:event.seance,is_exam:0
+#: field:event.seance.type,is_exam:0
+msgid "Exam"
+msgstr ""
+
+#. module: event_exam
+#: view:event.degree:0
+#: field:event.degree.contact,degree_id:0
+msgid "Degree"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.question,level:0
+msgid "Normal"
+msgstr ""
+
+#. module: event_exam
+#: field:event.degree.contact,acquired_date:0
+msgid "Acquired Date"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_scoring_level
+msgid "event.scoring.level"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.question,type:0
+msgid "Yes/No"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_content
+msgid " Event Content "
+msgstr ""
+
+#. module: event_exam
+#: view:event.scoring:0
+#: field:event.scoring,level_ids:0
+msgid "Levels"
+msgstr ""
+
+#. module: event_exam
+#: field:event.participation,exam_course_id:0
+msgid "Exam Course"
+msgstr ""
+
+#. module: event_exam
+#: field:event.degree,active:0
+msgid "Active"
+msgstr ""
+
+#. module: event_exam
+#: field:event.participation.exam,score_points:0
+msgid "Score (points)"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_scoring
+msgid "event.scoring"
+msgstr ""
+
+#. module: event_exam
+#: field:event.degree,desired_count:0
+msgid "# of desired"
+msgstr ""
+
+#. module: event_exam
+#: field:event.degree,lang_id:0
+#: field:event.question,lang_id:0
+#: field:event.questionnaire,lang_id:0
+msgid "Language"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.degree,state:0
+#: selection:event.question,state:0
+#: selection:event.questionnaire,state:0
+msgid "Deprecated"
+msgstr ""
+
+#. module: event_exam
+#: view:event.degree.contact:0
+msgid "Exams Done"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_participation_response
+msgid "event.participation.response"
+msgstr ""
+
+#. module: event_exam
+#: view:event.question.domain:0
+msgid "Domain"
+msgstr ""
+
+#. module: event_exam
+#: view:event.degree:0
+#: field:event.degree,course_ids:0
+#: field:event.question,course_ids:0
+msgid "Courses"
+msgstr ""
+
+#. module: event_exam
+#: field:event.participation.response,points:0
+#: field:event.question,points:0
+#: field:event.questionnaire.line,points:0
+msgid "Points"
+msgstr ""
+
+#. module: event_exam
+#: view:event.question:0
+#: view:event.questionnaire:0
+msgid "Version:"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.question,level:0
+msgid "Super hard"
+msgstr ""
+
+#. module: event_exam
+#: help:event.question,image_position:0
+msgid "Image position relatively to question's text"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,is_mandatory:0
+msgid "Mandatory"
+msgstr ""
+
+#. module: event_exam
+#: field:event.participation.response,max_points:0
+msgid "Max Points"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question.answer,text:0
+#: selection:event.questionnaire.line,type:0
+msgid "Text"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,points_from:0
+msgid "Count points from"
+msgstr ""
+
+#. module: event_exam
+#: help:event.scoring.level,pass:0
+msgid "If checked, this means this level should be considered as succeeded"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.question,image_position:0
+msgid "Before Question's Text"
+msgstr ""
+
+#. module: event_exam
+#: view:event.scoring:0
+msgid "Low Percentage/Min Score"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_questionnaire_line
+msgid "event.questionnaire.line"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_degree_contact
+msgid "event.degree.contact"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.questionnaire.line,type:0
+msgid "Page Break"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.question,type:0
+msgid "Plain response"
+msgstr ""
+
+#. module: event_exam
+#: field:event.scoring,name:0
+msgid "Scoring Name"
+msgstr ""
+
+#. module: event_exam
+#: field:event.participation.exam,questionnaire_id:0
+#: field:event.participation.response,questionnaire_id:0
+#: field:event.questionnaire.line,questionnaire_id:0
+msgid "Questionnaire"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.degree,state:0
+#: selection:event.question,state:0
+#: selection:event.questionnaire,state:0
+msgid "Validated"
+msgstr ""
+
+#. module: event_exam
+#: view:event.questionnaire:0
+msgid "Information"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.degree.contact,state:0
+msgid "Eligible"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_participation_exam
+msgid "event.participation.exam"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.actions.act_window,name:event_exam.action_event_question_domain
+#: model:ir.ui.menu,name:event_exam.menu_event_config_question_domain
+msgid "Question's Domain"
+msgstr ""
+
+#. module: event_exam
+#: help:event.question,course_ids:0
+msgid "Courses related to this question"
+msgstr ""
+
+#. module: event_exam
+#: field:event.participation.exam,score_id:0
+msgid "Score"
+msgstr ""
+
+#. module: event_exam
+#: view:event.degree.contact:0
+#: model:ir.actions.act_window,name:event_exam.action_event_degree_contact
+#: model:ir.ui.menu,name:event_exam.menu_event_degree_contact
+msgid "Degree Contact"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question.domain,description:0
+msgid "Description"
+msgstr ""
+
+#. module: event_exam
+#: view:event.question:0
+#: view:event.questionnaire:0
+msgid "Ref./Version"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,type:0
+#: field:event.questionnaire.line,type:0
+msgid "Type"
+msgstr ""
+
+#. module: event_exam
+#: field:event.participation.exam,participation_id:0
+#: field:event.participation.response,participation_id:0
+msgid "Participation"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,reference:0
+#: field:event.questionnaire,reference:0
+msgid "Ref."
+msgstr ""
+
+#. module: event_exam
+#: field:event.scoring.level,name:0
+msgid "Level name"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_questionnaire
+msgid "event.questionnaire"
+msgstr ""
+
+#. module: event_exam
+#: view:event.degree.contact:0
+msgid "Degree Contacts"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.question,type:0
+msgid "Multiple choice"
+msgstr ""
+
+#. module: event_exam
+#: field:event.participation.exam,succeeded:0
+msgid "Succeeded"
+msgstr ""
+
+#. module: event_exam
+#: view:event.questionnaire:0
+#: field:event.questionnaire,line_ids:0
+msgid "Lines"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question.answer,is_solution:0
+msgid "Solution"
+msgstr ""
+
+#. module: event_exam
+#: field:event.participation.response,is_graded:0
+msgid "Graded?"
+msgstr ""
+
+#. module: event_exam
+#: view:event.participation:0
+#: field:event.participation,exam_ids:0
+msgid "Exams"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,domain_ids:0
+#: view:event.question.domain:0
+msgid "Domains"
+msgstr ""
+
+#. module: event_exam
+#: field:event.questionnaire,main_course_id:0
+msgid "Main Course"
+msgstr ""
+
+#. module: event_exam
+#: help:event.question,duration:0
+msgid "Maxium time allowed to respond to this question"
+msgstr ""
+
+#. module: event_exam
+#: field:event.question.answer,sequence:0
+#: field:event.questionnaire.line,sequence:0
+msgid "Sequence"
+msgstr ""
+
+#. module: event_exam
+#: selection:event.degree.contact,state:0
+msgid "Acquired"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_question
+msgid "event.question"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_seance_type
+msgid "event.seance.type"
+msgstr ""
+
+#. module: event_exam
+#: model:ir.model,name:event_exam.model_event_seance
+msgid "Email Thread"
+msgstr ""
+
+#. module: event_exam
+#: view:event.question:0
+msgid "Type here the answer text..."
+msgstr ""
+
+#. module: event_exam
+#: field:event.question,duration:0
+msgid "Duration"
+msgstr ""
+
+#. module: event_exam
+#: help:event.question,domain_ids:0
+msgid "Domains related to this question"
+msgstr ""
+

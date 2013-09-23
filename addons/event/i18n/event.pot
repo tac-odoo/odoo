@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-06-07 19:37+0000\n"
-"PO-Revision-Date: 2013-06-07 19:37+0000\n"
+"POT-Creation-Date: 2013-09-23 15:03+0000\n"
+"PO-Revision-Date: 2013-09-23 15:03+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,9 +16,648 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: event
+#: model:ir.actions.act_window,name:event.act_event_view_registration
+#: model:mail.message.subtype,name:event.mt_event_registration
+msgid "New Registration"
+msgstr ""
+
+#. module: event
+#: help:event.course.material,course_id:0
+msgid "If no course is specified, this material will be available on all courses"
+msgstr ""
+
+#. module: event
+#: view:event.course.material:0
+msgid "Material Name"
+msgstr ""
+
+#. module: event
+#: field:event.event,register_min:0
+msgid "Minimum Registrations"
+msgstr ""
+
+#. module: event
+#: field:event.event.estimate_end_date.wizard,date_start:0
+msgid "Start on"
+msgstr ""
+
+#. module: event
+#: view:event.participation.take.presence.wizard:0
+msgid "Arrived at"
+msgstr ""
+
+#. module: event
+#: model:ir.ui.menu,name:event.menu_event_management_root
+msgid "Event Management"
+msgstr ""
+
+#. module: event
+#: field:event.content,seance_ids:0
+#: view:event.event:0
+#: field:event.event,seance_ids:0
+#: view:event.event.preplanning:0
+#: view:event.seance:0
+#: model:ir.actions.act_window,name:event.action_event_2_seance_link
+#: model:ir.actions.act_window,name:event.action_event_seance
+#: model:ir.ui.menu,name:event.menu_event_seance
+msgid "Seances"
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_event_constraint
+msgid "event.constraint"
+msgstr ""
+
+#. module: event
+#: field:event.type,default_registration_min:0
+msgid "Default Minimum Registration"
+msgstr ""
+
+#. module: event
+#: model:ir.actions.act_window,name:event.action_resource_calendar_form
+#: model:ir.ui.menu,name:event.menu_event_config_calendars
+msgid "Schedules"
+msgstr ""
+
+#. module: event
+#: field:event.content,constraint_ids:0
+#: field:event.course,constraint_ids:0
+#: field:event.seance,constraint_ids:0
+msgid "Constraints"
+msgstr ""
+
+#. module: event
+#: model:ir.ui.menu,name:event.menu_event_library_root
+msgid "Event Library"
+msgstr ""
+
+#. module: event
+#: view:report.event.registration:0
+msgid "Day"
+msgstr ""
+
+#. module: event
+#: selection:event.participation,presence:0
+msgid "Present"
+msgstr ""
+
+#. module: event
+#: view:event.participation.take.presence.wizard:0
+#: model:ir.actions.act_window,name:event.action_event_participation_take_presence_wizard
+msgid "Take Presence"
+msgstr ""
+
+#. module: event
+#: field:event.event,address_id:0
+msgid "Location Address"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "tickets"
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_event_participation_take_presence_wizard
+msgid "event.participation.take.presence.wizard"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Template of Events"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "ticket"
+msgstr ""
+
+#. module: event
+#: field:event.seance.type,room_product_id:0
+msgid "Room's Product"
+msgstr ""
+
+#. module: event
+#: help:event.course,message_unread:0
+#: help:event.course.material,message_unread:0
+#: help:event.event,message_unread:0
+#: help:event.participation,message_unread:0
+#: help:event.registration,message_unread:0
+#: help:event.seance,message_unread:0
+msgid "If checked new messages require your attention."
+msgstr ""
+
+#. module: event
+#: sql_constraint:event.course.speakerinfo:0
+msgid "Couple course/speaker must be unique"
+msgstr ""
+
+#. module: event
+#: selection:event.participation,presence:0
+msgid "No Presence Information"
+msgstr ""
+
+#. module: event
+#: view:event.participation:0
+#: view:event.registration:0
+msgid "Mark as Late"
+msgstr ""
+
+#. module: event
+#: view:event.content:0
+#: field:event.content,course_id:0
+#: view:event.course:0
+#: field:event.course.material,course_id:0
+#: field:event.course.speakerinfo,course_id:0
+#: view:event.event:0
+#: field:event.event,course_id:0
+#: field:event.seance,course_id:0
+#: view:report.event.seance:0
+#: field:report.event.seance,course_id:0
+msgid "Course"
+msgstr ""
+
+#. module: event
+#: help:event.course,message_summary:0
+#: help:event.course.material,message_summary:0
+#: help:event.event,message_summary:0
+#: help:event.participation,message_summary:0
+#: help:event.registration,message_summary:0
+#: help:event.seance,message_summary:0
+msgid "Holds the Chatter summary (number of messages, ...). This summary is directly in html format in order to be inserted in kanban views."
+msgstr ""
+
+#. module: event
+#: code:addons/event/event.py:204
+#: code:addons/event/event.py:206
+#, python-format
+msgid "Warning!"
+msgstr ""
+
+#. module: event
+#: view:event.registration:0
+#: field:event.registration,partner_id:0
+#: model:ir.model,name:event.model_res_partner
+msgid "Partner"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:1041
+#, python-format
+msgid "You cannot change content group subscription on done events"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "available."
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_event_type
+msgid " Event Type "
+msgstr ""
+
+#. module: event
+#: field:event.content.module,date_begin:0
+#: field:event.event.preplanning,date_begin:0
+#: field:event.seance,date_begin:0
+msgid "Begin date"
+msgstr ""
+
+#. module: event
+#: view:event.participation:0
+#: field:event.participation,partner_id:0
+#: selection:event.participation,role:0
+#: field:event.participation.take.presence.wizard,name:0
+#: view:event.registration:0
+#: view:event.seance:0
+msgid "Participant"
+msgstr ""
+
+#. module: event
+#: code:addons/event/wizard/event_participant_take_presence.py:47
+#, python-format
+msgid "Invalid participants"
+msgstr ""
+
+#. module: event
+#: view:res.partner:0
+msgid "Street..."
+msgstr ""
+
+#. module: event
+#: help:event.type,default_email_registration_id:0
+msgid "It will select this default confirmation registration mail value when you choose this event"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Only"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:1677
+#, python-format
+msgid "You have to choose one group for '%s'"
+msgstr ""
+
+#. module: event
+#: view:event.participation:0
+msgid "Participation"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Upcoming events from today"
+msgstr ""
+
+#. module: event
+#: view:event.participation:0
+#: view:event.registration:0
+msgid "Mark as Present"
+msgstr ""
+
+#. module: event
+#: field:event.event,type:0
+msgid "Type of Event"
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_event_event_preplanning
+msgid "event.event.preplanning"
+msgstr ""
+
+#. module: event
+#: help:event.event,content_planification:0
+#: help:event.type,default_content_planification:0
+msgid "Define mode used for created seance of this event"
+msgstr ""
+
+#. module: event
+#: view:event.constraint:0
+#: field:event.constraint,category_ids:0
+msgid "Categories"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:1513
+#: code:addons/event/event_seance.py:1522
+#, python-format
+msgid "Undefined"
+msgstr ""
+
+#. module: event
+#: view:event.course.material:0
+msgid "Created"
+msgstr ""
+
+#. module: event
+#: code:addons/event/wizard/event_participant_take_presence.py:52
+#, python-format
+msgid "%d participants"
+msgstr ""
+
+#. module: event
+#: help:event.event,main_speaker_id:0
+msgid "Speaker who will be giving speech at the event."
+msgstr ""
+
+#. module: event
+#: field:event.content,is_divided:0
+msgid "Divided?"
+msgstr ""
+
+#. module: event
+#: field:event.participation,name:0
+msgid "Participant Name"
+msgstr ""
+
+#. module: event
+#: view:res.partner:0
+msgid "External Resources.."
+msgstr ""
+
+#. module: event
+#: field:event.event,register_prospect:0
+msgid "Unconfirmed Registrations"
+msgstr ""
+
+#. module: event
+#: field:event.course,speakerinfo_ids:0
+#: field:res.partner,speakerinfo_ids:0
+msgid "Speaker Infos"
+msgstr ""
+
+#. module: event
+#: selection:event.constraint,category_mode:0
+msgid "Any categories"
+msgstr ""
+
+#. module: event
+#: field:event.event,email_registration_id:0
+#: field:event.type,default_email_registration_id:0
+msgid "Registration Confirmation Email"
+msgstr ""
+
+#. module: event
+#: field:event.registration,date_closed:0
+msgid "Attended Date"
+msgstr ""
+
+#. module: event
+#: view:event.registration:0
+msgid "Registrations in unconfirmed state"
+msgstr ""
+
+#. module: event
+#: model:ir.actions.act_window,help:event.act_event_course_2_course_material
+msgid "<p class=\"oe_view_nocontent_create\">\n"
+"            Click to create a new material for this course.\n"
+"          </p>\n"
+"        "
+msgstr ""
+
+#. module: event
 #: view:event.event:0
 #: view:report.event.registration:0
 msgid "My Events"
+msgstr ""
+
+#. module: event
+#: view:event.course.material:0
+msgid "Display all material which are not obsolete"
+msgstr ""
+
+#. module: event
+#: view:event.participation.group:0
+#: view:event.seance:0
+#: field:event.seance,group_id:0
+msgid "Group"
+msgstr ""
+
+#. module: event
+#: field:event.event,user_id:0
+msgid "Responsible User"
+msgstr ""
+
+#. module: event
+#: field:event.seance,resource_participation_ids:0
+msgid "Resource Participation"
+msgstr ""
+
+#. module: event
+#: field:event.constraint,name:0
+msgid "Constraint Name"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+msgid "Type the course content description here..."
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+#: field:event.event,state:0
+#: field:event.participation.take.presence.wizard,status:0
+#: view:event.registration:0
+#: field:event.registration,state:0
+msgid "Status"
+msgstr ""
+
+#. module: event
+#: model:ir.ui.menu,name:event.menu_action_event_customer
+msgid "Customers"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:235
+#, python-format
+msgid "Content '%s' is divided, it should have at least 2 groups"
+msgstr ""
+
+#. module: event
+#: selection:report.event.registration,month:0
+msgid "June"
+msgstr ""
+
+#. module: event
+#: help:event.type,default_reply_to:0
+msgid "The email address of the organizer which is put in the 'Reply-To' of all emails sent automatically at event or registrations confirmation. You can also put your email address of your mail gateway if you use one."
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_event_content
+msgid " Event Content "
+msgstr ""
+
+#. module: event
+#: view:event.participation:0
+#: field:event.participation,seance_id:0
+#: view:event.seance:0
+#: field:report.event.seance,seance_id:0
+msgid "Seance"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:550
+#, python-format
+msgid "You could only modify seance duration or begin date on draft seance"
+msgstr ""
+
+#. module: event
+#: field:res.partner,room_max_seats:0
+msgid "Max seats"
+msgstr ""
+
+#. module: event
+#: selection:event.course,state:0
+#: selection:event.course.material,state:0
+msgid "Under review"
+msgstr ""
+
+#. module: event
+#: selection:report.event.registration,month:0
+msgid "October"
+msgstr ""
+
+#. module: event
+#: view:event.constraint:0
+msgid "Event Constraint"
+msgstr ""
+
+#. module: event
+#: view:event.seance.type:0
+msgid "Limits"
+msgstr ""
+
+#. module: event
+#: field:event.course,message_summary:0
+#: field:event.course.material,message_summary:0
+#: field:event.event,message_summary:0
+#: field:event.participation,message_summary:0
+#: field:event.registration,message_summary:0
+#: field:event.seance,message_summary:0
+msgid "Summary"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event.py:187
+#, python-format
+msgid "You have already set a registration for this event as 'Attended'. Please reset it to draft if you want to cancel this event."
+msgstr ""
+
+#. module: event
+#: field:event.type,default_content_planification:0
+msgid "Content planification mode"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Open preplanning"
+msgstr ""
+
+#. module: event
+#: field:event.event.preplanning,children_ids:0
+msgid "Children Events"
+msgstr ""
+
+#. module: event
+#: view:event.participation:0
+#: field:event.participation,purchase_qty:0
+msgid "Quantity"
+msgstr ""
+
+#. module: event
+#: field:event.content.module,date_end:0
+#: field:event.event.preplanning,date_end:0
+msgid "End date"
+msgstr ""
+
+#. module: event
+#: field:event.content,slot_count:0
+msgid "Slot count"
+msgstr ""
+
+#. module: event
+#: selection:event.constraint,category_mode:0
+msgid "All categories"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event.py:151
+#, python-format
+msgid "Trying to use a non-template event as template one"
+msgstr ""
+
+#. module: event
+#: view:report.event.resource:0
+msgid "Between Dates"
+msgstr ""
+
+#. module: event
+#: selection:event.seance,state:0
+msgid "In Progress"
+msgstr ""
+
+#. module: event
+#: view:event.registration:0
+msgid "Set To Unconfirmed"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+#: field:event.event,is_subscribed:0
+msgid "Subscribed"
+msgstr ""
+
+#. module: event
+#: view:event.constraint:0
+#: selection:event.constraint,applies_to:0
+#: field:event.content,speaker_id:0
+#: field:event.course,speaker_id:0
+#: field:event.course.speakerinfo,speaker_id:0
+#: view:event.participation:0
+#: selection:event.participation,role:0
+#: field:event.participation.group,speaker_id:0
+#: view:event.seance:0
+#: view:report.event.registration:0
+#: field:report.event.registration,speaker_id:0
+#: selection:report.event.resource,resource_type:0
+#: view:report.event.seance:0
+#: field:report.event.seance,speaker_id:0
+#: model:res.groups,name:event.group_event_professor
+#: field:res.partner,speaker:0
+msgid "Speaker"
+msgstr ""
+
+#. module: event
+#: field:report.event.registration,name_registration:0
+msgid "Participant / Contact Name"
+msgstr ""
+
+#. module: event
+#: view:event.course.material:0
+msgid "Notes"
+msgstr ""
+
+#. module: event
+#: view:report.event.registration:0
+msgid "Events which are in confirm state"
+msgstr ""
+
+#. module: event
+#: field:event.content,remaining_duration:0
+msgid "Remaining Duration"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+#: view:event.type:0
+#: field:event.type,name:0
+#: view:report.event.registration:0
+#: field:report.event.registration,event_type:0
+msgid "Event Type"
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_event_course_speakerinfo
+msgid "event.course.speakerinfo"
+msgstr ""
+
+#. module: event
+#: help:event.participation.group,speaker_id:0
+msgid "Default speaker assigned to seances of this group"
+msgstr ""
+
+#. module: event
+#: field:report.event.resource,reserved_time:0
+msgid "Reserved"
+msgstr ""
+
+#. module: event
+#: sql_constraint:event.seance:0
+msgid "You have to specify a begin date when leaving the draft state"
+msgstr ""
+
+#. module: event
+#: model:ir.actions.act_window,name:event.action_event_leaves
+msgid "Event non-working days"
+msgstr ""
+
+#. module: event
+#: field:event.seance.type,speaker_min_required:0
+msgid "Minimum Speakers required"
+msgstr ""
+
+#. module: event
+#: view:event.content:0
+msgid "Content & Planning"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:880
+#, python-format
+msgid "Only draft and cancelled participation can be unlinked. Check that there is no manual resource assignment, that should be cancelled manually."
 msgstr ""
 
 #. module: event
@@ -32,23 +671,6 @@ msgid "# of Participations"
 msgstr ""
 
 #. module: event
-#: field:event.event,main_speaker_id:0
-msgid "Main Speaker"
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-#: view:event.registration:0
-#: view:report.event.registration:0
-msgid "Group By..."
-msgstr ""
-
-#. module: event
-#: field:event.event,register_min:0
-msgid "Minimum Registrations"
-msgstr ""
-
-#. module: event
 #: help:event.event,register_min:0
 msgid "You can for each event define a minimum registration level. If you do not enough registrations you are not able to confirm your event. (put 0 to ignore this rule )"
 msgstr ""
@@ -59,54 +681,30 @@ msgid "Registration Date"
 msgstr ""
 
 #. module: event
-#: field:event.event,type:0
-msgid "Type of Event"
-msgstr ""
-
-#. module: event
-#: model:event.event,name:event.event_0
-msgid "Concert of Bon Jovi"
-msgstr ""
-
-#. module: event
-#: view:event.registration:0
-#: selection:event.registration,state:0
-#: selection:report.event.registration,registration_state:0
-msgid "Attended"
-msgstr ""
-
-#. module: event
 #: selection:report.event.registration,month:0
 msgid "March"
 msgstr ""
 
 #. module: event
-#: view:event.registration:0
-msgid "Send Email"
+#: view:event.event:0
+msgid "Schedule"
 msgstr ""
 
 #. module: event
-#: field:event.event,company_id:0
-#: field:event.registration,company_id:0
-#: view:report.event.registration:0
-#: field:report.event.registration,company_id:0
-msgid "Company"
+#: help:res.partner,room:0
+msgid "Check this box if this contact address could be used as room location"
 msgstr ""
 
 #. module: event
-#: field:event.event,email_confirmation_id:0
-#: field:event.type,default_email_event:0
-msgid "Event Confirmation Email"
+#: code:addons/event/event_seance.py:1682
+#, python-format
+msgid "You have to subscribe to one and only one group for each event content"
 msgstr ""
 
 #. module: event
-#: field:event.type,default_registration_max:0
-msgid "Default Maximum Registration"
-msgstr ""
-
-#. module: event
-#: view:report.event.registration:0
-msgid "Display"
+#: code:addons/event/event.py:198
+#, python-format
+msgid "The total of confirmed registration for the event '%s' does not meet the expected minimum/maximum. Please reconsider those limits before going further."
 msgstr ""
 
 #. module: event
@@ -115,52 +713,38 @@ msgid "Available Registrations"
 msgstr ""
 
 #. module: event
-#: view:event.registration:0
-#: model:ir.model,name:event.model_event_registration
-msgid "Event Registration"
+#: view:report.event.resource:0
+msgid "This Week"
 msgstr ""
 
 #. module: event
-#: model:ir.module.category,description:event.module_category_event_management
-msgid "Helps you manage your Events."
+#: view:event.course:0
+msgid "Mark as Unreviewed"
 msgstr ""
 
 #. module: event
-#: view:report.event.registration:0
-msgid "Day"
+#: view:event.seance.type:0
+msgid "Purchase"
 msgstr ""
 
 #. module: event
-#: view:report.event.registration:0
-msgid "Event on Registration"
+#: field:res.partner,event_assignment_mode:0
+msgid "Assignment Mode"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-msgid "Confirmed events"
-msgstr ""
-
-#. module: event
-#: view:event.event:0
+#: view:res.partner:0
 msgid "ZIP"
-msgstr ""
-
-#. module: event
-#: view:report.event.registration:0
-msgid "Event Beginning Date"
-msgstr ""
-
-#. module: event
-#: model:ir.actions.act_window,name:event.action_report_event_registration
-#: model:ir.model,name:event.model_report_event_registration
-#: model:ir.ui.menu,name:event.menu_report_event_registration
-#: view:report.event.registration:0
-msgid "Events Analysis"
 msgstr ""
 
 #. module: event
 #: help:event.type,default_registration_max:0
 msgid "It will select this default maximum value when you choose this event"
+msgstr ""
+
+#. module: event
+#: view:res.partner:0
+msgid "Suppliers"
 msgstr ""
 
 #. module: event
@@ -170,226 +754,125 @@ msgid "Register"
 msgstr ""
 
 #. module: event
-#: field:event.event,message_ids:0
-#: field:event.registration,message_ids:0
-msgid "Messages"
-msgstr ""
-
-#. module: event
+#: code:addons/event/res_partner.py:96
 #: view:event.event:0
 #: field:event.event,registration_ids:0
+#: field:event.participation.group,registration_ids:0
 #: model:ir.actions.act_window,name:event.act_event_list_register_event
 #: model:ir.actions.act_window,name:event.action_registration
 #: model:ir.ui.menu,name:event.menu_action_registration
 #: view:res.partner:0
+#, python-format
 msgid "Registrations"
 msgstr ""
 
 #. module: event
-#: code:addons/event/event.py:89
-#: code:addons/event/event.py:100
-#: code:addons/event/event.py:355
-#, python-format
-msgid "Error!"
+#: field:event.event,content_planification:0
+msgid "Content Planification"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-msgid "Confirm Event"
+#: field:event.participation,presence:0
+msgid "Presence"
 msgstr ""
 
 #. module: event
-#: view:board.board:0
-#: model:ir.actions.act_window,name:event.act_event_view
-msgid "Next Events"
+#: help:event.seance.type,included_into_analysis:0
+msgid "Does this type of seance be included into 'Event Seance Report'?"
 msgstr ""
 
 #. module: event
-#: selection:event.event,state:0
-#: selection:event.registration,state:0
-#: selection:report.event.registration,event_state:0
-#: selection:report.event.registration,registration_state:0
-msgid "Cancelled"
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-msgid "ticket"
-msgstr ""
-
-#. module: event
-#: model:event.event,name:event.event_1
-msgid "Opera of Verdi"
-msgstr ""
-
-#. module: event
-#: help:event.event,message_unread:0
-#: help:event.registration,message_unread:0
-msgid "If checked new messages require your attention."
-msgstr ""
-
-#. module: event
-#: view:report.event.registration:0
-#: field:report.event.registration,registration_state:0
-msgid "Registration State"
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-msgid "tickets"
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-msgid "Street..."
+#: model:res.groups,name:event.group_event_planning
+msgid "Planning"
 msgstr ""
 
 #. module: event
 #: view:res.partner:0
-msgid "False"
+msgid "[('is_company','=',0),('room','=',False),('equipment','=',False)]"
 msgstr ""
 
 #. module: event
-#: field:event.registration,event_end_date:0
-msgid "Event End Date"
-msgstr ""
-
-#. module: event
-#: help:event.event,message_summary:0
-#: help:event.registration,message_summary:0
-msgid "Holds the Chatter summary (number of messages, ...). This summary is directly in html format in order to be inserted in kanban views."
-msgstr ""
-
-#. module: event
-#: view:report.event.registration:0
-msgid "Registrations in confirmed or done state"
-msgstr ""
-
-#. module: event
-#: code:addons/event/event.py:106
-#: code:addons/event/event.py:108
-#, python-format
-msgid "Warning!"
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-#: view:event.registration:0
-msgid "Registration"
-msgstr ""
-
-#. module: event
-#: view:event.registration:0
-#: field:event.registration,partner_id:0
-#: model:ir.model,name:event.model_res_partner
-msgid "Partner"
-msgstr ""
-
-#. module: event
-#: help:event.type,default_registration_min:0
-msgid "It will select this default minimum value when you choose this event"
-msgstr ""
-
-#. module: event
-#: model:ir.model,name:event.model_event_type
-msgid " Event Type "
-msgstr ""
-
-#. module: event
+#: field:event.event.estimate_end_date.wizard,event_id:0
 #: view:event.registration:0
 #: field:event.registration,event_id:0
 #: model:ir.model,name:event.model_event_event
 #: view:report.event.registration:0
 #: field:report.event.registration,event_id:0
+#: view:report.event.seance:0
+#: field:report.event.seance,event_id:0
 #: view:res.partner:0
+#: field:resource.calendar.leaves,event_id:0
 msgid "Event"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-#: selection:event.event,state:0
-#: view:event.registration:0
-#: selection:event.registration,state:0
-#: selection:report.event.registration,event_state:0
-#: selection:report.event.registration,registration_state:0
-msgid "Confirmed"
+#: field:event.content,subject_id:0
+#: view:event.course:0
+#: field:event.course,subject_id:0
+#: field:event.event,subject_id:0
+#: field:event.seance,subject_id:0
+msgid "Subject"
 msgstr ""
 
 #. module: event
-#: view:event.registration:0
-msgid "Participant"
+#: model:ir.actions.act_window,name:event.action_report_event_seance
+#: model:ir.ui.menu,name:event.menu_report_event_seance
+msgid "Events Seances"
 msgstr ""
 
 #. module: event
-#: view:event.registration:0
+#: field:event.seance.type,equipment_product_id:0
+msgid "Equipement Product"
+msgstr ""
+
+#. module: event
+#: view:event.course.subject:0
+msgid "Course Subject"
+msgstr ""
+
+#. module: event
 #: view:report.event.registration:0
-msgid "Confirm"
+msgid "Show Confirmed Registrations"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-msgid "Organized by"
+#: view:res.partner:0
+msgid "Tags..."
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-msgid "Register with this event"
+#: view:event.content:0
+msgid "Dispatch registration between groups"
 msgstr ""
 
 #. module: event
-#: help:event.type,default_email_registration:0
-msgid "It will select this default confirmation registration mail value when you choose this event"
+#: field:event.constraint,type:0
+#: field:event.content,type_id:0
+#: view:event.seance:0
+#: field:event.seance,type_id:0
+#: field:report.event.resource,resource_type:0
+#: field:report.event.seance,type_id:0
+msgid "Type"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-msgid "Only"
+#: view:event.course:0
+msgid "Display all courses which are not obsolete"
 msgstr ""
 
 #. module: event
-#: field:event.event,message_follower_ids:0
-#: field:event.registration,message_follower_ids:0
-msgid "Followers"
+#: field:event.event.preplanning,event_id:0
+msgid "Event Id"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-msgid "Location"
+#: view:event.seance:0
+msgid "Resource Assignments"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-#: field:event.event,message_unread:0
-#: view:event.registration:0
-#: field:event.registration,message_unread:0
-msgid "Unread Messages"
-msgstr ""
-
-#. module: event
-#: view:event.registration:0
-#: view:report.event.registration:0
-msgid "New"
-msgstr ""
-
-#. module: event
-#: field:event.event,register_current:0
-msgid "Confirmed Registrations"
-msgstr ""
-
-#. module: event
-#: field:event.registration,email:0
-msgid "Email"
-msgstr ""
-
-#. module: event
-#: code:addons/event/event.py:329
-#, python-format
-msgid "New registration confirmed: %s."
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-msgid "Upcoming"
+#: field:event.seance.type,room_required:0
+msgid "Room Required"
 msgstr ""
 
 #. module: event
@@ -404,30 +887,34 @@ msgid "Event Responsible"
 msgstr ""
 
 #. module: event
+#: view:event.course:0
+msgid "Material"
+msgstr ""
+
+#. module: event
 #: view:event.event:0
 #: view:event.registration:0
-#: view:res.partner:0
 msgid "Cancel Registration"
 msgstr ""
 
 #. module: event
-#: selection:report.event.registration,month:0
-msgid "July"
+#: field:event.seance,equipments_ok:0
+msgid "Equipment Confirmed"
 msgstr ""
 
 #. module: event
-#: field:event.event,reply_to:0
-msgid "Reply-To Email"
+#: view:event.seance:0
+msgid "Stop seance"
 msgstr ""
 
 #. module: event
-#: view:event.registration:0
-msgid "Confirmed registrations"
+#: model:ir.model,name:event.model_event_seance_type
+msgid "event.seance.type"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-msgid "Starting Date"
+#: view:event.seance:0
+msgid "Inprogress"
 msgstr ""
 
 #. module: event
@@ -436,23 +923,18 @@ msgid "Event Organization"
 msgstr ""
 
 #. module: event
-#: view:event.confirm:0
-msgid "Confirm Anyway"
+#: field:event.constraint,category_mode:0
+msgid "Category Mode"
 msgstr ""
 
 #. module: event
-#: field:report.event.registration,nbevent:0
-msgid "Number Of Events"
-msgstr ""
-
-#. module: event
-#: help:event.event,main_speaker_id:0
-msgid "Speaker who will be giving speech at the event."
+#: help:event.course,description:0
+msgid "Some notes on the course"
 msgstr ""
 
 #. module: event
 #: view:event.event:0
-msgid "Cancel Event"
+msgid "Describe here the event..."
 msgstr ""
 
 #. module: event
@@ -462,13 +944,14 @@ msgid "Events Filling Status"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-msgid "Event Category"
+#: view:event.constraint:0
+#: selection:event.constraint,mode:0
+msgid "Soft"
 msgstr ""
 
 #. module: event
-#: field:event.event,register_prospect:0
-msgid "Unconfirmed Registrations"
+#: view:event.course:0
+msgid "Delete"
 msgstr ""
 
 #. module: event
@@ -477,30 +960,8 @@ msgid "Open Event Menu"
 msgstr ""
 
 #. module: event
-#: view:report.event.registration:0
-#: field:report.event.registration,event_state:0
-msgid "Event State"
-msgstr ""
-
-#. module: event
-#: field:event.registration,log_ids:0
-msgid "Logs"
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-#: field:event.event,state_id:0
-msgid "State"
-msgstr ""
-
-#. module: event
 #: selection:report.event.registration,month:0
 msgid "September"
-msgstr ""
-
-#. module: event
-#: selection:report.event.registration,month:0
-msgid "December"
 msgstr ""
 
 #. module: event
@@ -509,100 +970,24 @@ msgid "Reference of the sales order which created the registration"
 msgstr ""
 
 #. module: event
-#: field:report.event.registration,draft_state:0
-msgid " # No of Draft Registrations"
-msgstr ""
-
-#. module: event
-#: field:event.event,email_registration_id:0
-#: field:event.type,default_email_registration:0
-msgid "Registration Confirmation Email"
-msgstr ""
-
-#. module: event
-#: view:report.event.registration:0
-#: field:report.event.registration,month:0
-msgid "Month"
-msgstr ""
-
-#. module: event
-#: field:event.registration,date_closed:0
-msgid "Attended Date"
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-msgid "Finish Event"
-msgstr ""
-
-#. module: event
-#: view:event.registration:0
-msgid "Registrations in unconfirmed state"
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-msgid "Event Description"
-msgstr ""
-
-#. module: event
-#: field:event.event,date_begin:0
-msgid "Start Date"
-msgstr ""
-
-#. module: event
-#: view:event.confirm:0
-msgid "or"
-msgstr ""
-
-#. module: event
-#: help:res.partner,speaker:0
-msgid "Check this box if this contact is a speaker."
-msgstr ""
-
-#. module: event
-#: code:addons/event/event.py:108
-#, python-format
-msgid "No Tickets Available!"
-msgstr ""
-
-#. module: event
-#: help:event.event,state:0
-msgid "If event is created, the status is 'Draft'.If event is confirmed for the particular dates the status is set to 'Confirmed'. If the event is over, the status is set to 'Done'.If event is cancelled the status is set to 'Cancelled'."
-msgstr ""
-
-#. module: event
-#: model:ir.actions.act_window,help:event.action_event_view
-msgid "<p class=\"oe_view_nocontent_create\">\n"
-"               Click to add a new event.\n"
-"             </p><p>\n"
-"               OpenERP helps you schedule and efficiently organize your events:\n"
-"               track subscriptions and participations, automate the confirmation emails,\n"
-"               sell tickets, etc.\n"
-"             </p>\n"
-"           "
-msgstr ""
-
-#. module: event
 #: help:event.event,register_max:0
 msgid "You can for each event define a maximum registration level. If you have too much registrations you are not able to confirm your event. (put 0 to ignore this rule )"
 msgstr ""
 
 #. module: event
-#: code:addons/event/event.py:106
+#: code:addons/event/resource.py:51
 #, python-format
-msgid "Only %d Seats are Available!"
+msgid "This event"
 msgstr ""
 
 #. module: event
-#: code:addons/event/event.py:100
-#, python-format
-msgid "The total of confirmed registration for the event '%s' does not meet the expected minimum/maximum. Please reconsider those limits before going further."
+#: field:event.constraint,applies_to:0
+msgid "Applies To"
 msgstr ""
 
 #. module: event
-#: help:event.event,email_confirmation_id:0
-msgid "If you set an email template, each participant will receive this email announcing the confirmation of the event."
+#: view:event.seance:0
+msgid "Resources Assignments"
 msgstr ""
 
 #. module: event
@@ -611,87 +996,28 @@ msgid "Events Filling By Status"
 msgstr ""
 
 #. module: event
-#: selection:report.event.registration,event_state:0
-#: selection:report.event.registration,registration_state:0
-msgid "Draft"
+#: view:event.seance:0
+#: field:event.seance,participant_ids:0
+#: model:ir.actions.act_window,name:event.action_seance_2_participant_link
+msgid "Participants"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-msgid "Events in New state"
+#: field:event.event,has_program:0
+msgid "Program"
 msgstr ""
 
 #. module: event
-#: view:report.event.registration:0
-msgid "Events which are in New state"
+#: help:event.seance.type,manual_participation:0
+msgid "Check if you want to manually create participations for this type of seances"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-#: model:ir.actions.act_window,name:event.action_event_view
-#: model:ir.actions.act_window,name:event.open_board_associations_manager
-#: model:ir.module.category,name:event.module_category_event_management
-#: model:ir.ui.menu,name:event.event_main_menu
-#: model:ir.ui.menu,name:event.menu_board_associations_manager
-#: model:ir.ui.menu,name:event.menu_event_event
-#: model:ir.ui.menu,name:event.menu_reporting_events
-#: view:res.partner:0
-msgid "Events"
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-#: field:event.event,state:0
-#: view:event.registration:0
-#: field:event.registration,state:0
-msgid "Status"
-msgstr ""
-
-#. module: event
-#: field:event.event,city:0
-msgid "city"
-msgstr ""
-
-#. module: event
-#: selection:report.event.registration,month:0
-msgid "August"
-msgstr ""
-
-#. module: event
-#: field:event.event,zip:0
-msgid "zip"
-msgstr ""
-
-#. module: event
+#: field:event.content,group_ids:0
+#: field:event.registration,event_has_manual_participation:0
 #: field:res.partner,event_ids:0
 #: field:res.partner,event_registration_ids:0
 msgid "unknown"
-msgstr ""
-
-#. module: event
-#: field:event.event,street2:0
-msgid "Street2"
-msgstr ""
-
-#. module: event
-#: selection:report.event.registration,month:0
-msgid "June"
-msgstr ""
-
-#. module: event
-#: help:event.type,default_reply_to:0
-msgid "The email address of the organizer which is put in the 'Reply-To' of all emails sent automatically at event or registrations confirmation. You can also put your email address of your mail gateway if you use one."
-msgstr ""
-
-#. module: event
-#: help:event.event,message_ids:0
-#: help:event.registration,message_ids:0
-msgid "Messages and communication history"
-msgstr ""
-
-#. module: event
-#: field:event.registration,phone:0
-msgid "Phone"
 msgstr ""
 
 #. module: event
@@ -705,35 +1031,18 @@ msgid "\n"
 msgstr ""
 
 #. module: event
+#: field:event.course,message_is_follower:0
+#: field:event.course.material,message_is_follower:0
 #: field:event.event,message_is_follower:0
+#: field:event.participation,message_is_follower:0
 #: field:event.registration,message_is_follower:0
+#: field:event.seance,message_is_follower:0
 msgid "Is a Follower"
 msgstr ""
 
 #. module: event
-#: field:event.registration,user_id:0
-#: model:res.groups,name:event.group_event_user
-msgid "User"
-msgstr ""
-
-#. module: event
-#: view:event.confirm:0
-msgid "Warning: This Event has not reached its Minimum Registration Limit. Are you sure you want to confirm it?"
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-msgid "(confirmed:"
-msgstr ""
-
-#. module: event
-#: view:event.registration:0
-msgid "My Registrations"
-msgstr ""
-
-#. module: event
-#: selection:report.event.registration,month:0
-msgid "November"
+#: field:event.participation,date:0
+msgid "Date"
 msgstr ""
 
 #. module: event
@@ -742,13 +1051,28 @@ msgid "Extended Filters..."
 msgstr ""
 
 #. module: event
-#: selection:report.event.registration,month:0
-msgid "October"
+#: view:event.course.material:0
+msgid "Data"
 msgstr ""
 
 #. module: event
-#: selection:report.event.registration,month:0
-msgid "January"
+#: field:event.content,lang_id:0
+#: view:event.course:0
+#: field:event.course,lang_id:0
+#: field:event.event,lang_id:0
+#: field:event.seance,lang_id:0
+msgid "Language"
+msgstr ""
+
+#. module: event
+#: selection:event.course,state:0
+#: selection:event.course.material,state:0
+msgid "Deprecated"
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_res_company
+msgid "Companies"
 msgstr ""
 
 #. module: event
@@ -758,35 +1082,862 @@ msgstr ""
 
 #. module: event
 #: view:event.event:0
-#: view:event.registration:0
-#: view:res.partner:0
-msgid "Confirm Registration"
-msgstr ""
-
-#. module: event
-#: code:addons/event/event.py:89
-#, python-format
-msgid "You have already set a registration for this event as 'Attended'. Please reset it to draft if you want to cancel this event."
-msgstr ""
-
-#. module: event
-#: view:res.partner:0
-msgid "Date"
+msgid "(recompute seances)"
 msgstr ""
 
 #. module: event
 #: view:event.event:0
-msgid "Email Configuration"
+msgid "Events still in progress as of today"
 msgstr ""
 
 #. module: event
-#: field:event.type,default_registration_min:0
-msgid "Default Minimum Registration"
+#: view:event.course.material:0
+msgid "Attached To"
 msgstr ""
 
 #. module: event
-#: field:event.event,address_id:0
-msgid "Location Address"
+#: view:res.partner:0
+msgid "External Resources"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:894
+#, python-format
+msgid "No Presence Arrival & Departure Provided"
+msgstr ""
+
+#. module: event
+#: field:report.event.resource,effective_time:0
+msgid "Effective Time"
+msgstr ""
+
+#. module: event
+#: view:event.constraint:0
+#: model:ir.actions.act_window,name:event.action_event_constraint
+msgid "Event Constraints"
+msgstr ""
+
+#. module: event
+#: view:event.constraint:0
+#: selection:event.constraint,applies_to:0
+#: view:event.participation:0
+#: selection:event.participation,role:0
+#: selection:report.event.resource,resource_type:0
+#: view:res.partner:0
+#: field:res.partner,equipment:0
+msgid "Equipment"
+msgstr ""
+
+#. module: event
+#: field:event.participation,presence_summary:0
+msgid "Presence Summary"
+msgstr ""
+
+#. module: event
+#: field:event.course,state:0
+#: field:event.course.material,state:0
+#: view:event.participation:0
+#: field:event.participation,state:0
+#: view:event.seance:0
+#: field:event.seance,state:0
+#: view:res.partner:0
+msgid "State"
+msgstr ""
+
+#. module: event
+#: field:event.event,reply_to:0
+msgid "Reply-To Email"
+msgstr ""
+
+#. module: event
+#: view:event.confirm:0
+#: view:event.participation:0
+#: view:event.participation.take.presence.wizard:0
+#: view:event.seance:0
+#: selection:event.seance,state:0
+msgid "Cancel"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "New Event based on Template"
+msgstr ""
+
+#. module: event
+#: field:event.participation.group,name:0
+msgid "Group name"
+msgstr ""
+
+#. module: event
+#: field:event.course.material,res_id:0
+msgid "Resource ID"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+#: view:event.event:0
+#: view:event.participation:0
+#: view:event.seance:0
+msgid "Information"
+msgstr ""
+
+#. module: event
+#: model:core.calendar,name:event.core_calendar_event_seance
+msgid "Cours"
+msgstr ""
+
+#. module: event
+#: view:event.seance:0
+msgid "Related Events"
+msgstr ""
+
+#. module: event
+#: field:event.course,price:0
+#: field:event.participation,purchase_price:0
+msgid "Purchase Price"
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_event_event_estimate_end_date_wizard
+msgid "event.event.estimate_end_date.wizard"
+msgstr ""
+
+#. module: event
+#: selection:event.participation,presence:0
+msgid "Late"
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_helper_groupby_many2many
+msgid "helper.groupby_many2many"
+msgstr ""
+
+#. module: event
+#: view:event.content:0
+msgid "Default Speaker"
+msgstr ""
+
+#. module: event
+#: help:res.partner,external:0
+msgid "This resource is an external resource"
+msgstr ""
+
+#. module: event
+#: view:event.participation:0
+#: field:event.seance,name:0
+msgid "Seance Name"
+msgstr ""
+
+#. module: event
+#: field:event.event,register_max:0
+#: field:report.event.registration,register_max:0
+msgid "Maximum Registrations"
+msgstr ""
+
+#. module: event
+#: help:event.content,speaker_id:0
+msgid "Default speaker assigned to created seances related to this content"
+msgstr ""
+
+#. module: event
+#: field:event.course.speakerinfo,price:0
+msgid "Price"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "No ticket available."
+msgstr ""
+
+#. module: event
+#: code:addons/event/report/report_event_resource.py:115
+#, python-format
+msgid "Invalid date interval provided"
+msgstr ""
+
+#. module: event
+#: help:event.content,remaining_duration:0
+msgid "Remaining duration to be scheduled"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:984
+#, python-format
+msgid "%d / %d"
+msgstr ""
+
+#. module: event
+#: field:event.event,reference:0
+msgid "Internal Reference"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+#: selection:event.event,state:0
+#: selection:event.registration,state:0
+msgid "Unconfirmed"
+msgstr ""
+
+#. module: event
+#: selection:event.participation,presence:0
+msgid "Absent"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+#: field:event.event,name:0
+#: field:event.event.preplanning,name:0
+#: field:event.registration,name:0
+msgid "Name"
+msgstr ""
+
+#. module: event
+#: view:event.participation:0
+msgid "Sub-Total"
+msgstr ""
+
+#. module: event
+#: help:event.type,default_email_confirmation_id:0
+msgid "It will select this default confirmation event mail value when you choose this event"
+msgstr ""
+
+#. module: event
+#: field:event.constraint,mode:0
+msgid "Mode"
+msgstr ""
+
+#. module: event
+#: field:event.course,code:0
+msgid "Internal reference"
+msgstr ""
+
+#. module: event
+#: help:event.course,message_ids:0
+#: help:event.course.material,message_ids:0
+#: help:event.event,message_ids:0
+#: help:event.participation,message_ids:0
+#: help:event.registration,message_ids:0
+#: help:event.seance,message_ids:0
+msgid "Messages and communication history"
+msgstr ""
+
+#. module: event
+#: field:event.seance,speakers_ok:0
+msgid "Speakers Confirmed"
+msgstr ""
+
+#. module: event
+#: field:event.registration,event_begin_date:0
+#: field:report.event.registration,event_date:0
+msgid "Event Start Date"
+msgstr ""
+
+#. module: event
+#: view:report.event.registration:0
+msgid "Participant / Contact"
+msgstr ""
+
+#. module: event
+#: field:event.content,module_id:0
+#: view:event.seance:0
+#: field:event.seance,module_id:0
+msgid "Module"
+msgstr ""
+
+#. module: event
+#: help:event.event,reply_to:0
+msgid "The email address of the organizer is likely to be put here, with the effect to be in the 'Reply-To' of the mails sent automatically at event or registrations confirmation. You can also put the email address of your mail gateway if you use one."
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+#: model:ir.actions.act_window,name:event.act_register_event_partner
+msgid "Subscribe"
+msgstr ""
+
+#. module: event
+#: field:event.course,standard_price:0
+msgid "Cost"
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_event_course
+#: model:ir.model,name:event.model_event_course_material
+#: model:ir.model,name:event.model_event_seance
+msgid "Email Thread"
+msgstr ""
+
+#. module: event
+#: view:res.partner:0
+#: field:res.partner,room_ids:0
+msgid "Rooms"
+msgstr ""
+
+#. module: event
+#: field:event.event,speaker_confirmed:0
+msgid "Speaker Confirmed"
+msgstr ""
+
+#. module: event
+#: view:event.participation:0
+#: view:event.registration:0
+#: field:event.registration,participation_ids:0
+#: view:event.seance:0
+#: model:ir.actions.act_window,name:event.action_event_participation
+#: model:ir.actions.act_window,name:event.action_event_resource_participation
+#: model:ir.actions.act_window,name:event.action_registration_2_participation_link
+#: model:ir.ui.menu,name:event.menu_event_participant
+#: model:ir.ui.menu,name:event.menu_event_resource_participation
+msgid "Participations"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:166
+#: code:addons/event/event_seance.py:1034
+#: code:addons/event/event_seance.py:1041
+#: code:addons/event/event_seance.py:1048
+#: code:addons/event/event_seance.py:1608
+#: selection:event.participation,state:0
+#, python-format
+msgid "Error"
+msgstr ""
+
+#. module: event
+#: view:event.content:0
+#: view:event.course:0
+#: view:event.course.material:0
+#: view:event.event:0
+#: view:event.participation:0
+#: view:event.registration:0
+#: view:event.seance:0
+#: view:report.event.registration:0
+#: view:report.event.resource:0
+#: view:report.event.seance:0
+msgid "Group By..."
+msgstr ""
+
+#. module: event
+#: field:event.participation,role:0
+msgid "Role"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+#: selection:event.event,state:0
+#: field:event.event,template_id:0
+#: view:report.event.registration:0
+#: field:report.event.registration,template_id:0
+msgid "Template"
+msgstr ""
+
+#. module: event
+#: model:ir.actions.act_window,name:event.action_event_library_resource
+#: model:ir.ui.menu,name:event.menu_event_library_resource
+msgid "Resources"
+msgstr ""
+
+#. module: event
+#: view:event.registration:0
+#: selection:event.registration,state:0
+#: selection:report.event.registration,registration_state:0
+msgid "Attended"
+msgstr ""
+
+#. module: event
+#: field:event.participation.group,room_id:0
+#: view:event.seance:0
+#: field:event.seance,address_id:0
+#: view:res.partner:0
+msgid "Address"
+msgstr ""
+
+#. module: event
+#: field:event.course,message_unread:0
+#: field:event.course.material,message_unread:0
+#: view:event.event:0
+#: field:event.event,message_unread:0
+#: field:event.participation,message_unread:0
+#: view:event.registration:0
+#: field:event.registration,message_unread:0
+#: field:event.seance,message_unread:0
+msgid "Unread Messages"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:1608
+#, python-format
+msgid "You can only change groups when registration is not done"
+msgstr ""
+
+#. module: event
+#: field:event.seance,participant_max:0
+msgid "Participant Max"
+msgstr ""
+
+#. module: event
+#: field:event.event,email_confirmation_id:0
+#: field:event.type,default_email_confirmation_id:0
+msgid "Event Confirmation Email"
+msgstr ""
+
+#. module: event
+#: field:event.type,default_registration_max:0
+msgid "Default Maximum Registration"
+msgstr ""
+
+#. module: event
+#: view:event.participation.take.presence.wizard:0
+msgid "Update"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:927
+#, python-format
+msgid "No Presence Value Found"
+msgstr ""
+
+#. module: event
+#: model:ir.module.category,description:event.module_category_event_management
+msgid "Helps you manage your Events."
+msgstr ""
+
+#. module: event
+#: view:report.event.resource:0
+msgid "This Year"
+msgstr ""
+
+#. module: event
+#: view:event.seance:0
+#: view:report.event.seance:0
+msgid "Event Seances"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+msgid "Validate Course"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event.py:454
+#, python-format
+msgid "You must wait for the starting day of the event to do this action."
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_event_level
+msgid " Event Level "
+msgstr ""
+
+#. module: event
+#: view:event.event.estimate_end_date.wizard:0
+#: model:ir.actions.act_window,name:event.action_estimate_end_date_wizard
+msgid "Estimate End Date Wizard"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+msgid "Mark as Deprecated"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+#: field:event.course,level_id:0
+#: field:event.event,level_id:0
+msgid "Level"
+msgstr ""
+
+#. module: event
+#: model:ir.actions.act_window,name:event.action_report_event_registration
+#: model:ir.model,name:event.model_report_event_registration
+#: model:ir.ui.menu,name:event.menu_report_event_registration
+#: view:report.event.registration:0
+msgid "Events Analysis"
+msgstr ""
+
+#. module: event
+#: field:report.event.resource,leave_time:0
+msgid "Leaves"
+msgstr ""
+
+#. module: event
+#: view:event.event.preplanning:0
+msgid "=>"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Confirm Event"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+msgid "during"
+msgstr ""
+
+#. module: event
+#: help:res.partner,equipment:0
+msgid "Check this box if this contact can be used as a event equipment (like a beamer, ...)"
+msgstr ""
+
+#. module: event
+#: view:report.event.registration:0
+msgid "Display"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+msgid "hour(s)"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:1034
+#, python-format
+msgid "You can only add new content group on template and draft events"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+#: view:event.participation:0
+#: field:event.participation,registration_id:0
+#: view:event.registration:0
+msgid "Registration"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+msgid "Edit..."
+msgstr ""
+
+#. module: event
+#: view:event.course.material:0
+#: model:ir.actions.act_window,name:event.act_event_course_2_course_material
+#: model:ir.actions.act_window,name:event.action_event_course_material
+#: model:ir.ui.menu,name:event.menu_event_course_material
+msgid "Course Materials"
+msgstr ""
+
+#. module: event
+#: field:event.course,split_by:0
+msgid "Split by"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:1048
+#, python-format
+msgid "You can only remove a new content group on draft events"
+msgstr ""
+
+#. module: event
+#: view:event.seance.type:0
+#: field:event.seance.type,name:0
+#: view:report.event.seance:0
+msgid "Seance Type"
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_event_content_module
+msgid "event.content.module"
+msgstr ""
+
+#. module: event
+#: model:ir.ui.menu,name:event.menu_event_resources_root
+#: view:report.event.resource:0
+msgid "Event Resources"
+msgstr ""
+
+#. module: event
+#: view:report.event.seance:0
+#: field:report.event.seance,address_id:0
+msgid "Location"
+msgstr ""
+
+#. module: event
+#: view:res.partner:0
+msgid "Fax:"
+msgstr ""
+
+#. module: event
+#: view:res.partner:0
+msgid "Phone:"
+msgstr ""
+
+#. module: event
+#: field:res.company,slot_time_unit:0
+msgid "Slot time Unit"
+msgstr ""
+
+#. module: event
+#: field:event.course.subject,name:0
+msgid "Subject Name"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Schedule mode"
+msgstr ""
+
+#. module: event
+#: field:event.event,calendar_id:0
+msgid "Hours"
+msgstr ""
+
+#. module: event
+#: selection:event.course,state:0
+#: selection:event.course.material,state:0
+msgid "Unreviewed"
+msgstr ""
+
+#. module: event
+#: selection:report.event.registration,month:0
+msgid "July"
+msgstr ""
+
+#. module: event
+#: view:event.participation:0
+msgid "Room/Seat"
+msgstr ""
+
+#. module: event
+#: field:event.content,slot_info:0
+msgid "Info"
+msgstr ""
+
+#. module: event
+#: constraint:event.seance:0
+msgid "You have to specify a group for divided content"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:167
+#, python-format
+msgid "Slot unit duration (%s) must a multiple of %s"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+msgid "Settings"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Cancel Event"
+msgstr ""
+
+#. module: event
+#: view:event.event.estimate_end_date.wizard:0
+msgid "Close"
+msgstr ""
+
+#. module: event
+#: field:event.seance,participant_min:0
+msgid "Participant Min"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Event Category"
+msgstr ""
+
+#. module: event
+#: field:event.registration,log_ids:0
+msgid "Logs"
+msgstr ""
+
+#. module: event
+#: view:res.partner:0
+msgid "Speaker Partners"
+msgstr ""
+
+#. module: event
+#: view:event.constraint:0
+#: selection:event.constraint,mode:0
+msgid "Hard"
+msgstr ""
+
+#. module: event
+#: field:report.event.registration,draft_state:0
+msgid " # No of Draft Registrations"
+msgstr ""
+
+#. module: event
+#: view:report.event.registration:0
+#: field:report.event.registration,month:0
+msgid "Month"
+msgstr ""
+
+#. module: event
+#: help:event.event,has_program:0
+msgid "This event has a program"
+msgstr ""
+
+#. module: event
+#: field:event.event,date_begin:0
+msgid "Start Date"
+msgstr ""
+
+#. module: event
+#: view:event.content:0
+#: field:event.event,content_ids:0
+msgid "Contents"
+msgstr ""
+
+#. module: event
+#: field:event.seance,room_ok:0
+msgid "Room Confirmed"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "(configure event vacations)"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event.py:204
+#, python-format
+msgid "Only %d Seats are Available!"
+msgstr ""
+
+#. module: event
+#: model:ir.actions.act_window,name:event.action_report_event_resource
+#: model:ir.ui.menu,name:event.menu_report_event_resource
+msgid "Events Resources"
+msgstr ""
+
+#. module: event
+#: help:event.event,email_confirmation_id:0
+msgid "If you set an email template, each participant will receive this email announcing the confirmation of the event."
+msgstr ""
+
+#. module: event
+#: model:ir.actions.act_window,name:event.action_event_seance_type
+#: model:ir.ui.menu,name:event.menu_event_seance_type
+msgid "Type of Seances"
+msgstr ""
+
+#. module: event
+#: view:event.course.material:0
+#: field:event.course.material,attachment_id:0
+msgid "Attachment"
+msgstr ""
+
+#. module: event
+#: selection:event.seance,state:0
+msgid "Closed"
+msgstr ""
+
+#. module: event
+#: view:event.seance:0
+msgid "Set Planned"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event.py:170
+#: code:addons/event/res_partner.py:113
+#: field:event.content,event_ids:0
+#: view:event.event:0
+#: field:event.participation,seance_event_ids:0
+#: field:event.seance,event_ids:0
+#: model:ir.actions.act_window,name:event.action_event_view
+#: model:ir.actions.act_window,name:event.open_board_associations_manager
+#: model:ir.module.category,name:event.module_category_event_management
+#: model:ir.ui.menu,name:event.event_main_menu
+#: model:ir.ui.menu,name:event.menu_board_associations_manager
+#: model:ir.ui.menu,name:event.menu_event_event
+#: model:ir.ui.menu,name:event.menu_reporting_events
+#: view:res.partner:0
+#, python-format
+msgid "Events"
+msgstr ""
+
+#. module: event
+#: view:event.seance.type:0
+msgid "Seance Types"
+msgstr ""
+
+#. module: event
+#: field:report.event.resource,resource_name:0
+msgid "Resource Name"
+msgstr ""
+
+#. module: event
+#: field:event.registration,phone:0
+msgid "Phone"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+msgid "Material(s)"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Unsubscribe"
+msgstr ""
+
+#. module: event
+#: view:event.seance:0
+msgid "Start seance"
+msgstr ""
+
+#. module: event
+#: view:event.content:0
+#: view:event.participation.group:0
+#: field:event.registration,group_ids:0
+msgid "Groups"
+msgstr ""
+
+#. module: event
+#: view:event.confirm:0
+msgid "Warning: This Event has not reached its Minimum Registration Limit. Are you sure you want to confirm it?"
+msgstr ""
+
+#. module: event
+#: field:event.course,active:0
+msgid "Active"
+msgstr ""
+
+#. module: event
+#: field:event.seance,planned_week_date:0
+msgid "Planned Week Date"
+msgstr ""
+
+#. module: event
+#: view:report.event.resource:0
+msgid "Resource Type"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+#: view:event.registration:0
+msgid "Confirm Registration"
+msgstr ""
+
+#. module: event
+#: model:ir.ui.menu,name:event.menu_event_constraint
+msgid "Events Constraint"
+msgstr ""
+
+#. module: event
+#: help:event.content,room_id:0
+msgid "Default room assigned to created seances related to this content"
+msgstr ""
+
+#. module: event
+#: view:report.event.registration:0
+#: field:report.event.registration,event_state:0
+msgid "Event State"
+msgstr ""
+
+#. module: event
+#: view:report.event.registration:0
+msgid "Registrations in confirmed or done state"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+#: view:event.course.material:0
+#: view:event.event:0
+msgid "Current"
 msgstr ""
 
 #. module: event
@@ -807,44 +1958,32 @@ msgid "Attended the Event"
 msgstr ""
 
 #. module: event
-#: constraint:event.event:0
-msgid "Error ! Closing Date cannot be set before Beginning Date."
-msgstr ""
-
-#. module: event
-#: code:addons/event/event.py:355
-#, python-format
-msgid "You must wait for the starting day of the event to do this action."
-msgstr ""
-
-#. module: event
-#: field:event.event,user_id:0
-msgid "Responsible User"
-msgstr ""
-
-#. module: event
 #: selection:event.event,state:0
+#: selection:event.participation,state:0
+#: view:event.seance:0
+#: selection:event.seance,state:0
 #: selection:report.event.registration,event_state:0
 msgid "Done"
 msgstr ""
 
 #. module: event
-#: view:report.event.registration:0
-msgid "Show Confirmed Registrations"
-msgstr ""
-
-#. module: event
-#: view:event.confirm:0
-msgid "Cancel"
-msgstr ""
-
-#. module: event
-#: field:event.registration,reply_to:0
-msgid "Reply-to Email"
-msgstr ""
-
-#. module: event
 #: view:event.event:0
+msgid "TEMPLATE"
+msgstr ""
+
+#. module: event
+#: selection:event.course,state:0
+#: selection:event.course.material,state:0
+msgid "Validated"
+msgstr ""
+
+#. module: event
+#: view:event.seance:0
+msgid "Group:"
+msgstr ""
+
+#. module: event
+#: view:res.partner:0
 msgid "City"
 msgstr ""
 
@@ -855,58 +1994,58 @@ msgid "Your registration at ${object.event_id.name}"
 msgstr ""
 
 #. module: event
-#: view:event.registration:0
-msgid "Set To Unconfirmed"
-msgstr ""
-
-#. module: event
 #: view:event.event:0
-#: field:event.event,is_subscribed:0
-msgid "Subscribed"
+msgid "Set as Template"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-msgid "Unsubscribe"
+#: model:ir.model,name:event.model_resource_calendar_leaves
+msgid "Leave Detail"
 msgstr ""
 
 #. module: event
+#: field:event.course,user_id:0
 #: view:event.event:0
 #: view:event.registration:0
 msgid "Responsible"
 msgstr ""
 
 #. module: event
-#: view:report.event.registration:0
-msgid "Registration contact"
+#: view:event.content:0
+#: field:event.content,name:0
+#: field:event.participation.group,event_content_id:0
+#: view:event.seance:0
+#: field:event.seance,content_id:0
+#: view:report.event.seance:0
+#: field:report.event.seance,content_id:0
+msgid "Content"
 msgstr ""
 
 #. module: event
-#: view:report.event.registration:0
-#: field:report.event.registration,speaker_id:0
-#: field:res.partner,speaker:0
-msgid "Speaker"
+#: field:event.course.speakerinfo,price_from:0
+msgid "Price From"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-msgid "Upcoming events from today"
+#: field:event.participation,arrival_time:0
+#: field:event.participation.take.presence.wizard,arrival_time:0
+msgid "Arrival Time"
 msgstr ""
 
 #. module: event
-#: model:event.event,name:event.event_2
-msgid "Conference on ERP Business"
+#: field:event.course,material_note:0
+msgid "Note on Material"
 msgstr ""
 
 #. module: event
-#: model:ir.actions.act_window,name:event.act_event_view_registration
-#: model:mail.message.subtype,name:event.mt_event_registration
-msgid "New Registration"
+#: field:event.participation.group,is_default:0
+msgid "Is default?"
 msgstr ""
 
 #. module: event
-#: field:event.event,note:0
-msgid "Description"
+#: code:addons/event/event_seance.py:1328
+#, python-format
+msgid "This event cannot be set as a template because it have shared contents or existing seances linked to it"
 msgstr ""
 
 #. module: event
@@ -915,36 +2054,35 @@ msgid " # No of Confirmed Registrations"
 msgstr ""
 
 #. module: event
-#: field:report.event.registration,name_registration:0
-msgid "Participant / Contact Name"
+#: selection:event.course.speakerinfo,price_from:0
+msgid "Custom Price"
 msgstr ""
 
 #. module: event
-#: selection:report.event.registration,month:0
-msgid "May"
+#: field:event.course.speakerinfo,standard_price:0
+msgid "Custom Cost"
 msgstr ""
 
 #. module: event
-#: view:res.partner:0
-msgid "Events Registration"
+#: field:event.event.estimate_end_date.wizard,date_end:0
+msgid "End on"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-msgid "No ticket available."
+#: view:board.board:0
+#: model:ir.actions.act_window,name:event.act_event_view
+msgid "Next Events"
 msgstr ""
 
 #. module: event
-#: field:event.event,register_max:0
-#: field:report.event.registration,register_max:0
-msgid "Maximum Registrations"
+#: view:report.event.resource:0
+msgid "This Month"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-#: selection:event.event,state:0
-#: selection:event.registration,state:0
-msgid "Unconfirmed"
+#: field:event.participation.group,participant_count:0
+#: field:event.seance,participant_count:0
+msgid "# of participants"
 msgstr ""
 
 #. module: event
@@ -953,66 +2091,56 @@ msgid "End Date"
 msgstr ""
 
 #. module: event
-#: selection:report.event.registration,month:0
-msgid "February"
+#: field:report.event.resource,resource_id:0
+msgid "Resource"
 msgstr ""
 
 #. module: event
-#: view:board.board:0
-msgid "Association Dashboard"
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-#: field:event.event,name:0
-#: field:event.registration,name:0
-msgid "Name"
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-#: field:event.event,country_id:0
-msgid "Country"
-msgstr ""
-
-#. module: event
+#: view:event.constraint:0
+#: selection:event.constraint,applies_to:0
+#: field:event.content,room_id:0
+#: selection:event.participation,role:0
+#: selection:report.event.resource,resource_type:0
 #: view:res.partner:0
-msgid "Close Registration"
+#: field:res.partner,room:0
+msgid "Room"
 msgstr ""
 
 #. module: event
-#: field:event.registration,origin:0
-msgid "Source Document"
+#: view:event.content.module:0
+msgid "Modules"
 msgstr ""
 
 #. module: event
-#: selection:report.event.registration,month:0
-msgid "April"
+#: model:ir.actions.act_window,help:event.action_resource_calendar_form
+msgid "Define working hours and time table that could be scheduled to your events"
 msgstr ""
 
 #. module: event
-#: help:event.type,default_email_event:0
-msgid "It will select this default confirmation event mail value when you choose this event"
+#: code:addons/event/preplanning.py:49
+#, python-format
+msgid "Preplanning: %s"
 msgstr ""
 
 #. module: event
-#: view:report.event.registration:0
-msgid "Events which are in confirm state"
+#: field:event.content.module,name:0
+msgid "Module name"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-#: view:event.type:0
-#: field:event.type,name:0
-#: view:report.event.registration:0
-#: field:report.event.registration,event_type:0
-msgid "Event Type"
+#: help:event.content,type_id:0
+msgid "Default type of seance"
 msgstr ""
 
 #. module: event
-#: field:event.event,message_summary:0
-#: field:event.registration,message_summary:0
-msgid "Summary"
+#: field:event.registration,date_cancel:0
+msgid "Cancellation Date"
+msgstr ""
+
+#. module: event
+#: model:ir.actions.act_window,name:event.action_resource_calendar_leaves_form
+#: model:ir.ui.menu,name:event.menu_event_config_leaves
+msgid "Schedules - Leaves"
 msgstr ""
 
 #. module: event
@@ -1026,24 +2154,9 @@ msgid "Default Reply-To"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-msgid "available."
-msgstr ""
-
-#. module: event
-#: field:event.registration,event_begin_date:0
-#: field:report.event.registration,event_date:0
-msgid "Event Start Date"
-msgstr ""
-
-#. module: event
-#: view:report.event.registration:0
-msgid "Participant / Contact"
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-msgid "Current Registrations"
+#: model:ir.actions.act_window,name:event.action_event_course_subject
+#: model:ir.ui.menu,name:event.menu_event_config_course_subject
+msgid "Course Subjects"
 msgstr ""
 
 #. module: event
@@ -1057,24 +2170,739 @@ msgid "\n"
 msgstr ""
 
 #. module: event
-#: help:event.event,reply_to:0
-msgid "The email address of the organizer is likely to be put here, with the effect to be in the 'Reply-To' of the mails sent automatically at event or registrations confirmation. You can also put the email address of your mail gateway if you use one."
-msgstr ""
-
-#. module: event
-#: view:event.event:0
-#: model:ir.actions.act_window,name:event.act_register_event_partner
-msgid "Subscribe"
-msgstr ""
-
-#. module: event
 #: model:res.groups,name:event.group_event_manager
 msgid "Manager"
 msgstr ""
 
 #. module: event
-#: field:event.event,street:0
-msgid "Street"
+#: field:event.course,room_category_ids:0
+msgid "Prefered room types"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+msgid "In"
+msgstr ""
+
+#. module: event
+#: view:event.content:0
+#: field:event.content,duration:0
+#: field:event.course,duration:0
+#: field:event.participation,duration:0
+#: field:event.seance,date_end:0
+#: field:event.seance,duration:0
+#: field:report.event.seance,duration:0
+msgid "Duration"
+msgstr ""
+
+#. module: event
+#. openerp-web
+#: code:addons/event/static/src/js/event.js:236
+#: field:event.participation,purchase_subtotal:0
+#, python-format
+msgid "Total"
+msgstr ""
+
+#. module: event
+#: field:report.event.resource,id:0
+#: field:report.event.seance,id:0
+msgid "Id"
+msgstr ""
+
+#. module: event
+#: help:res.partner,speaker:0
+msgid "Check this box if this contact is a speaker."
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "No hours specified, OpenERP will consider 24/24 7/7 hours"
+msgstr ""
+
+#. module: event
+#: field:event.event,main_speaker_id:0
+#: field:event.seance,main_speaker_id:0
+msgid "Main Speaker"
+msgstr ""
+
+#. module: event
+#: help:event.event,state:0
+msgid "If event is created, the status is 'Draft'.If event is confirmed for the particular dates the status is set to 'Confirmed'. If the event is over, the status is set to 'Done'.If event is cancelled the status is set to 'Cancelled'."
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+#: field:event.course,name:0
+msgid "Course Name"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Organized by"
+msgstr ""
+
+#. module: event
+#: field:event.registration,origin:0
+msgid "Source Document"
+msgstr ""
+
+#. module: event
+#: field:event.content,slot_duration:0
+msgid "Slot duration"
+msgstr ""
+
+#. module: event
+#: selection:event.event,content_planification:0
+msgid "Linear"
+msgstr ""
+
+#. module: event
+#: field:event.event,company_id:0
+#: field:event.registration,company_id:0
+#: view:report.event.registration:0
+#: field:report.event.registration,company_id:0
+#: field:report.event.resource,company_id:0
+msgid "Company"
+msgstr ""
+
+#. module: event
+#: view:event.registration:0
+#: model:ir.model,name:event.model_event_registration
+msgid "Event Registration"
+msgstr ""
+
+#. module: event
+#: view:event.content:0
+msgid "Default room"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+msgid "Resources/Planification"
+msgstr ""
+
+#. module: event
+#: view:report.event.registration:0
+msgid "Event on Registration"
+msgstr ""
+
+#. module: event
+#: help:event.participation.group,room_id:0
+msgid "Default location assigned to seances of this group"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Confirmed events"
+msgstr ""
+
+#. module: event
+#: view:report.event.registration:0
+msgid "Event Beginning Date"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:1355
+#: selection:event.event,content_planification:0
+#: view:event.event.preplanning:0
+#, python-format
+msgid "Preplanning"
+msgstr ""
+
+#. module: event
+#: field:event.course,message_ids:0
+#: field:event.course.material,message_ids:0
+#: field:event.event,message_ids:0
+#: field:event.participation,message_ids:0
+#: field:event.registration,message_ids:0
+#: field:event.seance,message_ids:0
+msgid "Messages"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event.py:133
+#: code:addons/event/event.py:141
+#: code:addons/event/event.py:150
+#: code:addons/event/event.py:187
+#: code:addons/event/event.py:198
+#: code:addons/event/event.py:454
+#: code:addons/event/event_seance.py:549
+#: code:addons/event/event_seance.py:879
+#: code:addons/event/event_seance.py:893
+#: code:addons/event/event_seance.py:926
+#: code:addons/event/event_seance.py:943
+#: code:addons/event/event_seance.py:1140
+#: code:addons/event/event_seance.py:1327
+#: code:addons/event/event_seance.py:1411
+#: code:addons/event/event_seance.py:1479
+#: code:addons/event/report/report_event_resource.py:115
+#, python-format
+msgid "Error!"
+msgstr ""
+
+#. module: event
+#: help:event.course,material_note:0
+msgid "Some notes on the course materials"
+msgstr ""
+
+#. module: event
+#: view:res.partner:0
+msgid "Mobile:"
+msgstr ""
+
+#. module: event
+#: selection:event.event,state:0
+#: selection:event.participation,state:0
+#: selection:event.registration,state:0
+#: view:event.seance:0
+#: selection:report.event.registration,event_state:0
+#: selection:report.event.registration,registration_state:0
+msgid "Cancelled"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:328
+#, python-format
+msgid "Groups of %s"
+msgstr ""
+
+#. module: event
+#: view:report.event.registration:0
+#: field:report.event.registration,registration_state:0
+msgid "Registration State"
+msgstr ""
+
+#. module: event
+#: field:event.seance.type,speaker_product_id:0
+msgid "Speaker's Product"
+msgstr ""
+
+#. module: event
+#: field:event.course,color:0
+#: field:event.course.subject,color:0
+msgid "Color Index"
+msgstr ""
+
+#. module: event
+#: field:event.registration,event_end_date:0
+msgid "Event End Date"
+msgstr ""
+
+#. module: event
+#: selection:event.course.speakerinfo,price_from:0
+msgid "Course Price"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Program & Schedule"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+#: selection:event.event,state:0
+#: selection:event.participation,state:0
+#: view:event.registration:0
+#: selection:event.registration,state:0
+#: selection:event.seance,state:0
+#: selection:report.event.registration,event_state:0
+#: selection:report.event.registration,registration_state:0
+msgid "Confirmed"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "(=> open preplanning)"
+msgstr ""
+
+#. module: event
+#: view:event.participation:0
+#: view:event.registration:0
+#: view:event.seance:0
+#: view:report.event.registration:0
+msgid "Confirm"
+msgstr ""
+
+#. module: event
+#: view:event.content:0
+#: field:event.seance,content_divided:0
+msgid "Divided"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Register with this event"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Reset as Event"
+msgstr ""
+
+#. module: event
+#: field:event.registration,reply_to:0
+msgid "Reply-to Email"
+msgstr ""
+
+#. module: event
+#: field:event.course,message_follower_ids:0
+#: field:event.course.material,message_follower_ids:0
+#: field:event.event,message_follower_ids:0
+#: field:event.participation,message_follower_ids:0
+#: field:event.registration,message_follower_ids:0
+#: field:event.seance,message_follower_ids:0
+msgid "Followers"
+msgstr ""
+
+#. module: event
+#: view:event.registration:0
+#: view:report.event.registration:0
+msgid "New"
+msgstr ""
+
+#. module: event
+#: field:event.event,register_current:0
+msgid "Confirmed Registrations"
+msgstr ""
+
+#. module: event
+#: field:event.registration,email:0
+msgid "Email"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:1479
+#, python-format
+msgid "groupby is empty"
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_event_participation
+msgid " Event Participation "
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+#: view:event.seance:0
+msgid "Upcoming"
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_report_event_resource
+#: view:report.event.resource:0
+msgid "Event Resource"
+msgstr ""
+
+#. module: event
+#: sql_constraint:event.participation:0
+msgid "Registration is required for participant's participations"
+msgstr ""
+
+#. module: event
+#: field:res.partner,external:0
+msgid "External"
+msgstr ""
+
+#. module: event
+#: view:event.registration:0
+msgid "Confirmed registrations"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+#: view:event.participation:0
+#: view:event.seance:0
+msgid "Configuration"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Starting Date"
+msgstr ""
+
+#. module: event
+#: help:event.type,default_registration_min:0
+msgid "It will select this default minimum value when you choose this event"
+msgstr ""
+
+#. module: event
+#: view:event.confirm:0
+msgid "Confirm Anyway"
+msgstr ""
+
+#. module: event
+#: field:report.event.registration,nbevent:0
+msgid "Number Of Events"
+msgstr ""
+
+#. module: event
+#: field:event.level,name:0
+msgid "Event Level"
+msgstr ""
+
+#. module: event
+#: field:event.seance.type,included_into_analysis:0
+msgid "Included into Analysis"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+#: field:event.course,material_ids:0
+msgid "Materials"
+msgstr ""
+
+#. module: event
+#: selection:event.seance,state:0
+msgid "Planned"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "{'readonly': ['|',('state','!=','draft'),('has_program','=',True)],\n"
+"                                             'required': [('has_program','=',False)]}"
+msgstr ""
+
+#. module: event
+#: selection:report.event.registration,month:0
+msgid "August"
+msgstr ""
+
+#. module: event
+#: view:event.registration:0
+#: field:event.registration,manual_participation_ids:0
+#: field:event.seance.type,manual_participation:0
+msgid "Manual Participations"
+msgstr ""
+
+#. module: event
+#: selection:report.event.registration,month:0
+msgid "December"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Finish Event"
+msgstr ""
+
+#. module: event
+#: field:event.event,tz:0
+#: field:event.seance,tz:0
+msgid "Timezone"
+msgstr ""
+
+#. module: event
+#: field:report.event.resource,calendar_id:0
+msgid "Calendar"
+msgstr ""
+
+#. module: event
+#: view:event.confirm:0
+#: view:event.event.estimate_end_date.wizard:0
+#: view:event.participation.take.presence.wizard:0
+msgid "or"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event.py:206
+#, python-format
+msgid "No Tickets Available!"
+msgstr ""
+
+#. module: event
+#: view:event.course:0
+#: view:res.partner:0
+msgid "Speakers"
+msgstr ""
+
+#. module: event
+#: model:ir.actions.act_window,help:event.action_event_view
+msgid "<p class=\"oe_view_nocontent_create\">\n"
+"               Click to add a new event.\n"
+"             </p><p>\n"
+"               OpenERP helps you schedule and efficiently organize your events:\n"
+"               track subscriptions and participations, automate the confirmation emails,\n"
+"               sell tickets, etc.\n"
+"             </p>\n"
+"           "
+msgstr ""
+
+#. module: event
+#: view:event.participation:0
+#: selection:event.participation,state:0
+#: view:event.seance:0
+#: selection:event.seance,state:0
+#: selection:report.event.registration,event_state:0
+#: selection:report.event.registration,registration_state:0
+msgid "Draft"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Events in New state"
+msgstr ""
+
+#. module: event
+#: view:report.event.registration:0
+msgid "Events which are in New state"
+msgstr ""
+
+#. module: event
+#: view:event.participation:0
+#: view:event.seance:0
+msgid "Set Draft"
+msgstr ""
+
+#. module: event
+#: help:event.course,split_by:0
+msgid "Split the course by the specified duration. Use 0 to automatically split following calendar slot"
+msgstr ""
+
+#. module: event
+#: field:event.type,default_has_program:0
+msgid "Has program"
+msgstr ""
+
+#. module: event
+#: view:event.registration:0
+msgid "My Registrations"
+msgstr ""
+
+#. module: event
+#: field:event.registration,user_id:0
+#: model:res.groups,name:event.group_event_user
+msgid "User"
+msgstr ""
+
+#. module: event
+#: field:event.course.subject,parent_id:0
+msgid "Parent Subject"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "(confirmed:"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:1679
+#, python-format
+msgid "You have to choose only one group for '%s'"
+msgstr ""
+
+#. module: event
+#: selection:report.event.registration,month:0
+msgid "November"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Estimate end date"
+msgstr ""
+
+#. module: event
+#. openerp-web
+#: code:addons/event/static/src/xml/event.xml:5
+#, python-format
+msgid "Export to XLS"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:944
+#, python-format
+msgid "OpenERP can not delete participations which are related to a done seance"
+msgstr ""
+
+#. module: event
+#: selection:report.event.registration,month:0
+msgid "January"
+msgstr ""
+
+#. module: event
+#: view:event.seance:0
+msgid "Speaker:"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event.py:142
+#, python-format
+msgid "Event is already used as a template for other events, it can't be reset to a standard Event"
+msgstr ""
+
+#. module: event
+#: view:event.participation.take.presence.wizard:0
+msgid "Change status to:"
+msgstr ""
+
+#. module: event
+#: model:ir.actions.act_window,name:event.link_event_2_module
+msgid "Modules (summary)"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event.py:134
+#, python-format
+msgid "This event cannot be set as a template as it have registrations"
+msgstr ""
+
+#. module: event
+#: view:event.seance:0
+msgid "Participant(s):"
+msgstr ""
+
+#. module: event
+#: help:res.partner,room_max_seats:0
+msgid "Max seats available in the room. Use 0 for unlimited seats"
+msgstr ""
+
+#. module: event
+#: field:event.content,sequence:0
+msgid "Sequence"
+msgstr ""
+
+#. module: event
+#: constraint:event.event:0
+msgid "Error ! Closing Date cannot be set before Beginning Date."
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_course.py:52
+#, python-format
+msgid "Error! You can not create recursive subjects"
+msgstr ""
+
+#. module: event
+#: view:event.participation:0
+#: view:event.registration:0
+msgid "Mark as Absent"
+msgstr ""
+
+#. module: event
+#: field:event.participation,purchase_product_id:0
+msgid "Purchase Product"
+msgstr ""
+
+#. module: event
+#: field:report.event.resource,effective_rate:0
+msgid "Effective Rate"
+msgstr ""
+
+#. module: event
+#: view:report.event.registration:0
+msgid "Registration contact"
+msgstr ""
+
+#. module: event
+#: field:event.participation,departure_time:0
+msgid "Departure Time"
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_report_event_seance
+#: view:report.event.seance:0
+msgid "Event Seance"
+msgstr ""
+
+#. module: event
+#: field:event.course,description:0
+#: view:event.course.subject:0
+#: field:event.course.subject,description:0
+#: field:event.event,note:0
+msgid "Description"
+msgstr ""
+
+#. module: event
+#: selection:report.event.registration,month:0
+msgid "May"
+msgstr ""
+
+#. module: event
+#: help:event.event,level_id:0
+msgid "Indicate the difficulty or pre-requisite level of this event"
+msgstr ""
+
+#. module: event
+#: view:res.partner:0
+#: field:res.partner,equipment_ids:0
+msgid "Equipments"
+msgstr ""
+
+#. module: event
+#: view:event.constraint:0
+msgid "Resource must be part of"
+msgstr ""
+
+#. module: event
+#: field:report.event.resource,working_hours:0
+msgid "Working Hours"
+msgstr ""
+
+#. module: event
+#: selection:report.event.registration,month:0
+msgid "February"
+msgstr ""
+
+#. module: event
+#: view:board.board:0
+msgid "Association Dashboard"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event.py:428
+#, python-format
+msgid "New registration confirmed: %s."
+msgstr ""
+
+#. module: event
+#: view:res.partner:0
+msgid "Country"
+msgstr ""
+
+#. module: event
+#: selection:report.event.registration,month:0
+msgid "April"
+msgstr ""
+
+#. module: event
+#: view:event.event.estimate_end_date.wizard:0
+msgid "Compute End Date"
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_event_participation_group
+msgid "event.participation.group"
+msgstr ""
+
+#. module: event
+#: model:ir.model,name:event.model_event_course_subject
+msgid "event.course.subject"
+msgstr ""
+
+#. module: event
+#: code:addons/event/event_seance.py:1141
+#: code:addons/event/event_seance.py:1412
+#, python-format
+msgid "No enough time to schedule all content \"%s\""
+msgstr ""
+
+#. module: event
+#: code:addons/event/res_partner.py:124
+#: view:event.course:0
+#: view:event.course.material:0
+#: model:ir.actions.act_window,name:event.action_event_course
+#: model:ir.ui.menu,name:event.menu_event_course
+#: view:res.partner:0
+#, python-format
+msgid "Courses"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Current Registrations"
+msgstr ""
+
+#. module: event
+#: help:event.type,default_has_program:0
+msgid "Does this type of event always has a program"
 msgstr ""
 
 #. module: event
@@ -1091,7 +2919,7 @@ msgid "Year"
 msgstr ""
 
 #. module: event
-#: field:event.event,speaker_confirmed:0
-msgid "Speaker Confirmed"
+#: view:event.course:0
+msgid "Share a note..."
 msgstr ""
 
