@@ -536,6 +536,12 @@ class EventSeance(osv.Model):
 
     def write(self, cr, uid, ids, values, context=None):
         retval = super(EventSeance, self).write(cr, uid, ids, values, context=context)
+        if 'duration' in values or 'date_begin' in values:
+            for seance in self.browse(cr, uid, ids, context=context):
+                if seance.state != 'draft':
+                    raise osv.except_osv(
+                        _('Error!'),
+                        _('You could only modify seance duration or begin date on draft seance'))
         resource_related_fields_set = set(self._get_resource_related_fields(cr, uid, context=context))
         if resource_related_fields_set & set(values.keys()):
             self._refresh_resource_participations(cr, uid, ids, context=context)
