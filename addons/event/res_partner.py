@@ -52,6 +52,25 @@ class ResPartner(osv.osv):
         'event_assignment_mode': 'automatic',
     }
 
+    def name_search(self, cr, user, name='', args=None, operator='ilike', context=None, limit=100):
+        if context is None:
+            context = {}
+        if args is None:
+            args = []
+        if context.get('search_default_room'):
+            room_filter = [('room', '=', 1)]
+            if args:
+                room_filter.insert(0, '&')
+            args = room_filter + args
+        if context.get('search_default_speaker'):
+            speaker_filter = [('speaker', '=', 1)]
+            if args:
+                speaker_filter.insert(0, '&')
+            args = speaker_filter + args
+        return super(ResPartner, self).name_search(cr, user, name=name, args=args,
+                                                   operator=operator, context=context,
+                                                   limit=limit)
+
     def create(self, cr, uid, values, context=None):
         if context is None:
             context = {}

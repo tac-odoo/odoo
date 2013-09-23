@@ -370,8 +370,8 @@
                                 <group>
                                     <group>
                                         <field name="type_id" options="{'no_open': True}"/>
-                                        <field name="main_speaker_id" context="{'default_speaker': 1, 'fb_from': date_begin, 'fb_duration': duration}"/>
-                                        <field name="address_id" context="{'show_address': 1, 'fb_from': date_begin, 'fb_duration': duration}" options="{'always_reload': True}"/>
+                                        <field name="main_speaker_id" context="{'search_default_speaker': 1, 'default_speaker': 1, 'fb_from': date_begin, 'fb_duration': duration}"/>
+                                        <field name="address_id" context="{'show_address': 1, 'fb_from': date_begin, 'fb_duration': duration, 'search_default_room': 1, 'default_room': 1}" options="{'always_reload': True}"/>
                                     </group>
                                     <group>
                                         <field name="date_begin"/>
