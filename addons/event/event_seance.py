@@ -465,9 +465,15 @@ class EventSeance(osv.Model):
     _columns = {
         'name': fields.char('Seance Name', required=True),
         'type_id': fields.many2one('event.seance.type', 'Type'),
-        'date_begin': fields.datetime('Begin date', **RQ_EXCEPT_IN_DRAFT),
-        'date_end': fields.function(_get_date_end, type='datetime', string='Duration'),
-        'duration': fields.float('Duration', required=True),
+        'date_begin': fields.datetime('Begin date', readonly=True,
+                                      states=dict((st, [('readonly', not bool(st == 'draft')),
+                                                        ('required', not bool(st == 'draft'))])
+                                                   for st, sn in SEANCE_STATES)
+                                      ),
+        'date_end': fields.function(_get_date_end, type='datetime', string='Duration', readonly=True),
+        'duration': fields.float('Duration', required=True,
+                                  states=dict((st, [('readonly', not bool(st == 'draft'))])
+                                              for st, sn in SEANCE_STATES)),
         # 'planned_week_date': fields.function(_get_planned_week_date, string='Planned Week date',
         #                                      type='date', readonly=True, store=True, groupby_range='week'),
         'planned_week_date': fields.date('Planned Week Date', readonly=True, groupby_range='week'),
