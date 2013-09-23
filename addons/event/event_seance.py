@@ -1156,15 +1156,15 @@ class EventEvent(osv.Model):
 
                 ed = event.date_begin
 
-                # timeline = None
-                # if event.content_ids:
-                #     tmlayers = ['working_hours', 'leaves']
-                #     timeline = self._get_resource_timeline(cr, uid, event.id, layers=tmlayers,
-                #                                            date_from=event_begin, date_to=event_end,
-                #                                            context=context)
+                timeline = None
+                if event.content_ids:
+                    tmlayers = ['working_hours', 'leaves']
+                    timeline = self._get_resource_timeline(cr, uid, event.id, layers=tmlayers,
+                                                           date_from=event_begin, date_to=event_end,
+                                                           context=context)
 
-                # ed = self._estimate_end_date(cr, uid, event.date_begin, event.content_ids,
-                #                              timeline=timeline, context=context)
+                ed = self._estimate_end_date(cr, uid, event.date_begin, event.content_ids,
+                                             timeline=timeline, context=context)
 
                 # search max seance date
                 current_seance_filter = [
