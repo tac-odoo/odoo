@@ -420,7 +420,7 @@ class EventSeance(osv.Model):
 class EventParticipationReponse(osv.Model):
     _name = 'event.participation.response'
     _columns = {
-        'participation_id': fields.many2one('event.participation', 'Participation', required=True),
+        'participation_id': fields.many2one('event.participation', 'Participation', required=True, ondelete='cascade'),
         'questionnaire_id': fields.many2one('event.questionnaire', 'Questionnaire', required=True),
         'question_id': fields.many2one('event.question', 'Question', required=True),
         'points': fields.float('Points'),
