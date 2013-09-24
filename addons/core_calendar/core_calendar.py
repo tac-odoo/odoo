@@ -260,7 +260,7 @@ class CoreCalendarResource(osv.TransientModel):
         fb_short_status = context.get('fb_short_status') and True or False
 
         for i, record in enumerate(self.browse(cr, uid, ids, context=context)):
-            print("[%04d - %s :: %d] FreeBusy %s => %s" % (i, record._name, record.id, fb_from, fb_to,))
+            # print("[%04d - %s :: %d] FreeBusy %s => %s" % (i, record._name, record.id, fb_from, fb_to,))
             sdate = fb_from
             if fb_duration:
                 tz = record.tz or 'UTC'
@@ -612,7 +612,7 @@ class CoreCalendar(osv.Model):
                             return long(x)
                         return x
                     calendar_attendee_fields = calendar_info['fields']['attendee_ids']
-                    print("Attendee calendar fields: %s" % (calendar_attendee_fields,))
+                    # print("Attendee calendar fields: %s" % (calendar_attendee_fields,))
                     if calendar_attendee_fields:
                         domains = [[f + field_extra, arg[1], fix_id(arg[2])] for f in calendar_attendee_fields]
                         expr.extend([JOIN_OP] * (len(domains) - 1) + domains)
@@ -728,7 +728,7 @@ class CoreCalendarEvent(osv.Model):
         return dict.fromkeys(ids, False)
 
     def _search_attendee_id(self, cr, uid, model, fieldname, domain, context=None):
-        print("Model; %s, fieldname: %s, domain: %s" % (model, fieldname, domain,))
+        # print("Model; %s, fieldname: %s, domain: %s" % (model, fieldname, domain,))
         return []
 
     def _get_attendee_type(self, cr, uid, context=None):
@@ -915,14 +915,22 @@ class CoreCalendarEvent(osv.Model):
                             record[f] = value
 
                 if date_fields_requested:
-                    record_dt_start = datetime.strptime(val[calendar_fields['date_start']], DT_FMT)
-                    if byduration and 'date_end' in fields_pre:
-                        duration = timedelta(hours=val[calendar_fields['duration']])
-                        record['date_end'] = (record_dt_start + duration).strftime(DT_FMT)
-                    elif not byduration and 'duration' in fields_pre:
-                        record_dt_end = datetime.strptime(val[calendar_fields['date_end']], DT_FMT)
-                        duration = (record_dt_end - record_dt_start)
-                        record['duration'] = duration.days * 24. + duration.seconds / 3600.
+                    value_dt_start = val.get(calendar_fields['date_start'])
+                    if value_dt_start:
+                        record_dt_start = datetime.strptime(value_dt_start, DT_FMT)
+                        if byduration and 'date_end' in fields_pre:
+                            duration = timedelta(hours=val[calendar_fields['duration']])
+                            record['date_end'] = (record_dt_start + duration).strftime(DT_FMT)
+                        elif not byduration and 'duration' in fields_pre:
+                            record_dt_end = datetime.strptime(val[calendar_fields['date_end']], DT_FMT)
+                            duration = (record_dt_end - record_dt_start)
+                            record['duration'] = duration.days * 24. + duration.seconds / 3600.
+                    else:
+                        # not date start
+                        if byduration and 'date_end' in fields_pre:
+                            record['date_end'] = False
+                        elif not byduration and 'duration' in fields_pre:
+                            record['duration'] = 0.0
                 result.append(record)
 
         # Compute POST fields
@@ -1016,12 +1024,12 @@ class CoreCalendarEvent(osv.Model):
 
     @logged
     def write(self, cr, uid, ids, values, context=None):
-        if all(x in values for x in ('duration', 'date_end')):
-            raise Exception("You can't write both duration and end date at the same time")
+        Calendar = self.pool.get('core.calendar')
 
         ids_by_calendar = self._group_ids_by_calendar(cr, uid, ids, context=context)
         calendar_ids = self.get_calendars(cr, uid, ids_by_calendar.keys(), context=context)
         for calendar in self.pool.get('core.calendar').browse(cr, uid, calendar_ids, context=context):
+            calendar_info = Calendar._get_calendar_info(cr, uid, calendar.id, context.get('lang'))
             item_ids = ids_by_calendar[calendar.id]
             calendar_model = self.pool.get(calendar.action_res_model)
             item_values = {}
@@ -1031,6 +1039,13 @@ class CoreCalendarEvent(osv.Model):
                 if calfield:
                     fields.append(k)
                     item_values[calfield.name] = v
+
+            if all(calendar_info['fields'][f] for f in ['date_start', 'date_end', 'duration']):
+                # all dates fields are directly writable - passthough
+                vals = dict((calendar_info['fields'][f], values[f])
+                            for f in ['date_start', 'date_end', 'duration'])
+                calendar_model.write(cr, uid, item_ids, vals, context=context)
+                continue
 
             byduration = calendar.date_mode == 'duration'
             datestart_fname = calendar.field_date_start.name
