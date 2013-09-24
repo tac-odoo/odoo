@@ -1280,6 +1280,21 @@ class EventEvent(osv.Model):
         default.update(content_ids=False, seance_ids=False)
         return super(EventEvent, self).copy_data(cr, uid, id, default=default, context=context)
 
+    def copy(self, cr, uid, id, default=None, context=None):
+        Content = self.pool.get('event.content')
+        new_event_id = super(EventEvent, self).copy(cr, uid, id, context=context)
+        event = self.browse(cr, uid, id, context=context)
+        new_event = self.browse(cr, uid, new_event_id, context=context)
+        if new_event.has_program:
+            contents = []
+            for content_template in event.content_ids:
+                data = Content.copy_data(cr, uid, content_template.id, context=context)
+                contents.append((0, 0, data))
+            new_event.write({'content_ids': contents})
+        # Recompute seances (content_planification == 'linear')
+        self.recompute_seances(cr, uid, [new_event_id], context=context)
+        return new_event_id
+
     def write(self, cr, uid, ids, values, context=None):
         content_ids_to_check = set()
         if 'content_ids' in values:
