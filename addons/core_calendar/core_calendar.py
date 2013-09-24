@@ -211,7 +211,8 @@ class CoreCalendarResource(osv.TransientModel):
         Leave = self.pool.get('resource.calendar.leaves')
         for record in self.browse(cr, uid, ids, context=context):
             leave_domain = [
-                '|',
+                '|', '|',
+                    ('applies_to', '=', 'resource_all'),
                     '&', ('applies_to', '=', 'company'), ('company_id', '=', record.company_id.id),
                     '&', ('applies_to', '=', 'resource'), ('partner_id', '=', record.id),
             ]

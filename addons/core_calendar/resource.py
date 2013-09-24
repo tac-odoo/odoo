@@ -104,12 +104,15 @@ class resource_calendar_leaves(osv.Model):
             ('company', _('Whole Company')),
             ('calendar', _('This calendar')),
             ('resource', _('This resource')),
+            ('resource_all', _('All resources')),
         ]
 
     def _get_applies_to(self, cr, uid, ids, field_name, args, context=None):
         result = {}
         for leave in self.browse(cr, uid, ids, context=context):
-            if leave.partner_id or leave.resource_id:
+            if leave.applies_to == 'resource_all':
+                result[leave.id] = 'resource_all'
+            elif leave.partner_id or leave.resource_id:
                 result[leave.id] = 'resource'
             elif leave.calendar_id:
                 result[leave.id] = 'calendar'
@@ -117,14 +120,22 @@ class resource_calendar_leaves(osv.Model):
                 result[leave.id] = 'company'
         return result
 
+    def _set_applies_to(self, cr, uid, id, field_name, value, args, context=None):
+        if value == 'resource_all':
+            cr.execute("""UPDATE resource_calendar_leaves
+                             SET applies_to = %s
+                          WHERE id = %s""",
+                       (value, id,))
+        return True
+
     _columns = {
         # allow to store company id directly - this is required to have company global closing days
         'company_id': fields.function(_get_leave_company_id, type='many2one', relation='res.company',
                                       fnct_inv=_set_leave_company_id,
                                       string="Company", store=True, readonly=True),
-        'applies_to': fields.function(_get_applies_to, type='selection', string='Applies to',
+        'applies_to': fields.function(lambda s, *a, **kw: s._get_applies_to(*a, **kw), type='selection', string='Applies to',
                                       selection=lambda s, *a, **kw: s._get_applies_to_selection(*a, **kw),
-                                      store=True, fnct_inv=lambda *a: True),
+                                      store=True, fnct_inv=lambda s, *a, **kw: s._set_applies_to(*a, **kw)),
         'partner_id': fields.many2one('res.partner', 'Contact'),
     }
 

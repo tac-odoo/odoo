@@ -29,7 +29,9 @@ class resource_calendar_leaves(osv.Model):
     def _get_applies_to(self, cr, uid, ids, field_name, args, context=None):
         result = {}
         for leave in self.browse(cr, uid, ids, context=context):
-            if leave.partner_id or leave.resource_id:
+            if leave.applies_to in ('resource_all', 'event_all'):
+                result[leave.id] = leave.applies_to
+            elif leave.partner_id or leave.resource_id:
                 result[leave.id] = 'resource'
             elif leave.event_id:
                 result[leave.id] = 'event'
@@ -39,33 +41,32 @@ class resource_calendar_leaves(osv.Model):
                 result[leave.id] = 'company'
         return result
 
-    _columns = {
-        'event_id': fields.many2one('event.event', 'Event'),
-        'applies_to': fields.function(_get_applies_to, type='selection', string='Applies to',
-                                      selection=lambda s, *a, **kw: s._get_applies_to_selection(*a, **kw),
-                                      store=True, fnct_inv=lambda *a: True),
-    }
-
     def _get_applies_to_selection(self, cr, uid, context=None):
         result = super(resource_calendar_leaves, self)._get_applies_to_selection(cr, uid, context=context)
-        result.append(('event', _('This event')))
+        result.extend([
+            ('event', _('This event')),
+            ('event_all', _('All events')),
+        ])
         return result
 
-    def _get_applies_to(self, cr, uid, ids, field_name, args, context=None):
-        result = {}
-        for leave in self.browse(cr, uid, ids, context=context):
-            if leave.partner_id or leave.resource_id:
-                result[leave.id] = 'resource'
-            # elif leave.event_id:
-            #     result[leave.id] = 'event'
-            elif leave.calendar_id:
-                result[leave.id] = 'calendar'
-            else:
-                result[leave.id] = 'company'
+    def _set_applies_to(self, cr, uid, id, field_name, value, args, context=None):
+        result = super(resource_calendar_leaves, self)._set_applies_to(cr, uid, id, field_name,
+                                                                       value, args, context=context)
+        if value == 'event_all':
+            cr.execute("""UPDATE resource_calendar_leaves
+                             SET applies_to = %s
+                          WHERE id = %s""",
+                       (value, id,))
         return result
+
+    _columns = {
+        'event_id': fields.many2one('event.event', 'Event'),
+    }
 
     def onchange_applies_to(self, cr, uid, ids, applies_to, context=None):
         ocv = super(resource_calendar_leaves, self).onchange_applies_to(cr, uid, ids, applies_to, context=context)
         if applies_to == 'event':
             ocv['value'].update(resource_id=False, partner_id=False)
+        if applies_to == 'event_all':
+            ocv['value'].update(resource_id=False, partner_id=False, event_id=False)
         return ocv
