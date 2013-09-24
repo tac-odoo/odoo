@@ -11,7 +11,7 @@
             <field name="action_id" ref="base_calendar.action_crm_meeting"/>
             <field name="field_name" ref="base_calendar.field_crm_meeting_name"/>
             <field name="field_date_start" ref="base_calendar.field_crm_meeting_date"/>
-            <field name="field_date_end" eval="False"/>
+            <field name="field_date_end" ref="base_calendar.field_crm_meeting_end_date"/>
             <field name="field_duration" ref="base_calendar.field_crm_meeting_duration"/>
             <field name="field_recurrent" ref="base_calendar.field_crm_meeting_recurrency"/>
             <field name="field_organizer_id" ref="base_calendar.field_crm_meeting_user_id"/>
