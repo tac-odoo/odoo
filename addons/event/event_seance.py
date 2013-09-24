@@ -1498,7 +1498,8 @@ class EventEvent(osv.Model):
             leave_domain = [
                 '|', '|',
                     ('applies_to', '=', 'event_all'),
-                    '&', ('applies_to', '=', 'company'), ('company_id', '=', record.company_id.id),
+                    '&', ('applies_to', '=', 'company'), '|', ('company_id', '=', record.company_id.id),
+                                                              ('company_id', '=', False),
                     '&', ('applies_to', '=', 'event'), ('event_id', '=', record.id),
             ]
             if record.calendar_id:

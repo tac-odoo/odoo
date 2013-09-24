@@ -213,7 +213,8 @@ class CoreCalendarResource(osv.TransientModel):
             leave_domain = [
                 '|', '|',
                     ('applies_to', '=', 'resource_all'),
-                    '&', ('applies_to', '=', 'company'), ('company_id', '=', record.company_id.id),
+                    '&', ('applies_to', '=', 'company'), '|', ('company_id', '=', record.company_id.id),
+                                                              ('company_id', '=', False),
                     '&', ('applies_to', '=', 'resource'), ('partner_id', '=', record.id),
             ]
             if record.calendar_id:
