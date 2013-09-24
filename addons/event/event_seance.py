@@ -752,15 +752,20 @@ class EventParticipation(osv.Model):
         Course = self.pool.get('event.course')
         result = dict.fromkeys(ids, 0.0)
         ids = self.search(cr, uid, [('id', 'in', ids), ('role', '!=', 'participant')], context=context)
-        # TODO: get and use cached speaker/course price
+        resource_price_cache = {}
         for p in self.browse(cr, uid, ids, context=context):
             if p.purchase_product_id:
                 resource_price = p.purchase_product_id.standard_price
                 if p.seance_id.course_id:
-                    # speaker's course price have priority over product's puchase price (standard_price)
-                    ctx = dict(context, partner_id=p.partner_id.id)
-                    course = Course.browse(cr, uid, p.seance_id.course_id.id, context=ctx)
-                    resource_price = course.price
+                    key = (p.partner_id.id, p.seance_id.course_id)
+                    course_price = resource_price_cache.get(key)
+                    if course_price is None:
+                        # speaker's course price have priority over product's puchase price (standard_price)
+                        ctx = dict(context, partner_id=p.partner_id.id)
+                        course = Course.browse(cr, uid, p.seance_id.course_id.id, context=ctx)
+                        course_price = course.price
+                        resource_price_cache[key] = course_price
+                    resource_price = course_price
                 result[p.id] = resource_price
         return result
 
