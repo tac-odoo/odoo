@@ -104,6 +104,7 @@
                     <field name="name"/>
                     <field name="date_begin" invisible="not context.get('event_id')"/>
                     <field name="date_end" invisible="not context.get('event_id')"/>
+                    <field name="duration" invisible="not context.get('event_id')" widget="float_time" sum="Total duration"/>
                 </tree>
             </field>
         </record>

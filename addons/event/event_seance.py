@@ -71,7 +71,7 @@ class EventSeanceType(osv.Model):
 class EventContentModule(osv.Model):
     _name = 'event.content.module'
 
-    def _get_dates(self, cr, uid, ids, fieldnames, args, context=None):
+    def _get_infos(self, cr, uid, ids, fieldnames, args, context=None):
         if not ids:
             return {}
         if context is None:
@@ -80,28 +80,44 @@ class EventContentModule(osv.Model):
         for _id in ids:
             result[_id] = {'date_begin': False, 'date_end': False}
         if context.get('event_id'):
+            event_ids = (context['event_id'],)
             cr.execute("""
-                SELECT module.id,
-                       min(seance.date_begin),
-                       max(seance.date_begin + (INTERVAL '1 hour' * seance.duration))
+                SELECT module.id AS module_id,
+                       content_info.duration AS content_duration,
+                       min(seance.date_begin) AS min_date,
+                       max(seance.date_begin + (INTERVAL '1 hour' * seance.duration)) AS max_date
                 FROM event_event AS event
                 LEFT JOIN event_content_link AS link ON (link.event_id = event.id)
                 LEFT JOIN event_content AS content ON (link.content_id = content.id)
                 LEFT JOIN event_content_module module ON (content.module_id = module.id)
                 LEFT JOIN event_seance AS seance ON (seance.content_id = content.id)
+                LEFT JOIN (
+                    SELECT event.id AS event_id,
+                           content.module_id AS module_id,
+                           sum(content.duration) AS duration
+                    FROM event_event AS event
+                    LEFT JOIN event_content_link AS link ON (link.event_id = event.id)
+                    LEFT JOIN event_content AS content ON (link.content_id = content.id)
+                    WHERE event.id IN %s
+                    GROUP BY event.id, content.module_id
+                ) AS content_info ON (content_info.event_id = event.id AND content_info.module_id = module.id)
                 WHERE seance.date_begin IS NOT NULL
                   AND content.module_id IS NOT NULL
-                  AND event_id = %s
-                GROUP BY module.id
-            """, (context['event_id'],))
-            for module_id, min_date, max_date in cr.fetchall():
-                result[module_id].update(date_begin=min_date, date_end=max_date)
+                  AND event.id IN %s
+                GROUP BY module.id, content_info.duration
+            """, (event_ids, event_ids,))
+            for info in cr.dictfetchall():
+                module_id = info['module_id']
+                result[module_id].update(date_begin=info['min_date'],
+                                         date_end=info['max_date'],
+                                         duration=info['content_duration'])
         return result
 
     _columns = {
         'name': fields.char('Module name', required=True),
-        'date_begin': fields.function(_get_dates, type='datetime', string='Begin date', multi='dates'),
-        'date_end': fields.function(_get_dates, type='datetime', string='End date', multi='dates'),
+        'date_begin': fields.function(_get_infos, type='datetime', string='Begin date', multi='dates'),
+        'date_end': fields.function(_get_infos, type='datetime', string='End date', multi='dates'),
+        'duration': fields.function(_get_infos, type='float', string='Duration', multi='dates'),
     }
 
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
