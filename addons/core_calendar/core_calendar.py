@@ -842,7 +842,7 @@ class CoreCalendarEvent(osv.Model):
 
         if context is None:
             context = {}
-        if fields_to_read is None or (isinstance(fields, (list, tuple)) and not fields):
+        if not fields_to_read or (isinstance(fields, (list, tuple)) and not fields):
             fields_to_read = self._columns.keys()
 
         fields_pre = []
