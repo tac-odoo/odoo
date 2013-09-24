@@ -53,6 +53,33 @@ var commands = {
         callback(/^-?\d*\.?\d*$/.test(value) && value >= 0);
     };
 
+    HeaderCellRenderer = function (instance, TD, row, col, prop, value, cellProperties) {
+        Handsontable.TextCell.renderer.apply(this, arguments);
+        instance.view.wt.wtDom.addClass(TD, 'htHeaderCell');
+    };
+
+    SlotCountHeaderCellRenderer = function (instance, TD, row, col, prop, value, cellProperties) {
+        Handsontable.TextCell.renderer.apply(this, arguments);
+        instance.view.wt.wtDom.addClass(TD, 'htSlotCountHeaderCell');
+        var is_cell_valid = cellProperties.is_cell_valid;
+        if (cellProperties.is_cell_valid && !cellProperties.is_cell_valid(row, col)) {
+            if (typeof value == 'number' ? value > 0 : true) {
+                instance.view.wt.wtDom.addClass(TD, 'htInvalid');
+            }
+        }
+    };
+
+    PreplanningCellRendered = function (instance, TD, row, col, prop, value, cellProperties) {
+        Handsontable.NumericCell.renderer.apply(this, arguments);
+        instance.view.wt.wtDom.addClass(TD, 'htPreplanningCell');
+        var is_cell_valid = cellProperties.is_cell_valid;
+        if (cellProperties.is_cell_valid && !cellProperties.is_cell_valid(row, col)) {
+            if (typeof value == 'number' ? value > 0 : true) {
+                instance.view.wt.wtDom.addClass(TD, 'htInvalid');
+            }
+        }
+    };
+
     instance.event.EventPreplanning = instance.web.form.FormWidget.extend(instance.web.form.ReinitializeWidgetMixin, {
         init: function() {
             this._super.apply(this, arguments);
@@ -78,6 +105,7 @@ var commands = {
             });
             this.res_o2m_drop = new instance.web.DropMisordered();
             this.render_drop = new instance.web.DropMisordered();
+            this.COLUMN_HEADERS = 5;
         },
         query_events: function() {
             var self = this;
@@ -226,6 +254,39 @@ var commands = {
             availableHeight = $window.height() - offset.top + $window.scrollTop();
             return [availableWidth - 16, availableHeight - 26];
         },
+        preplanning_is_cell_valid: function(row, col) {
+            var content, week, matrix_cell, value;
+            // Handle Headers
+                if (row === 0 && col >= this.COLUMN_HEADERS) {
+                    week = this.weeks[col - this.COLUMN_HEADERS];
+                    if (week.slot_used < 0 || week.slot_used > week.slot_count) {
+                        return false;
+                    }
+                    return true;
+                }
+                if (row >= 1 && col == this.COLUMN_HEADERS - 1) {
+                    content = this.contents[row - 1];
+                    if (content.slot_used < 0 || content.slot_used > content.slot_count) {
+                        return false;
+                    }
+                    return true;
+                }
+            if (row > 0 && col > this.COLUMN_HEADERS) {
+                // Handle standard cells
+                    content = this.contents[row - 1];
+                    week = this.weeks[col - this.COLUMN_HEADERS];
+                    matrix_cell = this.matrix[content.id][week.id];
+                    value = matrix_cell['value'];
+                if (content.slot_used < 0
+                    || content.slot_used > content.slot_count
+                    || week.slot_used < 0
+                    || week.slot_used > week.slot_count) {
+                    return false;
+                }
+                return true;
+            }
+            return true;
+        },
         display_data: function() {
             // TODO
             var self = this;
@@ -233,23 +294,23 @@ var commands = {
             self.$el.html(QWeb.render("event.EventPreplanning", {widget: self}));
 
             var data = [
-                [_t('Total')],
+                [_t('Module'), _t('Subject'), _t('Content'), _t('Lang'), _t('Total')],
             ];
 
-            var columnHeads = [''];
-            var columnSizes = [40];
+            var columnHeads = ['', '', '', ''];
+            var columnSizes = [70, 70, 70, 40];
             _.each(self.weeks, function(week) {
                 columnHeads.push(week.name);
                 columnSizes.push(40);
                 data[0].push(_.str.sprintf('%d/%d', week.slot_used, week.slot_count));
             });
-            var rowHeads = [''];
+            // var rowHeads = [_t('Content')];
             var rowCounts = [''];
             _.each(self.contents, function(content, i) {
-                rowHeads.push(content.name);
+                // rowHeads.push(content.name);
 
                 var row_count = _.str.sprintf('%d/%d', content.slot_used, content.slot_count);
-                var row = [row_count];
+                var row = [content.module_name, content.subject_name, content.name, content.lang, row_count];
                 _.each(self.weeks, function(week) {
                     row.push(self.matrix[content.id][week.id]['value']);
                 });
@@ -258,57 +319,82 @@ var commands = {
 
             update_value = function(row, col, old_value, new_value) {
                 var content = self.contents[row - 1],
-                    week = self.weeks[col - 1],
+                    week = self.weeks[col - self.COLUMN_HEADERS],
                     matrix_cell = self.matrix[content.id][week.id],
                     delta = new_value - matrix_cell['value'];
+                if (delta === 0) {
+                    // nothing changed
+                    return false;
+                }
                 week.slot_used += delta;
                 content.slot_used += delta;
                 matrix_cell['value'] = new_value;
 
                 var ht = self.$el.find('#preplanning-table').handsontable('getInstance');
                 ht.setDataAtCell(0, col, _.str.sprintf('%d/%d', week.slot_used, week.slot_count));
-                ht.setDataAtCell(row, 0, _.str.sprintf('%d/%d', content.slot_used, content.slot_count));
-
-                self.setting = true;
-                var o2m_value = self.generate_o2m_value();
-                self.updating = true;
-                self.field_manager.set_values({children_ids: o2m_value}).done(function() {
-                    self.updating = false;
-                });
-                self.setting = false;
+                ht.setDataAtCell(row, self.COLUMN_HEADERS - 1, _.str.sprintf('%d/%d', content.slot_used, content.slot_count));
+                return true;
             };
+
+            var is_cell_valid = _.bind(self.preplanning_is_cell_valid, self);
 
             self.$el.find('#preplanning-table').handsontable({
                 data: data,
                 colHeaders: columnHeads,
-                rowHeaders: rowHeads,
+                // rowHeaders: rowHeads,
                 colWidths: columnSizes,
                 contextMenu: false,
                 fixedRowsTop: 1,
-                fixedColumnsLeft: 1,
+                fixedColumnsLeft: self.COLUMN_HEADERS,
+                autoWrapRow: 1,
+                currentRowClassName: 'currentRow',
+                currentColClassName: 'currentCol',
                 cells: function(row, col, prop) {
                     var cellprops = {};
-                    if (row === 0 || col === 0) {
+                    if (row === 0 || col < self.COLUMN_HEADERS) {
                         cellprops.readOnly = true;
+                        cellprops.renderer = HeaderCellRenderer;
+                        if (row === 0 && col >= self.COLUMN_HEADERS - 1) {
+                            cellprops.renderer = SlotCountHeaderCellRenderer;
+                            cellprops.is_cell_valid = is_cell_valid;
+                        }
+                        if (row >= 1 && col == self.COLUMN_HEADERS - 1) {
+                            cellprops.renderer = SlotCountHeaderCellRenderer;
+                            cellprops.is_cell_valid = is_cell_valid;
+                        }
                     } else {
                         cellprops.readOnly = self.get('effective_readonly');
                         cellprops.type = 'numeric';
                         cellprops.allowInvalid = true;
                         cellprops.validator = PreplanningCellValidator;
+                        cellprops.is_cell_valid = is_cell_valid;
+                        cellprops.renderer = PreplanningCellRendered;
                     }
                     return cellprops;
                 },
                 afterChange: function(changes, source) {
                     var cell;
-                    var self = this;
+                    var hot_instance = this;
+                    var need_resync = false;
                     if (changes === null)
                         return;
                     _.each(changes, function(change) {
-                        cell = self.getCellMeta(change[0], change[1]);
-                        if (change[0] > 0 && change[1] > 0 && typeof change[3] === 'number') {
-                            update_value.apply(self, change);
+                        cell = hot_instance.getCellMeta(change[0], change[1]);
+                        if (change[0] >= 1 && change[1] >= self.COLUMN_HEADERS && typeof change[3] === 'number') {
+                            if (update_value.apply(self, change)) {
+                                need_resync = true;
+                            }
                         }
                     });
+                    if (need_resync) {
+                        self.setting = true;
+                        var o2m_value = self.generate_o2m_value();
+                        self.updating = true;
+                        self.field_manager.set_values({children_ids: o2m_value}).done(function() {
+                            self.updating = false;
+                        });
+                        self.setting = false;
+                    }
                 },
                 afterValidate: function(isValid, value, row, col, source) {
                     var cell = this.getCellMeta(row, col);
@@ -318,7 +404,7 @@ var commands = {
                         return false;
                     }
                     var content = self.contents[row - 1];
-                        week = self.weeks[col - 1],
+                        week = self.weeks[col - self.COLUMN_HEADERS],
                         matrix_cell = self.matrix[content.id][week.id],
                         delta = value - matrix_cell['value'];
 

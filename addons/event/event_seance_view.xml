@@ -115,6 +115,7 @@
             <field name="arch" type="xml">
                 <form string="Modules">
                     <field name="name"/>
+                    <field name="sequence"/>
                 </form>
             </field>
         </record>

@@ -115,6 +115,7 @@ class EventContentModule(osv.Model):
 
     _columns = {
         'name': fields.char('Module name', required=True),
+        'sequence': fields.integer('Sequence'),
         'date_begin': fields.function(_get_infos, type='datetime', string='Begin date', multi='dates'),
         'date_end': fields.function(_get_infos, type='datetime', string='End date', multi='dates'),
         'duration': fields.function(_get_infos, type='float', string='Duration', multi='dates'),

@@ -96,7 +96,58 @@ th.oe_list_header_float_time {
   text-align: left;
 }
 
-.openerp .oe_preplanning .handsontable tbody tr :nth-child(2) {
+.openerp .oe_preplanning .handsontable .htHeaderCell {
+  font-style: normal;
+  color: #000000;
+  background-color: #EEEEEE !important;
+  white-space: nowrap;
+}
+
+.openerp .oe_preplanning .handsontable .htSlotCountHeaderCell {
+  font-style: normal;
+  font-weight: bold;
+  color: #000000;
+  background-color: #EEEEEE !important;
+  white-space: nowrap;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.openerp .oe_preplanning .handsontable .htPreplanningCell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.openerp .oe_preplanning .handsontable .htHeaderSum+.currentCol,
+.openerp .oe_preplanning .handsontable .htHeaderSum+.currentRow {
+  background-color: #CCCCCC !important;
+}
+
+.openerp .oe_preplanning .handsontable .htInvalid {
+  background-color: #FF4C42 !important;
+  color: #FFFFFF;
+}
+
+.openerp .oe_preplanning .handsontable .htInvalid+.htSlotCountHeaderCell {
+  color: #FF4C42;
+}
+
+.openerp .oe_preplanning .handsontable .currentRow,
+.openerp .oe_preplanning .handsontable .currentCol {
+
+}
+
+.openerp .oe_preplanning .handsontable .htHeaderCentered {
+  text-align: center;
+}
+
+/*.openerp .oe_preplanning .handsontable .htInvalid {
+  background-color: #FFFFFF;
+  color: #ff0000;
+}
+*/
+
+/*.openerp .oe_preplanning .handsontable tbody tr :nth-child(2) {
   text-align: center;
   color: #000000;
   background-color: #EEEEEE;
@@ -108,6 +159,7 @@ th.oe_list_header_float_time {
   color: #000000;
   background-color: #EEEEEE;
 }
+*/
 
 /*
 .openerp .oe_preplanning .handsontable tbody tr:first-child {

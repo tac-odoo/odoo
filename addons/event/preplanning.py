@@ -139,11 +139,27 @@ class EventPreplanning(osv.TransientModel):
                 'name': content.name,
                 'type_id': content.type_id.id or False,
                 'course_id': content.course_id.id or False,
+                'module_name': content.module_id.name if content.module_id else False,
+                'module_id': content.module_id.id,
+                'subject_name': content.subject_id.name or False,
                 'groups': [g.id for g in content.group_ids],
                 'slot_count': content.slot_count,
                 'slot_used': 0,
                 'slot_duration': content.slot_duration,
             })
+            if content.lang_id:
+                content_lang = content.lang_id.iso_code.upper() \
+                                or content.lang_id.code[:2].upper() \
+                                or content.lang_id.name[:2]
+            else:
+                content_lang = False
+            result['contents'][-1]['lang'] = content_lang
+
+        ContentModule = self.pool.get('event.content.module')
+        module_ids = [x['module_id'] for x in result['contents']]
+        module_ids = ContentModule.search(cr, uid, [('id', 'in', module_ids)], context=context)
+
+        result['contents'].sort(key=lambda x: (module_ids.index(x['module_id']), x['subject_name'], x['name']))
 
         tmlayers = ['working_hours', 'leaves']
         timeline = event._get_resource_timeline(layers=tmlayers, date_from=date_begin,
