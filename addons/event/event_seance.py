@@ -502,7 +502,7 @@ class EventSeance(osv.Model):
                                            domain=[('role', '=', 'participant')]),
         'participant_count': fields.function(_get_participant_count, type='integer', string='# of participants',
                                              store={
-                                                 'event.seance': (_store_get_seances_from_seances, ['content_id', 'group_id'], 10),
+                                                 'event.seance': (_store_get_seances_from_seances, ['content_id', 'group_id', 'state'], 10),
                                                  'event.participation': (_store_get_seances_from_participations, ['seance_id'], 10),
                                                  'event.registration': (_store_get_seances_from_registrations, ['group_ids', 'state'], 10),
                                                  'event.participation.group': (_store_get_seances_from_groups, ['registration_ids'], 10),
@@ -629,9 +629,15 @@ class EventSeance(osv.Model):
             pass
 
     def _refresh_participations(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        if context.get('__internal_refresh_participations'):
+            return True
+        context['__internal_refresh_participations'] = True
         Participation = self.pool.get('event.participation')
         # Registration = self.pool.get('event.registration')
         p_to_unlink = []  # participation ids to unlink
+        ids = list(set(ids))
 
         for seance in self.browse(cr, uid, ids, context=context):
             # print(">>> refreshing participation for seance '%s' [%d]" % (seance.name, seance.id,))
