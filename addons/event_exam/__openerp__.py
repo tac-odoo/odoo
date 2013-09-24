@@ -45,6 +45,7 @@ Key Features
     'depends': ['event'],
     'data': [
         'event_exam_view.xml',
+        'security/ir.model.access.csv',
     ],
     'demo': ['event_exam_demo.xml'],
     'test': [],

@@ -399,7 +399,7 @@
                                     </tree>
                                 </field>
                             </page>
-                            <page string="Configuration" groups="event.group_event_manager">
+                            <page string="Configuration" groups="event.group_event_manager,event.group_event_planning">
                                 <group>
                                     <group>
                                         <field name="content_id" domain="[('event_ids', 'in', event_ids[0][2])]"
@@ -513,7 +513,7 @@
             <field name="name">Seances</field>
             <field name="res_model">event.seance</field>
             <field name="view_type">form</field>
-            <field name="view_mode">calendar,tree,form</field>
+            <field name="view_mode">tree,form,calendar</field>
             <field name="search_view_id" ref="view_event_seance_search"/>
             <field name="context">{'search_default_upcoming': 1}</field>
         </record>
@@ -527,22 +527,23 @@
             <field name="arch" type="xml">
                 <tree string="Participations">
                     <field name="name"/>
-                    <field name="partner_id"/>
+                    <field name="partner_id" invisible="1"/>
+                    <field name="seance_event_ids"/>
                     <field name="seance_id"/>
-                    <field name="registration_id"/>
+                    <field name="duration"/>
                     <field name="presence" invisible="1"/>
                     <field name="presence_summary"/>
                     <button name="button_take_presence" type="object"
                             string="Mark as Present" icon="kanban-apply"
-                            attrs="{'invisible': ['|',('state','!=','draft'),('presence','=','present')]}"
+                            attrs="{'invisible': ['|',('state','in',['draft','confirm']),('presence','=','present')]}"
                             context="{'presence': 'present'}"/>
                     <button name="button_take_presence_2" type="object"
                             string="Mark as Absent" icon="kanban-stop"
-                            attrs="{'invisible': ['|', ('state','!=','draft'),('presence','=','absent')]}"
+                            attrs="{'invisible': ['|', ('state','in',['draft','confirm']),('presence','=','absent')]}"
                             context="{'presence': 'absent'}"/>
                     <button name="%(action_event_participation_take_presence_wizard)d" type="action"
                             string="Mark as Late" icon="kanban-pause"
-                            attrs="{'invisible': ['|',('state','!=','draft'),('presence','=','late')]}"
+                            attrs="{'invisible': ['|',('state','!=',['draft','confirm']),('presence','=','late')]}"
                             context="{'default_status': 'late'}"/>
                     <field name="state"/>
                 </tree>
@@ -640,7 +641,6 @@
                     <field name="registration_id"/>
                     <group string="Group By...">
                         <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
-                        <filter name="group_registration" string="Registration" context="{'group_by': 'registration_id'}"/>
                     </group>
                 </search>
             </field>

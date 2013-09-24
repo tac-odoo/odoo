@@ -19,3 +19,16 @@ access_event_registration,event.registration,model_event_registration,event.grou
 access_report_event_registration,report.event.registration,model_report_event_registration,event.group_event_user,1,1,1,1
 access_event_event_portal,event.event,model_event_event,,1,0,0,0
 access_event_registration_portal,event.registration,model_event_registration,,1,0,0,0
+access_event_seance_planning,event.seance,model_event_seance,event.group_event_planning,1,1,1,1
+access_event_participation_planning,event.participation,model_event_participation,event.group_event_planning,1,1,1,1
+access_event_event_planning,event.event,model_event_event,event.group_event_planning,1,0,0,0
+access_event_content_planning,event.content,model_event_content,event.group_event_planning,1,1,1,1
+access_event_participation_group_planning,event.participation.group,model_event_participation_group,event.group_event_planning,1,1,1,1
+access_event_content_module_planning,event.content.module,model_event_content_module,event.group_event_planning,1,0,0,0
+access_event_type_planning,event.type,model_event_type,event.group_event_planning,1,0,0,0
+access_event_seance_type_planning,event.seance.type,model_event_seance_type,event.group_event_planning,1,0,0,0
+access_resource_calendar_leaves_planning,resource.calendar.leaves,resource.model_resource_calendar_leaves,event.group_event_planning,1,0,0,0
+access_resource_calendar_planning,resource.calendar,resource.model_resource_calendar,event.group_event_planning,1,0,0,0
+access_resource_calendar_attendance_planning,resource.calendar.attendance,resource.model_resource_calendar_attendance,event.group_event_planning,1,0,0,0
+access_event_course_speakerinfo_planning,event.course.speakerinfo,model_event_course_speakerinfo,event.group_event_planning,1,0,0,0
+access_event_course_planning,event.course,model_event_course,event.group_event_planning,1,0,0,0

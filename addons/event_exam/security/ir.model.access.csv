@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_event_questionnaire_planning,event.questionnaire,model_event_questionnaire,event.group_event_planning,1,0,0,0
+access_event_questionnaire_line_planning,event.questionnaire.line,model_event_questionnaire_line,event.group_event_planning,1,0,0,0
+access_event_question,event.question,model_event_question,event.group_event_planning,1,0,0,0
+access_event_participation_exam_planning,event.participation.exam,model_event_participation_exam,event.group_event_planning,1,0,0,0
+access_event_participation_response_planning,event.participation.response,model_event_participation_response,event.group_event_planning,1,0,0,0
