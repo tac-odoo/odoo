@@ -487,7 +487,7 @@
         <field name="model">event.participation</field>
         <field name="inherit_id" ref="event.view_event_participation_tree"/>
         <field name="arch" type="xml">
-            <field name="registration_id" position="after">
+            <field name="state" position="before">
                 <field name="exam_course_id"/>
             </field>
         </field>
