@@ -382,7 +382,7 @@ class CoreCalendar(osv.Model):
 
     def _get_extended_fields(self, cr, uid, context=None):
         """Extended fields need to be post-processed"""
-        return ['attendee_ids', 'attendee_id', 'state']
+        return ['main_speaker_id', 'attendee_ids', 'attendee_id', 'state']
 
     @tools.ormcache()
     def _get_calendar_info(self, cr, uid, calendar_id, lang=None):
@@ -576,6 +576,7 @@ class CoreCalendar(osv.Model):
         # print("ARGS: %s" % (args,))
         calendar_info = self._get_calendar_info(cr, uid, calendar_id)
         calendar_event_obj = self.pool.get('core.calendar.event')
+        calendar_model = self.pool.get(calendar_info['model'])
         # calendar = self.browse(cr, uid, calendar_id, context=context)
         calendar_id_filter = '%d-' % calendar_id
         # field_is_standard = ['id', 'date_start', 'name', 'organizer_id', 'location']
@@ -602,6 +603,11 @@ class CoreCalendar(osv.Model):
                 field_realname = calendar_info['fields'].get(field)
                 if field_realname and field in field_is_standard:
                     expr.append([field_realname + field_extra, op, val])
+                elif field_is_valid and field == 'main_speaker_id':
+                    if 'main_speaker_id' in calendar_model._all_columns:
+                        expr.append(arg)
+                    else:
+                        expr.append(['id', '=', -1])
                 elif field_is_valid and field in ('attendee_ids', 'attendee_id'):
                     JOIN_OP = '&' if arg[1] in expression.NEGATIVE_TERM_OPERATORS else '|'
 
