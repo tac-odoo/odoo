@@ -44,6 +44,12 @@ class ResourceCalendar(osv.Model):
         'slot_duration': 4,
     }
 
+    def copy_data(self, cr, uid, id, default=None, context=None):
+        if default is None:
+            default = {}
+        default.update(company_leave_ids=False)
+        return super(ResourceCalendar, self).copy_data(cr, uid, id, default=default, context=context)
+
     def name_get(self, cr, user, ids, context=None):
         if not ids:
             return []
@@ -73,6 +79,13 @@ class ResourceCalendar(osv.Model):
                 resdict[calendar.id] += u'\n' + hours_text
             result = [(_id, resdict[_id]) for _id in ids]
         return result
+
+
+class ResourceCalendarAttendance(osv.Model):
+    _inherit = "resource.calendar.attendance"
+    _columns = {
+        'period_limit': fields.float('Period Limit'),
+    }
 
 
 class resource_calendar_leaves(osv.Model):
