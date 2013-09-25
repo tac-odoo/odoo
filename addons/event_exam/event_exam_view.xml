@@ -459,7 +459,7 @@
             <xpath expr="//div[@class='oe_title']" position="inside">
                 <field name="is_exam"/><label for="is_exam"/>
             </xpath>
-            <field name="group_id" position="after">
+            <field name="constraint_ids" position="after">
                 <field name="questionnaire_ids" widget="many2many_tags"/>
             </field>
         </field>

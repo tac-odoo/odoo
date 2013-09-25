@@ -414,12 +414,6 @@ class EventSeance(osv.Model):
             result[seance.id] = end
         return result
 
-    def _get_module_id(self, cr, uid, ids, fieldname, args, context=None):
-        result = {}
-        for seance in self.browse(cr, uid, ids, context=context):
-            result[seance.id] = seance.content_id.module_id.id
-        return result
-
     def _store_get_seances_from_seances(self, cr, uid, ids, context=None):
         """return list on seances for participant count refresh"""
         return ids
@@ -479,9 +473,31 @@ class EventSeance(osv.Model):
             r['equipments_ok'] = True
         return result
 
+    CONTENT_RELATED_STORE = {
+        'event.content': (_store_get_seances_from_content, ['name', 'lang_id', 'module_id', 'type_id'], 10),
+    }
+
     _columns = {
-        'name': fields.char('Seance Name', required=True),
-        'type_id': fields.many2one('event.seance.type', 'Type'),
+        'content_id': fields.many2one('event.content', 'Content', required=True, ondelete='cascade'),
+        # Content's related fields
+        'name': fields.related('content_id', 'name', type='char', string='Seance Name',
+                               readonly=True, required=True, store=CONTENT_RELATED_STORE),
+        'lang_id': fields.related('content_id', 'lang_id', type='many2one',
+                                  relation='res.lang', string='Language',
+                                  readonly=True, store=CONTENT_RELATED_STORE),
+        'event_ids': fields.related('content_id', 'event_ids', type='many2many',
+                                    relation='event.event', string='Events',
+                                    readonly=True),
+        'module_id': fields.related('content_id', 'module_id', type='many2one',
+                                    relation='event.content.module', string='Module',
+                                    readonly=True, store=CONTENT_RELATED_STORE),
+        'content_divided': fields.related('content_id', 'is_divided', type='boolean',
+                                          string='Divided', readonly=True,
+                                          store=CONTENT_RELATED_STORE),
+        'type_id': fields.related('content_id', 'type_id', type='many2one',
+                                  relation='event.seance.type', string='Type',
+                                  readonly=True, store=CONTENT_RELATED_STORE),
+
         'date_begin': fields.datetime('Begin date', readonly=True,
                                       states=dict((st, [('readonly', not bool(st == 'draft')),
                                                         ('required', not bool(st == 'draft'))])
@@ -495,24 +511,11 @@ class EventSeance(osv.Model):
         #                                      type='date', readonly=True, store=True, groupby_range='week'),
         'planned_week_date': fields.date('Planned Week Date', readonly=True, groupby_range='week'),
         'tz': fields.selection(_tz_get, size=64, string='Timezone'),
-        'lang_id': fields.many2one('res.lang', 'Language'),
         'participant_min': fields.integer('Participant Min'),
         'participant_max': fields.integer('Participant Max'),
         'main_speaker_id': fields.many2one('res.partner', 'Main Speaker'),
         'address_id': fields.many2one('res.partner', 'Address'),
-        'content_id': fields.many2one('event.content', 'Content', required=True, ondelete='cascade'),
-        'content_divided': fields.related('content_id', 'is_divided', type='boolean',
-                                          string='Divided'),
         'group_id': fields.many2one('event.participation.group', 'Group'),
-        'event_ids': fields.related('content_id', 'event_ids', type='many2many',
-                                    relation='event.event', string='Events',
-                                    readonly=True),
-        'module_id': fields.function(_get_module_id, type='many2one',
-                                     relation='event.content.module',
-                                     string='Module',
-                                     store={
-                                         'event.content': (_store_get_seances_from_content, ['module_id'], 10),
-                                     }, readonly=True),
         'resource_participation_ids': fields.one2many('event.participation', 'seance_id', 'Resource Participation',
                                                       domain=[('role', '!=', 'participant')]),
         'participant_ids': fields.one2many('event.participation', 'seance_id', 'Participants',
@@ -582,6 +585,7 @@ class EventSeance(osv.Model):
                 lang_id=content.lang_id.id,
                 content_divided=content.is_divided,
                 course_id=content.course_id.id,
+                module_id=content.module_id.id,
                 group_id=content.group_ids[0].id if content.is_divided else False)
         else:
             ocv['value']['group_id'] = False

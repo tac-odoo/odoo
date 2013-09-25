@@ -420,21 +420,28 @@
                         </div>
                         <div class="oe_title">
                             <label for="name" class="oe_edit_only"/>
-                            <h1><field name="name"/></h1>
+                            <h1>
+                                <field name="content_id" domain="[('event_ids', 'in', event_ids[0][2])]"
+                                               on_change="onchange_content_id(content_id)" options="{'no_open': 1}"/>
+                            </h1>
+                            <field name="event_ids" widget="many2many_tags" string="Related Events"/>
                         </div>
                         <notebook>
                             <page string="Information">
                                 <group>
                                     <group>
-                                        <field name="type_id" options="{'no_open': True}"/>
+                                        <field name="date_begin"/>
+                                        <field name="duration" widget="float_time"/>
                                         <field name="main_speaker_id" context="{'search_default_speaker': 1, 'default_speaker': 1, 'fb_from': date_begin, 'fb_duration': duration}"/>
                                         <field name="address_id" context="{'show_address': 1, 'fb_from': date_begin, 'fb_duration': duration, 'search_default_room': 1, 'default_room': 1}" options="{'always_reload': True}"/>
                                     </group>
                                     <group>
-                                        <field name="date_begin"/>
-                                        <field name="duration" widget="float_time"/>
-                                        <field name="lang_id"/>
-                                        <field name="event_ids" widget="many2many_tags" string="Related Events"/>
+                                        <field name="module_id" options="{'no_open': True}"/>
+                                        <field name="name" invisible="1"/>
+                                        <field name="course_id" invisible="1"/>
+                                        <field name="type_id" options="{'no_open': True}"/>
+                                        <field name="lang_id" options="{'no_open': True}"/>
+                                        <field name="group_id" domain="[('event_content_id','=',content_id)]"/>
                                     </group>
                                 </group>
                             </page>
@@ -459,13 +466,9 @@
                             <page string="Configuration" groups="event.group_event_manager,event.group_event_planning">
                                 <group>
                                     <group>
-                                        <field name="content_id" domain="[('event_ids', 'in', event_ids[0][2])]"
-                                               on_change="onchange_content_id(content_id)" options="{'no_open': 1}"/>
-                                        <field name="module_id"/>
-                                        <field name="group_id" domain="[('event_content_id','=',content_id)]"/>
+                                        <field name="constraint_ids" widget="many2many_tags"/>
                                     </group>
                                     <group>
-                                        <field name="constraint_ids" widget="many2many_tags"/>
                                     </group>
                                 </group>
                                 <separator string="Resources Assignments"/>
