@@ -592,15 +592,15 @@
                     <field name="presence_summary"/>
                     <button name="button_take_presence" type="object"
                             string="Mark as Present" icon="kanban-apply"
-                            attrs="{'invisible': ['|',('state','in',['draft','confirm']),('presence','=','present')]}"
+                            attrs="{'invisible': ['|',('state','not in',['draft','confirm']),('presence','=','present')]}"
                             context="{'presence': 'present'}"/>
                     <button name="button_take_presence_2" type="object"
                             string="Mark as Absent" icon="kanban-stop"
-                            attrs="{'invisible': ['|', ('state','in',['draft','confirm']),('presence','=','absent')]}"
+                            attrs="{'invisible': ['|', ('state','not in',['draft','confirm']),('presence','=','absent')]}"
                             context="{'presence': 'absent'}"/>
                     <button name="%(action_event_participation_take_presence_wizard)d" type="action"
                             string="Mark as Late" icon="kanban-pause"
-                            attrs="{'invisible': ['|',('state','!=',['draft','confirm']),('presence','=','late')]}"
+                            attrs="{'invisible': ['|',('state','not in',['draft','confirm']),('presence','=','late')]}"
                             context="{'default_status': 'late'}"/>
                     <field name="state"/>
                 </tree>
