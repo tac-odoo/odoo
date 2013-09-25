@@ -352,7 +352,7 @@ class CoreCalendar(osv.Model):
         'field_duration': fields.many2one('ir.model.fields', 'Duration'),
         'field_recurrent': fields.many2one('ir.model.fields', 'Recurrent', help='Field used to indicate if an event is recurrent'),
         'field_organizer_id': fields.many2one('ir.model.fields', 'Responsible', help='Responsible/Organizer for that event',
-                                              target_relation='res.users'),
+                                              target_relation='res.partner'),
         'field_location': fields.many2one('ir.model.fields', 'Location', help='Location of event',
                                           target_relation='res.partner'),
         'field_attendee_ids': fields.many2many('ir.model.fields', 'core_calendar_attendee_fields_rel', id1='calendar_id', id2='field_id',
@@ -620,6 +620,8 @@ class CoreCalendar(osv.Model):
                             return long(x)
                         return x
                     calendar_attendee_fields = calendar_info['fields']['attendee_ids']
+                    if calendar_info['fields']['organizer_id']:
+                        calendar_attendee_fields.append(calendar_info['fields']['organizer_id'])
                     # print("Attendee calendar fields: %s" % (calendar_attendee_fields,))
                     if calendar_attendee_fields:
                         domains = [[f + field_extra, arg[1], fix_id(arg[2])] for f in calendar_attendee_fields]
@@ -757,7 +759,7 @@ class CoreCalendarEvent(osv.Model):
         'date_end': fields.datetime('End date', required=True),
         'duration': fields.float('Duration', required=True, readonly=True),
         'recurrent': fields.boolean('Recurrent', readonly=True),
-        'organizer_id': fields.many2one('res.users', 'Responsible', readonly=True,
+        'organizer_id': fields.many2one('res.partner', 'Responsible', readonly=True,
                                           help='Responsible and/or Organizer person for this event'),
         'location': fields.char('Location', size=254, readonly=True,
                                  help="Location of this event"),
@@ -913,7 +915,16 @@ class CoreCalendarEvent(osv.Model):
                         field_type = calendar_info['fields_type'].get(f)
                         if not field_name:
                             continue
-                        value = val[field_name]
+                        if '.' in field_name:
+                            fns = field_name.split('.')
+                            fnb = calendar_model.browse(cr, user, val['id'], context=context)
+                            fnb_root = fnb
+                            while len(fns) > 1:
+                                b = fns.pop(0)
+                                fnb_root = fnb_root[b]
+                            value = fnb_root.read([fns[0]], context=context)[0][fns[0]]
+                        else:
+                            value = val[field_name]
                         if value:
                             if field_type == 'many2one':
                                 if column._type in 'integer':
