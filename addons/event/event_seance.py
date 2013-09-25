@@ -475,6 +475,7 @@ class EventSeance(osv.Model):
 
     CONTENT_RELATED_STORE = {
         'event.content': (_store_get_seances_from_content, ['name', 'lang_id', 'module_id', 'type_id'], 10),
+        'event.seance': (_store_get_seances_from_seances, ['content_id'], 10),
     }
 
     _columns = {
@@ -541,8 +542,8 @@ class EventSeance(osv.Model):
 
     def _check_content_group_ref(self, cr, uid, ids, context=None):
         """enforce presence of 'group' if linked content is 'divided'"""
-        for content_link in self.browse(cr, uid, ids, context=context):
-            if content_link.content_divided and not content_link.group_id:
+        for seance in self.browse(cr, uid, ids, context=context):
+            if seance.content_id.is_divided and not seance.group_id:
                 return False
         return True
 
