@@ -423,7 +423,7 @@
     </record>
 
     <menuitem id="menu_event_degree_contact"
-        parent="event.menu_event_management_root"
+        parent="base.menu_event_main"
         action="action_event_degree_contact"/>
 
 

@@ -94,7 +94,7 @@ instance.core_calendar.SelectOptionForm = instance.web.Widget.extend({
             var button_index = $(evt.target).attr('index');
             self.choosen_option = self.options_list[button_index];
             self.exit_selected(true);
-        })
+        });
     },
     display_popup: function() {
         var self = this;
@@ -158,8 +158,11 @@ instance.web_calendar.CalendarView = instance.web_calendar.CalendarView.extend({
         scheduler.config.display_marked_timespans = true;
         this._super();
     },
+    is_agenda_by_calendar: function() {
+        return this.model && this.color_field && this.color_field == 'calendar_id';
+    },
     events_loaded: function(events, fn_filter, no_filter_reload) {
-        if (this.model == 'core.calendar.event') {
+        if (this.is_agenda_by_calendar()) {
             // do not reload filter for 'Agenda' has they're preloaded and must stay this way.
             no_filter_reload = true;
         }
@@ -169,7 +172,7 @@ instance.web_calendar.CalendarView = instance.web_calendar.CalendarView.extend({
         var self = this;
         var converted_event = this._super(evt);
         if (this.model == 'core.calendar.event') {
-            if (this.color_field && evt[this.color_field]) {
+            if (this.is_agenda_by_calendar() && evt[this.color_field]) {
                 // force calendar custom color, not default indexed-color palette
                 var filter = evt[this.color_field];
                 var filter_value = (typeof filter === 'object') ? filter[0] : filter;
@@ -471,8 +474,7 @@ instance.web_calendar.CalendarView = instance.web_calendar.CalendarView.extend({
 
 instance.web_calendar.SidebarFilter = instance.web_calendar.SidebarFilter.extend({
     events_loaded: function(filters) {
-        console.log('SidebarFilter - events_loaded: ', filters);
-        if (this.view.model != 'core.calendar.event') {
+        if (!this.view.is_agenda_by_calendar()) {
             return this._super(filters);
         }
         this.$el.html(QWeb.render('AgendaView.sidebar.calendar', { filters: filters }));

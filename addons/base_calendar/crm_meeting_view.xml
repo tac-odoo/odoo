@@ -290,7 +290,7 @@
 
     <menuitem name="Calendar"
         id="mail_menu_calendar" parent="mail.mail_my_stuff"
-        sequence="10" action="action_crm_meeting"/>
+        sequence="10" action="core_calendar.action_agenda"/>
 
     </data>
 </openerp>

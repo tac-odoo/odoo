@@ -117,7 +117,6 @@
                     <field name="recurrent" options="{'calendar_recurrent_field': true}"/>
                     <field name="state"/>
                     <field name="location"/>
-                    <field name="main_speaker_id"/>
                     <field name="attendee_ids"/>
                     <templates>
                         <t t-name="calendar-text-box">
@@ -131,10 +130,7 @@
                         </t>
                         <t t-name="calendar-info-box">
                             <t t-if="record.organizer_id.raw_value">
-                                <span> Organizer: <field name="organizer_id"/></span><br/>
-                            </t>
-                            <t t-if="record.main_speaker_id.raw_value">
-                                <span> Speaker: <field name="main_speaker_id"/></span><br/>
+                                <span> Responsible: <field name="organizer_id"/></span><br/>
                             </t>
                             <t t-if="record.location.raw_value">
                                 <span> Location: <field name="location"/></span><br/>
@@ -158,14 +154,15 @@
                 <search string="Agenda">
                     <field name="name"/>
                     <field name="location"/>
+                    <field name="organizer_id"/>
                     <field name="attendee_id"/>
                     <field name="attendee_tags"/>
                     <filter name="my_agenda" string="My Agenda" domain="[('attendee_ids.user_ids','in',[uid])]" context="{}"/>
                     <!-- <field name="attendee_ids"/> -->
                     <group string="Group By...">
-                        <filter string="Organizer" domain="[]" context="{'group_by': 'organizer_id'}"/>
-                        <filter string="Speaker" domain="[]" context="{'group_by': 'main_speaker_id'}"/>
+                        <filter string="Responsible" domain="[]" context="{'group_by': 'organizer_id'}"/>
                         <filter string="Location" domain="[]" context="{'group_by': 'location'}"/>
+                        <filter string="Calendar" domain="[]" context="{'group_by': 'calendar_id'}"/>
                     </group>
                 </search>
             </field>
@@ -180,9 +177,6 @@
             <field name="search_view_id" ref="view_core_calendar_event_search"/>
             <field name="context">{'search_default_my_agenda': 1}</field>
         </record>
-
-        <menuitem name="Agenda" sequence="13"
-                  action="action_agenda"/>
 
         <record id="view_partner_tree_availibility" model="ir.ui.view">
             <field name="name">res.partner.tree.availibility</field>

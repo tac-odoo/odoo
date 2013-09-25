@@ -13,9 +13,9 @@
             <field name="field_date_start" ref="event.field_event_seance_date_begin"/>
             <field name="field_date_end" eval="False"/>
             <field name="field_duration" ref="event.field_event_seance_duration"/>
-            <field name="field_organizer_id" eval="False"/>
+            <field name="field_organizer_id" ref="event.field_event_seance_main_speaker_id"/>
             <field name="field_location" ref="event.field_event_seance_address_id"/>
-            <field name="field_attendee_ids" eval="[(6, 0, [ref('event.field_event_seance_main_speaker_id'),ref('event.field_event_seance_address_id')])]"/>
+            <field name="field_attendee_ids" eval="[(6, 0, [ref('event.field_event_seance_address_id')])]"/>
             <field name="filter_expr"></field>
             <field name="field_state" ref="event.field_event_seance_state"/>
             <field name="states_tentative">draft,planned</field>
