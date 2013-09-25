@@ -149,6 +149,13 @@ class EventCourse(osv.Model):
         'state': 'draft',
     }
 
+    def copy_data(self, cr, uid, id, default=None, context=None):
+        if default is None:
+            default = {}
+        default.update(speakerinfo_ids=False,
+                       material_ids=False)
+        return super(EventCourse, self).copy_data(cr, uid, id, default=default, context=context)
+
     def onchange_subject(self, cr, uid, ids, subject_id, context=None):
         values = {}
         if subject_id:
