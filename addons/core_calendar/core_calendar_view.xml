@@ -111,7 +111,7 @@
             <field name="name">core.calendar.event.calendar</field>
             <field name="model">core.calendar.event</field>
             <field name="arch" type="xml">
-                <calendar string="Agenda" date_start="date_start" color="calendar_id" date_stop="date_end" date_delay="duration" mode="week">
+                <calendar string="Agenda" date_start="date_start" color="organizer_id" date_stop="date_end" date_delay="duration" mode="week">
                     <field name="name"/>
                     <field name="organizer_id"/>
                     <field name="recurrent" options="{'calendar_recurrent_field': true}"/>
