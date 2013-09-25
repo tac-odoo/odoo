@@ -487,7 +487,7 @@ class EventSeance(osv.Model):
                                                         ('required', not bool(st == 'draft'))])
                                                    for st, sn in SEANCE_STATES)
                                       ),
-        'date_end': fields.function(_get_date_end, type='datetime', string='Duration', readonly=True),
+        'date_end': fields.function(_get_date_end, type='datetime', string='End date', readonly=True),
         'duration': fields.float('Duration', required=True,
                                   states=dict((st, [('readonly', not bool(st == 'draft'))])
                                               for st, sn in SEANCE_STATES)),
