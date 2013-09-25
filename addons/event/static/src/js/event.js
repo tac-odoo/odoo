@@ -297,8 +297,8 @@ var commands = {
                 [_t('Module'), _t('Subject'), _t('Content'), _t('Lang'), _t('Total')],
             ];
 
-            var columnHeads = ['', '', '', ''];
-            var columnSizes = [70, 70, 70, 40];
+            var columnHeads = ['', '', '', '', ''];
+            var columnSizes = [120, 120, 120, 40];
             _.each(self.weeks, function(week) {
                 columnHeads.push(week.name);
                 columnSizes.push(40);
