@@ -128,10 +128,6 @@ th.oe_list_header_float_time {
   color: #FFFFFF;
 }
 
-.openerp .oe_preplanning .handsontable .htInvalid+.htSlotCountHeaderCell {
-  color: #FF4C42;
-}
-
 .openerp .oe_preplanning .handsontable .currentRow,
 .openerp .oe_preplanning .handsontable .currentCol {
 

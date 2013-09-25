@@ -159,7 +159,8 @@ class EventPreplanning(osv.TransientModel):
         module_ids = [x['module_id'] for x in result['contents']]
         module_ids = ContentModule.search(cr, uid, [('id', 'in', module_ids)], context=context)
 
-        result['contents'].sort(key=lambda x: (module_ids.index(x['module_id']), x['subject_name'], x['name']))
+        result['contents'].sort(key=lambda x: (module_ids.index(x['module_id']) if x['module_id'] in module_ids else -1,
+                                               x['subject_name'], x['name']))
 
         tmlayers = ['working_hours', 'leaves']
         timeline = event._get_resource_timeline(layers=tmlayers, date_from=date_begin,
