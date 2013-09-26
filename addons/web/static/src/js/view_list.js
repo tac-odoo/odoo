@@ -2330,7 +2330,13 @@ instance.web.list.Many2Many = instance.web.list.Column.extend({
     _format: function (row_data, options) {
         if (!_.isEmpty(row_data[this.id].value)) {
             // If value, use __display version for printing
-            row_data[this.id] = row_data[this.id + '__display'];
+            var display_value = row_data[this.id + '__display'];
+            if (display_value === undefined && _.isArray(row_data[this.id].value)) {
+                // we're propably trying to display a record group_by on a many2many field
+                row_data[this.id].value = row_data[this.id].value[1];
+            } else {
+                row_data[this.id] = display_value;
+            }
         }
         return this._super(row_data, options);
     }
