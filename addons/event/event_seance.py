@@ -387,9 +387,17 @@ class EventSeance(osv.Model):
         result = []
         if isinstance(ids, (int, long)):
             ids = [ids]
+        if context is None:
+            context = {}
+
+        user_lang = context.get('lang') or self.pool.get('res.users').context_get(cr, uid)['lang']
+        user_lang_formats = self.pool.get('res.lang')._lang_date_formats(cr, uid, user_lang)
+
         for seance in self.browse(cr, uid, ids, context=context):
-            repr = '%s (%s, %s)' % (
-                seance.name, seance.date_begin,
+            date = datetime.strptime(seance.date_begin, DT_FMT)
+            date = fields.datetime.context_timestamp(cr, uid, date, context=context)
+            repr = '%s (%s - %s)' % (
+                seance.name, date.strftime(user_lang_formats['datetime']),
                 '%d:%02d' % float_to_hm(seance.duration))
             result.append((seance.id, repr))
         return result

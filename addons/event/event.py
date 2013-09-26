@@ -73,6 +73,9 @@ class event_event(osv.osv):
         if isinstance(ids, (long, int)):
             ids = [ids]
 
+        user_lang = context.get('lang') or self.pool.get('res.users').context_get(cr, uid)['lang']
+        user_lang_formats = self.pool.get('res.lang')._lang_date_formats(cr, uid, user_lang)
+
         res = []
         short_name = context.get('short_name')
         for record in self.browse(cr, uid, ids, context=context):
@@ -80,11 +83,12 @@ class event_event(osv.osv):
             if short_name:
                 display_name = record.reference or record.name
             if record.state != 'template':
-                date = record.date_begin.split(" ")[0]
-                date_end = record.date_end.split(" ")[0]
+                date = datetime.strptime(record.date_begin, DT_FMT)
+                date_end = datetime.strptime(record.date_end, DT_FMT)
+                date_value = date.strftime(user_lang_formats['date'])
                 if date != date_end:
-                    date += ' - ' + date_end
-                display_name += ' (' + date + ')'
+                    date_value += ' - ' + date_end.strftime(user_lang_formats['date'])
+                display_name += ' (' + date_value + ')'
             res.append((record['id'], display_name))
         return res
 
