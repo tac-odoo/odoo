@@ -394,12 +394,20 @@ class EventSeance(osv.Model):
         user_lang_formats = self.pool.get('res.lang')._lang_date_formats(cr, uid, user_lang)
 
         for seance in self.browse(cr, uid, ids, context=context):
-            date = datetime.strptime(seance.date_begin, DT_FMT)
-            date = fields.datetime.context_timestamp(cr, uid, date, context=context)
-            repr = '%s (%s - %s)' % (
-                seance.name, date.strftime(user_lang_formats['datetime']),
-                '%d:%02d' % float_to_hm(seance.duration))
-            result.append((seance.id, repr))
+            if seance.date_begin:
+                date = datetime.strptime(seance.date_begin, DT_FMT)
+                date = fields.datetime.context_timestamp(cr, uid, date, context=context)
+                display_name = '%s (%s - %s)' % (
+                    seance.name, date.strftime(user_lang_formats['datetime']),
+                    '%d:%02d' % float_to_hm(seance.duration))
+            elif seance.planned_week_date:
+                date = datetime.strptime(seance.planned_week_date, D_FMT)
+                display_name = '%s (%s* - %s)' % (
+                    seance.name, date.strftime(user_lang_formats['date']),
+                    '%d:%02d' % (float_to_hm(seance.duration)))
+            else:
+                display_name = '%s' % (seance.name,)
+            result.append((seance.id, display_name))
         return result
 
     def _get_participant_count(self, cr, uid, ids, field_name, args, context=None):
