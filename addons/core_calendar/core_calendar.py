@@ -679,6 +679,172 @@ class CoreCalendarEvent(osv.Model):
     _name = 'core.calendar.event'
     _auto = True
 
+    def _get_user_query(self, cr, uid, fields_to_read=None, attendee_list=False, context=None):
+        if not fields_to_read:
+            fields_to_read = self._all_columns.keys()
+        if 'id' not in fields_to_read:
+            fields_to_read.insert(0, 'id')
+        if context is None:
+            context = {}
+        lang = context.get('lang') or 'en_US'
+
+        def build_query(model, root_table, joins, where, fields):
+            q = 'SELECT '
+            q += ','.join("%s AS %s" % (f[1], f[0])
+                          for f in fields)
+            q += ' FROM %s AS %s' % (root_table[1], root_table[0])
+
+            # TYPE, AS_TABLE, TABLE, TABLE_FIELD, SRC, SRC_FIELD
+            # "LEFT JOIN" "TABLE" AS "AS_TABLE" ON ("AS_TABLE"."TABLE_FIELD" = "SRC"."SRC_FIELD")
+            for j in joins:
+                (join_type, table_alias,
+                    base_table, base_field,
+                    dest_table, dest_field) = j
+                q += ' %s %s AS %s ON (%s.%s = %s.%s) ' % \
+                    (join_type, dest_table, table_alias,
+                        base_table, base_field,
+                        table_alias, dest_field)
+
+            if where:
+                q += ' WHERE ' + ' AND '.join(where)
+            return q
+
+        unions = []
+        Calendar = self.pool.get('core.calendar')
+        for calendar_id in Calendar.get_subscribed_ids(cr, uid):
+            cal = Calendar._get_calendar_info(cr, uid, calendar_id, lang)
+            calfields = cal['fields']
+            model = self.pool.get(cal['model'])
+
+            root_table_alias = 't'
+            root_table = (root_table_alias, '%s' % model._table)
+            joins = [] # TYPE, AS_TABLE, TABLE, TABLE_FIELD, SRC, SRC_FIELD
+                       # "LEFT JOIN" "TABLE" AS "AS_TABLE" ON ("AS_TABLE"."TABLE_FIELD" = "SRC"."SRC_FIELD")
+            where = []
+            fields = [
+                ('id', "'%d-'||%s.id" % (calendar_id, root_table_alias)),
+                ('model', "'%s'" % cr.mogrify(cal['model'])),
+                ('calendar_id', '%d' % calendar_id),
+                ('res_id', "%s.id" % root_table_alias),
+                ('date_start', "%s.%s" % (root_table_alias, calfields['date_start'])),
+            ]
+
+            # Date Stop
+            if calfields['date_end']:
+                v = '%s.%s' % (root_table_alias, calfields['date_end'])
+                fields.append(('date_end', v))
+            else:
+                v = "%s.%s + '1 hour'::interval * %s.%s" % \
+                    (root_table_alias, calfields['date_start'],
+                     root_table_alias, calfields['duration'])
+                fields.append(('date_end', v))
+
+            # Duration
+            if calfields['duration']:
+                v = '%s.%s' % (root_table_alias, calfields['duration'])
+                fields.append(('duration', v))
+            else:
+                v = '%s.%s - %s.%s' % \
+                    (root_table_alias, calfields['date_end'],
+                     root_table_alias, calfields['date_start'])
+                fields.append(('duration', v))
+
+            # Attendees
+            if calfields['attendee_ids']:
+                attendee_parts = []
+                # return an 'ARRAY[]' notation for each fields
+                for field in calfields['attendee_ids']:
+                    subfields = field.split('.')
+                    sf = subfields.pop(0)
+                    column = model._all_columns[sf].column
+                    if column._type != 'many2one' and subfields:
+                        raise osv.except_osv(
+                            _('Error!'),
+                            _('Sub-field notation FIELD_1.FIELD_2 is only allowed for many2one field'))
+                    if column._type == 'many2many':
+                        v = "ARRAY(SELECT %s FROM %s WHERE %s = %s.%s)" % \
+                            (column._id2, column._rel, column._id1, root_table_alias, 'id')
+                        attendee_parts.append(v)
+                    elif column._type == 'many2one':
+                        base_table = root_table_alias
+                        base_field = sf
+                        base_model = model
+                        base_column = column
+                        while subfields:
+                            dest_field = subfields.pop(0)
+                            dest_model = self.pool.get(base_column._obj)
+                            dest_table = dest_model._table
+                            dest_table_alias = '%s_%s' % (base_field, dest_table)
+                            for j in joins:
+                                if j[0] == 'LEFT JOIN' and j[1] == dest_table_alias:
+                                    break   # already present
+                            else:
+                                joins.append(
+                                    ('LEFT JOIN', dest_table_alias,
+                                        root_table_alias, base_field,
+                                        dest_table, 'id'),
+                                )
+                            # update datas and continue
+                            base_table = dest_table_alias
+                            base_field = dest_field
+                            base_model = dest_model
+                            base_column = dest_model._all_columns[dest_field].column
+                        v = 'ARRAY[%s.%s]' % (base_table, base_field)
+                        attendee_parts.append(v)
+                attendee_query = '(%s)' % ' || '.join(attendee_parts)
+                if attendee_list:
+                    attendee_query = 'unnest%s' % attendee_query
+                    # where.append('attendee_ids IS NOT NULL')
+                fields.append(('attendee_ids', attendee_query))
+
+            fs = [f for f in fields if f[0] in fields_to_read]
+            q = build_query(model, root_table, joins, where, fs)
+            unions.append(q)
+
+        return "(%s)" % ' UNION ALL '.join(['(%s)' % q for q in unions])
+
+    def _get_user_overlapping_events(self, cr, uid, filter_sets, context=None, count=False):
+        union_all_fields = ['id', 'model', 'calendar_id', 'res_id',
+                            'date_start', 'date_end', 'attendee_ids']
+        union_all_query = self._get_user_query(cr, uid, union_all_fields,
+                                               attendee_list=True, context=context)
+        where_filter = []
+        where_params = []
+        for (model, ids) in filter_sets:
+            if not ids:
+                where_filter.append('a.model = %s')
+                where_params.append(model)
+            else:
+                where_filter.append('a.model = %s AND a.res_id IN %s')
+                where_params += [model, tuple(ids)]
+        where_clause = ' AND ' + ' AND '.join(where_filter) if where_filter else ''
+
+        query = """
+            SELECT a.id, a.model, a.res_id, a.attendee_ids AS partner_id, b.id
+            FROM (%s) AS a
+            LEFT JOIN (%s) AS b ON (b.attendee_ids = a.attendee_ids AND (a.date_start, a.date_end) OVERLAPS (b.date_start, b.date_end))
+            LEFT JOIN res_partner p ON (a.attendee_ids = p.id)
+            WHERE p.avoid_double_allocation = true
+              AND a.id != b.id %s
+        """ % (union_all_query, union_all_query, where_clause)
+        cr.execute(query, where_params)
+        result = []
+        data = {}
+        for r in cr.fetchall():
+            if r[0] in data:
+                data[r[0]]['overlapping_event_ids'].setdefault(r[4], []).append(r[3])
+                continue
+            v = {
+                'id': r[0],
+                'model': r[1],
+                'res_id': r[2],
+                'overlapping_event_ids': {}
+            }
+            v['overlapping_event_ids'].setdefault(r[4], []).append(r[3])
+            data[v['id']] = v
+            result.append(v)
+        return result
+
     def _get_attendees(self, cr, uid, ids, field_name, args, context=None):
         return self._compute_attendees(cr, uid, ids, field_name, args, context=context)
 

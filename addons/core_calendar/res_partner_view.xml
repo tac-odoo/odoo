@@ -22,6 +22,7 @@
                             <group>
                                 <field name="attendee_type"/>
                                 <field name="attendee_external"/>
+                                <field name="avoid_double_allocation"/>
                             </group>
                         </group>
                     </page>

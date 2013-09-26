@@ -510,6 +510,36 @@ class EventSeance(osv.Model):
             r['equipments_ok'] = True
         return result
 
+    def _get_event_conflicts(self, cr, uid, ids, fieldname, args, context=None):
+        if not ids:
+            return {}
+        CoreCalendarEvent = self.pool.get('core.calendar.event')
+        conflicts_method = CoreCalendarEvent._get_user_overlapping_events
+        result = {}
+        for _id in ids:
+            result[_id] = []
+        for conflict in conflicts_method(cr, uid, [(self._name, ids)], context=context):
+            result[conflict['res_id']] = conflict['overlapping_event_ids'].keys()
+        return result
+
+    def _search_event_conflicts(self, cr, uid, model, fieldname, domain, context=None):
+        search_in_conflicts = None
+        for a in domain:
+            if isinstance(a, (list, tuple)) and len(a) == 3 and a[0] == fieldname:
+                if a[1] == '!=' and a[2] is False:
+                    search_in_conflicts = True
+                    break
+        if search_in_conflicts is None:
+            return []
+        CoreCalendarEvent = self.pool.get('core.calendar.event')
+        conflicts_method = CoreCalendarEvent._get_user_overlapping_events
+        ids = [x['res_id'] for x in conflicts_method(cr, uid, [(self._name, False)], context=context)]
+        return [('id', 'in', ids)]
+
+    def _needaction_domain_get(self, cr, uid, context=None):
+        return False
+        # return [('event_conflict_ids','!=',False)]
+
     CONTENT_RELATED_STORE = {
         'event.content': (_store_get_seances_from_content, ['name', 'lang_id', 'module_id', 'type_id'], 10),
         'event.seance': (_store_get_seances_from_seances, ['content_id'], 10),
@@ -541,7 +571,7 @@ class EventSeance(osv.Model):
                                                         ('required', not bool(st == 'draft'))])
                                                    for st, sn in SEANCE_STATES)
                                       ),
-        'date_end': fields.function(_get_date_end, type='datetime', string='End date', readonly=True),
+        'date_end': fields.function(_get_date_end, type='datetime', string='End date', readonly=True, store=True),
         'duration': fields.float('Duration', required=True,
                                   states=dict((st, [('readonly', not bool(st == 'draft'))])
                                               for st, sn in SEANCE_STATES)),
@@ -551,8 +581,8 @@ class EventSeance(osv.Model):
         'tz': fields.selection(_tz_get, size=64, string='Timezone'),
         'participant_min': fields.integer('Participant Min'),
         'participant_max': fields.integer('Participant Max'),
-        'main_speaker_id': fields.many2one('res.partner', 'Main Speaker'),
-        'address_id': fields.many2one('res.partner', 'Address'),
+        'main_speaker_id': fields.many2one('res.partner', 'Main Speaker', select=True),
+        'address_id': fields.many2one('res.partner', 'Address', select=True),
         'other_resource_ids': fields.many2many('res.partner', 'event_seance_other_resources_rel',
                                                id1='seance_id', id2='partner_id', string='Other resources'),
         'group_id': fields.many2one('event.participation.group', 'Group'),
@@ -573,6 +603,9 @@ class EventSeance(osv.Model):
         'equipments_ok': fields.function(_get_resources_ok, string='Equipment Confirmed', type='boolean', multi='resources-ok'),
         'constraint_ids': fields.many2many('event.constraint', id1='seance_id', id2='constraint_id', string='Constraints'),
         'state': fields.selection(SEANCE_STATES, 'State', readonly=True, required=True),
+        'event_conflict_ids': fields.function(_get_event_conflicts, type='one2many',
+                                               relation='core.calendar.event', readonly=True,
+                                               fnct_search=_search_event_conflicts),
     }
 
     _defaults = {
@@ -903,8 +936,8 @@ class EventParticipation(osv.Model):
     _columns = {
         'name': fields.char('Participant Name', size=128, required=True),
         'role': fields.selection(ROLES, 'Role', required=True, select=True),
-        'partner_id': fields.many2one('res.partner', 'Participant'),
-        'seance_id': fields.many2one('event.seance', 'Seance', required=True, ondelete='cascade'),
+        'partner_id': fields.many2one('res.partner', 'Participant', select=True),
+        'seance_id': fields.many2one('event.seance', 'Seance', required=True, ondelete='cascade', select=True),
         'seance_date': fields.related('seance_id', 'date_begin', type='datetime', string='Seance Date', readonly=True),
         'seance_event_ids': fields.related('seance_id', 'event_ids', type='many2many', relation='event.event', readonly=True, string='Events'),
         'date': fields.related('seance_id', 'date_begin', type='datetime', string='Date', readonly=True),

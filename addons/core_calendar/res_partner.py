@@ -39,8 +39,10 @@ class ResPartner(osv.osv):
         'attendee_type': fields.selection(_attendee_types, 'Attendee Type', required=True,
                                           help='Usage of this contact on events'),
         'attendee_external': fields.boolean('External?', help='Check this is attendee should be considered external form the company'),
+        'avoid_double_allocation': fields.boolean('Avoid double allocation'),
     }
 
     _defaults = {
         'attendee_type': 'person',
+        'avoid_double_allocation': True,
     }
