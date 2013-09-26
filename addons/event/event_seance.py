@@ -749,7 +749,9 @@ class EventParticipation(osv.Model):
         ('none', 'No Presence Information'),
         ('present', 'Present'),
         ('absent', 'Absent'),
+        ('absent_justified', 'Absent (Justified)'),
         ('late', 'Late'),
+        ('late_justified', 'Late (Justified)'),
     ]
 
     STATES = [
@@ -850,6 +852,7 @@ class EventParticipation(osv.Model):
         'role': fields.selection(ROLES, 'Role', required=True),
         'partner_id': fields.many2one('res.partner', 'Participant'),
         'seance_id': fields.many2one('event.seance', 'Seance', required=True, ondelete='cascade'),
+        'seance_date': fields.related('seance_id', 'date_begin', type='datetime', string='Seance Date', readonly=True),
         'seance_event_ids': fields.related('seance_id', 'event_ids', type='many2many', relation='event.event', readonly=True, string='Events'),
         'date': fields.related('seance_id', 'date_begin', type='datetime', string='Date', readonly=True),
         'duration': fields.related('seance_id', 'duration', type='float', string='Duration', readonly=True),
@@ -1777,3 +1780,9 @@ class EventSeance2(osv.Model):
     _name = 'event.seance'
     _inherit = ['event.seance', 'helper.groupby_many2many']
     pass
+
+class EventParticipation2(osv.Model):
+    _name = 'event.participation'
+    _inherit = ['event.participation', 'helper.groupby_many2many']
+    pass
+

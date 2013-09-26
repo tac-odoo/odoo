@@ -364,6 +364,7 @@
                     <field name="event_ids"/>
                     <field name="lang_id"/>
                     <field name="type_id"/>
+                    <field name="planned_week_date"/>
                     <field name="date_begin"/>
                     <field name="duration" widget="float_time"/>
                     <field name="address_id"/>
@@ -459,6 +460,18 @@
                                         <field name="partner_id"/>
                                         <field name="registration_id"/>
                                         <field name="presence"/>
+                                        <button name="button_take_presence" type="object"
+                                                string="Mark as Present" icon="kanban-apply"
+                                                attrs="{'invisible': ['|',('state','not in',['draft','confirm']),('presence','=','present')]}"
+                                                context="{'presence': 'present'}"/>
+                                        <button name="button_take_presence_2" type="object"
+                                                string="Mark as Absent" icon="kanban-stop"
+                                                attrs="{'invisible': ['|', ('state','not in',['draft','confirm']),('presence','=','absent')]}"
+                                                context="{'presence': 'absent'}"/>
+                                        <button name="%(action_event_participation_take_presence_wizard)d" type="action"
+                                                string="Mark as Late" icon="kanban-pause"
+                                                attrs="{'invisible': ['|',('state','not in',['draft','confirm']),('presence','=','late')]}"
+                                                context="{'default_status': 'late'}"/>
                                         <field name="state" invisible="1"/>
                                     </tree>
                                 </field>
@@ -517,7 +530,7 @@
                     <field name="type_id"/>
                     <field name="module_id"/>
                     <separator/>
-                    <filter string="Upcoming" name="upcoming" domain="[('date_begin','>=',current_date)]"/>
+                    <filter string="Upcoming" name="upcoming" domain="['|',('date_begin','>=',current_date),('date_begin','=',False)]"/>
                     <separator/>
                     <filter string="Draft" name="state_draft" domain="[('state','=','draft')]"/>
                     <filter string="Confirm" name="state_confirm" domain="[('state','=','confirm')]"/>
@@ -689,6 +702,7 @@
                     <field name="seance_id" invisible="1"/>
                     <field name="name" filter_domain="[('seance_id.name', 'ilike', self)]" string="Seance Name"/>
                     <field name="state"/>
+                    <filter name="today" string="Today" domain="[('seance_date','>=',current_date),('seance_date','&lt;',current_date)]" context="{}"/>
                     <separator/>
                     <filter name="state_draft" string="Draft" domain="[('state','=','draft')]"/>
                     <filter name="state_confirm" string="Confirm" domain="[('state','=','confirm')]"/>
@@ -701,6 +715,9 @@
                     <field name="registration_id"/>
                     <group string="Group By...">
                         <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
+                        <filter name="group_presence" string="Presence" context="{'group_by': 'presence'}"/>
+                        <filter name="group_partner" string="Partner" context="{'group_by': 'partner_id'}"/>
+                        <filter name="group_event" string="Event" context="{'group_by': 'seance_event_ids'}"/>
                     </group>
                 </search>
             </field>
@@ -712,6 +729,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">[('role', '=', 'participant')]</field>
+            <field name="context">{'search_default_today': 1}</field>
             <field name="search_view_id" ref="view_event_participation_search"/>
         </record>
 
