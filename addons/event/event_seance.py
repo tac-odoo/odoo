@@ -221,6 +221,8 @@ class EventContent(osv.Model):
         'module_id': fields.many2one('event.content.module', 'Module'),
         'room_id': fields.many2one('res.partner', 'Room', help='Default room assigned to created seances related to this content'),
         'speaker_id': fields.many2one('res.partner', 'Speaker', help='Default speaker assigned to created seances related to this content'),
+        'other_resource_ids': fields.many2many('res.partner', 'event_content_other_resources_rel',
+                                               id1='content_id', id2='partner_id', string='Other resources'),
         'constraint_ids': fields.many2many('event.constraint', id1='content_id', id2='constraint_id', string='Constraints'),
     }
 
@@ -285,6 +287,8 @@ class EventContent(osv.Model):
             non_planned_seance_update['main_speaker_id'] = values['speaker_id']
         if 'room_id' in values:
             non_planned_seance_update['address_id'] = values['room_id']
+        if 'other_resource_ids' in values:
+            non_planned_seance_update['other_resource_ids'] = values['other_resource_ids']
         if non_planned_seance_update:
             Seance = self.pool.get('event.seance')
             future_seance_filter = [
@@ -327,6 +331,7 @@ class EventContent(osv.Model):
             'duration': duration,
             'main_speaker_id': speaker_id,
             'address_id': address_id,
+            'other_resource_ids': [(6, 0, [p.id for p in content.other_resource_ids])],
         }
         return values
 
@@ -548,6 +553,8 @@ class EventSeance(osv.Model):
         'participant_max': fields.integer('Participant Max'),
         'main_speaker_id': fields.many2one('res.partner', 'Main Speaker'),
         'address_id': fields.many2one('res.partner', 'Address'),
+        'other_resource_ids': fields.many2many('res.partner', 'event_seance_other_resources_rel',
+                                               id1='seance_id', id2='partner_id', string='Other resources'),
         'group_id': fields.many2one('event.participation.group', 'Group'),
         'resource_participation_ids': fields.one2many('event.participation', 'seance_id', 'Resource Participation',
                                                       domain=[('role', '!=', 'participant')]),
@@ -655,7 +662,7 @@ class EventSeance(osv.Model):
         return self.write(cr, uid, ids, {'state': 'done'}, context=context)
 
     def _get_resource_related_fields(self, cr, uid, context=None):
-        return ['main_speaker_id', 'address_id']
+        return ['main_speaker_id', 'address_id', 'other_resource_ids']
 
     def _refresh_resource_participations(self, cr, uid, ids, context=None):
         Paricipation = self.pool.get('event.participation')
@@ -666,6 +673,11 @@ class EventSeance(osv.Model):
                 resources.add(('room', seance.address_id))
             if seance.main_speaker_id:
                 resources.add(('speaker', seance.main_speaker_id))
+            for p in seance.other_resource_ids:
+                roles = [r for r in ['speaker', 'room', 'equipment'] if p[r]]
+                if not roles:
+                    continue
+                resources.add((roles[0], p))
 
             # computed diff from existing resource assignment
             changes = []

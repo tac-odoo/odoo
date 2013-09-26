@@ -103,6 +103,7 @@
                                           </div>
                                           <field name="room_id" domain="[('room','=',1)]"/>
                                           <field name="speaker_id" domain="[('speaker','=',1)]"/>
+                                          <field name="other_resource_ids" domain="['|',('equipment','=',1),('speaker','=',1)]" widget="many2many_tags"/>
                                           <field name="constraint_ids" widget="many2many_tags"/>
                                         </group>
                                     <group>
@@ -245,7 +246,7 @@
                                 </div>
                             </group>
                         </group>
-                        <field name="content_ids" widget="one2many" attrs="{'readonly': [('state','not in',['template',  'draft'])]}"
+                        <field name="content_ids" widget="one2many" attrs="{'readonly': [('state','not in',['template',  'draft', 'confirm'])]}"
                                context="{'calendar_id': calendar_id, 'from_event': 1}"/>
                     </page>
                 </page>
@@ -435,6 +436,7 @@
                                         <field name="duration" widget="float_time"/>
                                         <field name="main_speaker_id" context="{'search_default_speaker': 1, 'default_speaker': 1, 'fb_from': date_begin, 'fb_duration': duration}"/>
                                         <field name="address_id" context="{'show_address': 1, 'fb_from': date_begin, 'fb_duration': duration, 'search_default_room': 1, 'default_room': 1}" options="{'always_reload': True}"/>
+                                        <field name="other_resource_ids" context="{'search_default_speaker': 1, 'search_default_equipment': 1, 'fb_from': date_begin, 'fb_duration': duration}" widget="many2many_tags"/>
                                     </group>
                                     <group>
                                         <field name="module_id" options="{'no_open': True}"/>
@@ -529,6 +531,7 @@
                     <field name="address_id"/>
                     <field name="type_id"/>
                     <field name="module_id"/>
+                    <field name="lang_id"/>
                     <separator/>
                     <filter string="Upcoming" name="upcoming" domain="['|',('date_begin','>=',current_date),('date_begin','=',False)]"/>
                     <separator/>
@@ -546,6 +549,7 @@
                         <filter string="Speaker" name="speaker" domain="[]" context="{'group_by': 'main_speaker_id'}"/>
                         <filter string="Address" name="address" domain="[]" context="{'group_by': 'address_id'}"/>
                         <filter string="Group" name="group" domain="[]" context="{'group_by': 'group_id'}"/>
+                        <filter string="Lang" name="group_lang" context="{'group_by': 'lang_id'}"/>
                     </group>
                 </search>
             </field>

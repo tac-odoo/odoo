@@ -57,16 +57,15 @@ class ResPartner(osv.osv):
             context = {}
         if args is None:
             args = []
-        if context.get('search_default_room'):
-            room_filter = [('room', '=', 1)]
+        resource_args = []
+        for f in ['room', 'speaker', 'equipment']:
+            if context.get('search_default_'+f):
+                resource_args.append((f, '=', 1))
+        if resource_args:
+            resource_args = ['|'] * (len(resource_args) - 1) + resource_args
             if args:
-                room_filter.insert(0, '&')
-            args = room_filter + args
-        if context.get('search_default_speaker'):
-            speaker_filter = [('speaker', '=', 1)]
-            if args:
-                speaker_filter.insert(0, '&')
-            args = speaker_filter + args
+                resource_args.insert(0, '&')
+            args = resource_args + args
         return super(ResPartner, self).name_search(cr, user, name=name, args=args,
                                                    operator=operator, context=context,
                                                    limit=limit)
