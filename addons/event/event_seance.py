@@ -606,6 +606,14 @@ class EventSeance(osv.Model):
             self._refresh_resource_participations(cr, uid, ids, context=context)
         return retval
 
+    def unlink(self, cr, uid, ids, context=None):
+        for seance in self.read(cr, uid, ids, ['state'], context=context):
+            if seance['state'] not in ('draft', 'cancel'):
+                raise osv.except_osv(
+                    _('Error!'),
+                    _("You can only delete seances which are 'draft' or 'cancel'"))
+        return super(EventSeance, self).unlink(cr, uid, ids, context=context)
+
     def onchange_content_id(self, cr, uid, ids, content_id, context=None):
         ocv = {}
         ocv.setdefault('value', {})
@@ -688,9 +696,11 @@ class EventSeance(osv.Model):
         if context.get('__internal_refresh_participations'):
             return True
         context['__internal_refresh_participations'] = True
+        Registration = self.pool.get('event.registration')
         Participation = self.pool.get('event.participation')
         # Registration = self.pool.get('event.registration')
         p_to_unlink = []  # participation ids to unlink
+        p_to_create = defaultdict(list)  # {registration_id: [p1, p2, ...]}
         ids = list(set(ids))
 
         for seance in self.browse(cr, uid, ids, context=context):
@@ -732,6 +742,8 @@ class EventSeance(osv.Model):
                     if seance.state != 'done':
                         p_to_unlink.extend(p.id for p in v[-found-expected:])
                 elif found < expected:
+                    if seance.state == 'done':
+                        continue
                     for i in xrange(expected-found):
                         if contact:
                             part_name = contact.name
@@ -741,9 +753,14 @@ class EventSeance(osv.Model):
                             part_name = '%s #%d' % (reg.name or reg.partner_id.name or '', i+1)
                         part_values = self._prepare_participation_for_seance(cr, uid, part_name, seance,
                                                                              reg, context=context)
-                        Participation.create(cr, uid, part_values, context=context)
+                        registration_id = part_values['registration_id']
+                        p_to_create[registration_id].append((0, 0, part_values))
         if p_to_unlink:
             Participation.unlink(cr, uid, p_to_unlink, context=context)
+        for registration_id, commands in p_to_create.iteritems():
+            Registration.write(cr, uid, [registration_id], {
+                'participation_ids': commands,
+            }, context=context)
         return True
 
     def _prepare_participation_for_seance(self, cr, uid, name, seance, registration, context=None):
