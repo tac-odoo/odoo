@@ -170,9 +170,24 @@ class lang(osv.osv):
         grouping = lang_obj.grouping
         return grouping, thousands_sep, decimal_point
 
+    @tools.ormcache(skiparg=3)
+    def _lang_date_formats(self, cr, uid, lang_code):
+        lang_ids = self.search(cr, uid, [('code', '=', lang_code)])
+        if not lang_ids:
+            raise osv.except_osv(
+                _('Error!'),
+                _('No known lang with code %s') % lang_code)
+        lang_record = self.browse(cr, uid, lang_ids[0])
+        return {
+            'date': lang_record.date_format,
+            'time': lang_record.time_format,
+            'datetime': '%s %s' % (lang_record.date_format, lang_record.time_format),
+        }
+
     def write(self, cr, uid, ids, vals, context=None):
         for lang_id in ids :
             self._lang_data_get.clear_cache(self)
+        self._lang_date_formats.clear_cache(self)
         return super(lang, self).write(cr, uid, ids, vals, context)
 
     def unlink(self, cr, uid, ids, context=None):
@@ -190,6 +205,7 @@ class lang(osv.osv):
             trans_obj = self.pool.get('ir.translation')
             trans_ids = trans_obj.search(cr, uid, [('lang','=',language['code'])], context=context)
             trans_obj.unlink(cr, uid, trans_ids, context=context)
+        self._lang_date_formats.clear_cache(self)
         return super(lang, self).unlink(cr, uid, ids, context=context)
 
     def format(self, cr, uid, ids, percent, value, grouping=False, monetary=False, context=None):
