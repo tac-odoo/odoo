@@ -628,6 +628,14 @@ class EventSeance(osv.Model):
             'You have to specify a begin date when leaving the draft state'),
     ]
 
+    def _cron_auto_terminate_seance(self, cr, uid, context=None):
+        reference_date = time.strftime(DT_FMT)
+        seance_to_terminate = self.search(cr, uid, [
+            ('date_end', '<', reference_date),
+            ('state', 'in', ['confirm', 'inprogress', 'closed'])
+        ])
+        self.button_set_done(cr, uid, seance_to_terminate, context=context)
+
     def create(self, cr, uid, values, context=None):
         new_record_id = super(EventSeance, self).create(cr, uid, values, context=context)
         self._refresh_resource_participations(cr, uid, [new_record_id], context=context)

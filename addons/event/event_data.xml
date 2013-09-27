@@ -39,6 +39,19 @@
 
     </data>
     <data noupdate="1">
+
+        <record model="ir.cron" id="cron_event_seance_auto_terminate">
+            <field name="name">Event Seance - Auto terminate past seance</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="model" eval="'event.seance'"/>
+            <field name="function" eval="'_cron_auto_terminate_seance'"/>
+            <field name="args" eval="'()'"/>
+            <field name="active" eval="True"/>
+        </record>
+
         <!-- After installation of the module, open the related menu -->
         <record id="action_client_event_menu" model="ir.actions.client">
             <field name="name">Open Event Menu</field>
