@@ -407,7 +407,7 @@
             <field name="arch" type="xml">
                 <form string="Seance" version="7.0">
                     <header>
-                        <button type="object" name="button_set_draft" states="cancel,done,planned" string="Set Draft"/>
+                        <button type="object" name="button_set_draft" states="cancel,done,planned,confirm" string="Set Draft"/>
                         <button type="object" name="button_set_planned" states="draft" string="Set Planned"/>
                         <button type="object" name="button_set_confirm" states="draft,planned" string="Confirm"/>
                         <button type="object" name="button_set_inprogress" states="confirm" string="Start seance"/>
@@ -448,7 +448,7 @@
                                     </group>
                                 </group>
                                 <div groups="base.group_user">
-                                    <separator string="Collisions"/>
+                                    <separator string="Conflicts"/>
                                     <field name="event_conflict_ids" attrs="{'invisible': [('event_conflict_ids','=',False)]}">
                                         <tree string="Conflicts">
                                             <field name="calendar_id"/>

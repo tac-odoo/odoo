@@ -393,6 +393,8 @@ class EventSeance(osv.Model):
                                           for st, sn in SEANCE_STATES
                                           if st != 'draft'))
 
+    WRITABLE_ONLY_IN_DRAFT = dict(readonly=True, states={'draft': [('readonly', False)]})
+
     # def _get_planned_week_date(self, cr, uid, ids, fieldname, args, context=None):
     #     result = {}
     #     week_start_day = MO
@@ -546,7 +548,8 @@ class EventSeance(osv.Model):
     }
 
     _columns = {
-        'content_id': fields.many2one('event.content', 'Content', required=True, ondelete='cascade'),
+        'content_id': fields.many2one('event.content', 'Content', required=True, ondelete='cascade',
+                                      **WRITABLE_ONLY_IN_DRAFT),
         # Content's related fields
         'name': fields.related('content_id', 'name', type='char', string='Seance Name',
                                readonly=True, required=True, store=CONTENT_RELATED_STORE),
@@ -581,11 +584,13 @@ class EventSeance(osv.Model):
         'tz': fields.selection(_tz_get, size=64, string='Timezone'),
         'participant_min': fields.integer('Participant Min'),
         'participant_max': fields.integer('Participant Max'),
-        'main_speaker_id': fields.many2one('res.partner', 'Main Speaker', select=True),
-        'address_id': fields.many2one('res.partner', 'Address', select=True),
+        'main_speaker_id': fields.many2one('res.partner', 'Main Speaker', select=True, **WRITABLE_ONLY_IN_DRAFT),
+        'address_id': fields.many2one('res.partner', 'Address', select=True, **WRITABLE_ONLY_IN_DRAFT),
         'other_resource_ids': fields.many2many('res.partner', 'event_seance_other_resources_rel',
-                                               id1='seance_id', id2='partner_id', string='Other resources'),
-        'group_id': fields.many2one('event.participation.group', 'Group'),
+                                               id1='seance_id', id2='partner_id', string='Other resources',
+                                               **WRITABLE_ONLY_IN_DRAFT),
+        'group_id': fields.many2one('event.participation.group', 'Group',
+                                    **WRITABLE_ONLY_IN_DRAFT),
         'resource_participation_ids': fields.one2many('event.participation', 'seance_id', 'Resource Participation',
                                                       domain=[('role', '!=', 'participant')]),
         'participant_ids': fields.one2many('event.participation', 'seance_id', 'Participants',
