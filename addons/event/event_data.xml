@@ -64,5 +64,33 @@
             <value>From the top menu Events, you can organize events, manage registrations, automate communication around your event and sell events through your quotations.</value>
             <value>Module Events has been installed</value>
         </function>
+
+        <!-- default registration stages -->
+        <record id="event_regstage_draft" model="event.registration.stage">
+            <field name="name">Unconfirmed</field>
+            <field name="state">draft</field>
+            <field name="sequence">1</field>
+        </record>
+
+        <record id="event_regstage_confirmed" model="event.registration.stage">
+            <field name="name">Confirmed</field>
+            <field name="state">open</field>
+            <field name="sequence">2</field>
+        </record>
+
+        <record id="event_regstage_done" model="event.registration.stage">
+            <field name="name">Attended</field>
+            <field name="state">done</field>
+            <field name="sequence">3</field>
+            <field name="fold" eval="True"/>
+        </record>
+
+        <record id="event_regstage_cancel" model="event.registration.stage">
+            <field name="name">Cancelled</field>
+            <field name="state">cancel</field>
+            <field name="sequence">4</field>
+            <field name="fold" eval="True"/>
+        </record>
+
     </data>
 </openerp>

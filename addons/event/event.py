@@ -26,6 +26,7 @@ from openerp.osv.expression import normalize_domain
 from openerp import SUPERUSER_ID
 from openerp.addons.base.res.res_partner import _tz_get
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
+from openerp.addons.base_status.base_stage import base_stage
 
 
 class event_type(osv.osv):
@@ -387,11 +388,79 @@ class event_event(osv.osv):
         return res
 
 
-class event_registration(osv.osv):
+class event_registration_wizard(osv.TransientModel):
+    _name = 'event.registration.wizard'
+
+    ACTIONS = [
+        ('cancel', 'Cancel'),
+    ]
+
+    _columns = {
+        'action': fields.selection(ACTIONS, 'Action', required=True),
+        'registration_id': fields.many2one('event.registration', 'Registration', required=True),
+        'stage_id': fields.many2one('event.registration.stage', 'Stage'),
+        'date_cancel': fields.datetime('Cancellation Date'),
+    }
+
+    _defaults = {
+        'date_cancel': fields.datetime.now,
+    }
+
+    def onchange_action(self, cr, uid, ids, action, context=None):
+        values = {}
+        domains = {}
+        if not action:
+            domains['stage_id'] = []
+        elif action == 'cancel':
+            domains['stage_id'] = [('state', '=', 'cancel')]
+        return {'value': values, 'domain': domains}
+
+    def run_action(self, cr, uid, ids, context=None):
+        if not ids:
+            return False
+        Registration = self.pool.get('event.registration')
+        wizard = self.browse(cr, uid, ids[0], context=context)
+        runctx = dict(context)
+
+        if wizard.action == 'cancel':
+            values = {'stage_id': wizard.stage_id.id}
+            runctx['force_date_cancel'] = wizard.date_cancel
+            Registration.write(cr, uid, [wizard.registration_id.id], values, context=runctx)
+
+        return True
+
+
+class event_registration_stage(osv.Model):
+    _name = 'event.registration.stage'
+    _description = "Registration Stage"
+
+    REGISTRATION_STATES = [
+        ('draft', 'Unconfirmed'),
+        ('cancel', 'Cancelled'),
+        ('open', 'Confirmed'),
+        ('done', 'Attended')
+    ]
+
+    _columns = {
+        'name': fields.char('Stage Name', required=True, translate=True),
+        'sequence': fields.integer('Sequence', help='Used to order the the registration stage'),
+        # 'type_id': fields.many2one('event.type', 'Event Type', required=True,
+        #                             help='Indicate to which type of event this stage applies'),
+        'fold': fields.boolean('Folded by Default'),
+        'state': fields.selection(REGISTRATION_STATES, 'State', required=True),
+    }
+
+
+class event_registration(base_stage, osv.osv):
     """Event Registration"""
     _name= 'event.registration'
     _description = __doc__
     _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _order = 'name, create_date desc'
+
+    def _get_registration_states(self, cr, uid, context=None):
+        return self.pool.get('event.registration.stage').fields_get(cr, uid, ['state'], context=context)['state']['selection']
+
     _columns = {
         'id': fields.integer('ID'),
         'origin': fields.char('Source Document', size=124,readonly=True,help="Reference of the sales order which created the registration"),
@@ -408,35 +477,97 @@ class event_registration(osv.osv):
         'event_begin_date': fields.related('event_id', 'date_begin', type='datetime', string="Event Start Date", readonly=True),
         'user_id': fields.many2one('res.users', 'User', states={'done': [('readonly', True)]}),
         'company_id': fields.related('event_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True, states={'draft':[('readonly',False)]}),
-        'state': fields.selection([('draft', 'Unconfirmed'),
-                                    ('cancel', 'Cancelled'),
-                                    ('open', 'Confirmed'),
-                                    ('done', 'Attended')], 'Status',
+        'stage_id': fields.many2one('event.registration.stage', 'Stage',
                                     track_visibility='onchange',
-                                    size=16, readonly=True),
+                                    domain="[('fold','=',False)]",
+                                    ondelete='restrict'),
+        'state': fields.related('stage_id', 'state', type='selection', string='Status',
+                                selection=_get_registration_states, readonly=True, store=True),
         'email': fields.char('Email', size=64),
         'phone': fields.char('Phone', size=64),
         'name': fields.char('Name', size=128, select=True),
     }
+
+    def _get_default_stage_id(self, cr, uid, context=None):
+        """ Gives default stage_id """
+        return self.stage_find(cr, uid, [], None, [('state', '=', 'draft')], context=context)
+
+    def stage_find(self, cr, uid, cases, section_id, domain=[], order='sequence', context=None):
+        stage_ids = self.pool.get('event.registration.stage').search(cr, uid, domain, order=order, context=context)
+        if stage_ids:
+            return stage_ids[0]
+        return False
+
+    def _default_user_id(self, cr, uid, context=None):
+        # if user is an 'employee' set it as registration responsible
+        user_obj = self.pool.get('res.users')
+        if user_obj.has_group(cr, uid, 'base.group_user'):
+            return uid
+        return False
+
     _defaults = {
         'nb_register': 1,
+        'user_id': _default_user_id,
+        'stage_id': _get_default_stage_id,
         'state': 'draft',
     }
-    _order = 'name, create_date desc'
+
+    def _read_group_stage_ids(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
+        stage_obj = self.pool.get('event.registration.stage')
+        stage_ids = stage_obj.search(cr, uid, domain, context=context)
+        result = stage_obj.name_get(cr, uid, stage_ids, context=context)
+        fold = dict((stage.id, stage.fold or False)
+                    for stage in stage_obj.browse(cr, uid, stage_ids, context=context))
+        return result, fold
+
+    _group_by_full = {
+        'stage_id': _read_group_stage_ids
+    }
+
+    def button_switch_state(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        if not context.get('state'):
+            raise osv.except_osv(_('Error'), _('Not state specified within context'))
+        records = self.browse(cr, uid, ids, context=context)
+        return self.stage_set_with_state_name(cr, uid, records, context['state'], context=context)
+
+    def open_registration_wizard(self, cr, uid, ids, context=None):
+        if not ids:
+            return True
+        if context is None:
+            context = {}
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'event.registration.wizard',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_registration_id': ids[0],
+                'default_action': context.get('action') or False
+            }
+        }
 
     def do_draft(self, cr, uid, ids, context=None):
-        return self.write(cr, uid, ids, {'state': 'draft'}, context=context)
+        if context is None:
+            context = {}
+        stage_ctx = dict(context, state='draft')
+        return self.button_switch_state(cr, uid, ids, context=stage_ctx)
 
     def confirm_registration(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
         for reg in self.browse(cr, uid, ids, context=context or {}):
             self.pool.get('event.event').message_post(cr, uid, [reg.event_id.id], body=_('New registration confirmed: %s.') % (reg.name or '', ),subtype="event.mt_event_registration", context=context)
-        return self.write(cr, uid, ids, {'state': 'open'}, context=context)
+        stage_ctx = dict(context, state='open')
+        return self.button_switch_state(cr, uid, ids, context=stage_ctx)
 
     def registration_open(self, cr, uid, ids, context=None):
         """ Open Registration
         """
         event_obj = self.pool.get('event.event')
-        for register in  self.browse(cr, uid, ids, context=context):
+        for register in self.browse(cr, uid, ids, context=context):
             event_id = register.event_id.id
             no_of_registration = register.nb_register
             event_obj.check_registration_limits_before(cr, uid, [event_id], no_of_registration, context=context)
@@ -450,16 +581,25 @@ class event_registration(osv.osv):
         if context is None:
             context = {}
         today = fields.datetime.now()
+        stage_ctx = dict(context, state='done')
         for registration in self.browse(cr, uid, ids, context=context):
             if today >= registration.event_id.date_begin:
-                values = {'state': 'done', 'date_closed': today}
-                self.write(cr, uid, ids, values)
+                self.button_switch_state(cr, uid, [registration.id], context=stage_ctx)
+                values = {'date_closed': today}
+                self.write(cr, uid, [registration.id], values, context=context)
             else:
                 raise osv.except_osv(_('Error!'), _("You must wait for the starting day of the event to do this action."))
         return True
 
     def button_reg_cancel(self, cr, uid, ids, context=None, *args):
-        return self.write(cr, uid, ids, {'state': 'cancel'})
+        if context is None:
+            context = {}
+        today = fields.datetime.now()
+        if context.get('force_date_cancel'):
+            today = context['force_date_cancel']
+        stage_ctx = dict(context, state='cancel')
+        self.button_switch_state(cr, uid, ids, context=stage_ctx)
+        return self.write(cr, uid, ids, {'date_cancel': today}, context=context)
 
     def mail_user(self, cr, uid, ids, context=None):
         """
