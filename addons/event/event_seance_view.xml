@@ -544,6 +544,7 @@
                     <field name="type_id"/>
                     <field name="module_id"/>
                     <field name="lang_id"/>
+                    <field name="course_id"/>
                     <separator/>
                     <filter string="Upcoming" name="upcoming" domain="['|',('date_begin','>=',current_date),('date_begin','=',False)]"/>
                     <separator/>
