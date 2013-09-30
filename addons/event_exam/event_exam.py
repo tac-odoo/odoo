@@ -21,6 +21,7 @@
 
 import logging
 from openerp.osv import osv, fields
+from openerp.tools.translate import _
 
 
 class EventScoring(osv.Model):
@@ -40,6 +41,7 @@ class EventScoring(osv.Model):
     _defaults = {
         'mode': 'percentage',
     }
+
 
 
 class EventScoringLevel(osv.Model):
@@ -64,6 +66,29 @@ class EventQuestionnaire(osv.Model):
         ('deprecated', 'Deprecated'),
     ]
 
+    def _store_get_questionnaires_self(self, cr, uid, ids, context=None):
+        return ids
+
+    def _store_get_questionnaires_from_lines(self, cr, uid, ids, context=None):
+        questionnaires = set()
+        QuestionnaireLine = self.pool.get('event.questionnaire.line')
+        for line in QuestionnaireLine.browse(cr, uid, ids, context=context):
+            questionnaires.add(line.questionnaire_id.id)
+        return list(questionnaires)
+
+    def _store_get_questionnaires_from_questions(self, cr, uid, ids, context=None):
+        Questionnaire = self.pool.get('event.questionnaire')
+        QuestionnaireLine = self.pool.get('event.questionnaire.line')
+        line_ids = QuestionnaireLine.search(cr, uid, [('question_id', 'in', ids)], context=context)
+        return Questionnaire._store_get_questionnaires_from_lines(cr, uid, line_ids, context=context)
+
+    def _get_max_points(self, cr, uid, ids, fieldname, args, context=None):
+        result = dict.fromkeys(ids, 0.0)
+        for questionnaire in self.browse(cr, uid, ids, context=context):
+            result[questionnaire.id] = sum(line.question_id.points
+                                           for line in questionnaire.question_ids)
+        return result
+
     _columns = {
         'name': fields.char('Questionnaire Name', size=128, required=True),
         'reference': fields.char('Ref.', size=32),
@@ -75,6 +100,12 @@ class EventQuestionnaire(osv.Model):
         'question_ids': fields.one2many('event.questionnaire.line', 'questionnaire_id', 'Questions',
                                         domain=[('type', '=', 'question')], readonly=True),
         'state': fields.selection(STATES_SELECTION, 'State', required=True),
+        'max_points': fields.function(_get_max_points, type='float', string='Max Points',
+                                      store={
+                                          'event.questionnaire': (_store_get_questionnaires_self, ['line_ids'], 10),
+                                          'event.questionnaire.line': (_store_get_questionnaires_from_lines, ['question_id'], 10),
+                                          'event.question': (_store_get_questionnaires_from_questions, ['answer_ids', 'points_from', 'points_no_answer'], 10),
+                                      }),
 
         # TODO: course_ids
         # TODO: domain_ids
@@ -118,6 +149,12 @@ class EventContent(osv.Model):
             values.update(is_exam=True,
                           questionnaire_ids=[(6, 0, [q.id for q in content.questionnaire_ids])])
         return values
+
+    def _get_changes_to_propagate(self, cr, uid, ids, values, context=None):
+        changes = super(EventContent, self)._get_changes_to_propagate(cr, uid, ids, values, context=context)
+        if 'questionnaire_ids' in values:
+            changes['questionnaire_ids'] = values['questionnaire_ids']
+        return changes
 
 
 class EventQuestionnaireLine(osv.Model):
@@ -419,6 +456,7 @@ class EventSeance(osv.Model):
 
 class EventParticipationReponse(osv.Model):
     _name = 'event.participation.response'
+    _order = 'questionnaire_id'
     _columns = {
         'participation_id': fields.many2one('event.participation', 'Participation', required=True, ondelete='cascade'),
         'questionnaire_id': fields.many2one('event.questionnaire', 'Questionnaire', required=True),
@@ -428,17 +466,46 @@ class EventParticipationReponse(osv.Model):
         'is_graded': fields.boolean('Graded?'),
     }
 
+    def onchange_points(self, cr, uid, ids, question_id, points, context=None):
+        if not question_id:
+            return {}
+        question = self.pool.get('event.question').browse(cr, uid, question_id, context=context)
+        if points < 0 or points > question.points:
+            raise osv.except_osv(
+                _('Error!'),
+                _('Number of points should be between 0 and %0.2f') % (question.points,))
+        values = {'is_graded': True if points else False}
+        return {'value': values}
+
 
 class EventParticipationExam(osv.Model):
     _name = 'event.participation.exam'
 
-    def _get_score_points(self, cr, uid, ids, fieldname, args, context=None):
+    def _get_score(self, cr, uid, ids, fieldname, args, context=None):
         # TODO: compute real score based on response line
-        return dict.fromkeys(ids, 0.0)
+        if not ids:
+            return {}
+        result = {}
+        for exam in self.browse(cr, uid, ids, context=context):
+            questionnaire = exam.questionnaire_id
+            p = exam.participation_id
+            points = sum(r.points for r in p.exam_response_ids
+                         if r.questionnaire_id.id == questionnaire.id)
+            perc = points * 100.0 / questionnaire.max_points
 
-    def _get_score_id(self, cr, uid, ids, fieldname, args, context=None):
-        # TODO: compute real score based on 'exam_score_points' + 'exam_questionnaire_id'
-        return dict.fromkeys(ids, False)
+            scoring = questionnaire.scoring_id
+            score_id = False
+            for level in reversed(scoring.level_ids):
+                if (scoring.mode == 'points' and points >= level.level
+                        or scoring.mode == 'percentage' and perc >= level.level):
+                    score_id = level.id
+                    break
+
+            result[exam.id] = {
+                'score_points': points,
+                'score_id': score_id,
+            }
+        return result
 
     def _store_get_participation_exam_self(self, cr, uid, ids, context=None):
         return ids
@@ -459,15 +526,16 @@ class EventParticipationExam(osv.Model):
         'course_id': fields.related('participation_id', 'course_id', type='many2one',
                                     string='Course', relation='event.course'),
         'questionnaire_id': fields.many2one('event.questionnaire', 'Questionnaire', required=True),
-        'score_id': fields.function(_get_score_id, type='many2one', relation='event.scoring.level',
-                                    string='Score', store={
+        'max_points': fields.related('questionnaire_id', 'max_points', type='float', string='Max Points', readonly=True),
+        'score_id': fields.function(_get_score, type='many2one', relation='event.scoring.level',
+                                    string='Score', multi='exam-score', store={
                                         'event.participation.exam': (_store_get_participation_exam_self, ['score_points', 'questionnaire_id'], 20),
                                         'event.participation.response': (_store_get_participation_exam_from_responses, None, 10),
                                     }),
         'succeeded': fields.related('score_id', 'pass', type='boolean',
                                     string='Succeeded', store=True, readonly=True),
-        'score_points': fields.function(_get_score_points, type='float',
-                                        string='Score (points)', store={
+        'score_points': fields.function(_get_score, type='float',
+                                        string='Score (points)', multi='exam-score', store={
                                             'event.participation.exam': (_store_get_participation_exam_self, ['score_points', 'questionnaire_id'], 20),
                                             'event.participation.response': (_store_get_participation_exam_from_responses, None, 10),
                                         })
@@ -495,6 +563,28 @@ class EventParticipation(osv.Model):
             )
         return changes
 
+    def _recompute_exam_responses(self, cr, uid, ids, context=None):
+        for p in self.browse(cr, uid, ids, context=context):
+            current_question_ids = dict(((r.questionnaire_id.id, r.question_id.id), r.id)
+                                        for r in p.exam_response_ids)
+            current_questions_set = set(current_question_ids.keys())
+            needed_questions_set = set()
+            for exam in p.exam_ids:
+                for line in exam.questionnaire_id.line_ids:
+                    if line.question_id.id:
+                        needed_questions_set.add((exam.questionnaire_id.id, line.question_id.id))
+
+            commands = []
+            responses_to_delete = current_questions_set - needed_questions_set
+            commands.extend((2, current_question_ids[k]) for k in responses_to_delete)
+
+            responses_to_create = needed_questions_set - current_questions_set
+            for questionnaire_id, question_id in responses_to_create:
+                commands.append((0, 0, {'questionnaire_id': questionnaire_id,
+                                        'question_id': question_id}))
+
+            p.write({'exam_response_ids': commands})
+
     def create(self, cr, uid, values, context=None):
         seance_id = values.get('seance_id')
         if seance_id:
@@ -503,4 +593,12 @@ class EventParticipation(osv.Model):
             if seance_record.is_exam and seance_record.questionnaire_ids and not values.get('exam_ids'):
                 values['exam_ids'] = [(0, 0, {'questionnaire_id': q.id})
                                       for q in seance_record.questionnaire_ids]
-        return super(EventParticipation, self).create(cr, uid, values, context=context)
+        new_participation_id = super(EventParticipation, self).create(cr, uid, values, context=context)
+        self._recompute_exam_responses(cr, uid, [new_participation_id], context=context)
+        return new_participation_id
+
+    def write(self, cr, uid, ids, values, context=None):
+        rval = super(EventParticipation, self).write(cr, uid, ids, values, context=context)
+        if 'exam_ids' in values:
+            self._recompute_exam_responses(cr, uid, ids, context=context)
+        return rval

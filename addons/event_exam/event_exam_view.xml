@@ -511,17 +511,18 @@
                     <field name="exam_ids">
                         <tree string="Exams" editable="bottom">
                             <field name="questionnaire_id"/>
+                            <field name="score_points"/>
+                            <field name="max_points"/>
                             <field name="score_id"/>
                             <field name="succeeded"/>
-                            <field name="score_points"/>
                         </tree>
                     </field>
                     <separator string="Responses"/>
                     <field name="exam_response_ids">
-                        <tree string="Responses">
-                            <field name="questionnaire_id"/>
-                            <field name="question_id"/>
-                            <field name="points"/>
+                        <tree string="Responses" editable="bottom">
+                            <field name="questionnaire_id" readonly="1"/>
+                            <field name="question_id" readonly="1"/>
+                            <field name="points" on_change="onchange_points(question_id, points)"/>
                             <field name="max_points"/>
                             <field name="is_graded"/>
                         </tree>
