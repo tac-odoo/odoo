@@ -6,7 +6,7 @@
             <field name="name">report.event.resource.tree</field>
             <field name="model">report.event.resource</field>
             <field name="arch" type="xml">
-                <tree string="Event Resource" create="false">
+                <tree string="Resources Analysis" create="false">
                     <field name="resource_name"/>
                     <field name="resource_type"/>
                     <field name="company_id"/>
@@ -24,7 +24,7 @@
             <field name="name">report.event.resource.graph</field>
             <field name="model">report.event.resource</field>
             <field name="arch" type="xml">
-                <graph string="Event Resource" type="bar" orientation="horizontal">
+                <graph string="Resources Analysis" type="bar" orientation="horizontal">
                     <field name="resource_id"/>
                     <field name="effective_time" operator="+"/>
                 </graph>
@@ -35,7 +35,7 @@
             <field name="name">report.event.resource.search</field>
             <field name="model">report.event.resource</field>
             <field name="arch" type="xml">
-                <search string="Event Resources">
+                <search string="Resources Analysis">
                     <field name="resource_name"/>
                     <field name="resource_id"/>
                     <filter string="This Week" name="this_week" context="{'this_week': 1}"/>
@@ -50,7 +50,7 @@
         </record>
 
         <record model="ir.actions.act_window" id="action_report_event_resource">
-            <field name="name">Events Resources</field>
+            <field name="name">Resources Analysis</field>
             <field name="res_model">report.event.resource</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,graph</field>
@@ -76,6 +76,7 @@
         <menuitem id="menu_report_event_resource"
             parent="menu_reporting_events"
             action="action_report_event_resource"
+            string="Resources Analysis"
             sequence="4"
             groups="event.group_event_manager"/>
 

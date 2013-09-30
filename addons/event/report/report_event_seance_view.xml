@@ -6,7 +6,7 @@
             <field name="name">report.event.seance.tree</field>
             <field name="model">report.event.seance</field>
             <field name="arch" type="xml">
-                <tree string="Event Seance" create="false">
+                <tree string="Seances Analysis" create="false">
                     <field name="seance_id"/>
                     <field name="type_id"/>
                     <field name="course_id"/>
@@ -22,7 +22,7 @@
             <field name="name">report.event.seance.graph</field>
             <field name="model">report.event.seance</field>
             <field name="arch" type="xml">
-                <graph string="Event Seance" type="bar" orientation="horizontal">
+                <graph string="Seances Analysis" type="bar" orientation="horizontal">
                     <field name="seance_id"/>
                     <field name="duration" operator="+"/>
                 </graph>
@@ -33,7 +33,7 @@
             <field name="name">report.event.seance.search</field>
             <field name="model">report.event.seance</field>
             <field name="arch" type="xml">
-                <search string="Event Seances">
+                <search string="Seances Analysis">
                     <field name="seance_id"/>
                     <field name="event_id"/>
                     <group string="Group By...">
@@ -49,7 +49,7 @@
         </record>
 
         <record model="ir.actions.act_window" id="action_report_event_seance">
-            <field name="name">Events Seances</field>
+            <field name="name">Seances Analysis</field>
             <field name="res_model">report.event.seance</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,graph</field>
@@ -75,6 +75,7 @@
         <menuitem id="menu_report_event_seance"
             parent="menu_reporting_events"
             action="action_report_event_seance"
+            string="Seances Analysis"
             sequence="5"
             groups="event.group_event_manager"/>
 

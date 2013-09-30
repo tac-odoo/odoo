@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="report_event_participation_tree" model="ir.ui.view">
+            <field name="name">report.event.participation.tree</field>
+            <field name="model">report.event.participation</field>
+            <field name="arch" type="xml">
+                <tree string="Participations Analysis" create="false">
+                    <field name="id"/>
+                    <field name="partner_id"/>
+                    <field name="seance_id"/>
+                    <field name="seance_event_ids"/>
+                    <field name="seance_date"/>
+                    <field name="month"/>
+                    <field name="year"/>
+                    <field name="presence_status" invisible="1"/>
+                    <field name="presence_duration" widget="float_time"/>
+                    <field name="expected_duration" widget="float_time"/>
+                    <field name="ratio"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="report_event_participation_search" model="ir.ui.view">
+            <field name="name">report.event.participation.search</field>
+            <field name="model">report.event.participation</field>
+            <field name="arch" type="xml">
+                <search string="Participations Analysis">
+                    <field name="partner_id"/>
+                    <field name="seance_event_ids"/>
+                    <separator/>
+                    <filter string="Current Events" name="current_events" domain="[('seance_event_ids.state', 'in', ['draft', 'confirm'])]"/>
+                    <separator/>
+                    <filter string="Present" domain="[('presence_status', '=', 'present'])]"/>
+                    <filter string="Absent" domain="[('presence_status', 'in', ['absent', 'absent_justified'])]"/>
+                    <filter string="Late" domain="[('presence_status', 'in', ['late', 'late_justified'])]"/>
+                    <separator/>
+                    <group string="Group By...">
+                        <filter string="Events" name="group_events" context="{'group_by': 'seance_event_ids'}"/>
+                        <filter string="Partner" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Registration" name="group_registration" context="{'group_by': 'registration_id'}"/>
+                        <separator/>
+                        <filter string="Presence Status" context="{'group_by': 'presence_status'}"/>
+                        <separator/>
+                        <filter string="Day" icon="terp-go-month" domain="[]" context="{'group_by':'seance_date'}" help="Seance Beginning Date"/>
+                        <filter string="Month" icon="terp-go-month" domain="[]" context="{'group_by':'month'}" help="Seance Beginning Date"/>
+                        <filter string="Year" icon="terp-go-year" domain="[]" context="{'group_by':'year'}" help="Seance Beginning Date"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_report_event_participation">
+            <field name="name">Participations analysis</field>
+            <field name="res_model">report.event.participation</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="search_view_id" ref="report_event_participation_search"/>
+            <field name="context">{'search_default_group_events': 1, 'search_default_current_events': 1, 'search_default_group_partner': 1, 'group_by_no_leaf': 1}</field>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_report_event_participation_tree">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="report_event_participation_tree"/>
+            <field name="act_window_id" ref="action_report_event_participation"/>
+        </record>
+
+        <menuitem id="menu_report_event_participation"
+            parent="menu_reporting_events"
+            action="action_report_event_participation"
+            string="Participations analysis"
+            sequence="5"
+            groups="event.group_event_manager"/>
+
+    </data>
+</openerp>

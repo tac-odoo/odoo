@@ -25,7 +25,7 @@ from openerp.osv import osv, fields
 
 class report_event_seance(osv.Model):
     _name = 'report.event.seance'
-    _description = 'Event Seance'
+    _description = 'Seances Analysis'
     _auto = False
 
     _columns = {

@@ -32,7 +32,7 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
 
 class report_event_resource(osv.Model):
     _name = 'report.event.resource'
-    _description = 'Event Resource'
+    _description = 'Resources Analysis'
     _auto = False
 
     RESOURCE_TYPES = [
