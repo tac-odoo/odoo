@@ -273,6 +273,16 @@ class EventContent(osv.Model):
             Registration._update_registration_groups(cr, uid, registration_ids, context=context)
         return new_id
 
+    def _get_changes_to_propagate(self, cr, uid, ids, values, context=None):
+        non_planned_seance_update = {}
+        if 'speaker_id' in values:
+            non_planned_seance_update['main_speaker_id'] = values['speaker_id']
+        if 'room_id' in values:
+            non_planned_seance_update['address_id'] = values['room_id']
+        if 'other_resource_ids' in values:
+            non_planned_seance_update['other_resource_ids'] = values['other_resource_ids']
+        return non_planned_seance_update
+
     def write(self, cr, uid, ids, values, context=None):
         rval = super(EventContent, self).write(cr, uid, ids, values, context=context)
         if any(f in values for f in ['is_divided', 'group_ids']):
@@ -282,20 +292,14 @@ class EventContent(osv.Model):
         if 'event_ids' in values:
             self.unlink_isolated_content(cr, uid, ids, context=context)
 
-        non_planned_seance_update = {}
-        if 'speaker_id' in values:
-            non_planned_seance_update['main_speaker_id'] = values['speaker_id']
-        if 'room_id' in values:
-            non_planned_seance_update['address_id'] = values['room_id']
-        if 'other_resource_ids' in values:
-            non_planned_seance_update['other_resource_ids'] = values['other_resource_ids']
+        non_planned_seance_update = self._get_changes_to_propagate(cr, uid, ids, values, context=context)
         if non_planned_seance_update:
             Seance = self.pool.get('event.seance')
             future_seance_filter = [
                 ('content_id', 'in', ids),
                 '|',
                     ('date_begin', '=', False),
-                    '&', ('date_begin', '>=', time.strftime('%Y-%m-%d %H:%M:%S')),
+                    '&', ('date_begin', '>=', time.strftime('%Y-%m-%d 00:00:00')),
                          ('state', '=', 'draft')
             ]
             seance_ids = Seance.search(cr, uid, future_seance_filter, context=context)
