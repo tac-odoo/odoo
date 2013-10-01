@@ -57,7 +57,13 @@ instance.core_calendar.SelectOptionForm = instance.web.Widget.extend({
         this.options_list = options_list;
         this.options_template = template;
         this.choosen_option = null;
-        this.display_popup();
+        if (this.options_list.length == 1) {
+            // only 1 option to choose, don't ask user
+            this.choosen_option = options_list[0];
+            this.exit_selected(true);
+        } else {
+            this.display_popup();
+        }
         return this.option_selected;
     },
     /* Display aind internal */
@@ -157,6 +163,10 @@ instance.web_calendar.CalendarView = instance.web_calendar.CalendarView.extend({
         scheduler.config.check_limits = true; // required for display marked-spans
         scheduler.config.display_marked_timespans = true;
         this._super();
+        this.scheduler_attachEvent('onBeforeDrag', function(id) {
+            if (!id) return true;
+            return !this.getEvent(id).readonly;
+        });
     },
     is_agenda_by_calendar: function() {
         return this.model && this.color_field && this.color_field == 'calendar_id';
@@ -184,6 +194,14 @@ instance.web_calendar.CalendarView = instance.web_calendar.CalendarView.extend({
             if (this.recurrent_field) {
                 converted_event['recurrent'] = evt[this.recurrent_field];
             }
+            var evi = self.virtual_event_id_to_real(evt.id);
+            _.each(self.subscribed_calendars, function(calendar) {
+                if (calendar.id == evi.calendar_id) {
+                    if (!calendar.access.write) {
+                        converted_event.readonly = true;
+                    }
+                }
+            });
         }
         return converted_event;
     },
@@ -234,8 +252,12 @@ instance.web_calendar.CalendarView = instance.web_calendar.CalendarView.extend({
         var self = this;
         if (this.model == 'core.calendar.event') {
 
+            var calendar_list = _.filter(self.subscribed_calendars, function(calendar) {
+                return !!calendar.access.create;
+            });
+
             var optionpop = new instance.core_calendar.SelectOptionForm(this);
-            optionpop.select_options(self.subscribed_calendars,
+            optionpop.select_options(calendar_list,
                 'SelectSubsribedCalendar.render',
                 {title: _.str.sprintf(_t("Select Calendar"))}
             ).fail(function() {
