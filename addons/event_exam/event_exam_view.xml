@@ -67,6 +67,7 @@
                     <field name="lang_id"/>
                     <field name="main_course_id"/>
                     <field name="question_ids"/>
+                    <field name="max_points"/>
                     <field name="version"/>
                     <field name="state"/>
                 </tree>
@@ -511,10 +512,12 @@
                     <field name="exam_ids">
                         <tree string="Exams" editable="bottom">
                             <field name="questionnaire_id"/>
+                            <field name="questionnaire_scoring_id" invisible="1"/>
                             <field name="score_points"/>
                             <field name="max_points"/>
-                            <field name="score_id"/>
+                            <field name="score_id" attrs="{'readonly': [('manual_score','=',False)]}" domain="[('scoring_id','=',questionnaire_scoring_id)]"/>
                             <field name="succeeded"/>
+                            <field name="manual_score"/>
                         </tree>
                     </field>
                     <separator string="Responses"/>

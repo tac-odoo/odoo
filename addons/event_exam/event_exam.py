@@ -104,7 +104,7 @@ class EventQuestionnaire(osv.Model):
                                       store={
                                           'event.questionnaire': (_store_get_questionnaires_self, ['line_ids'], 10),
                                           'event.questionnaire.line': (_store_get_questionnaires_from_lines, ['question_id'], 10),
-                                          'event.question': (_store_get_questionnaires_from_questions, ['answer_ids', 'points_from', 'points_no_answer'], 10),
+                                          'event.question': (_store_get_questionnaires_from_questions, ['answer_ids', 'points_from', 'points', 'points_no_answer'], 10),
                                       }),
 
         # TODO: course_ids
@@ -242,8 +242,6 @@ class EventQuestion(osv.Model):
         return result
 
     def _set_points(self, cr, uid, id, fieldname, value, args, context=None):
-        l = logging.getLogger('event.question')
-        l.debug('set points to %s for id: %s' % (value, id,))
         cr.execute("UPDATE event_question SET points = %s WHERE id = %s", (value, id,))
         return True
 
@@ -486,6 +484,14 @@ class EventParticipationExam(osv.Model):
         if not ids:
             return {}
         result = {}
+
+        # prefetch manual score id
+        cr.execute("SELECT id, score_id "
+                   "FROM event_participation_exam "
+                   "WHERE id in %s AND manual_score = true",
+                   (tuple(ids),))
+        manual_scores = dict(x for x in cr.fetchall())
+
         for exam in self.browse(cr, uid, ids, context=context):
             questionnaire = exam.questionnaire_id
             p = exam.participation_id
@@ -500,12 +506,20 @@ class EventParticipationExam(osv.Model):
                         or scoring.mode == 'percentage' and perc >= level.level):
                     score_id = level.id
                     break
+            if exam.manual_score:
+                score_id = manual_scores.get(exam.id) or score_id
 
             result[exam.id] = {
                 'score_points': points,
                 'score_id': score_id,
             }
         return result
+
+    def _set_score(self, cr, uid, id, fieldname, value, args, context=None):
+        cr.execute("UPDATE event_participation_exam SET score_id = %s "
+                   "WHERE id = %s AND manual_score = true",
+                   (value, id,))
+        return True
 
     def _store_get_participation_exam_self(self, cr, uid, ids, context=None):
         return ids
@@ -526,17 +540,21 @@ class EventParticipationExam(osv.Model):
         'course_id': fields.related('participation_id', 'course_id', type='many2one',
                                     string='Course', relation='event.course'),
         'questionnaire_id': fields.many2one('event.questionnaire', 'Questionnaire', required=True),
+        'questionnaire_scoring_id': fields.related('questionnaire_id', 'scoring_id', type='many2one',
+                                                   relation='event.scoring', string='Questionnaire Scoring'),
         'max_points': fields.related('questionnaire_id', 'max_points', type='float', string='Max Points', readonly=True),
         'score_id': fields.function(_get_score, type='many2one', relation='event.scoring.level',
+                                    fnct_inv=_set_score,
                                     string='Score', multi='exam-score', store={
-                                        'event.participation.exam': (_store_get_participation_exam_self, ['score_points', 'questionnaire_id'], 20),
+                                        'event.participation.exam': (_store_get_participation_exam_self, ['score_points', 'questionnaire_id', 'manual_score'], 20),
                                         'event.participation.response': (_store_get_participation_exam_from_responses, None, 10),
                                     }),
+        'manual_score': fields.boolean('Manual', help='Check this to force the score manually'),
         'succeeded': fields.related('score_id', 'pass', type='boolean',
                                     string='Succeeded', store=True, readonly=True),
         'score_points': fields.function(_get_score, type='float',
                                         string='Score (points)', multi='exam-score', store={
-                                            'event.participation.exam': (_store_get_participation_exam_self, ['score_points', 'questionnaire_id'], 20),
+                                            'event.participation.exam': (_store_get_participation_exam_self, ['score_points', 'questionnaire_id', 'manual_score'], 20),
                                             'event.participation.response': (_store_get_participation_exam_from_responses, None, 10),
                                         })
     }
