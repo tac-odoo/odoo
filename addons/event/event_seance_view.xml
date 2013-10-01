@@ -723,8 +723,9 @@
                     <field name="name"/>
                     <field name="partner_id"/>
                     <field name="seance_id" invisible="1"/>
-                    <field name="name" filter_domain="[('seance_id.name', 'ilike', self)]" string="Seance Name"/>
                     <field name="state"/>
+                    <field name="name" filter_domain="[('seance_id.name', 'ilike', self)]" string="Seance Name"/>
+                    <field name="seance_type"/>
                     <filter name="today" string="Today" domain="[('seance_date','>=',current_date),('seance_date','&lt;',current_date)]" context="{}"/>
                     <separator/>
                     <filter name="state_draft" string="Draft" domain="[('state','=','draft')]"/>
