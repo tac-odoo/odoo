@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record model="ir.rule" id="event_professor_purchase_order">
+            <field name="name">Professor - List own purchase orders</field>
+            <field name="model_id" ref="purchase.model_purchase_order"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">[('partner_id','=',user.partner_id.id)]</field>
+            <field name="groups" eval="[(4, ref('event.group_event_professor'))]"/>
+        </record>
+
+        <record model="ir.rule" id="event_professor_purchase_order_line">
+            <field name="name">Professor - List own purchase orders line</field>
+            <field name="model_id" ref="purchase.model_purchase_order_line"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">[('order_id.partner_id','=',user.partner_id.id)]</field>
+            <field name="groups" eval="[(4, ref('event.group_event_professor'))]"/>
+        </record>
+
+    </data>
+</openerp>

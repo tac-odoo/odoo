@@ -59,6 +59,7 @@ class EventCourseSubject(osv.Model):
 class EventCourse(osv.Model):
     _name = 'event.course'
     _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _description = 'Event Course'
 
     _course_states = [
         ('draft', 'Unreviewed'),

@@ -26,6 +26,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 from functools import partial
 from dateutil.relativedelta import relativedelta, MO
+from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from openerp.tools import float_is_zero
@@ -1041,6 +1042,11 @@ class EventParticipation(osv.Model):
             raise osv.except_osv(_('Error!'),
                                  _('No Presence Arrival & Departure Provided'))
 
+        # Impersonate 'take presence' action for 'Professor' group
+        # (as they only have normally read access - except for taking presence)
+        ModelAccess = self.pool.get('ir.model.access')
+        write_user = SUPERUSER_ID if ModelAccess.check_groups(cr, uid, 'event.group_event_professor') else uid
+
         Seance = self.pool.get('event.seance')
         # Group participations by seance so we write() once per seance
         parts_by_seance = defaultdict(list)
@@ -1064,7 +1070,7 @@ class EventParticipation(osv.Model):
                 if not (seance.date_begin <= departure <= seance.date_end):
                     departure = seance.date_end
                 values.update(arrival_time=arrival, departure_time=departure)
-            self.write(cr, uid, participation_ids, values, context=context)
+            self.write(cr, write_user, participation_ids, values, context=context)
         return True
 
     def button_take_presence(self, cr, uid, ids, context=None):

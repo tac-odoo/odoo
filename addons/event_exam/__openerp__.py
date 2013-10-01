@@ -46,6 +46,7 @@ Key Features
     'data': [
         'event_exam_view.xml',
         'security/ir.model.access.csv',
+        'security/event_exam_rules.xml',
     ],
     'demo': ['event_exam_demo.xml'],
     'test': [],

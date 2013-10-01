@@ -32,7 +32,11 @@ speakers/trainer participations.
 """,
     'author': 'OpenERP SA',
     'depends': ['event', 'purchase'],
-    'data': ['event_purchase_view.xml'],
+    'data': [
+        'event_purchase_view.xml',
+        'security/ir.model.access.csv',
+        'security/event_purchase_rules.xml',
+    ],
     'demo': [],
     'test': [],
     'installable': True,

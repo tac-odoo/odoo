@@ -47,3 +47,10 @@ access_event_seance_type_registration,event.seance.type,model_event_seance_type,
 access_event_type_registration,event.type,model_event_type,event.group_event_registration,1,0,0,0
 access_report_event_registration,report.event.registration,model_report_event_registration,event.group_event_registration,1,0,0,0
 access_report_event_participation,report.event.participation,model_report_event_participation,event.group_event_registration,1,0,0,0
+access_event_course_professor,event.course,model_event_course,event.group_event_professor,1,0,0,0
+access_event_course_material_professor,event.course.material,model_event_course_material,event.group_event_professor,1,1,1,1
+access_event_course_speakerinfo_professor,event.course.speakerinfo,model_event_course_speakerinfo,event.group_event_professor,1,0,0,0
+access_resource_calendar_professor,resource.calendar,resource.model_resource_calendar,event.group_event_professor,1,0,0,0
+access_event_content_module_professor,event.content.module,model_event_content_module,event.group_event_professor,1,0,0,0
+access_event_course_subject_professor,event.course.subject,model_event_course_subject,event.group_event_professor,1,0,0,0
+access_report_event_resource,report.event.resource,model_report_event_resource,event.group_event_professor,1,0,0,0

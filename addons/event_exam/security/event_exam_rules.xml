@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record model="ir.rule" id="event_professor_participation_exams">
+            <field name="name">Professor - list all participations exams</field>
+            <field name="model_id" ref="model_event_participation_exam"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">['|',('participation_id.seance_id.main_speaker_id','=',user.partner_id.id),('participation_id.seance_id.other_resource_ids', 'in', [user.partner_id.id])]</field>
+            <field name="groups" eval="[(4, ref('event.group_event_professor'))]"/>
+        </record>
+
+        <record model="ir.rule" id="event_professor_participation_responses">
+            <field name="name">Professor - list all participations responses</field>
+            <field name="model_id" ref="model_event_participation_response"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">['|',('participation_id.seance_id.main_speaker_id','=',user.partner_id.id),('participation_id.seance_id.other_resource_ids', 'in', [user.partner_id.id])]</field>
+            <field name="groups" eval="[(4, ref('event.group_event_professor'))]"/>
+        </record>
+
+
+    </data>
+</openerp>

@@ -39,7 +39,8 @@
             <field name="arch" type="xml">
                 <xpath expr="//header/button[@name='button_cancel']" position="after">
                     <button type="action" name="%(action_estimate_end_date_wizard)d"
-                            string="Estimate end date"/>
+                            string="Estimate end date"
+                            groups="event.group_event_manager,event.group_event_planning"/>
                 </xpath>
             </field>
         </record>

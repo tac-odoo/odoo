@@ -13,10 +13,10 @@
                     <button type="object" name="open_registrations" string="Registrations"/>
                     <button type="object" name="open_events" string="Events"/>
                     <button type="object" name="open_courses" string="Courses"
-                            attrs="{'invisible': [('speaker','=',False)]}"/>
+                            attrs="{'invisible': [('speaker','=',False)]}" groups="base.group_event_manager"/>
                 </div>
                 <xpath expr="//page[@string='Sales &amp; Purchases']" position="after">
-                    <page string="Event">
+                    <page string="Event" groups="event.group_event_user,event.group_event_manager,event.group_event_planning">
                         <group>
                             <group>
                                 <field name="speaker" on_change="onchange_event_role('speaker', speaker, room, equipment)"/>
@@ -321,6 +321,7 @@
         <menuitem id="menu_event_library_resource"
                     parent="menu_event_resources_root"
                     action="action_event_library_resource"
+                    groups="event.group_event_user,event.group_event_manager"
                     sequence="20"/>
 
    </data>

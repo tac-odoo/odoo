@@ -71,6 +71,7 @@
                   parent="base.menu_reporting_dashboard"
                   action="open_board_associations_manager"
                   sequence="40"
-                  icon="terp-graph"/>
+                  icon="terp-graph"
+                  groups="event.group_event_user,event.group_event_manager"/>
     </data>
 </openerp>

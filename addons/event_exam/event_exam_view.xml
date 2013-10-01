@@ -140,7 +140,8 @@
         <menuitem id="menu_event_questionnaire"
             parent="event.menu_event_library_root"
             action="action_event_questionnaire"
-            sequence="12"/>
+            sequence="12"
+            groups="event.group_event_user,event.group_event_manager"/>
 
         <record id="view_event_question_tree" model="ir.ui.view">
             <field name="name">event.question.tree</field>
@@ -249,7 +250,8 @@
     <menuitem id="menu_event_question"
         parent="event.menu_event_library_root"
         action="action_event_question"
-        sequence="13"/>
+        sequence="13"
+        groups="event.group_event_user,event.group_event_manager"/>
 
     <record id="view_event_question_domain_tree" model="ir.ui.view">
         <field name="name">event.question.domain.tree</field>
@@ -519,6 +521,15 @@
                             <field name="succeeded"/>
                             <field name="manual_score"/>
                         </tree>
+                        <form string="Exams">
+                            <field name="questionnaire_id"/>
+                            <field name="questionnaire_scoring_id" invisible="1"/>
+                            <field name="score_points"/>
+                            <field name="max_points"/>
+                            <field name="score_id" attrs="{'readonly': [('manual_score','=',False)]}" domain="[('scoring_id','=',questionnaire_scoring_id)]"/>
+                            <field name="succeeded"/>
+                            <field name="manual_score"/>
+                        </form>
                     </field>
                     <separator string="Responses"/>
                     <field name="exam_response_ids">

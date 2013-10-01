@@ -23,6 +23,7 @@ import time
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta, MO
 from collections import defaultdict
+from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 from openerp import tools
 from openerp.addons.core_calendar.timeline import Availibility
@@ -145,10 +146,12 @@ class report_event_resource(osv.Model):
 
             get_timelines = Partner._get_resource_timeline
             get_hours = self._compute_resource_hours
-            for partner_id, timeline in get_timelines(cr, uid, ids,
+            # Get timeline & hours as SUPERUSER to get correct result
+            # even if ir.rule are applied
+            for partner_id, timeline in get_timelines(cr, SUPERUSER_ID, ids,
                                                       date_from=start, date_to=end,
                                                       context=context).iteritems():
-                result[partner_id] = get_hours(cr, uid, partner_id, timeline,
+                result[partner_id] = get_hours(cr, SUPERUSER_ID, partner_id, timeline,
                                                start, end, context=context)
             return result
 

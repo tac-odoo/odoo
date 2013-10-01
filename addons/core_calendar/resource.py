@@ -22,6 +22,7 @@
 from collections import defaultdict
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
+from openerp import SUPERUSER_ID
 
 
 def float_to_hm(hours):
@@ -61,8 +62,8 @@ class ResourceCalendar(osv.Model):
         if context.get('show_week_hours'):
             Attendance = self.pool.get('resource.calendar.attendance')
             resdict = dict(result)
-            weekdaynames = dict(Attendance.fields_get(cr, user, ['dayofweek'], context=context)['dayofweek']['selection'])
-            for calendar in self.browse(cr, user, ids, context=context):
+            weekdaynames = dict(Attendance.fields_get(cr, SUPERUSER_ID, ['dayofweek'], context=context)['dayofweek']['selection'])
+            for calendar in self.browse(cr, SUPERUSER_ID, ids, context=context):
                 hours_by_wday = defaultdict(list)
                 # Group attendance per "week day"
                 # then merge them together (1 weekday per line)

@@ -55,6 +55,7 @@
         <menuitem id="menu_event_resource_agenda"
                     parent="menu_event_resources_root"
                     action="action_resource_agenda"
+                    groups="event.group_event_manager,event.group_event_planning"
                     sequence="40"/>
 
         <!-- EVENTS CONTENT -->
@@ -213,7 +214,8 @@
             <field name="arch" type="xml">
                 <xpath expr="//div[contains(@class, 'oe_button_box')]" position="inside">
                     <button type="action" name="%(action_event_2_seance_link)d" string="Seances"
-                            attrs="{'invisible': [('has_program','=',False)]}" states="template,draft,confirm,done"/>
+                            attrs="{'invisible': [('has_program','=',False)]}" states="template,draft,confirm,done"
+                            groups="event.group_event_manager,event.group_event_planning"/>
                 </xpath>
                 <xpath expr="//div[@class='options_active']" position="inside">
                     <field name="has_program" on_change="onchange_has_program(has_program, date_begin, content_ids, context)"/><label for="has_program"/>
@@ -232,7 +234,7 @@
                                     <span attrs="{'invisible': [('calendar_id','!=',False)]}" groups="base.group_user">No hours specified, OpenERP will consider 24/24 7/7 hours</span>
                                     <button type="action" name="%(event.action_event_leaves)d"
                                             string="(configure event vacations)" class="oe_link" states="draft,confirm"
-                                            context="{'default_event_id': active_id}"/>
+                                            context="{'default_event_id': active_id}" groups="event.group_event_manager,event.group_event_planning"/>
                                 </div>
                             </group>
                             <group>
@@ -240,9 +242,9 @@
                                 <div>
                                     <field name="content_planification" class="oe_inline"/>
                                     <button type="object" name="recompute_seances" class="oe_link" string="(recompute seances)"
-                                            attrs="{'invisible': [('content_planification', '!=', 'linear')]}" states="draft,confirm"/>
+                                            attrs="{'invisible': [('content_planification', '!=', 'linear')]}" states="draft,confirm" groups="event.group_event_manager,event.group_event_planning"/>
                                     <button type="object" name="open_preplanning" class="oe_link" string="(=> open preplanning)"
-                                            attrs="{'invisible': [('content_planification', '!=', 'preplanning')]}" states="draft,confirm,done"/>
+                                            attrs="{'invisible': [('content_planification', '!=', 'preplanning')]}" states="draft,confirm,done" groups="event.group_event_manager,event.group_event_planning"/>
                                 </div>
                             </group>
                         </group>
@@ -407,12 +409,12 @@
             <field name="arch" type="xml">
                 <form string="Seance" version="7.0">
                     <header>
-                        <button type="object" name="button_set_draft" states="cancel,done,planned,confirm" string="Set Draft"/>
-                        <button type="object" name="button_set_planned" states="draft" string="Set Planned"/>
-                        <button type="object" name="button_set_confirm" states="draft,planned" string="Confirm"/>
-                        <button type="object" name="button_set_inprogress" states="confirm" string="Start seance"/>
-                        <button type="object" name="button_set_closed" states="inprogress" string="Stop seance"/>
-                        <button type="object" name="button_set_done" states="confirm,inprogress,closed" string="Done"/>
+                        <button type="object" name="button_set_draft" states="cancel,done,planned,confirm" string="Set Draft" groups="event.group_event_manager,event.group_event_planning"/>
+                        <button type="object" name="button_set_planned" states="draft" string="Set Planned" groups="event.group_event_manager,event.group_event_planning"/>
+                        <button type="object" name="button_set_confirm" states="draft,planned" string="Confirm" groups="event.group_event_manager,event.group_event_planning"/>
+                        <button type="object" name="button_set_inprogress" states="confirm" string="Start seance" groups="event.group_event_manager,event.group_event_planning,event.group_event_professor"/>
+                        <button type="object" name="button_set_closed" states="inprogress" string="Stop seance" groups="event.group_event_manager,event.group_event_planning,event.group_event_professor"/>
+                        <button type="object" name="button_set_done" states="confirm,inprogress,closed" string="Done" groups="event.group_event_manager,event.group_event_planning,event.group_event_professor"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
                     </header>
                     <sheet>
@@ -447,7 +449,7 @@
                                         <field name="group_id" domain="[('event_content_id','=',content_id)]"/>
                                     </group>
                                 </group>
-                                <div groups="base.group_user">
+                                <div groups="event.group_event_manager,event.group_event_planning">
                                     <separator string="Conflicts"/>
                                     <field name="event_conflict_ids" attrs="{'invisible': [('event_conflict_ids','=',False)]}">
                                         <tree string="Conflicts">
@@ -655,14 +657,14 @@
                         <button name="button_set_draft"
                             states="confirm,cancel"
                             string="Set Draft" type="object"
-                            icon="terp-crm"/>
+                            icon="terp-crm" groups="event.group_event_manager,event.group_event_planning"/>
                         <button name="button_set_confirm" string="Confirm"
                             states="draft,cancel"
-                            type="object" icon="gtk-apply"/>
+                            type="object" icon="gtk-apply" groups="event.group_event_manager,event.group_event_planning"/>
                         <button name="button_set_cancel" string="Cancel"
                             states="draft,confirm"
-                            type="object" icon="gtk-cancel"/>
-                        <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                            type="object" icon="gtk-cancel" groups="event.group_event_manager,event.group_event_planning"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,done" groups="event.group_event_manager,event.group_event_planning"/>
                     </header>
                     <sheet>
                         <div class="oe_right oe_button_box" name="buttons">
@@ -842,6 +844,7 @@
         <menuitem id="menu_event_resource_participation"
                     parent="menu_event_resources_root"
                     action="action_event_resource_participation"
+                    groups="event.group_event_manager,event.group_event_planning"
                     sequence="30"/>
 
         <record model="ir.ui.view" id="view_event_participation_group_tree">

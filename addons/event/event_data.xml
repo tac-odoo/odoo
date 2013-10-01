@@ -19,7 +19,7 @@
             <field name="filter_expr"></field>
             <field name="field_state" ref="event.field_event_seance_state"/>
             <field name="states_tentative">draft,planned</field>
-            <field name="states_confirm">confirm,done</field>
+            <field name="states_confirm">inprogress,closed,confirm,done</field>
             <field name="states_cancel">cancel</field>
         </record>
 

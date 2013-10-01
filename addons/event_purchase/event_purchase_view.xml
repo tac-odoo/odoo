@@ -116,5 +116,33 @@
             </field>
         </record>
 
+        <record id="action_resource_purchase" model="ir.actions.act_window">
+            <field name="name">Purchase Order</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.order</field>
+            <field name="context">{'search_default_draft': 1}</field>
+            <field name="domain">[]</field>
+            <field name="view_mode">tree,form,graph,calendar</field>
+            <field name="search_view_id" ref="purchase.view_purchase_order_filter"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to create a request for quotation.
+              </p><p>
+                The quotation contains the history of the discussion/negociation
+                you had with your supplier. Once confirmed, a request for
+                quotation is converted into a purchase order.
+              </p><p>
+                Most propositions of purchase orders are created automatically
+                by OpenERP based on inventory needs.
+              </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_event_resource_purchase"
+                    parent="event.menu_event_resources_root"
+                    action="action_resource_purchase"
+                    groups="event.group_event_manager,event.group_event_planning,event.group_event_professor"
+                    sequence="35"/>
+
     </data>
 </openerp>

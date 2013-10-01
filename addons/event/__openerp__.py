@@ -44,6 +44,7 @@ Key Features
                 'base_status'],
     'data': [
         'security/event_security.xml',
+        'security/event_rules.xml',
         'security/ir.model.access.csv',
         'wizard/event_confirm_view.xml',
         'wizard/event_participant_take_presence_view.xml',

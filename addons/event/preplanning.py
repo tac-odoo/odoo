@@ -22,6 +22,7 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta, MO
 from collections import defaultdict
+from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
@@ -110,7 +111,10 @@ class EventPreplanning(osv.TransientModel):
         if not event_id:
             return {}
         result = {'contents': [], 'weeks': []}
-        event = self.pool.get('event.event').browse(cr, uid, event_id, context=context)
+
+        # Browse as SUPERUSER_ID to prevent ir.rule from filtering stuff, which
+        # will display inconsitant datas
+        event = self.pool.get('event.event').browse(cr, SUPERUSER_ID, event_id, context=context)
         week_start_day = MO
 
         date_begin = datetime.strptime(max(event.date_begin, date_begin), DT_FMT) + relativedelta(weekday=week_start_day(-1))
