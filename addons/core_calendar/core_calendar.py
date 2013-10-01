@@ -1229,7 +1229,8 @@ class CoreCalendarEvent(osv.Model):
             if all(calendar_info['fields'][f] for f in ['date_start', 'date_end', 'duration']):
                 # all dates fields are directly writable - passthough
                 vals = dict((calendar_info['fields'][f], values[f])
-                            for f in ['date_start', 'date_end', 'duration'])
+                            for f in ['date_start', 'date_end', 'duration']
+                            if f in calendar_info['fields'] and f in values)
                 calendar_model.write(cr, uid, item_ids, vals, context=context)
                 continue
 
