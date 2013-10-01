@@ -619,9 +619,10 @@ class CoreCalendar(osv.Model):
                         elif isinstance(x, basestring) and x.isdigit():
                             return long(x)
                         return x
-                    calendar_attendee_fields = calendar_info['fields']['attendee_ids']
-                    if calendar_info['fields']['organizer_id']:
-                        calendar_attendee_fields.append(calendar_info['fields']['organizer_id'])
+                    calendar_attendee_fields = calendar_info['fields']['attendee_ids'][:]
+                    organizer_id_field = calendar_info['fields']['organizer_id']
+                    if organizer_id_field and organizer_id_field not in calendar_attendee_fields:
+                        calendar_attendee_fields.append(organizer_id_field)
                     # print("Attendee calendar fields: %s" % (calendar_attendee_fields,))
                     if calendar_attendee_fields:
                         domains = [[f + field_extra, arg[1], fix_id(arg[2])] for f in calendar_attendee_fields]
