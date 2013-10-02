@@ -590,7 +590,10 @@ openerp.web.pyeval = function (instance) {
             if (day > lastMonthDay) { day = lastMonthDay; }
             var days_offset = ((asJS(this.ops.weeks) || 0) * 7) + (asJS(this.ops.days) || 0);
             if (days_offset) {
-                day = new Date(year, month-1, day - days_offset).getDate();
+                var ndate = new Date(year, month-1, day - days_offset);
+                day = ndate.getDate();
+                month = ndate.getMonth() + 1;
+                year = ndate.getFullYear();
             }
             // TODO: leapdays?
             // TODO: hours, minutes, seconds? Not used in XML domains
