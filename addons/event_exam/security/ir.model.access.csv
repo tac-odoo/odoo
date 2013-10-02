@@ -16,3 +16,14 @@ access_event_participation_response_professor,event.participation.response,model
 access_event_questionnaire_professor,event.questionnaire,model_event_questionnaire,event.group_event_professor,1,0,0,0
 access_event_scoring_professor,event.scoring,model_event_scoring,event.group_event_professor,1,0,0,0
 access_event_scoring_level_professor,event.scoring.level,model_event_scoring_level,event.group_event_professor,1,0,0,0
+access_event_scoring_manager,event.scoring,model_event_scoring,event.group_event_manager,1,1,1,1
+access_event_scoring_leve_manager,event.scoring.level,model_event_scoring_level,event.group_event_manager,1,1,1,1
+access_event_question_manager,event.question,model_event_question,event.group_event_manager,1,1,1,1
+access_event_questionnaire_manager,event.questionnaire,model_event_questionnaire,event.group_event_manager,1,1,1,1
+access_event_questionnaire_line_manager,event.questionnaire.line,model_event_questionnaire_line,event.group_event_manager,1,1,1,1
+access_event_question_answer_manager,event.question.answer,model_event_question_answer,event.group_event_manager,1,1,1,1
+access_event_question_domain_manager,event.question.domain,model_event_question_domain,event.group_event_manager,1,1,1,1
+access_event_participation_exam_manager,event.participation.exam,model_event_participation_exam,event.group_event_manager,1,1,1,1
+access_event_participation_response_manager,event.participation.response,model_event_participation_response,event.group_event_manager,1,1,1,1
+access_event_degree_manager,event.degree,model_event_degree,event.group_event_manager,1,1,1,1
+access_event_degree_contact_manager,event.degree.contact,model_event_degree_contact,event.group_event_manager,1,1,1,1
