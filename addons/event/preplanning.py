@@ -152,7 +152,7 @@ class EventPreplanning(osv.TransientModel):
                 'slot_duration': content.slot_duration,
             })
             if content.lang_id:
-                content_lang = content.lang_id.iso_code.upper() \
+                content_lang = (content.lang_id.iso_code or content.lang_id.code).upper() \
                                 or content.lang_id.code[:2].upper() \
                                 or content.lang_id.name[:2]
             else:
