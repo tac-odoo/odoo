@@ -369,7 +369,7 @@
                     <field name="type_id"/>
                     <field name="planned_week_date"/>
                     <field name="date_begin"/>
-                    <field name="duration" widget="float_time"/>
+                    <field name="duration" widget="float_time" sum="Total duration"/>
                     <field name="address_id"/>
                     <field name="main_speaker_id"/>
                     <field name="content_id" invisible="1"/>
