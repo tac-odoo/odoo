@@ -951,12 +951,23 @@ class EventParticipation(osv.Model):
             }
         return result
 
+    def _store_get_participation_self(self, cr, uid, ids, context=None):
+        return ids
+
+    def _store_get_participation_from_seances(self, cr, uid, ids, context=None):
+        Participation = self.pool.get('event.participation')
+        return Participation.search(cr, uid, [('seance_id', 'in', ids)], context=context)
+
     _columns = {
         'name': fields.char('Participant Name', size=128, required=True),
         'role': fields.selection(ROLES, 'Role', required=True, select=True),
         'partner_id': fields.many2one('res.partner', 'Participant', select=True),
         'seance_id': fields.many2one('event.seance', 'Seance', required=True, ondelete='cascade', select=True),
-        'seance_date': fields.related('seance_id', 'date_begin', type='datetime', string='Seance Date', readonly=True),
+        'seance_date': fields.related('seance_id', 'date_begin', type='datetime', string='Seance Date', readonly=True,
+                                      store={
+                                          'event.participation': (_store_get_participation_self, ['seance_id'], 10),
+                                          'event.seance': (_store_get_participation_from_seances, ['date_begin'], 10),
+                                      }),
         'seance_event_ids': fields.related('seance_id', 'event_ids', type='many2many', relation='event.event', readonly=True, string='Events'),
         'seance_type': fields.related('seance_id', 'type_id', type='many2one', relation='event.seance.type', readonly=True, string='Seance Type'),
         'date': fields.related('seance_id', 'date_begin', type='datetime', string='Date', readonly=True),

@@ -628,6 +628,7 @@
                     <field name="partner_id" invisible="1"/>
                     <field name="seance_event_ids"/>
                     <field name="seance_id"/>
+                    <field name="seance_date" invisible="1"/>
                     <field name="duration"/>
                     <field name="presence" invisible="1"/>
                     <field name="presence_summary"/>
@@ -728,7 +729,10 @@
                     <field name="state"/>
                     <field name="name" filter_domain="[('seance_id.name', 'ilike', self)]" string="Seance Name"/>
                     <field name="seance_type"/>
+                    <separator/>
                     <filter name="today" string="Today" domain="[('seance_date','>=',current_date),('seance_date','&lt;',current_date)]" context="{}"/>
+                    <filter name="seven_floatting_days" string="7 floating days" domain="[('seance_date','&gt;=',(context_today() - relativedelta(days=3)).strftime('%%Y-%%m-%%d 00:00:00')),('seance_date','&lt;=', (context_today() + relativedelta(days=3)).strftime('%%Y-%%m-%%d 00:00:00'))]"/>
+                    <separator/>
                     <separator/>
                     <filter name="state_draft" string="Draft" domain="[('state','=','draft')]"/>
                     <filter name="state_confirm" string="Confirm" domain="[('state','=','confirm')]"/>
@@ -744,6 +748,7 @@
                         <filter name="group_presence" string="Presence" context="{'group_by': 'presence'}"/>
                         <filter name="group_partner" string="Partner" context="{'group_by': 'partner_id'}"/>
                         <filter name="group_event" string="Event" context="{'group_by': 'seance_event_ids'}"/>
+                        <filter name="group_day" string="Day" context="{'group_by': 'seance_date', 'datetime_format': {'seance_date': {'groupby_format': 'yyyy-mm-dd', 'display_format': 'dd MMM yyyy', 'interval': 'day'}}}"/>
                     </group>
                 </search>
             </field>
