@@ -454,8 +454,9 @@ class EventSeance(osv.Model):
 
 class EventParticipationReponse(osv.Model):
     _name = 'event.participation.response'
-    _order = 'questionnaire_id'
+    _order = 'questionnaire_id, sequence, id'
     _columns = {
+        'sequence': fields.integer('Sequence'),
         'participation_id': fields.many2one('event.participation', 'Participation', required=True, ondelete='cascade'),
         'questionnaire_id': fields.many2one('event.questionnaire', 'Questionnaire', required=True),
         'question_id': fields.many2one('event.question', 'Question', required=True),
@@ -581,25 +582,37 @@ class EventParticipation(osv.Model):
             )
         return changes
 
+    def button_recompute_responses(self, cr, uid, ids, context=None):
+        return self._recompute_exam_responses(cr, uid, ids, context=context)
+
     def _recompute_exam_responses(self, cr, uid, ids, context=None):
         for p in self.browse(cr, uid, ids, context=context):
-            current_question_ids = dict(((r.questionnaire_id.id, r.question_id.id), r.id)
+            current_question_ids = dict(((r.questionnaire_id.id, r.question_id.id), r)
                                         for r in p.exam_response_ids)
             current_questions_set = set(current_question_ids.keys())
             needed_questions_set = set()
+            commands = []
+
+            seq = 0
             for exam in p.exam_ids:
                 for line in exam.questionnaire_id.line_ids:
+                    seq += 1
                     if line.question_id.id:
-                        needed_questions_set.add((exam.questionnaire_id.id, line.question_id.id))
+                        qkey = (exam.questionnaire_id.id, line.question_id.id)
+                        needed_questions_set.add(qkey)
+                        if qkey in current_questions_set:
+                            response = current_question_ids[qkey]
+                            commands.append((1, response.id, {'sequence': seq}))
+                        else:
+                            values = {
+                                'sequence': seq,
+                                'questionnaire_id': exam.questionnaire_id.id,
+                                'question_id': line.question_id.id,
+                            }
+                            commands.append((0, 0, values))
 
-            commands = []
             responses_to_delete = current_questions_set - needed_questions_set
-            commands.extend((2, current_question_ids[k]) for k in responses_to_delete)
-
-            responses_to_create = needed_questions_set - current_questions_set
-            for questionnaire_id, question_id in responses_to_create:
-                commands.append((0, 0, {'questionnaire_id': questionnaire_id,
-                                        'question_id': question_id}))
+            commands.extend((2, current_question_ids[k].id) for k in responses_to_delete)
 
             p.write({'exam_response_ids': commands})
 

@@ -532,8 +532,13 @@
                         </form>
                     </field>
                     <separator string="Responses"/>
+                    <div groups="event.group_event_manager,event.group_event_registration" class="oe_inline">
+                        <button type="object" name="button_recompute_responses"
+                                string="(recompute responses)" class="oe_inline oe_link"/>
+                    </div>
                     <field name="exam_response_ids">
                         <tree string="Responses" editable="bottom">
+                            <field name="sequence" widget="handle"/>
                             <field name="questionnaire_id" readonly="1"/>
                             <field name="question_id" readonly="1"/>
                             <field name="points" on_change="onchange_points(question_id, points)"/>
@@ -546,6 +551,7 @@
                             <field name="points"/>
                             <field name="max_points"/>
                             <field name="is_graded"/>
+                            <field name="sequence" invisible="1"/>
                         </form>
                     </field>
                 </page>
