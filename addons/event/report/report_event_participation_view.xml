@@ -29,6 +29,7 @@
                 <search string="Participations Analysis">
                     <field name="partner_id"/>
                     <field name="seance_event_ids"/>
+                    <field name="registration_stage_id"/>
                     <separator/>
                     <filter string="Current Events" name="current_events" domain="[('seance_event_ids.state', 'in', ['draft', 'confirm'])]"/>
                     <separator/>

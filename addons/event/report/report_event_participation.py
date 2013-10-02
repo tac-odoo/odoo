@@ -33,10 +33,16 @@ class report_event_participation(osv.Model):
         presence = Participation.fields_get(cr, uid, ['presence'], context=context)['presence']
         return presence['selection']
 
+    def _get_registration_states(self, cr, uid, context=None):
+        Registration = self.pool.get('event.registration')
+        return Registration.fields_get(cr, uid, ['state'])['state']['selection']
+
     _columns = {
         'id': fields.integer('Id', readonly=True),
         'name': fields.char('Name', readonly=True),
         'registration_id': fields.many2one('event.registration', 'Registration', readonly=True),
+        'registration_stage_id': fields.many2one('event.registration.stage', 'Registration Status', readonly=True),
+        'registration_state': fields.selection(_get_registration_states, 'Registration State', readonly=True),
         'partner_id': fields.many2one('res.partner', 'Partner', readonly=True),
         'seance_id': fields.many2one('event.seance', 'Seance', readonly=True),
         'seance_date': fields.char('Seance Start Date', size=64, readonly=True),
@@ -67,6 +73,8 @@ class report_event_participation(osv.Model):
                 p.partner_id AS partner_id,
                 p.presence AS presence_status,
                 p.registration_id AS registration_id,
+                reg.stage_id AS registration_stage_id,
+                reg.state AS registration_state,
                 s.id AS seance_id,
                 to_char(s.date_begin, 'YYYY-MM-DD') AS seance_date,
                 to_char(s.date_begin, 'YYYY') AS year,
@@ -76,6 +84,7 @@ class report_event_participation(osv.Model):
                 (extract(epoch from (p.departure_time - p.arrival_time)) / 3600::float)  / s.duration AS ratio
 
             FROM event_participation AS p
+            LEFT JOIN event_registration AS reg ON (p.registration_id = reg.id)
             LEFT JOIN event_seance AS s ON (p.seance_id = s.id)
             WHERE p.role = 'participant'
         )
