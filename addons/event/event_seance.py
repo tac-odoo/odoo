@@ -1025,6 +1025,10 @@ class EventParticipation(osv.Model):
                       ('partner_id.event_assignment_mode', '=', 'automatic'),
         ], context=context)
         if auto_cancel_participation_ids:
+            for p in self.browse(cr, uid, auto_cancel_participation_ids, context=context):
+                if p.seance_id.state == 'done':
+                    raise osv.except_osv(_('Error!'),
+                                         _('OpenERP can not delete participations which are related to a done seance'))
             self.button_set_cancel(cr, uid, auto_cancel_participation_ids, context=context)
 
         participation_not_draft_not_cancel = self.search(cr, uid, [
@@ -1098,10 +1102,6 @@ class EventParticipation(osv.Model):
         return self.write(cr, uid, ids, {'state': 'done'}, context=context)
 
     def button_set_cancel(self, cr, uid, ids, context=None):
-        for p in self.browse(cr, uid, ids, context=context):
-            if p.seance_id.state == 'done':
-                raise osv.except_osv(_('Error!'),
-                                     _('OpenERP can not delete participations which are related to a done seance'))
         return self.write(cr, uid, ids, {'state': 'cancel'}, context=context)
 
 
