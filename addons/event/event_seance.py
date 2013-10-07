@@ -767,7 +767,6 @@ class EventSeance(osv.Model):
         ids = list(set(ids))
 
         for seance in self.browse(cr, uid, ids, context=context):
-            # print(">>> refreshing participation for seance '%s' [%d]" % (seance.name, seance.id,))
             # registrations = Registration.browse(cr, uid, regids_cache[seance.id], context=context)
             if seance.type_id and seance.type_id.manual_participation:
                 continue
@@ -799,8 +798,6 @@ class EventSeance(osv.Model):
             for k, v in sorted(partset.iteritems()):
                 reg, contact = k
                 found, expected = len(v), v.expected
-                # print(">>> %s" % (k,))
-                # print("--- found %d/%d: %s" % (found, expected, v,))
                 if found > expected:
                     if seance.state != 'done':
                         p_to_unlink.extend(p.id for p in v[-found-expected:])
@@ -1048,7 +1045,6 @@ class EventParticipation(osv.Model):
         if context is None:
             context = {}
 
-        print("%s / presence: %s, context: %s" % (ids, presence, context,))
         if presence == 'late' and not context.get('presence_arrival_time'):
             raise osv.except_osv(_('Error!'),
                                  _('No Presence Arrival & Departure Provided'))
@@ -1104,7 +1100,6 @@ class EventParticipation(osv.Model):
     def button_set_cancel(self, cr, uid, ids, context=None):
         for p in self.browse(cr, uid, ids, context=context):
             if p.seance_id.state == 'done':
-                print("%d: %s, %s %s" % (p.id, p.name, p.seance_id.name, p.seance_id.state,))
                 raise osv.except_osv(_('Error!'),
                                      _('OpenERP can not delete participations which are related to a done seance'))
         return self.write(cr, uid, ids, {'state': 'cancel'}, context=context)
@@ -1554,7 +1549,6 @@ class EventEvent(osv.Model):
 
             # if event.children_ids:
             #     continue  # do not re-create events twice
-            print(">>> event '%d': creating linear children events" % (event.id,))
             # content_total_duration = sum(c.duration for c in event.content_ids)
             event_begin = datetime.strptime(event.date_begin, DT_FMT)
             # 1 day before end of life - otherwise bigbang traceback
@@ -1663,7 +1657,6 @@ class HelperGroupByMany2Many(osv.AbstractModel):
         groupby_field, groupby_sub = groupby[0], groupby[1:]
         groupby_column = self._all_columns[groupby_field].column
         groupby_type = groupby_column._type
-        print("ReadGroup: %s, %s" % (groupby, groupby_type,))
         if groupby_type != 'many2many':
             return super(HelperGroupByMany2Many, self).read_group(cr, uid, domain, fields, groupby,
                                                                   offset=0, limit=limit, context=context,
@@ -1715,8 +1708,6 @@ class HelperGroupByMany2Many(osv.AbstractModel):
             result = self._read_group_fill_results(cr, uid, domain, groupby_field, groupby_list,
                                                    aggregated_fields, result, read_group_order=order,
                                                    context=context)
-        from pprint import pprint
-        pprint(result)
         return result
 
 
@@ -1889,7 +1880,6 @@ class EventRegistration(osv.Model):
             group_domain = [('event_content_id', '=', context['group_for_content_id'])]
             group_ids = ParticipationGroup.search(cr, uid, group_domain, context=context)
             result = ParticipationGroup.name_get(cr, uid, group_ids, context=context)
-        print("CONTEXT: %s" % (context,))
         return result, []
 
     _group_by_full = {

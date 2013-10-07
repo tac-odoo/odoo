@@ -206,7 +206,6 @@ class EventCourse(osv.Model):
         values = {'name': ','.join(parts)}
         if duration is not None:
             values['duration'] = duration
-        print("values: %s" % (values,))
         rec_id = self.create(cr, uid, values, context)
         return self.name_get(cr, uid, [rec_id], context)[0]
 
