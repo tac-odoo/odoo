@@ -21,11 +21,10 @@
 
 from openerp import tools
 from openerp.osv import osv, fields
-from openerp import SUPERUSER_ID
+
 
 class report_event_participation(osv.Model):
     _name = 'report.event.participation'
-    _inherit = ['helper.groupby_many2many']
     _auto = False
 
     def _get_presence_status(self, cr, uid, context=None):
@@ -56,7 +55,7 @@ class report_event_participation(osv.Model):
         'presence_status': fields.selection(_get_presence_status, 'Status', readonly=True),
         'presence_duration': fields.float('Presence'),
         'expected_duration': fields.float('Expected'),
-        'ratio': fields.float('Ratio'),
+        'ratio': fields.float('Ratio', group_operator='avg'),
     }
 
     def init(self, cr):
@@ -79,9 +78,9 @@ class report_event_participation(osv.Model):
                 to_char(s.date_begin, 'YYYY-MM-DD') AS seance_date,
                 to_char(s.date_begin, 'YYYY') AS year,
                 to_char(s.date_begin, 'MM') AS month,
-                (extract(epoch from (p.departure_time - p.arrival_time)) / 3600::float) AS presence_duration,
+                COALESCE(extract(epoch from (p.departure_time - p.arrival_time)) / 3600::float, 0.0) AS presence_duration,
                 s.duration AS expected_duration,
-                (extract(epoch from (p.departure_time - p.arrival_time)) / 3600::float)  / s.duration AS ratio
+                COALESCE(extract(epoch from (p.departure_time - p.arrival_time)) / 3600::float, 0.0)  / s.duration AS ratio
 
             FROM event_participation AS p
             LEFT JOIN event_registration AS reg ON (p.registration_id = reg.id)
@@ -89,4 +88,3 @@ class report_event_participation(osv.Model):
             WHERE p.role = 'participant'
         )
         """)
-
