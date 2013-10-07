@@ -1641,79 +1641,8 @@ class EventEvent(osv.Model):
         return result
 
 
-class HelperGroupByMany2Many(osv.AbstractModel):
-    _name = 'helper.groupby_many2many'
-
-    def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False):
-        """
-        Get the list of records in list view grouped by the given ``groupby`` fields
-        """
-        # TODO: implement offset, limit, orderby
-
-        ids = self.search(cr, uid, domain, context=context)
-        if not groupby:
-            raise osv.except_osv(_('Error!'), _('groupby is empty'))
-        groupby_list = groupby
-        groupby_field, groupby_sub = groupby[0], groupby[1:]
-        groupby_column = self._all_columns[groupby_field].column
-        groupby_type = groupby_column._type
-        if groupby_type != 'many2many':
-            return super(HelperGroupByMany2Many, self).read_group(cr, uid, domain, fields, groupby,
-                                                                  offset=0, limit=limit, context=context,
-                                                                  orderby=orderby)
-
-        fget = self.fields_get(cr, uid, fields)
-        aggregated_fields = [
-            f for f in fields
-            if f not in ('id', 'sequence')
-            if fget[f]['type'] in ('integer', 'float')
-            if (f in self._columns and getattr(self._columns[f], '_classic_write'))]
-        order = orderby or groupby_field
-
-        gb_records = defaultdict(set)
-        if ids:
-            for record in self.browse(cr, uid, ids, context=context):
-                values = record[groupby_field]
-                if values:
-                    for v in values:
-                        gb_records[v.id].add(record.id)
-                else:
-                    gb_records[False].add(record.id)
-
-            gb_model = self.pool.get(groupby_column._obj)
-            gb_records_ids = gb_model.search(cr, uid, [('id', 'in', gb_records.keys())], context=context)
-            gb_records_repr = dict(gb_model.name_get(cr, uid, gb_records_ids, context=context))
-            if False in gb_records:
-                gb_records_ids.insert(0, False)
-                gb_records_repr[False] = _('Undefined')
-
-        else:
-            gb_records_ids = []
-            gb_records_repr = {}
-
-        result = []
-        for _id in gb_records_ids:
-            if _id is False:
-                gbrepr = (_id, _('Undefined'))
-            else:
-                gbrepr = (_id, gb_records_repr[_id])
-            result.append({
-                '__context': {'group_by': groupby_sub},
-                '__domain': domain + [(groupby_field, '=', _id)],
-                groupby_field: gbrepr,
-                '%s_count' % (groupby_field,): len(gb_records[_id]),
-            })
-
-        if groupby_field and groupby_field in self._group_by_full:
-            result = self._read_group_fill_results(cr, uid, domain, groupby_field, groupby_list,
-                                                   aggregated_fields, result, read_group_order=order,
-                                                   context=context)
-        return result
-
-
 class EventRegistration(osv.Model):
-    _name = 'event.registration'
-    _inherit = ['event.registration', 'helper.groupby_many2many']
+    _inherit = 'event.registration'
 
     def _test_event_has_manual_participation(self, cr, uid, ids, context=None):
         if not ids:
@@ -1885,15 +1814,3 @@ class EventRegistration(osv.Model):
     _group_by_full = {
         'group_ids': _get_groupby_full_group_ids,
     }
-
-
-class EventSeance2(osv.Model):
-    _name = 'event.seance'
-    _inherit = ['event.seance', 'helper.groupby_many2many']
-    pass
-
-class EventParticipation2(osv.Model):
-    _name = 'event.participation'
-    _inherit = ['event.participation', 'helper.groupby_many2many']
-    pass
-
