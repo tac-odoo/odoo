@@ -342,6 +342,14 @@ def generate_table_alias(src_table_alias, joined_tables=[]):
         return '%s' % alias, '%s' % _quote(alias)
     for link in joined_tables:
         alias += '__' + link[1]
+    if len(alias) >= 64:
+        import hashlib
+        src_table_alias_digest = hashlib.sha224(src_table_alias).hexdigest()
+        src_table_alias_parts = src_table_alias.split('_')
+        shorted_alias = '%s%d%s' % (''.join(x[0] for x in src_table_alias_parts if x),  # first letter of each parts
+                                    len(src_table_alias_parts),  # part's count
+                                    src_table_alias_digest[:8])  # shorted SHA224 digest (first 8 characters)
+        return generate_table_alias(shorted_alias, joined_tables)
     assert len(alias) < 64, 'Table alias name %s is longer than the 64 characters size accepted by default in postgresql.' % alias
     return '%s' % alias, '%s as %s' % (_quote(joined_tables[-1][0]), _quote(alias))
 
