@@ -16,11 +16,39 @@
             <field name="field_organizer_id" ref="event.field_event_seance_main_speaker_id"/>
             <field name="field_location" ref="event.field_event_seance_address_id"/>
             <field name="field_attendee_ids" eval="[(6, 0, [ref('event.field_event_seance_main_speaker_id'),ref('event.field_event_seance_address_id'),ref('event.field_event_seance_other_resource_ids')])]"/>
+            <field name="field_event_ids" ref="event.field_event_seance_event_ids"/>
             <field name="filter_expr"></field>
             <field name="field_state" ref="event.field_event_seance_state"/>
             <field name="states_tentative">draft,planned</field>
             <field name="states_confirm">inprogress,closed,confirm,done</field>
             <field name="states_cancel">cancel</field>
+        </record>
+
+        <record model="ir.ui.view" id="view_core_calendar_form_events">
+            <field name="name">core.calendar.form.events</field>
+            <field name="model">core.calendar</field>
+            <field name="inherit_id" ref="core_calendar.view_core_calendar_form"/>
+            <field name="arch" type="xml">
+                <field name="field_attendee_ids" position="after">
+                    <field name="field_event_ids" domain="[('model_id','=',model),('ttype','in',('many2many','many2one')),('relation','=','event.event')]"/>
+                </field>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_core_calendar_event_calendar_if3">
+            <field name="name">core.calendar.event.calendar.if3</field>
+            <field name="model">core.calendar.event</field>
+            <field name="inherit_id" ref="core_calendar.view_core_calendar_event_calendar"/>
+            <field name="arch" type="xml">
+                <field name="attendee_ids" position="after">
+                    <field name="event_ids"/>
+                </field>
+                <xpath expr="//templates/t[@t-name='calendar-info-box']/t[2]" position="after">
+                    <t t-if="record.event_ids.raw_value.length">
+                        <span>Events: <field name="event_ids"/></span>
+                    </t>
+                </xpath>
+            </field>
         </record>
 
         <record model="event.constraint" id="event_constraint_internal_speaker">

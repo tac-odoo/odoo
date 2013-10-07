@@ -21,6 +21,7 @@
 
 import event
 import resource
+import calendar
 import preplanning
 import event_seance
 import event_course
