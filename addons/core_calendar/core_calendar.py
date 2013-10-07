@@ -1062,8 +1062,8 @@ class CoreCalendarEvent(osv.Model):
                         # multiple fields
                         values = []
                         if not isinstance(calendar_fields[f], (list, tuple)):
-                            fields_list = [calendar_info['fields'][f],
-                                           calendar_info['fields_type'][f]]
+                            fields_list = [(calendar_info['fields'][f],
+                                            calendar_info['fields_type'][f])]
                         else:
                             fields_list = zip(calendar_info['fields'][f],
                                               calendar_info['fields_type'][f])
