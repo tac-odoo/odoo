@@ -223,7 +223,7 @@ class PurchaseOrderImportLineFromSeance(osv.TransientModel):
                 _('Error!'),
                 _("No resource participation found for partner '%s' (id: %d)") % (partner.name, partner.id))
 
-        if p.purchase_order_line_id:
+        if p.purchase_order_line_id and p.purchase_order_line_id.order_id.state != 'cancel':
             raise osv.except_osv(
                 _('Error!'),
                 _('You can not add participation already assign to a purchase order'))
