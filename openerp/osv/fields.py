@@ -42,6 +42,7 @@ import pytz
 import re
 import xmlrpclib
 from psycopg2 import Binary
+from collections import deque
 
 import openerp
 import openerp.tools as tools
@@ -1242,6 +1243,27 @@ class related(function):
         if self.store is True:
             # TODO: improve here to change self.store = {...} according to related objects
             pass
+
+    def get_relation_chain(self, obj, cr, uid):
+        chain = []  # [(field, column_def, model_obj), (field2, column_def2, model_obj2), ...]
+        parts = deque(self._arg[:])
+        model = obj
+        while parts:
+            field = parts.popleft()
+            field_def = model._all_columns[field].column
+            if isinstance(field_def, related):
+                # fields.related: push new field chain onto stack
+                parts.extendleft(reversed(field_def._arg))
+                continue
+            chain.append((field, field_def, model))
+            if not getattr(field_def, '_obj', None):
+                break
+                # could not continue
+            model = obj.pool.get(field_def._obj)
+        return chain
+
+    def is_database_persisted(self, obj, cr, uid):
+        return False
 
 
 class sparse(function):   

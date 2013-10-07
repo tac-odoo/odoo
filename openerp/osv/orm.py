@@ -2702,16 +2702,58 @@ class BaseModel(object):
 
         # Take care of adding join(s) if groupby is an '_inherits'ed field
         groupby_list = groupby
+        groupby_model = self
         qualified_groupby_field = groupby
         if groupby:
             if isinstance(groupby, list):
                 groupby = groupby[0]
-            qualified_groupby_field = self._inherits_join_calc(groupby, query)
-
-        if groupby:
             assert not groupby or groupby in fields, "Fields in 'groupby' must appear in the list of fields to read (perhaps it's missing in the list view?)"
-            groupby_def = self._columns.get(groupby) or (self._inherit_fields.get(groupby) and self._inherit_fields.get(groupby)[2])
-            assert groupby_def and groupby_def._classic_write, "Fields in 'groupby' must be regular database-persisted fields (no function or related fields), or function fields with store=True"
+            groupby_def = self._all_columns[groupby].column
+
+            if not groupby_def._classic_write and isinstance(groupby_def, openerp.osv.fields.related):
+                related_chain = groupby_def.get_relation_chain(self, cr, uid)
+                related_path, related_field = related_chain[:-1], related_chain[-1]
+                assert len(related_chain) == 1 \
+                    or len(related_chain) > 1 and all(x[1]._type == 'many2one' and x[1]._classic_write
+                                                      for x in related_chain[:-1]), \
+                    "Related fields in 'groupby' must be a chain of regular database-persisted fields"
+
+                def inherit_join_calc_info(obj, field, query):
+                    current_table = obj
+                    parent_alias = '"%s"' % current_table._table
+                    while field in current_table._inherit_fields and not field in current_table._columns:
+                        parent_model_name = current_table._inherit_fields[field][0]
+                        parent_table = obj.pool.get(parent_model_name)
+                        parent_alias = obj._inherits_join_add(current_table, parent_model_name, query)
+                        current_table = parent_table
+                    return (current_table, parent_alias, field)
+
+                # Add inherits for 1st field
+                field = related_chain[0][0]
+                base_model, base_table, base_field = inherit_join_calc_info(self, field, query)
+                from openerp.osv.expression import get_alias_from_query
+                parent_table = get_alias_from_query(base_table)[1]
+                for field, field_def, field_parent_model in related_chain[0:-1]:
+                    groupby_model = self.pool.get(field_def._obj)
+                    ta, ta_stmt = query.add_join((parent_table, groupby_model._table, field, 'id', field), implicit=False, outer=True)
+                    parent_table = ta
+
+                qualified_groupby_field = '"%s"."%s"' % (parent_table, related_field[0])
+                groupby_def = groupby_model._all_columns[related_field[0]].column
+
+            else:
+                qualified_groupby_field = self._inherits_join_calc(groupby, query)
+
+            if isinstance(groupby_def, openerp.osv.fields.many2many):
+                m2m_sql_names = groupby_def._sql_names(groupby_model._name)
+                # split qualified_groupby_field into (table, field)
+                m2m_parent_table, m2m_parent_field = [x.replace('"', '') for x in qualified_groupby_field.split('.', 2)]
+                m2m_relation_table = self.pool.get(groupby_def._obj)._table
+                jta, jta_stmt = query.add_join((m2m_parent_table, m2m_sql_names[0], 'id', m2m_sql_names[1], m2m_parent_field), implicit=False, outer=True)
+                dta, dta_stmt = query.add_join((jta, m2m_relation_table, m2m_sql_names[2], 'id', m2m_parent_field), implicit=False, outer=True)
+                qualified_groupby_field = '"%s"."%s"' % (dta, 'id')
+
+            assert groupby_def and (groupby_def._classic_write or isinstance(groupby_def, openerp.osv.fields.many2many)), "Fields in 'groupby' must be regular database-persisted fields (no function or related fields), or function fields with store=True"
 
         # TODO it seems fields_get can be replaced by _all_columns (no need for translation)
         fget = self.fields_get(cr, uid, fields)
@@ -2800,10 +2842,22 @@ class BaseModel(object):
             del r['id']
 
         if groupby:
-            data = self.read(cr, uid, data_ids, [groupby], context=context)
-            # restore order of the search as read() uses the default _order (this is only for groups, so the footprint of data should be small):
-            data_dict = dict((d['id'], d[groupby] ) for d in data)
-            result = [{'id': i, groupby: data_dict[i]} for i in data_ids]
+            if groupby in fget and fget[groupby]['type'] in ('many2many',):
+                data_ids = self.search(cr, uid, [('id', 'in', alldata.keys())], order=orderby or groupby, context=context)
+                data_ids = [x if x is not None else False for x in data_ids]
+                # the IDs of records that have groupby field value = False or '' should be included too
+                data_ids += set(alldata.keys()).difference(data_ids)
+
+                relation_model = self.pool.get(groupby_def._obj)
+                relation_ids = list(set(x[groupby] for x in alldata.itervalues() if x[groupby]))
+                relation_names = dict(relation_model.name_get(cr, uid, relation_ids, context=context))
+                result = [{'id': i, groupby: (alldata[i][groupby], relation_names[alldata[i][groupby]]) if alldata[i][groupby] else False}
+                         for i in data_ids]
+            else:
+                data = self.read(cr, uid, data_ids, [groupby], context=context)
+                # restore order of the search as read() uses the default _order (this is only for groups, so the footprint of data should be small):
+                data_dict = dict((d['id'], d[groupby]) for d in data)
+                result = [{'id': i, groupby: data_dict[i]} for i in data_ids]
         else:
             result = [{'id': i} for i in data_ids]
 
