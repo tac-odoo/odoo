@@ -2,6 +2,20 @@
 <openerp>
     <data>
 
+    <record id="act_event_course_2_course_material" model="ir.actions.act_window">
+        <field name="name">Course Materials</field>
+        <field name="res_model">event.course.material</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_course_id': active_id, 'default_course_id': active_id}</field>
+        <field name="groups_id" eval="[(4, ref('base.group_sale_salesman'))]"/>
+        <field name="help" type="html">
+          <p class="oe_view_nocontent_create">
+            Click to create a new material for this course.
+          </p>
+        </field>
+    </record>
+
     <record id="view_event_course_tree" model="ir.ui.view">
         <field name="name">event.course.tree</field>
         <field name="model">event.course</field>
@@ -103,20 +117,6 @@
                     <field name="message_ids" widget="mail_thread" placeholder="Share a note..."/>
                 </div>
             </form>
-        </field>
-    </record>
-
-    <record id="act_event_course_2_course_material" model="ir.actions.act_window">
-        <field name="name">Course Materials</field>
-        <field name="res_model">event.course.material</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">tree,form</field>
-        <field name="context">{'search_default_course_id': active_id, 'default_course_id': active_id}</field>
-        <field name="groups_id" eval="[(4, ref('base.group_sale_salesman'))]"/>
-        <field name="help" type="html">
-          <p class="oe_view_nocontent_create">
-            Click to create a new material for this course.
-          </p>
         </field>
     </record>
 
