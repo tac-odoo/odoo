@@ -1500,12 +1500,82 @@ instance.web.ListView.Groups = instance.web.Class.extend( /** @lends instance.we
                     }
                 }
 
-                self.records.add(records, {silent: true});
-                list.render();
-                if (_.isEmpty(records)) {
-                    view.no_result();
-                }
-                return list;
+                var mtex = new $.Mutex();
+                _.each(self.columns, function(column) {
+                    if (column.tag != 'field' || column.type != 'many2many') {
+                        return;
+                    }
+                    var m2m_values = [];
+                    var record_values = {};
+                    _.each(records, function(record) {
+
+                        var value = record[column.id];
+                        if (value instanceof Array && !_.isEmpty(value)
+                            && !record[column.id + '__display']) {
+                            var ids;
+                            // they come in two shapes:
+                            if (value[0] instanceof Array) {
+                                var command = value[0];
+                                // 1. an array of m2m commands (usually (6, false, ids))
+                                if (command[0] !== 6) {
+                                    throw new Error(_.str.sprintf( _t("Unknown m2m command %s"), command[0]));
+                                }
+                                ids = command[2];
+                            } else {
+                                // 2. an array of ids
+                                ids = value;
+                            }
+                            m2m_values.push.apply(m2m_values, ids);
+                        }
+
+                    });
+
+                    mtex.exec(function() {
+                        var m2m_def = $.Deferred();
+                        new instance.web.Model(column.relation)
+                            .call('name_get', [_.uniq(m2m_values)]).done(function (names) {
+                                // FIXME: nth horrible hack in this poor listview
+                                _.each(names, function(ng) {
+                                    record_values[ng[0]] = ng[1];
+                                });
+                                _.each(records, function(record) {
+                                    var value = record[column.id];
+                                    if (value instanceof Array && !_.isEmpty(value)
+                                        && !record[column.id + '__display']) {
+                                        var ids;
+                                        // they come in two shapes:
+                                        if (value[0] instanceof Array) {
+                                            var command = value[0];
+                                            // 1. an array of m2m commands (usually (6, false, ids))
+                                            if (command[0] !== 6) {
+                                                throw new Error(_.str.sprintf( _t("Unknown m2m command %s"), command[0]));
+                                            }
+                                            ids = command[2];
+                                        } else {
+                                            // 2. an array of ids
+                                            ids = value;
+                                        }
+
+                                        record[column.id + '__display'] = _.chain(ids).map(function(_id) { return record_values[_id]; }).join(', ').value();
+                                    }
+
+                                });
+                                m2m_def.resolve();
+                            });
+                        return m2m_def;
+                    });
+                });
+
+                mtex.exec(function() {
+                    self.records.add(records, {silent: true});
+                    list.render();
+                    d.resolve(list);
+                    if (_.isEmpty(records)) {
+                        view.no_result();
+                    }
+                });
+
+                return d.promise();
             });
         });
     },
