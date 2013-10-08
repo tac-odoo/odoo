@@ -423,9 +423,9 @@ class event_registration_wizard(osv.TransientModel):
         runctx = dict(context)
 
         if wizard.action == 'cancel':
-            values = {'stage_id': wizard.stage_id.id}
-            runctx['force_date_cancel'] = wizard.date_cancel
-            Registration.write(cr, uid, [wizard.registration_id.id], values, context=runctx)
+            runctx.update(force_date_cancel=wizard.date_cancel,
+                          force_stage_id=wizard.stage_id.id)
+            Registration.button_reg_cancel(cr, uid, [wizard.registration_id.id], context=runctx)
 
         return True
 
@@ -527,6 +527,8 @@ class event_registration(base_stage, osv.osv):
     def button_switch_state(self, cr, uid, ids, context=None):
         if context is None:
             context = {}
+        if context.get('force_stage_id'):
+            return self.stage_set(cr, uid, ids, context['force_stage_id'], context=context)
         if not context.get('state'):
             raise osv.except_osv(_('Error'), _('Not state specified within context'))
         records = self.browse(cr, uid, ids, context=context)
@@ -594,12 +596,12 @@ class event_registration(base_stage, osv.osv):
     def button_reg_cancel(self, cr, uid, ids, context=None, *args):
         if context is None:
             context = {}
-        today = fields.datetime.now()
+        date_cancel = fields.datetime.now()
         if context.get('force_date_cancel'):
-            today = context['force_date_cancel']
+            date_cancel = context['force_date_cancel']
         stage_ctx = dict(context, state='cancel')
         self.button_switch_state(cr, uid, ids, context=stage_ctx)
-        return self.write(cr, uid, ids, {'date_cancel': today}, context=context)
+        return self.write(cr, uid, ids, {'date_cancel': date_cancel}, context=context)
 
     def mail_user(self, cr, uid, ids, context=None):
         """
