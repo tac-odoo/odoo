@@ -759,6 +759,14 @@ class BaseModel(object):
         """
         if context is None:
             context = {}
+        module = context.get('module')
+
+        # NOTE: this variable is also initialised by __init__ of ir.model.data
+        #       but it may not be already initialized. For the same reason, we
+        #       fill the variable directly instead of calling _update_dummy()
+        if getattr(self.pool, 'model_data_reference_ids', None) is None:
+            self.pool.model_data_reference_ids = {}
+
         cr.execute("SELECT id FROM ir_model WHERE model=%s", (self._name,))
         if not cr.rowcount:
             cr.execute('SELECT nextval(%s)', ('ir_model_id_seq',))
@@ -766,13 +774,15 @@ class BaseModel(object):
             cr.execute("INSERT INTO ir_model (id,model, name, info,state) VALUES (%s, %s, %s, %s, %s)", (model_id, self._name, self._description, self.__doc__, 'base'))
         else:
             model_id = cr.fetchone()[0]
-        if 'module' in context:
+        if module:
             name_id = 'model_'+self._name.replace('.', '_')
-            cr.execute('select * from ir_model_data where name=%s and module=%s', (name_id, context['module']))
+            cr.execute('select * from ir_model_data where name=%s and module=%s', (name_id, module))
             if not cr.rowcount:
                 cr.execute("INSERT INTO ir_model_data (name,date_init,date_update,module,model,res_id) VALUES (%s, (now() at time zone 'UTC'), (now() at time zone 'UTC'), %s, %s, %s)", \
-                    (name_id, context['module'], 'ir.model', model_id)
+                    (name_id, module, 'ir.model', model_id)
                 )
+
+            self.pool.model_data_reference_ids[(module, name_id)] = ('ir.model', model_id)
 
         cr.execute("SELECT * FROM ir_model_fields WHERE model=%s", (self._name,))
         cols = {}
@@ -816,27 +826,28 @@ class BaseModel(object):
 
             if k not in cols:
                 cr.execute('select nextval(%s)', ('ir_model_fields_id_seq',))
-                id = cr.fetchone()[0]
-                vals['id'] = id
+                field_id = cr.fetchone()[0]
+                vals['id'] = field_id
                 cr.execute("""INSERT INTO ir_model_fields (
                     id, model_id, model, name, field_description, ttype,
                     relation,state,select_level,relation_field, translate, serialization_field_id
                 ) VALUES (
                     %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s
                 )""", (
-                    id, vals['model_id'], vals['model'], vals['name'], vals['field_description'], vals['ttype'],
+                    field_id, vals['model_id'], vals['model'], vals['name'], vals['field_description'], vals['ttype'],
                      vals['relation'], 'base',
                     vals['select_level'], vals['relation_field'], bool(vals['translate']), vals['serialization_field_id']
                 ))
-                if 'module' in context:
-                    name1 = 'field_' + self._table + '_' + k
-                    cr.execute("select name from ir_model_data where name=%s", (name1,))
+                if module:
+                    field_xmlid = 'field_' + self._table + '_' + k
+                    cr.execute("select name from ir_model_data where module=%s AND name=%s", (module, field_xmlid,))
                     if cr.fetchone():
-                        name1 = name1 + "_" + str(id)
+                        field_xmlid = field_xmlid + "_" + str(field_id)
                     cr.execute("INSERT INTO ir_model_data (name,date_init,date_update,module,model,res_id) VALUES (%s, (now() at time zone 'UTC'), (now() at time zone 'UTC'), %s, %s, %s)", \
-                        (name1, context['module'], 'ir.model.fields', id)
+                        (field_xmlid, module, 'ir.model.fields', field_id)
                     )
             else:
+                field_id = cols[k]['id']
                 for key, val in vals.items():
                     if cols[k][key] != vals[key]:
                         cr.execute('update ir_model_fields set field_description=%s where model=%s and name=%s', (vals['field_description'], vals['model'], vals['name']))
@@ -850,6 +861,11 @@ class BaseModel(object):
                                 vals['select_level'], bool(vals['readonly']), bool(vals['required']), bool(vals['selectable']), vals['relation_field'], bool(vals['translate']), vals['serialization_field_id'], vals['model'], vals['name']
                             ))
                         break
+
+            if module:
+                cr.execute("SELECT name FROM ir_model_data WHERE module=%s AND model=%s AND res_id=%s", (module, 'ir.model.fields', field_id))
+                for xmlid, in cr.fetchall():
+                    self.pool.model_data_reference_ids[(module, xmlid)] = ('ir.model.fields', field_id)
 
     #
     # Goal: try to apply inheritance at the instanciation level and
