@@ -1168,18 +1168,20 @@ class ir_model_data(osv.osv):
         """
         if not modules:
             return True
+        context = {MODULE_UNINSTALL_FLAG: True}
         to_unlink = []
         cr.execute("""SELECT id,name,model,res_id,module FROM ir_model_data
-                      WHERE module IN %s AND res_id IS NOT NULL AND noupdate=%s ORDER BY id DESC""",
+                      WHERE module IN %s AND res_id IS NOT NULL AND (noupdate=%s or noupdate IS NULL)
+                      ORDER BY id DESC""",
                       (tuple(modules), False))
         for (id, name, model, res_id, module) in cr.fetchall():
-            if (module,name) not in self.loads:
-                to_unlink.append((model,res_id))
+            if (module, name) not in self.loads:
+                to_unlink.append((model, res_id, module, name))
         if not config.get('import_partial'):
-            for (model, res_id) in to_unlink:
+            for (model, res_id, module, name) in to_unlink:
                 if model in self.pool:
-                    _logger.info('Deleting %s@%s', res_id, model)
-                    self.pool[model].unlink(cr, uid, [res_id])
+                    _logger.info('Deleting %s@%s (%s.%s)', res_id, model, module, name)
+                    self.pool[model].unlink(cr, uid, [res_id], context=context)
 
 class wizard_model_menu(osv.osv_memory):
     _name = 'wizard.ir.model.menu.create'
