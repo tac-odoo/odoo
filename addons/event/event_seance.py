@@ -35,7 +35,6 @@ from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as D_FMT
 from openerp.addons.base.res.res_partner import _tz_get
 from core_calendar.timeline import Timeline, Availibility
 from openerp.addons.core_calendar.resource import float_to_hm
-from openerp.tools import logged, flatten
 import openerp.addons.decimal_precision as dp
 
 
@@ -439,8 +438,11 @@ class EventSeance(osv.Model):
         return result
 
     def _get_participant_count(self, cr, uid, ids, field_name, args, context=None):
+        if context is None:
+            context = {}
         # force a refresh just before computation
-        self._refresh_participations(cr, uid, ids, context=context)
+        if context.get('__internal_refresh_participations') is None:
+            self._refresh_participations(cr, uid, ids, context=context)
         # return number of participants
         return dict((seance.id, len(seance.participant_ids))
                     for seance in self.browse(cr, uid, ids, context=context))
@@ -464,12 +466,13 @@ class EventSeance(osv.Model):
 
     def _store_get_seances_from_registrations(self, cr, uid, ids, context=None):
         """retrun list of seances for participant count refresh"""
-        event_ids = []
+        seance_ids = []
         Registration = self.pool.get('event.registration')
-        ids = Registration.search(cr, uid, [('id', 'in', ids), ('state', '!=', 'draft')], context=context)
+        raw_ids = ids[:]
+        ids = Registration.search(cr, uid, [('id', 'in', ids), ('stage_id.state', '!=', 'draft')], context=context)
         for registration in Registration.browse(cr, uid, ids, context=context):
-            event_ids.extend(s.id for s in registration.event_id.seance_ids)
-        return list(set(event_ids))
+            seance_ids.extend(s.id for s in registration.event_id.seance_ids)
+        return list(set(seance_ids))
 
     def _store_get_seances_from_participations(self, cr, uid, ids, context=None):
         """return list of seances for participant count refresh"""
@@ -579,7 +582,10 @@ class EventSeance(osv.Model):
                                                         ('required', not bool(st == 'draft'))])
                                                    for st, sn in SEANCE_STATES)
                                       ),
-        'date_end': fields.function(_get_date_end, type='datetime', string='End date', readonly=True, store=True),
+        'date_end': fields.function(_get_date_end, type='datetime', string='End date', readonly=True,
+                                    store={
+                                        'event.seance': (_store_get_seances_from_seances, ['date_begin', 'duration'], 10),
+                                    }),
         'duration': fields.float('Duration', required=True,
                                   states=dict((st, [('readonly', not bool(st == 'draft'))])
                                               for st, sn in SEANCE_STATES)),
@@ -604,7 +610,7 @@ class EventSeance(osv.Model):
                                              store={
                                                  'event.seance': (_store_get_seances_from_seances, ['content_id', 'group_id', 'state'], 10),
                                                  'event.participation': (_store_get_seances_from_participations, ['seance_id'], 10),
-                                                 'event.registration': (_store_get_seances_from_registrations, ['group_ids', 'state'], 10),
+                                                 'event.registration': (_store_get_seances_from_registrations, ['group_ids', 'state', 'stage_id'], 10),
                                                  'event.participation.group': (_store_get_seances_from_groups, ['registration_ids'], 10),
                                                  'event.content': (_store_get_seances_from_content, ['is_divided'], 10),
                                              }),
@@ -756,15 +762,23 @@ class EventSeance(osv.Model):
     def _refresh_participations(self, cr, uid, ids, context=None):
         if context is None:
             context = {}
-        if context.get('__internal_refresh_participations'):
+        already_done_seances = context.get('__internal_refresh_participations')
+        if already_done_seances is None:
+            context = dict(context)
+            context['__internal_refresh_participations'] = already_done_seances = set([])
+        ids_not_done = [_id for _id in ids if _id not in already_done_seances]
+        already_done_seances |= set(ids_not_done)
+        ids = ids_not_done
+        if not ids:
             return True
-        context['__internal_refresh_participations'] = True
-        Registration = self.pool.get('event.registration')
+        Seance = self.pool.get('event.seance')
         Participation = self.pool.get('event.participation')
         # Registration = self.pool.get('event.registration')
         p_to_unlink = []  # participation ids to unlink
         p_to_create = defaultdict(list)  # {registration_id: [p1, p2, ...]}
         ids = list(set(ids))
+
+        force_participations_refresh = context.get('force_participations_refresh')
 
         for seance in self.browse(cr, uid, ids, context=context):
             # registrations = Registration.browse(cr, uid, regids_cache[seance.id], context=context)
@@ -783,6 +797,9 @@ class EventSeance(osv.Model):
                                 registrations.append(reg)
                         else:
                             registrations.append(reg)
+                    elif reg.state == 'cancel':
+                        if reg.date_cancel > (seance.date_begin or seance.planned_week_date):
+                            registrations.append(reg)
 
             partset = {}  # { (registration, contact): list_counted([p1, p2, ...]), ...}
             # build participation set on expected values
@@ -793,16 +810,23 @@ class EventSeance(osv.Model):
             # populate set with existing participation values
             for part in seance.participant_ids:
                 x = (part.registration_id, False)
-                partset.setdefault(x, list_counted(expected=0)).append(part)
+                if part.registration_id.state in ('open', 'done'):
+                    expected_count = part.registration_id.nb_register
+                elif part.registration_id.state == 'cancel' and part.registration_id.date_cancel > (seance.date_begin or seance.planned_week_date):
+                    expected_count = part.registration_id.nb_register
+                else:
+                    expected_count = 0
+                partset.setdefault(x, list_counted(expected=expected_count)).append(part)
+
             # iterate over the set and compare result (expected vs real)
             for k, v in sorted(partset.iteritems()):
                 reg, contact = k
                 found, expected = len(v), v.expected
                 if found > expected:
-                    if seance.state != 'done':
+                    if seance.state != 'done' or (seance.state == 'done' and force_participations_refresh):
                         p_to_unlink.extend(p.id for p in v[-found-expected:])
                 elif found < expected:
-                    if seance.state == 'done':
+                    if seance.state == 'done' and not force_participations_refresh:
                         continue
                     for i in xrange(expected-found):
                         if contact:
@@ -813,13 +837,12 @@ class EventSeance(osv.Model):
                             part_name = '%s #%d' % (reg.name or reg.partner_id.name or '', i+1)
                         part_values = self._prepare_participation_for_seance(cr, uid, part_name, seance,
                                                                              reg, context=context)
-                        registration_id = part_values['registration_id']
-                        p_to_create[registration_id].append((0, 0, part_values))
+                        p_to_create[seance.id].append((0, 0, part_values))
         if p_to_unlink:
             Participation.unlink(cr, uid, p_to_unlink, context=context)
-        for registration_id, commands in p_to_create.iteritems():
-            Registration.write(cr, uid, [registration_id], {
-                'participation_ids': commands,
+        for seance_id, commands in p_to_create.iteritems():
+            Seance.write(cr, uid, [seance_id], {
+                'participant_ids': commands,
             }, context=context)
         return True
 
@@ -1403,7 +1426,7 @@ class EventEvent(osv.Model):
                                     fnct_inv=_set_date_end, store={
                                         'event.event': (_store_get_events_from_events, ['date_begin', 'content_ids', 'has_program'], 10),
                                         'event.content': (_store_get_events_from_contents, [], 10),
-                                        'event.seance': (_store_get_events_from_seances, [], 10),
+                                        'event.seance': (_store_get_events_from_seances, ['date_begin', 'duration', 'state'], 10),
                                     }),
     }
 
@@ -1797,7 +1820,6 @@ class EventRegistration(osv.Model):
         (_check_content_group_subscription, _msg_content_group_subscription, ['group_ids']),
     ]
 
-    @logged
     def _get_groupby_full_group_ids(self, cr, uid, present_group_ids, domain,
                                     read_group_order=None, access_rights_uid=None,
                                     context=None):

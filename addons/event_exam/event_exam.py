@@ -587,6 +587,8 @@ class EventParticipation(osv.Model):
 
     def _recompute_exam_responses(self, cr, uid, ids, context=None):
         for p in self.browse(cr, uid, ids, context=context):
+            if not p.is_exam:
+                continue
             current_question_ids = dict(((r.questionnaire_id.id, r.question_id.id), r)
                                         for r in p.exam_response_ids)
             current_questions_set = set(current_question_ids.keys())
@@ -618,14 +620,17 @@ class EventParticipation(osv.Model):
 
     def create(self, cr, uid, values, context=None):
         seance_id = values.get('seance_id')
+        seance_is_exam = False
         if seance_id:
             Seance = self.pool.get('event.seance')
             seance_record = Seance.browse(cr, uid, seance_id, context=context)
-            if seance_record.is_exam and seance_record.questionnaire_ids and not values.get('exam_ids'):
+            seance_is_exam = seance_record.is_exam
+            if seance_is_exam and seance_record.questionnaire_ids and not values.get('exam_ids'):
                 values['exam_ids'] = [(0, 0, {'questionnaire_id': q.id})
                                       for q in seance_record.questionnaire_ids]
         new_participation_id = super(EventParticipation, self).create(cr, uid, values, context=context)
-        self._recompute_exam_responses(cr, uid, [new_participation_id], context=context)
+        if seance_is_exam:
+            self._recompute_exam_responses(cr, uid, [new_participation_id], context=context)
         return new_participation_id
 
     def write(self, cr, uid, ids, values, context=None):
