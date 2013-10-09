@@ -530,6 +530,7 @@
                                 <field name="user_id" attrs="{'readonly':[('state','!=', 'draft')]}"/>
                                 <field name="create_date" groups="base.group_no_one"/>
                                 <field name="date_closed" groups="base.group_no_one"/>
+                                <field name="date_cancel" groups="base.group_no_one" attrs="{'invisible': [('state','!=','cancel')]}"/>
                             </group>
                         </group>
                     </sheet>

@@ -897,7 +897,7 @@
             <field name="model">event.registration</field>
             <field name="inherit_id" ref="event.view_event_registration_form"/>
             <field name="arch" type="xml">
-                <field name="date_closed" position="after">
+                <field name="date_cancel" position="after">
                     <field name="group_ids" widget="many2many_tags" attrs="{'readonly': [('state','=','done')]}"
                             domain="[('event_content_id.event_ids','in',[event_id])]"
                             on_change="onchange_group_ids(event_id, group_ids)"
