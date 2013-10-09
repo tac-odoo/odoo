@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-    <data>
+    <data noupdate="1">
 
         <record model="core.calendar" id="core_calendar_event_seance">
             <field name="name">Event seances</field>
@@ -24,6 +24,13 @@
             <field name="states_cancel">cancel</field>
         </record>
 
+    </data>
+    <data>
+
+        <record model="core.calendar" id="core_calendar.core_calendar_resource_leaves">
+            <field name="field_event_ids" ref="event.field_resource_calendar_leaves_event_ids"/>
+        </record>
+
         <record model="ir.ui.view" id="view_core_calendar_form_events">
             <field name="name">core.calendar.form.events</field>
             <field name="model">core.calendar</field>
@@ -35,8 +42,8 @@
             </field>
         </record>
 
-        <record model="ir.ui.view" id="view_core_calendar_event_calendar_if3">
-            <field name="name">core.calendar.event.calendar.if3</field>
+        <record model="ir.ui.view" id="view_core_calendar_event_calendar">
+            <field name="name">core.calendar.event.calendar</field>
             <field name="model">core.calendar.event</field>
             <field name="inherit_id" ref="core_calendar.view_core_calendar_event_calendar"/>
             <field name="arch" type="xml">
@@ -48,6 +55,17 @@
                         <span>Events: <field name="event_ids"/></span>
                     </t>
                 </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_core_calendar_event_search">
+            <field name="name">core.calendar.event.search</field>
+            <field name="model">core.calendar.event</field>
+            <field name="inherit_id" ref="core_calendar.view_core_calendar_event_search"/>
+            <field name="arch" type="xml">
+                <field name="attendee_id" position="after">
+                    <field name="event_ids"/>
+                </field>
             </field>
         </record>
 

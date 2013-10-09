@@ -19,7 +19,47 @@
 #
 ##############################################################################
 
+from openerp import tools
 from openerp.osv import osv, fields
+
+
+class resource_calendar_leaves_events(osv.Model):
+    _name = 'resource.calendar.leaves.events'
+    _auto = False
+    _columns = {
+        'leave_id': fields.many2one('resource.calendar.leaves', 'Leave', readonly=True),
+        'event_id': fields.many2one('event.event', 'Event', readonly=True),
+    }
+
+    def init(self, cr):
+        """
+        Initialize the sql view for the leaves events
+        """
+        tools.drop_view_if_exists(cr, 'resource_calendar_leaves_events')
+        cr.execute(""" CREATE VIEW resource_calendar_leaves_events AS (
+        SELECT l.id AS leave_id,
+               e.id AS event_id
+
+        FROM resource_calendar_leaves l
+
+        LEFT JOIN event_event e ON (
+            CASE WHEN l.applies_to = 'event_all' THEN true
+                 WHEN l.applies_to = 'event' THEN e.id = l.event_id
+                 ELSE False
+            END)
+
+        WHERE l.applies_to IN ('event_all', 'event')
+          AND e.id IS NOT NULL
+
+        )""")
+
+
+class resource_calendar_leaves(osv.Model):
+    _inherit = "resource.calendar.leaves"
+    _columns = {
+        'event_ids': fields.many2many('event.event', 'resource_calendar_leaves_events',
+                                      id1='leave_id', id2='event_id', string='Events'),
+    }
 
 
 class CoreCalendar(osv.Model):
@@ -29,6 +69,8 @@ class CoreCalendar(osv.Model):
                                            target_relation='event.event'),
     }
 
+    def _get_base_fields(self, cr, uid, context=None):
+        return super(CoreCalendar, self)._get_base_fields(cr, uid, context=context) + ['event_ids']
 
 class CoreCalendarEvent(osv.Model):
     _inherit = 'core.calendar.event'

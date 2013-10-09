@@ -35,8 +35,6 @@ class resource_calendar_leaves(osv.Model):
                 result[leave.id] = 'resource'
             elif leave.event_id:
                 result[leave.id] = 'event'
-            elif leave.calendar_id:
-                result[leave.id] = 'calendar'
             else:
                 result[leave.id] = 'company'
         return result
