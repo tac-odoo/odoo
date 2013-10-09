@@ -821,13 +821,17 @@ class CoreCalendarEvent(osv.Model):
         where_clause = ' AND ' + ' AND '.join(where_filter) if where_filter else ''
 
         query = """
+            WITH events AS (%s)
             SELECT a.id, a.model, a.res_id, a.attendee_ids AS partner_id, b.id
-            FROM (%s) AS a
-            LEFT JOIN (%s) AS b ON (b.attendee_ids = a.attendee_ids AND (a.date_start, a.date_end) OVERLAPS (b.date_start, b.date_end))
+            FROM events AS a
+            LEFT JOIN events AS b ON (b.attendee_ids = a.attendee_ids
+                                      AND a.calendar_id != b.calendar_id
+                                      AND a.res_id != b.res_id
+                                      AND (a.date_start, a.date_end) OVERLAPS (b.date_start, b.date_end))
             LEFT JOIN res_partner p ON (a.attendee_ids = p.id)
             WHERE p.avoid_double_allocation = true
-              AND a.id != b.id %s
-        """ % (union_all_query, union_all_query, where_clause)
+              AND a.calendar_id != b.calendar_id AND a.res_id != b.res_id %s
+        """ % (union_all_query, where_clause)
         cr.execute(query, where_params)
         result = []
         data = {}
