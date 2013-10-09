@@ -1056,7 +1056,10 @@ class CoreCalendarEvent(osv.Model):
                 if 'calendar_id' in fields_pre:
                     record['calendar_id'] = (calendar_id, calendar_info['name'])
                 if 'state' in fields_pre:
-                    record['state'] = calendar_info['states_reversed'][val['state']] if val['state'] else False
+                    if calendar_info['fields'].get('state'):
+                        record['state'] = calendar_info['states_reversed'][val['state']] if val['state'] else False
+                    else:
+                        record['state'] = ''
 
                 for f in fields_pre:
                     if f in ['id', 'calendar_id', 'state']:
@@ -1072,7 +1075,7 @@ class CoreCalendarEvent(osv.Model):
                             fields_list = zip(calendar_info['fields'][f],
                                               calendar_info['fields_type'][f])
                         for field_name, field_type in fields_list:
-                            value = val[field_name]
+                            value = val.get(field_name)
                             if value:
                                 if field_type in ('many2many',):
                                     values.extend(value)
@@ -1090,10 +1093,13 @@ class CoreCalendarEvent(osv.Model):
                             fns = field_name.split('.')
                             fnb = calendar_model.browse(cr, user, val['id'], context=context)
                             fnb_root = fnb
-                            while len(fns) > 1:
+                            while len(fns) > 1 and fnb_root:
                                 b = fns.pop(0)
                                 fnb_root = fnb_root[b]
-                            value = fnb_root.read([fns[0]], context=context)[0][fns[0]]
+                            if fnb_root:
+                                value = fnb_root.read([fns[0]], context=context)[0][fns[0]]
+                            else:
+                                value = False
                         else:
                             value = val[field_name]
                         if value:
