@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data noupdate="1">
+
+        <record model="core.calendar" id="core_calendar_resource_leaves">
+            <field name="name">Leaves</field>
+            <field name="type">vevent</field>
+            <field name="date_mode">end</field>
+            <field name="color">#a5a5a5</field>
+            <field name="model" ref="resource.model_resource_calendar_leaves"/>
+            <field name="action_id" ref="resource.action_resource_calendar_leave_tree"/> <!-- do not open it to be opened in calendar -->
+            <field name="field_name" ref="resource.field_resource_calendar_leaves_name"/>
+            <field name="field_date_start" ref="resource.field_resource_calendar_leaves_date_from"/>
+            <field name="field_date_end" ref="resource.field_resource_calendar_leaves_date_to"/>
+            <field name="field_organizer_id" ref=""/>
+            <field name="field_location" ref=""/>
+            <field name="field_attendee_ids" eval="[(6, 0, [ref('core_calendar.field_resource_calendar_leaves_attendee_ids')])]"/>
+            <field name="filter_expr"></field>
+            <field name="field_state" ref=""/>
+        </record>
+
+    </data>
+</openerp>

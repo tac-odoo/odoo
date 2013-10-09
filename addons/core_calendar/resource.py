@@ -21,8 +21,9 @@
 
 from collections import defaultdict
 from openerp.osv import osv, fields
-from openerp.tools.translate import _
 from openerp import SUPERUSER_ID
+from openerp import tools
+from openerp.tools.translate import _
 
 
 def float_to_hm(hours):
@@ -89,6 +90,39 @@ class ResourceCalendarAttendance(osv.Model):
     }
 
 
+class resource_calendar_leaves_attendees(osv.Model):
+    _name = 'resource.calendar.leaves.attendees'
+    _auto = False
+    _columns = {
+        'leave_id': fields.many2one('resource.calendar.leaves', 'Leave', readonly=True),
+        'partner_id': fields.many2one('res.partner', 'Resource Partner', readonly=True),
+    }
+
+    def init(self, cr):
+        """
+        Initialize the sql view for the leaves attendees
+        """
+        tools.drop_view_if_exists(cr, 'resource_calendar_leaves_attendees')
+        cr.execute(""" CREATE VIEW resource_calendar_leaves_attendees AS (
+        SELECT l.id AS leave_id,
+               p.id AS partner_id
+
+        FROM resource_calendar_leaves l
+        LEFT JOIN resource_resource r ON (l.resource_id = r.id)
+        LEFT JOIN res_users u ON (r.user_id = u.id)
+
+        LEFT JOIN res_partner p ON (
+            CASE WHEN l.applies_to in ('company', 'resource_all') THEN true
+                 WHEN l.applies_to = 'resource' THEN p.id = COALESCE(l.partner_id, u.partner_id)
+                 ELSE False
+            END)
+
+        WHERE l.applies_to IN ('company', 'resource_all', 'resource')
+          AND p.id IS NOT NULL
+
+        )""")
+
+
 class resource_calendar_leaves(osv.Model):
     _inherit = "resource.calendar.leaves"
 
@@ -116,7 +150,6 @@ class resource_calendar_leaves(osv.Model):
     def _get_applies_to_selection(self, cr, uid, context=None):
         return [
             ('company', _('Whole Company')),
-            ('calendar', _('This calendar')),
             ('resource', _('This resource')),
             ('resource_all', _('All resources')),
         ]
@@ -128,8 +161,6 @@ class resource_calendar_leaves(osv.Model):
                 result[leave.id] = 'resource_all'
             elif leave.partner_id or leave.resource_id:
                 result[leave.id] = 'resource'
-            elif leave.calendar_id:
-                result[leave.id] = 'calendar'
             else:
                 result[leave.id] = 'company'
         return result
@@ -151,6 +182,8 @@ class resource_calendar_leaves(osv.Model):
                                       selection=lambda s, *a, **kw: s._get_applies_to_selection(*a, **kw),
                                       store=True, fnct_inv=lambda s, *a, **kw: s._set_applies_to(*a, **kw)),
         'partner_id': fields.many2one('res.partner', 'Contact'),
+        'attendee_ids': fields.many2many('res.partner', 'resource_calendar_leaves_attendees',
+                                         id1='leave_id', id2='partner_id', string='Attendees'),
     }
 
     def onchange_applies_to(self, cr, uid, ids, applies_to, context=None):

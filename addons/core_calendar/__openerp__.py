@@ -46,6 +46,7 @@ If you need to manage:
         'resource_view.xml',
         'core_calendar_view.xml',
         'res_partner_view.xml',
+        'core_calendar_data.xml',
         'security/core_calendar_security.xml',
         'security/ir.model.access.csv',
     ],
