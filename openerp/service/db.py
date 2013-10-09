@@ -33,13 +33,10 @@ class DatabaseExists(Warning):
 def _initialize_db(id, db_name, demo, lang, user_password):
     try:
         self_actions[id]['progress'] = 0
-        db = openerp.sql_db.db_connect(db_name)
-        with closing(db.cursor()) as cr:
-            # TODO this should be removed as it is done by RegistryManager.new().
-            openerp.modules.db.initialize(cr)
-            openerp.tools.config['lang'] = lang
-            cr.commit()
+        openerp.tools.config['lang'] = lang
+        openerp.tools.config['without_demo'] = not demo
 
+        db = openerp.sql_db.db_connect(db_name)
         registry = openerp.modules.registry.RegistryManager.new(
             db_name, demo, self_actions[id], update_module=True)
 

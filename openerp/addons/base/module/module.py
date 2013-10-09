@@ -731,16 +731,9 @@ class module(osv.osv):
             cr.execute('DELETE FROM ir_module_module_dependency WHERE module_id = %s and name = %s', (mod_browse.id, dep))
 
     def _update_category(self, cr, uid, mod_browse, category='Uncategorized'):
-        current_category = mod_browse.category_id
-        current_category_path = []
-        while current_category:
-            current_category_path.insert(0, current_category.name)
-            current_category = current_category.parent_id
-
         categs = category.split('/')
-        if categs != current_category_path:
-            cat_id = create_categories(cr, categs)
-            mod_browse.write({'category_id': cat_id})
+        cat_id = create_categories(cr, categs)
+        mod_browse.write({'category_id': cat_id})
 
     def update_translations(self, cr, uid, ids, filter_lang=None, context=None):
         if not filter_lang:

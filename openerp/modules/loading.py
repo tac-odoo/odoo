@@ -264,6 +264,7 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
     try:
         if not openerp.modules.db.is_initialized(cr):
             _logger.info("init db")
+            update_module = True
             openerp.modules.db.initialize(cr)
             tools.config["init"]["all"] = 1
             tools.config['update']['all'] = 1
@@ -296,7 +297,8 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         # STEP 2: Mark other modules to be loaded/updated
         if update_module:
             modobj = registry['ir.module.module']
-            if ('base' in tools.config['init']) or ('base' in tools.config['update']):
+            iu = tools.config['init'].keys() + tools.config['update'].keys()
+            if ('base' in iu) or ('all' in iu):
                 _logger.info('updating modules list')
                 modobj.update_list(cr, SUPERUSER_ID)
 
