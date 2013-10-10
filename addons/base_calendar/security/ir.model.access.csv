@@ -13,3 +13,5 @@ access_crm_meeting_type_sale_manager,crm.meeting.type.manager,model_crm_meeting_
 access_crm_meeting_type_sale_user,crm.meeting.type.user,model_crm_meeting_type,base.group_user,1,0,0,0
 access_crm_meeting_type_sale_user,crm.meeting.type.salesman,model_crm_meeting_type,base.group_sale_salesman,1,0,0,0
 access_crm_meeting_type_manager,crm.meeting.type.manager,model_crm_meeting_type,base.group_system,1,1,1,1
+access_crm_meeting_calendar_user,crm.meeting,model_crm_meeting,core_calendar.group_core_calendar_user,1,0,0,0
+access_calendar_attendee_calendar_user,calendar.attendee,model_calendar_attendee,core_calendar.group_core_calendar_user,1,1,1,1
