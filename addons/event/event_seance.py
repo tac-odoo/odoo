@@ -1646,21 +1646,24 @@ class EventEvent(osv.Model):
 
         return True
 
-    def _get_resource_leaves(self, cr, uid, ids, date_from=None, date_to=None, context=None):
+    def _get_resource_events(self, cr, uid, ids, date_from=None, date_to=None, context=None, usage=None):
+        assert usage in (None, 'events', 'leaves')
         result = {}
-        Leave = self.pool.get('resource.calendar.leaves')
+        Calendar = self.pool.get('core.calendar')
+        CalEvent = self.pool.get('core.calendar.event')
         for record in self.browse(cr, uid, ids, context=context):
-            leave_domain = [
-                '|', '|',
-                    ('applies_to', '=', 'event_all'),
-                    '&', ('applies_to', '=', 'company'), '|', ('company_id', '=', record.company_id.id),
-                                                              ('company_id', '=', False),
-                    '&', ('applies_to', '=', 'event'), ('event_id', '=', record.id),
+            event_domain = [
+                ('event_ids', 'in', [record.id]),
+                ('state', '!=', 'cancel'),
+                '|',
+                     '&', ('date_start', '>=', date_from.strftime(DT_FMT)),
+                          ('date_start', '<=', date_to.strftime(DT_FMT)),
+                     '&', ('date_end', '>=', date_from.strftime(DT_FMT)),
+                          ('date_end', '<=', date_to.strftime(DT_FMT))
             ]
-            if record.calendar_id:
-                leave_domain[:0] = ['|', '&', ('applies_to', '=', 'calendar'),
-                                              ('calendar_id', '=', record.calendar_id.id)]
-            result[record.id] = Leave.search(cr, uid, leave_domain, context=context)
+            if usage is not None:
+                event_domain = ['&', ('calendar_id.usage', '=', usage)] + event_domain
+            result[record.id] = CalEvent.search(cr, uid, event_domain, context=context)
         return result
 
 

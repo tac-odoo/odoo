@@ -43,7 +43,8 @@ class resource_calendar_leaves_events(osv.Model):
         FROM resource_calendar_leaves l
 
         LEFT JOIN event_event e ON (
-            CASE WHEN l.applies_to = 'event_all' THEN true
+            CASE WHEN l.applies_to = 'company' THEN true
+                 WHEN l.applies_to = 'event_all' THEN true
                  WHEN l.applies_to = 'event' THEN e.id = l.event_id
                  ELSE False
             END)
