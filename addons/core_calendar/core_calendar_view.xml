@@ -60,6 +60,7 @@
                                     <field name="action_id"/>
                                     <field name="color" widget="colorpicker"/>
                                     <field name="readonly"/>
+                                    <field name="usage"/>
                                 </group>
                                 <group string="Fields">
                                     <field name="field_name" domain="[('model_id','=',model),('ttype','=','char')]"/>

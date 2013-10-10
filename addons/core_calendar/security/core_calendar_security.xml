@@ -26,4 +26,32 @@
         </record>
 
     </data>
+    <data>
+
+        <record id="rule_calendar_user_see_own_leaves" model="ir.rule">
+            <field name="name">Calendar User - See own leaves</field>
+            <field name="model_id" ref="resource.model_resource_calendar_leaves"/>
+            <field name="global" eval="False"/>
+            <field name="groups" eval="[(4, ref('core_calendar.group_core_calendar_user'))]"/>
+            <field name="domain_force">[
+                '|','|',
+                    ('applies_to','=','company'),
+                    ('applies_to','=','resource_all'),
+                    '&amp;',
+                        ('applies_to','=','resource'),
+                        '|',('partner_id','=',user.partner_id.id),
+                            ('resource_id.user_id','=',user.id),
+                ]
+            </field>
+        </record>
+
+        <record id="rule_calendar_user_see_all_leaves" model="ir.rule">
+            <field name="name">Calendar User (All Events) - See all leaves</field>
+            <field name="model_id" ref="resource.model_resource_calendar_leaves"/>
+            <field name="global" eval="False"/>
+            <field name="groups" eval="[(4, ref('core_calendar.group_core_calendar_user_all_events'))]"/>
+            <field name="domain_force">[(1,'=',1)]</field>
+        </record>
+
+    </data>
 </openerp>

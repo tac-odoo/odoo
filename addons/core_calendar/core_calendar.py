@@ -62,10 +62,7 @@ class CoreCalendarTimeline(osv.TransientModel):
                 ]
         return result
 
-    def _get_resource_leaves(self, cr, uid, ids, date_from=None, date_to=None, context=None):
-        return dict((_id, []) for _id in ids)
-
-    def _get_resource_events(self, cr, uid, ids, date_from=None, date_to=None, context=None):
+    def _get_resource_events(self, cr, uid, ids, date_from=None, date_to=None, context=None, usage=None):
         return dict((_id, []) for _id in ids)
 
     def _get_resource_timezone(self, cr, uid, ids, context=None):
@@ -117,12 +114,12 @@ class CoreCalendarTimeline(osv.TransientModel):
                     # add all leaves for this event
                     leaves_emiter = GenericEventPeriodEmiter('leaves')
                     timeline.add_emiter(leaves_emiter)
-                    Leave = self.pool.get('resource.calendar.leaves')
-                    leave_ids = self._get_resource_leaves(cr, uid, [record.id], date_from=date_from,
-                                                          date_to=date_to, context=context)[record.id]
-                    for leave in Leave.browse(cr, uid, leave_ids, context=context):
-                        leave_from = timeline.datetime_from_str(leave.date_from, tz='UTC')
-                        leave_to = timeline.datetime_from_str(leave.date_to, tz='UTC')
+                    CalEvent = self.pool.get('core.calendar.event')
+                    leave_ids = self._get_resource_events(cr, uid, [record.id], date_from=date_from,
+                                                          date_to=date_to, context=context, usage='leaves')[record.id]
+                    for event in CalEvent.read(cr, uid, leave_ids, ['date_start', 'date_end', 'state'], context=context):
+                        leave_from = timeline.datetime_from_str(event['date_start'], tz='UTC')
+                        leave_to = timeline.datetime_from_str(event['date_end'], tz='UTC')
                         leaves_emiter.add_event(leave_from, leave_to, Availibility.BUSY)  # FIXME: implement OUT_OF_OFFICE level
 
                 elif layer == 'events':
@@ -131,7 +128,7 @@ class CoreCalendarTimeline(osv.TransientModel):
                     timeline.add_emiter(event_emiter)
                     CalEvent = self.pool.get('core.calendar.event')
                     event_ids = self._get_resource_events(cr, uid, [record.id], date_from=date_from,
-                                                          date_to=date_to, context=context)[record.id]
+                                                          date_to=date_to, context=context, usage='events')[record.id]
                     for event in CalEvent.read(cr, uid, event_ids, ['date_start', 'date_end', 'state'], context=context):
                         event_start = timeline.datetime_from_str(event['date_start'], tz='UTC')
                         event_end = timeline.datetime_from_str(event['date_end'], tz='UTC')
@@ -204,24 +201,8 @@ class CoreCalendarResource(osv.TransientModel):
         'freebusy': fields.function(_get_resource_freebusy, type='char', string='Free/Busy'),
     }
 
-    def _get_resource_leaves(self, cr, uid, ids, date_from=None, date_to=None, context=None):
-        result = {}
-        Leave = self.pool.get('resource.calendar.leaves')
-        for record in self.browse(cr, uid, ids, context=context):
-            leave_domain = [
-                '|', '|',
-                    ('applies_to', '=', 'resource_all'),
-                    '&', ('applies_to', '=', 'company'), '|', ('company_id', '=', record.company_id.id),
-                                                              ('company_id', '=', False),
-                    '&', ('applies_to', '=', 'resource'), ('partner_id', '=', record.id),
-            ]
-            if record.calendar_id:
-                leave_domain[:0] = ['|', '&', ('applies_to', '=', 'calendar'),
-                                              ('calendar_id', '=', record.calendar_id.id)]
-            result[record.id] = Leave.search(cr, uid, leave_domain, context=context)
-        return result
-
-    def _get_resource_events(self, cr, uid, ids, date_from=None, date_to=None, context=None):
+    def _get_resource_events(self, cr, uid, ids, date_from=None, date_to=None, context=None, usage=None):
+        assert usage in (None, 'events', 'leaves')
         result = {}
         Calendar = self.pool.get('core.calendar')
         CalEvent = self.pool.get('core.calendar.event')
@@ -234,6 +215,8 @@ class CoreCalendarResource(osv.TransientModel):
                      '&', ('date_end', '>=', date_from.strftime(DT_FMT)),
                           ('date_end', '<=', date_to.strftime(DT_FMT))
             ]
+            if usage is not None:
+                event_domain = ['&', ('calendar_id.usage', '=', usage)] + event_domain
             result[record.id] = CalEvent.search(cr, uid, event_domain, context=context)
         return result
 
@@ -343,6 +326,7 @@ class CoreCalendar(osv.Model):
         'date_mode': fields.selection(_calendar_date_modes, 'Date Mode', required=True),
         'model': fields.many2one('ir.model', 'Model', required=True),
         'readonly': fields.boolean('Readonly', help='Force events of this calendar to be readonly'),
+        'usage': fields.selection([('events', 'Events'),('leaves','Leaves')], 'Usage', help='What kind of events, this calendar will represent'),
         'action_id': fields.many2one('ir.actions.act_window', 'Action', required=True,
                                      help='Action used when opening/creating a new event'),
         'field_name': fields.many2one('ir.model.fields', 'Name', required=True, help='Field used to describe event name'),
@@ -372,6 +356,10 @@ class CoreCalendar(osv.Model):
         'action_res_model': fields.function(_get_action_data, type='char', string='Action Model', multi='action_data'),
     }
 
+    _defaults = {
+        'usage': 'events',
+    }
+
     _sql_constraints = [
         ('check_date_fields', "CHECK((date_mode = 'end' AND field_date_end IS NOT NULL) OR (date_mode = 'duration' AND field_duration IS NOT NULL))",
          'Missing date_end or duration field'),
@@ -383,7 +371,7 @@ class CoreCalendar(osv.Model):
 
     def _get_extended_fields(self, cr, uid, context=None):
         """Extended fields need to be post-processed"""
-        return ['main_speaker_id', 'attendee_ids', 'attendee_id', 'state']
+        return ['calendar_id', 'main_speaker_id', 'attendee_ids', 'attendee_id', 'state', 'date_end', 'duration']
 
     @tools.ormcache()
     def _get_calendar_info(self, cr, uid, calendar_id, lang=None):
@@ -608,11 +596,28 @@ class CoreCalendar(osv.Model):
                 field_realname = calendar_info['fields'].get(field)
                 if field_realname and field in field_is_standard:
                     expr.append([field_realname + field_extra, op, val])
+                elif field_is_valid and field == 'calendar_id':
+                    if not field_extra and op in ('=like', '=ilike', 'like',
+                                                  'not like', 'ilike', 'not ilike',):
+                        cal_ids = [x[0] for x in self.name_search(cr, uid, val, operator=op, context=context)]
+                    else:
+                        cal_args = [(field_extra[1:] if field_extra else 'id', op, val)]
+                        cal_ids = self.search(cr, uid, cal_args, context=context)
+                    if calendar_id not in cal_ids:
+                        expr.append(expression.FALSE_LEAF)
+                    else:
+                        expr.append(expression.TRUE_LEAF)
+                elif field_is_valid and field in ('date_end', 'duration'):
+                    mapped_field = calendar_info['fields'].get(field)
+                    if mapped_field:
+                        expr.append((mapped_field, op, val))  # standard field
+                    else:
+                        expr.append(expression.FALSE_LEAF)
                 elif field_is_valid and field == 'main_speaker_id':
                     if 'main_speaker_id' in calendar_model._all_columns:
                         expr.append(arg)
                     else:
-                        expr.append(['id', '=', -1])
+                        expr.append(expression.FALSE_LEAF)
                 elif field_is_valid and field in ('attendee_ids', 'attendee_id'):
                     JOIN_OP = '&' if arg[1] in expression.NEGATIVE_TERM_OPERATORS else '|'
 
@@ -631,7 +636,7 @@ class CoreCalendar(osv.Model):
                         domains = [[f + field_extra, arg[1], fix_id(arg[2])] for f in calendar_attendee_fields]
                         expr.extend([JOIN_OP] * (len(domains) - 1) + domains)
                     else:
-                        expr.append(['id', '=', -1])
+                        expr.append(expression.FALSE_LEAF)
                 elif field_is_valid and field == 'id':
                     if isinstance(val, (tuple, list)):
                         # filter only id related to this calendar
@@ -642,18 +647,23 @@ class CoreCalendar(osv.Model):
                         if not val.startswith('%d-' % calendar_id):
                             val = -1  # TODO
                     expr.append(['id', op, val])
-                elif field_is_valid and field == 'state' and calendar_info['fields']['state']:
-                    states = []
-                    if isinstance(arg[2], (list, tuple)):
-                        for v in arg[2]:
-                            states.extend(calendar_info['states'][v])
+                elif field_is_valid and field == 'state':
+                    if calendar_info['fields']['state']:
+                        states = []
+                        if isinstance(arg[2], (list, tuple)):
+                            for v in arg[2]:
+                                states.extend(calendar_info['states'][v])
+                        else:
+                            states.extend(calendar_info['states'][arg[2]])
+                        if op in ('=', '!='):
+                            op = {'=': 'in', '!=': 'not in'}[op]
+                        expr.append((calendar_info['fields']['state'], op, states))
                     else:
-                        states.extend(calendar_info['states'][arg[2]])
-                    if op in ('=', '!='):
-                        op = {'=': 'in', '!=': 'not in'}[op]
-                    expr.append((calendar_info['fields']['state'], op, states))
+                        # if calendar does not provide any 'state' field,
+                        # all item should match whatever filter
+                        expr.append(expression.TRUE_LEAF)
                 else:
-                    expr.append(['id', '=', -1])  # return always false domain
+                    expr.append(expression.FALSE_LEAF)  # return always false domain
             else:
                 expr.append(arg)
         expr = expression.normalize_domain(expr)
@@ -867,7 +877,9 @@ class CoreCalendarEvent(osv.Model):
 
         all_attendee_ids = set()
         calendar_ids = self.get_calendars(cr, uid, ids_by_calendar.keys(), context=context)
+        calendars = {}
         for calendar in self.pool.get('core.calendar').browse(cr, uid, calendar_ids, context=context):
+            calendars[calendar.id] = calendar
             calendar_model = self.pool.get(calendar.model.model)
             calendar_ids = ids_by_calendar[calendar.id]
 
@@ -901,10 +913,17 @@ class CoreCalendarEvent(osv.Model):
         speaker_ids = Partner.search(cr, uid, speaker_domain, context=context)
         speaker_names = dict(Partner.name_get(cr, uid, speaker_ids, context=context))
         speaker_ids = set(speaker_ids)
+        ids_to_calendar = {}
+        for cal_id, item_ids in ids_by_calendar.iteritems():
+            for _id in item_ids:
+                ids_to_calendar['%d-%d' % (cal_id, _id)] = cal_id
         for _id in ids:
             spks = [x for x in result[_id]['attendee_ids'] if x in speaker_ids]
             if spks:
-                result[_id]['main_speaker_id'] = (spks[0], speaker_names[spks[0]])
+                calendar = calendars[ids_to_calendar[_id]]
+                if calendar.model.model != 'resource.calendar.leaves' \
+                        or (calendar.model.model == 'resource.calendar.leaves' and len(spks) == 1):
+                    result[_id]['main_speaker_id'] = (spks[0], speaker_names[spks[0]])
 
         return result
 

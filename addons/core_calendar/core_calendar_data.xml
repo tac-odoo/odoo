@@ -8,6 +8,7 @@
             <field name="date_mode">end</field>
             <field name="color">#a5a5a5</field>
             <field name="readonly" eval="True"/>
+            <field name="usage">leaves</field>
             <field name="model" ref="resource.model_resource_calendar_leaves"/>
             <field name="action_id" ref="resource.action_resource_calendar_leave_tree"/> <!-- do not open it to be opened in calendar -->
             <field name="field_name" ref="resource.field_resource_calendar_leaves_name"/>

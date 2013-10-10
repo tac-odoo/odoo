@@ -3,3 +3,4 @@ access_core_calendar_user,core.calendar,model_core_calendar,group_core_calendar_
 access_core_calendar_user_all_events,core.calendar,model_core_calendar,group_core_calendar_user_all_events,1,0,0,0
 access_core_calendar_manager,core.calendar,model_core_calendar,group_core_calendar_manager,1,1,1,1
 access_core_calendar_event,core.calendar.event,model_core_calendar_event,,1,1,0,0
+access_core_calendar_user_leaves,resource.calendar.leaves,resource.model_resource_calendar_leaves,group_core_calendar_user,1,0,0,0
