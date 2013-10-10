@@ -3400,6 +3400,10 @@ class BaseModel(object):
             if not self.pool.get(f._obj):
                 raise except_orm('Programming Error', 'Many2Many destination model does not exist: `%s`' % (f._obj,))
             dest_model = self.pool.get(f._obj)
+            for m, mobj in self.pool.models.iteritems():
+                if mobj._table == m2m_tbl and mobj._auto == False:
+                    # do not automatically create table for destination models with are _auto=False
+                    return
             ref = dest_model._table
             cr.execute('CREATE TABLE "%s" ("%s" INTEGER NOT NULL, "%s" INTEGER NOT NULL, UNIQUE("%s","%s"))' % (m2m_tbl, col1, col2, col1, col2))
             # create foreign key references with ondelete=cascade, unless the targets are SQL views
