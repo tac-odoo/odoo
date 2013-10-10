@@ -20,16 +20,14 @@
 ##############################################################################
 
 import pytz
-import copy
 from datetime import datetime, timedelta
 from collections import defaultdict
 from openerp.osv import osv, fields, expression
 import openerp.tools as tools
-from openerp.tools.misc import logged, flatten
+from openerp.tools.misc import flatten
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
 from openerp.tools.safe_eval import safe_eval
 from openerp.tools.translate import _
-from openerp.tools.misc import flatten
 from openerp.addons.base.res.res_partner import _tz_get
 from timeline import Timeline, Availibility, WorkingHoursPeriodEmiter, GenericEventPeriodEmiter
 
@@ -344,6 +342,7 @@ class CoreCalendar(osv.Model):
         'type': fields.selection(_calendar_types, 'Type', required=True),
         'date_mode': fields.selection(_calendar_date_modes, 'Date Mode', required=True),
         'model': fields.many2one('ir.model', 'Model', required=True),
+        'readonly': fields.boolean('Readonly', help='Force events of this calendar to be readonly'),
         'action_id': fields.many2one('ir.actions.act_window', 'Action', required=True,
                                      help='Action used when opening/creating a new event'),
         'field_name': fields.many2one('ir.model.fields', 'Name', required=True, help='Field used to describe event name'),
@@ -433,6 +432,7 @@ class CoreCalendar(osv.Model):
             'name': calendar.name,
             'model': calendar.model.model,
             'date_mode': calendar.date_mode,
+            'readonly': calendar.readonly,
             'states': states,  # map core.calendar.event state to model states
             'states_reversed': states_reversed,  # map model states to core.calendar.event state
             'fields': fields,
@@ -457,13 +457,13 @@ class CoreCalendar(osv.Model):
                 user_calendar_ids.append(calendar.id)
         return user_calendar_ids
 
-    @logged
     def get_subscribed(self, cr, uid, context=None):
         ModelAccess = self.pool.get('ir.model.access')
         # TODO:
         # - checked: user-preference to store is we should display events from this calendar by default or not
         calendar_ids = self.get_subscribed_ids(cr, uid)
-        calendar_fields = ['name', 'color', 'action_id', 'action_res_model', 'action_form_view_id', 'date_mode']
+        calendar_fields = ['name', 'color', 'action_id', 'action_res_model',
+                           'action_form_view_id', 'date_mode', 'readonly']
         result = self.read(cr, uid, calendar_ids, calendar_fields, context=context)
         for r in result:
             calinfo = self._get_calendar_info(cr, uid, r['id'])
@@ -472,7 +472,12 @@ class CoreCalendar(osv.Model):
             r['fields_type'] = calinfo['fields_type']
             r['access'] = {}
             for mode in ['read', 'write', 'create', 'unlink']:
-                r['access'][mode] = ModelAccess.check(cr, uid, calendar_model, mode, False)
+                has_mode_access = ModelAccess.check(cr, uid, calendar_model, mode, False)
+                if mode != 'read' and r['readonly']:
+                    # if calendar is forced as readonly,
+                    # disable write/create/unlink access
+                    has_mode_access = False
+                r['access'][mode] = has_mode_access
         return result
 
     def _merge_m2m_search_args(self, cr, uid, args, context=None):
@@ -480,7 +485,6 @@ class CoreCalendar(osv.Model):
             return []
         root_model = self.pool.get('core.calendar.event')
         expr = expression.distribute_not(expression.normalize_domain(args))
-        from pprint import pprint
 
         # merge m2m using the same field for correctness of query
         # --- [('attendee_ids.attentee_type','=','speaker'),('attendee_ids.attendee_external','=',False)]
@@ -568,7 +572,6 @@ class CoreCalendar(osv.Model):
             final_leaf = RecrExpression('&', child=[final_leaf])
         return final_leaf.get_flatten()
 
-    # @logged
     def get_search_args(self, cr, uid, calendar_id, args, context=None):
         if not args:
             return []
@@ -909,7 +912,6 @@ class CoreCalendarEvent(osv.Model):
         return dict.fromkeys(ids, False)
 
     def _search_attendee_id(self, cr, uid, model, fieldname, domain, context=None):
-        # print("Model; %s, fieldname: %s, domain: %s" % (model, fieldname, domain,))
         return []
 
     def _get_attendee_type(self, cr, uid, context=None):
@@ -988,30 +990,21 @@ class CoreCalendarEvent(osv.Model):
     def create(self, cr, uid, values, context=None):
         raise Exception('You must call create() on related calendar model')
 
-    #@logged
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         ids_by_calendar = []
         calendar_obj = self.pool.get('core.calendar')
         calendar_ids = self.get_calendars(cr, user, context=context)
         for calendar in calendar_obj.browse(cr, user, calendar_ids, context=context):
-            # print("calendar: %s" % (calendar.name,))
-            # print("raw args: %s" % (args,))
             calendar_args = calendar_obj.get_search_args(cr, user, calendar.id, args)
-            # print("calendar args: %s" % (calendar_args,))
             calendar_model = self.pool.get(calendar.model.model)
             ids_by_calendar.append(['%s-%s' % (calendar.id, id)
                                     for id in calendar_model.search(cr, user, calendar_args, context=context)])
-        # from pprint import pprint
-        # pprint(ids_by_calendar)
         ids = flatten(ids_by_calendar)
         ids = ids[offset:limit or None]
         if count:
             return len(ids)
         return ids
-        # return super(res_calendar_event, self).search(cr, user, args, offset=offset, limit=limit,
-        #                                               order=order, context=context, count=count)
 
-    #@logged
     def read(self, cr, user, ids, fields_to_read=None, context=None, load='_classic_read'):
         Calendar = self.pool.get('core.calendar')
 
@@ -1157,8 +1150,6 @@ class CoreCalendarEvent(osv.Model):
 
         return result
 
-
-    @logged
     def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False):
         """
         Get the list of records in list view grouped by the given ``groupby`` fields
@@ -1218,7 +1209,6 @@ class CoreCalendarEvent(osv.Model):
             })
         return result
 
-    @logged
     def write(self, cr, uid, ids, values, context=None):
         Calendar = self.pool.get('core.calendar')
 
@@ -1285,9 +1275,7 @@ class CoreCalendarEvent(osv.Model):
         # TODO: handler write for date_start/date_end/duration to fallback to model write
         #       -- note: this is used when move a event on the agenda view
         return True  # stub
-        # return super(res_calendar_event, self).write(cr, uid, values, context=context)
 
-    @logged
     def unlink(self, cr, uid, ids, context=None):
         ids_by_calendar = self._group_ids_by_calendar(cr, uid, ids, context=context)
         calendar_ids = self.get_calendars(cr, uid, ids_by_calendar.keys(), context=context)
@@ -1296,4 +1284,3 @@ class CoreCalendarEvent(osv.Model):
             calendar_model = self.pool.get(calendar.action_res_model)
             calendar_model.unlink(cr, uid, item_ids, context=context)
         return True  # stub
-        # return super(res_calendar_event, self).unlink(cr, uid, ids, context=context)
