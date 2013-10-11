@@ -1710,6 +1710,18 @@ class EventRegistration(osv.Model):
                                                     domain=[('seance_id.type_id.manual_participation','=',True)]),
     }
 
+    def force_participation_generation(self, cr, uid, ids, context=None):
+        if not ids:
+            return True
+        if context is None:
+            context = {}
+        event_ids = set(x.event_id.id
+                        for x in self.browse(cr, uid, ids, context=context))
+        Seance = self.pool.get('event.seance')
+        seance_ids = Seance.search(cr, uid, [('event_ids', 'in', list(event_ids))], context=context)
+        ctx = dict(context, force_participations_refresh=True)
+        return Seance._refresh_participations(cr, uid, seance_ids, context=ctx)
+
     def create(self, cr, uid, values, context=None):
         if values and values.get('event_id') and 'group_ids' not in values:
             change_values = self.onchange_event_id(cr, uid, [], values['event_id'], context=context)

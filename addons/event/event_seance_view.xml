@@ -911,6 +911,7 @@
                 <xpath expr="//sheet/group" position="after">
                     <field name="event_has_manual_participation" invisible="1"/>
                     <separator string="Manual Participations" attrs="{'invisible': [('event_has_manual_participation', '=', False)]}"/>
+                    <button name="force_participation_generation" type="object" string="(Force Participation Generation)" class="oe_link" groups="event.group_event_registration,event.group_evenet_manager"/>
                     <field name="manual_participation_ids" attrs="{'invisible': [('event_has_manual_participation', '=', False)]}" context="{'default_partner_id': partner_id}">
                         <tree string="Manual Participations" editable="bottom">
                             <field name="partner_id" on_change="onchange_partner(partner_id)" required="1"/>
