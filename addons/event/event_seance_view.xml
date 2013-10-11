@@ -731,7 +731,7 @@
                     <field name="seance_type"/>
                     <separator/>
                     <filter name="today" string="Today" domain="[('seance_date','>=',current_date),('seance_date','&lt;',current_date)]" context="{}"/>
-                    <filter name="seven_floatting_days" string="7 floating days" domain="[('seance_date','&gt;=',(context_today() - relativedelta(days=3)).strftime('%%Y-%%m-%%d 00:00:00')),('seance_date','&lt;=', (context_today() + relativedelta(days=3)).strftime('%%Y-%%m-%%d 00:00:00'))]"/>
+                    <filter name="seven_floatting_days" string="7 floating days" domain="[('seance_date','&gt;=',(context_today() - relativedelta(days=7)).strftime('%%Y-%%m-%%d 00:00:00')),('seance_date','&lt;=', context_today().strftime('%%Y-%%m-%%d 00:00:00'))]"/>
                     <separator/>
                     <separator/>
                     <filter name="state_draft" string="Draft" domain="[('state','=','draft')]"/>
