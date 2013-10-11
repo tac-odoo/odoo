@@ -788,7 +788,9 @@ class EventSeance(osv.Model):
             for event in seance.content_id.event_ids:
                 if seance.state == 'done':
                     # done seance have to keep all participation for history tracking
-                    registrations.extend(r for r in event.registration_ids)
+                    registrations.extend(r for r in event.registration_ids
+                                         if r.state in ('open', 'done') or
+                                         (r.state == 'cancel' and r.date_cancel < (seance.date_begin or seance.planned_week_date)))
                     continue
                 for reg in event.registration_ids:
                     if reg.state in ('open', 'done'):
@@ -824,7 +826,11 @@ class EventSeance(osv.Model):
                 found, expected = len(v), v.expected
                 if found > expected:
                     if seance.state != 'done' or (seance.state == 'done' and force_participations_refresh):
-                        p_to_unlink.extend(p.id for p in v[-found-expected:])
+                        p_can_be_removed = lambda a: True
+                        if seance.state == 'done':
+                            # keep all presence that have 'presence' information
+                            p_can_be_removed = lambda a: a.presence == 'none'
+                        p_to_unlink.extend(p.id for p in v[-found-expected:] if p_can_be_removed(p))
                 elif found < expected:
                     if seance.state == 'done' and not force_participations_refresh:
                         continue
@@ -1039,6 +1045,8 @@ class EventParticipation(osv.Model):
         return new_participation_id
 
     def unlink(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
         # Automatically cancel
         auto_cancel_participation_ids = self.search(cr, uid, [
             '&', ('id', 'in', ids),
@@ -1049,9 +1057,9 @@ class EventParticipation(osv.Model):
         ], context=context)
         if auto_cancel_participation_ids:
             for p in self.browse(cr, uid, auto_cancel_participation_ids, context=context):
-                if p.seance_id.state == 'done':
+                if p.seance_id.state == 'done' and not context.get('force_participations_refresh') and p.presence != 'none':
                     raise osv.except_osv(_('Error!'),
-                                         _('OpenERP can not delete participations which are related to a done seance'))
+                                         _('OpenERP can not delete participations which are related to a done seance, and having presence information'))
             self.button_set_cancel(cr, uid, auto_cancel_participation_ids, context=context)
 
         participation_not_draft_not_cancel = self.search(cr, uid, [
