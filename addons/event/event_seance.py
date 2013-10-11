@@ -780,28 +780,25 @@ class EventSeance(osv.Model):
 
         force_participations_refresh = context.get('force_participations_refresh')
 
+        is_seance_before_cancellation = lambda s, r: r.date_cancel > (s.date_begin or s.planned_week_date)
+
+        def is_registration_for_seance(reg, seance):
+            if reg.state in ('open', 'done') \
+                or (reg.state == 'cancel' and
+                    is_seance_before_cancellation(seance, reg)):
+
+                if not seance.group_id or seance.group_id in reg.group_ids:
+                    return True
+            return False
+
         for seance in self.browse(cr, uid, ids, context=context):
             # registrations = Registration.browse(cr, uid, regids_cache[seance.id], context=context)
             if seance.type_id and seance.type_id.manual_participation:
                 continue
             registrations = []
             for event in seance.content_id.event_ids:
-                if seance.state == 'done':
-                    # done seance have to keep all participation for history tracking
-                    registrations.extend(r for r in event.registration_ids
-                                         if r.state in ('open', 'done') or
-                                         (r.state == 'cancel' and r.date_cancel < (seance.date_begin or seance.planned_week_date)))
-                    continue
-                for reg in event.registration_ids:
-                    if reg.state in ('open', 'done'):
-                        if seance.group_id:
-                            if seance.group_id in reg.group_ids:
-                                registrations.append(reg)
-                        else:
-                            registrations.append(reg)
-                    elif reg.state == 'cancel':
-                        if reg.date_cancel > (seance.date_begin or seance.planned_week_date):
-                            registrations.append(reg)
+                registrations.extend(r for r in event.registration_ids
+                                     if is_registration_for_seance(r, seance))
 
             partset = {}  # { (registration, contact): list_counted([p1, p2, ...]), ...}
             # build participation set on expected values
@@ -812,9 +809,7 @@ class EventSeance(osv.Model):
             # populate set with existing participation values
             for part in seance.participant_ids:
                 x = (part.registration_id, False)
-                if part.registration_id.state in ('open', 'done'):
-                    expected_count = part.registration_id.nb_register
-                elif part.registration_id.state == 'cancel' and part.registration_id.date_cancel > (seance.date_begin or seance.planned_week_date):
+                if is_registration_for_seance(part.registration_id, part.seance_id):
                     expected_count = part.registration_id.nb_register
                 else:
                     expected_count = 0
@@ -826,10 +821,8 @@ class EventSeance(osv.Model):
                 found, expected = len(v), v.expected
                 if found > expected:
                     if seance.state != 'done' or (seance.state == 'done' and force_participations_refresh):
-                        p_can_be_removed = lambda a: True
-                        if seance.state == 'done':
-                            # keep all presence that have 'presence' information
-                            p_can_be_removed = lambda a: a.presence == 'none'
+                        # keep all presence that have 'presence' information
+                        p_can_be_removed = lambda a: a.presence == 'none'
                         p_to_unlink.extend(p.id for p in v[-found-expected:] if p_can_be_removed(p))
                 elif found < expected:
                     if seance.state == 'done' and not force_participations_refresh:
