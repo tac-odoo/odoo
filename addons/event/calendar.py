@@ -49,7 +49,7 @@ class resource_calendar_leaves_events(osv.Model):
                  ELSE False
             END)
 
-        WHERE l.applies_to IN ('event_all', 'event')
+        WHERE l.applies_to IN ('company', 'event_all', 'event')
           AND e.id IS NOT NULL
 
         )""")
