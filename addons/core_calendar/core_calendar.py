@@ -977,6 +977,9 @@ class CoreCalendarEvent(osv.Model):
         # Compute automatic default values
         for f in fields_list:
             if f not in defaults:
+                if f == 'display_name':
+                    defaults[f] = False
+                    continue
                 _type = self._all_columns[f].column._type
                 if _type in ('char', 'text', 'html', 'selection', 'reference'):
                     defaults[f] = ''
@@ -1038,6 +1041,8 @@ class CoreCalendarEvent(osv.Model):
         fields_pre = []
         fields_post = []
         for f in fields_to_read:
+            if f == 'display_name':
+                f = 'name'
             column = self._all_columns[f].column
             if isinstance(column, fields.function):
                 fields_post.append(f)
@@ -1067,6 +1072,8 @@ class CoreCalendarEvent(osv.Model):
             for val in calendar_model.read(cr, user, event_ids, calendar_fields_to_read, context=context):
                 record = dict(record_defaults)
                 record['id'] = '%s-%s' % (calendar_id, val['id'])
+                if 'display_name' in fields_to_read:
+                    record['display_name'] = val['name']
                 # TODO: handle log_access columns read
                 if 'calendar_id' in fields_pre:
                     record['calendar_id'] = (calendar_id, calendar_info['name'])
