@@ -760,6 +760,8 @@ class EventSeance(osv.Model):
             pass
 
     def _refresh_participations(self, cr, uid, ids, context=None):
+        rfp_logger = logging.getLogger('event.seance.refresh_participations')
+        rfp_logger.debug('refresh-participations # seance ids: %s' % (ids,))
         if context is None:
             context = {}
         already_done_seances = context.get('__internal_refresh_participations')
@@ -815,10 +817,12 @@ class EventSeance(osv.Model):
                     expected_count = 0
                 partset.setdefault(x, list_counted(expected=expected_count)).append(part)
 
+            rfp_logger.debug("seance %d: registrations: %s" % (seance.id, registrations,))
             # iterate over the set and compare result (expected vs real)
             for k, v in sorted(partset.iteritems()):
                 reg, contact = k
                 found, expected = len(v), v.expected
+                rfp_logger.info("Reg: %s <id: %d> # contact: %s, found/expected: %s/%s" % (reg.name, reg.id, contact, found, expected))
                 if found > expected:
                     if seance.state != 'done' or (seance.state == 'done' and force_participations_refresh):
                         # keep all presence that have 'presence' information
