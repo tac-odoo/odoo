@@ -52,7 +52,12 @@
                 </field>
                 <xpath expr="//templates/t[@t-name='calendar-info-box']/t[2]" position="after">
                     <t t-if="record.event_ids.raw_value.length">
-                        <span>Events: <field name="event_ids"/></span>
+                        <t t-if="record.event_ids.raw_value.length &lt;= 8">
+                            <span>Events: <field name="event_ids"/></span>
+                        </t>
+                        <t t-if="record.event_ids.raw_value.length > 8">
+                            <span>Events: #<t t-esc="record.event_ids.raw_value.length"/></span>
+                        </t>
                     </t>
                 </xpath>
             </field>
