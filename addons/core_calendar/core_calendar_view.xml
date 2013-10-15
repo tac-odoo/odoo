@@ -138,7 +138,7 @@
                                 <span> Location: <field name="location"/></span><br/>
                             </t>
                             <t t-if="record.attendee_ids.raw_value.length">
-                                <span> Participants: <t t-esc="record.attendee_ids.raw_value.length"/></span><br/>
+                                <span> Participants: #<t t-esc="record.attendee_ids.raw_value.length"/></span><br/>
                             </t>
                             <t t-if="!record.attendee_ids.raw_value.length">
                                 <span> No participant!</span><br/>
