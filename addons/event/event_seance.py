@@ -1840,6 +1840,61 @@ class EventRegistration(osv.Model):
         (_check_content_group_subscription, _msg_content_group_subscription, ['group_ids']),
     ]
 
+    def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False):
+        if context is None:
+            context = {}
+        groupby_list = groupby
+        groupby = groupby
+        if isinstance(groupby, (list, tuple)):
+            groupby = groupby[0]
+
+        if context.get('group_for_content_id') and groupby == 'group_ids':
+            fget = self.fields_get(cr, uid, fields)
+            aggregated_fields = [
+                f for f in fields
+                if f not in ('id', 'sequence')
+                if fget[f]['type'] in ('integer', 'float')
+                if (f in self._columns and getattr(self._columns[f], '_classic_write'))]
+
+            ids = self.search(cr, uid, domain, context=context)
+            regs = defaultdict(list)
+            for reg in self.read(cr, uid, ids, [groupby], context=context):
+                if not reg[groupby]:
+                    regs[False].append(reg['id'])
+                    continue
+                for g in reg[groupby]:
+                    regs[g].append(reg['id'])
+            ParticipationGroup = self.pool.get('event.participation.group')
+            group_ids = [x for x in regs.iterkeys() if x]
+            group_ids = ParticipationGroup.search(cr, uid, [('id', 'in', group_ids)], context=context)
+            group_names = ParticipationGroup.name_get(cr, uid, group_ids, context=context)
+            if False in regs:
+                group_names.insert(0, (False, _('Undefined')))
+
+            result = []
+            for (group_id, group_name) in group_names:
+                d = {
+                    'id': group_id,
+                    groupby: (group_id, group_name),
+                    groupby + '_count': len(regs.get(group_id) or []),
+                    '__domain': [(groupby, '=', group_id)] + domain,
+                }
+                if not isinstance(groupby_list, (str, unicode)):
+                    if groupby or not context.get('group_by_no_leaf', False):
+                        d['__context'] = {'group_by': groupby_list[1:]}
+                result.append(d)
+
+            if groupby and groupby in self._group_by_full:
+                order = orderby or groupby
+                result = self._read_group_fill_results(cr, uid, domain, groupby, groupby_list,
+                                                       aggregated_fields, result, read_group_order=order,
+                                                       context=context)
+
+            return result
+
+        return super(EventRegistration, self).read_group(cr, uid, domain, fields, groupby_list, offset=offset, limit=limit,
+                                                         context=context, orderby=orderby)
+
     def _get_groupby_full_group_ids(self, cr, uid, present_group_ids, domain,
                                     read_group_order=None, access_rights_uid=None,
                                     context=None):
