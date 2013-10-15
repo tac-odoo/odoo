@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+import logging
 import pytz
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -838,14 +839,16 @@ class CoreCalendarEvent(osv.Model):
             SELECT a.id, a.model, a.res_id, a.attendee_ids AS partner_id, b.id
             FROM events AS a
             LEFT JOIN events AS b ON (b.attendee_ids = a.attendee_ids
-                                      AND a.calendar_id != b.calendar_id
-                                      AND a.res_id != b.res_id
+                                      AND (a.calendar_id != b.calendar_id
+                                           OR a.res_id != b.res_id)
                                       AND (a.date_start, a.date_end) OVERLAPS (b.date_start, b.date_end))
             LEFT JOIN res_partner p ON (a.attendee_ids = p.id)
             WHERE p.avoid_double_allocation = true
-              AND a.calendar_id != b.calendar_id AND a.res_id != b.res_id %s
+              AND (a.calendar_id != b.calendar_id OR a.res_id != b.res_id) %s
         """ % (union_all_query, where_clause)
         cr.execute(query, where_params)
+        logger = logging.getLogger('core.calendar.event')
+        logger.debug('event overlapping query\n%s' % cr.query)
         result = []
         data = {}
         for r in cr.fetchall():
