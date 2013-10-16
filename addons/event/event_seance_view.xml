@@ -415,6 +415,7 @@
                         <button type="object" name="button_set_inprogress" states="confirm" string="Start seance" groups="event.group_event_manager,event.group_event_planning,event.group_event_professor"/>
                         <button type="object" name="button_set_closed" states="inprogress" string="Stop seance" groups="event.group_event_manager,event.group_event_planning,event.group_event_professor"/>
                         <button type="object" name="button_set_done" states="confirm,inprogress,closed" string="Done" groups="event.group_event_manager,event.group_event_planning,event.group_event_professor"/>
+                        <button type="object" name="button_set_cancel" states="draft,confirm,planned,inprogress,done" string="Cancel" groups="event.group_event_manager,event.group_event_planning"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
                     </header>
                     <sheet>
