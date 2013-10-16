@@ -380,6 +380,7 @@ class EventContent(osv.Model):
 class EventSeance(osv.Model):
     _name = 'event.seance'
     _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _order = 'date_begin ASC, name'
 
     SEANCE_STATES = [
         ('draft', 'Draft'),
