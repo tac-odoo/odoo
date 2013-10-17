@@ -20,7 +20,7 @@
 ##############################################################################
 
 from collections import defaultdict
-from openerp.osv import osv, fields
+from openerp.osv import osv, fields, expression
 from openerp.osv.expression import normalize_domain
 from openerp.tools.translate import _
 
@@ -149,7 +149,15 @@ class EventSeance(osv.Model):
                 allowed_course_ids += [False]  # for allowing seance without any course
                 partner_args = [('course_id', 'in', allowed_course_ids)]
 
-            args = (['&'] if (args and partner_args) else []) + partner_args + args
+            Participation = self.pool.get('event.participation')
+            past_part_ids = Participation.search(cr, user,
+                                                 [('partner_id', '=', partner_id),
+                                                  ('purchase_order_line_id', '!=', False)],
+                                                 context=context)
+            past_seances = set(p.seance_id.id for p in Participation.browse(cr, user, past_part_ids, context=context))
+            past_seances_filter = [('id', 'not in', list(past_seances))]
+
+            args = expression.AND((partner_args, past_seances_filter, args))
 
         _super = super(EventSeance, self)
         return _super._search(cr, user, args, offset=offset, limit=limit, order=order,
