@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 ⁻*-
 ##############################################################################
 #
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2013-TODAY OpenERP SA (<http://www.openerp.com>).
+#    OpenERP, Open Source Business Applications
+#    Copyright (C) 2013-TODAY OpenERP S.A. (<http://openerp.com>).
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,5 +19,8 @@
 #
 ##############################################################################
 
-import base_contact
+from . import test_base_contact
 
+checks = [
+    test_base_contact,
+]

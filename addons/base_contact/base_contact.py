@@ -19,80 +19,12 @@
 #
 ##############################################################################
 
-import inspect
-from openerp import tools
-from openerp.osv import fields, osv, orm
-
-class function_stored_location(fields.function):
-    """This field allow to store computed address in language-agnostic format
-       and to recompute language-specific address value uppon read
-    """
-
-    def __init__(self, fnct, arg=None, fnct_inv=None, fnct_inv_arg=None, type='float', fnct_search=None, obj=None, store=False, multi=False, **args):
-        rval = super(function_stored_location, self).__init__(fnct, arg=arg, fnct_inv=fnct_inv, fnct_inv_arg=fnct_inv_arg,
-                                                                type=type, fnct_search=fnct_search, obj=obj, store=store,
-                                                                multi=multi, **args)
-        if store and type != 'many2one':
-            # force classic read to false as we want to compute values based on user language
-            self._classic_read = False
-        return rval
-
-    def get(self, cr, obj, ids, name, uid=False, context=None, values=None):
-        f = inspect.currentframe()
-        called_from = ''
-        if f:
-            fback = f.f_back
-            if fback:
-                called_from = fback.f_code.co_name
-        if called_from == '_store_set_values':
-            # we force lang to en_US, as we want stored value be language
-            # agnostic, otherwise group_by might return different values
-            # depending on the translated coutry name, ...
-            if context is None:
-                context = {}
-            context = dict(context, lang='en_US')
-        return super(function_stored_location, self).get(cr, obj, ids, name, uid=uid, context=context, values=values)
-
-
-# XXX: this is required for the following case:
-# - menu "Sale Order" have action with context {'show_address': 1}
-# - create a new "Sale Order", affect a customer (linked to another context)
-# - open the customer form
-#   => when reading the "contact_id" field on partner - the name_get() is called
-#      with the current context which is {'show_address': 1} - the contact is display
-#      with it's address, which is not what we want here.
-class many2one_use_context(fields.many2one):
-    """many2one variant that use context set on fields init"""
-    def get(self, cr, obj, ids, name, user=None, context=None, values=None):
-        if self._context and isinstance(self._context, dict):
-            context = context.copy()
-            context.update(self._context)
-        return super(many2one_use_context, self).get(cr, obj, ids, name, user=user, context=context, values=values)
+from openerp.osv import fields, osv, expression
 
 
 class res_partner(osv.osv):
     _inherit = 'res.partner'
 
-    def _basecontact_location_display(self, cr, uid, ids, name, args, context=None):
-        """compute partner location (address wo/ company)"""
-        res = {}
-        for partner in self.browse(cr, uid, ids, context=context):
-            res[partner.id] = self._display_address(cr, uid, partner, without_company=True, context=context)
-        return res
-
-    def _commercial_partner_compute(self, cr, uid, ids, name, args, context=None):
-        """ Returns the partner that is considered the commercial
-        entity of this partner. The commercial entity holds the master data
-        for all commercial fields (see :py:meth:`~_commercial_fields`) """
-        result = super(res_partner, self)._commercial_partner_compute(cr, uid, ids, name, args, context=context)
-        for partner in self.browse(cr, uid, ids, context=context):
-            if partner.contact_type == 'attached' and not partner.parent_id:
-                result[partner.id] = partner.contact_id.id
-        return result
-
-    #
-    # "Contact Type" management
-    #
     _contact_type = [
         ('standalone', 'Standalone Contact'),
         ('attached', 'Attached to existing Contact'),
@@ -105,25 +37,15 @@ class res_partner(osv.osv):
                 result[partner.id] = 'attached'
         return result
 
-    def onchange_contact_id(self, cr, uid, ids, contact_id, context=None):
-        if contact_id:
-            name = self.browse(cr, uid, contact_id, context=context).name
-            return {'value': {'name': name}}
-        return {}
-
     _columns = {
         'contact_type': fields.function(_get_contact_type, type='selection', selection=_contact_type,
                                         string='Contact Type', required=True, select=1, store=True),
-        'contact_id': many2one_use_context('res.partner', 'Main Contact', domain=[('is_company','=',False),('contact_type','=','standalone')],
-                                        context={'show_address': False}),
+        'contact_id': fields.many2one('res.partner', 'Main Contact',
+                                      domain=[('is_company','=',False),('contact_type','=','standalone')]),
         'other_contact_ids': fields.one2many('res.partner', 'contact_id', 'Others Positions'),
-        # Special computed address to allow grouping on address
-        # TODO: update stored value when changing country address definition
-        'contact_location': function_stored_location(_basecontact_location_display,  type='char', string='Location',
-                                        store=True),
 
         # Person specific fields
-        'birthdate_date': fields.date('Birthdate'),  # TODO: why is birthdate become a 'char' field in v6.1?
+        'birthdate_date': fields.date('Birthdate'),  # add a 'birthdate' as date field, i.e different from char 'birthdate' introduced v6.1!
         'nationality_id': fields.many2one('res.country', 'Nationality'),
     }
 
@@ -135,8 +57,8 @@ class res_partner(osv.osv):
         if context is None:
             context = {}
         # Remove 'search_show_all_positions' for non-search mode.
-        # Keeping in context can give bad side-effects (ex: reading one2many
-        # might retrun wrong result - i.e with "attached contact" removed
+        # Keeping it in context can result in unexpected behaviour (ex: reading
+        # one2many might return wrong result - i.e with "attached contact" removed
         # even if it's directly linked to a company).
         if mode != 'search':
             context.pop('search_show_all_positions', None)
@@ -145,12 +67,17 @@ class res_partner(osv.osv):
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         if context is None:
             context = {}
-        show_all_positions = context.get('search_show_all_positions')
-        if show_all_positions is False:
-            other_positions_args = [('contact_type', '=', 'standalone')]
-            if args:
-                other_positions_args.insert(0, '&')
-            args[:0] = other_positions_args
+        if context.get('search_show_all_positions') is False:
+            # display only standalone contact matching ``args`` or having
+            # attached contact matching ``args``
+            args = expression.normalize_domain(args)
+            attached_contact_args = expression.AND((args, [('contact_type', '=', 'attached')]))
+            attached_contact_ids = super(res_partner, self).search(cr, user, attached_contact_args,
+                                                                   context=context)
+            args = expression.OR((
+                expression.AND(([('contact_type', '=', 'standalone')], args)),
+                [('other_contact_ids', 'in', attached_contact_ids)],
+            ))
         return super(res_partner, self).search(cr, user, args, offset=offset, limit=limit,
                                                order=order, context=context, count=count)
 
@@ -172,6 +99,22 @@ class res_partner(osv.osv):
         context = self._basecontact_check_context(cr, user, 'unlink', context)
         return super(res_partner, self).unlink(cr, user, ids, context=context)
 
+    def _commercial_partner_compute(self, cr, uid, ids, name, args, context=None):
+        """ Returns the partner that is considered the commercial
+        entity of this partner. The commercial entity holds the master data
+        for all commercial fields (see :py:meth:`~_commercial_fields`) """
+        result = super(res_partner, self)._commercial_partner_compute(cr, uid, ids, name, args, context=context)
+        for partner in self.browse(cr, uid, ids, context=context):
+            if partner.contact_type == 'attached' and not partner.parent_id:
+                result[partner.id] = partner.contact_id.id
+        return result
+
+    def onchange_contact_id(self, cr, uid, ids, contact_id, context=None):
+        if contact_id:
+            name = self.browse(cr, uid, contact_id, context=context).name
+            return {'value': {'name': name}}
+        return {}
+
 
 class ir_actions_window(osv.osv):
     _inherit = 'ir.actions.act_window'
@@ -183,6 +126,7 @@ class ir_actions_window(osv.osv):
         actions = super(ir_actions_window, self).read(cr, user, action_ids, fields=fields, context=context, load=load)
         for action in actions:
             if action.get('res_model', '') == 'res.partner':
+                # By default, only show standalone contact
                 action_context = action.get('context', '{}') or '{}'
                 if 'search_show_all_positions' not in action_context:
                     action['context'] = action_context.replace('{',

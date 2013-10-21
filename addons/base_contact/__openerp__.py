@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
+#    OpenERP, Open Source Business Applications
+#    Copyright (C) 2013-TODAY OpenERP S.A. (<http://openerp.com>).
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -29,14 +29,9 @@ This module allows you to manage your contacts
 ==============================================
 
 It lets you define groups of contacts sharing some common information, like:
-    * Last Name / First Name
     * Birthdate
     * Nationality
     * Native Language
-
-It also adds new menu items located in
-    Messaging / Organizer / Contact Groups
-    Sales / Customer / Contacts
 
     """,
     'author': 'OpenERP SA',
@@ -44,20 +39,14 @@ It also adds new menu items located in
     'depends': ['base', 'process', 'contacts'],
     'init_xml': [],
     'update_xml': [
-        #'security/ir.model.access.csv',
         'base_contact_view.xml',
     ],
     'demo_xml': [
-    ],
-    'test': [
-        #'test/base_contact_tests.yml',
-    ],
-    'css': [
-        'static/src/css/base_contact.css',
+        'base_contact_demo.xml',
     ],
     'installable': True,
     'auto_install': False,
     #'certificate': '0031287885469',
-    'images': ['images/base_contact1.jpeg', 'images/base_contact2.jpeg', 'images/base_contact3.jpeg'],
+    'images': [],
 }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

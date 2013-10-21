@@ -8,16 +8,13 @@
         <field name="inherit_id" ref="base.view_res_partner_filter"/>
         <field name="arch" type="xml">
             <filter name="type_company" position="after">
+                <separator/>
                 <filter string="All positions" name="type_otherpositions"
                         context="{'search_show_all_positions': True}"
                         help="All partner positions"/>
             </filter>
             <xpath expr="/search/group/filter[@string='Company']" position="before">
                 <filter string="Person" name="group_person" context="{'group_by': 'contact_id'}"/>
-                <filter string="Address" name="group_address" context="{'group_by': 'contact_location'}"/>
-            </xpath>
-            <xpath expr="/search//field[@name='parent_id']" position="attributes">
-                <attribute name="filter_domain">['|',('parent_id','child_of',[self]),('other_contact_ids.parent_id','child_of',[self])]</attribute>
             </xpath>
         </field>
     </record>
@@ -29,7 +26,6 @@
         <field name="arch" type="xml">
             <field name="parent_id" position="after">
                 <field name="contact_id" invisible="1"/>
-                <field name="contact_location" invisible="1"/>
             </field>
         </field>
     </record>
@@ -157,7 +153,7 @@
                 </page>
                 <page name="personal-info" string="Personal Information" attrs="{'invisible': ['|',('is_company','=',True)]}">
                     <p attrs="{'invisible': [('contact_id','=',False)]}">
-                        To see personal information about this contact, please go to to the his person form: <field name="contact_id" class="oe_inline" domain="[('contact_type','!=','attached')]"/>
+                        To see personal information about this contact, please go to to the his person form: <field name="contact_id" class="oe_inline" domain="[('contact_type','!=','attached')]" context="{'show_address': 1}" options="{'always_reload': True}"/>
                     </p>
                     <group attrs="{'invisible': [('contact_id','!=',False)]}">
                         <field name="birthdate_date"/>
