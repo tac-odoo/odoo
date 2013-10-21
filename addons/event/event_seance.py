@@ -264,6 +264,12 @@ class EventContent(osv.Model):
         (lambda self, *a, **kw: self._check_divided_groups(*a, **kw), _msg_divided_groups, ['group_ids']),
     ]
 
+    _sql_constraints = [
+        ('duration_positive',
+            'CHECK(slot_duration > 0 AND duration > 0)',
+            'Duration and Slot duration fields must be stictly positive'),
+    ]
+
     def create(self, cr, uid, values, context=None):
         new_id = super(EventContent, self).create(cr, uid, values, context=context)
         Registration = self.pool.get('event.registration')
