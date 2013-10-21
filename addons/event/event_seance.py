@@ -705,12 +705,23 @@ class EventSeance(osv.Model):
         return {'value': values}
 
     def button_set_draft(self, cr, uid, ids, context=None):
-        return self.write(cr, uid, ids, {'state': 'draft'}, context=context)
+        rval = self.write(cr, uid, ids, {'state': 'draft'}, context=context)
+        # Reset all cancelled participation to draft
+        Participation = self.pool.get('event.participation')
+        participation_ids = Participation.search(cr, uid, [('seance_id', 'in', ids),('state', 'in', 'cancel')], context=context)
+        Participation.button_set_draft(cr, uid, participation_ids, context=context)
+        return rval
 
     def button_set_planned(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'planned'}, context=context)
 
     def button_set_confirm(self, cr, uid, ids, context=None):
+        for seance in self.browse(cr, uid, ids, context=context):
+            for p in seance.resource_participation_ids:
+                if p.state != 'confirm':
+                    raise osv.except_osv(
+                        _('Error!'),
+                        _('You have to confirm all resource participations before confirming the seance'))
         return self.write(cr, uid, ids, {'state': 'confirm'}, context=context)
 
     def button_set_inprogress(self, cr, uid, ids, context=None):
@@ -721,6 +732,13 @@ class EventSeance(osv.Model):
 
     def button_set_done(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'done'}, context=context)
+
+    def button_set_cancel(self, cr, uid, ids, context=None):
+        rval = self.write(cr, uid, ids, {'state': 'cancel'}, context=context)
+        Participation = self.pool.get('event.participation')
+        participation_ids = Participation.search(cr, uid, [('seance_id', 'in', ids)], context=context)
+        Participation.button_set_cancel(cr, uid, participation_ids, context=context)
+        return rval
 
     def _get_resource_related_fields(self, cr, uid, context=None):
         return ['main_speaker_id', 'address_id', 'other_resource_ids']
