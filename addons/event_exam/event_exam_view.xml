@@ -562,5 +562,24 @@
         </field>
     </record>
 
+    <record id="action_partner_2_exam_participation" model="ir.actions.act_window">
+        <field name="name">Exam participations</field>
+        <field name="src_model">res.partner</field>
+        <field name="res_model">event.participation</field>
+        <field name="domain">[('seance_id.is_exam','=',True),('partner_id','=',active_id)]</field>
+    </record>
+
+    <record id="view_partner_form_event_exam" model="ir.ui.view">
+        <field name="name">res.partner.form.event_exam</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='buttons']" position="inside">
+                <button type="action" name="%(action_partner_2_exam_participation)d" string="Exam participations"
+                        attrs="{'invisibile': [('is_company','=',True)]}"/>
+            </xpath>
+        </field>
+    </record>
+
     </data>
 </openerp>
