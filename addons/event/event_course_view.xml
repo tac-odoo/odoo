@@ -346,6 +346,9 @@
                 <field name="course_id" on_change="onchange_content_course(course_id, slot_duration, context)"/>
                 <newline/>
             </xpath>
+            <xpath expr="//page[@string='Content &amp; Planning']//field[@name='lang_id']" position="attributes">
+                <attribute name="attrs">{'readonly': [('course_id', '!=', False)]}</attribute>
+            </xpath>
         </field>
     </record>
 
