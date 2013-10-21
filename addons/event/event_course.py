@@ -22,6 +22,7 @@
 import re
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
+from openerp.tools import get_iso_codes
 import openerp.addons.decimal_precision as dp
 
 
@@ -67,6 +68,13 @@ class EventCourse(osv.Model):
         ('validated', 'Validated'),
         ('deprecated', 'Deprecated'),
     ]
+
+    def name_get(self, cr, uid, ids, context=None):
+        result = []
+        for course in self.browse(cr, uid, ids, context=context):
+            display_name = '%s (%s)' % (course.name, get_iso_codes(course.lang_id.code or '').upper() or course.lang_id.name)
+            result.append((course.id, display_name))
+        return result
 
     def _compute_price(self, cr, uid, ids, name, args, context=None):
         if context is None:
