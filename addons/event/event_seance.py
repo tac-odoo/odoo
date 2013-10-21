@@ -273,6 +273,18 @@ class EventContent(osv.Model):
             Registration._update_registration_groups(cr, uid, registration_ids, context=context)
         return new_id
 
+    def _update_future_seances(self, cr, uid, ids, values, context=None):
+        Seance = self.pool.get('event.seance')
+        future_seance_filter = [
+            ('content_id', 'in', ids),
+            '|',
+                ('date_begin', '=', False),
+                '&', ('date_begin', '>=', time.strftime('%Y-%m-%d 00:00:00')),
+                     ('state', '=', 'draft')
+        ]
+        seance_ids = Seance.search(cr, uid, future_seance_filter, context=context)
+        return Seance.write(cr, uid, seance_ids, values, context=context)
+
     def _get_changes_to_propagate(self, cr, uid, ids, values, context=None):
         non_planned_seance_update = {}
         if 'speaker_id' in values:
@@ -294,16 +306,7 @@ class EventContent(osv.Model):
 
         non_planned_seance_update = self._get_changes_to_propagate(cr, uid, ids, values, context=context)
         if non_planned_seance_update:
-            Seance = self.pool.get('event.seance')
-            future_seance_filter = [
-                ('content_id', 'in', ids),
-                '|',
-                    ('date_begin', '=', False),
-                    '&', ('date_begin', '>=', time.strftime('%Y-%m-%d 00:00:00')),
-                         ('state', '=', 'draft')
-            ]
-            seance_ids = Seance.search(cr, uid, future_seance_filter, context=context)
-            Seance.write(cr, uid, seance_ids, non_planned_seance_update, context=context)
+            self._update_future_seances(cr, uid, ids, non_planned_seance_update, context=context)
         return rval
 
     def unlink_isolated_content(self, cr, uid, ids, context=None):
@@ -1203,6 +1206,14 @@ class EventParticipationGroup(osv.Model):
         default['registration_ids'] = None
         return super(EventParticipationGroup, self).copy_data(cr, uid, id, default=default, context=context)
 
+    def _get_changes_to_propagate(self, cr, uid, ids, values, context=None):
+        non_planned_seance_update = {}
+        if 'speaker_id' in values:
+            non_planned_seance_update['main_speaker_id'] = values['speaker_id']
+        if 'room_id' in values:
+            non_planned_seance_update['address_id'] = values['room_id']
+        return non_planned_seance_update
+
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         if context is None:
             context = {}
@@ -1228,6 +1239,22 @@ class EventParticipationGroup(osv.Model):
             for group in self.browse(cr, uid, ids, context=context):
                 if group.event_content_id.event_id.state == 'done':
                     raise osv.except_osv(_('Error'), _('You cannot change content group subscription on done events'))
+
+        non_planned_seance_update = self._get_changes_to_propagate(cr, uid, ids, values, context=context)
+        if non_planned_seance_update:
+            contents = defaultdict(list)
+            for group in self.browse(cr, uid, ids, context=context):
+                contents[group.event_content_id.id].append(group.id)
+
+            Content = self.pool.get('event.content')
+            for content in self.browse(cr, uid, contents.keys(), context=context):
+                new_values = dict(non_planned_seance_update)
+                for f, v in Content._get_changes_to_propagate(cr, uid, [content.id], values, context=context).iteritems():
+                    if v and not new_values.get(f):
+                        new_values[f] = v
+
+                Content._update_future_seances(cr, uid, [content.id], new_values, context=context)
+
         return super(EventParticipationGroup, self).write(cr, uid, ids, values, context=context)
 
     def unlink(self, cr, uid, ids, context=None):
