@@ -811,6 +811,11 @@ class CoreCalendarEvent(osv.Model):
                     attendee_query = 'unnest%s' % attendee_query
                     # where.append('attendee_ids IS NOT NULL')
                 fields.append(('attendee_ids', attendee_query))
+            else:
+                attendee_query = '(ARRAY[]::integer[])'
+                if attendee_list:
+                    attendee_query = 'unnest%s' % attendee_query
+                fields.append(('attendee_ids', attendee_query))
 
             fs = [f for f in fields if f[0] in fields_to_read]
             q = build_query(model, root_table, joins, where, fs)
