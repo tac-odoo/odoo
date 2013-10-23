@@ -54,8 +54,8 @@
                         <div class="oe_clear">
                             <group>
                                 <group string="Options">
-                                    <field name="type" invisible="1"/>
-                                    <field name="model" on_change="onchange_model_id(model)"/>
+                                    <field name="type"/>
+                                    <field name="model" on_change="onchange_model(model)"/>
                                     <field name="date_mode"/>
                                     <field name="action_id"/>
                                     <field name="color" widget="colorpicker"/>
