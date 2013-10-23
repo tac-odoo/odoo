@@ -99,7 +99,7 @@ th.oe_list_header_float_time {
 .openerp .oe_preplanning .handsontable .htHeaderCell {
   font-style: normal;
   color: #000000;
-  background-color: #EEEEEE !important;
+  background-color: #EEEEEE;
   white-space: nowrap;
 }
 
@@ -107,7 +107,7 @@ th.oe_list_header_float_time {
   font-style: normal;
   font-weight: bold;
   color: #000000;
-  background-color: #EEEEEE !important;
+  background-color: #EEEEEE;
   white-space: nowrap;
   text-align: center;
   vertical-align: middle;
@@ -128,7 +128,11 @@ th.oe_list_header_float_time {
   color: #FFFFFF;
 }
 
-.openerp .oe_preplanning .handsontable .currentRow,
+.openerp .oe_preplanning .handsontable tr td.currentRow,
+.openerp .oe_preplanning .handsontable tr td.current {
+  background-color: #CCCCCC !important;
+}
+
 .openerp .oe_preplanning .handsontable .currentCol {
 
 }
@@ -211,3 +215,6 @@ th.oe_list_header_float_time {
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
 }
 
+.openerp .oe_preplanning .handsontable tbody tr:nth-child(odd) td:not(.htHeaderCell) {
+  background-color: #EEE;
+}

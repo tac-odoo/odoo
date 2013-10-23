@@ -45,26 +45,41 @@ class EventExportPreplanning(openerp.addons.web.http.Controller):
     def preplanning_data(self, eventinfo, weeks, contents, matrix):
         workbook = xlwt.Workbook()
         worksheet = workbook.add_sheet('Sheet 1')
+        worksheet.panes_frozen = True
+        worksheet.vert_split_pos = 5
+        worksheet.horz_split_pos = 2
 
-        header_left = xlwt.easyxf('font: bold on; align: horiz left')
-        header_center = xlwt.easyxf('font: bold on; align: horiz center')
-        header_rotated = xlwt.easyxf('font: bold on; align: rotation 90, horiz center')
+        header_left = xlwt.easyxf('font: bold on; align: horiz left; pattern: pattern solid, fore-color grey25')
+        header_center = xlwt.easyxf('font: bold on; align: horiz center; pattern: pattern solid, fore-color grey25')
+        header_rotated = xlwt.easyxf('font: bold on; align: rotation 45, horiz left; pattern: pattern solid, fore-color grey25')
         cell_center = xlwt.easyxf('align: horiz center')
 
-        for i, week in enumerate(weeks, 2):
+        worksheet.write_merge(0, 0, 0, 4, '', header_left)
+        for i, week in enumerate(weeks, 5):
             worksheet.write(0, i, week['name'], header_rotated)
-            worksheet.write(1, i, '%d / %d' % (week['slot_used'], week['slot_count']), header_center)
-            worksheet.col(i).width = 2000
+            worksheet.write(1, i, '%d/%d' % (week['slot_used'], week['slot_count']), header_center)
+            worksheet.col(i).width = 1400
 
-        worksheet.col(0).width = 10000
-        worksheet.write(1, 1, 'Total', header_left)
+        worksheet.col(0).width = 4000
+        worksheet.col(1).width = 4000
+        worksheet.col(2).width = 6000
+        worksheet.col(3).width = 1000
+        worksheet.col(4).width = 1900
+        worksheet.write(1, 0, 'Module', header_left)
+        worksheet.write(1, 1, 'Subject', header_left)
+        worksheet.write(1, 2, 'Content', header_left)
+        worksheet.write(1, 3, 'Lang', header_left)
+        worksheet.write(1, 4, 'Total', header_left)
 
         for j, content in enumerate(contents, 2):
             content_id = str(content['id'])
-            worksheet.write(j, 0, content['name'], header_left)
-            worksheet.write(j, 1, '%d / %d' % (content['slot_used'], content['slot_count']), header_center)
+            worksheet.write(j, 0, content['module_name'], header_left)
+            worksheet.write(j, 1, content['subject_name'], header_left),
+            worksheet.write(j, 2, content['name'], header_left),
+            worksheet.write(j, 3, content['lang'], header_left)
+            worksheet.write(j, 4, '%d / %d' % (content['slot_used'], content['slot_count']), header_center)
             row = matrix[content_id]
-            for i, week in enumerate(weeks, 2):
+            for i, week in enumerate(weeks, 5):
                 value = row[week['id']]['value']
                 worksheet.write(j, i, value, cell_center)
 
