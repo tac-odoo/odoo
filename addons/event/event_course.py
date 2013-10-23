@@ -322,7 +322,7 @@ class EventContent(osv.Model):
         if values.get('course_id') and 'lang_id' not in values:
             course = self.pool.get('event.course').browse(cr, uid, values['course_id'], context=context)
             values['lang_id'] = course.lang_id.id
-        return super(EventContent, self).browse(cr, uid, values, context=context)
+        return super(EventContent, self).create(cr, uid, values, context=context)
 
     def write(self, cr, uid, ids, values, context=None):
         if values.get('course_id') and 'lang_id' not in values:
