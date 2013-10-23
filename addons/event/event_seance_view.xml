@@ -365,6 +365,7 @@
                 <tree string="Seances">
                     <field name="name"/>
                     <field name="event_ids"/>
+                    <field name="group_id"/>
                     <field name="lang_id"/>
                     <field name="type_id"/>
                     <field name="planned_week_date"/>
@@ -373,7 +374,6 @@
                     <field name="address_id"/>
                     <field name="main_speaker_id"/>
                     <field name="content_id" invisible="1"/>
-                    <field name="group_id" invisible="1"/>
                     <field name="module_id" invisible="1"/>
                     <field name="state"/>
                 </tree>
