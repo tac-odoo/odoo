@@ -128,8 +128,8 @@ th.oe_list_header_float_time {
   color: #FFFFFF;
 }
 
-.openerp .oe_preplanning .handsontable tr td.currentRow,
-.openerp .oe_preplanning .handsontable tr td.current {
+.openerp .oe_preplanning .handsontable tr td.currentRow:not(.htInvalid),
+.openerp .oe_preplanning .handsontable tr td.current:not(.htInvalid) {
   background-color: #CCCCCC !important;
 }
 
