@@ -123,7 +123,7 @@ class res_partner(osv.osv):
                                         store=True),
 
         # Person specific fields
-        'birthdate': fields.date('Birthdate'),  # TODO: why is birthdate become a 'char' field in v6.1?
+        'birthdate_date': fields.date('Birthdate'),  # TODO: why is birthdate become a 'char' field in v6.1?
         'nationality_id': fields.many2one('res.country', 'Nationality'),
     }
 

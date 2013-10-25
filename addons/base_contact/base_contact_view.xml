@@ -160,7 +160,7 @@
                         To see personal information about this contact, please go to to the his person form: <field name="contact_id" class="oe_inline" domain="[('contact_type','!=','attached')]"/>
                     </p>
                     <group attrs="{'invisible': [('contact_id','!=',False)]}">
-                        <field name="birthdate"/>
+                        <field name="birthdate_date"/>
                         <field name="nationality_id"/>
                     </group>
                 </page>
