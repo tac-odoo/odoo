@@ -27,7 +27,7 @@ from collections import defaultdict
 from functools import partial
 from dateutil.relativedelta import relativedelta, MO
 from openerp import SUPERUSER_ID
-from openerp.osv import osv, fields
+from openerp.osv import osv, fields, expression
 from openerp.tools.translate import _
 from openerp.tools import float_is_zero
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
@@ -70,55 +70,9 @@ class EventSeanceType(osv.Model):
 
 class EventContentModule(osv.Model):
     _name = 'event.content.module'
-
-    def _get_infos(self, cr, uid, ids, fieldnames, args, context=None):
-        if not ids:
-            return {}
-        if context is None:
-            context = {}
-        result = {}
-        for _id in ids:
-            result[_id] = {'date_begin': False, 'date_end': False}
-        if context.get('event_id'):
-            event_ids = (context['event_id'],)
-            cr.execute("""
-                SELECT module.id AS module_id,
-                       content_info.duration AS content_duration,
-                       min(seance.date_begin) AS min_date,
-                       max(seance.date_begin + (INTERVAL '1 hour' * seance.duration)) AS max_date
-                FROM event_event AS event
-                LEFT JOIN event_content_link AS link ON (link.event_id = event.id)
-                LEFT JOIN event_content AS content ON (link.content_id = content.id)
-                LEFT JOIN event_content_module module ON (content.module_id = module.id)
-                LEFT JOIN event_seance AS seance ON (seance.content_id = content.id)
-                LEFT JOIN (
-                    SELECT event.id AS event_id,
-                           content.module_id AS module_id,
-                           sum(content.duration) AS duration
-                    FROM event_event AS event
-                    LEFT JOIN event_content_link AS link ON (link.event_id = event.id)
-                    LEFT JOIN event_content AS content ON (link.content_id = content.id)
-                    WHERE event.id IN %s
-                    GROUP BY event.id, content.module_id
-                ) AS content_info ON (content_info.event_id = event.id AND content_info.module_id = module.id)
-                WHERE seance.date_begin IS NOT NULL
-                  AND content.module_id IS NOT NULL
-                  AND event.id IN %s
-                GROUP BY module.id, content_info.duration
-            """, (event_ids, event_ids,))
-            for info in cr.dictfetchall():
-                module_id = info['module_id']
-                result[module_id].update(date_begin=info['min_date'],
-                                         date_end=info['max_date'],
-                                         duration=info['content_duration'])
-        return result
-
     _columns = {
         'name': fields.char('Module name', required=True),
         'sequence': fields.integer('Sequence'),
-        'date_begin': fields.function(_get_infos, type='datetime', string='Begin date', multi='dates'),
-        'date_end': fields.function(_get_infos, type='datetime', string='End date', multi='dates'),
-        'duration': fields.function(_get_infos, type='float', string='Duration', multi='dates'),
     }
 
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
@@ -131,10 +85,7 @@ class EventContentModule(osv.Model):
             for content in Event.browse(cr, user, context['event_id'], context=context).content_ids:
                 if content.module_id:
                     module_ids.add(content.module_id.id)
-            module_filter = [('id', 'in', list(module_ids))]
-            if args:
-                module_filter.insert(0, '&')
-            args = module_filter + args
+            args = expression.AND((args, [('id', 'in', list(module_ids))]))
         return super(EventContentModule, self).search(cr, user, args, offset=offset,
                                                       limit=limit, order=order,
                                                       context=context, count=count)
@@ -588,11 +539,13 @@ class EventSeance(osv.Model):
                                   readonly=True, store=CONTENT_RELATED_STORE),
 
         'date_begin': fields.datetime('Begin date', readonly=True,
+                                      group_operator='min',
                                       states=dict((st, [('readonly', not bool(st == 'draft')),
                                                         ('required', not bool(st == 'draft'))])
                                                    for st, sn in SEANCE_STATES)
                                       ),
         'date_end': fields.function(_get_date_end, type='datetime', string='End date', readonly=True,
+                                    group_operator='max',
                                     store={
                                         'event.seance': (_store_get_seances_from_seances, ['date_begin', 'duration'], 10),
                                     }),
@@ -653,6 +606,27 @@ class EventSeance(osv.Model):
         ('date_begin_notnull', "CHECK(CASE WHEN state != 'draft' THEN date_begin IS NOT NULL ELSE True END)",
             'You have to specify a begin date when leaving the draft state'),
     ]
+
+    def _read_group_module_id(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
+        access_rights_uid = access_rights_uid or uid
+        if context is None:
+            context = {}
+        Event = self.pool.get('event.event')
+        ContentModule = self.pool.get('event.content.module')
+        if context.get('event_id'):
+            module_ids = set()
+            for content in Event.browse(cr, uid, context['event_id'], context=context).content_ids:
+                if content.module_id:
+                    module_ids.add(content.module_id.id)
+        else:
+            module_ids = ids
+        result = ContentModule.name_get(cr, uid, module_ids, context=context)
+        fold = dict.fromkeys(module_ids, False)
+        return result, fold
+
+    _group_by_full = {
+        'module_id': _read_group_module_id,
+    }
 
     def _cron_auto_terminate_seance(self, cr, uid, context=None):
         reference_date = time.strftime(DT_FMT)

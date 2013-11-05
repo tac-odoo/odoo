@@ -159,9 +159,6 @@
             <field name="arch" type="xml">
                 <tree string="Modules">
                     <field name="name"/>
-                    <field name="date_begin" invisible="not context.get('event_id')"/>
-                    <field name="date_end" invisible="not context.get('event_id')"/>
-                    <field name="duration" invisible="not context.get('event_id')" widget="float_time" sum="Total duration"/>
                 </tree>
             </field>
         </record>
@@ -177,14 +174,45 @@
             </field>
         </record>
 
+        <record id="view_event_seance_tree_module_summary" model="ir.ui.view">
+            <field name="name">event.seance.tree.module_summary</field>
+            <field name="model">event.seance</field>
+            <field name="priority">100</field>
+            <field name="arch" type="xml">
+                <tree string="Seances (summary)">
+                    <field name="module_id"/>
+                    <field name="date_begin"/>
+                    <field name="date_end"/>
+                    <field name="planned_week_date" string="Max. Planned Week"/>
+                    <field name="content_id" invisible="1"/>
+                    <field name="main_speaker_id" invisible="1"/>
+                    <field name="address_id" invisible="1"/>
+                    <field name="duration" sum="Duration" widget="float_time"/>
+                </tree>
+            </field>
+        </record>
+
         <act_window id="link_event_2_module"
             name="Modules (summary)"
             src_model="event.event"
-            res_model="event.content.module"
+            res_model="event.seance"
             view_type="form"
             view_mode="tree,form"
             key2="client_action_relate"
-            context="{'event_id': active_id}"/>
+            domain="[('event_ids','in',[active_id])]"
+            context="{'search_default_group_module': 1, 'group_by_no_leaf': 1, 'event_id': active_id}"/>
+
+        <record id="link_event_2_module_tree" model="ir.actions.act_window.view">
+            <field name="act_window_id" ref="link_event_2_module"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_event_seance_tree_module_summary"/>
+        </record>
+
+        <record id="link_event_2_module_form" model="ir.actions.act_window.view">
+            <field name="act_window_id" ref="link_event_2_module"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref=""/>
+        </record>
 
         <record id="view_event_type_form_seance" model="ir.ui.view">
             <field name="name">event.type.form.seance</field>
