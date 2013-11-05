@@ -2790,10 +2790,13 @@ class BaseModel(object):
         aggregated_fields = [
             f for f in fields
             if f not in ('id', 'sequence', groupby)
-            if fget[f]['type'] in ('integer', 'float')
+            if fget[f]['type'] in ('integer', 'float', 'date', 'datetime')
             if (f in self._all_columns and getattr(self._all_columns[f].column, '_classic_write'))]
         for f in aggregated_fields:
-            group_operator = fget[f].get('group_operator', 'sum')
+            default_group_operator = 'sum'
+            if self._columns[f]._type in ('date', 'datetime'):
+                default_group_operator = 'max'
+            group_operator = fget[f].get('group_operator', default_group_operator)
             qualified_field = self._inherits_join_calc(f, query)
             select_terms.append("%s(%s) AS %s" % (group_operator, qualified_field, f))
 
