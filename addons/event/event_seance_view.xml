@@ -55,7 +55,7 @@
         <menuitem id="menu_event_resource_agenda"
                     parent="menu_event_resources_root"
                     action="action_resource_agenda"
-                    groups="event.group_event_manager,event.group_event_planning"
+                    groups="event.group_event_manager,event.group_event_planning,event.group_event_professor"
                     sequence="40"/>
 
         <!-- EVENTS CONTENT -->

@@ -3,7 +3,7 @@ access_event_type_professor,event.type,model_event_type,event.group_event_profes
 access_event_professor,event.event,model_event_event,event.group_event_professor,1,0,0,0
 access_event_seance_type_professor,event.seance.type,model_event_seance_type,event.group_event_professor,1,0,0,0
 access_event_seance_professor,event.seance,model_event_seance,event.group_event_professor,1,0,0,0
-access_event_participation_professor,event.participation,model_event_participation,event.group_event_professor,1,0,0,0
+access_event_participation_professor,event.participation,model_event_participation,event.group_event_professor,1,1,0,0
 access_event_content_professor,event.content,model_event_content,event.group_event_professor,1,0,0,0
 access_core_calendar_professor,core.calendar,core_calendar.model_core_calendar,event.group_event_professor,1,0,0,0
 access_core_calendar_event_professor,core.calendar.event,core_calendar.model_core_calendar_event,event.group_event_professor,1,0,0,0
