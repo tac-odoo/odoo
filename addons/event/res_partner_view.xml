@@ -321,7 +321,7 @@
         <menuitem id="menu_event_library_resource"
                     parent="menu_event_resources_root"
                     action="action_event_library_resource"
-                    groups="event.group_event_user,event.group_event_manager"
+                    groups="event.group_event_user,event.group_event_manager,event.group_event_professor"
                     sequence="20"/>
 
    </data>

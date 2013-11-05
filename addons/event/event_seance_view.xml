@@ -579,6 +579,8 @@
                     <separator/>
                     <filter string="Upcoming" name="upcoming" domain="['|',('date_begin','>=',current_date),('date_begin','=',False)]"/>
                     <separator/>
+                    <filter string="My seances" name="my_seance" domain="['|',('main_speaker_id.user_ids', 'in', [uid]),('other_resource_ids.user_ids','in',[uid])]"/>
+                    <separator/>
                     <filter string="Draft" name="state_draft" domain="[('state','=','draft')]"/>
                     <filter string="Confirm" name="state_confirm" domain="[('state','=','confirm')]"/>
                     <filter string="Inprogress" name="state_inprogress" domain="[('state','=','inprogress')]"/>

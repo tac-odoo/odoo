@@ -606,7 +606,7 @@
 
         <menuitem name="Registrations"
             id="menu_action_registration" parent="base.menu_event_main"
-            action="action_registration" groups="event.group_event_manager,event.group_event_user"/>
+            action="action_registration" groups="event.group_event_manager,event.group_event_user,event.group_event_professor"/>
 
         <menuitem name="Customers"
             id="menu_action_event_customer" parent="base.menu_event_main"
