@@ -70,6 +70,8 @@ class EventCourse(osv.Model):
     ]
 
     def name_get(self, cr, uid, ids, context=None):
+        if isinstance(ids, (int, long)):
+            ids = [ids]
         result = []
         for course in self.browse(cr, uid, ids, context=context):
             display_name = '%s (%s)' % (course.name, get_iso_codes(course.lang_id.code or '').upper() or course.lang_id.name)
