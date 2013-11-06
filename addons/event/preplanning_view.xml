@@ -9,7 +9,7 @@
             <field name="arch" type="xml">
                 <form string="Preplanning" version="7.0">
                     <div name="oe_title">
-                        <h1><field name="name" readonly="1"/></h1>
+                        <field name="name" invisible="1"/>
                         <field name="date_begin" class="oe_inline" readonly="1"/> => <field name="date_end" class="oe_inline"/>
                         <field name="event_id" invisible="1"/>
                     </div>

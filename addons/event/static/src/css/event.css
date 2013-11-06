@@ -141,6 +141,56 @@ th.oe_list_header_float_time {
   text-align: center;
 }
 
+/*
+ * Rotated Preplanning Headers
+ */
+.openerp .oe_preplanning .handsontable thead th {
+  height: 60px;
+  width: 40px;
+  min-width: 40px;
+  max-width: 40px;
+  position: relative;
+  vertical-align: bottom;
+  padding: 0;
+  font-size: 12px;
+  line-height: 0.8;
+  overflow: visible;
+  border-left: 0;
+  border-right: 0;
+}
+
+.openerp .oe_preplanning .handsontable thead th div.relative {
+  position: relative;
+  top: 0px;
+  left: 33px;
+  height: 100%;
+  -ms-transform:skew(-45deg,0deg);
+  -moz-transform:skew(-45deg,0deg);
+  -webkit-transform:skew(-45deg,0deg);
+  -o-transform:skew(-45deg,0deg);
+  transform:skew(-45deg,0deg);
+  overflow: hidden;
+  border-left: 1px solid #dddddd;
+  border-right: 1px solid #dddddd;
+  border-top: 1px solid #dddddd;
+  z-index: 1;
+}
+
+.openerp .oe_preplanning .handsontable thead th span.colHeader {
+  -ms-transform:skew(45deg,0deg) rotate(315deg);
+  -moz-transform:skew(45deg,0deg) rotate(315deg);
+  -webkit-transform:skew(45deg,0deg) rotate(315deg);
+  -o-transform:skew(45deg,0deg) rotate(315deg);
+  transform:skew(45deg,0deg) rotate(315deg);
+  position: absolute;
+  bottom: 30px;
+  left: -25px;
+  display: inline-block;
+  width: 85px;
+  text-align: left;
+  white-space: nowrap;
+}
+
 /*.openerp .oe_preplanning .handsontable .htInvalid {
   background-color: #FFFFFF;
   color: #ff0000;
@@ -175,46 +225,10 @@ th.oe_list_header_float_time {
 }
 */
 
-.openerp .oe_preplanning .handsontable thead th {
-  vertical-align: bottom;
-}
 
-.openerp .oe_preplanning .handsontable thead th div.relative {
-  height: 80px;
-  min-height: 80px;
-  display: table-cell;
-  vertical-align: bottom;
-  /* from .handsontable .relative */
-  padding: 2px 4px;
-  position: relative;
-}
-
-.openerp .oe_preplanning .handsontable thead th span.colHeader {
-  text-align: center;
-  width: 1.5em;
-  padding: 5px;
-  display: block;
-
-  vertical-align: middle;
-  white-space: nowrap;
-
-  -webkit-transform: rotate(-90deg);
-  -moz-transform: rotate(-90deg);
-  -ms-transform: rotate(-90deg);
-  -o-transform: rotate(-90deg);
-  transform: rotate(-90deg);
-
-  // also accepts left, right, top, bottom coordinates; not required, but a good idea for styling
-  -webkit-transform-origin: 50% 50%;
-  -moz-transform-origin: 50% 50%;
-  -ms-transform-origin: 50% 50%;
-  -o-transform-origin: 50% 50%;
-  transform-origin: 50% 50%;
-
-  // Should be unset in IE9+ I think.
-  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
-}
-
+/*
+ * Display row alternatively in normal / grey colors
+ */
 .openerp .oe_preplanning .handsontable tbody tr:nth-child(odd) td:not(.htHeaderCell) {
   background-color: #EEE;
 }
