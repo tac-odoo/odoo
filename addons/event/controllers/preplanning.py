@@ -53,8 +53,10 @@ class EventExportPreplanning(openerp.addons.web.http.Controller):
         header_center = xlwt.easyxf('font: bold on; align: horiz center; pattern: pattern solid, fore-color grey25')
         header_rotated = xlwt.easyxf('font: bold on; align: rotation 45, horiz left; pattern: pattern solid, fore-color grey25')
         cell_center = xlwt.easyxf('align: horiz center')
+        cell_center_hl = xlwt.easyxf('align: horiz center; pattern: pattern solid, fore-color gray25')
 
         worksheet.write_merge(0, 0, 0, 4, '', header_left)
+        worksheet.row(0).height = 1100
         for i, week in enumerate(weeks, 5):
             worksheet.write(0, i, week['name'], header_rotated)
             worksheet.write(1, i, '%d/%d' % (week['slot_used'], week['slot_count']), header_center)
@@ -79,9 +81,12 @@ class EventExportPreplanning(openerp.addons.web.http.Controller):
             worksheet.write(j, 3, content['lang'], header_left)
             worksheet.write(j, 4, '%d / %d' % (content['slot_used'], content['slot_count']), header_center)
             row = matrix[content_id]
+            cell_style = cell_center
+            if ((j - 2) % 2 == 1):
+                cell_style = cell_center_hl
             for i, week in enumerate(weeks, 5):
                 value = row[week['id']]['value']
-                worksheet.write(j, i, value, cell_center)
+                worksheet.write(j, i, value, cell_style)
 
         fp = StringIO()
         workbook.save(fp)
