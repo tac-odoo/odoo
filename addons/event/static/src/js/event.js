@@ -73,10 +73,11 @@ var commands = {
         Handsontable.NumericCell.renderer.apply(this, arguments);
         instance.view.wt.wtDom.addClass(TD, 'htPreplanningCell');
         var is_cell_valid = cellProperties.is_cell_valid;
-        if (cellProperties.is_cell_valid && !cellProperties.is_cell_valid(row, col)) {
-            if (typeof value == 'number' ? value > 0 : true) {
-                instance.view.wt.wtDom.addClass(TD, 'htInvalid');
-            }
+        if (cellProperties.is_cell_valid && !cellProperties.is_cell_valid(row, col)
+                && typeof value == 'number' && value > 0) {
+            instance.view.wt.wtDom.addClass(TD, 'htInvalid');
+        } else {
+            instance.view.wt.wtDom.removeClass(TD, 'htInvalid');
         }
     };
 
@@ -414,7 +415,7 @@ var commands = {
                         cell.valid = false;
                         return false;
                     }
-                    cell.value = true;
+                    cell.valid = true;
                     return true;
                 },
             });
