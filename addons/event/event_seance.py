@@ -1574,6 +1574,14 @@ class EventEvent(osv.Model):
         preplanning_id = self.pool.get('event.event.preplanning').create(cr, uid, {
             'event_id': ids[0],
         }, context=context)
+
+        ModelAccess = self.pool.get('ir.model.access')
+        user_can_create_seance = ModelAccess.check(cr, uid, 'event.seance', 'write', False)
+
+        flags = {}
+        if user_can_create_seance:
+            flags.update(form={'initial_mode': 'edit'})
+
         return {
             'type': 'ir.actions.act_window',
             'name': _('Preplanning'),
@@ -1583,7 +1591,7 @@ class EventEvent(osv.Model):
             'views': [(form_view_id, 'form')],
             'res_id': preplanning_id,
             'target': 'current',
-            'flags': {'form': {'initial_mode': 'edit'}},
+            'flags': flags,
             # 'context': {'filter_offer_id': ids[0]},
         }
 

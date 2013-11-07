@@ -50,6 +50,15 @@ class EventPreplanning(osv.TransientModel):
         return [(x['id'], _('Preplanning: %s') % x['name'])
                 for x in self.read(cr, uid, ids, ['name'], context=context)]
 
+    def check_access_rights(self, cr, uid, operation, raise_exception=True):
+        if operation in 'write':
+            # modification of preplanning will require create/write/unlink access to seance,
+            # if user has not the required rights - restrict it to read only.
+            ModelAccess = self.pool.get('ir.model.access')
+            if any(not ModelAccess.check(cr, uid, 'event.seance', op, False) for op in ('create', 'write', 'unlink')):
+                return False
+        return super(EventPreplanning, self).check_access_rights(cr, uid, operation, raise_exception=raise_exception)
+
     def _get_children_ids(self,  cr, uid, ids, fieldname, args, context=None):
         result = {}
         for preplan in self.browse(cr, uid, ids, context=context):

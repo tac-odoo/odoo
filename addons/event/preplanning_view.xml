@@ -7,7 +7,7 @@
             <field name="model">event.event.preplanning</field>
             <field name="priority">100</field>
             <field name="arch" type="xml">
-                <form string="Preplanning" version="7.0">
+                <form string="Preplanning" version="7.0" create="0">
                     <div name="oe_title">
                         <field name="name" invisible="1"/>
                         <field name="date_begin" class="oe_inline" readonly="1"/> => <field name="date_end" class="oe_inline"/>
