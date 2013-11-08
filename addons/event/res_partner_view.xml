@@ -16,7 +16,7 @@
                             attrs="{'invisible': [('speaker','=',False)]}" groups="base.group_event_manager"/>
                 </div>
                 <xpath expr="//page[@string='Sales &amp; Purchases']" position="after">
-                    <page string="Event" groups="event.group_event_user,event.group_event_manager,event.group_event_planning">
+                    <page string="Event" groups="event.group_event_user,event.group_event_manager,event.group_event_planning,event.group_event_professor">
                         <group>
                             <group>
                                 <field name="speaker" on_change="onchange_event_role('speaker', speaker, room, equipment)"/>
@@ -33,8 +33,8 @@
                         <field name="speakerinfo_ids" colspan="4" attrs="{'invisible': [('speaker','=',False)]}">
                             <tree string="Courses" editable="bottom">
                                 <field name="course_id"/>
-                                <field name="price_from"/>
-                                <field name="price" attrs="{'readonly': [('price_from','!=','custom')]}"/>
+                                <field name="price_from" groups="event.group_event_manager,purchase.group_purchase_user"/>
+                                <field name="price" attrs="{'readonly': [('price_from','!=','custom')]}" groups="event.group_event_manager,purchase.group_purchase_user"/>
                             </tree>
                         </field>
                     </page>

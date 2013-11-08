@@ -272,7 +272,7 @@
                                     <button type="object" name="recompute_seances" class="oe_link" string="(recompute seances)"
                                             attrs="{'invisible': [('content_planification', '!=', 'linear')]}" states="draft,confirm" groups="event.group_event_manager,event.group_event_planning"/>
                                     <button type="object" name="open_preplanning" class="oe_link" string="(=> open preplanning)"
-                                            attrs="{'invisible': [('content_planification', '!=', 'preplanning')]}" states="draft,confirm,done" groups="event.group_event_manager,event.group_event_planning"/>
+                                            attrs="{'invisible': [('content_planification', '!=', 'preplanning')]}" states="draft,confirm,done" groups="event.group_event_manager,event.group_event_planning,event.group_event_professor"/>
                                 </div>
                             </group>
                         </group>

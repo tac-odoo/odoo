@@ -242,13 +242,24 @@ class EventCourseSpeakerInfo(osv.Model):
         if speakerinfo.price_from == 'custom':
             self.write(cr, uid, [id], {'standard_price': value}, context=context)
 
+    def _store_price_from_speakerinfo(self, cr, uid, ids, context=None):
+        return ids
+
+    def _store_price_from_course(self, cr, uid, ids, context=None):
+        SpeakerInfo = self.pool.get('event.course.speakerinfo')
+        return SpeakerInfo.search(cr, uid, [('course_id', 'in', ids)], context=context)
+
     _columns = {
         'course_id': fields.many2one('event.course', 'Course', required=True, ondelete='cascade'),
         'speaker_id': fields.many2one('res.partner', 'Speaker', required=True, domain=[('speaker', '=', True)], ondelete='cascade'),
         'price_from': fields.selection(_prices_from_selection, 'Price From', required=True),
         'standard_price': fields.float('Custom Cost', digits_compute=dp.get_precision('Product Price')),
         'price': fields.function(_get_price, type='float', digits_compute=dp.get_precision('Product Price'),
-                                 fnct_inv=_set_price, string='Price'),
+                                 fnct_inv=_set_price, string='Price',
+                                 store={
+                                    'event.course': (_store_price_from_course, ['standard_price'], 10),
+                                    'event.course.speakerinfo': (_store_price_from_speakerinfo, [], 10),
+                                 }),
     }
     _defaults = {
         'price_from': 'course',

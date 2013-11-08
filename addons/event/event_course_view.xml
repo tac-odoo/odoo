@@ -76,7 +76,7 @@
                                     </div>
                                 </group>
                             </page>
-                            <page string="Resources/Planification" groups="event.group_event_manager,event.group_event_planning">
+                            <page string="Resources/Planification" groups="event.group_event_manager,event.group_event_planning,event.group_event_professor">
                                 <group>
                                     <group>
                                         <field name="split_by" widget="float_time"/>
@@ -88,13 +88,13 @@
                                 </group>
                                 <separator string="Speakers"/>
                                 <group colspan="2">
-                                    <field name="standard_price"/>
+                                    <field name="standard_price" groups="event.group_event_manager,purchase.group_purchase_user"/>
                                 </group>
                                 <field name="speakerinfo_ids" colspan="4">
                                     <tree string="Speakers" editable="bottom">
                                         <field name="speaker_id" domain="[('speaker','=',True)]"/>
-                                        <field name="price_from"/>
-                                        <field name="price" attrs="{'readonly': [('price_from','!=','custom')]}"/>
+                                        <field name="price_from" groups="event.group_event_manager,purchase.group_purchase_user"/>
+                                        <field name="price" attrs="{'readonly': [('price_from','!=','custom')]}" groups="event.group_event_manager,purchase.group_purchase_user"/>
                                     </tree>
                                 </field>
                                 <separator string="Materials"/>
@@ -167,12 +167,16 @@
         <field name="model">event.course</field>
         <field name="arch" type="xml">
             <search string="Courses">
-                <filter name="current" string="Current" domain="[('state','!=','deprecated')]" context="{}" help="Display all courses which are not obsolete"/>
                 <field name="name" string="Course Name"/>
                 <field name="lang_id"/>
                 <field name="subject_id" filter_domain="[('subject_id','child_of',[self])]"/>
                 <field name="level_id"/>
                 <field name="speaker_id"/>
+                <separator/>
+                <filter name="current" string="Current" domain="[('state','!=','deprecated')]" context="{}" help="Display all courses which are not obsolete"/>
+                <separator/>
+                <filter string="My courses" name="my_courses" domain="['|',('user_id','=',uid),('speakerinfo_ids.speaker_id.user_ids', 'in', [uid])]" help="Filter on courses that the user is responsible or listed as a professor"/>
+                <separator/>
                 <!-- FIXME: <field name="category_ids"/> -->
                 <group expand="0" string="Group By...">
                     <filter name="groupby_lang_id" string="Language" domain="[]" context="{'group_by': 'lang_id'}"/>
@@ -188,7 +192,7 @@
         <field name="res_model">event.course</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form,kanban</field>
-        <field name="context">{'search_default_current': 1}</field>
+        <field name="context">{'search_default_my_courses': 1}</field>
     </record>
 
     <menuitem id="menu_event_course"

@@ -2,14 +2,6 @@
 <openerp>
     <data>
 
-        <record model="ir.rule" id="event_professor_own_course">
-            <field name="name">Professor's own course</field>
-            <field name="model_id" ref="model_event_course"/>
-            <field name="global" eval="False"/>
-            <field name="domain_force">[('speakerinfo_ids.speaker_id', '=', user.partner_id.id)]</field>
-            <field name="groups" eval="[(4, ref('event.group_event_professor'))]"/>
-        </record>
-
         <record model="ir.rule" id="event_professor_list_course_material">
             <field name="name">Professor list course material</field>
             <field name="model_id" ref="model_event_course_material"/>
