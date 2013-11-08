@@ -2872,7 +2872,11 @@ class BaseModel(object):
                         d['__context'] = {'group_by': groupby_list[1:]}
             if groupby and groupby in fget:
                 if d[groupby] and fget[groupby]['type'] in ('date', 'datetime'):
-                    groupby_datetime = datetime.datetime.strptime(alldata[d['id']][groupby], '%Y-%m-%d')
+                    if fget[groupby]['type'] == 'datetime':
+                        gb_date_format = tools.DEFAULT_SERVER_DATETIME_FORMAT
+                    else:
+                        gb_date_format = tools.DEFAULT_SERVER_DATE_FORMAT
+                    groupby_datetime = datetime.datetime.strptime(alldata[d['id']][groupby], gb_date_format)
                     d[groupby] = babel.dates.format_date(
                         groupby_datetime, format=group_by_params.get('display_format', 'MMMM yyyy'), locale=context.get('lang', 'en_US'))
                     if group_by_params.get('interval') == 'month':
