@@ -85,6 +85,6 @@ class report_event_participation(osv.Model):
             FROM event_participation AS p
             LEFT JOIN event_registration AS reg ON (p.registration_id = reg.id)
             LEFT JOIN event_seance AS s ON (p.seance_id = s.id)
-            WHERE p.role = 'participant'
+            WHERE p.role = 'participant' AND s.state != 'cancel'
         )
         """)
