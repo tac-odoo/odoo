@@ -212,7 +212,7 @@ class EventContent(osv.Model):
         return True
 
     _constraints = [
-        (lambda self, *a, **kw: self._check_divided_groups(*a, **kw), _msg_divided_groups, ['group_ids']),
+        (lambda self, *a, **kw: self._check_divided_groups(*a, **kw), _msg_divided_groups, ['is_divided', 'group_ids']),
     ]
 
     _sql_constraints = [
