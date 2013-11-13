@@ -688,7 +688,7 @@ class EventSeance(osv.Model):
         rval = self.write(cr, uid, ids, {'state': 'draft'}, context=context)
         # Reset all cancelled participation to draft
         Participation = self.pool.get('event.participation')
-        participation_ids = Participation.search(cr, uid, [('seance_id', 'in', ids),('state', 'in', 'cancel')], context=context)
+        participation_ids = Participation.search(cr, uid, [('seance_id', 'in', ids), ('state', '=', 'cancel')], context=context)
         Participation.button_set_draft(cr, uid, participation_ids, context=context)
         return rval
 
