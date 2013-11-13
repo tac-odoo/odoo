@@ -90,39 +90,6 @@ class ResourceCalendarAttendance(osv.Model):
     }
 
 
-class resource_calendar_leaves_attendees(osv.Model):
-    _name = 'resource.calendar.leaves.attendees'
-    _auto = False
-    _columns = {
-        'leave_id': fields.many2one('resource.calendar.leaves', 'Leave', readonly=True),
-        'partner_id': fields.many2one('res.partner', 'Resource Partner', readonly=True),
-    }
-
-    def init(self, cr):
-        """
-        Initialize the sql view for the leaves attendees
-        """
-        tools.drop_view_if_exists(cr, 'resource_calendar_leaves_attendees')
-        cr.execute(""" CREATE VIEW resource_calendar_leaves_attendees AS (
-        SELECT l.id AS leave_id,
-               p.id AS partner_id
-
-        FROM resource_calendar_leaves l
-        LEFT JOIN resource_resource r ON (l.resource_id = r.id)
-        LEFT JOIN res_users u ON (r.user_id = u.id)
-
-        LEFT JOIN res_partner p ON (
-            CASE WHEN l.applies_to in ('company', 'resource_all') THEN true
-                 WHEN l.applies_to = 'resource' THEN p.id = COALESCE(l.partner_id, u.partner_id)
-                 ELSE False
-            END)
-
-        WHERE l.applies_to IN ('company', 'resource_all', 'resource')
-          AND p.id IS NOT NULL
-
-        )""")
-
-
 class resource_calendar_leaves(osv.Model):
     _inherit = "resource.calendar.leaves"
 
@@ -193,3 +160,36 @@ class resource_calendar_leaves(osv.Model):
         elif applies_to == 'calendar':
             values.update(resource_id=False, partner_id=False, event_id=False)
         return {'value': values}
+
+
+class resource_calendar_leaves_attendees(osv.Model):
+    _name = 'resource.calendar.leaves.attendees'
+    _auto = False
+    _columns = {
+        'leave_id': fields.many2one('resource.calendar.leaves', 'Leave', readonly=True),
+        'partner_id': fields.many2one('res.partner', 'Resource Partner', readonly=True),
+    }
+
+    def init(self, cr):
+        """
+        Initialize the sql view for the leaves attendees
+        """
+        tools.drop_view_if_exists(cr, 'resource_calendar_leaves_attendees')
+        cr.execute(""" CREATE VIEW resource_calendar_leaves_attendees AS (
+        SELECT l.id AS leave_id,
+               p.id AS partner_id
+
+        FROM resource_calendar_leaves l
+        LEFT JOIN resource_resource r ON (l.resource_id = r.id)
+        LEFT JOIN res_users u ON (r.user_id = u.id)
+
+        LEFT JOIN res_partner p ON (
+            CASE WHEN l.applies_to in ('company', 'resource_all') THEN true
+                 WHEN l.applies_to = 'resource' THEN p.id = COALESCE(l.partner_id, u.partner_id)
+                 ELSE False
+            END)
+
+        WHERE l.applies_to IN ('company', 'resource_all', 'resource')
+          AND p.id IS NOT NULL
+
+        )""")
