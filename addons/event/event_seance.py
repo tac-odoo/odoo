@@ -824,7 +824,7 @@ class EventSeance(osv.Model):
             for k, v in sorted(partset.iteritems()):
                 reg, contact = k
                 found, expected = len(v), v.expected
-                rfp_logger.info("Reg: %s <id: %d> # contact: %s, found/expected: %s/%s" % (reg.name, reg.id, contact, found, expected))
+                rfp_logger.debug("Reg: %s <id: %d> # contact: %s, found/expected: %s/%s" % (reg.name, reg.id, contact, found, expected))
                 if found > expected:
                     if seance.state != 'done' or (seance.state == 'done' and force_participations_refresh):
                         # keep all presence that have 'presence' information
