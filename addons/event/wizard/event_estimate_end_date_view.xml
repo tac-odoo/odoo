@@ -12,9 +12,14 @@
                         <field name="event_id"/>
                         <field name="date_start"/>
                         <field name="date_end"/>
+                        <field name="simulation_id" invisible="1"/>
+                    </group>
+                    <group string="Options">
+                        <field name="include_existing_seances"/>
                     </group>
                     <footer>
                         <button name="button_compute_date_end" type="object" class="oe_highlight" string="Compute End Date"/>
+                        <button name="button_show_simulation" type="object" class="oe_highlight" string="Show Simulation" attrs="{'invisible': [('simulation_id','=',False)]}"/>
                         or <button type="special" special="cancel" string="Close" class="oe_link"/>
                     </footer>
                 </form>
@@ -42,6 +47,45 @@
                             string="Estimate end date"
                             groups="event.group_event_manager,event.group_event_planning"/>
                 </xpath>
+            </field>
+        </record>
+
+
+        <record id="view_event_event_schedule_simulation_seance_calendar" model="ir.ui.view">
+            <field name="name">event.event.schedule.simulation.seance.calendar</field>
+            <field name="model">event.event.schedule.simulation.seance</field>
+            <field name="arch" type="xml">
+                <calendar string="Seances Simulation" date_start="date_begin" color="content_id" date_stop="date_end" date_delay="duration">
+                    <field name="name"/>
+                    <field name="content_id"/>
+                </calendar>
+            </field>
+        </record>
+
+        <record id="view_event_event_schedule_simulation_seance_tree" model="ir.ui.view">
+            <field name="name">event.event.schedule.simulation.seance.tree</field>
+            <field name="model">event.event.schedule.simulation.seance</field>
+            <field name="arch" type="xml">
+                <tree string="Seances simulation">
+                    <field name="name"/>
+                    <field name="date_begin"/>
+                    <field name="duration"/>
+                    <field name="content_id"/>
+                    <field name="module_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_event_event_schedule_simulation_seance_search" model="ir.ui.view">
+            <field name="name">event.event.schedule.simulation.seance.search</field>
+            <field name="model">event.event.schedule.simulation.seance</field>
+            <field name="arch" type="xml">
+                <search string="Seances Simulation">
+                    <field name="name"/>
+                    <field name="module_id"/>
+                    <field name="content_id"/>
+                    <filter string="Simulated Seances" domain="[('simulation_scheduled','=',True)]"/>
+                </search>
             </field>
         </record>
 

@@ -25,6 +25,7 @@ import logging
 from datetime import datetime, timedelta
 from collections import defaultdict
 from functools import partial
+from itertools import izip_longest
 from dateutil.relativedelta import relativedelta, MO
 from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields, expression
@@ -70,6 +71,7 @@ class EventSeanceType(osv.Model):
 
 class EventContentModule(osv.Model):
     _name = 'event.content.module'
+    _order = 'sequence ASC'
     _columns = {
         'name': fields.char('Module name', required=True),
         'sequence': fields.integer('Sequence'),
@@ -111,6 +113,40 @@ class EventContent(osv.Model):
                 scheduled_duration += seance.duration
             result[content.id] = content.duration - scheduled_duration
 
+        return result
+
+    def _get_schedule_infos(self, cr, uid, ids, fieldnames, args, context=None):
+        result = {}
+        for content in self.browse(cr, uid, ids, context=context):
+            remaining_count = content.slot_count
+            remaining_duration = content.duration
+            last_scheduled_date = False
+
+            seances_by_group = defaultdict(list)
+            for seance in content.seance_ids:
+                seances_by_group[seance.group_id.id].append(seance)
+
+            if content.seance_ids:
+                last_scheduled_date = max(s.date_end for s in content.seance_ids)
+
+            for sgroup in izip_longest(*seances_by_group.values(), fillvalue=None):
+                if None in sgroup:
+                    # incomplete group, skip it
+                    continue
+                if all(not s.date_begin for s in sgroup):
+                    # all seances for the same divided group are not scheduled,
+                    # consider the whole group as not scheduled.
+                    # If at least one seances is schedule, considere the whole
+                    # group as sheduled - normally on the same date. And so, only occupying 1 slot.
+                    continue
+                remaining_count -= 1
+                remaining_duration -= min(s.duration for s in sgroup)
+
+            result[content.id] = {
+                'remaining_duration': remaining_duration,
+                'remaining_count': remaining_count,
+                'last_scheduled_date': last_scheduled_date,
+            }
         return result
 
     def _get_slot_info(self, cr, uid, ids, fieldname, args, context=None):
@@ -167,6 +203,9 @@ class EventContent(osv.Model):
         'slot_duration': fields.float('Slot duration'),
         'slot_count': fields.function(_get_slot_info, type='integer', string='Slot count', store=True, multi='slot-info'),
         'slot_info': fields.function(_get_slot_info, type='char', string='Info', store=True, multi='slot-info'),
+        'remaining_count': fields.function(_get_schedule_infos, type='integer', string='Remaining Count', multi='schedule-info'),
+        'remaining_duration': fields.function(_get_schedule_infos, type='float', string='Remaining Duration', multi='schedule-info'),
+        'last_scheduled_date': fields.function(_get_schedule_infos, type='datetime', string='Last Scheduled Date', multi='schedule-info'),
         'is_divided': fields.boolean('Divided?'),
         'group_ids': fields.one2many('event.participation.group', 'event_content_id'),
         'module_id': fields.many2one('event.content.module', 'Module'),
@@ -1312,7 +1351,7 @@ class EventEvent(osv.Model):
                     result[event.id].append(seance.id)
         return result
 
-    def _estimate_end_date(self, cr, uid, start, contents, timeline=None, context=None):
+    def _estimate_end_date(self, cr, uid, start, contents, timeline=None, simulation_id=None, context=None):
         """Estimated event duration based on start date and contents length
         :param cr: database cursor
         :param uid: current user id
@@ -1329,6 +1368,14 @@ class EventEvent(osv.Model):
         if not contents:
             return end.strftime(DT_FMT)
 
+        # Modules infos
+        modules = list(set(c.module_id for c in contents))
+        modules.sort(key=lambda m: m.sequence if m else 0)  # content without module are ordered first
+        contents_by_module = defaultdict(list)
+        for c in contents:
+            contents_by_module[c.module_id].append(c)
+        contents.sort(key=lambda c: (modules.index(c.module_id), c.id))
+
         # iter on each timeline change, and eat all "available" time
         if not timeline:
             raise NotImplementedError('No timeline specified, this is currently unsupported')
@@ -1338,30 +1385,135 @@ class EventEvent(osv.Model):
                                                              start=tlstart, end=tlend)
                              if p.status == Availibility.FREE).__iter__()
 
+        free_periods = []
+
+        # to cleanup
+        from itertools import tee, izip
+        def pairwise(iterable):
+            "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+            a, b = tee(iterable)
+            next(b, None)
+            return izip(a, b)
+
+        event_min_start = start.replace()  # minimum start date of module/content
+        module_min_start = start.replace()
+        content_min_start = start.replace()
+        schedule_by_date = defaultdict(list)
         period = None
-        for content in contents:
-            remaining_duration = content['duration']
-            content_allow_splitting = True  # TODO: allow user to change
-            while remaining_duration > 0:
-                try:
-                    period = period or available_periods.next()
-                except StopIteration as e:
-                    raise osv.except_osv(_('Error!'),
-                                         _('No enough time to schedule all content "%s"') % (content.name,))
-                if period.duration < content.slot_duration and not content_allow_splitting:
-                    # remaining period is too small, get the next one
-                    period = None
-                    continue
-                alloc_duration = min(content.slot_duration, remaining_duration, period.duration)
-                (s, e) = period.shift_hours(alloc_duration)
-                remaining_duration -= alloc_duration
-                end = e
-        return end.strftime(DT_FMT)
+
+        for module in modules:
+            cts = contents_by_module[module]
+
+            for content in cts:
+                content_min_start = module_min_start.replace()
+
+                # include pre-schedule items
+                if context.get('event_date_end_include_scheduled_items'):
+                    for s in content.seance_ids:
+                        schedule_by_date[s.date_begin].append(s)
+                    if content.last_scheduled_date:
+                        content_min_start = datetime.strptime(content.last_scheduled_date, DT_FMT)
+                    remaining_duration = content.remaining_duration
+                else:
+                    remaining_duration = content['duration']
+
+                content_allow_splitting = False  # TODO: allow user to change
+                while remaining_duration > 0.0:
+                    for i, p in enumerate(free_periods):
+                        # Does period match constraints
+                        match = self._schedule_period_match_content_constraints(cr, content, p, min_date=content_min_start,
+                                                                                split=content_allow_splitting, context=context)
+                        if match:
+                            alloc_duration = min(content.slot_duration, remaining_duration, period.duration)
+                            (s, e) = period.shift_hours(alloc_duration)
+                            remaining_duration -= alloc_duration
+                            schedule_by_date[s.strftime(DT_FMT)].append({
+                                'date_begin': s.strftime(DT_FMT),
+                                'date_end': e.strftime(DT_FMT),
+                                'duration': alloc_duration,
+                                'name': 'openerp-auto-allocator',
+                                'content_id': content,
+                                'module_id': module,
+                                'id': False,
+                            })
+                            if period.duration <= 0.0:
+                                # no more free time available in the current
+                                # period, remove it from free-periods' list
+                                del free_periods[i]
+                            break
+                    else:
+                        # no existing free period match. Search for a new one
+                        while True:
+                            try:
+                                period = available_periods.next()
+                            except StopIteration as e:
+                                raise osv.except_osv(_('Error!'),
+                                                     _('No enough time to schedule all content "%s"') % (content.name,))
+                            match = self._schedule_period_match_content_constraints(cr, content, period, min_date=content_min_start,
+                                                                                    split=content_allow_splitting, context=context)
+                            if match:
+                                alloc_duration = min(content.slot_duration, remaining_duration, period.duration)
+                                (s, e) = period.shift_hours(alloc_duration)
+                                remaining_duration -= alloc_duration
+                                schedule_by_date[s.strftime(DT_FMT)].append({
+                                    'date_begin': s.strftime(DT_FMT),
+                                    'date_end': e.strftime(DT_FMT),
+                                    'duration': alloc_duration,
+                                    'name': 'openerp-auto-allocator',
+                                    'content_id': content,
+                                    'module_id': module,
+                                    'id': False,
+                                })
+                                if period.duration > 0.0:
+                                    # new period has still available free-time,
+                                    # add it to the free-periods' list.
+                                    free_periods.append(period)
+                                break
+                    content_min_start = e
+            module_min_start = content_min_start.replace()
+        end = max(s['date_end'] for v in schedule_by_date.values() for s in v)
+
+        if simulation_id:
+            # Store simulated seances
+            SimulationSeance = self.pool.get('event.event.schedule.simulation.seance')
+            for d in sorted(schedule_by_date):
+                for item in schedule_by_date[d]:
+                    SimulationSeance.create(cr, uid, {
+                        'simulation_id': simulation_id,
+                        'name': item['name'],
+                        'date_begin': item['date_begin'],
+                        'date_end': item['date_end'],
+                        'duration': item['duration'],
+                        'description': _('Module: %s\nContent: %s') % (item['module_id'].name, item['content_id'].name,),
+                        'content_id': item['content_id'].id,
+                        'module_id': item['module_id'].id,
+                        'simulation_scheduled': True if item['name'] == 'openerp-auto-allocator' else False,
+                        'seance_id': item['id'],
+                    }, context=context)
+        return end
+
+    def _schedule_period_match_content_constraints(self, cr, content, period, min_date=None, max_date=None, split=False, context=None):
+        if period.duration < content.slot_duration and not split:
+            # remaining period is too small
+            return False
+        if min_date and period.start < min_date:
+            # period is before required min. date
+            return False
+        if max_date and period.start > max_date:
+            # period is after required max. date
+            return False
+        return True
 
     def _get_date_end(self, cr, uid, ids, fieldname, args, context=None):
         result = {}
         if not ids:
             return result
+        if context is None:
+            context = {}
+
+        # Estimated end-date on Event should always include
+        # exisintg scheduled items
+        context['event_date_end_include_scheduled_items'] = True
 
         # Fetch stored value
         cr.execute("""SELECT id, date_end
@@ -1380,6 +1532,8 @@ class EventEvent(osv.Model):
                 timeline = None
                 if event.content_ids:
                     tmlayers = ['working_hours', 'leaves']
+                    if context.get('event_date_end_include_scheduled_items'):
+                        tmlayers.append('events')
                     timeline = self._get_resource_timeline(cr, uid, event.id, layers=tmlayers,
                                                            date_from=event_begin, date_to=event_end,
                                                            context=context)
