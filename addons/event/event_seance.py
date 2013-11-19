@@ -736,6 +736,13 @@ class EventSeance(osv.Model):
 
     def button_set_confirm(self, cr, uid, ids, context=None, raise_exception=True):
         for seance in self.browse(cr, uid, ids, context=context):
+            if not seance.date_begin:
+                if raise_exception:
+                    raise osv.except_osv(
+                        _('Error!'),
+                        _('You have to set a begin date on the seance before confirming the seance'))
+                else:
+                    return False
             for p in seance.resource_participation_ids:
                 if p.state != 'confirm':
                     if raise_exception:
