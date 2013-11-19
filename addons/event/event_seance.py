@@ -1430,7 +1430,17 @@ class EventEvent(osv.Model):
                 else:
                     remaining_duration = content['duration']
 
-                content_allow_splitting = False  # TODO: allow user to change
+                # lookup for max slot duration from calendar
+                max_slot_duration = None
+                for e in content.event_ids:
+                    if e.calendar_id:
+                        for att in e.calendar_id.attendance_ids:
+                            max_slot_duration = max(max_slot_duration, att.hour_to - att.hour_from)
+                    else:
+                        max_slot_duration = max(max_slot_duration, 24.0)
+                # Allow content splitting if standard slot_duration is greater
+                # than biggest available slot from event calendar
+                content_allow_splitting = max_slot_duration < content.slot_duration
                 while remaining_duration > 0.0:
                     for i, p in enumerate(free_periods):
                         # Does period match constraints
