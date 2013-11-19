@@ -1171,15 +1171,17 @@ class EventParticipation(osv.Model):
 
     def button_set_confirm(self, cr, uid, ids, context=None):
         result = self.write(cr, uid, ids, {'state': 'confirm'}, context=context)
-        cr.execute("SELECT DISTINCT seance_id "
-                   "FROM event_participation "
-                   "WHERE id in %s AND role != %s GROUP BY seance_id",
+        cr.execute("SELECT DISTINCT part.seance_id "
+                   "FROM event_participation part "
+                   "LEFT JOIN res_partner partner ON (part.partner_id = partner.id) "
+                   "WHERE part.id in %s AND part.role != %s AND partner.event_assignment_mode = 'manual'",
                    (tuple(ids), 'participant'))
 
         seance_ids = [x[0] for x in cr.fetchall()]
-        Seance = self.pool.get('event.seance')
-        Seance.button_set_confirm(cr, uid, seance_ids,
-                                  context=context, raise_exception=False)
+        if seance_ids:
+            Seance = self.pool.get('event.seance')
+            Seance.button_set_confirm(cr, uid, seance_ids,
+                                      context=context, raise_exception=False)
         return result
 
     def button_set_done(self, cr, uid, ids, context=None):
