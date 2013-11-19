@@ -107,10 +107,12 @@ class event_event_estimate_end_date_wizard(osv.osv_memory):
         user_lang = context.get('lang') or self.pool.get('res.users').context_get(cr, uid)['lang']
         user_lang_formats = self.pool.get('res.lang')._lang_date_formats(cr, uid, user_lang)
 
-        date_start = datetime.strptime(wizard.date_start, DT_FMT).strftime(user_lang_formats['datetime'])
+        date_start = datetime.strptime(wizard.date_start, DT_FMT)
         date_start = fields.datetime.context_timestamp(cr, uid, date_start, context=context)
-        date_end = datetime.strptime(wizard.date_end, DT_FMT).strftime(user_lang_formats['datetime'])
+        date_start = date_start.strftime(user_lang_formats['datetime'])
+        date_end = datetime.strptime(wizard.date_end, DT_FMT)
         date_end = fields.datetime.context_timestamp(cr, uid, date_end, context=context)
+        date_end = date_end.strftime(user_lang_formats['datetime'])
 
         return {
             'name': _('Simulation result (begins: %s, ends: %s)') % (date_start, date_end),
