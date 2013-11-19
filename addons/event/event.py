@@ -190,7 +190,7 @@ class event_event(osv.osv):
         for event_reg in registration.browse(cr,uid,reg_ids,context=context):
             if event_reg.state == 'done':
                 raise osv.except_osv(_('Error!'),_("You have already set a registration for this event as 'Attended'. Please reset it to draft if you want to cancel this event.") )
-        registration.write(cr, uid, reg_ids, {'state': 'cancel'}, context=context)
+        registration.button_reg_cancel(cr, uid, reg_ids, context=context)
         return self.write(cr, uid, ids, {'state': 'cancel'}, context=context)
 
     def button_done(self, cr, uid, ids, context=None):
@@ -450,6 +450,13 @@ class event_registration_stage(osv.Model):
         'state': fields.selection(REGISTRATION_STATES, 'State', required=True),
     }
 
+    def _default_sequence(self, cr, uid, context=None):
+        cr.execute("SELECT max(sequence) FROM event_registration_stage")
+        return cr.fetchone()[0] + 1
+
+    _defaults = {
+        'sequence': _default_sequence,
+    }
 
 class event_registration(base_stage, osv.osv):
     """Event Registration"""
