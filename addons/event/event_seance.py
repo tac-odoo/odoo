@@ -270,6 +270,9 @@ class EventContent(osv.Model):
         return new_id
 
     def _update_future_seances(self, cr, uid, ids, values, context=None):
+        if context is None:
+            context = {}
+        fields = values.keys()
         Seance = self.pool.get('event.seance')
         future_seance_filter = [
             ('content_id', 'in', ids),
@@ -279,7 +282,17 @@ class EventContent(osv.Model):
                      ('state', '=', 'draft')
         ]
         seance_ids = Seance.search(cr, uid, future_seance_filter, context=context)
-        return Seance.write(cr, uid, seance_ids, values, context=context)
+
+        content_group_data = {}
+        for seance in Seance.browse(cr, uid, seance_ids, context=context):
+            vals = self._prepare_seance_for_content(cr, uid, seance.content_id,
+                                                    seance.date_begin, seance.date_end,
+                                                    group=seance.group_id or None,
+                                                    context=context)
+            updvals = dict((f, v) for f, v in vals.iteritems() if f in fields)
+            seance.write(updvals)
+        return True
+        # return Seance.write(cr, uid, seance_ids, values, context=context)
 
     def _get_changes_to_propagate(self, cr, uid, ids, values, context=None):
         non_planned_seance_update = {}
@@ -318,9 +331,12 @@ class EventContent(osv.Model):
         if isinstance(date_begin, basestring):
             date_begin = datetime.strptime(date_begin, DT_FMT)
         if isinstance(date_end, basestring):
-            date_end = datetime.strptime(date_begin, DT_FMT)
-        duration_delta = date_end - date_begin
-        duration = duration_delta.days * 24 + (duration_delta.seconds / 3600.)
+            date_end = datetime.strptime(date_end, DT_FMT)
+        if date_end is not False and date_begin is not False:
+            duration_delta = date_end - date_begin
+            duration = duration_delta.days * 24 + (duration_delta.seconds / 3600.)
+        else:
+            duration = 0.0
 
         speaker_id = (group and group.speaker_id.id) or content.speaker_id.id or False
         address_id = (group and group.room_id.id) or content.room_id.id or False
@@ -330,7 +346,7 @@ class EventContent(osv.Model):
             'type_id': content.type_id.id,
             'lang_id': content.lang_id.id,
             'group_id': group.id if group else False,
-            'date_begin': date_begin.strftime(DT_FMT),
+            'date_begin': date_begin.strftime(DT_FMT) if date_begin else False,
             'duration': duration,
             'main_speaker_id': speaker_id,
             'address_id': address_id,
@@ -1289,10 +1305,14 @@ class EventParticipationGroup(osv.Model):
         return super(EventParticipationGroup, self).create(cr, uid, values, context=context)
 
     def write(self, cr, uid, ids, values, context=None):
+        if context is None:
+            context = {}
         if 'registration_ids' in values:
             for group in self.browse(cr, uid, ids, context=context):
                 if group.event_content_id.event_id.state == 'done':
                     raise osv.except_osv(_('Error'), _('You cannot change content group subscription on done events'))
+
+        rval = super(EventParticipationGroup, self).write(cr, uid, ids, values, context=context)
 
         non_planned_seance_update = self._get_changes_to_propagate(cr, uid, ids, values, context=context)
         if non_planned_seance_update:
@@ -1301,15 +1321,9 @@ class EventParticipationGroup(osv.Model):
                 contents[group.event_content_id.id].append(group.id)
 
             Content = self.pool.get('event.content')
-            for content in self.browse(cr, uid, contents.keys(), context=context):
-                new_values = dict(non_planned_seance_update)
-                for f, v in Content._get_changes_to_propagate(cr, uid, [content.id], values, context=context).iteritems():
-                    if v and not new_values.get(f):
-                        new_values[f] = v
+            Content._update_future_seances(cr, uid, contents.keys(), non_planned_seance_update, context=context)
 
-                Content._update_future_seances(cr, uid, [content.id], new_values, context=context)
-
-        return super(EventParticipationGroup, self).write(cr, uid, ids, values, context=context)
+        return rval
 
     def unlink(self, cr, uid, ids, context=None):
         content_ids = []
