@@ -371,7 +371,7 @@ class EventContent(osv.Model):
             'view_type': 'form',
             'view_mode': 'kanban,tree,form',
             'domain': [('event_id', 'in', event_ids)],
-            'context': {'group_by': 'group_ids', 'group_for_content_id': content.id},
+            'context': {'group_by': 'group_ids', 'group_for_content_id': content.id, 'search_default_confirmed': 1},
         }
         return True
 
