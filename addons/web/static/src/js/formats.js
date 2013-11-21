@@ -134,6 +134,12 @@ instance.web.format_value = function (value, descriptor, value_if_empty) {
     if (typeof value === 'number' && isNaN(value)) {
         value = false;
     }
+    var descriptor_fld_type = (descriptor.widget || descriptor.type || (descriptor.field && descriptor.field.type));
+    if (typeof value === 'number' && value === 0
+        && (descriptor_fld_type == 'datetime' || descriptor_fld_type == 'date')) {
+        // xal: fixup for grouped datetime value which is False but converted to 0 in DataGroup.init()
+        value = false;
+    }
     //noinspection FallthroughInSwitchStatementJS
     switch (value) {
         case '':
