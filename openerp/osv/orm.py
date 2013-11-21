@@ -2571,6 +2571,9 @@ class BaseModel(object):
         if groupby_list and len(groupby_list) > 1:
             result_template['__context'] = {'group_by': groupby_list[1:]}
 
+        if context is None:
+            context = {}
+
         # Merge the left_side (current results as dicts) with the right_side (all
         # possible values as m2o pairs). Both lists are supposed to be using the
         # same ordering, and can be merged in one pass.
@@ -2578,6 +2581,8 @@ class BaseModel(object):
         known_values = {}
         def append_left(left_side):
             grouped_value = left_side[groupby] and left_side[groupby][0]
+            if len(groupby_list) < 2 and context.get('group_by_no_leaf'):
+                left_side[groupby + '_count'] = left_side['__count']
             if not grouped_value in known_values:
                 result.append(left_side)
                 known_values[grouped_value] = left_side
