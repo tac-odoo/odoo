@@ -207,7 +207,8 @@ class ir_attachment(osv.osv):
             # (resource was deleted but attachment was not)
             mids = self.pool.get(model).exists(cr, uid, mids)
             ima.check(cr, uid, model, mode)
-            self.pool.get(model).check_access_rule(cr, uid, mids, mode, context=context)
+            if mids:
+                self.pool.get(model).check_access_rule(cr, uid, mids, mode, context=context)
 
     def _search(self, cr, uid, args, offset=0, limit=None, order=None, context=None, count=False, access_rights_uid=None):
         ids = super(ir_attachment, self)._search(cr, uid, args, offset=offset,
