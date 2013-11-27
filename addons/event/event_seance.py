@@ -660,6 +660,9 @@ class EventSeance(osv.Model):
     _sql_constraints = [
         ('date_begin_notnull', "CHECK(CASE WHEN state != 'draft' THEN date_begin IS NOT NULL ELSE True END)",
             'You have to specify a begin date when leaving the draft state'),
+        ('duration_positive',
+            'CHECK(duration > 0)',
+            'Duration fields must be stictly positive'),
     ]
 
     def _read_group_module_id(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
