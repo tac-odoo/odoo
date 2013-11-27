@@ -64,7 +64,9 @@ import openerp
 import openerp.netsvc as netsvc
 import openerp.tools as tools
 from openerp.tools.config import config
-from openerp.tools.misc import CountingStream
+from openerp.tools.misc import (CountingStream,
+                                DEFAULT_SERVER_DATE_FORMAT as D_FMT,
+                                DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT)
 from openerp.tools.safe_eval import safe_eval as eval
 from openerp.tools.translate import _
 from openerp import SUPERUSER_ID
@@ -1153,6 +1155,9 @@ class BaseModel(object):
                 r = '__export__.'+n
             return r
 
+        user_lang = context.get('lang') or self.pool.get('res.users').context_get(cr, uid)['lang']
+        user_lang_formats = self.pool.get('res.lang')._lang_date_formats(cr, uid, user_lang)
+
         lines = []
         data = map(lambda x: '', range(len(fields)))
         done = []
@@ -1179,6 +1184,13 @@ class BaseModel(object):
                             if r and type(sel_list) == type([]):
                                 r = [x[1] for x in sel_list if r==x[0]]
                                 r = r and r[0] or False
+                        if r and cols and cols._type in ('date', 'datetime') and context.get('import_compat') is False:
+                            if cols._type == 'date':
+                                r = datetime.datetime.strptime(r, D_FMT).strftime(user_lang_formats['date'])
+                            if cols._type == 'datetime':
+                                rdt = datetime.datetime.strptime(r, DT_FMT)
+                                rdt = openerp.osv.fields.datetime.context_timestamp(cr, uid, rdt, context=context)
+                                r = rdt.strftime(user_lang_formats['datetime'])
                     if not r:
                         if f[i] in self._columns:
                             r = check_type(self._columns[f[i]]._type)
