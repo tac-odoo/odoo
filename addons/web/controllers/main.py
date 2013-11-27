@@ -1615,7 +1615,9 @@ class ExportFormat(object):
         ids = ids or Model.search(domain, 0, False, False, req.context)
 
         field_names = map(operator.itemgetter('name'), fields)
-        import_data = Model.export_data(ids, field_names, req.context).get('datas',[])
+        import_ctx = dict(req.context, import_compat=import_compat)
+        import_ctx.update(req.session.get_context())
+        import_data = Model.export_data(ids, field_names, import_ctx).get('datas',[])
 
         if import_compat:
             columns_headers = field_names
