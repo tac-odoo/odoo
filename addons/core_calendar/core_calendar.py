@@ -53,12 +53,12 @@ class CoreCalendarTimeline(osv.TransientModel):
             # dayofweek (=> iso weekday): 1: Monday, ..., 6: Saturday, 7: Sunday
             if record.calendar_id and record.calendar_id.attendance_ids:
                 result[record.id] = [
-                    (int(att.dayofweek)+1, att.hour_from, att.hour_to)
+                    (int(att.dayofweek)+1, att.hour_from, att.hour_to, att.period_limit)
                     for att in record.calendar_id.attendance_ids
                 ]
             else:
                 result[record.id] = [
-                    (dayofweek+1, 0, 24)
+                    (dayofweek+1, 0, 24, 0)
                     for dayofweek in xrange(7)
                 ]
         return result
@@ -106,8 +106,8 @@ class CoreCalendarTimeline(osv.TransientModel):
                     wkhours = self._get_resource_working_hours(cr, uid, [record.id], date_from=date_from,
                                                                date_to=date_to, context=context)[record.id]
                     timeline.add_emiter(WorkingHoursPeriodEmiter('working_hours', working_hours=[
-                        # 0: wday, 1: hour_from, 2: hour_to
-                        (att[0], att[1], att[2]) for att in wkhours
+                        # 0: wday, 1: hour_from, 2: hour_to, 3: period limit
+                        (att[0], att[1], att[2], att[3]) for att in wkhours
                     ]))
 
                 elif layer == 'leaves':

@@ -44,25 +44,59 @@ class report_event_resource(osv.Model):
 
     def _compute_resource_hours(self, cr, uid, partner_id, timeline, start, end, context=None):
         # Working Hours
-        sum_wkhours = sum(p.duration
-                          for p in timeline.iterperiods(as_tz='UTC',
-                                                 start=start, end=end, layers=['working_hours'])
-                          if p.status == Availibility.FREE)
+        wkhours = [p for p in timeline.iterperiods(as_tz='UTC',
+                                                   start=start, end=end,
+                                                   layers=['working_hours'])
+                   if p.status == Availibility.FREE]
+        sum_wkhours = 0.0
+        if wkhours:
+            sum_wkhours = sum(p.infos.get('period_limit') or p.duration
+                              for p in wkhours)
 
         # Leaves
-        sum_leaves = sum(p.duration
-                         for p in timeline.iterperiods(as_tz='UTC',
-                                                start=start, end=end, layers=['leaves'])
-                         if p.status >= Availibility.BUSY_TENTATIVE)
+        leaves_layers = set(['working_hours', 'leaves'])
+        leaves = (p for p in timeline.iterperiods(as_tz='UTC',
+                                                  start=start, end=end,
+                                                  layers=['working_hours', 'leaves'])
+                  if p.status >= Availibility.BUSY_TENTATIVE
+                  and p.layers & leaves_layers == leaves_layers)
+        sum_leaves = 0.0
+        leaves_it = iter(leaves)
+        try:
+            l = leaves_it.next()
+        except StopIteration:
+            l = None
+        if l:
+            # sum leaves by taking related working hours 'period_limit' into account.
+            done = False
+            for wkh in wkhours:
+                period_limit = wkh.infos.get('period_limit')
+                if done:
+                    break  # we've already finished
+                if wkh.stop < l.start:
+                    continue  # leave to a following working hours
+                wkh_sum = 0.0
+                while wkh.start <= l.start <= l.stop <= wkh.stop:
+                    wkh_sum += l.duration
+                    try:
+                        l = leaves_it.next()
+                    except StopIteration:
+                        break
+                if period_limit and wkh_sum > period_limit:
+                    sum_leaves += period_limit
+                else:
+                    sum_leaves += wkh_sum
 
         # Effective Time (Busy events times)
         sum_events = sum(p.duration
                          for p in timeline.iterperiods(as_tz='UTC',
-                                                start=start, end=end, layers=['events'])
+                                                       start=start, end=end,
+                                                       layers=['events'])
                          if p.status >= Availibility.BUSY_TENTATIVE)
 
         # Effective Rate
-        eff_rate = sum_events / ((sum_wkhours - sum_leaves) or 1.0)
+        sum_avail_time = sum_wkhours - sum_leaves
+        eff_rate = sum_events / (sum_avail_time or 1.0)
 
         return {
             'working_hours': sum_wkhours,

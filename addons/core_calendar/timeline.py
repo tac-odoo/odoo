@@ -3,6 +3,7 @@
 
 import pytz
 import math
+import operator
 from functools import partial
 from datetime import datetime, timedelta
 
@@ -28,14 +29,23 @@ class Availibility:
 
 class AvailibilityPeriod(object):
     name = 'Availability'
-    __slots__ = ('start', 'stop', 'status', 'splitable')
+    __slots__ = ('start', 'stop', 'status', 'splitable', 'layers', 'infos')
 
-    def __init__(self, start, stop, status, splitable=True):
+    def __init__(self, start, stop, status, splitable=True, layers=None, **kw):
         assert status in Availibility.values
         self.start = start
         self.stop = stop
         self.status = status
         self.splitable = splitable
+        self.layers = layers or set()
+
+        # Set owns infos
+        self.infos = {}
+        if 'infos' in kw:
+            self.infos.update(kw['infos'])
+        for k, v in kw.iteritems():
+            if k.startswith('info_'):
+                self.infos[k[5:]] = v
 
     def __str__(self):
         return "%s '[ %s -> %s [' :: %s" % (
@@ -85,10 +95,10 @@ class WorkingHoursPeriodEmiter(PeriodEmiter):
         super(WorkingHoursPeriodEmiter, self).__init__(name, default)
         if not working_hours:  # None or empty list
             self.working_hours = [
-                ((1, 0.0), (7, 24.0), default),
+                ((1, 0.0), (7, 24.0), default, 1.0),
             ]
         else:
-            H_WEEKDAY, H_START, H_END, H_STATUS = range(4)
+            H_WEEKDAY, H_START, H_END, H_LIMIT = range(4)
             hours = []
             last = (1, 0.0)
             for i, workhour in enumerate(working_hours):
@@ -104,17 +114,17 @@ class WorkingHoursPeriodEmiter(PeriodEmiter):
                 last_consecutive = tuple(last_consecutive)
 
                 if workhour_start > last_consecutive:
-                    hours.append((last, workhour_start, Availibility.UNKNOWN))
-                hours.append((workhour_start, workhour_end, default))
+                    hours.append((last, workhour_start, Availibility.UNKNOWN, None))
+                hours.append((workhour_start, workhour_end, default, workhour[H_LIMIT]))
                 last = hours[-1][1]
 
             if last < (7, 24.0):
-                hours.append((last, (7, 24.0), Availibility.UNKNOWN))
+                hours.append((last, (7, 24.0), Availibility.UNKNOWN, None))
 
             self.working_hours = hours
 
     def get_iterator(self, start, end, tz=None):
-        P_START, P_END, P_STATUS = range(3)
+        P_START, P_END, P_STATUS, P_LIMIT = range(4)
         P_WEEKDAY, P_HOURMIN = range(2)
 
         def to_hourmin(x):
@@ -148,7 +158,10 @@ class WorkingHoursPeriodEmiter(PeriodEmiter):
                 e += timedelta(days=1)
                 h, m = (0, 0)
             e = min(e.replace(hour=h, minute=m, second=0, microsecond=0), end)
-            yield AvailibilityPeriod(s, e, period[P_STATUS])
+            if period[P_STATUS] != Availibility.UNKNOWN:
+                yield AvailibilityPeriod(s, e, period[P_STATUS],
+                                         layers=set([self.name]),
+                                         info_period_limit=period[P_LIMIT])
 
             s = e
             period_idx = (period_idx + 1) % len(hours)
@@ -228,7 +241,7 @@ class GenericEventPeriodEmiter(PeriodEmiter):
                 continue
 
         for e in periods:
-            yield AvailibilityPeriod(e.start, e.stop, e.status)
+            yield AvailibilityPeriod(e.start, e.stop, e.status, layers=set([self.name]))
         return
 
 
@@ -352,21 +365,25 @@ class Timeline(object):
                     periods.append(c)
                 elif i.alive:
                     periods.append(AvailibilityPeriod(pstart, i.current.start, self.default))
-                else:  # not i.alive:
-                    iters.remove(i)
+            iters = [i for i in iters if i.alive]
 
             if not periods and iters:
                 # still some iters available but no matching
                 # for current start date, returning default one
-                pend = min(i.current.start for i in iters)
+                pend = min(i.current.start for i in iters if i.current is not None)
                 cdate = pend
                 yield tzhandler(AvailibilityPeriod(pstart, pend, self.default))
             elif periods:
                 # find min end date
                 pend = min(p.stop for p in periods)
                 pstatus = max(p.status for p in periods)
+                players = reduce(operator.or_, (p.layers for p in periods))
+                pinfos = {}
+                for p in periods:
+                    pinfos.update(p.infos)
                 cdate = pend
-                yield tzhandler(AvailibilityPeriod(pstart, pend, pstatus))
+                yield tzhandler(AvailibilityPeriod(pstart, pend, pstatus,
+                                                   layers=players, infos=pinfos))
             # else (not period & not iters)
             # => we've finished - returning final date with default status
             pass
