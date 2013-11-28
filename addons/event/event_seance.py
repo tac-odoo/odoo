@@ -775,10 +775,16 @@ class EventSeance(osv.Model):
         return self.write(cr, uid, ids, {'state': 'confirm'}, context=context)
 
     def button_set_inprogress(self, cr, uid, ids, context=None):
-        return self.write(cr, uid, ids, {'state': 'inprogress'}, context=context)
+        if self.user_has_groups(cr, uid, 'event.group_event_professor'):
+            # do write as superuser for this specific operation, no context on purpose
+            uid = SUPERUSER_ID
+        return self.write(cr, uid, ids, {'state': 'inprogress'})
 
     def button_set_closed(self, cr, uid, ids, context=None):
-        return self.write(cr, uid, ids, {'state': 'closed'}, context=context)
+        if self.user_has_groups(cr, uid, 'event.group_event_professor'):
+            # do write as superuser for this specific operation, no context on purpose
+            uid = SUPERUSER_ID
+        return self.write(cr, uid, ids, {'state': 'closed'})
 
     def button_set_done(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'done'}, context=context)

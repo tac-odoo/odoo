@@ -442,7 +442,7 @@
                         <button type="object" name="button_set_confirm" states="draft,planned" string="Confirm" groups="event.group_event_manager,event.group_event_planning"/>
                         <button type="object" name="button_set_inprogress" states="confirm" string="Start seance" groups="event.group_event_manager,event.group_event_planning,event.group_event_professor"/>
                         <button type="object" name="button_set_closed" states="inprogress" string="Stop seance" groups="event.group_event_manager,event.group_event_planning,event.group_event_professor"/>
-                        <button type="object" name="button_set_done" states="confirm,inprogress,closed" string="Done" groups="event.group_event_manager,event.group_event_planning,event.group_event_professor"/>
+                        <button type="object" name="button_set_done" states="confirm,inprogress,closed" string="Done" groups="event.group_event_manager,event.group_event_planning"/>
                         <button type="object" name="button_set_cancel" states="draft,confirm,planned,inprogress,done" string="Cancel" groups="event.group_event_manager,event.group_event_planning"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
                     </header>
@@ -478,7 +478,7 @@
                                         <field name="group_id" domain="[('event_content_id','=',content_id)]"/>
                                     </group>
                                 </group>
-                                <div groups="event.group_event_manager,event.group_event_planning">
+                                <div name="div_alerts" groups="event.group_event_manager,event.group_event_planning">
                                     <separator string="Conflicts"/>
                                     <field name="event_conflict_ids" attrs="{'invisible': [('event_conflict_ids','=',False)]}">
                                         <tree string="Conflicts">
