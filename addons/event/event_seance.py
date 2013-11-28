@@ -621,9 +621,11 @@ class EventSeance(osv.Model):
         'group_id': fields.many2one('event.participation.group', 'Group',
                                     **WRITABLE_ONLY_IN_DRAFT),
         'resource_participation_ids': fields.one2many('event.participation', 'seance_id', 'Resource Participation',
-                                                      domain=[('role', '!=', 'participant')]),
+                                                      domain=[('role', '!=', 'participant')],
+                                                      auto_join=True),
         'participant_ids': fields.one2many('event.participation', 'seance_id', 'Participants',
-                                           domain=[('role', '=', 'participant')]),
+                                           domain=[('role', '=', 'participant')],
+                                           auto_join=True),
         'participant_count': fields.function(_get_participant_count, type='integer', string='# of participants',
                                              store={
                                                  'event.seance': (_store_get_seances_from_seances, ['content_id', 'group_id', 'state'], 10),

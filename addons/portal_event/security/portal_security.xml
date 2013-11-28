@@ -9,6 +9,24 @@
             <field name="groups" eval="[(4, ref('portal.group_portal')), (4, ref('portal.group_anonymous'))]"/>
         </record>
 
+        <record id="portal_event_seance_rule" model="ir.rule">
+            <field name="name">Portal Visible Seances</field>
+            <field name="model_id" ref="event.model_event_seance"/>
+            <field name="domain_force">['|',('participant_ids.partner_id','=',user.partner_id.id),('resource_participation_ids.partner_id','=',user.partner_id.id)]</field>
+            <field name="groups" eval="[(4, ref('portal.group_portal')), (4, ref('portal.group_anonymous'))]"/>
+        </record>
+
+        <record id="portal_event_rule_professor" model="ir.rule">
+            <field name="name">Portal Visible Events for Professors</field>
+            <field name="model_id" ref="event.model_event_event"/>
+            <field name="domain_force">[]</field>
+            <field name="groups" eval="[(4, ref('event.group_event_professor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
         <record id="portal_registration_rule" model="ir.rule">
             <field name="name">Portal Personal Registrations</field>
             <field ref="event.model_event_registration" name="model_id"/>

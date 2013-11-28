@@ -19,5 +19,18 @@
         <menuitem name="Events" id="portal_company_events" parent="portal.portal_company"
             action="action_event_view" sequence="30"/>
 
+        <record model="ir.actions.act_window" id="action_event_seance">
+            <field name="name">Seances</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">event.seance</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">calendar,form,tree</field>
+            <field name="search_view_id" ref="event.view_event_seance_search"/>
+            <field name="context">{'search_default_my_seance': 1}</field>
+        </record>
+
+        <menuitem name="Seances" id="portal_company_seances" parent="portal.portal_company"
+            action="action_event_seance" sequence="31" groups="base.group_user,event.group_event_professor"/>
+
     </data>
 </openerp>
