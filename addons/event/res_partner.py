@@ -46,6 +46,7 @@ class ResPartner(osv.osv):
         'equipment_ids': fields.one2many('res.partner', 'parent_id', 'Equipments', domain=[('active', '=', True), ('equipment', '=', True)]),
         'external': fields.boolean('External', help='This resource is an external resource'),
         'event_assignment_mode': fields.selection(_get_event_resource_assignment_mode, 'Assignment Mode', required=True),
+        'registration_id': fields.many2one('event.registration', 'Related Registration'),
     }
 
     _defaults = {
