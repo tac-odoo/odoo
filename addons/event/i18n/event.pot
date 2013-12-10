@@ -2923,3 +2923,33 @@ msgstr ""
 msgid "Share a note..."
 msgstr ""
 
+#. module: event
+#: view:event.event:0
+msgid "Are you sure you want to cancel this event ? (all registrations and seances will be cancelled)"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Are you sure you want to confirm this event?"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Are you sure you want to reset this template event as a normal event?"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Are you sure you want to convert this event to a template event?"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Are you sure you want to terminate this event?"
+msgstr ""
+
+#. module: event
+#: view:event.event:0
+msgid "Are you sure you want to cancel this event ? (all registrations and seances will be cancelled)"
+msgstr ""
+

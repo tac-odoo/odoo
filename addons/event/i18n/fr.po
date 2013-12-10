@@ -1203,3 +1203,29 @@ msgstr "Année"
 #: field:event.event,speaker_confirmed:0
 msgid "Speaker Confirmed"
 msgstr "Orateur confirmé"
+
+#. module: event
+#: view:event.event:0
+msgid "Are you sure you want to confirm this event?"
+msgstr "Êtes-vous sûr de vouloir confirmer cet évènement ?"
+
+#. module: event
+#: view:event.event:0
+msgid "Are you sure you want to reset this template event as a normal event?"
+msgstr "Êtes-vous sûr de vouloir reconvertir ce modèle d'évènement en un évènement classique ?"
+
+#. module: event
+#: view:event.event:0
+msgid "Are you sure you want to convert this event to a template event?"
+msgstr "Êtes-vous sûr de vouloir convertir cet évènement en un modèle d'évènement ?"
+
+#. module: event
+#: view:event.event:0
+msgid "Are you sure you want to terminate this event?"
+msgstr "Êtes-vous sûr de vouloir terminer cet évènement ?"
+
+#. module: event
+#: view:event.event:0
+msgid "Are you sure you want to cancel this event ? (all registrations and seances will be cancelled)"
+msgstr "Êtes-vous sûr de vouloir annuler cet évènement ? (toutes les inscriptions et séances seront annulées)"
+

@@ -84,13 +84,13 @@
             <field name="arch" type="xml">
                 <form string="Events" version="7.0">
                     <header>
-                        <button string="Confirm Event" name="button_confirm" states="draft" type="object" class="oe_highlight" groups="event.group_event_manager,event.group_event_planning"/>
-                        <button string="Finish Event" name="button_done" states="confirm" type="object" class="oe_highlight" groups="event.group_event_manager,event.group_event_planning"/>
+                        <button string="Confirm Event" name="button_confirm" states="draft" type="object" class="oe_highlight" groups="event.group_event_manager,event.group_event_planning" confirm="Are you sure you want to confirm this event?"/>
+                        <button string="Finish Event" name="button_done" states="confirm" type="object" class="oe_highlight" groups="event.group_event_manager,event.group_event_planning" confirm="Are you sure you want to terminate this event?"/>
                         <button string="Set To Draft" name="button_draft" states="cancel,done" type="object" groups="event.group_event_manager,event.group_event_planning"/>
-                        <button string="Cancel Event" name="button_cancel" states="draft,confirm" type="object" groups="event.group_event_manager,event.group_event_planning"/>
-                        <button string="Set as Template" name="button_set_template" states="draft" type="object" groups="event.group_event_manager,event.group_event_planning"/>
+                        <button string="Cancel Event" name="button_cancel" states="draft,confirm" type="object" groups="event.group_event_manager,event.group_event_planning" confirm="Are you sure you want to cancel this event ? (all registrations and seances will be cancelled)"/>
+                        <button string="Set as Template" name="button_set_template" states="draft" type="object" groups="event.group_event_manager,event.group_event_planning" confirm="Are you sure you want to convert this event to a template event?"/>
                         <button string="New Event based on Template" name="button_duplicate_template" states="template" type="object" groups="event.group_event_manager,event.group_event_planning"/>
-                        <button string="Reset as Event" name="button_reset_template" states="template" type="object" groups="event.group_event_manager,event.group_event_planning"/>
+                        <button string="Reset as Event" name="button_reset_template" states="template" type="object" groups="event.group_event_manager,event.group_event_planning" confirm="Are you sure you want to reset this template event as a normal event?"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirm,done"/>
                     </header>
                     <sheet>
