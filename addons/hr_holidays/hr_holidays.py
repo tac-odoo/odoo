@@ -354,21 +354,7 @@ class hr_holidays(osv.osv):
             else:
                 self.write(cr, uid, [record.id], {'manager_id': manager})
             if record.holiday_type == 'employee' and record.type == 'remove':
-                meeting_obj = self.pool.get('crm.meeting')
-                meeting_vals = {
-                    'name': record.name or _('Leave Request'),
-                    'categ_ids': record.holiday_status_id.categ_id and [(6,0,[record.holiday_status_id.categ_id.id])] or [],
-                    'duration': record.number_of_days_temp * 8,
-                    'description': record.notes,
-                    'user_id': record.user_id.id,
-                    'date': record.date_from,
-                    'end_date': record.date_to,
-                    'date_deadline': record.date_to,
-                    'state': 'open',            # to block that meeting date in the calendar
-                }
-                meeting_id = meeting_obj.create(cr, uid, meeting_vals)
                 self._create_resource_leave(cr, uid, [record], context=context)
-                self.write(cr, uid, ids, {'meeting_id': meeting_id})
             elif record.holiday_type == 'category':
                 emp_ids = obj_emp.search(cr, uid, [('category_ids', 'child_of', [record.category_id.id])])
                 leave_ids = []
@@ -413,12 +399,7 @@ class hr_holidays(osv.osv):
         return True
 
     def holidays_cancel(self, cr, uid, ids, context=None):
-        meeting_obj = self.pool.get('crm.meeting')
         for record in self.browse(cr, uid, ids):
-            # Delete the meeting
-            if record.meeting_id:
-                meeting_obj.unlink(cr, uid, [record.meeting_id.id])
-
             # If a category that created several holidays, cancel all related
             wf_service = netsvc.LocalService("workflow")
             for request in record.linked_request_ids or []:
