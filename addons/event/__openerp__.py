@@ -40,7 +40,7 @@ Key Features
 """,
     'author': 'OpenERP SA',
     'depends': ['base_setup', 'board', 'email_template',
-                'resource', 'core_calendar', 'product',
+                'resource', 'base_calendar', 'product',
                 'base_status'],
     'data': [
         'security/event_security.xml',
