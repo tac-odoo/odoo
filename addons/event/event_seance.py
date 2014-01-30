@@ -667,6 +667,18 @@ class EventSeance(osv.Model):
             'Duration fields must be stictly positive'),
     ]
 
+    def _read_group_fill_results(self, cr, uid, domain, groupby, groupby_list, aggregated_fields,
+                                 read_group_result, read_group_order=None, context=None):
+        if isinstance(groupby, basestring) and groupby == 'module_id':
+            Module = self.pool.get('event.content.module')
+            module_ids = Module.search(cr, SUPERUSER_ID, [], context=context)
+            module_order = dict((_id, index) for index, _id in enumerate(module_ids, 1))
+            read_group_result.sort(key=lambda r: module_order[r['module_id'][0]] if r['module_id'] else None)
+        return super(EventSeance, self)._read_group_fill_results(cr, uid, domain, groupby, groupby_list,
+                                                                 aggregated_fields, read_group_result,
+                                                                 read_group_order=read_group_order,
+                                                                 context=context)
+
     def _read_group_module_id(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
         access_rights_uid = access_rights_uid or uid
         if context is None:
