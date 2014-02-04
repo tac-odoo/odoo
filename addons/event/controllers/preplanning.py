@@ -32,6 +32,30 @@ import openerp
 from openerp.addons.web.controllers.main import content_disposition
 
 
+class FitSheetWrapper(object):
+    """Try to fit columns to max size of any entry.
+    To use, wrap this around a worksheet returned from the
+    workbook's add_sheet method, like follows:
+
+        sheet = FitSheetWrapper(book.add_sheet(sheet_name))
+
+    The worksheet interface remains the same: this is a drop-in wrapper
+    for auto-sizing columns.
+    """
+    def __init__(self, sheet):
+        self.sheet = sheet
+        self.widths = dict()
+
+    def write(self, r, c, label='', *args, **kwargs):
+        self.sheet.write(r, c, label, *args, **kwargs)
+        width = 262.637 * len(unicode(label))
+        if width > self.widths.get(c, 0):
+            self.widths[c] = width
+            self.sheet.col(c).width = int(width)
+
+    def __getattr__(self, attr):
+        return getattr(self.sheet, attr)
+
 class EventExportPreplanning(openerp.addons.web.http.Controller):
     _cp_path = '/event/export/preplanning'
 
@@ -44,19 +68,23 @@ class EventExportPreplanning(openerp.addons.web.http.Controller):
 
     def preplanning_data(self, eventinfo, weeks, contents, matrix):
         workbook = xlwt.Workbook()
-        worksheet = workbook.add_sheet('Sheet 1')
+        worksheet = FitSheetWrapper(workbook.add_sheet('Sheet 1'))
         worksheet.panes_frozen = True
         worksheet.vert_split_pos = 5
         worksheet.horz_split_pos = 2
+
 
         header_left = xlwt.easyxf('font: bold on; align: horiz left; pattern: pattern solid, fore-color grey25')
         header_center = xlwt.easyxf('font: bold on; align: horiz center; pattern: pattern solid, fore-color grey25')
         header_rotated = xlwt.easyxf('font: bold on; align: rotation 45, horiz left; pattern: pattern solid, fore-color grey25')
         cell_center = xlwt.easyxf('align: horiz center')
         cell_center_hl = xlwt.easyxf('align: horiz center; pattern: pattern solid, fore-color gray25')
+        cell_no_week_slot = xlwt.easyxf('align: horiz center; pattern: pattern solid, fore-color purple_ega')
+        cell_value_hl = xlwt.easyxf('font: bold on; align: horiz center; pattern: pattern solid, fore-color yellow')
 
         worksheet.write_merge(0, 0, 0, 4, '', header_left)
         worksheet.row(0).height = 1100
+        colwidths = {}
         for i, week in enumerate(weeks, 5):
             worksheet.write(0, i, week['name'], header_rotated)
             worksheet.write(1, i, '%d/%d' % (week['slot_used'], week['slot_count']), header_center)
@@ -81,11 +109,16 @@ class EventExportPreplanning(openerp.addons.web.http.Controller):
             worksheet.write(j, 3, content['lang'], header_left)
             worksheet.write(j, 4, '%d / %d' % (content['slot_used'], content['slot_count']), header_center)
             row = matrix[content_id]
-            cell_style = cell_center
+            row_style = cell_center
             if ((j - 2) % 2 == 1):
-                cell_style = cell_center_hl
+                row_style = cell_center_hl
             for i, week in enumerate(weeks, 5):
+                cell_style = row_style
                 value = row[week['id']]['value']
+                if week['slot_count'] == 0:
+                    cell_style = cell_no_week_slot
+                elif value > 0:
+                    cell_style = cell_value_hl
                 worksheet.write(j, i, value, cell_style)
 
         fp = StringIO()
