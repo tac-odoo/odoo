@@ -1616,10 +1616,10 @@ class EventEvent(osv.Model):
                     ('state', '!=', 'cancelled'),
                 ]
                 last_seance_ids = Seance.search(cr, uid, current_seance_filter,
-                                                order='date_begin DESC', limit=1)
+                                                order='date_begin DESC, planned_week_date DESC', limit=1)
                 if last_seance_ids:
                     seance = Seance.browse(cr, uid, last_seance_ids[0], context=context)
-                    ed = max(ed, seance.date_end)
+                    ed = max(ed, seance.date_end or seance.planned_week_date)
 
             else:
                 ed = stored_values[event.id]
