@@ -48,7 +48,10 @@ class FitSheetWrapper(object):
 
     def write(self, r, c, label='', *args, **kwargs):
         self.sheet.write(r, c, label, *args, **kwargs)
-        width = 262.637 * len(unicode(label))
+        label_len = len(unicode(label))
+        if label_len < 2:
+            label_len = 2
+        width = 366 * label_len
         if width > self.widths.get(c, 0):
             self.widths[c] = width
             self.sheet.col(c).width = int(width)
@@ -73,14 +76,16 @@ class EventExportPreplanning(openerp.addons.web.http.Controller):
         worksheet.vert_split_pos = 5
         worksheet.horz_split_pos = 2
 
+        std_font = 'font: name Verdana, height 240;'
 
-        header_left = xlwt.easyxf('font: bold on; align: horiz left; pattern: pattern solid, fore-color grey25')
-        header_center = xlwt.easyxf('font: bold on; align: horiz center; pattern: pattern solid, fore-color grey25')
-        header_rotated = xlwt.easyxf('font: bold on; align: rotation 45, horiz left; pattern: pattern solid, fore-color grey25')
-        cell_center = xlwt.easyxf('align: horiz center')
-        cell_center_hl = xlwt.easyxf('align: horiz center; pattern: pattern solid, fore-color gray25')
-        cell_no_week_slot = xlwt.easyxf('align: horiz center; pattern: pattern solid, fore-color purple_ega')
-        cell_value_hl = xlwt.easyxf('font: bold on; align: horiz center; pattern: pattern solid, fore-color yellow')
+
+        header_left = xlwt.easyxf(std_font+'font: bold on; align: horiz left; pattern: pattern solid, fore-color grey25')
+        header_center = xlwt.easyxf(std_font+'font: bold on; align: horiz center; pattern: pattern solid, fore-color grey25')
+        header_rotated = xlwt.easyxf(std_font+'font: bold on; align: rotation 45, horiz left; pattern: pattern solid, fore-color grey25')
+        cell_center = xlwt.easyxf(std_font+'align: horiz center')
+        cell_center_hl = xlwt.easyxf(std_font+'align: horiz center; pattern: pattern solid, fore-color gray25')
+        cell_no_week_slot = xlwt.easyxf(std_font+'align: horiz center; pattern: pattern solid, fore-color purple_ega')
+        cell_value_hl = xlwt.easyxf(std_font+'font: bold on; align: horiz center; pattern: pattern solid, fore-color yellow')
 
         worksheet.write_merge(0, 0, 0, 4, '', header_left)
         worksheet.row(0).height = 1100
@@ -88,13 +93,9 @@ class EventExportPreplanning(openerp.addons.web.http.Controller):
         for i, week in enumerate(weeks, 5):
             worksheet.write(0, i, week['name'], header_rotated)
             worksheet.write(1, i, '%d/%d' % (week['slot_used'], week['slot_count']), header_center)
-            worksheet.col(i).width = 1400
+            worksheet.col(i).width = 366 * 5 + 400
 
-        worksheet.col(0).width = 4000
-        worksheet.col(1).width = 4000
-        worksheet.col(2).width = 6000
-        worksheet.col(3).width = 1000
-        worksheet.col(4).width = 1900
+        worksheet.row(1).height = 332
         worksheet.write(1, 0, 'Module', header_left)
         worksheet.write(1, 1, 'Subject', header_left)
         worksheet.write(1, 2, 'Content', header_left)
@@ -103,6 +104,7 @@ class EventExportPreplanning(openerp.addons.web.http.Controller):
 
         for j, content in enumerate(contents, 2):
             content_id = str(content['id'])
+            worksheet.row(j).height = 332
             worksheet.write(j, 0, content['module_name'], header_left)
             worksheet.write(j, 1, content['subject_name'], header_left),
             worksheet.write(j, 2, content['name'], header_left),
