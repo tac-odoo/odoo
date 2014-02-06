@@ -197,7 +197,7 @@
             <para style="terp_5f_default_5f_Right_5f_9">[[ formatLang(line.delay ) ]] days </para>
           </td>
           <td>
-            <para style="terp_5f_default_5f_Right_5f_9">[[ formatLang(line.price_unit ) ]]</para>
+            <para style="terp_5f_default_5f_Right_5f_9">[[ formatLang(line.price_unit * (1 + (line.markup or 0.0) / 100.0))]]</para>
           </td>
           <td>
             <para style="terp_5f_default_5f_Right_5f_9">[[ formatLang(line.price_subtotal, digits=get_digits(dp='Sale Price')) ]] [[ o.pricelist_id.currency_id.symbol ]]</para>

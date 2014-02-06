@@ -38,6 +38,22 @@
             </xpath>
         </field>
     </record>
-        
+
+    <record id="sparetech_l10n_in_purchase_order_inherit_form" model="ir.ui.view">
+            <field name="name">l10n_in_purchase.order.inherit.form1</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='date_approve']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='origin']" position="before">
+                    <field name="date_approve" string="Order Date" attrs="{'invisible': [('state','in',('draft','sent'))]}"/>
+                </xpath>
+                <xpath expr="//field[@name='date_order']" position="attributes">
+                    <attribute name="string">Quotation Date</attribute>
+                </xpath>
+            </field>
+        </record>
+
     </data>
 </openerp>
