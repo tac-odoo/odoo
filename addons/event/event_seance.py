@@ -219,7 +219,7 @@ class EventContent(osv.Model):
     def copy_data(self, cr, uid, id, default=None, context=None):
         if default is None:
             default = {}
-        default.update(seance_ids=None, event_ids=None)
+        default.update(seance_ids=[], event_ids=[])
         return super(EventContent, self).copy_data(cr, uid, id, default=default, context=context)
 
     def _default_slot_duration(self, cr, uid, context=None):
