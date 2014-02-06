@@ -65,6 +65,7 @@ This module provides the core of the OpenERP Web Client.
         "static/lib/jquery.ui.notify/css/ui.notify.css",
         "static/lib/jquery.tipsy/tipsy.css",
         "static/lib/jquery.textext/jquery.textext.css",
+        "static/lib/fontawesome/css/font-awesome.css",
         "static/src/css/base.css",
         "static/src/css/data_export.css",
         "static/lib/cleditor/jquery.cleditor.css",

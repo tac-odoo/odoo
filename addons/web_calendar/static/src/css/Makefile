@@ -1,3 +1,3 @@
-web_calendar.css: web_calendar.sass
-	sass --trace -t expended web_calendar.sass web_calendar.css
+web_fullcalendar.css: web_fullcalendar.sass
+	sass --trace -t expanded web_fullcalendar.sass web_fullcalendar.css
 
