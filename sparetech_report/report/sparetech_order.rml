@@ -259,7 +259,7 @@
       </tr>
       <tr>
         <td>
-          <para style="P12">CST Rate:</para>
+          <para style="P12">Tax Rate:</para>
         </td>
         <td>
           <para style="P11">[[o.shop_id.company_id.country_id.code != 'AE' and o.order_line and o.order_line[0] and o.order_line[0].tax_id and o.order_line[0].tax_id[0].name or removeParentNode('tr')]]</para>
@@ -303,6 +303,14 @@
         </td>
         <td>
           <para style="P11">[[ formatLang(o.amount_tax , digits=get_digits(dp='Sale Price')) ]] [[ o.pricelist_id.currency_id. Symbol ]] [[o.shop_id.company_id.country_id.code == 'IN' removeParentNode('tr')]]</para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <para style="P12">Taxes :</para>
+        </td>
+        <td>
+          <para style="P11">[[ formatLang(o.amount_tax, dp='Account', currency_obj=o.pricelist_id.currency_id) ]]</para>
         </td>
       </tr>
       <tr>
