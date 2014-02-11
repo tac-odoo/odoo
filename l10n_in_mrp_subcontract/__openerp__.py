@@ -28,7 +28,7 @@
     ''',
     'author': 'OpenERP SA',
     'depends': ['base','sale_stock','mrp_jit','mrp_operations'],
-    'data': ['mrp_view.xml','purchase_view.xml','product_view.xml', 'stock_view.xml','invoice_view.xml',
+    'data': ['mrp_view.xml','purchase_view.xml','product_view.xml', 'stock_view.xml','invoice_view.xml','sale_view.xml',
              'wizard/process_qty_to_reject_view.xml','wizard/process_qty_to_finished_view.xml',
              'wizard/all_in_once_qty_to_finished_view.xml','wizard/all_in_once_qty_to_cancelled_view.xml',
              'wizard/reallocate_rejected_move_view.xml','wizard/generate_service_order_view.xml',

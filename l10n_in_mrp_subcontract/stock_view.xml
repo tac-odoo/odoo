@@ -21,6 +21,33 @@
 					<field name="workorder_id" readonly="1"
 						attrs="{'invisible':[('workorder_id', '=', False)]}" />
 				</field>
+				<field name="date" position="after">
+					<field name="ex_work_date" required="1"
+						on_change="onchange_shipping_time(ex_work_date, shipping_time)" />
+					<field name="shipping_time" required="1"
+						on_change="onchange_shipping_time(ex_work_date, shipping_time)" />
+					<field name="destination_date" required="1" />
+				</field>
+				<field name="min_date" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</field>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="sale_picking_date_commitment">
+			<field name="name">stock.picking.sale_picking.date.commitment.tree
+			</field>
+			<field name="model">stock.picking.out</field>
+			<field name="inherit_id" ref="stock.view_picking_out_tree" />
+			<field name="arch" type="xml">
+				<field name="date" position="after">
+					<field name="ex_work_date" />
+					<field name="shipping_time" />
+					<field name="destination_date" />
+				</field>
+				<field name="min_date" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</field>
 			</field>
 		</record>
 
@@ -32,7 +59,7 @@
 				<field name="date" position="after">
 					<field name="pass_to_qc" readonly="1"
 						attrs="{'invisible':[('pass_to_qc', '=', False)]}" />
-						<!-- field name="total_moves_to_xloc"/ -->
+					<!-- field name="total_moves_to_xloc"/ -->
 				</field>
 
 				<field name="move_lines" position="attributes">
@@ -122,23 +149,24 @@
 					</attribute>
 				</field>
 				<button name="%(stock.move_scrap)d" position="attributes">
-					<attribute name="attrs">{'invisible':[('is_qc','=', True)]}</attribute>
+					<attribute name="attrs">{'invisible':[('is_qc','=', True)]}
+					</attribute>
 				</button>
 			</field>
 		</record>
 
-        <record id="view_move_form_removebuttons" model="ir.ui.view">
-            <field name="name">stock.move.form.removebuttons</field>
-            <field name="model">stock.move</field>
-            <field name="inherit_id" ref="stock.view_move_form" />
-            <field name="arch" type="xml">
-                <button name="action_confirm" position="replace"/>
-                <button string="Process Partially" position="replace"/>
-                <button name="action_done" position="replace"/>
-                <button name="force_assign" position="replace"/>
-                <button name="action_cancel" position="replace"/>
-            </field>
-        </record>
+		<record id="view_move_form_removebuttons" model="ir.ui.view">
+			<field name="name">stock.move.form.removebuttons</field>
+			<field name="model">stock.move</field>
+			<field name="inherit_id" ref="stock.view_move_form" />
+			<field name="arch" type="xml">
+				<button name="action_confirm" position="replace" />
+				<button string="Process Partially" position="replace" />
+				<button name="action_done" position="replace" />
+				<button name="force_assign" position="replace" />
+				<button name="action_cancel" position="replace" />
+			</field>
+		</record>
 
 	</data>
 </openerp>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-	<data>
-
+	<data noupdate="1">
 
         <record id="workorders_form_moves_lines2" model="ir.ui.view">
             <field name="name">mrp.production.workcenter.tree.buttons</field>
@@ -26,7 +25,8 @@
                 </xpath>
             </field>
         </record>
-
+   </data>
+   <data>
 		<record id="workorders_form_moves_lines" model="ir.ui.view">
 			<field name="name">mrp.production.form.inherit</field>
 			<field name="model">mrp.production</field>

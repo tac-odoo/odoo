@@ -21,6 +21,8 @@
 
 from openerp.osv import osv, fields
 import openerp.addons.decimal_precision as dp
+from dateutil.relativedelta import relativedelta
+from datetime import datetime
 
 class stock_move(osv.osv):
     """
@@ -203,7 +205,22 @@ class stock_picking(osv.osv):
                 'stock.move': (_get_picking, ['qc_completed'], 10),
             },
             ),
+
+        #Dates Commitments
+        'ex_work_date': fields.date('Ex.work Delivery Date', help = "Date should be consider as date of Goods ready for delivery"),
+        'shipping_time':  fields.integer('Shipping Time(In Days)'),
+        'destination_date': fields.date('Destination  Delivery Date', help="Reaching date of delivery goods(Ex.work Delivery Date + Shipping Time)"),
+
     }
+
+    def onchange_shipping_time(self, cr, uid, ids, ex_work_date, shipping_time, context=None):
+        return {'value':{'destination_date':(datetime.strptime(ex_work_date, '%Y-%m-%d') + relativedelta(days=shipping_time)).strftime('%Y-%m-%d')}}
+
+    _defaults = {
+        'ex_work_date': fields.date.context_today,
+        'shipping_time': 7,
+    }
+
 stock_picking()
 
 class stock_picking_out(osv.osv):
@@ -211,7 +228,20 @@ class stock_picking_out(osv.osv):
     _columns = {
         'service_order': fields.boolean('Service Order'),
         'move_lines': fields.one2many('stock.move', 'picking_id', 'Internal Moves', readonly=True, states={'draft': [('readonly', False)]}),
-        'workorder_id':  fields.many2one('mrp.production.workcenter.line', 'Work-Order')
+        'workorder_id':  fields.many2one('mrp.production.workcenter.line', 'Work-Order'),
+
+        #Dates Commitments
+        'ex_work_date': fields.date('Ex.work Delivery Date', help = "Date should be consider as date of Goods ready for delivery"),
+        'shipping_time':  fields.integer('Shipping Time(In Days)'),
+        'destination_date': fields.date('Destination  Delivery Date', help="Reaching date of delivery goods(Ex.work Delivery Date + Shipping Time)"),
+    }
+
+    def onchange_shipping_time(self, cr, uid, ids, ex_work_date, shipping_time, context=None):
+        return {'value':{'destination_date':(datetime.strptime(ex_work_date, '%Y-%m-%d') + relativedelta(days=shipping_time)).strftime('%Y-%m-%d')}}
+
+    _defaults = {
+        'ex_work_date': fields.date.context_today,
+        'shipping_time': 7,
     }
 stock_picking_out()
 
@@ -268,5 +298,4 @@ class stock_picking_in(osv.osv):
         
     }
 stock_picking_in()
-
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

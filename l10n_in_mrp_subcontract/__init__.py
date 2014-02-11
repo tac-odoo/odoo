@@ -26,5 +26,6 @@ import stock
 import purchase
 import partner
 import invoice
+import sale
 import wizard
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
