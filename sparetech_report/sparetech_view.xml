@@ -10,6 +10,11 @@
                 name="purchase.quotation" rml="sparetech_report/report/request_quotation.rml"
                 string="Request for Quotation"/>
 
+        <report auto="False" id="account.account_invoices" model="account.invoice"
+            name="account.invoice" rml="sparetech_report/report/account_print_invoice.rml"
+            string="Invoices" attachment="(object.state in ('open','paid')) and ('INV'+(object.number or '').replace('/','')+'.pdf')"
+            attachment_use="True" usage="default"/>
+            
         <record id='view_currency_form' model='ir.ui.view'>
             <field name="name">product.product.currency.form</field>
             <field name="model">product.product</field>
