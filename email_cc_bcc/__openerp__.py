@@ -19,7 +19,25 @@
 #
 ##############################################################################
 
-import sale_order
-import request_quotation
-
+{
+    'name': 'Email CC BCC',
+    'version': '1.0',
+    'category': 'Social Network',
+    'sequence': 144,
+    'summary': 'Social Network',
+    'description': """
+    Add CC and BCC on Compose Email wizard
+    """,
+    'author': 'OpenERP SA',
+    'website': 'http://www.openerp.com',
+    'images': [],
+    'depends': ['mail'],
+    'data': ['email_cc_bcc_view.xml',
+    ],
+    'demo': [],
+    'test': [],
+    'installable': True,
+    'auto_install': False,
+    'application': False,
+}
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
