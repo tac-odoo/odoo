@@ -213,8 +213,10 @@ class CoreCalendarResource(osv.TransientModel):
                 ('state', '!=', 'cancel'),
                 '|', '&', ('date_start', '>=', date_from.strftime(DT_FMT)),
                           ('date_start', '<=', date_to.strftime(DT_FMT)),
-                     '&', ('date_end', '>=', date_from.strftime(DT_FMT)),
-                          ('date_end', '<=', date_to.strftime(DT_FMT))
+                '|', '&', ('date_end', '>=', date_from.strftime(DT_FMT)),
+                          ('date_end', '<=', date_to.strftime(DT_FMT)),
+                     '&', ('date_start', '<=', date_from.strftime(DT_FMT)),
+                          ('date_end', '>=', date_to.strftime(DT_FMT))
             ]
             if usage is not None:
                 event_domain = ['&', ('calendar_id.usage', '=', usage)] + event_domain
@@ -247,10 +249,9 @@ class CoreCalendarResource(osv.TransientModel):
             # print("[%04d - %s :: %d] FreeBusy %s => %s" % (i, record._name, record.id, fb_from, fb_to,))
             sdate = fb_from
             if fb_duration:
-                tz = record.tz or 'UTC'
-                s = Timeline.datetime_tz_convert(fb_from, 'UTC', tz)
+                s = datetime.strptime(fb_from, DT_FMT)
                 s += timedelta(hours=fb_duration)
-                edate = Timeline.datetime_tz_convert(s, tz, 'UTC').strftime(DT_FMT)
+                edate = s.strftime(DT_FMT)
             else:
                 edate = fb_to
             timeline = self._get_resource_timeline(cr, uid, record.id,
