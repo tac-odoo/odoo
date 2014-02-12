@@ -376,6 +376,8 @@ class Timeline(object):
             elif periods:
                 # find min end date
                 pend = min(p.stop for p in periods)
+                if pend > end:
+                    pend = end.replace()
                 pstatus = max(p.status for p in periods)
                 players = reduce(operator.or_, (p.layers for p in periods))
                 pinfos = {}
