@@ -116,11 +116,12 @@ class indent_indent(osv.Model):
 
     def _get_picking_ids(self, cr, uid, ids, name, args, context=None):
         res = {}
-        for sale in self.browse(cr, uid, ids, context=context):
-            if not sale.procurement_group_id:
-                res[sale.id] = []
-                continue
-            res[sale.id] = self.pool.get('stock.picking').search(cr, uid, [('group_id', '=', sale.procurement_group_id.id)], context=context)
+        for indent_id in ids:
+            picking_ids = set()
+            move_ids = self.pool.get('stock.move').search(cr, uid, [('indent_id','=', indent_id)] , context=context)
+            for move in self.pool.get('stock.move').browse(cr, uid, move_ids, context=context):
+                picking_ids.add(move.picking_id.id)
+            res[indent_id] = list(picking_ids)
         return res
 
     _columns = {
@@ -234,7 +235,8 @@ class indent_indent(osv.Model):
             'state': 'draft',
             'approver_id':False,
             'approve_date':False,
-            'required_date':required_date
+            'required_date':required_date,
+            'procurement_group_id': False,
         })
         return super(indent_indent, self).copy(cr, uid, id, default, context=context)
 
@@ -287,7 +289,6 @@ class indent_indent(osv.Model):
             'product_uos': (line.product_uos and line.product_uos.id)\
                     or line.product_uom.id,
             'location_id': location_id,
-            #'procure_method': line.product_id.procure_method,
             'group_id': group_id,
             'move_id': move_id,
             'note': line.name,
@@ -297,12 +298,11 @@ class indent_indent(osv.Model):
             res = dict(res, company_id = indent.company_id.id)
         return res
 
-    def _prepare_indent_line_move(self, cr, uid, indent, line, picking_id, date_planned, group_id, context=None):
+    def _prepare_indent_line_move(self, cr, uid, indent, line, date_planned, group_id, context=None):
         location_id = indent.warehouse_id.lot_stock_id.id
         res = {
             'name': line.name,
             'indent_id':indent.id,
-            'picking_id': picking_id,
             'product_id': line.product_id.id,
             'date': date_planned,
             'date_expected': date_planned,
@@ -364,10 +364,12 @@ class indent_indent(osv.Model):
                 move_id = False
 #                if not picking_id:
 #                    picking_id = picking_obj.create(cr, uid, self._prepare_indent_picking(cr, uid, indent, context=context))
-                move_id = move_obj.create(cr, uid, self._prepare_indent_line_move(cr, uid, indent, line, picking_id, date_planned, group_id, context=context), context=context)
+                move_id = move_obj.create(cr, uid, self._prepare_indent_line_move(cr, uid, indent, line, date_planned, group_id, context=context), context=context)
                 todo_moves.append(move_id)
-                proc_id = procurement_obj.create(cr, uid, self._prepare_indent_line_procurement(cr, uid, indent, line, move_id, date_planned, group_id, context=context))
-                proc_ids.append(proc_id)
+
+                if line.type == 'make_to_order':
+                    proc_id = procurement_obj.create(cr, uid, self._prepare_indent_line_procurement(cr, uid, indent, line, move_id, date_planned, group_id, context=context))
+                    proc_ids.append(proc_id)
 
 #        wf_service = netsvc.LocalService("workflow")
 #        if picking_id:
@@ -380,6 +382,7 @@ class indent_indent(osv.Model):
         move_obj.force_assign(cr, uid, todo_moves)
 
         procurement_obj.run(cr, uid, proc_ids, context=context)
+
 
     def _check_gatepass_flow(self, cr, uid, indent, context):
         if indent.type == 'existing':
@@ -394,16 +397,16 @@ class indent_indent(osv.Model):
 
         location_id = indent.warehouse_id.lot_stock_id.id
 
-        picking_id = False
+#        picking_id = False
         for line in indent.product_lines:
             date_planned = self._get_date_planned(cr, uid, indent, line, indent.indent_date, context=context)
 
             if line.product_id:
                 move_id = False
-                if not picking_id:
-                    picking_id = picking_obj.create(cr, uid, self._prepare_indent_picking(cr, uid, indent, context=context))
+#                if not picking_id:
+#                    picking_id = picking_obj.create(cr, uid, self._prepare_indent_picking(cr, uid, indent, context=context))
 
-                res = self._prepare_indent_line_move(cr, uid, indent, line, picking_id, date_planned, context=context)
+                res = self._prepare_indent_line_move(cr, uid, indent, line, date_planned, context=context)
                 res.update({
                     'location_id': indent.department_id.id,
                     'location_dest_id': location_id
@@ -442,9 +445,9 @@ class indent_indent(osv.Model):
             self.create_transfer_move(cr, uid, indent, False, context)
 
         if indent.product_lines:
-            picking_id = self._create_pickings_and_procurements(cr, uid, indent, indent.product_lines, None, context=context)
+            self._create_pickings_and_procurements(cr, uid, indent, indent.product_lines, None, context=context)
 
-        self.write(cr, uid, ids, {'picking_id': picking_id, 'state' : 'inprogress', 'message_follower_ids': [(4, indent.approver_id and indent.approver_id.partner_id and indent.approver_id.partner_id.id)]}, context=context)
+        self.write(cr, uid, ids, {'state' : 'inprogress', 'message_follower_ids': [(4, indent.approver_id and indent.approver_id.partner_id and indent.approver_id.partner_id.id)]}, context=context)
 
     def check_reject(self, cr, uid, ids):
         res = {
