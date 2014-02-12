@@ -85,15 +85,11 @@ Enables expand and collapse in List Group By
 """,
     'depends' : ['base'],
     'data' : [
-    ],
-    'update_xml' : [
         'res_config_view.xml',
         'l10n_in_base_groups.xml'
     ],
-
     'demo': [
     ],
-
     'installable' : True,
     'application' : True,
 }
