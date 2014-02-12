@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
 	<data>
-	
+
         <!-- Product configuration for repairable product -->
         <record id='view_product_container_form' model='ir.ui.view'>
             <field name="name">product.product.container.form</field>
             <field name="model">product.product</field>
-            <field name="inherit_id" ref="product.product_normal_form_view" />
+            <field name="inherit_id" ref="product.product_template_form_view" />
             <field name="arch" type="xml">
                 <field name="list_price" position="after">
                     <field name="repair_id" attrs="{'invisible':[('type','!=','service')]}" />
@@ -81,12 +81,12 @@
 						<button name="indent_inprogress" string="Approve" states="waiting_approval"
 							class="oe_highlight" />
 						<button name="indent_reject" string="Reject" states="waiting_approval" />
-						
+
 						<button name="action_deliver_products" string="Transfer for Repair"
                             type="object" class="oe_highlight" attrs="{'invisible': ['|', ('type','=','new'), ('state','in',['draft','confirm', 'waiting_approval','received'])]}"/>
 						<button name="action_receive_products" string="Issue Product(s)"
 							states="inprogress" type="object" class="oe_highlight" />
-						
+
 						<field name="state" widget="statusbar"
 							statusbar_visible="draft,waiting_approval,inprogress,received"
 							statusbar_colors='{"reject":"red"}' />
@@ -137,7 +137,7 @@
 										<group>
 											<group>
 												<field name="product_id" groups="base.group_user"
-													on_change="onchange_product_id(product_id, product_uom_qty, product_uom, price_unit, qty_available, virtual_available, 
+													on_change="onchange_product_id(product_id, product_uom_qty, product_uom, price_unit, qty_available, virtual_available,
             name, parent.analytic_account_id, parent.type)" />
 												<field name="original_product_id" attrs="{'invisible':[('indent_type','=','new')], 'required':[('indent_type','=','existing')]}"/>
 												<label for="product_uom_qty" />
@@ -145,25 +145,25 @@
 													<field name="product_uom_qty" class="oe_inline" />
 													<field name="product_uom" groups="product.group_uom"
 														class="oe_inline oe_no_button"
-														on_change="onchange_product_id(product_id, 
-            product_uom_qty, product_uom, price_unit, qty_available, virtual_available, 
+														on_change="onchange_product_id(product_id,
+            product_uom_qty, product_uom, price_unit, qty_available, virtual_available,
             name, parent.analytic_account_id, parent.type)" />
 												</div>
 												<field name="price_unit"
-													on_change="onchange_product_id(product_id, product_uom_qty, product_uom, 
-            price_unit, qty_available, virtual_available, name, parent.analytic_account_id, 
+													on_change="onchange_product_id(product_id, product_uom_qty, product_uom,
+            price_unit, qty_available, virtual_available, name, parent.analytic_account_id,
             parent.type)" />
 											</group>
 											<group>
 												<field name="type" />
 												<field name="indent_type" invisible="1"/>
 												<field name="qty_available"
-													on_change="onchange_product_id(product_id, 
-            product_uom_qty, product_uom, price_unit, qty_available, virtual_available, 
+													on_change="onchange_product_id(product_id,
+            product_uom_qty, product_uom, price_unit, qty_available, virtual_available,
             name, parent.analytic_account_id, parent.type)" />
 												<field name="virtual_available"
-													on_change="onchange_product_id(product_id, product_uom_qty, product_uom, 
-            price_unit, qty_available, virtual_available, name, parent.analytic_account_id, 
+													on_change="onchange_product_id(product_id, product_uom_qty, product_uom,
+            price_unit, qty_available, virtual_available, name, parent.analytic_account_id,
             parent.type)" />
 												<field name="delay" />
 											</group>
@@ -204,6 +204,7 @@
 									<group>
 										<field name="move_type" />
 										<field name="warehouse_id" />
+										<field name="procurement_group_id"/>
 									</group>
 									<group>
 										<field name="manager_id" readonly="1" />
@@ -266,7 +267,7 @@
 					<filter string="Received" name="received" domain="[('state','=','received')]" />
 					<filter string="Rejected" name="reject"
 						domain="[('state','=','reject'),('active','=',False)]" />
-						
+
 					<filter string="My Indents" name="draft" domain="[('indentor_id','=',uid)]" />
 
 					<group expand="0" string="Group By...">
@@ -299,9 +300,9 @@
 		<!-- Indent Menu -->
 		<menuitem name="Indents" parent="stock.menu_stock_root" id="menu_indent_indent_main"
 			sequence="1" />
-			
+
 		<menuitem id="menu_reporting_indent" name="Indents" parent="base.menu_reporting" sequence="10"/>
-		
+
 		<menuitem action="action_indent_indent" name="Indents"
 			parent="menu_indent_indent_main" id="menu_indent_indent" sequence="1" />
 		<menuitem id="stock.menu_stock_warehouse_mgmt" name="Receive/Deliver By Orders"
@@ -310,7 +311,7 @@
 			parent="stock.menu_stock_root" sequence="3" />
 
 		<!-- Document Authority Menu -->
-		<menuitem name="Indent 
+		<menuitem name="Indent
             Management" parent="stock.menu_stock_configuration"
 			id="menu_indent_configuration" sequence="41" />
 	</data>

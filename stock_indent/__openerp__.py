@@ -55,23 +55,20 @@ A purchase order is generated for the service taken for the supplier who repairs
 """,
     'depends' : ['l10n_in_base', 'stock', 'purchase', 'product_container'],
     'data' : [
-        "stock_indent_data.xml",
-        "stock_indent_sequence.xml"
-    ],
-    'update_xml' : [
         'stock_indent_view.xml',
         'stock_indent_workflow.xml',
         'stock_workflow_change.xml',
+        'stock_indent_data.xml',
+        'stock_indent_sequence.xml',
         'stock_indent_report.xml',
         'report/stock_indent_analysis_report_view.xml'
     ],
-
     'demo': [
-        "stock_indent_demo.xml"
+        'stock_indent_demo.xml'
     ],
-
     'installable' : True,
     'application' : True,
+    'auto_install' : False
 }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

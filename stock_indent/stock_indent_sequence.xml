@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-    <data noupdate="1">
-    
+    <data noupdate="0">
+
         <!-- Indent Statement Sequences -->
         <record id="sequence_stock_indent_type" model="ir.sequence.type">
             <field name="name">Indent</field>
             <field name="code">stock.indent</field>
         </record>
-        
+
         <!-- Indent Sequences -->
         <record id="sequence_stock_indent" model="ir.sequence">
             <field name="name">Indent</field>
@@ -15,6 +15,6 @@
             <field name="prefix">%(year)s/</field>
             <field name="code">stock.indent</field>
         </record>
-        
+
     </data>
-</openerp>       
+</openerp>

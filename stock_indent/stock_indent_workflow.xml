@@ -26,8 +26,7 @@
 		<record model="workflow.activity" id="act_inprogress">
 			<field name="wkf_id" ref="wkf_indent" />
 			<field name="name">activity.inprogress</field>
-			<field name="kind">subflow</field>
-			<field name="subflow_id" search="[('name','=','stock.picking.basic')]" />
+			<field name="kind">function</field>
 			<field name="action">action_picking_create()</field>
 		</record>
 
@@ -36,7 +35,7 @@
 			<field name="name">activity.received</field>
 			<field name="flow_stop">True</field>
 			<field name="kind">function</field>
-			<field name="action">write({'state': 'received'})</field>
+			<field name="action">indent_received()</field>
 		</record>
 
 		<record model="workflow.activity" id="act_reject">
@@ -78,13 +77,17 @@
 		<record model="workflow.transition" id="trans_inprogress_reject">
 			<field name="act_from" ref="act_inprogress" />
 			<field name="act_to" ref="act_reject" />
-			<field name="signal">subflow.cancel</field>
+			<field name="trigger_model">stock.move</field>
+            <field name="trigger_expr_id">move_lines_get()</field>
+            <field name="condition">test_moves_reject()</field>
 		</record>
 
 		<record model="workflow.transition" id="trans_inprogress_received">
 			<field name="act_from" ref="act_inprogress" />
 			<field name="act_to" ref="act_received" />
-			<field name="signal">subflow.done</field>
+			<field name="trigger_model">stock.move</field>
+            <field name="trigger_expr_id">move_lines_get()</field>
+            <field name="condition">test_moves_done()</field>
 		</record>
 
 	</data>
