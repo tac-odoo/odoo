@@ -33,16 +33,16 @@ class product_product(osv.Model):
         'currency_price': fields.float('Price', required=True),
         'currency_id': fields.many2one('res.currency', 'Currency'),
     }
-    def onchange_currency_price(self, cr, uid, ids, currency_price=False,currency=False):
+    def update_currency_price(self, cr, uid, ids, context):
         result = {}
         currency_pool = self.pool.get('res.currency')
-        if currency:
-            currency = currency_pool.browse(cr, uid, currency)
-            prd = self.browse(cr, uid, ids[0])
-            new_price = currency_pool.compute(cr, uid, currency.id, prd.company_id.currency_id.id, currency_price)
-            result['standard_price'] = new_price
-        print "result", result
-        return {'value': result}
+        prd = self.browse(cr, uid, ids)[0]
+        new_price = prd.currency_price
+        if prd.currency_id:
+            new_price = currency_pool.compute(cr, uid, prd.currency_id.id, prd.company_id.currency_id.id, prd.currency_price)
+            
+        self.write(cr, uid, [prd.id], {'standard_price':new_price})
+        return True
 
 product_product()
 

@@ -20,12 +20,16 @@
 ##############################################################################
 
 import re
+import base64
+import logging
+
 from openerp import tools
 from openerp import SUPERUSER_ID
-from openerp.osv import osv
-from openerp.osv import fields
-from openerp.tools.safe_eval import safe_eval as eval
+from openerp.osv import fields, osv
+from openerp.osv.orm import except_orm
 from openerp.tools.translate import _
+
+_logger = logging.getLogger(__name__)
 
 class mail_compose_message(osv.TransientModel):
     _inherit = 'mail.compose.message'
@@ -188,7 +192,7 @@ mail_notification()
 
 class mail_mail(osv.Model):
     _inherit = 'mail.mail'
-    __columns = {
+    _columns = {
         'email_bcc': fields.char('Bcc', help='Black Carbon copy message recipients'),
     }
     
