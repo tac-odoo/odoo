@@ -23,15 +23,115 @@ import netsvc
 
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
+from openerp import SUPERUSER_ID
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+class purchase_expected_date(osv.osv):
+    _name = 'purchase.expected.date'
+    _columns = {
+        'product_id': fields.many2one('product.product', 'Product'),
+        'production_id':  fields.many2one('mrp.production', 'Production Order'),
+        'order_id':  fields.many2one('purchase.order', 'Purchase Order'),
+        'production_scheduled_date':  fields.date('Production Scheduled Date'),
+        'purchase_lead_time':  fields.integer('Product Purchase Lead Time'),
+        'company_po_lead_time':  fields.integer('Company Purchase Lead Time'),
+        'po_expected_date':  fields.date('Purchase Expected Date')
+    }
+
+purchase_expected_date()
 
 class purchase_order(osv.osv):
     _inherit = 'purchase.order'
+
+    def _make_expected_date_data(self, cr, uid, data, order_id, company_id , context=None):
+        """ create product wise dictionary"""
+        total_list = []
+        for rec in data:
+            if rec.get('product_id') and rec.get('production_id') and rec.get('move_id'):
+                prod_obj = self.pool.get('mrp.production')
+                product_obj = self.pool.get('product.product')
+                comp_obj = self.pool.get('res.company')
+                date_planned = prod_obj.browse(cr, uid, rec['production_id']).date_planned
+                po_lead_time = product_obj.browse(cr, uid, rec['product_id']).seller_delay
+                comp_lead_time = comp_obj.browse(cr, uid, company_id).po_lead
+                scheduled_date = datetime.strptime(date_planned, DEFAULT_SERVER_DATETIME_FORMAT)
+                po_expected_date = (scheduled_date - relativedelta(days=(int(po_lead_time) + int(comp_lead_time))) )
+                total_list.append(
+                                    {
+                                    'product_id': int(rec['product_id']),
+                                    'production_id': int(rec['production_id']),
+                                    'production_scheduled_date': scheduled_date.strftime('%Y-%m-%d'),
+                                    'purchase_lead_time':  int(po_lead_time),
+                                    'po_expected_date': po_expected_date.strftime('%Y-%m-%d'),
+                                    'company_po_lead_time': int(comp_lead_time),
+                                    'order_id':order_id
+                                     }
+                                  )
+        return total_list
+
+    def _get_expected_dates_by_products(self, cr, uid, ids,context=None):
+        """ Expected date Products wise"""
+        res = {}
+        context = context or {}
+        if not ids: return res
+        po_expd_obj = self.pool.get('purchase.expected.date')
+
+        for order in self.browse(cr, uid, ids, context=context):
+            unlink_ids = [x.id for x in order.expected_date_by_production_order]
+            po_expd_obj.unlink(cr, SUPERUSER_ID, unlink_ids, context=context)
+
+        for order in self.browse(cr, uid, ids, context=context):
+            if order.state not in ('draft'):
+                return res
+            produced_p_ids = [] 
+            for line in order.order_line:
+                if not line.product_id: pass
+                if line.product_id and line.product_id.supply_method <> 'produce': pass
+                produced_p_ids.append(line.product_id.id)
+
+            produced_p_ids = list(set(produced_p_ids))
+            if produced_p_ids:
+                cr.execute("""
+                            SELECT sm.product_id,mpm.production_id,mpm.move_id from mrp_production_move_ids mpm 
+                            LEFT JOIN mrp_production mp on (mp.id = mpm.production_id) 
+                            LEFT JOIN stock_move sm on (sm.id = mpm.move_id) 
+                            WHERE sm.product_id IN %s 
+                            AND sm.state not in ('done','cancel') 
+                            AND mp.state in ('confirmed') 
+                """, (tuple(produced_p_ids),))
+
+                data = cr.dictfetchall()
+                line_data = self._make_expected_date_data(cr, uid, data, order.id, order.company_id and order.company_id.id or 1)
+            #create date lines on order
+            for c_line in line_data:
+                po_expd_obj.create(cr, uid, c_line,context=context)
+        return True
+
     _columns = {
         'service_order': fields.boolean('Service Order'),
         'workorder_id':  fields.many2one('mrp.production.workcenter.line', 'Work-Order'),
-        'service_delivery_order':  fields.many2one('stock.picking', 'Service Delivery Order')
+        'service_delivery_order':  fields.many2one('stock.picking', 'Service Delivery Order'),
+        'expected_date_by_production_order': fields.one2many('purchase.expected.date', 'order_id',string='Expected Dates By Production Order',readonly=True)
     }
+
+    def create(self, cr, uid, vals, context=None):
+        """ To update Expected Date lines"""
+        context = context or {}
+        new_id = super(purchase_order,self).create(cr, uid, vals,context=context)
+        self._get_expected_dates_by_products(cr, uid, [new_id], context=context)
+        return new_id
+
+    def write(self, cr, uid, ids, vals, context=None):
+        """ To update Expected Date lines"""
+        context = context or {}
+        res = super(purchase_order,self).write(cr, uid, ids, vals,context=context)
+        if isinstance(ids,int):
+            ids = [ids]
+        if vals.get('order_line') or vals.get('state'):
+            self._get_expected_dates_by_products(cr, uid, ids, context=context)
+        return res
 
     def copy(self, cr, uid, id, default=None, context=None):
         if not default:

@@ -19,25 +19,21 @@
 #
 ##############################################################################
 
-{
-    'name': 'Indian Manufacturing Subcontract',
-    'version': '1.0',
-    'category' : 'Indian Localization',
-    'description':'''
-		Extend the flow of manufacturing process
-    ''',
-    'author': 'OpenERP SA',
-    'depends': ['base','sale_stock','mrp_jit','mrp_operations'],
-    'data': ['wizard/change_receiveddate_inward_view.xml','wizard/change_qcapproved_date_view.xml',
-             'mrp_view.xml','purchase_view.xml','product_view.xml', 'stock_view.xml','invoice_view.xml','sale_view.xml',
-             'wizard/process_qty_to_reject_view.xml','wizard/process_qty_to_finished_view.xml',
-             'wizard/all_in_once_qty_to_finished_view.xml','wizard/all_in_once_qty_to_cancelled_view.xml',
-             'wizard/reallocate_rejected_move_view.xml','wizard/generate_service_order_view.xml',
-             'wizard/qty_to_consume_view.xml','wizard/add_rawmaterial_to_consume_view.xml',
-             'wizard/consignment_variation_po_view.xml','wizard/qc2xlocation_view.xml',
-             ],
-    'demo': [],
-    'installable': True,
-}
+from openerp.osv import fields, osv
+from openerp.tools.translate import _
+import openerp.addons.decimal_precision as dp
+
+class split_in_production_lot(osv.osv_memory):
+    _inherit = "stock.move.split"
+
+    def split_lot(self, cr, uid, ids, context=None):
+        """
+        Process
+            -Overwrite context because copy moves generate is_qc = False
+        """
+        context = context or {}
+        print 'CCCCCCCCCCCCCCCCCCCCCccc'
+        context.update({'split_move':True})
+        return super(split_in_production_lot, self).split_lot(cr, uid, ids, context=context)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

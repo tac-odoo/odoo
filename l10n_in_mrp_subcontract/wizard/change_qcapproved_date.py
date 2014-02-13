@@ -18,26 +18,30 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from openerp.osv import fields, osv
+import openerp.addons.decimal_precision as dp
 
-{
-    'name': 'Indian Manufacturing Subcontract',
-    'version': '1.0',
-    'category' : 'Indian Localization',
-    'description':'''
-		Extend the flow of manufacturing process
-    ''',
-    'author': 'OpenERP SA',
-    'depends': ['base','sale_stock','mrp_jit','mrp_operations'],
-    'data': ['wizard/change_receiveddate_inward_view.xml','wizard/change_qcapproved_date_view.xml',
-             'mrp_view.xml','purchase_view.xml','product_view.xml', 'stock_view.xml','invoice_view.xml','sale_view.xml',
-             'wizard/process_qty_to_reject_view.xml','wizard/process_qty_to_finished_view.xml',
-             'wizard/all_in_once_qty_to_finished_view.xml','wizard/all_in_once_qty_to_cancelled_view.xml',
-             'wizard/reallocate_rejected_move_view.xml','wizard/generate_service_order_view.xml',
-             'wizard/qty_to_consume_view.xml','wizard/add_rawmaterial_to_consume_view.xml',
-             'wizard/consignment_variation_po_view.xml','wizard/qc2xlocation_view.xml',
-             ],
-    'demo': [],
-    'installable': True,
-}
+class change_qcapproved_date(osv.osv_memory):
+    _name = "change.qcapproved.date"
+    _description = "Change QC Approved Date"
+
+    _columns = {
+        'qc_approved_date':fields.datetime('QC Approved Date', required=True),
+    }
+
+    def to_update(self, cr, uid, ids, context=None):
+        """
+        - Process
+            - Update QC Approved Date
+        """
+        context = context or {}
+        move_obj = self.pool.get('stock.move')
+
+        wizard_rec = self.browse(cr, uid, ids[0])
+        move_id = context and context.get('active_id', False) or False
+        move_obj.write(cr ,uid, move_id, {'qc_approved_date': wizard_rec.qc_approved_date})
+        return True
+
+change_qcapproved_date()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

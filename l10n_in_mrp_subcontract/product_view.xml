@@ -25,6 +25,9 @@
 				<field name="property_stock_production" position="attributes">
 					<attribute name="required">1</attribute>
 				</field>
+				<field name="active" position="before">
+					<field name="seller_delay" string="Purchase Lead Time" />
+				</field>
 			</field>
 		</record>
 
@@ -35,7 +38,8 @@
 			<field name="arch" type="xml">
 				<button string="Bill of Materials" position="attributes">
 					<attribute name="attrs">{'invisible':[('supply_method', '=',
-						'buy')]}</attribute>
+						'buy')]}
+					</attribute>
 				</button>
 			</field>
 		</record>
@@ -48,7 +52,8 @@
 			<field name="arch" type="xml">
 				<button string="Orderpoints" position="attributes">
 					<attribute name="attrs">{'invisible':[('supply_method', '=',
-						'produce')]}</attribute>
+						'produce')]}
+					</attribute>
 				</button>
 			</field>
 		</record>

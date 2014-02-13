@@ -12,15 +12,16 @@
 						attrs="{'invisible':[('service_order', '=', False)]}" />
 					<field name="workorder_id" readonly="1"
 						attrs="{'invisible':[('workorder_id', '=', False)]}" />
-                    <field name="service_delivery_order" readonly="1"
-                        attrs="{'invisible':[('workorder_id', '=', False)]}" />
+					<field name="service_delivery_order" readonly="1"
+						attrs="{'invisible':[('workorder_id', '=', False)]}" />
 				</field>
 				<field name="location_id" position="replace" />
 				<xpath expr="//group" position="inside">
 					<group colspan="4" style="font-weight:bold;">
-						<field style="font-weight:bold;font-size: 14px;color:#C0C0C0;" name="location_id" groups="stock.group_locations"
+						<field style="font-weight:bold;font-size: 14px;color:#C0C0C0;"
+							name="location_id" groups="stock.group_locations"
 							attrs="{'readonly':['|',('service_order', '=', True),('state','in',('confirmed','approved','done'))]}"
-							string="Destination Location"/>
+							string="Destination Location" />
 					</group>
 				</xpath>
 
@@ -41,6 +42,26 @@
 				<xpath expr="//field[@name='order_line']/tree/field[@name='product_uom']"
 					position="attributes">
 					<attribute name="string">Issue UoM</attribute>
+				</xpath>
+
+				<xpath
+					expr="//notebook/page[@string='Incoming Shipments &amp; Invoices']"
+					position="after">
+					<page string="Expected Date By Production Order" attrs="{'invisible':[('expected_date_by_production_order','=',[])]}">
+						<group>
+							<field name="expected_date_by_production_order" nolabel="1"
+								view_mode="tree" context="{'group_by':'product_id'}" widget="one2many_list">
+								<tree string="Product Lines">
+									<field name="product_id" />
+									<field name="production_id" />
+									<field name="production_scheduled_date" />
+									<field name="purchase_lead_time" />
+									<field name="company_po_lead_time" />
+									<field name="po_expected_date" />
+								</tree>
+							</field>
+						</group>
+					</page>
 				</xpath>
 			</field>
 		</record>
@@ -72,6 +93,48 @@
 					<filter string="Service Order" domain="[('service_order','=',True)]"
 						help="Service order generated from manufacturing order" />
 				</xpath>
+			</field>
+		</record>
+
+
+		<record id="purchase_expected_date_form" model="ir.ui.view">
+			<field name="name">purchase.expected.date.form</field>
+			<field name="model">purchase.expected.date</field>
+			<field name="arch" type="xml">
+				<form string="Purchase Expected Date" version="7.0">
+					<div>
+						<h2>
+							<label for="po_expected_date" string="Quatation Expected Date" />
+							<field name="po_expected_date" />
+						</h2>
+					</div>
+					<group>
+						<group>
+							<field name="product_id" />
+							<field name="purchase_lead_time" />
+							<field name="production_scheduled_date" />
+						</group>
+						<group>
+							<field name="production_id" />
+							<field name="company_po_lead_time" />
+						</group>
+					</group>
+				</form>
+			</field>
+		</record>
+
+		<record id="purchase_expected_date_tree" model="ir.ui.view">
+			<field name="name">purchase.expected.date.tree</field>
+			<field name="model">purchase.expected.date</field>
+			<field name="arch" type="xml">
+				<tree string="Purchase Expected Date">
+					<field name="product_id" />
+					<field name="production_id" />
+					<field name="production_scheduled_date" />
+					<field name="purchase_lead_time" />
+					<field name="company_po_lead_time" />
+					<field name="po_expected_date" />
+				</tree>
 			</field>
 		</record>
 

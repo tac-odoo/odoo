@@ -30,4 +30,7 @@ import add_rawmaterial_to_consume
 import consignment_variation_po
 import qc2xlocation
 import stock_return_picking
+import change_receiveddate_inward
+import change_qcapproved_date
+import split_lot_move
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -140,6 +140,17 @@
 						type="object" icon="gtk-go-forward"
 						attrs="{'invisible':['|','|','|',('state','not in',('done')),('qc_completed','=',True),('qc_approved','=', True),('is_qc','=', False)]}" />
 				</field>
+				<field name="product_uom" position="after">
+					<field name="date_expected" string="Expected Date"
+						invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'yes' or (not context.get('pass_to_qc',False))" />
+					<field name="received_date" string="Received Date" invisible="context.get('picking_type',False) != 'in'"/>
+					<button name="%(action_change_receiveddate_inward)d" string="Change Receive Date"
+						type="action" icon="gtk-execute" invisible="context.get('picking_type',False) != 'in'"/>
+					<field name="qc_approved_date"
+						invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'yes' or (not context.get('pass_to_qc',False))" />
+					<button name="%(action_change_qc_approved_date)d" string="Change Approved Date"
+						type="action" icon="gtk-execute" invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'yes' or (not context.get('pass_to_qc',False))"/>
+				</field>
 				<field name="product_uos" position="attributes">
 					<attribute name="invisible">context.get('pass_to_qc',False)
 					</attribute>
@@ -148,10 +159,18 @@
 					<attribute name="invisible">context.get('pass_to_qc',False)
 					</attribute>
 				</field>
+				<field name="tracking_id" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</field>
 				<button name="%(stock.move_scrap)d" position="attributes">
-					<attribute name="attrs">{'invisible':[('is_qc','=', True)]}
-					</attribute>
+					<attribute name="invisible">1</attribute>
 				</button>
+				<button name="setlast_tracking" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</button>
+				<!-- button name="%(stock.move_scrap)d" position="attributes"> <attribute 
+					name="attrs">{'invisible':['|',('is_qc','=', True),('qc_approved','=', True)]} 
+					</attribute> </button -->
 			</field>
 		</record>
 
@@ -165,6 +184,22 @@
 				<button name="action_done" position="replace" />
 				<button name="force_assign" position="replace" />
 				<button name="action_cancel" position="replace" />
+				<xpath expr="//sheet/group[1]" position="before">
+					<h3>
+						<group>
+							<group>
+								<field name="received_date" invisible="context.get('picking_type',False) != 'in'"/>
+							</group>
+							<group>
+								<field name="qc_approved_date"
+									invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'yes' or (not context.get('pass_to_qc',False))" />
+							</group>
+						</group>
+					</h3>
+				</xpath>
+				<field name="date" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</field>
 			</field>
 		</record>
 

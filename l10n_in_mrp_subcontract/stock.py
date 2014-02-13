@@ -97,13 +97,42 @@ class stock_move(osv.osv):
         'qc_ok_qty': fields.float('QC Qty ', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
         'is_qc': fields.boolean('Can be QC?'),
         'returned_qty': fields.function(_return_history, string="Return Qty", digits_compute=dp.get_precision('Product Unit of Measure')),
+
+        #Fields here overwrites only for readonly process.
+        'date': fields.datetime('Move Done Date', states={'done': [('readonly', True)]}, required=True, select=True, help="Move date: scheduled date until move is done, then date of actual move processing"),
+        'date_expected': fields.datetime('Expected Date', states={'done': [('readonly', True)]},required=True, help="Scheduled date for the processing of this move"),
+        'received_date': fields.datetime('Received Date',states={'done': [('readonly', True)]}),
+        'qc_approved_date': fields.datetime('QC Approved Date',states={'done': [('readonly', True)]}),
+
+#        'product_id': fields.many2one('product.product', 'Product', required=True, select=True, domain=[('type','<>','service')],readonly=True, states={'draft': [('readonly', False)]}),
+#        'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure'),
+#            required=True,readonly=True, states={'draft': [('readonly', False)]},
+#            help="This is the quantity of products from an inventory "
+#                "point of view. For moves in the state 'done', this is the "
+#                "quantity of products that were actually moved. For other "
+#                "moves, this is the quantity of product that is planned to "
+#                "be moved. Lowering this quantity does not generate a "
+#                "backorder. Changing this quantity on assigned moves affects "
+#                "the product reservation, and should be done with care."
+#        ),
+#        'product_uom': fields.many2one('product.uom', 'Unit of Measure', required=True,readonly=True, states={'draft': [('readonly', False)]}),
+#        'product_uos_qty': fields.float('Quantity (UOS)', digits_compute=dp.get_precision('Product Unit of Measure'),readonly=True, states={'draft': [('readonly', False)]}),
+#        'product_uos': fields.many2one('product.uom', 'Product UOS',readonly=True, states={'draft': [('readonly', False)]}),
+#        'location_id': fields.many2one('stock.location', 'Source Location', required=True, select=True,readonly=True, states={'draft': [('readonly', False)]}, help="Sets a location if you produce at a fixed location. This can be a partner location if you subcontract the manufacturing operations."),
+#        'location_dest_id': fields.many2one('stock.location', 'Destination Location', required=True,readonly=True, states={'draft': [('readonly', False)]}, select=True, help="Location where the system will stock the finished products."),
+#        'partner_id': fields.many2one('res.partner', 'Destination Address ',readonly=True, states={'draft': [('readonly', False)]}, help="Optional address where goods are to be delivered, specifically used for allotment"),
+#        'type': fields.related('picking_id', 'type', type='selection', selection=[('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal')], string='Shipping Type',readonly=True, states={'draft': [('readonly', False)]}),
+#        'picking_id': fields.many2one('stock.picking', 'Reference', select=True,readonly=True, states={'draft': [('readonly', False)]}),
+#        'origin': fields.related('picking_id','origin',type='char', size=64, relation="stock.picking", string="Source", store=True,readonly=True, states={'draft': [('readonly', False)]}),
     }
 
     def copy(self, cr, uid, id, default=None, context=None):
         if default is None:
             default = {}
         default = default.copy()
-        default.update({'qc_completed': False, 'qc_ok_qty':0.0,'is_qc':False,'extra_consumed':False})
+        is_qc = self.browse(cr, uid, id, context=context).is_qc
+        if context and context.get('split_move',False): is_qc = True
+        default.update({'qc_completed': False, 'qc_ok_qty':0.0,'is_qc':is_qc,'extra_consumed':False,'received_date':False})
         return super(stock_move, self).copy(cr, uid, id, default, context=context)
 
     def _prepare_chained_picking(self, cr, uid, picking_name, picking, picking_type, moves_todo, context=None):
@@ -261,7 +290,8 @@ class stock_picking_in(osv.osv):
                    'move_loc_id':False,
                    'service_order':False,
                    'workorder_id':False,
-                   'move_lines':[]
+                   'move_lines':[],
+                   'purchase_id':False
                    }
         return super(stock_picking_in, self).copy(cr, uid, id, default, context)
 
@@ -285,7 +315,7 @@ class stock_picking_in(osv.osv):
 
     _columns = {
         'pass_to_qc': fields.boolean('QC Test?'),
-        'move_lines': fields.one2many('stock.move', 'picking_id', 'Internal Moves', readonly=True, states={'draft': [('readonly', False)]}),
+        'move_lines': fields.one2many('stock.move', 'picking_id', 'Internal Moves',readonly=True, states={'draft': [('readonly', False)]}),
         'move_lines_qc2store': fields.one2many('stock.move', 'picking_qc_id', 'Store Moves', readonly=True),
         'qc_loc_id': fields.many2one('stock.location', 'QC Location', readonly=True),
         'move_loc_id': fields.many2one('stock.location', 'Destination Location', readonly=True),

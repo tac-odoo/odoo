@@ -41,11 +41,29 @@ class sale_order(osv.osv):
     }
 
     def _prepare_order_picking(self, cr, uid, order, context=None):
+        """
+        Process
+            -call super() to get dictionary values,
+            -Update values of ex_work_date,shipping_time,destination_date
+        """
         res = super(sale_order,self)._prepare_order_picking(cr, uid, order, context=context)
         res.update({
                     'ex_work_date': order.ex_work_date,
                     'shipping_time': order.shipping_time,
                     'destination_date': order.destination_date
+                    })
+        return res
+
+
+    def _prepare_order_line_procurement(self, cr, uid, order, line, move_id, date_planned, context=None):
+        """
+        Process
+            -call super() to get dictionary values,
+            -Date Planned should be Ex.work Date
+        """
+        res = super(sale_order,self)._prepare_order_line_procurement(cr, uid, order, line, move_id, date_planned, context=context)
+        res.update({
+                    'date_planned': order.ex_work_date,
                     })
         return res
 

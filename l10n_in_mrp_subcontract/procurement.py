@@ -39,6 +39,7 @@ class procurement_order(osv.osv):
         """
         -Process
             - Overwrite this function only to "draft" production order instead of "confirm" stage
+            - Manufacturing Start Date should be calculated by Procurement planned date - (Product Manufacturing Lead Time + Company Manufacturing Lead Time)
         -Result
             - AS it is
         """
@@ -50,6 +51,7 @@ class procurement_order(osv.osv):
         procurement_obj = self.pool.get('procurement.order')
         for procurement in procurement_obj.browse(cr, uid, ids, context=context):
             res_id = procurement.move_id.id
+            #Manufacture Start date = procurement planned date - (product manufacturing lead time + company manufacturing lead time)
             newdate = datetime.strptime(procurement.date_planned, '%Y-%m-%d %H:%M:%S') - relativedelta(days=procurement.product_id.produce_delay or 0.0)
             newdate = newdate - relativedelta(days=company.manufacturing_lead)
             produce_id = production_obj.create(cr, uid, {
@@ -111,6 +113,7 @@ class procurement_order(osv.osv):
     def make_po(self, cr, uid, ids, context=None):
         """ Make purchase order from procurement
         @return: New created Purchase Orders procurement wise
+        NOTE : #Quatation Date = Manufacturing Date - (Company PO Lead Time + Supplier Delivery Time)
         """
         res = {}
         if context is None:
@@ -137,6 +140,7 @@ class procurement_order(osv.osv):
 
             price = pricelist_obj.price_get(cr, uid, [pricelist_id], procurement.product_id.id, qty, partner_id, {'uom': uom_id})[pricelist_id]
 
+            #Quatation Date = Manufacturing Date - (Company PO Lead Time + Supplier Delivery Time)
             schedule_date = self._get_purchase_schedule_date(cr, uid, procurement, company, context=context)
             purchase_date = self._get_purchase_order_date(cr, uid, procurement, company, schedule_date, context=context)
 
