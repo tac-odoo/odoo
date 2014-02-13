@@ -38,12 +38,9 @@ Managing member through portal
         'base',
         'portal'
     ],
-    
+
     'data' : [
-    ],
-    
-    'update_xml' : [
-        'member_portal_view.xml'
+        'member_portal_view.xml',
     ],
 
     'demo': [

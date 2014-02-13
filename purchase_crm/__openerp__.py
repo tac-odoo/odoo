@@ -36,7 +36,7 @@ Sometimes your sales person/manager needs to know the price from supplier for so
 """,    
     "depends" : ['crm', 'purchase', 'l10n_in_base'],
     "init_xml" : [],
-    "update_xml" : [
+    "data" : [
         "wizard/create_rfq_wizard.xml",
         "purchase_crm_view.xml",
     ],

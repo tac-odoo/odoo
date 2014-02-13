@@ -33,9 +33,9 @@ Module to make ordering on Production Lot / Batch
 - Add actions on dashboards.
 """,        
     "depends" : ["sale_stock"],
-    "update_xml" : [
+    "data" : [
         "production_lot_order_view.xml",
-        ],
+    ],
     "installable": True,
     "auto_install": False,
     "application": False,

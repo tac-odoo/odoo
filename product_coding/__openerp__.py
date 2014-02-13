@@ -39,9 +39,7 @@ You can also create major and sub groups of products and based on the code provi
 """,
     'depends' : ['l10n_in_base', 'product'],
     'data' : [
-    ],
-    'update_xml' : [
-        'product_coding_view.xml'
+        'product_coding_view.xml',
     ],
 
     'demo': [

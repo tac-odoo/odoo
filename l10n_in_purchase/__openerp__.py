@@ -51,10 +51,9 @@ It also prints reports of Purchase orders and Supplier Invoices with Freight/Pac
 """,
     'depends' : ['l10n_in_base', 'purchase'],
     'data' : [
-    ],
-    'update_xml' : ['l10n_in_purchase_view.xml',
-                    'l10n_in_account_view.xml',
-                    'purchase_report.xml',
+        'l10n_in_purchase_view.xml',
+        'l10n_in_account_view.xml',
+        'purchase_report.xml',
     ],
 
     'demo': [],

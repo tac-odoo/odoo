@@ -51,9 +51,6 @@ When the invoice is created from goods receipt, the accounting entries also got 
 
     'data' : [
         'receipt_sequence.xml',
-    ],
-
-    'update_xml' : [
         'l10n_in_excise_receipt_view.xml',
     ],
 

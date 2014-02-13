@@ -50,8 +50,6 @@ The report to print the details of gate pass with products and shipping details.
     'data' : [
         'stock_gatepass_sequence.xml',
         'stock_gatepass_data.xml',
-    ],
-    'update_xml' : [
         'stock_gatepass_view.xml',
         'stock_gatepass_workflow.xml',
         'stock_gatepass_report.xml',

@@ -35,7 +35,7 @@ While creating invoice from picking the entries will be filled on invoice form.
     """,
     'website' : 'http://www.openerp.com',
     "category" : "Accounting & Finance",
-    "update_xml" : [
+    "data" : [
        "invoice_buyer_reference_view.xml"
     ],
     "active": False,
