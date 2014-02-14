@@ -331,6 +331,16 @@ class mrp_production(osv.osv):
             raise osv.except_osv(_('Routing not found!'), _('Atleast define one route for starting of production order'))
         return True
 
+    def test_if_product(self, cr, uid, ids):
+        """
+        Process
+            -Check for BoM lines, If BoM lines not avail, It will generate warning message. 
+        """
+        for production in self.browse(cr, uid, ids):
+            if production.bom_id and (not production.bom_id.bom_lines):
+                raise osv.except_osv(_('BoM lines not found!'),_('Provide BoM lines for (%s)'%(production.bom_id.name)))
+        return super(mrp_production, self).test_if_product(cr, uid, ids)
+
     def action_confirm(self, cr, uid, ids, context=None):
         """ 
         - Process

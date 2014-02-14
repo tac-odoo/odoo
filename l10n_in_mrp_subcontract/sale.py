@@ -22,6 +22,7 @@
 from openerp.osv import fields, osv
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
+from openerp.tools.translate import _
 
 class sale_order(osv.osv):
     _inherit = "sale.order"
@@ -66,6 +67,37 @@ class sale_order(osv.osv):
                     'date_planned': order.ex_work_date,
                     })
         return res
+
+    def _check_configuration_ok(self, cr, uid, products):
+        product_obj = self.pool.get('product.product')
+        orderpoint_obj = self.pool.get('stock.warehouse.orderpoint')
+        bom_obj = self.pool.get('mrp.bom')
+        warning_msg = ''
+        for prdct in product_obj.browse(cr, uid, products):
+            if prdct.supply_method == 'buy' and prdct.procure_method == 'make_to_stock':
+                if not prdct.seller_id:
+                    warning_msg += prdct.name + ':'+'Atleast define one supplier for this product.\n\n'
+                if not orderpoint_obj.search(cr,uid, [('product_id','=',prdct.id),('active','=',True)]):
+                    warning_msg += prdct.name + ':'+'Atleast define one Minimum Order Rule for this product.\n\n'
+            if prdct.supply_method == 'produce':
+                if not bom_obj._bom_find(cr, uid, prdct.id, prdct.uom_id.id):
+                    warning_msg += prdct.name + ':'+'BoM(Bill Of Materials) not found for this product.\n\n'
+        if warning_msg:
+            raise osv.except_osv(_('Cannot confirm sales order line!'),_(warning_msg))
+        return True
+
+    def action_button_confirm(self, cr, uid, ids, context=None):
+        """
+        Process
+            -To generate warning message, if anything wrong configuration apply on product
+        """
+        for order in self.browse(cr, uid, ids, context):
+            assign_products = []
+            for l in order.order_line:
+                if l.product_id and l.product_id.type not in ('consu','service'): assign_products.append(l.product_id.id)
+            self._check_configuration_ok(cr, uid, list(set(assign_products)))
+
+        return super(sale_order,self).action_button_confirm(cr, uid, ids, context=context)
 
 sale_order()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
