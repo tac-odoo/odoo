@@ -57,7 +57,7 @@
 			<field name="inherit_id" ref="stock.view_picking_in_form" />
 			<field name="arch" type="xml">
 				<field name="date" position="after">
-					<field name="pass_to_qc" readonly="1"
+					<field name="pass_to_qc" invisible="1"
 						attrs="{'invisible':[('pass_to_qc', '=', False)]}" />
 					<!-- field name="total_moves_to_xloc"/ -->
 				</field>
