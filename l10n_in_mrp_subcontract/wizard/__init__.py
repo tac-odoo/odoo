@@ -33,4 +33,6 @@ import stock_return_picking
 import change_receiveddate_inward
 import change_qcapproved_date
 import split_lot_move
+import common_date_updation
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

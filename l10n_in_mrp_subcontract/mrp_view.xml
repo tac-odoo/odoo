@@ -2,31 +2,31 @@
 <openerp>
 	<data noupdate="1">
 
-        <record id="workorders_form_moves_lines2" model="ir.ui.view">
-            <field name="name">mrp.production.workcenter.tree.buttons</field>
-            <field name="model">mrp.production</field>
-            <field name="inherit_id" ref="mrp_operations.mrp_production_form_inherit_view2" />
-            <field name="arch" type="xml">
-                <xpath
-                    expr="//field[@name='workcenter_lines']/tree//button[@name='button_start_working']"
-                    position="replace">
-                    <button name="action_to_start_working" string="Start"
-                        states="draft" icon="gtk-media-play" help="Start Workingss" type="object" />
-                </xpath>
-                <xpath
-                    expr="//field[@name='workcenter_lines']/tree//button[@name='button_draft']"
-                    position="replace">
-                </xpath>
-                <xpath
-                    expr="//field[@name='workcenter_lines']/tree//button[@name='button_done']"
-                    position="replace">
-                    <button name="action_finish" string="Finished" states="startworking"
-                        icon="terp-check" help="Finish Order" type="object" />
-                </xpath>
-            </field>
-        </record>
-   </data>
-   <data>
+		<record id="workorders_form_moves_lines2" model="ir.ui.view">
+			<field name="name">mrp.production.workcenter.tree.buttons</field>
+			<field name="model">mrp.production</field>
+			<field name="inherit_id" ref="mrp_operations.mrp_production_form_inherit_view2" />
+			<field name="arch" type="xml">
+				<xpath
+					expr="//field[@name='workcenter_lines']/tree//button[@name='button_start_working']"
+					position="replace">
+					<button name="action_to_start_working" string="Start"
+						states="draft" icon="gtk-media-play" help="Start Workingss" type="object" />
+				</xpath>
+				<xpath
+					expr="//field[@name='workcenter_lines']/tree//button[@name='button_draft']"
+					position="replace">
+				</xpath>
+				<xpath
+					expr="//field[@name='workcenter_lines']/tree//button[@name='button_done']"
+					position="replace">
+					<button name="action_finish" string="Finished" states="startworking"
+						icon="terp-check" help="Finish Order" type="object" />
+				</xpath>
+			</field>
+		</record>
+	</data>
+	<data>
 		<record id="workorders_form_moves_lines" model="ir.ui.view">
 			<field name="name">mrp.production.form.inherit</field>
 			<field name="model">mrp.production</field>
@@ -48,12 +48,10 @@
 						icon="terp-check" help="Finish Order" type="object" />
 				</xpath>
 
-				<!-- xpath
-					expr="//field[@name='workcenter_lines']/tree//button[@name='button_start_working']"
-					position="replace">
-					<button name="action_to_start_working" string="Start"
-						states="draft" icon="gtk-media-play" help="Start Workingss" type="object" />
-				</xpath -->
+				<!-- xpath expr="//field[@name='workcenter_lines']/tree//button[@name='button_start_working']" 
+					position="replace"> <button name="action_to_start_working" string="Start" 
+					states="draft" icon="gtk-media-play" help="Start Workingss" type="object" 
+					/> </xpath -->
 
 				<xpath
 					expr="//field[@name='workcenter_lines']/form//button[@name='button_start_working']"
@@ -77,18 +75,39 @@
 					expr="//field[@name='workcenter_lines']/form//button[@name='button_draft']"
 					position="replace">
 				</xpath>
-				<!-- xpath
-					expr="//field[@name='workcenter_lines']/tree//button[@name='button_draft']"
-					position="replace">
-				</xpath -->
+				<!-- xpath expr="//field[@name='workcenter_lines']/tree//button[@name='button_draft']" 
+					position="replace"> </xpath -->
 
 				<xpath
 					expr="//field[@name='workcenter_lines']/form//field[@name='cycle']"
 					position="before">
-					<field name="delay" readonly="1" string="Total Time" />
-					<field name="date_start" readonly="1" string="Start Date" />
-					<field name="temp_date_finished" readonly="1" string="Stop Date" />
-
+					<field name="delay" readonly="1" string="Total Time(HH.MM)" />
+				</xpath>
+				<xpath expr="//field[@name='workcenter_lines']/form" position="inside">
+					<group>
+						<group>
+							<label for="date_start" string="Start Date" />
+							<div>
+								<h3>
+									<field name="date_start" readonly="1" string="Start Date" />
+								</h3>
+								<button name="%(action_change_common_date_update)d" type="action"
+									string="Update Start Date?" class="oe_link"
+									context="{'fields_name':'date_start'}" />
+							</div>
+						</group>
+						<group>
+							<label for="temp_date_finished" string="Stop Date" />
+							<div>
+								<h3>
+									<field name="temp_date_finished" readonly="1" />
+								</h3>
+								<button name="%(action_change_common_date_update)d" type="action"
+									string="Update Stop Date?" class="oe_link"
+									context="{'fields_name':'date_finished,temp_date_finished'}" />
+							</div>
+						</group>
+					</group>
 				</xpath>
 
 				<xpath
@@ -135,9 +154,10 @@
 					<attribute name="readonly">1</attribute>
 				</xpath>
 
-                <xpath expr="//field[@name='move_lines2']/tree/field[@name='product_id']" position="after">
-                    <field name="extra_consumed" readonly="1"/>
-                </xpath>
+				<xpath expr="//field[@name='move_lines2']/tree/field[@name='product_id']"
+					position="after">
+					<field name="extra_consumed" readonly="1" />
+				</xpath>
 
 				<xpath expr="//field[@name='move_created_ids']" position="attributes">
 					<attribute name="readonly">1</attribute>
@@ -187,18 +207,15 @@
 				<xpath expr="//button[@string='Produce']" position="replace" />
 				<xpath expr="//button[@name='force_production']" position="replace" />
 
-                <xpath expr="//button[@name='action_cancel']" position="before">
-                    <button name="open_procurements" string="Open Procurements"
-                        states="confirmed" help="Procurments to check for waiting materials.."
-                        type="object" class="oe_highlight"/>
-                </xpath>
+				<xpath expr="//button[@name='action_cancel']" position="before">
+					<button name="open_procurements" string="Open Procurements"
+						states="confirmed" help="Procurments to check for waiting materials.."
+						type="object" class="oe_highlight" />
+				</xpath>
 
-				<!-- xpath
-					expr="//field[@name='workcenter_lines']/tree//button[@name='button_done']"
-					position="replace">
-					<button name="action_finish" string="Finished" states="startworking"
-						icon="terp-check" help="Finish Order" type="object" />
-				</xpath -->
+				<!-- xpath expr="//field[@name='workcenter_lines']/tree//button[@name='button_done']" 
+					position="replace"> <button name="action_finish" string="Finished" states="startworking" 
+					icon="terp-check" help="Finish Order" type="object" /> </xpath -->
 
 				<xpath expr="//field[@name='workcenter_lines']/form" position="inside">
 					<notebook>
@@ -219,8 +236,11 @@
 										<field name="accepted_qty" readonly="1" />
 										<field name="rejected_qty" readonly="1" />
 										<field name="start_date" readonly="1" />
+										<button name="%(action_change_common_date_update)d"
+											type="action" icon="gtk-execute" context="{'fields_name':'start_date'}" string="Update Start Date"/>
 										<field name="end_date" readonly="1" />
-
+										<button name="%(action_change_common_date_update_end)d"
+											type="action" icon="gtk-execute" context="{'fields_name':'end_date'}" string="Update End Date"/>
 										<!-- For OutSourcing Process -->
 										<field name="order_type" invisible="1" />
 										<field name="service_supplier_id"
@@ -476,13 +496,10 @@
 					<!-- field name="service_supplier_id" attrs="{'required':[('order_type','=','out')], 
 						'invisible':[('order_type','!=','out')]}" / -->
 				</field>
-				<!-- label for="note" position="replace" />
-				<field name="note" position="replace">
-					<field name="note"
-						attrs="{'required':[('order_type','=','out')], 'invisible':[('order_type','!=','out')]}"
-						placeholder="Add service description here(you could change also in manufacturing order)...."
-						colspan="4" />
-				</field -->
+				<!-- label for="note" position="replace" /> <field name="note" position="replace"> 
+					<field name="note" attrs="{'required':[('order_type','=','out')], 'invisible':[('order_type','!=','out')]}" 
+					placeholder="Add service description here(you could change also in manufacturing 
+					order)...." colspan="4" /> </field -->
 			</field>
 		</record>
 

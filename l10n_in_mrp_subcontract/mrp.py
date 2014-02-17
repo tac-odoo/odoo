@@ -27,6 +27,7 @@ from openerp.tools.translate import _
 from openerp.tools import float_compare
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp import tools
+from datetime import datetime
 
 STATE_SELECTION = [
         ('draft', 'Draft'),
@@ -443,14 +444,14 @@ class stock_moves_workorder(osv.osv):
         'move_id': fields.many2one('stock.move', 'Move', readonly=True),
         #Problem when reallocated move to process
         #'prodlot_id': fields.related('move_id', 'prodlot_id', type='many2one', relation='stock.production.lot', string='Serial Number', readonly=True),
-        'prodlot_id': fields.many2one('stock.production.lot', 'Serial Number', readonly=True), 
+        'prodlot_id': fields.many2one('stock.production.lot', 'Lot No.', readonly=True), 
         'product_id': fields.many2one('product.product', 'Product', readonly=True),
         'start_date':fields.datetime('Start Date', help="Time when Product goes to start for workorder", readonly=True),
         'end_date':fields.datetime('End Date', help="Time when Product goes to finish or cancel for workorder", readonly=True),
-        'total_qty': fields.float('Total Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
-        'process_qty': fields.float('In Process Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
-        'accepted_qty': fields.float('Accept Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
-        'rejected_qty': fields.float('Reject Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'total_qty': fields.float('Total Qty', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'process_qty': fields.float('InProcess Qty', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'accepted_qty': fields.float('Accept Qty', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'rejected_qty': fields.float('Reject Qty', digits_compute=dp.get_precision('Product Unit of Measure')),
         #'reason': fields.text('Reason'),
         'state': fields.selection(STATE_SELECTION, 'Status', readonly=True),
 
@@ -952,6 +953,50 @@ class mrp_production_workcenter_line(osv.osv):
 
     def create_service_order(self, cr, uid, ids , context=None):
         return True
+
+    def write(self, cr, uid, ids, vals, context=None, update=True):
+        """
+        -process
+            -Update delay, depends on start date and finished date dynamically.
+        """
+        if vals.get('date_start', False) or vals.get('date_finished', False):
+            date_start, date_finished = False,False
+            if isinstance(ids, (int, long)):
+                ids = [ids]
+            if vals.get('date_start'):
+                date_finished = self.browse(cr, uid, ids[0], context=context).date_finished
+                date_start = vals['date_start']
+            if vals.get('date_finished'):
+                date_start = self.browse(cr, uid, ids[0], context=context).date_start
+                date_finished = vals['date_finished']
+            if date_start and date_finished:
+                start = datetime.strptime(date_start,'%Y-%m-%d %H:%M:%S')
+                finished = datetime.strptime(date_finished,'%Y-%m-%d %H:%M:%S')
+                days = ((finished-start).days * 24) + ((finished-start).seconds) // 3600
+                minite = (((finished-start).seconds%3600) / float(60))/100
+                vals.update({'delay': days+minite})
+        return super(mrp_production_workcenter_line, self).write(cr, uid, ids, vals, context=context)
+
+    def action_done(self, cr, uid, ids, context=None):
+        """ 
+        -Process
+            -Delay shaw in HH:MM format with diffrent calculation
+        """
+        date_now = time.strftime('%Y-%m-%d %H:%M:%S')
+        obj_line = self.browse(cr, uid, ids[0])
+
+        date_start = datetime.strptime(obj_line.date_start,'%Y-%m-%d %H:%M:%S')
+        date_finished = datetime.strptime(date_now,'%Y-%m-%d %H:%M:%S')
+#        delay += (date_finished-date_start).days * 24
+#        delay += (date_finished-date_start).seconds / float(60*60)
+        days = ((date_finished-date_start).days * 24) + ((date_finished-date_start).seconds) // 3600
+        minite = (((date_finished-date_start).seconds%3600) / float(60))/100
+        delay = days + minite
+
+        self.write(cr, uid, ids, {'state':'done', 'date_finished': date_now,'delay':delay}, context=context)
+        self.modify_production_order_state(cr,uid,ids,'done')
+        return True
+
 
 mrp_production_workcenter_line()
 

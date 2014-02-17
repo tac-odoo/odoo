@@ -82,6 +82,7 @@ class purchase_order(osv.osv):
             unlink_ids = [x.id for x in order.expected_date_by_production_order]
             po_expd_obj.unlink(cr, SUPERUSER_ID, unlink_ids, context=context)
 
+        line_data = []
         for order in self.browse(cr, uid, ids, context=context):
             if order.state not in ('draft'):
                 return res
