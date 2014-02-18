@@ -7,20 +7,25 @@
 			<field name="model">process.qty.to.finished</field>
 			<field name="arch" type="xml">
 				<form string="Accept Quantity" version="7.0">
-					<h1>
-						<field name="product_id" class="oe_inline" />
-					</h1>
-					<group>
+					<h3>
 						<group>
-							<field name="process_qty" string="In Process Qty" />
-							<field name="production_id" invisible="1" />
-							<!-- field name="next_stage_workorder_id" on_change="onchange_workorder_id(next_stage_workorder_id, 
-								production_id, context)" / -->
+							<group>
+								<field name="product_id" />
+								<field name="process_qty" string="In Process Qty" />
+								<field name="production_id" invisible="1" />
+								<field name="product_factor" invisible="1" />
+								<field name="accepted_qty" on_change="onchange_accepted_qty(product_factor, accepted_qty, context)" />
+								<!-- field name="next_stage_workorder_id" on_change="onchange_workorder_id(next_stage_workorder_id, 
+									production_id, context)" / -->
+							</group>
+							<group>
+								<field name="s_product_id" attrs="{'invisible':[('s_product_id','=',False)]}"/>
+								<field name="s_process_qty" string="In Process Qty" attrs="{'invisible':[('s_product_id','=',False)]}"/>
+								<field name="s_accepted_qty" attrs="{'invisible':[('s_product_id','=',False)]}" readonly="1"/> <!-- context="{'s_accepted':True}" on_change="onchange_s_accepted_qty(product_factor, s_accepted_qty, context)"/ -->
+								<field name="equation" attrs="{'invisible':[('s_product_id','=',False)]}" readonly="1"/>
+							</group>
 						</group>
-						<group>
-							<field name="accepted_qty" />
-						</group>
-					</group>
+					</h3>
 					<group colspan="4">
 						<field name="next_stage_workorder_id"
 							on_change="onchange_workorder_id(next_stage_workorder_id, production_id, context)"

@@ -438,13 +438,43 @@ mrp_production()
 
 class stock_moves_workorder(osv.osv):
     _name = 'stock.moves.workorder'
+
+    def _semiproduct_calc(self, cr, uid, ids, name, args, context=None):
+        result = dict([(id, {'product_factor': 0.0, 's_product_id':False,'s_total_qty': 0.0, 's_process_qty': 0.0, 's_accepted_qty': 0.0,'s_rejected_qty':0.0}) for id in ids])
+        uom_obj = self.pool.get('product.uom')
+        for smv in self.browse(cr, uid, ids, context=context):
+            factor = 0.0
+            if smv.workorder_id and smv.workorder_id.production_id:
+                production = smv.workorder_id.production_id
+                bom_point = smv.workorder_id.production_id.bom_id
+                factor = uom_obj._compute_qty(cr, uid, production.product_uom.id, 1, bom_point.product_uom.id)
+                factor = factor / bom_point.product_qty
+                factor = factor / (bom_point.product_efficiency or 1.0)
+                factor = rounding(factor, bom_point.product_rounding)
+                if factor < bom_point.product_rounding:
+                    factor = bom_point.product_rounding
+                r_qty = 0.0
+                for b in bom_point.bom_lines:
+                    if smv.product_id.id == b.product_id.id:
+                        r_qty = b.product_qty
+                        break
+                factor = factor * r_qty
+            if factor == 0.0: return result
+            result[smv.id]['product_factor'] = factor
+            result[smv.id]['s_product_id'] = production.product_id.id
+            result[smv.id]['s_total_qty'] = smv.total_qty / factor
+            result[smv.id]['s_process_qty'] = smv.process_qty / factor
+            result[smv.id]['s_accepted_qty'] = smv.accepted_qty / factor
+            result[smv.id]['s_rejected_qty'] = smv.rejected_qty / factor
+        return result
+
     _columns = {
         'name': fields.char('Name'),
         'workorder_id': fields.many2one('mrp.production.workcenter.line', 'WorkOrder'),
         'move_id': fields.many2one('stock.move', 'Move', readonly=True),
         #Problem when reallocated move to process
         #'prodlot_id': fields.related('move_id', 'prodlot_id', type='many2one', relation='stock.production.lot', string='Serial Number', readonly=True),
-        'prodlot_id': fields.many2one('stock.production.lot', 'Lot No.', readonly=True), 
+        'prodlot_id': fields.many2one('stock.production.lot', 'Serial Number', readonly=True), 
         'product_id': fields.many2one('product.product', 'Product', readonly=True),
         'start_date':fields.datetime('Start Date', help="Time when Product goes to start for workorder", readonly=True),
         'end_date':fields.datetime('End Date', help="Time when Product goes to finish or cancel for workorder", readonly=True),
@@ -452,6 +482,14 @@ class stock_moves_workorder(osv.osv):
         'process_qty': fields.float('InProcess Qty', digits_compute=dp.get_precision('Product Unit of Measure')),
         'accepted_qty': fields.float('Accept Qty', digits_compute=dp.get_precision('Product Unit of Measure')),
         'rejected_qty': fields.float('Reject Qty', digits_compute=dp.get_precision('Product Unit of Measure')),
+
+        'product_factor': fields.function(_semiproduct_calc, multi='semiproduct', type='float', string='Product Factor',digits_compute=dp.get_precision('Product Unit of Measure'),store=True),
+        's_product_id': fields.function(_semiproduct_calc, multi='semiproduct', type='many2one', relation='product.product', string="Product"), 
+        's_total_qty': fields.function(_semiproduct_calc, multi='semiproduct', type='float', string='Total Qty',digits_compute=dp.get_precision('Product Unit of Measure'),store=True),
+        's_process_qty': fields.function(_semiproduct_calc, multi='semiproduct', type='float', string='InProcess Qty',digits_compute=dp.get_precision('Product Unit of Measure'),store=True),
+        's_accepted_qty': fields.function(_semiproduct_calc, multi='semiproduct', type='float', string='Accept Qty',digits_compute=dp.get_precision('Product Unit of Measure'),store=True),
+        's_rejected_qty': fields.function(_semiproduct_calc, multi='semiproduct', type='float', string='Reject Qty',digits_compute=dp.get_precision('Product Unit of Measure'),store=True),
+
         #'reason': fields.text('Reason'),
         'state': fields.selection(STATE_SELECTION, 'Status', readonly=True),
 
@@ -556,11 +594,16 @@ class stock_moves_workorder(osv.osv):
         # Get Accepted wizard
         dummy, form_view = models_data.get_object_reference(cr, uid, 'l10n_in_mrp_subcontract', 'view_process_qty_to_finished')
         currnt_data = self.browse(cr, uid, ids[0], context=context)
+        factor = currnt_data.product_factor
         context.update({
                         'already_accepted_qty':currnt_data.accepted_qty,
                         'total_qty':currnt_data.total_qty,
                         'product_id':currnt_data.product_id.id,
                         'process_qty': currnt_data.process_qty,
+
+                        'product_factor':factor,
+                        's_product_id': currnt_data.s_product_id and currnt_data.s_product_id.id or False,
+                        's_process_qty': factor <> 0.0 and currnt_data.process_qty / currnt_data.product_factor or currnt_data.process_qty,
                         })
 
         return {

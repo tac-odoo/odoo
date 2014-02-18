@@ -32,7 +32,6 @@ class split_in_production_lot(osv.osv_memory):
             -Overwrite context because copy moves generate is_qc = False
         """
         context = context or {}
-        print 'CCCCCCCCCCCCCCCCCCCCCccc'
         context.update({'split_move':True})
         return super(split_in_production_lot, self).split_lot(cr, uid, ids, context=context)
 

@@ -46,6 +46,10 @@ class process_qty_to_finished(osv.osv_memory):
         process_qty = context and context.get('process_qty', 0.0) or 0.0
         already_accepted_qty = context and context.get('already_accepted_qty', 0.0) or 0.0
 
+        s_product_id = context and context.get('s_product_id', False) or False
+        s_process_qty = context and context.get('s_process_qty', 0.0) or 0.0
+        product_factor = context and context.get('product_factor', 0.0) or 0.0
+
         res = super(process_qty_to_finished, self).default_get(cr, uid, fields, context=context)
         next_stage_workorder_id, production_id = False, False
         if process_move_id:
@@ -70,6 +74,16 @@ class process_qty_to_finished(osv.osv_memory):
             res.update({'next_stage_workorder_id': next_stage_workorder_id})
         if 'production_id' in fields:
             res.update({'production_id': production_id})
+
+        if 's_product_id' in fields:
+            res.update({'s_product_id': s_product_id})
+        if 's_process_qty' in fields:
+            res.update({'s_process_qty': s_process_qty})
+        if 'product_factor' in fields:
+            res.update({'product_factor': product_factor})
+        if 'equation' in fields:
+            res.update({'equation': ''})
+
         return res
 
     _columns = {
@@ -81,7 +95,25 @@ class process_qty_to_finished(osv.osv_memory):
         'accepted_qty': fields.float('Accept Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
         'next_stage_workorder_id':fields.many2one('mrp.production.workcenter.line', 'Next Stage of Work-Order'),
         'production_id':fields.many2one('mrp.production', 'Production'),
+
+        's_product_id': fields.many2one('product.product', 'Semi Product', readonly=True),
+        's_process_qty': fields.float('Process Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
+        's_accepted_qty': fields.float('Accept Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'product_factor': fields.float('Factor', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'equation': fields.char('Conversion Equation',size=256),
     }
+
+    def onchange_accepted_qty(self, cr, uid, ids, factor,accepted_qty, context=None):
+        context = context or {}
+        equation = ''
+        if factor <> 0.0: equation = '('+str(accepted_qty)+'/'+ str(factor)+ '='+str(round(accepted_qty / factor,2))+')'
+        else: equation = '('+str(accepted_qty)+'='+str(accepted_qty)+')'
+        return {'value': {'s_accepted_qty': factor <> 0.0 and accepted_qty / factor or accepted_qty,'equation':equation}}
+
+#    def onchange_s_accepted_qty(self, cr, uid, ids, factor,s_accepted_qty, context=None):
+#        context = context or {}
+#        return {'value': {'accepted_qty': s_accepted_qty * factor}}
+
 
     def onchange_workorder_id(self, cr, uid, ids, workorder_id, production_id, context=None):
         """
