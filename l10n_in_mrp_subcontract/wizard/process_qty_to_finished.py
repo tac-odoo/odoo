@@ -106,9 +106,9 @@ class process_qty_to_finished(osv.osv_memory):
     def onchange_accepted_qty(self, cr, uid, ids, factor,accepted_qty, context=None):
         context = context or {}
         equation = ''
-        if factor <> 0.0: equation = '('+str(accepted_qty)+'/'+ str(factor)+ '='+str(round(accepted_qty / factor,2))+')'
+        if factor <> 0.0: equation = '('+str(accepted_qty)+'/'+ str(factor)+ '='+str(float(accepted_qty) / factor)+')'
         else: equation = '('+str(accepted_qty)+'='+str(accepted_qty)+')'
-        return {'value': {'s_accepted_qty': factor <> 0.0 and accepted_qty / factor or accepted_qty,'equation':equation}}
+        return {'value': {'s_accepted_qty': factor <> 0.0 and float(accepted_qty) / factor or accepted_qty,'equation':equation}}
 
 #    def onchange_s_accepted_qty(self, cr, uid, ids, factor,s_accepted_qty, context=None):
 #        context = context or {}
