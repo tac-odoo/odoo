@@ -78,10 +78,10 @@ class sale_order(osv.osv):
                 if not prdct.seller_id:
                     warning_msg += prdct.name + ':'+'Atleast define one supplier for this product.\n\n'
                 if not orderpoint_obj.search(cr,uid, [('product_id','=',prdct.id),('active','=',True)]):
-                    warning_msg += prdct.name + ':'+'Atleast define one Minimum Order Rule for this product.\n\n'
+                    warning_msg += 'Atleast define one Minimum Order Rule for ('+prdct.name+')product.\n\n'
             if prdct.supply_method == 'produce':
                 if not bom_obj._bom_find(cr, uid, prdct.id, prdct.uom_id.id):
-                    warning_msg += prdct.name + ':'+'BoM(Bill Of Materials) not found for this product.\n\n'
+                    warning_msg += 'BoM(Bill Of Materials) not found for ('+prdct.name+') product.\n\n'
         if warning_msg:
             raise osv.except_osv(_('Cannot confirm sales order line!'),_(warning_msg))
         return True

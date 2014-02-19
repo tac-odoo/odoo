@@ -52,7 +52,48 @@ class mrp_production(osv.osv):
         'workcenter_lines': fields.one2many('mrp.production.workcenter.line', 'production_id', 'Work Centers Utilisation',
             readonly=False, states={'done':[('readonly', True)]}),
         'moves_to_workorder': fields.boolean('Materials Moves To Work-Center?'),
+        'procurement_generated': fields.boolean('Procurement Generated?'),
+        'parent_id': fields.many2one('mrp.production', 'Parent Order', readonly=True),
+        'backorder_ids': fields.one2many('mrp.production', 'parent_id','Split Orders', readonly=True),
+        'date_planned': fields.datetime('Scheduled Date', required=True, select=1, readonly=False, states={'done':[('readonly',True)]}),
+        'state': fields.selection(
+            [('split_order','Split Order'),('draft', 'New'), ('cancel', 'Cancelled'), ('picking_except', 'Picking Exception'), ('confirmed', 'Awaiting Raw Materials'),
+                ('ready', 'Ready to Produce'), ('in_production', 'Production Started'), ('done', 'Done')],
+            string='Status', readonly=True,
+            track_visibility='onchange',
+            help="When the production order is created the status is set to 'Draft'.\n\
+                If the order in split mode the status is set to 'Split Order'.\n\
+                If the order is confirmed the status is set to 'Waiting Goods'.\n\
+                If any exceptions are there, the status is set to 'Picking Exception'.\n\
+                If the stock is available then the status is set to 'Ready to Produce'.\n\
+                When the production gets started then the status is set to 'In Production'.\n\
+                When the production is over, the status is set to 'Done'."),
     }
+
+    def split_qty_order(self, cr, uid, ids, context=None):
+        """
+        -Process
+            Split production order with partially quantity.
+        """
+        context = context or {}
+        prod = self.browse(cr, uid, ids[0], context)
+        context.update({'product_id':prod.product_id.id, 'qty': prod.product_qty})
+        return {
+                'name': 'Split Order Quantity',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'res_model': 'split.production.order.qty',
+                'type': 'ir.actions.act_window',
+                'context':context,
+                'target':'new'
+                }
+
+    def set_to_draft_order(self, cr, uid, ids, context=None):
+        """
+        -Process
+            Set to order in draft state
+        """
+        return self.write(cr, uid, ids, {'state':'draft'})
 
     def open_procurements(self, cr, uid, ids, context=None):
         """
@@ -65,7 +106,8 @@ class mrp_production(osv.osv):
         models_data = self.pool.get('ir.model.data')
         orderp_obj = self.pool.get('stock.warehouse.orderpoint')
         data= self.browse(cr, uid, ids[0])
-        procurment_obj._procure_orderpoint_confirm(cr, uid, context=context)
+        if not data.procurement_generated:
+            procurment_obj._procure_orderpoint_confirm(cr, uid, context=context)
 
         search_args = (data.origin or '')+':'+(data.name or '')
         raw_material_ids = list(set([x.product_id.id for x in data.move_lines]))
@@ -85,7 +127,7 @@ class mrp_production(osv.osv):
         dummy, form_view = models_data.get_object_reference(cr, uid, 'procurement', 'procurement_form_view')
         dummy, tree_view = models_data.get_object_reference(cr, uid, 'procurement', 'procurement_tree_view')
         context.update({'active_model': 'procurement.order', 'active_ids': procurments_ids})
-        
+        data.write({'procurement_generated':True})
         return {
                 'domain': "[('id','in',["+','.join(map(str, procurments_ids))+"])]",
                 'name': 'Procurements Order',
@@ -391,7 +433,7 @@ class mrp_production(osv.osv):
             - blank workorder lines
         """
         if default is None: default = {}
-        default.update({'workcenter_lines' : [],'moves_to_workorder':False})
+        default.update({'workcenter_lines' : [],'moves_to_workorder':False,'parent_id':False,'procurement_generated':False})
         return super(mrp_production, self).copy(cr, uid, id, default, context)
 
     def _find_production_id(self, cr, uid, workorder):

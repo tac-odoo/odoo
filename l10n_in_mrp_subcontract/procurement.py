@@ -67,6 +67,7 @@ class procurement_order(osv.osv):
                 'date_planned': newdate.strftime('%Y-%m-%d %H:%M:%S'),
                 'move_prod_id': res_id,
                 'company_id': procurement.company_id.id,
+                'state':'split_order'
             })
             
             res[procurement.id] = produce_id
