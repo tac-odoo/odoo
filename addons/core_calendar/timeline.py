@@ -188,14 +188,16 @@ class GenericEventPeriodEmiter(PeriodEmiter):
         super(GenericEventPeriodEmiter, self).__init__(name, default)
         self.events = []  # list of event period
 
-    def add_event(self, start, stop, status=None):
+    def add_event(self, start, stop, status=None, infos=None):
         if status is None:
             status = self.default
-        self.events.append(EventPeriod(start, stop, status))
+        if infos is None:
+            infos = {}
+        self.events.append(EventPeriod(start, stop, status, infos=infos))
 
     def add_events(self, event_list):
         for (s, e, a) in event_list:
-            self.events.append(EventPeriod(s, e, a))
+            self.events.append(EventPeriod(s, e, a, infos={}))
         return True
 
     def get_iterator(self, start, end, tz=None):
@@ -227,7 +229,9 @@ class GenericEventPeriodEmiter(PeriodEmiter):
             if last.start <= e.start < last.stop:
                 if last.start == e.start:
                     periods.pop(-1)
-                intersect = EventPeriod(e.start, last.stop, max(last.status, e.status))
+                einfos = e.infos.copy()
+                einfos.update(last.infos)
+                intersect = EventPeriod(e.start, last.stop, max(last.status, e.status), infos=einfos)
                 periods.append(intersect)
                 k = last.stop
                 last.stop = e.start
@@ -241,7 +245,7 @@ class GenericEventPeriodEmiter(PeriodEmiter):
                 continue
 
         for e in periods:
-            yield AvailibilityPeriod(e.start, e.stop, e.status, layers=set([self.name]))
+            yield AvailibilityPeriod(e.start, e.stop, e.status, layers=set([self.name]), infos=e.infos)
         return
 
 

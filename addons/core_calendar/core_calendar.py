@@ -118,10 +118,11 @@ class CoreCalendarTimeline(osv.TransientModel):
                     CalEvent = self.pool.get('core.calendar.event')
                     leave_ids = self._get_resource_events(cr, uid, [record.id], date_from=date_from,
                                                           date_to=date_to, context=context, usage='leaves')[record.id]
-                    for event in CalEvent.read(cr, uid, leave_ids, ['date_start', 'date_end', 'state'], context=context):
+                    for event in CalEvent.browse(cr, uid, leave_ids, context=context):
                         leave_from = timeline.datetime_from_str(event['date_start'], tz='UTC')
                         leave_to = timeline.datetime_from_str(event['date_end'], tz='UTC')
-                        leaves_emiter.add_event(leave_from, leave_to, Availibility.BUSY)  # FIXME: implement OUT_OF_OFFICE level
+                        leave_infos = {('item_%s' % event.id): event}
+                        leaves_emiter.add_event(leave_from, leave_to, Availibility.BUSY, infos=leave_infos)  # FIXME: implement OUT_OF_OFFICE level
 
                 elif layer == 'events':
 
@@ -130,9 +131,10 @@ class CoreCalendarTimeline(osv.TransientModel):
                     CalEvent = self.pool.get('core.calendar.event')
                     event_ids = self._get_resource_events(cr, uid, [record.id], date_from=date_from,
                                                           date_to=date_to, context=context, usage='events')[record.id]
-                    for event in CalEvent.read(cr, uid, event_ids, ['date_start', 'date_end', 'state'], context=context):
+                    for event in CalEvent.browse(cr, uid, event_ids, context=context):
                         event_start = timeline.datetime_from_str(event['date_start'], tz='UTC')
                         event_end = timeline.datetime_from_str(event['date_end'], tz='UTC')
+                        event_infos = {('item_%s' % event.id): event}
                         event_state = event['state']
                         if event_state == 'tentative':
                             event_mapped_state = Availibility.BUSY_TENTATIVE
@@ -140,7 +142,7 @@ class CoreCalendarTimeline(osv.TransientModel):
                             event_mapped_state = Availibility.BUSY
                         else:
                             raise Exception(_('Bad Event State %s') % (event_state))
-                        event_emiter.add_event(event_start, event_end, event_mapped_state)
+                        event_emiter.add_event(event_start, event_end, event_mapped_state, infos=event_infos)
 
             result[record.id] = timeline
 
