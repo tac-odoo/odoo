@@ -65,6 +65,8 @@ class mrp_production(osv.osv):
         models_data = self.pool.get('ir.model.data')
         orderp_obj = self.pool.get('stock.warehouse.orderpoint')
         data= self.browse(cr, uid, ids[0])
+        procurment_obj._procure_orderpoint_confirm(cr, uid, context=context)
+
         search_args = (data.origin or '')+':'+(data.name or '')
         raw_material_ids = list(set([x.product_id.id for x in data.move_lines]))
         filter_rm_ids = orderp_obj.search(cr, uid, [('product_id', 'in' ,raw_material_ids)])
@@ -83,7 +85,7 @@ class mrp_production(osv.osv):
         dummy, form_view = models_data.get_object_reference(cr, uid, 'procurement', 'procurement_form_view')
         dummy, tree_view = models_data.get_object_reference(cr, uid, 'procurement', 'procurement_tree_view')
         context.update({'active_model': 'procurement.order', 'active_ids': procurments_ids})
-        procurment_obj._procure_orderpoint_confirm(cr, uid, context=context)
+        
         return {
                 'domain': "[('id','in',["+','.join(map(str, procurments_ids))+"])]",
                 'name': 'Procurements Order',
