@@ -36,7 +36,7 @@
              'wizard/reallocate_rejected_move_view.xml','wizard/generate_service_order_view.xml',
              'wizard/qty_to_consume_view.xml','wizard/add_rawmaterial_to_consume_view.xml',
              'wizard/consignment_variation_po_view.xml','wizard/qc2xlocation_view.xml',
-             'wizard/split_production_order_qty_view.xml'
+             'wizard/split_production_order_qty_view.xml','wizard/mrp_product_produce_view.xml'
              ],
     'demo': [],
     'installable': True,

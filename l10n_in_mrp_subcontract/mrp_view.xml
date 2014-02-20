@@ -210,7 +210,10 @@
 						attrs="{'invisible': ['|',('state','!=', 'ready'), ('moves_to_workorder','=',True)]}" />
 				</xpath>
 				<xpath expr="//button[@name='button_produce']" position="replace" />
-				<xpath expr="//button[@string='Produce']" position="replace" />
+				<xpath expr="//button[@string='Produce']" position="replace" >
+				    <button name="%(mrp.act_mrp_product_produce)d" attrs="{'invisible': [('state','!=', 'in_production')]}" string="Partially Produce" type="action"  class="oe_highlight"/>
+				</xpath>
+				<xpath expr="//button[@name='force_production']" position="replace" />
 				<xpath expr="//button[@name='force_production']" position="replace" />
 
 
@@ -283,18 +286,16 @@
 										<button name="button_to_finish" string="Finished"
 											states="in_progress" icon="terp-check" help="Finish Product"
 											type="object" />
-										<button name="button_to_consume" string="Consume Product"
+										<!-- button name="button_to_consume" string="Consume Product"
 											states="in_progress" icon="gtk-go-forward" context="{'consume': True}"
-											help="Consume Product" type="object" />
+											help="Consume Product" type="object" / -->
 									</tree>
 									<form string="Products To Process" version="7.0">
 										<header colspan="8">
 											<field name="state" widget="statusbar"
 												statusbar_visible="draft,in_progress,finished" type="object" />
 										</header>
-										<h3>
 											<group>
-
 												<group string="Raw Materials Movements">
 													<field name="product_id" readonly="1" />
 													<field name="name" invisible="1" />
@@ -308,9 +309,7 @@
 													<field name="s_accepted_qty" readonly="1" />
 													<field name="s_rejected_qty" readonly="1" />
 												</group>
-
 											</group>
-										</h3>
 										<group string="General Information">
 											<group>
 												<field name="start_date" readonly="1" />
