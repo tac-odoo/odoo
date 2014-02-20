@@ -48,12 +48,27 @@ def rounding(f, r):
 class mrp_production(osv.osv):
     _inherit = 'mrp.production'
     _order = "id desc"
+
+    def _produced_qty_calc(self, cr, uid, ids, name, args, context=None):
+        result = dict([(id, {'already_produced_qty': 0.0}) for id in ids])
+        for prod in self.browse(cr, uid, ids, context=context):
+            done = 0.0
+            for move in prod.move_created_ids2:
+                if move.product_id == prod.product_id:
+                    #ignore scrapped and extra consumed and cancel moves
+                    if move.state <> 'cancel':
+                        if (not move.scrapped) or (not move.extra_consumed):
+                            done += move.product_qty
+            result[prod.id]['already_produced_qty'] = done
+        return result
+
     _columns = {
         'workcenter_lines': fields.one2many('mrp.production.workcenter.line', 'production_id', 'Work Centers Utilisation',
             readonly=False, states={'done':[('readonly', True)]}),
         'moves_to_workorder': fields.boolean('Materials Moves To Work-Center?'),
         'procurement_generated': fields.boolean('Procurement Generated?'),
         'parent_id': fields.many2one('mrp.production', 'Parent Order', readonly=True),
+        'already_produced_qty': fields.function(_produced_qty_calc, multi='produced', type='float', string='Produced Qty',digits_compute=dp.get_precision('Product Unit of Measure')),
         'backorder_ids': fields.one2many('mrp.production', 'parent_id','Split Orders', readonly=True),
         'date_planned': fields.datetime('Scheduled Date', required=True, select=1, readonly=False, states={'done':[('readonly',True)]}),
         'state': fields.selection(

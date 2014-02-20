@@ -193,6 +193,10 @@
 				<xpath expr="//sheet/group/group[3]" position="replace">
 				</xpath>
 
+				<field name="date_planned" position="before">
+					<field name="already_produced_qty" />
+				</field>
+
 				<field name="date_planned" position="after">
 					<field name="moves_to_workorder" string="Materials moved to workcenter?"
 						readonly="1" />
@@ -210,8 +214,10 @@
 						attrs="{'invisible': ['|',('state','!=', 'ready'), ('moves_to_workorder','=',True)]}" />
 				</xpath>
 				<xpath expr="//button[@name='button_produce']" position="replace" />
-				<xpath expr="//button[@string='Produce']" position="replace" >
-				    <button name="%(mrp.act_mrp_product_produce)d" attrs="{'invisible': [('state','!=', 'in_production')]}" string="Partially Produce" type="action"  class="oe_highlight"/>
+				<xpath expr="//button[@string='Produce']" position="replace">
+					<button name="%(mrp.act_mrp_product_produce)d"
+						attrs="{'invisible': [('state','!=', 'in_production')]}" string="Partially Produce"
+						type="action" class="oe_highlight" />
 				</xpath>
 				<xpath expr="//button[@name='force_production']" position="replace" />
 				<xpath expr="//button[@name='force_production']" position="replace" />
@@ -286,30 +292,30 @@
 										<button name="button_to_finish" string="Finished"
 											states="in_progress" icon="terp-check" help="Finish Product"
 											type="object" />
-										<!-- button name="button_to_consume" string="Consume Product"
-											states="in_progress" icon="gtk-go-forward" context="{'consume': True}"
-											help="Consume Product" type="object" / -->
+										<!-- button name="button_to_consume" string="Consume Product" states="in_progress" 
+											icon="gtk-go-forward" context="{'consume': True}" help="Consume Product" 
+											type="object" / -->
 									</tree>
 									<form string="Products To Process" version="7.0">
 										<header colspan="8">
 											<field name="state" widget="statusbar"
 												statusbar_visible="draft,in_progress,finished" type="object" />
 										</header>
-											<group>
-												<group string="Raw Materials Movements">
-													<field name="product_id" readonly="1" />
-													<field name="name" invisible="1" />
-													<field name="total_qty" readonly="1" />
-													<field name="accepted_qty" readonly="1" />
-													<field name="rejected_qty" readonly="1" />
-												</group>
-												<group string="Semi-Finished Products Movements">
-													<field name="s_product_id" readonly="1" />
-													<field name="s_total_qty" readonly="1" />
-													<field name="s_accepted_qty" readonly="1" />
-													<field name="s_rejected_qty" readonly="1" />
-												</group>
+										<group>
+											<group string="Raw Materials Movements">
+												<field name="product_id" readonly="1" />
+												<field name="name" invisible="1" />
+												<field name="total_qty" readonly="1" />
+												<field name="accepted_qty" readonly="1" />
+												<field name="rejected_qty" readonly="1" />
 											</group>
+											<group string="Semi-Finished Products Movements">
+												<field name="s_product_id" readonly="1" />
+												<field name="s_total_qty" readonly="1" />
+												<field name="s_accepted_qty" readonly="1" />
+												<field name="s_rejected_qty" readonly="1" />
+											</group>
+										</group>
 										<group string="General Information">
 											<group>
 												<field name="start_date" readonly="1" />
@@ -393,6 +399,18 @@
 
 			</field>
 		</record>
+
+        <record id="mrp_production_tree_view_add_fields" model="ir.ui.view">
+            <field name="name">mrp.production.tree.produced.qty</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_tree_view" />
+            <field name="arch" type="xml">
+                <field name="product_qty" position="after">
+                    <field name="already_produced_qty" />
+                </field>
+            </field>
+        </record>
+
 
 		<record model="ir.ui.view"
 			id="mrp_production_workcenter_form_view_process_lines">
