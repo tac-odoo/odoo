@@ -130,3 +130,23 @@ class sale_order_line(osv.Model):
     }
 
 sale_order()
+
+class res_users(osv.Model):
+    _inherit = 'res.users'
+    
+    _columns = {
+        'outgoing_mail_server_id': fields.many2one('ir.mail_server', 'Outgoing Mail Servers', help='configure for send Out Going Mail Server for current users.', 
+                                          required= True)
+    }
+res_users()
+
+class mail_mail(osv.Model):
+    _inherit = 'mail.mail'
+    
+    def create(self, cr, uid, values, context=None):
+        mail_server = self.pool.get('res.users').browse(cr, uid, uid, context=context)
+        if 'notification' not in values and values.get('mail_message_id'):
+            values['notification'] = True
+            values['mail_server_id'] = mail_server.outgoing_mail_server.id
+        return super(mail_mail, self).create(cr, uid, values, context=context)
+mail_mail()

@@ -27,6 +27,7 @@
       <lineStyle kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
       <lineStyle kind="LINEBELOW" colorName="#000000" start="4,-1" stop="4,-1"/>
       <lineStyle kind="LINEBELOW" colorName="#000000" start="5,-1" stop="5,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="6,-1" stop="6,-1"/>
     </blockTableStyle>
     <blockTableStyle id="Table5">
       <blockAlignment value="LEFT"/>
@@ -37,6 +38,7 @@
       <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="3,-1" stop="3,-1"/>
       <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="4,-1" stop="4,-1"/>
       <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="5,-1" stop="5,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="6,-1" stop="6,-1"/>
     </blockTableStyle>
     <blockTableStyle id="Table3">
       <blockAlignment value="LEFT"/>
@@ -124,7 +126,7 @@
     <para style="P1">
       <font color="white"> </font>
     </para>
-    <blockTable colWidths="83.0,455.0" style="Table2">
+    <blockTable colWidths="0.0,538.0" style="Table2">
       <tr>
         <td>
           <para style="P7">
@@ -165,8 +167,11 @@
     <para style="P5">
       <font color="white"> </font>
     </para>
-    <blockTable colWidths="190.0,81.0,66.0,50.0,68.0,68.0" repeatRows="1" style="Table4">
+    <blockTable colWidths="40.0,150.0,81.0,66.0,50.0,68.0,68.0" repeatRows="1" style="Table4">
       <tr>
+        <td>
+          <para style="terp_5f_tblheader_5f_Details">Sr.No.</para>
+        </td>
         <td>
           <para style="terp_5f_tblheader_5f_Details">Part Number and Description</para>
         </td>
@@ -189,8 +194,11 @@
     </blockTable>
     <section>
       <para style="terp_5f_default_5f_1">[[repeatIn(o.order_line,'line')]]</para>
-      <blockTable colWidths="190.0,81.0,66.0,50.0,68.0,68.0"  style="Table5">
+      <blockTable colWidths="40.0,150.0,81.0,66.0,50.0,68.0,68.0"  style="Table5">
         <tr>
+          <td>
+            <para style="terp_5f_default_5f_Centre_5f_9"> <seq id="L1"/> </para>
+          </td>
           <td>
             <para style="terp_5f_default_5f_9">[[ line.name ]] </para>
           </td>
@@ -204,7 +212,7 @@
             <para style="terp_5f_default_5f_Right_5f_9">[[ formatLang(line.delay ) ]] days </para>
           </td>
           <td>
-            <para style="terp_5f_default_5f_Right_5f_9">[[ formatLang(line.price_unit ) ]]</para>
+            <para style="terp_5f_default_5f_Right_5f_9">[[ formatLang(line.price_unit * (1 + (line.markup) / 100.0)) ]]</para>
           </td>
           <td>
             <para style="terp_5f_default_5f_Right_5f_9">[[ formatLang(line.price_subtotal, digits=get_digits(dp='Sale Price')) ]] [[ o.pricelist_id.currency_id.symbol ]]</para>
@@ -285,7 +293,7 @@
           <para style="P11">[[ o.shop_id.company_id.country_id.code == 'AE' and removeParentNode('tr') ]] Credit Limit:</para>
         </td>
         <td>
-          <para style="P10">[[ formatLang(o.partner_id and o.partner_id.parent_id and o.partner_id.parent_id.credit_limit or o.partner_id.credit_limit , digits=get_digits(dp='Sale Price')) ]][[ o.pricelist_id.currency_id.symbol ]]</para>
+          <para style="P10"> [[ o.pricelist_id.currency_id.symbol ]] [[ formatLang(o.partner_id and o.partner_id.parent_id and o.partner_id.parent_id.credit_limit or o.partner_id.credit_limit , digits=get_digits(dp='Sale Price')) ]]</para>
         </td>
       </tr>
       <tr>
@@ -293,7 +301,7 @@
           <para style="P11">Order Amount:</para>
         </td>
         <td>
-          <para style="P10">[[ formatLang(o.amount_untaxed , digits=get_digits(dp='Sale Price')) ]] [[ o.pricelist_id.currency_id.symbol ]]</para>
+          <para style="P10"> [[ o.pricelist_id.currency_id.symbol ]] [[ formatLang(o.amount_untaxed , digits=get_digits(dp='Sale Price')) ]] </para>
         </td>
       </tr>
       <tr>
@@ -301,7 +309,7 @@
           <para style="P11">TAX Amount:</para>
         </td>
         <td>
-          <para style="P10">[[ formatLang(o.amount_tax , digits=get_digits(dp='Sale Price')) ]] [[ o.pricelist_id.currency_id.symbol ]]</para>
+          <para style="P10"> [[ o.pricelist_id.currency_id.symbol ]] [[ formatLang(o.amount_tax , digits=get_digits(dp='Sale Price')) ]] </para>
         </td>
       </tr>
       <tr>
@@ -309,7 +317,7 @@
           <para style="P11">Total Amount:</para>
         </td>
         <td>
-          <para style="P10">[[ formatLang(o.amount_total , digits=get_digits(dp='Sale Price')) ]] [[ o.pricelist_id.currency_id.symbol ]] </para>
+          <para style="P10"> [[ o.pricelist_id.currency_id.symbol ]] [[ formatLang(o.amount_total , digits=get_digits(dp='Sale Price')) ]] </para>
         </td>
       </tr>
       <tr>
@@ -331,5 +339,8 @@
     <para style="P3">N.B. Air Freight on the consignment will be charged on actual basis </para>
     <para style="P3"/>
     <para style="P3">---------------------------------------------------------------------------------------------------------------------------------------------------------------</para>
+    <para>
+      <seqReset id="L1"/>
+    </para>
   </story>
 </document>
