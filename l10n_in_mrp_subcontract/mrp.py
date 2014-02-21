@@ -52,7 +52,7 @@ class mrp_production(osv.osv):
     def _produced_qty_calc(self, cr, uid, ids, name, args, context=None):
         result = dict([(id, {'already_produced_qty': 0.0}) for id in ids])
         for prod in self.browse(cr, uid, ids, context=context):
-            done = 0.0
+            done = -(prod.scraped_qty)
             for move in prod.move_created_ids2:
                 if move.product_id == prod.product_id:
                     #ignore scrapped and extra consumed and cancel moves
@@ -68,7 +68,9 @@ class mrp_production(osv.osv):
         'moves_to_workorder': fields.boolean('Materials Moves To Work-Center?'),
         'procurement_generated': fields.boolean('Procurement Generated?'),
         'parent_id': fields.many2one('mrp.production', 'Parent Order', readonly=True),
+        'scrap_order_id': fields.many2one('stock.picking', 'Scrap Order', readonly=True),
         'already_produced_qty': fields.function(_produced_qty_calc, multi='produced', type='float', string='Produced Qty',digits_compute=dp.get_precision('Product Unit of Measure')),
+        'scraped_qty': fields.float('Scraped Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
         'backorder_ids': fields.one2many('mrp.production', 'parent_id','Split Orders', readonly=True),
         'date_planned': fields.datetime('Scheduled Date', required=True, select=1, readonly=False, states={'done':[('readonly',True)]}),
         'state': fields.selection(
@@ -623,11 +625,18 @@ class stock_moves_workorder(osv.osv):
         # Get Rejected wizard
         dummy, form_view = models_data.get_object_reference(cr, uid, 'l10n_in_mrp_subcontract', 'view_process_qty_to_update_reject')
         currnt_data = self.browse(cr, uid, ids[0], context=context)
+        factor = currnt_data.product_factor
         context.update({
                         'total_qty':currnt_data.total_qty,
                         'product_id':currnt_data.product_id.id,
                         'already_rejected_qty': currnt_data.rejected_qty,
                         'process_qty': currnt_data.process_qty,
+
+
+                        'product_factor':factor,
+                        's_product_id': currnt_data.s_product_id and currnt_data.s_product_id.id or False,
+                        's_process_qty': factor <> 0.0 and currnt_data.process_qty / currnt_data.product_factor or currnt_data.process_qty,
+
                         })
 
         return {
@@ -1096,7 +1105,8 @@ class mrp_production_workcenter_line(osv.osv):
         delay = days + minite
 
         self.write(cr, uid, ids, {'state':'done', 'date_finished': date_now,'delay':delay}, context=context)
-        self.modify_production_order_state(cr,uid,ids,'done')
+        #IMPORTANTE, Cannot done production order after processing of done workorder.
+        #self.modify_production_order_state(cr,uid,ids,'done')
         return True
 
 

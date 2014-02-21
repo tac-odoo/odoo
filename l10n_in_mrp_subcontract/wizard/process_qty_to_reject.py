@@ -42,7 +42,13 @@ class process_qty_to_update_reject(osv.osv_memory):
         product_id = context and context.get('product_id', False) or False
         process_qty = context and context.get('process_qty', 0.0) or 0.0
         already_rejected_qty = context and context.get('already_rejected_qty', 0.0) or 0.0
+
+        s_product_id = context and context.get('s_product_id', False) or False
+        s_process_qty = context and context.get('s_process_qty', 0.0) or 0.0
+        product_factor = context and context.get('product_factor', 0.0) or 0.0
+
         res = super(process_qty_to_update_reject, self).default_get(cr, uid, fields, context=context)
+
 
         if 'process_move_id' in fields:
             res.update({'process_move_id': process_move_id})
@@ -56,6 +62,17 @@ class process_qty_to_update_reject(osv.osv_memory):
             res.update({'already_rejected_qty': already_rejected_qty})
         if 'rejected_qty' in fields:
             res.update({'rejected_qty': 0.0})
+
+
+        if 's_product_id' in fields:
+            res.update({'s_product_id': s_product_id})
+        if 's_process_qty' in fields:
+            res.update({'s_process_qty': s_process_qty})
+        if 'product_factor' in fields:
+            res.update({'product_factor': product_factor})
+        if 'equation' in fields:
+            res.update({'equation': ''})
+
         return res
 
     _columns = {
@@ -67,7 +84,21 @@ class process_qty_to_update_reject(osv.osv_memory):
         'rejected_qty': fields.float('Reject Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
         'rejected_location_id': fields.many2one('stock.location', 'Rejected Location', required=True),
         'reason': fields.text('Reason'),
+
+        's_product_id': fields.many2one('product.product', 'Semi Product', readonly=True),
+        's_process_qty': fields.float('Process Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
+        's_rejected_qty': fields.float('Reject Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'product_factor': fields.float('Factor', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'equation': fields.char('Conversion Equation',size=256),
+
     }
+
+    def onchange_rejected_qty(self, cr, uid, ids, factor,rejected_qty, context=None):
+        context = context or {}
+        equation = ''
+        if factor <> 0.0: equation = '('+str(rejected_qty)+'/'+ str(factor)+ '='+str(float(rejected_qty) / factor)+')'
+        else: equation = '('+str(rejected_qty)+'='+str(rejected_qty)+')'
+        return {'value': {'s_rejected_qty': factor <> 0.0 and float(rejected_qty) / factor or rejected_qty,'equation':equation}}
 
     def _check_validation_reject_qty(self, cr, uid, total_qty, rejected_qty):
         """
