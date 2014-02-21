@@ -26,7 +26,7 @@ from collections import defaultdict
 from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 from openerp import tools
-from openerp.addons.core_calendar.timeline import Availibility
+from openerp.addons.core_calendar.timeline import Availibility, Timeline
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
 
@@ -128,6 +128,7 @@ class report_event_resource(osv.Model):
         formats = []
         User = self.pool.get('res.users')
         lang = context.get('lang') or User.context_get(cr, uid)['lang']
+        tz = context.get('tz') or User.context_get(cr, uid)['tz']
         formats = self._get_user_dates_format(cr, uid, lang, context=context)
 
         def try_parse(value, formats):
@@ -142,8 +143,11 @@ class report_event_resource(osv.Model):
         if di:
             diparts = [x.strip() for x in di.split(' - ', 2)]
             start = try_parse(diparts[0], formats).replace(hour=0, minute=0, second=0, microsecond=0)
+            start = Timeline.datetime_tz_convert(start, tz, 'UTC')
             if len(diparts) > 1:
-                stop = try_parse(diparts[1], formats)
+                stop = try_parse(diparts[1], formats).replace(hour=0, minute=0, second=0, microsecond=0)
+                stop += relativedelta(days=1)
+                stop = Timeline.datetime_tz_convert(stop, tz, 'UTC')
             else:
                 stop = start + timedelta(days=1)
             return start, stop
