@@ -305,6 +305,9 @@ class EventContent(osv.Model):
         return non_planned_seance_update
 
     def write(self, cr, uid, ids, values, context=None):
+        Seance = self.pool.get('event.seance')
+        seance_ids = Seance.search(cr, uid, [('content_id', 'in', ids)], context=context)
+
         rval = super(EventContent, self).write(cr, uid, ids, values, context=context)
         if any(f in values for f in ['is_divided', 'group_ids']):
             Registration = self.pool.get('event.registration')
@@ -312,6 +315,17 @@ class EventContent(osv.Model):
             Registration._update_registration_groups(cr, uid, registration_ids, context=context)
         if 'event_ids' in values:
             self.unlink_isolated_content(cr, uid, ids, context=context)
+        if 'course_id' in values:
+            Seance.write(cr, uid, seance_ids, {'course_id': values['course_id']}, context=context)
+        if 'slot_duration' in values:
+            seance_not_draft = Seance.search(cr, uid, [('id', 'in', seance_ids),
+                                                       ('state', 'not in', ['draft', 'cancel'])], context=context)
+            if seance_not_draft:
+                raise osv.except_osv(
+                    _('Error!'),
+                    _('You cannot change slot duration because there are '
+                      'some seance which are not draft or cancelled'))
+            Seance.write(cr, uid, seance_ids, {'duration': values['slot_duration']}, context=context)
 
         non_planned_seance_update = self._get_changes_to_propagate(cr, uid, ids, values, context=context)
         if non_planned_seance_update:
