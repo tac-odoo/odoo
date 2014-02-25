@@ -200,7 +200,7 @@
             view_mode="tree,form"
             key2="client_action_relate"
             domain="[('event_ids','in',[active_id])]"
-            context="{'search_default_group_module': 1, 'group_by_no_leaf': 1, 'event_id': active_id}"/>
+            context="{'search_default_group_module': 1, 'search_default_included_into_analysis': 1, 'group_by_no_leaf': 1, 'event_id': active_id}"/>
 
         <record id="link_event_2_module_tree" model="ir.actions.act_window.view">
             <field name="act_window_id" ref="link_event_2_module"/>
@@ -588,6 +588,8 @@
                     <filter string="Cancelled" name="state_done" domain="[('state','=','cancelled')]"/>
                     <separator/>
                     <filter string="In conflict" domain="[('event_conflict_ids','!=',False)]"/>
+                    <separator/>
+                    <filter string="Included into Analysis" name="included_into_analysis" domain="[('type_id.included_into_analysis','=',True)]"/>
                     <separator/>
                     <group expand="0" string="Group By...">
                         <filter string="Type" name="type" domain="[]" context="{'group_by': 'type_id'}"/>
