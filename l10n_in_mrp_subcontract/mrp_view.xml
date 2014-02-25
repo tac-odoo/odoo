@@ -200,15 +200,12 @@
 						attrs="{'invisible':[('scrap_order_id','=',False)]}" />
 				</field>
 
-				<field name="date_planned" position="after">
+				<field name="company_id" position="after">
+					<field name="date_finished" />
+				</field>
+				<field name="origin" position="after">
 					<field name="moves_to_workorder" string="Materials moved to workcenter?"
 						readonly="1" />
-					<field name="location_src_id" domain="[('usage','=','internal')]"
-						on_change="location_id_change(location_src_id,location_dest_id)" />
-				</field>
-
-				<field name="origin" position="after">
-					<field name="location_dest_id" domain="[('usage','=','internal')]" />
 				</field>
 
 				<xpath expr="//button[@name='button_produce']" position="before">
@@ -228,6 +225,19 @@
 				<xpath expr="//button[@name='force_production']" position="replace" />
 				<xpath expr="//button[@name='force_production']" position="replace" />
 
+
+				<xpath expr="//notebook/page[@string='Extra Information']"
+					position="inside">
+					<group string="Location Movements">
+						<group>
+							<field name="location_src_id" domain="[('usage','=','internal')]"
+								on_change="location_id_change(location_src_id,location_dest_id)" />
+						</group>
+						<group>
+							<field name="location_dest_id" domain="[('usage','=','internal')]" />
+						</group>
+					</group>
+				</xpath>
 
 				<xpath expr="//notebook/page[@string='Extra Information']"
 					position="after">
@@ -378,6 +388,7 @@
 				<xpath expr="//field[@name='workcenter_lines']/form//field[@name='name']"
 					position="after">
 					<field name="order_type" />
+					<field name="user_id" />
 					<!-- field name="po_order_id" attrs="{'invisible':[('order_type','!=','out')]}" 
 						readonly="1" /> <field name="service_supplier_id" attrs="{'required':[('order_type','=','out')], 
 						'invisible':[('order_type','!=','out')]}" /> <field name="service_description" 

@@ -774,6 +774,7 @@ class mrp_production_workcenter_line(osv.osv):
     _inherit = 'mrp.production.workcenter.line'
     _columns = {
         'sequence': fields.integer('Sequence', required=True, help="Gives the sequence order when displaying a list of work orders.",readonly=True, states={'draft':[('readonly', False)]}),
+        'user_id': fields.many2one('res.users', 'Responsible',readonly=False, states={'done':[('readonly', True)]}),
         'moves_workorder': fields.one2many('stock.moves.workorder', 'workorder_id', 'Raw Material To Process'),
         'moves_rejection': fields.one2many('stock.moves.rejection', 'rejected_workorder_id', 'Rejected Raw Material'),
         'hour': fields.float('Est.Time(HH:MM)', digits=(16,2)),
