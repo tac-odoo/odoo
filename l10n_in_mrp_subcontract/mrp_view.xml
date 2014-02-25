@@ -81,7 +81,7 @@
 				<xpath
 					expr="//field[@name='workcenter_lines']/form//field[@name='cycle']"
 					position="before">
-					<field name="delay" readonly="1" string="Total Time(HH.MM)" />
+					<field name="delay" readonly="1" widget="float_time" />
 				</xpath>
 				<xpath
 					expr="//notebook/page[@string='Work Orders']/button[@name='action_compute']"
@@ -122,7 +122,7 @@
 					<field name="order_type" string="Type" />
 					<field name="date_start" readonly="1" string="Start Date" />
 					<field name="temp_date_finished" readonly="1" string="Stop Date" />
-					<field name="delay" readonly="1" string="Time(HH:MM)" />
+					<field name="delay" readonly="1" widget="float_time" />
 				</xpath>
 
 				<xpath
@@ -196,7 +196,8 @@
 				<field name="date_planned" position="before">
 					<field name="already_produced_qty" />
 					<field name="scraped_qty" readonly="1" />
-					<field name="scrap_order_id" readonly="1" attrs="{'invisible':[('scrap_order_id','=',False)]}"/>
+					<field name="scrap_order_id" readonly="1"
+						attrs="{'invisible':[('scrap_order_id','=',False)]}" />
 				</field>
 
 				<field name="date_planned" position="after">
@@ -369,10 +370,6 @@
 						</page>
 					</notebook>
 				</xpath>
-				<xpath expr="//field[@name='workcenter_lines']/tree/field[@name='hour']"
-					position="attributes">
-					<attribute name="invisible">1</attribute>
-				</xpath>
 				<xpath expr="//field[@name='workcenter_lines']/tree/field[@name='cycle']"
 					position="attributes">
 					<attribute name="invisible">1</attribute>
@@ -414,6 +411,9 @@
 					<field name="already_produced_qty" />
 					<field name="scraped_qty" />
 				</field>
+				<xpath expr="//field[@name='cycle_total']" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</xpath>
 			</field>
 		</record>
 
@@ -538,6 +538,20 @@
 				<button name="button_draft" position="replace" />
 				<button name="button_cancel" position="replace" />
 
+			</field>
+		</record>
+
+
+		<record model="ir.ui.view"
+			id="mrp_production_workcenter_form_view_process_lines_tree">
+			<field name="name">mrppwl.process.lines.tree</field>
+			<field name="model">mrp.production.workcenter.line</field>
+			<field name="inherit_id"
+				ref="mrp_operations.mrp_production_workcenter_tree_view_inherit" />
+			<field name="arch" type="xml">
+				<field name="hour" position="after">
+					<field name="delay" widget="float_time" />
+				</field>
 			</field>
 		</record>
 

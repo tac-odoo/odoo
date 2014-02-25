@@ -776,6 +776,8 @@ class mrp_production_workcenter_line(osv.osv):
         'sequence': fields.integer('Sequence', required=True, help="Gives the sequence order when displaying a list of work orders.",readonly=True, states={'draft':[('readonly', False)]}),
         'moves_workorder': fields.one2many('stock.moves.workorder', 'workorder_id', 'Raw Material To Process'),
         'moves_rejection': fields.one2many('stock.moves.rejection', 'rejected_workorder_id', 'Rejected Raw Material'),
+        'hour': fields.float('Est.Time(HH:MM)', digits=(16,2)),
+        'delay': fields.float('Actual Time(HH:MM)',help="The elapsed time between operation start and stop in this Work Center",readonly=True),
         #'service_product_id': fields.many2one('product.product', 'Service Product'),
         #'service_supplier_id': fields.many2one('res.partner', 'Partner',domain=[('supplier','=',True)]),
         #'service_description': fields.text('Description'),
