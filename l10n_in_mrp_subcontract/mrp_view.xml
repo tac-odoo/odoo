@@ -48,11 +48,6 @@
 						icon="terp-check" help="Finish Order" type="object" />
 				</xpath>
 
-				<!-- xpath expr="//field[@name='workcenter_lines']/tree//button[@name='button_start_working']" 
-					position="replace"> <button name="action_to_start_working" string="Start" 
-					states="draft" icon="gtk-media-play" help="Start Workingss" type="object" 
-					/> </xpath -->
-
 				<xpath
 					expr="//field[@name='workcenter_lines']/form//button[@name='button_start_working']"
 					position="replace">
@@ -75,8 +70,6 @@
 					expr="//field[@name='workcenter_lines']/form//button[@name='button_draft']"
 					position="replace">
 				</xpath>
-				<!-- xpath expr="//field[@name='workcenter_lines']/tree//button[@name='button_draft']" 
-					position="replace"> </xpath -->
 
 				<xpath
 					expr="//field[@name='workcenter_lines']/form//field[@name='cycle']"
@@ -342,8 +335,6 @@
 													attrs="{'invisible':[('order_type','=','in')]}" />
 											</group>
 										</group>
-										<!-- field name="reason" nolabel="1" colspan="4" placeholder="Add 
-											reason for rejection..." readonly="1" / -->
 									</form>
 								</field>
 							</group>
@@ -417,11 +408,14 @@
 				<field name="product_qty" position="after">
 					<field name="already_produced_qty" />
 					<field name="scraped_qty" />
-					<field name="customer_id" invisible="1"/>
-					<field name="sale_order_id" invisible="1"/>
+					<field name="customer_id" invisible="1" />
+					<field name="sale_order_id" invisible="1" />
 				</field>
 				<xpath expr="//field[@name='cycle_total']" position="attributes">
 					<attribute name="invisible">1</attribute>
+				</xpath>
+				<xpath expr="//field[@name='hour_total']" position="attributes">
+					<attribute name="widget">float_time</attribute>
 				</xpath>
 			</field>
 		</record>
@@ -518,8 +512,6 @@
 												attrs="{'invisible':[('order_type','=','in')]}" />
 										</group>
 									</group>
-									<!-- field name="reason" nolabel="1" colspan="4" placeholder="Add 
-										reason for rejection..." readonly="1" / -->
 								</form>
 							</field>
 						</group>
@@ -621,13 +613,7 @@
 			<field name="arch" type="xml">
 				<field name="workcenter_id" position="after">
 					<field name="order_type" required="1" />
-					<!-- field name="service_supplier_id" attrs="{'required':[('order_type','=','out')], 
-						'invisible':[('order_type','!=','out')]}" / -->
 				</field>
-				<!-- label for="note" position="replace" /> <field name="note" position="replace"> 
-					<field name="note" attrs="{'required':[('order_type','=','out')], 'invisible':[('order_type','!=','out')]}" 
-					placeholder="Add service description here(you could change also in manufacturing 
-					order)...." colspan="4" /> </field -->
 			</field>
 		</record>
 
