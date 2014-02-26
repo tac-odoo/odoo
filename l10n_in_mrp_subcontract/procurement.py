@@ -50,15 +50,21 @@ class procurement_order(osv.osv):
         wf_service = netsvc.LocalService("workflow")
         procurement_obj = self.pool.get('procurement.order')
         for procurement in procurement_obj.browse(cr, uid, ids, context=context):
+            customer_id,order_id = False,False
             res_id = procurement.move_id.id
             #Manufacture Start date = procurement planned date - (product manufacturing lead time + company manufacturing lead time)
             newdate = datetime.strptime(procurement.date_planned, '%Y-%m-%d %H:%M:%S') - relativedelta(days=procurement.product_id.produce_delay or 0.0)
             newdate = newdate - relativedelta(days=company.manufacturing_lead)
+            if procurement.move_id and hasattr(procurement.move_id, 'sale_line_id') and procurement.move_id.sale_line_id and procurement.move_id.sale_line_id.order_id:
+                order_id = procurement.move_id.sale_line_id.order_id.id
+                customer_id = procurement.move_id.sale_line_id.order_id.partner_id.id
             produce_id = production_obj.create(cr, uid, {
                 'origin': procurement.origin,
                 'product_id': procurement.product_id.id,
                 'product_qty': procurement.product_qty,
                 'product_uom': procurement.product_uom.id,
+                'customer_id':customer_id,
+                'sale_order_id':order_id,
                 'product_uos_qty': procurement.product_uos and procurement.product_uos_qty or False,
                 'product_uos': procurement.product_uos and procurement.product_uos.id or False,
                 'location_src_id': procurement.location_id.id,

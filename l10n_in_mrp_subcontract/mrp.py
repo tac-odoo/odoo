@@ -66,6 +66,8 @@ class mrp_production(osv.osv):
         'workcenter_lines': fields.one2many('mrp.production.workcenter.line', 'production_id', 'Work Centers Utilisation',
             readonly=False, states={'done':[('readonly', True)]}),
         'moves_to_workorder': fields.boolean('Materials Moves To Work-Center?'),
+        'customer_id': fields.many2one('res.partner', 'Customer', readonly=True, states={'draft':[('readonly',False)]}),
+        'sale_order_id': fields.many2one('sale.order', 'Sale Order', readonly=True),
         'procurement_generated': fields.boolean('Procurement Generated?'),
         'parent_id': fields.many2one('mrp.production', 'Parent Order', readonly=True),
         'scrap_order_id': fields.many2one('stock.picking', 'Scrap Order', readonly=True),
@@ -450,7 +452,7 @@ class mrp_production(osv.osv):
             - blank workorder lines
         """
         if default is None: default = {}
-        default.update({'workcenter_lines' : [],'moves_to_workorder':False,'parent_id':False,'procurement_generated':False})
+        default.update({'workcenter_lines' : [],'moves_to_workorder':False,'parent_id':False,'procurement_generated':False,'scraped_qty':0.0,'scrap_order_id':False})
         return super(mrp_production, self).copy(cr, uid, id, default, context)
 
     def _find_production_id(self, cr, uid, workorder):

@@ -19,6 +19,7 @@
 #
 ##############################################################################
 import time
+import netsvc
 
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
@@ -122,6 +123,7 @@ class mrp_partially_close(osv.osv_memory):
         prod_obj = self.pool.get('mrp.production')
         pick_obj = self.pool.get('stock.picking')
         move_obj = self.pool.get('stock.move')
+        wf_service = netsvc.LocalService("workflow")
         production_id = context.get('active_id', False)
         assert production_id, "Production Id should be specified in context as a Active ID."
         wizard = self.browse(cr, uid, ids[0], context=context)
@@ -144,6 +146,12 @@ class mrp_partially_close(osv.osv_memory):
             picking_id = pick_obj.create(cr, uid, self._prepare_order_picking(cr, uid, prod, scrap_qty, context=context), context=context)
             move_obj.create(cr, uid, self._prepare_order_line_move(cr, uid, prod, picking_id, scrap_qty, context=context), context=context)
             prod.write({'scrap_order_id':picking_id, 'scraped_qty': scrap_qty}) 
+
+
+            #Picking Directly Done
+            wf_service.trg_validate(uid, 'stock.picking', picking_id, 'button_confirm', cr)
+            pick_obj.action_move(cr, uid, [picking_id], context)
+            wf_service.trg_validate(uid, 'stock.picking', picking_id, 'button_done', cr)
 
         return {}
 
