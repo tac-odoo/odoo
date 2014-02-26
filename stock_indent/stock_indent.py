@@ -375,13 +375,13 @@ class indent_indent(osv.Model):
 #            wf_service.trg_validate(uid, 'procurement.order', proc_id, 'button_confirm', cr)
 #
 #        return picking_id
-        move_obj.action_confirm(cr, uid, todo_moves)
+        todo_moves = move_obj.action_confirm(cr, uid, todo_moves)
         move_obj.force_assign(cr, uid, todo_moves)
-        
+
         for move in move_obj.browse(cr, uid, todo_moves):
             picking_id = move.picking_id.id
         procurement_obj.run(cr, uid, proc_ids, context=context)
-        
+
         return picking_id
 
 
@@ -397,7 +397,7 @@ class indent_indent(osv.Model):
         product_pool = self.pool.get('product.product')
 
         location_id = indent.warehouse_id.lot_stock_id.id
-        
+
         todo_moves = []
 
 #        picking_id = False
@@ -405,7 +405,7 @@ class indent_indent(osv.Model):
             date_planned = self._get_date_planned(cr, uid, indent, line, indent.indent_date, context=context)
 
             if line.product_id:
-#                move_id = False
+                move_id = False
 #                if not picking_id:
 #                    picking_id = picking_obj.create(cr, uid, self._prepare_indent_picking(cr, uid, indent, context=context))
 
@@ -418,22 +418,23 @@ class indent_indent(osv.Model):
                     move_id = move_obj.create(cr, uid, res, context=context)
                 elif not internal and not product_pool.browse(cr, uid, res.get('product_id')).repair_ok:
                     move_id = move_obj.create(cr, uid, res, context=context)
-                
-                todo_moves.append(move_id)
+
+                if move_id:
+                    todo_moves.append(move_id)
 
 #        wf_service = netsvc.LocalService("workflow")
 #        if picking_id:
 #            wf_service.trg_validate(uid, 'stock.picking', picking_id, 'button_confirm', cr)
-        
-        move_obj.action_confirm(cr, uid, todo_moves)
-        move_obj.force_assign(cr, uid, todo_moves)
-        
-        picking_id = False
-        
-        for move in move_obj.browse(cr, uid, todo_moves):
-            picking_id = move.picking_id.id
-            
-        self.write(cr, uid, [indent.id], {'in_picking_id': picking_id})
+        if todo_moves:
+            todo_moves = move_obj.action_confirm(cr, uid, todo_moves)
+            move_obj.force_assign(cr, uid, todo_moves)
+
+            picking_id = False
+
+            for move in move_obj.browse(cr, uid, todo_moves):
+                picking_id = move.picking_id.id
+
+            self.write(cr, uid, [indent.id], {'in_picking_id': picking_id})
         return True
 
     def create_repairing_gatepass(self, cr, uid, indent, context):
@@ -446,13 +447,13 @@ class indent_indent(osv.Model):
         picking_id = False
 
         indent = self.browse(cr, uid, ids[0], context=context)
-        
+
         group_id = self.pool.get('procurement.group').create(cr, uid,{'name': indent.name}, context=context)
         indent.write({'procurement_group_id': group_id}, context=context)
 
         #Check if gatepass is not installed, transfer product to stock for repairing, else
         #Create a returnable gatepass to send supplier to repair their location\
-        gatepass_flow = self._check_gatepass_flow(cr, uid, indent,context)
+        gatepass_flow = self._check_gatepass_flow(cr, uid, indent, context)
 
         if gatepass_flow and indent.type == 'existing':
             self.create_transfer_move(cr, uid, indent, True, group_id, context)

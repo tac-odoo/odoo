@@ -19,8 +19,8 @@
         <record model="workflow.activity" id="act_pending">
             <field name="wkf_id" ref="wkf_gate_pass"/>
             <field name="name">activity.pending</field>
-            <field name="kind">subflow</field>
-            <field name="subflow_id" search="[('name','=','stock.picking.basic')]"/>
+            <field name="kind">function</field>
+<!--            <field name="subflow_id" search="[('name','=','stock.picking.basic')]"/>-->
             <field name="action">action_picking_create()</field>
         </record>
 
@@ -50,7 +50,7 @@
         <record model="workflow.transition" id="trans_pending_done">
             <field name="act_from" ref="act_pending"/>
             <field name="act_to" ref="act_done"/>
-            <field name="signal">subflow.done</field>
+            <field name="signal">gate_pass_done</field>
         </record>
 
     </data>

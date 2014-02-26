@@ -26,7 +26,7 @@
     'category': 'Warehouse Management',
     'website' : 'http://www.openerp.com',
     'summary' : 'Gate Pass, Delivery Orders, Returnable Incoming Shipments',
-    'description' : """
+    'description' : '''
 Gate Pass
 =============
 Useful to manage documents that allows gate keeper to pass the outgoing materials, products, etc. and keeps track of returning items.
@@ -45,7 +45,7 @@ Gate Pass Receipt
 +++++++++++++++++++
 The report to print the details of gate pass with products and shipping details.
 
-""",
+''',
     'depends' : ['l10n_in_base', 'stock'],
     'data' : [
         'stock_gatepass_sequence.xml',
@@ -54,11 +54,10 @@ The report to print the details of gate pass with products and shipping details.
         'stock_gatepass_workflow.xml',
         'stock_gatepass_report.xml',
     ],
-
     'demo': [],
-
     'installable' : True,
     'application' : False,
+    'auto_install': False,
 }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

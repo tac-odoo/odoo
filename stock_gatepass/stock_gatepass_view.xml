@@ -52,7 +52,7 @@
 								<field name="out_picking_id" on_change="onchange_delivery_order(out_picking_id)"
 									attrs="{'invisible': [('sales_delivery', '=', False)], 
                         				'required': [('sales_delivery', '=', True)]}"
-									domain="[('state', '=', 'done'), ('type','=','out')]" />
+									domain="[('state', '=', 'done'), ('picking_type_id.code','=','outgoing')]" />
 							</group>
 							<group>
 								<field name="person_id" />

@@ -23,7 +23,7 @@ import time
 
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
-from openerp import netsvc
+from openerp import workflow
 
 class stock_picking(osv.Model):
     _inherit = 'stock.picking'
@@ -34,23 +34,23 @@ class stock_picking(osv.Model):
 
 stock_picking()
 
-class stock_picking_in(osv.Model):
-    _inherit = "stock.picking.in"
+#class stock_picking_in(osv.Model):
+#    _inherit = "stock.picking.in"
 
-    _columns = {
-        'gate_pass_id': fields.many2one('stock.gatepass', 'Gate Pass'),
-    }
+#    _columns = {
+#        'gate_pass_id': fields.many2one('stock.gatepass', 'Gate Pass'),
+#    }
 
-stock_picking_in()
+#stock_picking_in()
 
-class stock_picking_out(osv.Model):
-    _inherit = "stock.picking.out"
+#class stock_picking_out(osv.Model):
+#    _inherit = "stock.picking.out"
 
-    _columns = {
-        'gate_pass_id': fields.many2one('stock.gatepass', 'Gate Pass'),
-    }
+#    _columns = {
+#        'gate_pass_id': fields.many2one('stock.gatepass', 'Gate Pass'),
+#    }
 
-stock_picking_out()
+#stock_picking_out()
 
 class gate_pass_type(osv.Model):
     _name = 'gatepass.type'
@@ -119,8 +119,10 @@ class stock_gatepass(osv.Model):
         'location_id': fields.many2one('stock.location', 'Source Location', readonly=True, states={'draft': [('readonly', False)]}),
         'state':fields.selection([('draft', 'Draft'), ('pending', 'Pending'), ('done', 'Done')], 'State', readonly=True, track_visibility='onchange'),
         'return_type': fields.selection([('return', 'Returnable'), ('non_return', 'Non-returnable')], 'Return Type', readonly=True, states={'draft': [('readonly', False)]}, track_visibility='onchange'),
-        'out_picking_id': fields.many2one('stock.picking.out', 'Delivery Order', readonly=True, states={'draft': [('readonly', False)]}, domain=[('type','=','out')]),
-        'in_picking_id': fields.many2one('stock.picking.in', 'Incoming Shipment', readonly=True, states={'draft': [('readonly', False)]}),
+#        'out_picking_id': fields.many2one('stock.picking.out', 'Delivery Order', readonly=True, states={'draft': [('readonly', False)]}, domain=[('type','=','out')]),
+#        'in_picking_id': fields.many2one('stock.picking.in', 'Incoming Shipment', readonly=True, states={'draft': [('readonly', False)]}),
+        'in_picking_id': fields.many2one('stock.picking', 'Incoming Shipment', readonly=True, states={'draft': [('readonly', False)]}),
+        'out_picking_id': fields.many2one('stock.picking', 'Delivery Order', readonly=True, states={'draft': [('readonly', False)]}),
         'approval_required': fields.boolean('Approval State', readonly=True, states={'draft': [('readonly', False)]}),
         'sales_delivery': fields.boolean('Sales Delivery'),
     }
@@ -135,24 +137,23 @@ class stock_gatepass(osv.Model):
     def onchange_delivery_order(self, cr, uid, ids, order_id=False, *args, **kw):
         result = {'line_ids': []}
         lines = []
- 
+
         if not order_id:
             return {'value': result}
-        
-        order = self.pool.get('stock.picking.out').browse(cr, uid, order_id)
+
+        order = self.pool.get('stock.picking').browse(cr, uid, order_id)
         products = order.move_lines
-        
+
         for product in products:
             vals = dict(
-                product_id = product.product_id.id, 
-                product_qty = product.product_qty, 
-                uom_id= product.product_uom.id, 
-                name = product.product_id.name, 
+                product_id = product.product_id.id,
+                product_qty = product.product_qty,
+                uom_id= product.product_uom.id,
+                name = product.product_id.name,
                 location_id = product.location_id.id,
                 location_dest_id = product.location_dest_id.id,
-                prodlot_id=product.prodlot_id.id
             )
-            
+
             #TODO: need to check in other ways whether sale module is installed or not instead of try and except..
             try:
                 if product.sale_line_id:
@@ -164,86 +165,87 @@ class stock_gatepass(osv.Model):
         result['partner_id'] = order.partner_id.id
         return {'value': result}
 
-
     def create_delivery_order(self, cr, uid, gatepass, context=None):
-        picking_out_obj = self.pool.get('stock.picking.out')
+        picking_out_obj = self.pool.get('stock.picking')
         move_obj = self.pool.get('stock.move')
-        
-        vals = {
-            'partner_id': gatepass.partner_id.id,
-            'gate_pass_id': gatepass.id,
-            'date': time.strftime('%Y-%m-%d %H:%M:%S'),
-            'origin': gatepass.name,
-            'type': 'out',
-        }
-        
-        out_picking_id = picking_out_obj.create(cr, uid, vals, context=context)
-        
+        todo_moves = []
+
+        obj_data = self.pool.get('ir.model.data')
+        out_type_id = obj_data.get_object_reference(cr, uid, 'stock','picking_type_out')[1]
+
         for line in gatepass.line_ids:
-            result = dict(name=line.product_id.name, 
-                product_id=line.product_id.id, 
-                product_qty=line.product_qty, 
-                product_uom=line.uom_id.id, 
-                location_id=line.location_id.id, 
-                location_dest_id=line.location_dest_id.id, 
-                picking_id=out_picking_id,
-                prodlot_id = line.prodlot_id.id,
-                origin=gatepass.name
+            result = dict(name=line.product_id.name,
+                product_id=line.product_id.id,
+                product_qty=line.product_qty,
+                product_uom=line.uom_id.id,
+                location_id=line.location_id.id,
+                location_dest_id=line.location_dest_id.id,
+                origin=gatepass.name,
+                picking_type_id=out_type_id,
             )
-            move_obj.create(cr, uid, result, context=context)
-        
+            move_id = move_obj.create(cr, uid, result, context=context)
+            todo_moves.append(move_id)
+
+        move_obj.action_confirm(cr, uid, todo_moves)
+        move_obj.force_assign(cr, uid, todo_moves)
+
+        out_picking_id = False
+
+        for move in move_obj.browse(cr, uid, todo_moves):
+            out_picking_id = move.picking_id.id
         return out_picking_id
 
     def create_incoming_shipment(self, cr, uid, gatepass, context=None):
-        picking_in_obj = self.pool.get('stock.picking.in')
         move_obj = self.pool.get('stock.move')
+        obj_data = self.pool.get('ir.model.data')
+        todo_moves = []
 
-        vals = {
-            'partner_id': gatepass.partner_id.id,
-            'gate_pass_id': gatepass.id,
-            'date': time.strftime('%Y-%m-%d %H:%M:%S'),
-            'origin': gatepass.name,
-            'type': 'in',
-        }
-        in_picking_id = picking_in_obj.create(cr, uid, vals, context=context)
-        
         supplier_location = self.pool.get('ir.model.data').get_object(cr, uid, 'stock', 'stock_location_suppliers')
-        
+
+        in_type_id = obj_data.get_object_reference(cr, uid, 'stock','picking_type_in')[1]
+
         for line in gatepass.line_ids:
             if line.product_id.container_id:
-                result = dict(name=line.product_id.container_id.name, 
-                    product_id=line.product_id.container_id.id, 
-                    product_qty=1, 
-                    product_uom=line.product_id.container_id.uom_id.id, 
-                    location_id=supplier_location.id, 
+                result = dict(name=line.product_id.container_id.name,
+                    product_id=line.product_id.container_id.id,
+                    product_qty=1,
+                    product_uom=line.product_id.container_id.uom_id.id,
+                    location_id=supplier_location.id,
                     location_dest_id=line.location_id.id,
-                    picking_id=in_picking_id,
+                    picking_type_id=in_type_id,
                     origin=gatepass.name
                 )
             elif gatepass.type_id.approval_required == True:
-                result = dict(name=line.product_id.name, 
-                    product_id=line.product_id.id, 
-                    product_qty=line.product_qty, 
-                    product_uom=line.uom_id.id, 
-                    location_id=supplier_location.id, 
+                result = dict(name=line.product_id.name,
+                    product_id=line.product_id.id,
+                    product_qty=line.product_qty,
+                    product_uom=line.uom_id.id,
+                    location_id=supplier_location.id,
                     location_dest_id=line.location_id.id,
-                    picking_id=in_picking_id,
-                    prodlot_id = line.prodlot_id.id,
+                    picking_type_id=in_type_id,
                     origin=gatepass.name
                 )
-            move_obj.create(cr, uid, result, context=context)
-        
+            move_id = move_obj.create(cr, uid, result, context=context)
+            todo_moves.append(move_id)
+
+        move_obj.action_confirm(cr, uid, todo_moves)
+        move_obj.force_assign(cr, uid, todo_moves)
+
+        in_picking_id = False
+
+        for move in move_obj.browse(cr, uid, todo_moves):
+            in_picking_id = move.picking_id.id
         return in_picking_id
 
     def open_delivery_order(self, cr, uid, ids, context=None):
         out_picking_id = self.browse(cr, uid, ids[0], context=context).out_picking_id.id
-        res = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'view_picking_out_form')
+        res = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'view_picking_form')
         result = {
             'name': _('Delivery Order'),
             'view_type': 'form',
             'view_mode': 'form',
             'view_id': res and res[1] or False,
-            'res_model': 'stock.picking.out',
+            'res_model': 'stock.picking',
             'type': 'ir.actions.act_window',
             'target': 'current',
             'res_id': out_picking_id,
@@ -252,18 +254,30 @@ class stock_gatepass(osv.Model):
 
     def open_incoming_shipment(self, cr, uid, ids, context=None):
         in_picking_id = self.browse(cr, uid, ids[0], context=context).in_picking_id.id
-        res = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'view_picking_in_form')
+        res = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'view_picking_form')
         result = {
             'name': _('Incoming Shipment'),
             'view_type': 'form',
             'view_mode': 'form',
             'view_id': res and res[1] or False,
-            'res_model': 'stock.picking.in',
+            'res_model': 'stock.picking',
             'type': 'ir.actions.act_window',
             'target': 'current',
             'res_id': in_picking_id,
         }
         return result
+
+    def move_lines_get(self, cr, uid, ids, *args):
+        res = []
+        for gate in self.browse(cr, uid, ids, context={}):
+            res += [x.id for x in gate.in_picking_id.move_lines]
+        return res
+
+    def test_moves_done(self, cr, uid, ids, context=None):
+        for gate in self.browse(cr, uid, ids, context=context):
+            if gate.in_picking_id.state != 'done':
+                return False
+        return True
 
     def check_returnable(self, cr, uid, ids, context=None):
         for gp in self.browse(cr, uid, ids, context=context):
@@ -278,21 +292,18 @@ class stock_gatepass(osv.Model):
         for gatepass in self.browse(cr, uid, ids, context=context):
             if not gatepass.line_ids:
                 raise osv.except_osv(_('Warning!'),_('You cannot confirm a gate pass which has no line.'))
-            out_picking_id = gatepass.out_picking_id.id
+            out_picking_id = gatepass.out_picking_id.id or False
             in_picking_id = False
-            picking_ids = []
 
             if not out_picking_id:
                 out_picking_id = self.create_delivery_order(cr, uid, gatepass, context=context)
-                picking_ids.append(out_picking_id)
 
             if gatepass.type_id and gatepass.type_id.return_type == 'return':
                 in_picking_id = self.create_incoming_shipment(cr, uid, gatepass, context=context)
-                picking_ids.append(in_picking_id)
 
             name = seq_obj.get(cr, uid, 'stock.gatepass')
             res = {
-                'name': name, 
+                'name': name,
                 'approve_date': time.strftime('%Y-%m-%d %H:%M:%S'),
                 'out_picking_id': out_picking_id,
                 'in_picking_id': in_picking_id,
@@ -301,16 +312,15 @@ class stock_gatepass(osv.Model):
             if gatepass.person_id:
                 res = dict(res, message_follower_ids = [(4, gatepass.person_id and gatepass.person_id.id)])
             self.write(cr, uid, [gatepass.id], res, context=context)
-            picking_pool.write(cr, uid, picking_ids, {'origin': name}, context)
         return True
 
     def action_picking_create(self, cr, uid, ids, context=None):
         self.action_confirm(cr, uid, ids, context=context)
         assert len(ids) == 1, 'This option should only be used for a single id at a time.'
         picking = self.browse(cr, uid, ids[0], context=context).in_picking_id.id
-        self.pool.get('stock.picking.in').write(cr, uid, [picking], {'gate_pass_id': ids[0]}, context=context)
+        self.pool.get('stock.picking').write(cr, uid, [picking], {'gate_pass_id': ids[0]}, context=context)
         self.write(cr, uid, ids, {'state': 'pending'}, context=context)
-        return picking
+        return True
 
     def action_done(self, cr, uid, ids, context=None):
         for gatepass in self.browse(cr, uid, ids, context=context):
@@ -350,11 +360,11 @@ class stock_gatepass_line(osv.Model):
     def _default_stock_location(self, cr, uid, context=None):
         stock_location = self.pool.get('ir.model.data').get_object(cr, uid, 'stock', 'stock_location_stock')
         return stock_location.id
-    
+
     def _default_dest_location(self, cr, uid, context=None):
         stock_location = self.pool.get('ir.model.data').get_object(cr, uid, 'stock', 'stock_location_customers')
         return stock_location.id
-    
+
     _defaults = {
         'product_qty': 1,
         'uom_id': _get_uom_id,
@@ -370,5 +380,22 @@ class stock_gatepass_line(osv.Model):
         return result
 
 stock_gatepass_line()
+
+
+class stock_move(osv.osv):
+    _inherit = 'stock.move'
+
+    def write(self, cr, uid, ids, vals, context=None):
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        res = super(stock_move, self).write(cr, uid, ids, vals, context=context)
+        from openerp import workflow
+        if 'state' in vals:
+            for move in self.browse(cr, uid, ids, context=context):
+                if move.picking_id and move.picking_id.gate_pass_id:
+                    gate_pass_id = move.picking_id.gate_pass_id.id
+                    if self.pool.get('stock.gatepass').test_moves_done(cr, uid, [gate_pass_id], context=context):
+                        workflow.trg_validate(uid, 'stock.gatepass', gate_pass_id, 'gate_pass_done', cr)
+        return res
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
