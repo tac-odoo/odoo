@@ -1183,7 +1183,9 @@ class mrp_bom(osv.osv):
             if routing:
                 for wc_use in routing.workcenter_lines:
                     wc = wc_use.workcenter_id
-                    d, m = divmod(factor, wc_use.workcenter_id.capacity_per_cycle)
+                    #change here , suppose workcentere put 0.0 capicity then ?
+                    #d, m = divmod(factor, wc_use.workcenter_id.capacity_per_cycle)
+                    d, m = divmod(factor, wc_use.workcenter_id.capacity_per_cycle or 1.0)
                     mult = (d + (m and 1.0 or 0.0))
                     cycle = mult * wc_use.cycle_nbr
                     result2.append({
