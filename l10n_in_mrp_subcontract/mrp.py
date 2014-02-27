@@ -1071,28 +1071,31 @@ class mrp_production_workcenter_line(osv.osv):
         return True
 
     #Added float_time widget to auto converted
-#    def write(self, cr, uid, ids, vals, context=None, update=True):
-#        """
-#        -process
-#            -Update delay, depends on start date and finished date dynamically.
-#        """
-#        if vals.get('date_start', False) or vals.get('date_finished', False):
-#            date_start, date_finished = False,False
-#            if isinstance(ids, (int, long)):
-#                ids = [ids]
-#            if vals.get('date_start'):
-#                date_finished = self.browse(cr, uid, ids[0], context=context).date_finished
-#                date_start = vals['date_start']
-#            if vals.get('date_finished'):
-#                date_start = self.browse(cr, uid, ids[0], context=context).date_start
-#                date_finished = vals['date_finished']
-#            if date_start and date_finished:
-#                start = datetime.strptime(date_start,'%Y-%m-%d %H:%M:%S')
-#                finished = datetime.strptime(date_finished,'%Y-%m-%d %H:%M:%S')
+    def write(self, cr, uid, ids, vals, context=None, update=True):
+        """
+        -process
+            -Update delay, depends on start date and finished date dynamically.
+        """
+        if vals.get('date_start', False) or vals.get('date_finished', False):
+            date_start, date_finished = False,False
+            if isinstance(ids, (int, long)):
+                ids = [ids]
+            if vals.get('date_start'):
+                date_finished = self.browse(cr, uid, ids[0], context=context).date_finished
+                date_start = vals['date_start']
+            if vals.get('date_finished'):
+                date_start = self.browse(cr, uid, ids[0], context=context).date_start
+                date_finished = vals['date_finished']
+            if date_start and date_finished:
+                delay = 0.0
+                start = datetime.strptime(date_start,'%Y-%m-%d %H:%M:%S')
+                finished = datetime.strptime(date_finished,'%Y-%m-%d %H:%M:%S')
+                delay += (finished-start).days * 24
+                delay += (finished-start).seconds / float(60*60)
 #                days = ((finished-start).days * 24) + ((finished-start).seconds) // 3600
 #                minite = (((finished-start).seconds%3600) / float(60))/100
-#                vals.update({'delay': days+minite})
-#        return super(mrp_production_workcenter_line, self).write(cr, uid, ids, vals, context=context)
+                vals.update({'delay': delay})
+        return super(mrp_production_workcenter_line, self).write(cr, uid, ids, vals, context=context)
 
     def action_done(self, cr, uid, ids, context=None):
         """ 
