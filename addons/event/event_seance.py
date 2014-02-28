@@ -975,6 +975,7 @@ class EventParticipation(osv.Model):
     _name = 'event.participation'
     _description = __doc__
     _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _order = 'name'
 
     PRESENCE_STATUS = [
         ('none', 'No Presence Information'),
