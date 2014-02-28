@@ -31,7 +31,7 @@
     'author': 'OpenERP SA',
     'website': 'http://www.openerp.com',
     'images': [],
-    'depends': ['mail'],
+    'depends': ['mail','email_template'],
     'data': ['email_cc_bcc_view.xml',
     ],
     'demo': [],

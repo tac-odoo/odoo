@@ -23,6 +23,7 @@ import re
 import base64
 import logging
 
+from openerp import netsvc
 from openerp import tools
 from openerp import SUPERUSER_ID
 from openerp.osv import fields, osv
@@ -41,7 +42,82 @@ class mail_compose_message(osv.TransientModel):
             'mail_compose_message_res_partner_bcc_rel',
             'wizard_id', 'partner_bcc_id', 'Email BCC'),
     }
+    _defaults = {
+         'email_cc_ids': lambda self, cr, uid, ctx={}: [],
+         'email_bcc_ids': lambda self, cr, uid, ctx={}: [],
+    }
+    def generate_email_for_composer(self, cr, uid, template_id, res_id, context=None):
+        """ Call email_template.generate_email(), get fields relevant for
+            mail.compose.message, transform email_cc and email_to into partner_ids """
+        template_values = self.pool.get('email.template').generate_email(cr, uid, template_id, res_id, context=context)
+        # filter template values
+        fields = ['body_html', 'subject', 'email_to', 'email_recipients', 'email_cc','email_bcc', 'attachment_ids', 'attachments']
+        values = dict((field, template_values[field]) for field in fields if template_values.get(field))
+        values['body'] = values.pop('body_html', '')
 
+        # transform email_to, email_cc into partner_ids
+        partner_ids = set()
+        partner_cc_ids = set()
+        partner_bcc_ids = set()
+        mails = tools.email_split(values.pop('email_to', ''))
+        mails_cc = tools.email_split(values.pop('email_cc', ''))
+        mails_bcc = tools.email_split(values.pop('email_bcc', ''))
+        ctx = dict((k, v) for k, v in (context or {}).items() if not k.startswith('default_'))
+        for mail in mails:
+            partner_id = self.pool.get('res.partner').find_or_create(cr, uid, mail, context=ctx)
+            partner_ids.add(partner_id)
+        for mail_cc in mails_cc:
+            partner_cc_id = self.pool.get('res.partner').find_or_create(cr, uid, mail_cc, context=ctx)
+            partner_cc_ids.add(partner_cc_id)
+            
+        for mail_bcc in mails_bcc:
+            partner_bcc_id = self.pool.get('res.partner').find_or_create(cr, uid, mail_bcc, context=ctx)
+            partner_bcc_ids.add(partner_bcc_id)
+        email_recipients = values.pop('email_recipients', '')
+        if email_recipients:
+            for partner_id in email_recipients.split(','):
+                if partner_id:  # placeholders could generate '', 3, 2 due to some empty field values
+                    partner_ids.add(int(partner_id))
+            
+
+        # legacy template behavior: void values do not erase existing values and the
+        # related key is removed from the values dict
+        if partner_ids:
+            values['partner_ids'] = list(partner_ids)
+        if partner_cc_ids:
+            values['email_cc_ids'] = list(partner_cc_ids)
+        if partner_bcc_ids:
+            values['email_bcc_ids'] = list(partner_bcc_ids)
+        return values
+    
+    def onchange_template_id(self, cr, uid, ids, template_id, composition_mode, model, res_id, context=None):
+        """ - mass_mailing: we cannot render, so return the template values
+            - normal mode: return rendered values """
+        if template_id and composition_mode == 'mass_mail':
+            values = self.pool.get('email.template').read(cr, uid, template_id, ['subject', 'body_html', 'attachment_ids'], context)
+            values.pop('id')
+        elif template_id:
+            values = self.generate_email_for_composer(cr, uid, template_id, res_id, context=context)
+            # transform attachments into attachment_ids; not attached to the document because this will
+            # be done further in the posting process, allowing to clean database if email not send
+            values['attachment_ids'] = values.pop('attachment_ids', [])
+            ir_attach_obj = self.pool.get('ir.attachment')
+            for attach_fname, attach_datas in values.pop('attachments', []):
+                data_attach = {
+                    'name': attach_fname,
+                    'datas': attach_datas,
+                    'datas_fname': attach_fname,
+                    'res_model': 'mail.compose.message',
+                    'res_id': 0,
+                    'type': 'binary',  # override default_type from context, possibly meant for another model!
+                }
+                values['attachment_ids'].append(ir_attach_obj.create(cr, uid, data_attach, context=context))
+        else:
+            values = self.default_get(cr, uid, ['body', 'subject', 'partner_ids', 'attachment_ids','email_cc_ids','email_bcc_ids'], context=context)
+        if values.get('body_html'):
+            values['body'] = values.pop('body_html')
+        return {'value': values}
+    
     def send_mail(self, cr, uid, ids, context=None):
         """ Process the wizard content and proceed with sending the related
             email(s), rendering any template patterns on the fly if needed. """
@@ -465,3 +541,71 @@ class mail_mail(osv.Model):
                 cr.commit()
         return True
 mail_mail()
+
+class email_template(osv.osv):
+    "Templates for sending email"
+    _inherit = "email.template"
+    _columns = {
+        'email_bcc': fields.char('Bcc', help="Carbon copy recipients (placeholders may be used here)"),
+    }
+    def generate_email(self, cr, uid, template_id, res_id, context=None):
+        """Generates an email from the template for given (model, res_id) pair.
+
+           :param template_id: id of the template to render.
+           :param res_id: id of the record to use for rendering the template (model
+                          is taken from template definition)
+           :returns: a dict containing all relevant fields for creating a new
+                     mail.mail entry, with one extra key ``attachments``, in the
+                     format expected by :py:meth:`mail_thread.message_post`.
+        """
+        if context is None:
+            context = {}
+        report_xml_pool = self.pool.get('ir.actions.report.xml')
+        template = self.get_email_template(cr, uid, template_id, res_id, context)
+        values = {}
+        for field in ['subject', 'body_html', 'email_from',
+                      'email_to', 'email_recipients', 'email_cc','email_bcc', 'reply_to']:
+            values[field] = self.render_template(cr, uid, getattr(template, field),
+                                                 template.model, res_id, context=context) \
+                                                 or False
+        if template.user_signature:
+            signature = self.pool.get('res.users').browse(cr, uid, uid, context).signature
+            values['body_html'] = tools.append_content_to_html(values['body_html'], signature)
+
+        if values['body_html']:
+            values['body'] = tools.html_sanitize(values['body_html'])
+
+        values.update(mail_server_id=template.mail_server_id.id or False,
+                      auto_delete=template.auto_delete,
+                      model=template.model,
+                      res_id=res_id or False)
+
+        attachments = []
+        # Add report in attachments
+        if template.report_template:
+            report_name = self.render_template(cr, uid, template.report_name, template.model, res_id, context=context)
+            report_service = 'report.' + report_xml_pool.browse(cr, uid, template.report_template.id, context).report_name
+            # Ensure report is rendered using template's language
+            ctx = context.copy()
+            if template.lang:
+                ctx['lang'] = self.render_template(cr, uid, template.lang, template.model, res_id, context)
+            service = netsvc.LocalService(report_service)
+            (result, format) = service.create(cr, uid, [res_id], {'model': template.model}, ctx)
+            result = base64.b64encode(result)
+            if not report_name:
+                report_name = report_service
+            ext = "." + format
+            if not report_name.endswith(ext):
+                report_name += ext
+            attachments.append((report_name, result))
+
+        attachment_ids = []
+        # Add template attachments
+        for attach in template.attachment_ids:
+            attachment_ids.append(attach.id)
+
+        values['attachments'] = attachments
+        values['attachment_ids'] = attachment_ids
+        return values
+email_template()
+

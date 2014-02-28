@@ -32,6 +32,7 @@
     'images': [],
     'depends': ['sale'],
     'data': ['sparetech_view.xml',
+             'sparetech_data.xml',
     ],
     'demo': [],
     'test': [],
