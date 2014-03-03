@@ -1139,6 +1139,7 @@ mrp_routing_workcenter()
 class mrp_bom(osv.osv):
     _inherit = 'mrp.bom'
 
+
     def _bom_explode(self, cr, uid, bom, factor, properties=None, addthis=False, level=0, routing_id=False):
         """ Finds Products and Work Centers for related BoM for manufacturing order.
         @param bom: BoM of particular product.
@@ -1149,6 +1150,7 @@ class mrp_bom(osv.osv):
         @return: result: List of dictionaries containing product details.
                  result2: List of dictionaries containing Work Center details.
         """
+
         routing_obj = self.pool.get('mrp.routing')
         factor = factor / (bom.product_efficiency or 1.0)
         max_rounding = max(bom.product_rounding, bom.product_uom.rounding)
@@ -1192,11 +1194,12 @@ class mrp_bom(osv.osv):
                         'name': tools.ustr(wc_use.name) + ' - '  + tools.ustr(bom.product_id.name),
                         'workcenter_id': wc.id,
                         'order_type':wc_use.order_type,
-                        #'service_description':wc_use.note,
-                        #'service_supplier_id':wc_use.service_supplier_id and wc_use.service_supplier_id.id or False,
                         'sequence': level+(wc_use.sequence or 0),
                         'cycle': cycle,
-                        'hour': float(wc_use.hour_nbr*mult + ((wc.time_start or 0.0)+(wc.time_stop or 0.0)+cycle*(wc.time_cycle or 0.0)) * (wc.time_efficiency or 1.0)),
+                        #'hour': float(wc_use.hour_nbr*mult + ((wc.time_start or 0.0)+(wc.time_stop or 0.0)+cycle*(wc.time_cycle or 0.0)) * (wc.time_efficiency or 1.0)),
+                        #Estimatated Hours = (Before P Stat+Before P Stop + total hours(define in routing) ) / effieciency
+                        #Engineering manufacturing company dosent consider cycle loop, Its alwys work on hours basis.
+                        'hour': float((wc_use.hour_nbr*mult + ((wc.time_start or 0.0)+(wc.time_stop or 0.0))) / float(wc.time_efficiency or 1.0))
                     })
             for bom2 in bom.bom_lines:
                 res = self._bom_explode(cr, uid, bom2, factor, properties, addthis=True, level=level+10)
