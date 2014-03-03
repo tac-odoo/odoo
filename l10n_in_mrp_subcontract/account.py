@@ -18,14 +18,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import account
-import mrp
-import procurement
-import product
-import stock
-import purchase
-import partner
-import invoice
-import sale
-import wizard
+
+from openerp.osv import fields, osv
+
+class account_analytic_line(osv.osv):
+    _inherit = 'account.analytic.line'
+    _columns = {
+        'planned_cost' : fields.float('Planned Cost'),
+    }
+
+account_analytic_line()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

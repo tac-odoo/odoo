@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+        <record id="view_account_analytic_line_tree_estimated_cost" model="ir.ui.view">
+            <field name="name">account.analytic.line.tree.estimated_cost</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="account.view_account_analytic_line_tree"/>
+            <field name="arch" type="xml">
+                <field name="amount" position="before">
+                    <field name="planned_cost"/>
+                </field>
+                <field name="amount" position="attributes">
+                    <attribute name="string">Actual Cost</attribute>
+                </field>
+            </field>
+        </record>
+          <record id="view_account_analytic_line_form_estimated_cost" model="ir.ui.view">
+            <field name="name">account.analytic.line.form.estimated_cost</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="account.view_account_analytic_line_form"/>
+            <field name="arch" type="xml">
+                <field name="amount" position="before">
+                    <field name="planned_cost"/>
+                </field>
+                <field name="amount" position="attributes">
+                    <attribute name="string">Actual Cost</attribute>
+                </field>
+            </field>
+        </record>
+
+    </data>
+</openerp>

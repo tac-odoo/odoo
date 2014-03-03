@@ -497,6 +497,57 @@ class mrp_production(osv.osv):
         # to find next work-order
         return self.to_find_next_wrkorder(cr, uid, production_id, wrkorder_id.id, wrkorder_id.sequence, context=context)
 
+    def _costs_generate(self, cr, uid, production):
+        """ Calculates total costs at the end of the production.
+        @param production: Id of production order.
+        @return: Calculated amount.
+        """
+        amount = 0.0
+        amount_a = 0.0
+        analytic_line_obj = self.pool.get('account.analytic.line')
+        for wc_line in production.workcenter_lines:
+            wc = wc_line.workcenter_id
+            if wc.costs_journal_id and wc.costs_general_account_id:
+                # Estimated Cost per hour
+                value = wc_line.hour * wc.costs_hour
+                # Actual Cost per hour
+                actual_value = wc_line.delay * wc.costs_hour
+                account = wc.costs_hour_account_id.id
+                if value and account:
+                    amount += value
+                    amount_a += actual_value
+                    analytic_line_obj.create(cr, uid, {
+                        'name': wc_line.name + ' (H)',
+                        'amount': amount_a,
+                        'planned_cost':value,
+                        'account_id': account,
+                        'general_account_id': wc.costs_general_account_id.id,
+                        'journal_id': wc.costs_journal_id.id,
+                        'ref': wc.code,
+                        'product_id': wc.product_id.id,
+                        'unit_amount': wc_line.hour,
+                        'product_uom_id': wc.product_id and wc.product_id.uom_id.id or False
+                    } )
+                # Cost per cycle
+                value = wc_line.cycle * wc.costs_cycle
+                account = wc.costs_cycle_account_id.id
+                if value and account:
+                    amount += value
+                    amount_a += actual_value
+                    analytic_line_obj.create(cr, uid, {
+                        'name': wc_line.name+' (C)',
+                        'amount': amount_a,
+                        'account_id': account,
+                        'planned_cost':value,
+                        'general_account_id': wc.costs_general_account_id.id,
+                        'journal_id': wc.costs_journal_id.id,
+                        'ref': wc.code,
+                        'product_id': wc.product_id.id,
+                        'unit_amount': wc_line.cycle,
+                        'product_uom_id': wc.product_id and wc.product_id.uom_id.id or False
+                    } )
+        return amount
+
 mrp_production()
 
 class stock_moves_workorder(osv.osv):
