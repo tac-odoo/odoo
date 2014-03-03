@@ -19,6 +19,7 @@
 #
 ##############################################################################
 import account
+import res_company
 import mrp
 import procurement
 import product

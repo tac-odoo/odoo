@@ -21,12 +21,16 @@
 
 from openerp.osv import fields, osv
 
-class account_analytic_line(osv.osv):
-    _inherit = 'account.analytic.line'
+class res_company(osv.osv):
+    _inherit = "res.company"
     _columns = {
-        'planned_cost' : fields.float('Planned Cost'),
+        'cst_no': fields.char('CST Number', size=32, help='Central Sales Tax Number of Company'),
+        'cst_date': fields.date('CST Number Issue Date', help='Central Sales Tax Date of Company'),
+        'vat_no' : fields.char('VAT Number', size=32, help="Value Added Tax Number"),
+        'vat_date': fields.date('VAT Number Issue Date', help='VAT Number Issue Date'),
+        'excise_no': fields.char('Excise Control Code', size=32, help="Excise Control Code"),
+        'excise_date': fields.date('Excise Code Issue Date',  help="Excise Code Issue Date"),
     }
-
-account_analytic_line()
+res_company()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
