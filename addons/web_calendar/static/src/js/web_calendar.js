@@ -625,14 +625,14 @@ openerp.web_calendar = function(instance) {
                 'id': evt.id,
                 'attendees':attendees
             };
-            
 
-            if (!self.useContacts || self.all_filters[evt[this.color_field]] != undefined) {
+            var color_key = evt[this.color_field];
+            if (typeof color_key === "object") {
+                color_key = color_key[0];
+            }
+
+            if (!self.useContacts || self.all_filters[color_key] != undefined) {
                 if (this.color_field && evt[this.color_field]) {
-                    var color_key = evt[this.color_field];
-                    if (typeof color_key === "object") {
-                        color_key = color_key[0];
-                    }
                     r.className = 'cal_opacity calendar_color_'+ this.get_color(color_key);                                
                 }
             }
