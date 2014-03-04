@@ -224,6 +224,7 @@ class stock_picking(osv.osv):
         'move_lines': fields.one2many('stock.move', 'picking_id', 'Internal Moves', readonly=True, states={'draft': [('readonly', False)]}),
         'service_order': fields.boolean('Service Order'),
         'pass_to_qc': fields.boolean('QC Test?'),
+        'dc_number': fields.char('DC Number',size=256),
         'workorder_id':  fields.many2one('mrp.production.workcenter.line', 'Work-Order'),
         'move_lines_qc2store': fields.one2many('stock.move', 'picking_qc_id', 'Store Moves', readonly=True),
         'qc_loc_id': fields.many2one('stock.location', 'QC Location', readonly=True),
@@ -315,6 +316,7 @@ class stock_picking_in(osv.osv):
 
     _columns = {
         'pass_to_qc': fields.boolean('QC Test?'),
+        'dc_number': fields.char('DC Number',size=256),
         'move_lines': fields.one2many('stock.move', 'picking_id', 'Internal Moves',readonly=True, states={'draft': [('readonly', False)]}),
         'move_lines_qc2store': fields.one2many('stock.move', 'picking_qc_id', 'Store Moves', readonly=True),
         'qc_loc_id': fields.many2one('stock.location', 'QC Location', readonly=True),

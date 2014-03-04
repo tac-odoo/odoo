@@ -71,11 +71,9 @@
 					position="replace">
 				</xpath>
 
-				<xpath
-					expr="//field[@name='workcenter_lines']/form//field[@name='cycle']"
-					position="before">
-					<field name="delay" readonly="1" widget="float_time" />
-				</xpath>
+				<!-- xpath expr="//field[@name='workcenter_lines']/form//field[@name='cycle']" 
+					position="before"> <field name="delay" readonly="1" widget="float_time" /> 
+					</xpath -->
 				<xpath
 					expr="//notebook/page[@string='Work Orders']/button[@name='action_compute']"
 					position="replace" />
@@ -221,6 +219,17 @@
 
 				<xpath expr="//notebook/page[@string='Extra Information']"
 					position="inside">
+					<group string="Manufacturing Costing">
+						<group>
+							<field name="currency_id" invisible="1" />
+							<field name="planned_cost" widget='monetary'
+								options="{'currency_field': 'currency_id'}" />
+						</group>
+						<group>
+							<field name="actual_cost" widget='monetary'
+								options="{'currency_field': 'currency_id'}" />
+						</group>
+					</group>
 					<group string="Location Movements">
 						<group>
 							<field name="location_src_id" domain="[('usage','=','internal')]"
@@ -337,6 +346,25 @@
 										</group>
 									</form>
 								</field>
+							</group>
+						</page>
+						<page string="Time/Costing Calculation">
+							<group>
+								<group string="Time Calculation">
+									<field name="currency_id" invisible="1" />
+									<field name="hour" readonly="1" widget="float_time"
+										string="Workorder Planned Time(HH:MM)" />
+									<field name="delay" readonly="1" widget="float_time"
+										string="Workorder Actual Time(HH:MM)" />
+									<field name="operator_efficiency" readonly="1" />
+
+								</group>
+								<group string="Cost Calculation">
+									<field name="wo_planned_cost" widget='monetary'
+										options="{'currency_field': 'currency_id'}" />
+									<field name="wo_actual_cost" widget='monetary'
+										options="{'currency_field': 'currency_id'}" />
+								</group>
 							</group>
 						</page>
 						<page string="Rejected Raw Materials">

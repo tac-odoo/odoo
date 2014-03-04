@@ -20,6 +20,7 @@
 ##############################################################################
 import netsvc
 import time
+import math
 
 from openerp.osv import osv, fields
 import openerp.addons.decimal_precision as dp
@@ -50,6 +51,10 @@ class mrp_production(osv.osv):
     _order = "id desc"
 
     def _produced_qty_calc(self, cr, uid, ids, name, args, context=None):
+        """
+        Process
+            -Find already Produce Qty from Manufacturing Order.
+        """
         result = dict([(id, {'already_produced_qty': 0.0}) for id in ids])
         for prod in self.browse(cr, uid, ids, context=context):
             done = -(prod.scraped_qty)
@@ -60,6 +65,23 @@ class mrp_production(osv.osv):
                         if (not move.scrapped) or (not move.extra_consumed):
                             done += move.product_qty
             result[prod.id]['already_produced_qty'] = done
+        return result
+
+    def _mrp_costing(self, cr, uid, ids, name, args, context=None):
+        """
+        Process
+            -Planned Cost = cost hour * planned time
+            -Actual Cost = cost hour * actual time
+        """
+        result = dict([(id, {'planned_cost': 0.0, 'actual_cost': 0.0}) for id in ids])
+        for order in self.browse(cr, uid, ids, context=context):
+            planned_cost = actual_cost = 0.0
+            for wo in order.workcenter_lines:
+                if wo.state == 'cancel': continue
+                planned_cost += wo.hour * wo.workcenter_id.costs_hour
+                actual_cost += wo.delay * wo.workcenter_id.costs_hour
+            result[order.id]['planned_cost'] = planned_cost
+            result[order.id]['actual_cost'] = actual_cost
         return result
 
     _columns = {
@@ -87,6 +109,11 @@ class mrp_production(osv.osv):
                 If the stock is available then the status is set to 'Ready to Produce'.\n\
                 When the production gets started then the status is set to 'In Production'.\n\
                 When the production is over, the status is set to 'Done'."),
+
+        'currency_id': fields.related('company_id', 'currency_id', type="many2one", relation="res.currency", string="Currency", readonly=True),
+        'planned_cost': fields.function(_mrp_costing, multi='cost', type='float', string='Planned Cost'),
+        'actual_cost': fields.function(_mrp_costing, multi='cost', type='float', string='Actual Cost'),
+
     }
 
     def split_qty_order(self, cr, uid, ids, context=None):
@@ -824,6 +851,37 @@ class stock_moves_rejection(osv.osv):
 stock_moves_rejection()
 
 class mrp_production_workcenter_line(osv.osv):
+
+
+    def _mrp_wo_costing(self, cr, uid, ids, name, args, context=None):
+        """
+        Process
+            -Planned Cost = cost hour * planned time
+            -Actual Cost = cost hour * actual time
+        """
+
+        def float_time_convert(float_val):
+            factor = float_val < 0 and -1 or 1
+            val = abs(float_val)
+            return (factor * int(math.floor(val)), int(round((val % 1) * 60)))
+
+        result = dict([(id, {'wo_planned_cost': 0.0, 'wo_actual_cost': 0.0,'operator_efficiency':0.0}) for id in ids])
+        for wo in self.browse(cr, uid, ids, context=context):
+            wo_planned_cost = wo_actual_cost = operator_efficiency = 0.0
+            if wo.state == 'cancel': continue
+            wo_planned_cost += wo.hour * wo.workcenter_id.costs_hour
+            wo_actual_cost += wo.delay * wo.workcenter_id.costs_hour
+            p_hour,p_min = float_time_convert(wo.hour)
+            a_hour,a_min = float_time_convert(wo.delay)
+            p_seconds = p_hour * 3600 + p_min * 60
+            a_seconds = a_hour * 3600 + a_min * 60
+            if a_seconds > 0:
+                operator_efficiency =  (float(p_seconds) / float(a_seconds)) * 100
+        result[wo.id]['wo_planned_cost'] = wo_planned_cost
+        result[wo.id]['wo_actual_cost'] = wo_actual_cost
+        result[wo.id]['operator_efficiency'] = int(operator_efficiency)
+        return result
+
     _inherit = 'mrp.production.workcenter.line'
     _columns = {
         'sequence': fields.integer('Sequence', required=True, help="Gives the sequence order when displaying a list of work orders.",readonly=True, states={'draft':[('readonly', False)]}),
@@ -839,6 +897,12 @@ class mrp_production_workcenter_line(osv.osv):
         'order_type': fields.selection([('in', 'Inside'), ('out', 'Outside')], 'WorkOrder Process', readonly=True, states={'draft':[('readonly', False)]}),
         'workcenter_id': fields.many2one('mrp.workcenter', 'Work Center', required=True , readonly=True, states={'draft':[('readonly', False)]}),
         'temp_date_finished':fields.related('date_finished', type="datetime",store=True),
+
+        'currency_id': fields.related('production_id', 'currency_id', type="many2one", relation="res.currency", string="Currency", readonly=True),
+        'wo_planned_cost': fields.function(_mrp_wo_costing, multi='cost', type='float', string='Workorder Planned Cost'),
+        'wo_actual_cost': fields.function(_mrp_wo_costing, multi='cost', type='float', string='Workorder Actual Cost'),
+        'operator_efficiency': fields.function(_mrp_wo_costing, multi='cost', type='integer', string='Operator Efficiency(%)'),
+
     }
     _sql_constraints = [('sequence_uniq', 'unique(sequence, production_id)', "You cannot assign same sequence on current production order")] 
 
