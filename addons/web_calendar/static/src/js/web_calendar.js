@@ -1454,7 +1454,7 @@ openerp.web_calendar = function(instance) {
             this.$('div.oe_calendar_all_responsibles').append(QWeb.render('CalendarView.sidebar.button_add_contact'));
             this.$(".add_contacts_link_btn").on('click', function() {  
                 self.rpc("/web/action/load", { 
-                    action_id: "calendar.action_calendar_contacts" 
+                    action_id: "core_calendar.action_calendar_contacts" 
                 }).then( function(result) { return self.do_action(result); });
             });
             
