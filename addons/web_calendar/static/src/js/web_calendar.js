@@ -309,8 +309,38 @@ openerp.web_calendar = function(instance) {
                 this.sidebar.appendTo(this.$el.find('.oe_calendar_sidebar_container'));
 
                 this.$small_calendar = self.$el.find(".oe_calendar_mini");
-                this.$small_calendar.datepicker({ onSelect: self.calendarMiniChanged(self) });
-            
+                $.datepicker.setDefaults({
+                    clearText: _t('Clear'),
+                    clearStatus: _t('Erase the current date'),
+                    closeText: _t('Done'),
+                    closeStatus: _t('Close without change'),
+                    prevText: _t('<Prev'),
+                    prevStatus: _t('Show the previous month'),
+                    nextText: _t('Next>'),
+                    nextStatus: _t('Show the next month'),
+                    currentText: _t('Today'),
+                    currentStatus: _t('Show the current month'),
+                    monthNames: Date.CultureInfo.monthNames,
+                    monthNamesShort: Date.CultureInfo.abbreviatedMonthNames,
+                    monthStatus: _t('Show a different month'),
+                    yearStatus: _t('Show a different year'),
+                    weekHeader: _t('Wk'),
+                    weekStatus: _t('Week of the year'),
+                    dayNames: Date.CultureInfo.dayNames,
+                    dayNamesShort: Date.CultureInfo.abbreviatedDayNames,
+                    dayNamesMin: Date.CultureInfo.shortestDayNames,
+                    dayStatus: _t('Set DD as first week day'),
+                    dateStatus: _t('Select D, M d'),
+                    firstDay: Date.CultureInfo.firstDayOfWeek,
+                    initStatus: _t('Select a date'),
+                    isRTL: false
+                });
+                this.$small_calendar.datepicker({
+                    onSelect: self.calendarMiniChanged(self),
+                    showWeek: true,
+                    firstDay: Date.CultureInfo.firstDayOfWeek
+                });
+
                 if (this.useContacts) {
                     new instance.web.Model("res.users").query(["partner_id"]).filter([["id", "=",this.dataset.context.uid]]).first()
                         .done(
