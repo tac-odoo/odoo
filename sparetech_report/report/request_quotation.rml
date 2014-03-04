@@ -36,18 +36,18 @@
     <initialize>
       <paraStyle name="all" alignment="justify"/>
     </initialize>
-    <paraStyle name="P1" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P1" fontName="Helvetica" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="Standard"/>
-    <paraStyle name="terp_header" fontSize="12.0" leading="15" alignment="LEFT" spaceBefore="12.0" spaceAfter="6.0"/>
-    <paraStyle name="terp_header_center" alignment="CENTER" fontSize="12.0" leading="15" spaceBefore="12.0" spaceAfter="6.0"/>
-    <paraStyle name="terp_tblheader_Details" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="6.0" spaceAfter="6.0"/>
-    <paraStyle name="terp_default_8" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="terp_tblheader_Details_Centre" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="6.0" spaceAfter="6.0"/>
-    <paraStyle name="terp_default_9" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="terp_default_Bold_9" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="terp_default_Centre_9" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="terp_default_Right_9" fontSize="9.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="Space bet user and signature" fontSize="4.0" leading="5" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_header" fontName="Helvetica" fontSize="12.0" leading="13" alignment="LEFT" spaceBefore="12.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_header_center" fontName="Helvetica" alignment="CENTER" fontSize="12.0" leading="15" spaceBefore="12.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_tblheader_Details" fontName="Helvetica" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_default_8" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_tblheader_Details_Centre" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_default_9" fontSize="9.0" fontName="Helvetica" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Bold_9" fontSize="9.0" fontName="Helvetica" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Centre_9" fontSize="9.0" fontName="Helvetica" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Right_9" fontName="Helvetica" fontSize="9.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="Space bet user and signature" fontName="Helvetica" fontSize="4.0" leading="5" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <images/>
   </stylesheet>
   <story>
@@ -87,15 +87,12 @@
         </td>
       </tr>
     </blockTable>
-    <para style="Standard">
-      <font color="white"> </font>
-    </para>
     <para style="terp_header"><b>Request for Quotation : [[order.name]]</b></para>
-    <para style="terp_default_8">
-      <font color="white"> </font>
-    </para>
-    <blockTable colWidths="461.0,69.0" repeatRows="1" style="Table_Product_Header_Title">
+    <blockTable colWidths="40.0, 421.0,69.0" repeatRows="1" style="Table_Product_Header_Title">
       <tr>
+        <td>
+          <para style="terp_tblheader_Details"><b>Sr.No.</b></para>
+        </td>
         <td>
           <para style="terp_tblheader_Details"><b>PART NO. And DESCRIPTION</b></para>
         </td>
@@ -106,8 +103,11 @@
     </blockTable>
     <section>
       <para style="terp_default_9">[[ repeatIn(order.order_line,'order_line') ]]</para>
-      <blockTable colWidths="461.0,69.0" style="Table_Product_Line">
+      <blockTable colWidths="40.0, 421.0,69.0" style="Table_Product_Line">
         <tr>
+          <td>
+            <para style="terp_default_9"> <seq id="L1"/> </para>
+          </td>
           <td>
             <para style="terp_default_9">[[ order_line.name ]]</para>
           </td>
@@ -127,6 +127,8 @@
     <para style="terp_default_9">
       <font color="white"> </font>
     </para>
-    
+    <para>
+      <seqReset id="L1"/>
+    </para>
   </story>
 </document>

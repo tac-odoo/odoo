@@ -26,7 +26,7 @@ from openerp.tools.translate import _
 from openerp import netsvc
 import openerp.addons.decimal_precision as dp
 
-class product_product(osv.Model):
+class purchae_order(osv.Model):
     _inherit = 'purchase.order'
     def wkf_send_rfq(self, cr, uid, ids, context=None):
             '''
@@ -153,15 +153,26 @@ class sale_order_line(osv.Model):
         if context is None:
             context = {}
         for line in self.browse(cr, uid, ids, context=context):
-            price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)*(1 + (line.markup or 0.0) / 100.0)
+            price = round(line.price_unit * (1 - (line.discount or 0.0) / 100.0)*(1 + (line.markup or 0.0) / 100.0),2)
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>", price
             taxes = tax_obj.compute_all(cr, uid, line.tax_id, price, line.product_uom_qty, line.product_id, line.order_id.partner_id)
             cur = line.order_id.pricelist_id.currency_id
             res[line.id] = cur_obj.round(cr, uid, cur, taxes['total'])
+        return res
+    
+    def _net_price(self, cr, uid, ids, field_name, arg, context=None):
+        res = {}
+        if context is None:
+            context = {}
+        for line in self.browse(cr, uid, ids, context=context):
+            res[line.id] = round(line.price_unit * (1 - (line.discount or 0.0) / 100.0)*(1 + (line.markup or 0.0) / 100.0),2)
+        print "ASSSSSSSSSSSSSSSSSSSSSSSS", res
         return res
 
     _columns = {
         'markup': fields.float('Markup (%)'),
         'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account')),
+        'unit_net_price': fields.function(_net_price, string='Net Unit Price', digits_compute= dp.get_precision('Account')),
     }
     _defaults = {
         'discount': 0.0,
