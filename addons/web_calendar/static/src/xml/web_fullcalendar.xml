@@ -33,7 +33,7 @@
                        <span><i t-attf-class="fa fa-users fa-fw cal_avatar" ></i></span>
                    </t>
                    <t t-if="(filters_value.value != -1) &amp;&amp; filters_value.avatar_model ">
-                       <img t-att-src="'/web/binary/image?model=' + filters_value.avatar_model + '&amp;field=image_small&amp;id=' + filters_value.value"  class="cal_avatar"/>     
+                       <img t-att-src="'/web/binary/image?model=' + filters_value.avatar_model + '&amp;field=image_small&amp;id=' + filters_value.value + '&amp;session_id=' + session_id"  class="cal_avatar"/>     
                    </t>
                    <span t-attf-class="cal_opacity underline_color_#{filters_value.color}" ><t t-esc="filters_value.label" /></span>
                </t>
