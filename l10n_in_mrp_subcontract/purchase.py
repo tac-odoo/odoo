@@ -24,6 +24,7 @@ import netsvc
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from openerp import SUPERUSER_ID
+import openerp.addons.decimal_precision as dp
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -320,6 +321,7 @@ class purchase_order_line(osv.osv):
         return res and res[0] or False
 
     _columns = {
+        'product_qty': fields.float('Issue Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), required=True),
         'line_qty': fields.float('Purchase Quantity'),
         'line_uom_id':  fields.many2one('product.uom', 'Purchase UoM'),
         'consignment_variation': fields.char('Variation(±)'),
