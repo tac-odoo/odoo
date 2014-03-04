@@ -15,6 +15,11 @@
                 <field name="date_order" position="attributes">
                     <attribute name="string">Creation Date</attribute>
                 </field>
+                <xpath expr="//field[@name='order_line']/form//field[@name='tax_id']" position="attributes">
+                    <attribute name="widget"/>
+                    <attribute name="nolabel">1</attribute>
+                    <attribute name="colspan">4</attribute>
+                </xpath>
             </field>
         </record>
 

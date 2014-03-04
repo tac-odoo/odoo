@@ -47,7 +47,8 @@
 				<xpath
 					expr="//notebook/page[@string='Incoming Shipments &amp; Invoices']"
 					position="after">
-					<page string="Expected Date By Production Order" attrs="{'invisible':[('expected_date_by_production_order','=',[])]}">
+					<page string="Expected Date By Production Order"
+						attrs="{'invisible':[('expected_date_by_production_order','=',[])]}">
 						<group>
 							<field name="expected_date_by_production_order" nolabel="1"
 								view_mode="tree" context="{'group_by':'product_id'}" widget="one2many_list">
@@ -76,10 +77,16 @@
 					<field name="line_uom_id" required="1" />
 					<field name="state" invisible="1" />
 					<field name="consignment_variation" readonly="1" />
-					<button name="add_variations" string="Add Consignment Variation"
-						icon="gtk-execute" help="Add Consignment Variation" type="object"
-						attrs="{'invisible': [('state','=','draft')]}" />
+					<!-- button name="add_variations" string="Add Consignment Variation" 
+						icon="gtk-execute" help="Add Consignment Variation" type="object" attrs="{'invisible': 
+						[('state','=','draft')]}" / -->
 				</field>
+				<field name="taxes_id" position="attributes">
+					<attribute name="widget" />
+					<attribute name="nolabel">1</attribute>
+					<attribute name="colspan">4</attribute>
+				</field>
+
 			</field>
 		</record>
 
