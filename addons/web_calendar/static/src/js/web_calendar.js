@@ -1417,7 +1417,16 @@ openerp.web_calendar = function(instance) {
             var self = this;
             self.selected_filters = [];
             self.view.all_filters = filters;
-            this.$el.html(QWeb.render('CalendarView.sidebar.responsible', { filters: filters }));
+
+            if (this.view.useContacts) {
+                // Ensure 'All calendars' item always appears last.
+                filters = _.values(filters).sort(function(a, b) {
+                    if (a.value === -1) { return 1; }
+                    if (b.value == -1) { return -1; }
+                    return 0;
+                });
+            }
+            this.$el.html(QWeb.render('CalendarView.sidebar.responsible', { filters: filters, session_id: instance.session.session_id }));
             this.filter_click(null);                        
         },
         filter_click: function(e) {
