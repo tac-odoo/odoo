@@ -35,6 +35,9 @@
 						icon="gtk-execute" help="Add Consignment Variation" type="object"
 						attrs="{'invisible': [('state','=','draft')]}" />
 				</xpath>
+				<xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="after">
+				    <field name="symbol" nolabel="1"/>
+				</xpath>
 				<xpath expr="//field[@name='order_line']/tree/field[@name='product_qty']"
 					position="attributes">
 					<attribute name="string">Issue Quantity</attribute>

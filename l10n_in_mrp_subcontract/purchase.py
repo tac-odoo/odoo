@@ -326,6 +326,7 @@ class purchase_order_line(osv.osv):
         'line_uom_id':  fields.many2one('product.uom', 'Purchase UoM'),
         'consignment_variation': fields.char('Variation(±)'),
         'process_move_id':fields.many2one('stock.moves.workorder', 'Process Line'),
+        'symbol': fields.related('order_id', 'currency_id','symbol', type="char",string="in",readonly=True),
     }
 
     _defaults = {
