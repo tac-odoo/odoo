@@ -888,7 +888,7 @@ class mrp_production_workcenter_line(osv.osv):
         'user_id': fields.many2one('res.users', 'Responsible',readonly=False, states={'done':[('readonly', True)]}),
         'moves_workorder': fields.one2many('stock.moves.workorder', 'workorder_id', 'Raw Material To Process'),
         'moves_rejection': fields.one2many('stock.moves.rejection', 'rejected_workorder_id', 'Rejected Raw Material'),
-        'hour': fields.float('Est.Time(HH:MM)', digits=(16,2)),
+        'hour': fields.float('Est.Time(HH:MM)', digits=(16,2),readonly=True, states={'draft':[('readonly', False)]}),
         'delay': fields.float('Actual Time(HH:MM)',help="The elapsed time between operation start and stop in this Work Center",readonly=True),
         #'service_product_id': fields.many2one('product.product', 'Service Product'),
         #'service_supplier_id': fields.many2one('res.partner', 'Partner',domain=[('supplier','=',True)]),
@@ -909,6 +909,33 @@ class mrp_production_workcenter_line(osv.osv):
     _defaults = {
         'order_type': 'in'
         }
+
+    def onchange_planned_cost(self,cr, uid, ids, planned_hour, actual_hour, actual_cost, workcenter_id, context=None):
+        """
+        Process
+            -In case , Added manually work-order for production at that time,
+                It will update all fields according to planned hour.
+        """
+        workcenter_obj = self.pool.get('mrp.workcenter')
+        if not workcenter_id:
+            return {}
+
+        wdata = workcenter_obj.browse(cr, uid, workcenter_id)
+        def float_time_convert(float_val):
+            factor = float_val < 0 and -1 or 1
+            val = abs(float_val)
+            return (factor * int(math.floor(val)), int(round((val % 1) * 60)))
+
+        operator_efficiency = 0
+        wo_planned_cost = planned_hour * wdata.costs_hour
+        wo_actual_cost = actual_hour * wdata.costs_hour
+        p_hour,p_min = float_time_convert(planned_hour)
+        a_hour,a_min = float_time_convert(actual_hour)
+        p_seconds = p_hour * 3600 + p_min * 60
+        a_seconds = a_hour * 3600 + a_min * 60
+        if a_seconds > 0:
+            operator_efficiency =  (float(p_seconds) / float(a_seconds)) * 100
+        return {'value':{'wo_planned_cost':wo_planned_cost,'wo_actual_cost':wo_actual_cost,'operator_efficiency':operator_efficiency}}
 
     def modify_production_order_state(self, cr, uid, ids, action):
         """

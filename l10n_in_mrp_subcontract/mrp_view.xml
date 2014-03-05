@@ -352,8 +352,8 @@
 							<group>
 								<group string="Time Calculation">
 									<field name="currency_id" invisible="1" />
-									<field name="hour" readonly="1" widget="float_time"
-										string="Workorder Planned Time(HH:MM)" />
+									<field name="hour" widget="float_time"
+										string="Workorder Planned Time(HH:MM)" on_change="onchange_planned_cost(hour,delay,wo_actual_cost,workcenter_id)"/>
 									<field name="delay" readonly="1" widget="float_time"
 										string="Workorder Actual Time(HH:MM)" />
 									<field name="operator_efficiency" readonly="1" />
@@ -366,6 +366,7 @@
 										options="{'currency_field': 'currency_id'}" />
 								</group>
 							</group>
+							<label string="You can change 'Workorder Planned Time' only for new workorder, not for already attached with routing" attrs="{'invisible':[('state','!=','draft')]}"/>
 						</page>
 						<page string="Rejected Raw Materials">
 							<group string="Rejected Raw Materials" colspan="4">
