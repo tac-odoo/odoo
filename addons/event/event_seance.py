@@ -1927,6 +1927,7 @@ class EventEvent(osv.Model):
             event_domain = [
                 ('event_ids', 'in', [record.id]),
                 ('state', '!=', 'cancel'),
+                ('date_start', '!=', False),
                 '|',
                      '&', ('date_start', '>=', date_from.strftime(DT_FMT)),
                           ('date_start', '<=', date_to.strftime(DT_FMT)),
