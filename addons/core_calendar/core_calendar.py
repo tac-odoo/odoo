@@ -132,6 +132,8 @@ class CoreCalendarTimeline(osv.TransientModel):
                     event_ids = self._get_resource_events(cr, uid, [record.id], date_from=date_from,
                                                           date_to=date_to, context=context, usage='events')[record.id]
                     for event in CalEvent.browse(cr, uid, event_ids, context=context):
+                        if not event['date_start'] or not event['date_end']:
+                            continue
                         event_start = timeline.datetime_from_str(event['date_start'], tz='UTC')
                         event_end = timeline.datetime_from_str(event['date_end'], tz='UTC')
                         event_infos = {('item_%s' % event.id): event}
@@ -1148,9 +1150,12 @@ class CoreCalendarEvent(osv.Model):
                             duration = timedelta(hours=val[calendar_fields['duration']])
                             record['date_end'] = (record_dt_start + duration).strftime(DT_FMT)
                         elif not byduration and 'duration' in fields_pre:
-                            record_dt_end = datetime.strptime(val[calendar_fields['date_end']], DT_FMT)
-                            duration = (record_dt_end - record_dt_start)
-                            record['duration'] = duration.days * 24. + duration.seconds / 3600.
+                            if calendar_fields.get('duration'):
+                                record['duration'] = val[calendar_fields['duration']]
+                            else:
+                                record_dt_end = datetime.strptime(val[calendar_fields['date_end']], DT_FMT)
+                                duration = (record_dt_end - record_dt_start)
+                                record['duration'] = duration.days * 24. + duration.seconds / 3600.
                     else:
                         # not date start
                         if byduration and 'date_end' in fields_pre:
