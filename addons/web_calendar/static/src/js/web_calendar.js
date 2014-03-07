@@ -555,7 +555,13 @@ openerp.web_calendar = function(instance) {
             });
             return def;
         },
-        
+        is_range_multiday: function(start, stop) {
+            if (start === undefined || stop === undefined) {
+                return false;
+            }
+            var MILLISECONDS_IN_A_DAY = 86400000;
+            return (stop.getTime() - start.getTime() >= MILLISECONDS_IN_A_DAY) ? true : false;
+        },
         /**
          * Transform OpenERP event object to fullcalendar event object
          */
@@ -667,7 +673,7 @@ openerp.web_calendar = function(instance) {
                 'start': date_start.toString('yyyy-MM-dd HH:mm:ss'),
                 'end': date_stop.toString('yyyy-MM-dd HH:mm:ss'),
                 'title': the_title, //res_text.join(', '),
-                'allDay': (this.fields[this.date_start].type == 'date' || (this.all_day && evt[this.all_day]) || false),
+                'allDay': (this.fields[this.date_start].type == 'date' || (this.all_day && evt[this.all_day]) || this.is_range_multiday(date_start, date_stop)),
                 'id': evt.id,
                 'attendees':attendees
             };
