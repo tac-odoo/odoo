@@ -36,4 +36,5 @@ import split_lot_move
 import common_date_updation
 import split_production_order_qty
 import mrp_partially_close
+import costing_analysis_report
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -868,7 +868,7 @@ class mrp_production_workcenter_line(osv.osv):
         result = dict([(id, {'wo_planned_cost': 0.0, 'wo_actual_cost': 0.0,'operator_efficiency':0.0}) for id in ids])
         for wo in self.browse(cr, uid, ids, context=context):
             wo_planned_cost = wo_actual_cost = operator_efficiency = 0.0
-            if wo.state == 'cancel': continue
+            #if wo.state == 'cancel': continue
             wo_planned_cost += wo.hour * wo.workcenter_id.costs_hour
             wo_actual_cost += wo.delay * wo.workcenter_id.costs_hour
             p_hour,p_min = float_time_convert(wo.hour)
@@ -899,13 +899,13 @@ class mrp_production_workcenter_line(osv.osv):
         'temp_date_finished':fields.related('date_finished', type="datetime",store=True),
 
         'currency_id': fields.related('production_id', 'currency_id', type="many2one", relation="res.currency", string="Currency", readonly=True),
-        'wo_planned_cost': fields.function(_mrp_wo_costing, multi='cost', type='float', string='Workorder Planned Cost'),
-        'wo_actual_cost': fields.function(_mrp_wo_costing, multi='cost', type='float', string='Workorder Actual Cost'),
-        'operator_efficiency': fields.function(_mrp_wo_costing, multi='cost', type='integer', string='Operator Efficiency(%)'),
+        'wo_planned_cost': fields.function(_mrp_wo_costing, multi='cost', type='float', string='Workorder Planned Cost',store=True),
+        'wo_actual_cost': fields.function(_mrp_wo_costing, multi='cost', type='float', string='Workorder Actual Cost',store=True),
+        'operator_efficiency': fields.function(_mrp_wo_costing, multi='cost', type='integer', string='Operator Efficiency(%)',group_operator="avg",store=True),
 
     }
     _sql_constraints = [('sequence_uniq', 'unique(sequence, production_id)', "You cannot assign same sequence on current production order")] 
-
+    _sql_constraints = [('wo_date_greater','check(date_finished >= date_start)','Error ! Stop Date cannot be set before Beginning Date.')] 
     _defaults = {
         'order_type': 'in'
         }
@@ -921,6 +921,7 @@ class mrp_production_workcenter_line(osv.osv):
             return {}
 
         wdata = workcenter_obj.browse(cr, uid, workcenter_id)
+
         def float_time_convert(float_val):
             factor = float_val < 0 and -1 or 1
             val = abs(float_val)

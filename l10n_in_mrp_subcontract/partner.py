@@ -26,6 +26,7 @@ class res_partner(osv.osv):
 
     _columns = {
         'supplier': fields.boolean('Supplier/Service Providers', help="Check this box if this contact is a supplier/Service Providers(For outsourcing materials). If it's not checked, purchase people will not see it when encoding a purchase order."),
+        'contact_name': fields.char('Contact Name',size=256),
     }
 
 res_partner()

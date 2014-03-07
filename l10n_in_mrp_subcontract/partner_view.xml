@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+		<record id="res_partner_add_cname" model="ir.ui.view">
+			<field name="name">res.partner.add.cname</field>
+			<field name="model">res.partner</field>
+			<field name="inherit_id" ref="base.view_partner_form" />
+			<field name="arch" type="xml">
+				<xpath expr="//div[@name='div_type']" position="after">
+					<label for="contact_name" />
+					<div name="cname">
+						<field class="oe_inline" name="contact_name" />
+					</div>
+				</xpath>
+			</field>
+		</record>
+	</data>
+</openerp>
