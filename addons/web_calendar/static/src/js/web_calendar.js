@@ -201,11 +201,57 @@ openerp.web_calendar = function(instance) {
                     });
                 });
         },
+        get_fc_init_options_i18n: function() {
+            var i18n_options = {
+                monthNames: Date.CultureInfo.monthNames,
+                monthNamesShort: Date.CultureInfo.abbreviatedMonthNames,
+                dayNames: Date.CultureInfo.dayNames,
+                dayNamesShort: Date.CultureInfo.abbreviatedDayNames,
+                firstDay: Date.CultureInfo.firstDayOfWeek,
 
+                weekNumberTitle: _t("W"),
+                allDayText: _t("all-day"),
+                buttonText: {
+                    today: _t("Today"),
+                    day: _t("Day"),
+                    week: _t("Week"),
+                    month: _t("Month")
+                }
+            };
+            if (Date.CultureInfo.dateElementOrder == 'ymd' || Date.CultureInfo.dateElementOrder == 'mdy') {
+                i18n_options = $.extend(i18n_options, {
+                    columnFormat: {
+                        month: 'ddd',
+                        week: 'ddd M/d',
+                        day: 'dddd M/d'
+                    },
+                    titleFormat: {
+                        month: 'MMMM yyyy',
+                        week: "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}",
+                        day: 'dddd, MMM d, yyyy'
+                    }
+                });
+            }
+            else {
+                i18n_options = $.extend(i18n_options, {
+                    columnFormat: {
+                        month: 'ddd',
+                        week: 'ddd d/M',
+                        day: 'dddd d/M'
+                    },
+                    titleFormat: {
+                        month: 'MMMM yyyy',
+                        week: "d[ MMM][ yyyy]{ '&#8212;' d MMM yyyy}",
+                        day: 'dddd, d MMM, yyyy'
+                    }
+                });
+            }
+            return i18n_options;
+        },
         get_fc_init_options: function () {
             //Documentation here : http://arshaw.com/fullcalendar/docs/
             var self = this;
-            return $.extend({}, fc_defaultOptions, {
+            return $.extend({}, fc_defaultOptions, self.get_fc_init_options_i18n(), {
                 
                 defaultView: (this.mode == "month")?"month":
                     (this.mode == "week"?"agendaWeek":
