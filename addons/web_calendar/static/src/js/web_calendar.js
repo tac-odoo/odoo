@@ -60,7 +60,13 @@ openerp.web_calendar = function(instance) {
             this.range_start = null;
             this.range_stop = null;
             this.selected_filters = [];
-                        
+            this.many2manys = [];
+
+            // QWeb initalization
+            this.qweb = new QWeb2.Engine();
+            this.qweb.debug = instance.session.debug;
+            this.qweb.default_dict = _.clone(QWeb.default_dict);
+            this.qweb_context = {};
         },
 
         set_default_options: function(options) {
@@ -95,6 +101,20 @@ openerp.web_calendar = function(instance) {
                 self.dataset.index = null;
                 self.do_switch_view('form');
             });
+
+            /* custom calendar item template */
+            this.add_qweb_template();
+
+            this.qweb_context = {
+                instance: instance,
+                widget: this,
+                read_only_mode: this.options.read_only_mode
+            };
+            for (var p in this) {
+                if (_.str.startsWith(p, 'calendar_') && _.isFunction(this[p])) {
+                    this.qweb_context[p] = _.bind(this[p], this);
+                }
+            }
 
             /* xml view calendar options */
             var attrs = fv.arch.attrs;
@@ -188,7 +208,9 @@ openerp.web_calendar = function(instance) {
             this.fields = fv.fields;
 
             for (var fld = 0; fld < fv.arch.children.length; fld++) {
-                this.info_fields.push(fv.arch.children[fld].attrs.name);
+                if (fv.arch.children[fld].tag == 'field') {
+                    this.info_fields.push(fv.arch.children[fld].attrs.name);
+                }
             }
             
             return (new instance.web.Model(this.dataset.model))
@@ -277,7 +299,7 @@ openerp.web_calendar = function(instance) {
                     self.proxy('update_record')(event._id, data);
                 },
                 eventRender: function (event, element, view) {
-                    element.find('.fc-event-title').html(event.title);                    
+                    self.render_event(event, element, view);
                 },
                 eventAfterRender: function (event, element, view) {                    
                     if ((view.name !== 'month') && (((event.end-event.start)/60000)<=30)) {
@@ -286,6 +308,9 @@ openerp.web_calendar = function(instance) {
                         var new_title = current_title.substr(0,current_title.indexOf("<img")>0?current_title.indexOf("<img"):current_title.length)
                         element.find('.fc-event-time').html(new_title);
                     }                    
+                },
+                eventDestroy: function (event, element, view) {
+                    self.destroy_event(event, element, view);
                 },
                 eventClick: function (event) { self.open_event(event._id,event.title); },
                 select: function (start_date, end_date, all_day, _js_event, _view) {
@@ -505,8 +530,132 @@ openerp.web_calendar = function(instance) {
             this.color_map[key] = index;
             return index;
         },
-        
+        /**
+          * Event Rendering
+          * ===============
+          */
+        transform_record: function(record) {
+            var self = this,
+                new_record = {},
+                calendar_field_names = _(this.calendar_fields).chain()
+                                            .values().pluck('name').value(),
+                fields = _.uniq(_.keys(self.fields_view.fields)
+                                .concat(calendar_field_names));
+            _.each(record, function(value, name) {
+                if (_.indexOf(fields, name) === -1) {
+                    return;
+                }
+                var r = _.clone(self.fields_view.fields[name] || {});
+                if ((r.type === 'date' || r.type === 'datetime') && value) {
+                    r.raw_value = instance.web.auto_str_to_date(value);
+                } else {
+                    r.raw_value = value;
+                }
+                if (self.fields[name].type == 'many2many' && record['__display_name_'+name] !== undefined) {
+                    r.value = record['__display_name_'+name];
+                } else {
+                    r.value = instance.web.format_value(value, r);
+                }
+                new_record[name] = r;
+            });
+            return new_record;
+        },
+        /*  add_qweb_template
+         *   select the nodes into the xml and send to extract_aggregates the nodes with TagName="field"
+         */
+        add_qweb_template: function() {
+            for (var i=0, ii=this.fields_view.arch.children.length; i < ii; i++) {
+                var child = this.fields_view.arch.children[i];
+                if (child.tag === "templates") {
+                    this.transform_qweb_template(child);
+                    this.qweb.add_template(instance.web.json_node_to_xml(child));
+                    break;
+                }
+            }
+        },
+        transform_qweb_template: function(node) {
+            var qweb_add_if = function(node, condition) {
+                if (node.attrs[QWeb.prefix + '-if']) {
+                    condition = _.str.sprintf("(%s) and (%s)", node.attrs[QWeb.prefix + '-if'], condition);
+                }
+                node.attrs[QWeb.prefix + '-if'] = condition;
+            };
+            // Process modifiers
+            if (node.tag && node.attrs.modifiers) {
+                var modifiers = JSON.parse(node.attrs.modifiers || '{}');
+                if (modifiers.invisible) {
+                    qweb_add_if(node, _.str.sprintf("!calendar_compute_domain(%s)", JSON.stringify(modifiers.invisible)));
+                }
+            }
+            switch (node.tag) {
+                case 'field':
+                    if (this.fields_view.fields[node.attrs.name].type === 'many2many') {
+                        if (_.indexOf(this.many2manys, node.attrs.name) < 0) {
+                            this.many2manys.push(node.attrs.name);
+                        }
+                    }
+                    node.tag = QWeb.prefix;
+                    node.attrs[QWeb.prefix + '-esc'] = 'record.' + node.attrs['name'] + '.value';
+                    break;
+            }
+            if (node.children) {
+                for (var i = 0, ii = node.children.length; i < ii; i++) {
+                    this.transform_qweb_template(node.children[i]);
+                }
+            }
+        },
+        destroy_event: function(event, element, view) {
+            // Called when destroying item on the calendar view (inverse of 'render')
+            // This doesn't mean we 'delete/unlink' the event!
+        },
+        render_event: function(event, element, view) {
+            var self = this;
 
+            var result = event.title;  // default value
+            if (!!self.qweb.templates['calendar-event-title'] && !!event.record) {
+                var qweb_context = _.extend({}, this.qweb_context || {}, {
+                    display_short: false,
+                    record: event.record,
+                    event_title: event.title,
+                    event_start: event.start,
+                    event_end: event.end,
+                    event_is_allday: event.allDay
+                });
+                result = this.qweb.render('calendar-event-title', qweb_context);
+            }
+            element.find('.fc-event-title').html(result);
+            return false; // always use our custom rendering only
+        },
+        render_has_template: function(template_name) {
+            return !!this.qweb.templates[template_name];
+        },
+        calendar_compute_domain: function(domain) {
+            return instance.web.form.compute_domain(domain, this.values);
+        },
+        calendar_dates_range: function(start_date, end_date, allDay) {
+            end_date = end_date || start_date;
+            var range = '';
+            var format_value = instance.web.format_value;
+            var formats = {
+                'datetime': {type: 'datetime'},
+                'date': {type: 'date'},
+                'time': {type: 'time'}
+            };
+            var is_same_day = start_date.isSameDay(end_date);
+            if (allDay) {
+                if (is_same_day) {
+                    range = _.str.sprintf('%s', format_value(start_date, formats.date));
+                } else {
+                    range = _.str.sprintf('%s - %s', format_value(start_date, formats.date),
+                                                     format_value(end_date, formats.date));
+                }
+            } else {
+                range = _.str.sprintf('%s - %s',
+                            format_value(start_date, formats.datetime),
+                            format_value(end_date, is_same_day ? formats.time : formats.datetime));
+            }
+            return range;
+        },
         /**
          * In o2m case, records from dataset won't have names attached to their *2o values.
          * We should make sure this is the case.
@@ -559,8 +708,10 @@ openerp.web_calendar = function(instance) {
             if (start === undefined || stop === undefined) {
                 return false;
             }
-            var MILLISECONDS_IN_A_DAY = 86400000;
-            return (stop.getTime() - start.getTime() >= MILLISECONDS_IN_A_DAY) ? true : false;
+            if (stop.isAfter(start) && !stop.isSameDay(start)) {
+                return true;
+            }
+            return false;
         },
         /**
          * Transform OpenERP event object to fullcalendar event object
@@ -670,6 +821,7 @@ openerp.web_calendar = function(instance) {
                 date_stop.addDays(-1);
             }
             var r = {
+                'record': this.transform_record(evt),
                 'start': date_start.toString('yyyy-MM-dd HH:mm:ss'),
                 'end': date_stop.toString('yyyy-MM-dd HH:mm:ss'),
                 'title': the_title, //res_text.join(', '),
