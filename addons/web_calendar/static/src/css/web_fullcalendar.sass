@@ -416,4 +416,80 @@ img.attendee_head
         
     .oe_calendar_buttons_add_contact
         .add_contacts_link_btn
-          margin-top: 10px
+            margin-top: 10px
+
+.oe_calendar_popover_container
+    position: absolute
+    left: 0
+    top: 0
+
+.oe_calendar_popover
+    position: relative
+    background: #fff
+    border: 1px solid #CCCCCC
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2)
+    display: none
+    z-index: 999
+    overflow: visible
+    padding: 0
+    margin: 0
+
+    .oe_calendar_popover_content
+        min-width: 220px
+        min-height: 100px
+        max-width: 350px
+        border: none
+        padding: 0
+
+        .oe_calendar_event_attr.oe_i
+            font-size: 16px
+            line-height: 0.7em
+
+    .ui-dialog-buttonpane
+        background: none repeat scroll 0 0 #F5F7F9
+        border-radius: 0 0 2px 2px
+        border-top: 1px solid #E0E0E0
+        margin: 0
+
+    .oe_calendar_popover_close
+        position: absolute
+        right: 10px
+        top: 10px
+
+        a
+            color: #000000
+            text-decoration: none
+            &:hover
+                text-decoration: none
+                color: #999999
+
+    .oe_calendar_button_box
+        a.oe_button
+            cursor: pointer
+            text-decoration: none
+
+
+/* Popup Arrow styling */
+.oe_calendar_popover:after, .oe_calendar_popup:before
+    top: 100%
+    border: solid transparent
+    content: " "
+    height: 0
+    width: 0
+    position: absolute
+    pointer-events: none
+
+.oe_calendar_popover:after
+    border-color: rgba(255, 255, 255, 0)
+    border-top-color: #F5F7F9
+    border-width: 8px
+    left: 50%
+    margin-left: -8px
+
+.oe_calendar_popover:before
+    border-color: rgba(0, 0, 0, 0)
+    border-top-color: #CCCCCC
+    border-width: 9px
+    left: 50%
+    margin-left: -9px
+    /*box-shadow: -2px 0px 2px 0px rgba(178, 178, 178, 4);*/

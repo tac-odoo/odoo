@@ -3,6 +3,7 @@
     <table cellspacing="0" cellpadding="0" border="0" width="100%" class="oe_calendar_table">
         <tr>
             <td width="100%">
+                <div class="oe_calendar_popover_container"></div>
                 <div class="oe_calendar_view">        
                   <div class="oe_calendar_widget" />
                   <div class="oe_calendar_buttons"/>
@@ -76,6 +77,48 @@
     </t>
   </div>
 
+  <t t-name="CalendarView.popover">
+      <div class="oe_calendar_popover ui-dialog">
+          <div class="oe_calendar_popover_content ui-dialog-content">
+          </div>
+          <div class="oe_calendar_button_box ui-dialog-buttonpane">
+              <t t-if="widget.view.options.action_buttons !== false">
+                  <a class="oe_button oe_bold oe_calendar_button_edit" href="javascript:void(0);">
+                      <t t-if="widget.view.is_action_enabled('edit')">
+                          <t t-esc="widget.view.options.edit_text || _t('Edit')"/>
+                      </t>
+                      <t t-if="!widget.view.is_action_enabled('edit')">
+                          <t t-esc="widget.view.options.open_text || _t('Details')"/>
+                      </t>
+                  </a>
+                  <t t-if="widget.view.is_action_enabled('delete')">
+                      <span class="oe_fade">or</span>
+                      <a class="oe_button oe_calendar_button_delete" href="javascript:void(0);">
+                          <t t-esc="widget.view.options.delete_text || _t('Delete')"/>
+                      </a>
+                  </t>
+              </t>
+          </div>
+          <div class="oe_calendar_popover_close">
+              <a href="javascript:void(0);" class="oe_calendar_action_close">X</a>
+          </div>
+      </div>
+  </t>
+  <t t-name="CalendarView.popover.layout">
+      <div class="oe_calendar_event">
+          <div class="oe_calendar_event_header">
+              <div class="oe_calendar_event_title">
+                  <t t-call="calendar-event-title"/>
+              </div>
+              <div class="oe_calendar_event_dates">
+                  <t t-esc="calendar_dates_range(event_start, event_end, event_is_allday)"/>
+              </div>
+          </div>
+          <div class="oe_calendar_event_description">
+              <t t-call="calendar-event-description"/>
+          </div>
+      </div>
+  </t>
 
   
 </template>

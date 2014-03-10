@@ -104,6 +104,7 @@ openerp.web_calendar = function(instance) {
 
             /* custom calendar item template */
             this.add_qweb_template();
+            this.qweb.templates['CalendarView.popover.layout'] = QWeb.templates['CalendarView.popover.layout'].cloneNode(true);
 
             this.qweb_context = {
                 instance: instance,
@@ -135,6 +136,11 @@ openerp.web_calendar = function(instance) {
             this.all_day = attrs.all_day; 
             this.attendee_people = attrs.attendee;  
             this.how_display_event = '';
+            this.use_intermediate_popover = false;
+
+            if (!isNullOrUndef(attrs.use_intermediate_popover)) {
+                self.use_intermediate_popover = true;
+            }
            
             if (!isNullOrUndef(attrs.quick_create_instance)) {
                 self.quick_create_instance = 'instance.' + attrs.quick_create_instance;                
@@ -312,7 +318,13 @@ openerp.web_calendar = function(instance) {
                 eventDestroy: function (event, element, view) {
                     self.destroy_event(event, element, view);
                 },
-                eventClick: function (event) { self.open_event(event._id,event.title); },
+                eventClick: function (event, jsEvent, view) {
+                    if (self.popover) {
+                        self.popover.event_clicked(event, jsEvent, view);
+                    } else {
+                        self.open_event(event._id,event.title);
+                    }
+                },
                 select: function (start_date, end_date, all_day, _js_event, _view) {
                     var data_template = self.get_event_data({
                         start: start_date,
@@ -375,6 +387,11 @@ openerp.web_calendar = function(instance) {
         init_calendar: function() {
             var self = this;
              
+            if (!this.popover && self.use_intermediate_popover) {
+                this.popover = new instance.web_calendar.EventPopover(this);
+                this.popover.appendTo(this.$el.find('.oe_calendar_popover_container'));
+            }
+
             if (!this.sidebar && this.options.$sidebar) {
                 this.sidebar = new instance.web_calendar.Sidebar(this);
                 this.sidebar.appendTo(this.$el.find('.oe_calendar_sidebar_container'));
@@ -1683,6 +1700,92 @@ openerp.web_calendar = function(instance) {
             });
             
         },
+    });
+
+    instance.web_calendar.EventPopover = instance.web.Widget.extend({
+        template: 'CalendarView.popover',
+        init: function(parent) {
+            this._super(parent);
+            this.view = this.getParent();
+            this.displayed_event_id = null;
+            this.pos = null;
+        },
+        start: function() {
+            var self = this;
+            this.$content = this.$el.find('.oe_calendar_popover_content');
+            this.$el.find('.oe_calendar_action_close').on('click', this.proxy('hide'));
+            $(window).on('keydown:fullcalendar-event-popover', function(e) {
+                if (e.which === $.ui.keyCode.ESCAPE) {
+                    self.hide();
+                }
+            });
+            $(window).on('click:fullcalendar-event-popover', function(ev) {
+                if (self.$el.is(':visible')) {
+                    var target = ev.target || ev.srcElement;
+                    if (self.$el.find(target).length === 0) {
+                        // Clicked outside of popup, hiding it
+                        self.hide();
+                    }
+                }
+            });
+            this.$el.find('.oe_calendar_button_edit').on('click', function() {
+                self.view.open_event(self.displayed_event_id);
+                self.hide();
+            });
+            this.$el.find('.oe_calendar_button_delete').on('click', function() {
+                self.view.remove_event(self.displayed_event_id);
+                self.hide();
+            });
+            return $.when();
+        },
+        destroy: function() {
+            if (this.$el) {
+                this.$el.find('.oe_calendar_popover_close').off();
+                this.$el.find('a.oe_button').off();
+            }
+            $(window).off('keydown:fullcalendar-event-popover');
+            $(window).off('click:fullcalendar-event-popover');
+            this._super();
+        },
+        event_clicked: function(event, jsEvent, view) {
+            if (event.id == this.displayed_event_id) {
+                this.hide();
+                return;
+            }
+            // Set popup position
+            this.pos = {
+                x: jsEvent.pageX,
+                y: jsEvent.pageY
+            };
+            this.show(event);
+        },
+        show: function(event) {
+            if (!!this.pos) {
+                this.render_popover(event);
+                this.$el.css('left', this.pos.x - this.$el.width() / 2.0);
+                this.$el.css('top', this.pos.y - this.$el.height() - 12);
+                this.$el.css('display', 'block');
+                this.displayed_event_id = event.id;
+                this.$el.find('.oe_calendar_popover').trigger('focusin');
+            }
+        },
+        hide: function() {
+            this.$el.css('display', 'none');
+            this.displayed_event_id = null;
+        },
+        render_popover: function(event) {
+            var qweb_context = _.extend({}, this.view.qweb_context || {}, {
+                display_short: true,
+                record: event.record,
+                event_start: event.start,
+                event_end: event.end,
+                event_title: event.title,
+                event_is_allday: event.allDay,
+                custom_title: true
+            });
+            this.$content.html(this.view.qweb.render('CalendarView.popover.layout', qweb_context));
+            this.rendered_event_id = event.id;
+        }
     });
 
 };
