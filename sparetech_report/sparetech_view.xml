@@ -18,7 +18,7 @@
             name="account.invoice" rml="sparetech_report/report/account_print_invoice.rml"
             string="Invoices" attachment="(object.state in ('open','paid')) and ('INV'+(object.number or '').replace('/','')+'.pdf')"
             attachment_use="True" usage="default"/>
-            
+        <report id="stock.report_picking_list_out" model="stock.picking.out" name="stock.picking.list.out" string="Delivery Slip" rml="sparetech_report/report/picking.rml"/>
         <record id='view_currency_form' model='ir.ui.view'>
             <field name="name">product.product.currency.form</field>
             <field name="model">product.product</field>
