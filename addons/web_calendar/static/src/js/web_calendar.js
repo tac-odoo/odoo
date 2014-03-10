@@ -665,12 +665,17 @@ openerp.web_calendar = function(instance) {
             var self = this;
             var to_get = {};
             _(this.info_fields).each(function (fieldname) {
-                if (!_(["many2one", "one2one"]).contains(
+                if (!_(["many2one", "one2one", "many2many"]).contains(
                     self.fields[fieldname].type))
                     return;
                 to_get[fieldname] = [];
                 _(evts).each(function (evt) {
                     var value = evt[fieldname];
+                    if (self.fields[fieldname].type === "many2many") {
+                        _(evt[fieldname]).each(function (id) {
+                            to_get[fieldname].push(id);
+                        });
+                    }
                     if (value === false || (value instanceof Array)) {
                         return;
                     }
@@ -682,7 +687,7 @@ openerp.web_calendar = function(instance) {
             });
             var defs = _(to_get).map(function (ids, fieldname) {
                 return (new instance.web.Model(self.fields[fieldname].relation))
-                    .call('name_get', ids).then(function (vals) {
+                    .call('name_get', [ids]).then(function (vals) {
                         return [fieldname, vals];
                     });
             });
@@ -692,6 +697,21 @@ openerp.web_calendar = function(instance) {
                 _(values).each(function(value) {
                     var fieldname = value[0];
                     var name_gets = value[1];
+                    // for many2many fields
+                    if (self.fields[fieldname].type == 'many2many') {
+                        var name_gets_dict = {};
+                        _(name_gets).each(function (v) {
+                            name_gets_dict[v[0]] = v[1];
+                        });
+                        _(evts).each(function(evt) {
+                            evt['__display_name_'+fieldname] =
+                                _(evt[fieldname])
+                                    .map(function (id){return name_gets_dict[id];})
+                                    .join(', ');
+                        });
+                        return;
+                    }
+                    // for many2one, one2one fields
                     _(name_gets).each(function(name_get) {
                         _(evts).chain()
                             .filter(function (e) {return e[fieldname] == name_get[0];})
