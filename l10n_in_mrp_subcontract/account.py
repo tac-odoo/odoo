@@ -29,4 +29,17 @@ class account_analytic_line(osv.osv):
 
 account_analytic_line()
 
+class account_tax(osv.osv):
+    _inherit = 'account.tax'
+
+    def name_get(self, cr, uid, ids, context=None):
+        if not ids:
+            return []
+        res = []
+        for record in self.read(cr, uid, ids, ['description','name'], context=context):
+            name =  record['name'] or record['description']
+            res.append((record['id'],name ))
+        return res
+
+account_tax()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
