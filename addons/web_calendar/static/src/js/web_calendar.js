@@ -105,6 +105,7 @@ openerp.web_calendar = function(instance) {
             /* custom calendar item template */
             this.add_qweb_template();
             this.qweb.templates['CalendarView.popover.layout'] = QWeb.templates['CalendarView.popover.layout'].cloneNode(true);
+            this.qweb.templates['CalendarView.popover.buttons'] = QWeb.templates['CalendarView.popover.buttons'].cloneNode(true);
 
             this.qweb_context = {
                 instance: instance,
@@ -215,10 +216,24 @@ openerp.web_calendar = function(instance) {
 
             for (var fld = 0; fld < fv.arch.children.length; fld++) {
                 if (fv.arch.children[fld].tag == 'field') {
-                    this.info_fields.push(fv.arch.children[fld].attrs.name);
+                    var field_attrs = fv.arch.children[fld].attrs;
+                    var field_name = field_attrs.name;
+                    var field_modifiers = JSON.parse(field_attrs.modifiers || '{}');
+
+                    this.info_fields.push(field_name);
+
+                    if (!!field_modifiers.readonly) {
+                        if (field_name === this.date_start) {
+                            this.date_start_readonly = field_modifiers.readonly;
+                        } else if (field_name === this.date_duration) {
+                            this.date_duration_readonly = field_modifiers.readonly;
+                        } else if (field_name === this.date_stop) {
+                            this.date_stop_readonly = field_modifiers.readonly;
+                        }
+                    }
                 }
             }
-            
+
             return (new instance.web.Model(this.dataset.model))
                 .call("check_access_rights", ["create", false])
                 .then(function (create_right) {
@@ -867,6 +882,25 @@ openerp.web_calendar = function(instance) {
                 'attendees':attendees
             };
 
+            // Setup event access
+            r['access'] = {
+                'edit': this.is_action_enabled('edit') && !this.options.read_only_mode,
+                'delete': this.is_action_enabled('delete') && !this.options.read_only_mode,
+            }
+            var values = {};
+            _.each(evt, function(v, k) {
+                values[k] = { value: v }
+            });
+            var calendar_fields_readonly = {};
+            _.each(['date_start', 'date_stop', 'duration'], function(field) {
+                var field_ro_domain = self[field + '_readonly'];
+                calendar_fields_readonly[field] = field_ro_domain
+                    ? instance.web.form.compute_domain(field_ro_domain || [], values)
+                    : false;
+            });
+            r['startEditable'] = r.access.edit && !calendar_fields_readonly['date_start'];
+            r['durationEditable'] = r.access.edit && !calendar_fields_readonly['date_stop'] && !calendar_fields_readonly['duration'];
+
             var color_key = evt[this.color_field];
             if (typeof color_key === "object") {
                 color_key = color_key[0];
@@ -1076,10 +1110,18 @@ openerp.web_calendar = function(instance) {
         },
         open_event: function(id,title) {
             var self = this;
+            var event_objs = self.$calendar.fullCalendar('clientEvents', id);
+            if (event_objs.length == 1) {
+                event_objs = event_objs[0];
+            } else {
+                event_objs = null;
+            }
+
             if (! this.open_popup_action) { 
                 var index = this.dataset.get_id_index(id);
                 this.dataset.index = index;
-                this.do_switch_view('form', null, { mode: "edit" });
+                this.do_switch_view('form', null,
+                                    { mode: (event_objs && event_objs.access.edit) ? "edit" : "view" });
             }            
             else {
 
@@ -1099,10 +1141,13 @@ openerp.web_calendar = function(instance) {
                     button_delete = _.str.sprintf("<button class='oe_button oe_bold delme'><span> %s </span></button>",_t("Delete"));
                     button_edit = _.str.sprintf("<button class='oe_button oe_bold editme oe_highlight'><span> %s </span></button>",_t("Edit Event"));
                     
-                    
-                    pop.$el.closest(".ui-dialog").find(".ui-dialog-buttonpane").prepend(button_delete)
-                    pop.$el.closest(".ui-dialog").find(".ui-dialog-buttonpane").prepend(button_edit)
-                    
+                    if (event_objs && event_objs.access.edit) {
+                        pop.$el.closest(".ui-dialog").find(".ui-dialog-buttonpane").prepend(button_delete)
+                    }
+                    if (event_objs && event_objs.access.unlink) {
+                        pop.$el.closest(".ui-dialog").find(".ui-dialog-buttonpane").prepend(button_edit)
+                    }
+
                     $('.delme').click(
                         function() { 
                             $('.oe_form_button_cancel').trigger('click'); 
@@ -1713,6 +1758,7 @@ openerp.web_calendar = function(instance) {
         start: function() {
             var self = this;
             this.$content = this.$el.find('.oe_calendar_popover_content');
+            this.$buttons = this.$el.find('.oe_calendar_button_box');
             this.$el.find('.oe_calendar_action_close').on('click', this.proxy('hide'));
             $(window).on('keydown:fullcalendar-event-popover', function(e) {
                 if (e.which === $.ui.keyCode.ESCAPE) {
@@ -1727,14 +1773,6 @@ openerp.web_calendar = function(instance) {
                         self.hide();
                     }
                 }
-            });
-            this.$el.find('.oe_calendar_button_edit').on('click', function() {
-                self.view.open_event(self.displayed_event_id);
-                self.hide();
-            });
-            this.$el.find('.oe_calendar_button_delete').on('click', function() {
-                self.view.remove_event(self.displayed_event_id);
-                self.hide();
             });
             return $.when();
         },
@@ -1774,17 +1812,32 @@ openerp.web_calendar = function(instance) {
             this.displayed_event_id = null;
         },
         render_popover: function(event) {
+            var self = this;
             var qweb_context = _.extend({}, this.view.qweb_context || {}, {
+                widget: this,
                 display_short: true,
                 record: event.record,
                 event_start: event.start,
                 event_end: event.end,
                 event_title: event.title,
                 event_is_allday: event.allDay,
+                event_access: event.access,
                 custom_title: true
             });
+            // popover-content
             this.$content.html(this.view.qweb.render('CalendarView.popover.layout', qweb_context));
-            this.rendered_event_id = event.id;
+
+            // popover-buttons
+            this.$buttons.find('.oe_button').off('click');
+            this.$buttons.html(this.view.qweb.render('CalendarView.popover.buttons', qweb_context));
+            this.$el.find('.oe_calendar_button_edit').on('click', function() {
+                self.view.open_event(self.displayed_event_id);
+                self.hide();
+            });
+            this.$el.find('.oe_calendar_button_delete').on('click', function() {
+                self.view.remove_event(self.displayed_event_id);
+                self.hide();
+            });
         }
     });
 
