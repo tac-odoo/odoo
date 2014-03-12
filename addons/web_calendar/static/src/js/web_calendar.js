@@ -1800,8 +1800,8 @@ openerp.web_calendar = function(instance) {
         show: function(event) {
             if (!!this.pos) {
                 this.render_popover(event);
-                this.$el.css('left', this.pos.x - this.$el.width() / 2.0);
-                this.$el.css('top', this.pos.y - this.$el.height() - 12);
+                this.$el.css('left', this.pos.x - this.$el.width() / 2.0 - this.$el.parent().offset().left);
+                this.$el.css('top', this.pos.y - this.$el.height() - 12 - this.$el.parent().offset().top);
                 this.$el.css('display', 'block');
                 this.displayed_event_id = event.id;
                 this.$el.find('.oe_calendar_popover').trigger('focusin');
