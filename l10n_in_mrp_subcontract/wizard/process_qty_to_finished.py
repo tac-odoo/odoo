@@ -93,6 +93,7 @@ class process_qty_to_finished(osv.osv_memory):
         'process_qty': fields.float('Process Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
         'already_accepted_qty': fields.float('Already Accepted Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
         'accepted_qty': fields.float('Accept Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'temp_accepted_qty': fields.float('Accept Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
         'next_stage_workorder_id':fields.many2one('mrp.production.workcenter.line', 'Next Stage of Work-Order'),
         'production_id':fields.many2one('mrp.production', 'Production'),
 
@@ -103,12 +104,13 @@ class process_qty_to_finished(osv.osv_memory):
         'equation': fields.char('Conversion Equation',size=256),
     }
 
-    def onchange_accepted_qty(self, cr, uid, ids, factor,accepted_qty, context=None):
+    def onchange_accepted_qty(self, cr, uid, ids, factor,s_accepted_qty, context=None):
         context = context or {}
         equation = ''
-        if factor <> 0.0: equation = '('+str(accepted_qty)+'/'+ str(factor)+ '='+str(float(accepted_qty) / factor)+')'
-        else: equation = '('+str(accepted_qty)+'='+str(accepted_qty)+')'
-        return {'value': {'s_accepted_qty': factor <> 0.0 and float(accepted_qty) / factor or accepted_qty,'equation':equation}}
+        if factor <> 0.0: equation = '('+str(s_accepted_qty)+'*'+ str(factor)+ '='+str(float(s_accepted_qty) * factor)+')'
+        else: equation = '('+str(s_accepted_qty)+'='+str(s_accepted_qty)+')'
+        accept_qty = factor <> 0.0 and float(s_accepted_qty) * factor or s_accepted_qty
+        return {'value': {'accepted_qty': accept_qty,'temp_accepted_qty': accept_qty ,'equation':equation}}
 
 #    def onchange_s_accepted_qty(self, cr, uid, ids, factor,s_accepted_qty, context=None):
 #        context = context or {}

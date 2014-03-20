@@ -331,18 +331,18 @@
 												statusbar_visible="draft,in_progress,finished" type="object" />
 										</header>
 										<group>
+											<group string="Semi-Finished Products Movements">
+												<field name="s_product_id" readonly="1" />
+												<field name="s_total_qty" readonly="1" />
+												<field name="s_accepted_qty" readonly="1" />
+												<field name="s_rejected_qty" readonly="1" />
+											</group>
 											<group string="Raw Materials Movements">
 												<field name="product_id" readonly="1" />
 												<field name="name" invisible="1" />
 												<field name="total_qty" readonly="1" />
 												<field name="accepted_qty" readonly="1" />
 												<field name="rejected_qty" readonly="1" />
-											</group>
-											<group string="Semi-Finished Products Movements">
-												<field name="s_product_id" readonly="1" />
-												<field name="s_total_qty" readonly="1" />
-												<field name="s_accepted_qty" readonly="1" />
-												<field name="s_rejected_qty" readonly="1" />
 											</group>
 										</group>
 										<group string="General Information">
@@ -530,18 +530,18 @@
 											statusbar_visible="draft,in_progress,finished" type="object" />
 									</header>
 									<group>
+										<group string="Semi-Finished Products Movements">
+											<field name="s_product_id" readonly="1" />
+											<field name="s_total_qty" readonly="1" />
+											<field name="s_accepted_qty" readonly="1" />
+											<field name="s_rejected_qty" readonly="1" />
+										</group>
 										<group string="Raw Materials Movements">
 											<field name="product_id" readonly="1" />
 											<field name="name" invisible="1" />
 											<field name="total_qty" readonly="1" />
 											<field name="accepted_qty" readonly="1" />
 											<field name="rejected_qty" readonly="1" />
-										</group>
-										<group string="Semi-Finished Products Movements">
-											<field name="s_product_id" readonly="1" />
-											<field name="s_total_qty" readonly="1" />
-											<field name="s_accepted_qty" readonly="1" />
-											<field name="s_rejected_qty" readonly="1" />
 										</group>
 									</group>
 									<group string="General Information">
@@ -912,8 +912,6 @@
 				</tree>
 			</field>
 		</record>
-
-
 
 	</data>
 </openerp>

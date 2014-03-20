@@ -1353,4 +1353,13 @@ class mrp_bom(osv.osv):
         return result, result2
 
 mrp_bom()
+
+
+class mrp_routing(osv.osv):
+    """ Max size given to code """
+    _inherit = 'mrp.routing'
+    _columns = {
+        'code': fields.char('Code', size=256),
+    }
+mrp_routing()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
