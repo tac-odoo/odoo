@@ -347,13 +347,14 @@
 										</group>
 										<group string="General Information">
 											<group>
+												<field name="accepted_date" readonly="1" string="Material In-Date"/>
 												<field name="start_date" readonly="1" />
 												<field name="order_type" invisible="1" />
 												<field name="service_supplier_id"
 													attrs="{'required':[('order_type','=','out')],'invisible':[('order_type','=','in')]}" />
-												<field name="prodlot_id" readonly="1" />
 											</group>
 											<group>
+												<field name="prodlot_id" readonly="1" />
 												<field name="end_date" readonly="1" />
 												<field name="po_order_id" readonly="1"
 													attrs="{'invisible':[('order_type','=','in')]}" />
@@ -535,6 +536,7 @@
 											<field name="s_total_qty" readonly="1" />
 											<field name="s_accepted_qty" readonly="1" />
 											<field name="s_rejected_qty" readonly="1" />
+
 										</group>
 										<group string="Raw Materials Movements">
 											<field name="product_id" readonly="1" />
@@ -546,13 +548,14 @@
 									</group>
 									<group string="General Information">
 										<group>
+											<field name="accepted_date" readonly="1" string="Material In-Date"/>
 											<field name="start_date" readonly="1" />
 											<field name="order_type" invisible="1" />
 											<field name="service_supplier_id"
 												attrs="{'required':[('order_type','=','out')],'invisible':[('order_type','=','in')]}" />
-											<field name="prodlot_id" readonly="1" />
 										</group>
 										<group>
+											<field name="prodlot_id" readonly="1" />
 											<field name="end_date" readonly="1" />
 											<field name="po_order_id" readonly="1"
 												attrs="{'invisible':[('order_type','=','in')]}" />
@@ -774,18 +777,18 @@
 													statusbar_visible="draft,in_progress,finished" type="object" />
 											</header>
 											<group>
+												<group string="Semi-Finished Products Movements">
+													<field name="s_product_id" readonly="1" />
+													<field name="s_total_qty" readonly="1" />
+													<field name="s_accepted_qty" readonly="1" />
+													<field name="s_rejected_qty" readonly="1" />
+												</group>
 												<group string="Raw Materials Movements">
 													<field name="product_id" readonly="1" />
 													<field name="name" invisible="1" />
 													<field name="total_qty" readonly="1" />
 													<field name="accepted_qty" readonly="1" />
 													<field name="rejected_qty" readonly="1" />
-												</group>
-												<group string="Semi-Finished Products Movements">
-													<field name="s_product_id" readonly="1" />
-													<field name="s_total_qty" readonly="1" />
-													<field name="s_accepted_qty" readonly="1" />
-													<field name="s_rejected_qty" readonly="1" />
 												</group>
 											</group>
 											<group string="General Information">

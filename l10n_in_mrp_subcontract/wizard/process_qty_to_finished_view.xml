@@ -14,7 +14,8 @@
 							<field name="s_process_qty" string="In Process Qty"
 								attrs="{'invisible':[('s_product_id','=',False)]}" />
 							<field name="s_accepted_qty" attrs="{'invisible':[('s_product_id','=',False)]}"
-								on_change="onchange_accepted_qty(product_factor, s_accepted_qty, context)" /> 
+								on_change="onchange_accepted_qty(product_factor, s_accepted_qty, context)" />
+							<field name="accepted_date"/>
 						</group>
 						<group>
 							<field name="product_id" />

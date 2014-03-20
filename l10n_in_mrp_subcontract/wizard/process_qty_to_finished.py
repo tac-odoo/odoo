@@ -100,6 +100,7 @@ class process_qty_to_finished(osv.osv_memory):
         's_product_id': fields.many2one('product.product', 'Semi Product', readonly=True),
         's_process_qty': fields.float('Process Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
         's_accepted_qty': fields.float('Accept Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'accepted_date':fields.datetime('Accepted Date',required=True),
         'product_factor': fields.float('Factor', digits_compute=dp.get_precision('Product Unit of Measure')),
         'equation': fields.char('Conversion Equation',size=256),
     }
@@ -305,7 +306,7 @@ class process_qty_to_finished(osv.osv_memory):
         # create new process move of next stage if work-order available.
         if next_workorder_id:
             res = production_obj._create_process_dict(cr, uid, wizard_rec.process_move_id.move_id, next_workorder_id)
-            res.update({'total_qty':accepted_qty})
+            res.update({'total_qty':accepted_qty,'accepted_date':wizard_rec.accepted_date})
             process_move.create(cr, uid, res, context=context)
         else:
             # TODO:Close order if all products have done stage...
