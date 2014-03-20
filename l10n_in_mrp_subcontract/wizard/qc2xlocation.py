@@ -91,6 +91,7 @@ class qc2xlocation(osv.osv_memory):
         'to_qc_qty': fields.float('In QC Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
         'returned_qty': fields.float('Return Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
         'process_qty': fields.float('Process Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'qc_approved_date': fields.datetime('QC Approved Date',required=True),
     }
 
 
@@ -180,6 +181,7 @@ class qc2xlocation(osv.osv_memory):
                         'location_id':move_data.location_dest_id.id,
                         'location_dest_id':move_data.picking_id.purchase_id.location_id.id,
                         'state': 'draft',
+                        'qc_approved_date':wizard_rec.qc_approved_date,
                         'qc_completed':False,
                         'qc_approved':True,
                         'picking_id':False

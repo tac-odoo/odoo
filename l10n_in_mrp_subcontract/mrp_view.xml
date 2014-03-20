@@ -26,6 +26,21 @@
 			</field>
 		</record>
 	</data>
+
+	<data noupdate="1">
+		<record id="workorders_form_moves_lines2_hide" model="ir.ui.view">
+			<field name="name">mrp.production.workcenter.tree.buttons</field>
+			<field name="model">mrp.production</field>
+			<field name="inherit_id" ref="workorders_form_moves_lines2" />
+			<field name="arch" type="xml">
+				<xpath
+					expr="//field[@name='workcenter_lines']/tree//button[@name='action_finish']"
+					position="replace">
+				</xpath>
+			</field>
+		</record>
+	</data>
+
 	<data>
 		<record id="workorders_form_moves_lines" model="ir.ui.view">
 			<field name="name">mrp.production.form.inherit</field>
@@ -870,7 +885,8 @@
 		</record>
 
 		<record model="ir.ui.view" id="mrp_production_workcenter_tree_view_cost_report">
-			<field name="name">mrp.production.workcenter.line.tree.cost.report</field>
+			<field name="name">mrp.production.workcenter.line.tree.cost.report
+			</field>
 			<field name="model">mrp.production.workcenter.line</field>
 			<field name="priority">50</field>
 			<field name="arch" type="xml">
@@ -891,7 +907,7 @@
 						options="{'currency_field': 'currency_id'}" />
 					<field name="wo_actual_cost" widget='monetary'
 						options="{'currency_field': 'currency_id'}" />
-					<field name="operator_efficiency"/>
+					<field name="operator_efficiency" />
 					<field name="state" />
 				</tree>
 			</field>

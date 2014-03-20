@@ -99,6 +99,26 @@ class sale_order(osv.osv):
 
         return super(sale_order,self).action_button_confirm(cr, uid, ids, context=context)
 
+    def _prepare_invoice(self, cr, uid, order, lines, context=None):
+        """
+        -Process
+            add all fields to invoice for reference and report purpose.
+        """
+        stock_obj = self.pool.get('stock.picking')
+        res = super(sale_order, self)._prepare_invoice(cr, uid, order, lines, context=context)
+        do_ids = stock_obj.search(cr, uid, [('sale_id','=',order.id)])
+        if do_ids:
+            do_data = stock_obj.browse(cr, uid, do_ids[0])
+            res.update({
+                    'do_id': do_ids[0],
+                    'do_address_id': order.partner_id.id,
+                    'so_date': order.date_order,
+                    #'do_carrier_id': picking.carrier_id and picking.carrier_id.id,
+                    'do_name': do_data.name,
+                    'do_delivery_date': order.ex_work_date,
+                    'so_id': order.id
+                })
+        return res
 sale_order()
 
 class sale_order_line(osv.osv):

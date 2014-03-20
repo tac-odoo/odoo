@@ -18,11 +18,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import time
 
 from openerp.osv import osv, fields
 import openerp.addons.decimal_precision as dp
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
+from openerp import netsvc
 
 class stock_move(osv.osv):
     """
@@ -179,6 +182,61 @@ class stock_move(osv.osv):
                 'context':context
                 }
 
+    def action_done(self, cr, uid, ids, context=None):
+        """ Makes the move done and if all moves are done, it will finish the picking.
+        @return:
+        """
+        picking_ids = []
+        move_ids = []
+        wf_service = netsvc.LocalService("workflow")
+        if context is None:
+            context = {}
+
+        todo = []
+        for move in self.browse(cr, uid, ids, context=context):
+            if move.state=="draft":
+                todo.append(move.id)
+        if todo:
+            self.action_confirm(cr, uid, todo, context=context)
+            todo = []
+
+        for move in self.browse(cr, uid, ids, context=context):
+            if move.state in ['done','cancel']:
+                continue
+            move_ids.append(move.id)
+
+            if move.picking_id:
+                picking_ids.append(move.picking_id.id)
+            if move.move_dest_id.id and (move.state != 'done'):
+                # Downstream move should only be triggered if this move is the last pending upstream move
+                other_upstream_move_ids = self.search(cr, uid, [('id','!=',move.id),('state','not in',['done','cancel']),
+                                            ('move_dest_id','=',move.move_dest_id.id)], context=context)
+                if not other_upstream_move_ids:
+                    self.write(cr, uid, [move.id], {'move_history_ids': [(4, move.move_dest_id.id)]})
+                    if move.move_dest_id.state in ('waiting', 'confirmed'):
+                        self.force_assign(cr, uid, [move.move_dest_id.id], context=context)
+                        if move.move_dest_id.picking_id:
+                            wf_service.trg_write(uid, 'stock.picking', move.move_dest_id.picking_id.id, cr)
+                        if move.move_dest_id.auto_validate:
+                            self.action_done(cr, uid, [move.move_dest_id.id], context=context)
+
+            self._create_product_valuation_moves(cr, uid, move, context=context)
+            if move.state not in ('confirmed','done','assigned'):
+                todo.append(move.id)
+
+        if todo:
+            self.action_confirm(cr, uid, todo, context=context)
+
+        #Just to update move Received Date
+        self.write(cr, uid, move_ids, {'state': 'done', 'date': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),'received_date': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)}, context=context)
+        for id in move_ids:
+            wf_service.trg_trigger(uid, 'stock.move', id, cr)
+
+        for pick_id in picking_ids:
+            wf_service.trg_write(uid, 'stock.picking', pick_id, cr)
+
+        return True
+
 stock_move()
 
 
@@ -193,7 +251,7 @@ class stock_picking(osv.osv):
         default = {
                    'move_lines_qc2store':False,
                    'total_moves_to_xloc':False,
-                   'pass_to_qc':False,
+                   #'pass_to_qc':False,
                    'qc_loc_id':False,
                    'move_loc_id':False,
                    'service_order':False,
@@ -225,6 +283,8 @@ class stock_picking(osv.osv):
         'service_order': fields.boolean('Service Order'),
         'pass_to_qc': fields.boolean('QC Test?'),
         'dc_number': fields.char('DC Number',size=256),
+        'dc_date': fields.date('DC Date'),
+        'received_date': fields.datetime('Received Date'),
         'workorder_id':  fields.many2one('mrp.production.workcenter.line', 'Work-Order'),
         'move_lines_qc2store': fields.one2many('stock.move', 'picking_qc_id', 'Store Moves', readonly=True),
         'qc_loc_id': fields.many2one('stock.location', 'QC Location', readonly=True),
@@ -250,6 +310,29 @@ class stock_picking(osv.osv):
         'ex_work_date': fields.date.context_today,
         'shipping_time': 7,
     }
+
+    def _prepare_invoice(self, cr, uid, picking, partner, inv_type, journal_id, context=None):
+        res = super(stock_picking, self)._prepare_invoice(cr, uid, picking, partner, inv_type, journal_id, context=context)
+        if picking.sale_id:
+            res.update({
+                    'do_id': picking.id,
+                    'do_address_id': picking.partner_id.id,
+                    'so_date': picking.sale_id.date_order,
+                    'do_name': picking.name,
+                    'do_delivery_date': picking.ex_work_date,
+                    'so_id': picking.sale_id.id
+                })
+        return res
+
+    def action_done(self, cr, uid, ids, context=None):
+        """Changes picking state to done.
+        
+        This method is called at the end of the workflow by the activity "done".
+        @return: True
+        """
+        # Just update recieved date at d end of received.
+        self.write(cr, uid, ids, {'state': 'done', 'date_done': time.strftime('%Y-%m-%d %H:%M:%S'),'received_date': time.strftime('%Y-%m-%d %H:%M:%S')})
+        return True
 
 stock_picking()
 
@@ -317,6 +400,8 @@ class stock_picking_in(osv.osv):
     _columns = {
         'pass_to_qc': fields.boolean('QC Test?'),
         'dc_number': fields.char('DC Number',size=256),
+        'dc_date': fields.date('DC Date'),
+        'received_date': fields.datetime('Received Date'),
         'move_lines': fields.one2many('stock.move', 'picking_id', 'Internal Moves',readonly=True, states={'draft': [('readonly', False)]}),
         'move_lines_qc2store': fields.one2many('stock.move', 'picking_qc_id', 'Store Moves', readonly=True),
         'qc_loc_id': fields.many2one('stock.location', 'QC Location', readonly=True),

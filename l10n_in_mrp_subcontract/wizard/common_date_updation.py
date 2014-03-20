@@ -36,6 +36,7 @@ class common_date_updation(osv.osv_memory):
         """
         context = context or {}
         wizard_rec = self.browse(cr, uid, ids[0])
+        pick_obj = self.pool.get('stock.picking.in')
         record_id = context and context.get('active_id', False) or False
         active_model = context and context.get('active_model', False) or False
         fields_name = context and context.get('fields_name', False) or False
@@ -48,6 +49,11 @@ class common_date_updation(osv.osv_memory):
         for fields in update_dates:
             update_v.update({fields: wizard_rec.date_to_update})
         active_obj.write(cr ,uid, record_id, update_v)
+        #Update only when GRN made with diffrent recieved date, Its auto update moves received date.
+        if active_model == 'stock.picking.in' and record_id:
+            pick = pick_obj.browse(cr, uid, record_id, context=context)
+            for move in pick.move_lines:
+                move.write({fields: wizard_rec.date_to_update})
         return True
 
 common_date_updation()

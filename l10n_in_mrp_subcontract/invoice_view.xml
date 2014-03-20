@@ -37,5 +37,25 @@
             </field>
         </record>
 
+        <record id="view_account_invoice_do_info" model="ir.ui.view">
+            <field name="name">account.invoice.do.info</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+                <field name="origin" position="after">
+                    <field name="so_date"/>
+                    <field name="do_delivery_date"/>
+                    <field name="do_name"/>
+                    <!-- field name="do_carrier_id" string="Dispatched Through"/ -->
+                    <field name="do_address_id"/>
+                    <field name="do_id"/>
+                </field>
+                <field name="date_due" position="after">
+                    <field name="do_dispatch_doc_no"/>
+                    <field name="do_dispatch_doc_date"/>
+                </field>
+            </field>
+        </record>
+
     </data>
 </openerp>

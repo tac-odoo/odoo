@@ -1064,6 +1064,7 @@ class mrp_production_workcenter_line(osv.osv):
         -Return
             -Wizard to ask for all in once to process ?
         Note: Super method call on apply button on wizard ;)
+              First check all lines of workorder are finished or not.
         """
         context = context or {}
         models_data = self.pool.get('ir.model.data')
@@ -1071,8 +1072,9 @@ class mrp_production_workcenter_line(osv.osv):
         # Get Accepted wizard
         dummy, form_view = models_data.get_object_reference(cr, uid, 'l10n_in_mrp_subcontract', 'view_all_in_once_qty_to_finished')
         currnt_data = self.browse(cr, uid, ids[0], context=context)
-        if currnt_data.order_type == 'out':
-            self._check_out_all_lines(cr, uid, currnt_data, context)
+        #if currnt_data.order_type == 'out':
+        #Now check for both types either "IN" or "OUT"
+        self._check_out_all_lines(cr, uid, currnt_data, context)
         next_stage_workorder_id = mrp_obj.to_find_next_wrkorder(cr, uid, currnt_data.production_id.id, ids[0], currnt_data.sequence, context=context)
         all_process_moves_ids = []
         for find_pm in currnt_data.moves_workorder:

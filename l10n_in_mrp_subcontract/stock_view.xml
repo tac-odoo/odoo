@@ -63,6 +63,16 @@
 				</field>
 				<field name="stock_journal_id" position="after">
 					<field name="dc_number" />
+					<field name="dc_date" />
+				</field>
+				<field name="origin" position="after">
+					<label for="received_date" />
+					<div>
+						<field name="received_date" readonly="1" />
+						<button name="%(action_change_common_date_update)d" type="action"
+							string="Update Received Date?" class="oe_link"
+							context="{'fields_name':'received_date'}" />
+					</div>
 				</field>
 
 				<field name="move_lines" position="attributes">
@@ -133,8 +143,9 @@
 						invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'yes' or (not context.get('pass_to_qc',False))" />
 					<field name="returned_qty" readonly="1" string="QC Returned Qty"
 						invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'yes' or (not context.get('pass_to_qc',False))" />
-					<field name="qc_approved"
-						invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'no'" />
+					<field name="qc_approved" invisible="1" />
+					<!-- invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) 
+						== 'no'" / -->
 				</field>
 				<field name="state" position="after">
 					<field name="qc_completed"
@@ -146,15 +157,22 @@
 				<field name="product_uom" position="after">
 					<field name="date_expected" string="Expected Date"
 						invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'yes' or (not context.get('pass_to_qc',False))" />
-					<field name="received_date" string="Received Date"
-						invisible="context.get('picking_type',False) != 'in'" />
-					<button name="%(action_change_receiveddate_inward)d" string="Change Receive Date"
-						type="action" icon="gtk-execute" invisible="context.get('picking_type',False) != 'in'" />
+					<!-- field name="received_date" string="Received Date" invisible="context.get('picking_type',False) 
+						!= 'in'" / > <button name="%(action_change_receiveddate_inward)d" string="Change 
+						Receive Date" type="action" icon="gtk-execute" invisible="context.get('picking_type',False) 
+						!= 'in'" / -->
 					<field name="qc_approved_date"
-						invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'yes' or (not context.get('pass_to_qc',False))" />
+						invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'no'" />
+					<!-- invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) 
+						== 'yes' or (not context.get('pass_to_qc',False))" / -->
 					<button name="%(action_change_qc_approved_date)d" string="Change Approved Date"
 						type="action" icon="gtk-execute"
-						invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'yes' or (not context.get('pass_to_qc',False))" />
+						invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'no'" />
+					<!-- invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) 
+						== 'yes' or (not context.get('pass_to_qc',False))" / -->
+				</field>
+				<field name="product_uom" position="attributes">
+					<attribute name="string">UoM</attribute>
 				</field>
 				<field name="product_uos" position="attributes">
 					<attribute name="invisible">context.get('pass_to_qc',False)
@@ -197,7 +215,9 @@
 							</group>
 							<group>
 								<field name="qc_approved_date"
-									invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'yes' or (not context.get('pass_to_qc',False))" />
+									invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'no'" />
+								<!-- invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) 
+									== 'yes' or (not context.get('pass_to_qc',False))" / -->
 							</group>
 						</group>
 					</h3>

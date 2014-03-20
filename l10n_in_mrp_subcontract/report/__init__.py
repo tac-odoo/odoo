@@ -18,16 +18,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import account
-import res_company
-import mrp
-import procurement
-import product
-import stock
-import purchase
-import partner
-import invoice
-import sale
-import wizard
-import report
+
+import sale_order
+import account_print_invoice
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
