@@ -9,21 +9,20 @@
 				<form string="Accept Or Reject Process" version="7.0">
 					<group>
 						<group>
-							<field name="product_id" />
 							<field name="product_factor" invisible="1" />
-							<field name="process_qty" string="In Process Qty" />
-							<field name="rejected_qty" on_change="onchange_rejected_qty(product_factor, rejected_qty, context)"/>
-							<field name="rejected_location_id" widget="selection"
-								domain="[('usage','!=','view'),('scrap_location','=',True)]" />
-							
-						</group>
-						<group>
 							<field name="s_product_id" attrs="{'invisible':[('s_product_id','=',False)]}" />
 							<field name="s_process_qty" string="In Process Qty"
 								attrs="{'invisible':[('s_product_id','=',False)]}" />
 							<field name="s_rejected_qty" attrs="{'invisible':[('s_product_id','=',False)]}"
-								readonly="1" /> <!-- context="{'s_accepted':True}" on_change="onchange_s_accepted_qty(product_factor, 
-								s_accepted_qty, context)"/ -->
+								on_change="onchange_rejected_qty(product_factor, s_rejected_qty, context)" />
+							<field name="rejected_location_id" widget="selection"
+								domain="[('usage','!=','view'),('scrap_location','=',True)]" />
+						</group>
+						<group>
+							<field name="product_id" />
+							<field name="process_qty" string="In Process Qty" />
+							<field name="temp_rejected_qty" readonly="1"/>
+							<field name="rejected_qty" invisible="1" />
 							<field name="equation" attrs="{'invisible':[('s_product_id','=',False)]}"
 								readonly="1" />
 						</group>

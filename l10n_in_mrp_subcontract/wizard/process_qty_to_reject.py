@@ -82,6 +82,7 @@ class process_qty_to_update_reject(osv.osv_memory):
         'process_qty': fields.float('Process Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
         'already_rejected_qty': fields.float('Already Reject Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
         'rejected_qty': fields.float('Reject Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'temp_rejected_qty': fields.float('Reject Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
         'rejected_location_id': fields.many2one('stock.location', 'Rejected Location', required=True),
         'reason': fields.text('Reason'),
 
@@ -93,12 +94,13 @@ class process_qty_to_update_reject(osv.osv_memory):
 
     }
 
-    def onchange_rejected_qty(self, cr, uid, ids, factor,rejected_qty, context=None):
+    def onchange_rejected_qty(self, cr, uid, ids, factor,s_rejected_qty, context=None):
         context = context or {}
         equation = ''
-        if factor <> 0.0: equation = '('+str(rejected_qty)+'/'+ str(factor)+ '='+str(float(rejected_qty) / factor)+')'
-        else: equation = '('+str(rejected_qty)+'='+str(rejected_qty)+')'
-        return {'value': {'s_rejected_qty': factor <> 0.0 and float(rejected_qty) / factor or rejected_qty,'equation':equation}}
+        if factor <> 0.0: equation = '('+str(s_rejected_qty)+'*'+ str(factor)+ '='+str(float(s_rejected_qty) * factor)+')'
+        else: equation = '('+str(s_rejected_qty)+'='+str(s_rejected_qty)+')'
+        rjc_qty = factor <> 0.0 and float(s_rejected_qty) * factor or s_rejected_qty
+        return {'value': {'rejected_qty': rjc_qty, 'temp_rejected_qty': rjc_qty, 'equation':equation}}
 
     def _check_validation_reject_qty(self, cr, uid, total_qty, rejected_qty):
         """
