@@ -27,6 +27,22 @@
 					position="after">
 					<field name="symbol" nolabel="1" />
 				</xpath>
+				<xpath expr="//notebook/page[@string='Other Information']"
+					position="inside">
+					<group string="Taxes Computation">
+						<field name="taxes_by_products_detail" nolabel="1"
+							view_mode="tree" widget="one2many_list">
+							<tree string="Taxes" editable="bottom">
+								<field name="product_id" />
+								<field name="name" />
+								<field name="price_unit" readonly="1" />
+								<field name="amount" readonly="1" />
+								<field invisible="True" name="base_amount" />
+								<field invisible="True" name="tax_amount" />
+							</tree>
+						</field>
+					</group>
+				</xpath>
 			</field>
 		</record>
 

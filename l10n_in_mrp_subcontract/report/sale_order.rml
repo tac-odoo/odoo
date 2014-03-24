@@ -454,10 +454,48 @@
           </td>
       </tr>
     </blockTable>
-    <para style="terp_default_8">
-            <font color="white"> </font>
-          </para>
+    <para style="terp_default_8"><font color="white"> </font></para>
+
+
+    <!-- QUOTATION TABLES-->
+    <blockTable colWidths="150.0,350.0,100.0" style="Table6">
+    <para style="terp_default_2">[[ o.state not in ['draft','sent'] and removeParentNode('blockTable') ]]</para>
+      <tr>
+        <td>
+          <para style="terp_default_Bold_9" textColor="white">Product Code</para>
+        </td>
+        <td>
+          <para style="terp_default_Bold_9" textColor="white">Description</para>
+        </td>
+        <td>
+          <para style="terp_default_Bold_Right_9" textColor="white">Quantity</para>
+        </td>
+      </tr>
+    </blockTable>
+    <section>
+    <para style="terp_default_2">[[ o.state not in ['draft','sent'] and removeParentNode('section') ]]</para>
+    <para style="terp_default_2">[[ repeatIn(o.order_line,'l') ]]</para>
+    <blockTable colWidths="150.0,350.0,100.0" style="Table7">
+      <tr>
+        <td>
+          <para style="terp_default_9">[[ l.product_id and l.product_id.default_code  or '' ]]</para>
+        </td>
+        <td>
+          <para style="terp_default_Bold_9">[[ l.product_id and l.product_id.name  or l.name ]]</para>
+          <para style="terp_default_9">[[ l.product_id and l.product_id.description  or '' ]]</para>
+          <image x="0.0cm" y="0.0cm" width="80.0" height="40.0" >[[ l.product_id and l.product_id.image or removeParentNode('image') ]]</image>
+        </td>
+        <td>
+          <para style="terp_default_Right_9">[[ formatLang(l.product_uom_qty,dp='Product')]] [[ l.product_uom.name ]] </para>
+        </td>
+      </tr>
+    </blockTable>
+   </section>
+
+
+    <!-- SALE ORDER TABLES-->
     <blockTable colWidths="100.0,250.0,70.0,65.0,115.0" style="Table6">
+    <para style="terp_default_2">[[ o.state in ['draft','sent'] and removeParentNode('blockTable') ]]</para>
       <tr>
         <td>
           <para style="terp_default_Bold_9" textColor="white">Product Code</para>
@@ -477,7 +515,8 @@
       </tr>
     </blockTable>
     <section>
-      <para style="terp_default_2">[[ repeatIn(o.order_line,'l') ]]</para>
+    <para style="terp_default_2">[[ o.state in ['draft','sent'] and removeParentNode('section') ]]</para>
+    <para style="terp_default_2">[[ repeatIn(o.order_line,'l') ]]</para>
     <blockTable colWidths="100.0,250.0,70.0,65.0,115.0" style="Table7">
       <tr>
         <td>
@@ -500,8 +539,11 @@
       </tr>
     </blockTable>
    </section>
+
+
    <spacer length="0.05cm"/>
    <blockTable colWidths="600.0" style="club">
+   <para style="terp_default_2">[[ o.state in ['draft','sent'] and removeParentNode('blockTable') ]]</para>
    <tr>
     <td>
     <blockTable colWidths="485.0,115.0" style="Table8">

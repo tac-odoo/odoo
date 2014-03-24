@@ -21,6 +21,7 @@
 
 import time
 from openerp.tools import amount_to_text_en
+from operator import itemgetter
 from openerp.tools.translate import _
 from openerp.report import report_sxw
 
@@ -85,7 +86,7 @@ class order_revise(report_sxw.rml_parse):
             t['tax_amount'] = cur_obj.round(self.cr, self.uid, cur, t['tax_amount'])
             res_list.append(t)
 
-        return res_list
+        return sorted(res_list, key=itemgetter('sequence'))
 
     def line_address(self, company):
         if not company:

@@ -22,15 +22,61 @@
 from openerp.osv import fields, osv
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
+import openerp.addons.decimal_precision as dp
+from openerp import SUPERUSER_ID
 from openerp.tools.translate import _
+
+class taxes_by_products(osv.osv):
+    _name = 'taxes.by.products'
+    _columns = {
+        'order_id': fields.many2one('sale.order', 'Order Reference'),
+        'product_id': fields.many2one('product.product', 'Product'),
+        'name': fields.char('Tax Description', size=64),
+        'price_unit': fields.float('Base Amount', digits_compute=dp.get_precision('Account')),
+        'amount': fields.float('Tax Amount', digits_compute=dp.get_precision('Account')),
+        'sequence': fields.integer('Sequence', help="Gives the sequence order when displaying a list of invoice tax."),
+        'base_code_id': fields.many2one('account.tax.code', 'Base Code', help="The account basis of the tax declaration."),
+        'base_amount': fields.float('Base Code Amount', digits_compute=dp.get_precision('Account')),
+        'tax_code_id': fields.many2one('account.tax.code', 'Tax Code', help="The tax basis of the tax declaration."),
+        'tax_amount': fields.float('Tax Code Amount', digits_compute=dp.get_precision('Account')),
+    }
+
+taxes_by_products()
 
 class sale_order(osv.osv):
     _inherit = "sale.order"
+
+    def _get_taxes_by_products_detail(self, cr, uid, ids,context=None):
+        """ Taxes products wise"""
+        res = {}
+        context = context or {}
+        if not ids: return res
+        tax_obj = self.pool.get('account.tax')
+        tax_product_obj = self.pool.get('taxes.by.products')
+        for order in self.browse(cr, uid, ids, context=context):
+            unlink_ids = [x.id for x in order.taxes_by_products_detail]
+            tax_product_obj.unlink(cr, SUPERUSER_ID, unlink_ids, context=context)
+        for order in self.browse(cr, uid, ids, context=context):
+            for line in order.order_line:
+                price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+                taxes = tax_obj.compute_all(cr, uid, line.tax_id, price, line.product_uom_qty, line.product_id, line.order_id.partner_id)
+                count = 0
+                for tax in taxes.get('taxes', []):
+                    count += 1
+                    if count == 1: tax.update({'product_id':line.product_id and line.product_id.id or False})
+                    tax.update({'order_id':order.id})
+                    for rmv in ['ref_base_sign','ref_tax_code_id','account_paid_id', 'base_sign', 'include_base_amount', 
+                                'account_analytic_paid_id', 'ref_base_code_id','account_collected_id', 'account_analytic_collected_id',
+                                 'parent_id, tax_sign', 'ref_tax_sign']:
+                        tax.has_key(rmv) and tax.pop(rmv)
+                    tax_product_obj.create(cr, uid, tax,context=context)
+        return True
 
     _columns = {
         'ex_work_date': fields.date('Ex.work Delivery Date', help = "Date should be consider as date of Goods ready for delivery"),
         'shipping_time':  fields.integer('Shipping Time(In Days)'),
         'destination_date': fields.date('Destination  Delivery Date', help="Reaching date of delivery goods(Ex.work Delivery Date + Shipping Time)"),
+        'taxes_by_products_detail': fields.one2many('taxes.by.products', 'order_id',string='Taxes By Products',readonly=True)
     }
 
     def onchange_shipping_time(self, cr, uid, ids, ex_work_date, shipping_time, context=None):
@@ -40,6 +86,23 @@ class sale_order(osv.osv):
         'ex_work_date': fields.date.context_today,
         'shipping_time': 7,
     }
+
+    def write(self, cr, uid, ids, vals, context=None):
+        """ To update taxes lines"""
+        context = context or {}
+        res = super(sale_order,self).write(cr, uid, ids, vals,context=context)
+        if isinstance(ids,int):
+            ids = [ids]
+        if vals and vals.get('order_line'):
+            self._get_taxes_by_products_detail(cr, uid, ids, context=context)
+        return res
+
+    def create(self, cr, uid, vals, context=None):
+        """ To update taxes lines"""
+        context = context or {}
+        new_id = super(sale_order,self).create(cr, uid, vals,context=context)
+        self._get_taxes_by_products_detail(cr, uid, [new_id], context=context)
+        return new_id
 
     def _prepare_order_picking(self, cr, uid, order, context=None):
         """
