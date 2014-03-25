@@ -347,7 +347,8 @@
 										</group>
 										<group string="General Information">
 											<group>
-												<field name="accepted_date" readonly="1" string="Material In-Date"/>
+												<field name="accepted_date" readonly="1"
+													string="Material In-Date" />
 												<field name="start_date" readonly="1" />
 												<field name="order_type" invisible="1" />
 												<field name="service_supplier_id"
@@ -548,7 +549,7 @@
 									</group>
 									<group string="General Information">
 										<group>
-											<field name="accepted_date" readonly="1" string="Material In-Date"/>
+											<field name="accepted_date" readonly="1" string="Material In-Date" />
 											<field name="start_date" readonly="1" />
 											<field name="order_type" invisible="1" />
 											<field name="service_supplier_id"
@@ -915,6 +916,29 @@
 				</tree>
 			</field>
 		</record>
+
+		<record id="mrp_routing_form_view_remove_location" model="ir.ui.view">
+			<field name="name">mrp.routing.form.remove.location</field>
+			<field name="model">mrp.routing</field>
+			<field name="inherit_id" ref="mrp.mrp_routing_form_view" />
+			<field name="arch" type="xml">
+				<field name="location_id" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</field>
+			</field>
+		</record>
+
+		<record id="mrp_routing_tree_view_remove_location" model="ir.ui.view">
+			<field name="name">mrp.routing.form.remove.location</field>
+			<field name="model">mrp.routing</field>
+			<field name="inherit_id" ref="mrp.mrp_routing_tree_view" />
+			<field name="arch" type="xml">
+				<field name="location_id" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</field>
+			</field>
+		</record>
+
 
 	</data>
 </openerp>

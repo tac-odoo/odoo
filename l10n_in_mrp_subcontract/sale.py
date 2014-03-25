@@ -47,7 +47,16 @@ class sale_order(osv.osv):
     _inherit = "sale.order"
 
     def _get_taxes_by_products_detail(self, cr, uid, ids,context=None):
-        """ Taxes products wise"""
+        """ 
+        Taxes products wise
+        @ Return:
+            1) Product 2
+                -Tax    Base Amount    Tax Amount
+            2) Product 2
+                -Tax    Base Amount    Tax Amount
+            ----
+                --------
+        """
         res = {}
         context = context or {}
         if not ids: return res
@@ -72,11 +81,74 @@ class sale_order(osv.osv):
                     tax_product_obj.create(cr, uid, tax,context=context)
         return True
 
+
+    def _amount_line_tax(self, cr, uid, line, context=None):
+        val = 0.0
+        for c in self.pool.get('account.tax').compute_all(cr, uid, line.tax_id, line.price_unit * (1-(line.discount or 0.0)/100.0), line.product_uom_qty, line.product_id, line.order_id.partner_id)['taxes']:
+            val += c.get('amount', 0.0)
+        return val
+
+    def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
+        cur_obj = self.pool.get('res.currency')
+        res = {}
+        for order in self.browse(cr, uid, ids, context=context):
+            res[order.id] = {
+                'amount_untaxed': 0.0,
+                'amount_tax': 0.0,
+                'amount_total': 0.0,
+                'extra_charges':0.0,
+            }
+            val = val1 = other_charges = 0.0
+            cur = order.pricelist_id.currency_id
+            for line in order.order_line:
+                val1 += line.price_subtotal
+                val += self._amount_line_tax(cr, uid, line, context=context)
+
+            other_charges = (order.package_and_forwording + order.freight + order.insurance + order.extra_charges)
+            res[order.id]['amount_tax'] = cur_obj.round(cr, uid, cur, val)
+            res[order.id]['amount_untaxed'] = cur_obj.round(cr, uid, cur, val1)
+            res[order.id]['amount_total'] = res[order.id]['amount_untaxed'] + res[order.id]['amount_tax'] + other_charges + order.round_off
+        return res
+
+    def _get_order(self, cr, uid, ids, context=None):
+        result = {}
+        for line in self.pool.get('sale.order.line').browse(cr, uid, ids, context=context):
+            result[line.order_id.id] = True
+        return result.keys()
+
     _columns = {
         'ex_work_date': fields.date('Ex.work Delivery Date', help = "Date should be consider as date of Goods ready for delivery"),
         'shipping_time':  fields.integer('Shipping Time(In Days)'),
         'destination_date': fields.date('Destination  Delivery Date', help="Reaching date of delivery goods(Ex.work Delivery Date + Shipping Time)"),
-        'taxes_by_products_detail': fields.one2many('taxes.by.products', 'order_id',string='Taxes By Products',readonly=True)
+        'taxes_by_products_detail': fields.one2many('taxes.by.products', 'order_id',string='Taxes By Products',readonly=True),
+
+        'package_and_forwording': fields.float('Packaging & Forwarding', states={'confirmed':[('readonly', True)], 'approved':[('readonly', True)], 'done':[('readonly', True)]}),
+        'insurance': fields.float('Insurance', states={'confirmed':[('readonly', True)], 'approved':[('readonly', True)], 'done':[('readonly', True)]}),
+        'freight': fields.float('Freight', states={'confirmed':[('readonly', True)], 'approved':[('readonly', True)], 'done':[('readonly', True)]}),
+        'extra_charges': fields.float('Other Charges', states={'confirmed':[('readonly', True)], 'approved':[('readonly', True)], 'done':[('readonly', True)]}),
+        'round_off': fields.float('Round Off', states={'confirmed':[('readonly', True)], 'approved':[('readonly', True)], 'done':[('readonly', True)]}, help="Round Off Amount"),
+
+        'amount_untaxed': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Untaxed Amount',
+            store={
+                'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['package_and_forwording','insurance', 'freight' 'extra_charges','round_off', 'order_line'], 10),
+                'sale.order.line': (_get_order, ['price_unit', 'tax_id', 'discount', 'product_uom_qty'], 10),
+            }, multi="sums", help="The amount without tax", track_visibility='always'),
+        'amount_tax': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Taxes',
+            store={
+                'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['package_and_forwording','insurance', 'freight' 'extra_charges','round_off', 'order_line'], 10),
+                'sale.order.line': (_get_order, ['price_unit', 'tax_id', 'discount', 'product_uom_qty'], 10),
+            }, multi="sums", help="The tax amount"),
+        'amount_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total',
+            store={
+                'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['package_and_forwording','insurance', 'freight' 'extra_charges','round_off', 'order_line'], 10),
+                'sale.order.line': (_get_order, ['price_unit', 'tax_id', 'discount', 'product_uom_qty'], 10),
+            }, multi="sums",help="The total amount"),
+#        'other_charges': fields.function(_amount_all, digits_compute=dp.get_precision('Account'), string='P&F+Freight+Insurance',
+#            store={
+#                'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['package_and_forwording','insurance', 'freight' 'extra_charges','round_off', 'order_line'], 10),
+#                'sale.order.line': (_get_order, ['price_unit', 'tax_id', 'discount', 'product_uom_qty'], 10),
+#            }, multi="sums", help="Computed as Packing & Forwarding + Freight + Insurance"),
+
     }
 
     def onchange_shipping_time(self, cr, uid, ids, ex_work_date, shipping_time, context=None):
@@ -103,7 +175,7 @@ class sale_order(osv.osv):
         new_id = super(sale_order,self).create(cr, uid, vals,context=context)
         self._get_taxes_by_products_detail(cr, uid, [new_id], context=context)
         return new_id
-
+    
     def _prepare_order_picking(self, cr, uid, order, context=None):
         """
         Process
