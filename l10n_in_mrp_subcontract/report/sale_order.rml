@@ -359,6 +359,7 @@
     <paraStyle name="terp_default_Bold_Centre_9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica-Bold" fontSize="16.0" leading="25" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_default_Right_9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_default_Bold_Right_9" rightIndent="0.0" leftIndent="-3.0" fontName="Helvetica-Bold" fontSize="9.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Bold_Right_8" rightIndent="0.0" leftIndent="-3.0" fontName="Helvetica-Bold" fontSize="8.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_default_Bold_Right_14" rightIndent="0.0" leftIndent="-3.0" fontName="Helvetica-Bold" fontSize="14.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="Standard" fontName="Times-Roman"/>
     <paraStyle name="Heading" fontName="Helvetica" fontSize="14.0" leading="17" spaceBefore="12.0" spaceAfter="6.0"/>
@@ -575,14 +576,81 @@
     <blockTable colWidths="485.0,115.0" style="Table99">
       <tr>
         <td>
-          <para style="terp_default_Right_9">Tax</para>
+          <para style="terp_default_Bold_Right_8">Tax</para>
         </td>
         <td>
-          <para style="terp_default_Right_9">[[ formatLang(o.amount_tax, digits=get_digits(dp='Account')) ]] [[ o.pricelist_id.currency_id.symbol ]]</para>
+          <para style="terp_default_Bold_Right_8">[[ formatLang(o.amount_tax, digits=get_digits(dp='Account')) ]] [[ o.pricelist_id.currency_id.symbol ]]</para>
         </td>
       </tr>
     </blockTable>
-    <spacer length="0.01cm"/>
+
+
+      <spacer length="0.01cm"/>
+      <blockTable colWidths="485.0,115.0" style="Table99">
+      <para style="terp_default_2">[[ o.state in ['draft','sent'] and removeParentNode('blockTable')  or (o.package_and_forwording == 0.0 and  removeParentNode('blockTable'))]]</para>
+        <tr>
+          <td>
+            <para style="terp_default_Right_9">Packaging &amp; Forwarding</para>
+          </td>
+          <td>
+            <para style="terp_default_Right_9">[[ formatLang(o.package_and_forwording, digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
+          </td>
+        </tr>
+      </blockTable>
+
+      <spacer length="0.01cm"/>
+      <blockTable colWidths="485.0,115.0" style="Table99">
+      <para style="terp_default_2">[[ o.state in ['draft','sent'] and removeParentNode('blockTable')  or (o.insurance == 0.0  and removeParentNode('blockTable'))]]</para>
+        <tr>
+          <td>
+            <para style="terp_default_Right_9">Insurance</para>
+          </td>
+          <td>
+            <para style="terp_default_Right_9">[[ formatLang(o.insurance, digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
+          </td>
+        </tr>
+      </blockTable>
+
+      <spacer length="0.01cm"/>
+      <blockTable colWidths="485.0,115.0" style="Table99">
+      <para style="terp_default_2">[[ o.state in ['draft','sent'] and removeParentNode('blockTable')  or (o.freight == 0.0  and removeParentNode('blockTable'))]]</para>
+        <tr>
+          <td>
+            <para style="terp_default_Right_9">Freight</para>
+          </td>
+          <td>
+            <para style="terp_default_Right_9">[[ formatLang(o.freight, digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
+          </td>
+        </tr>
+      </blockTable>
+
+      <spacer length="0.01cm"/>
+      <blockTable colWidths="485.0,115.0" style="Table99">
+      <para style="terp_default_2">[[ o.state in ['draft','sent'] and removeParentNode('blockTable')  or (o.extra_charges == 0.0  and removeParentNode('blockTable'))]]</para>
+        <tr>
+          <td>
+            <para style="terp_default_Right_9">Other Charges</para>
+          </td>
+          <td>
+            <para style="terp_default_Right_9">[[ formatLang(o.extra_charges, digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
+          </td>
+        </tr>
+      </blockTable>
+
+      <spacer length="0.01cm"/>
+      <blockTable colWidths="485.0,115.0" style="Table99">
+      <para style="terp_default_2">[[ o.state in ['draft','sent'] and removeParentNode('blockTable')  or (o.round_off == 0.0  and removeParentNode('blockTable'))]]</para>
+        <tr>
+          <td>
+            <para style="terp_default_Right_9">Round Off</para>
+          </td>
+          <td>
+            <para style="terp_default_Right_9">[[ formatLang(o.round_off, digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
+          </td>
+        </tr>
+      </blockTable>
+
+    <spacer length="0.1cm"/>
     <blockTable colWidths="485.0,115.0" style="Table8">
       <tr>
         <td>
