@@ -56,16 +56,72 @@ account_invoice_line()
 class account_invoice(osv.osv):
     _inherit = 'account.invoice'
 
+    def _amount_all(self, cr, uid, ids, name, args, context=None):
+        res = {}
+        for invoice in self.browse(cr, uid, ids, context=context):
+            res[invoice.id] = {
+                'amount_untaxed': 0.0,
+                'amount_tax': 0.0,
+                'amount_total': 0.0
+            }
+            for line in invoice.invoice_line:
+                res[invoice.id]['amount_untaxed'] += line.price_subtotal
+            for line in invoice.tax_line:
+                res[invoice.id]['amount_tax'] += line.amount
+            other_charges = (invoice.package_and_forwording + invoice.freight + invoice.insurance + invoice.extra_charges + invoice.round_off)
+            res[invoice.id]['amount_total'] = res[invoice.id]['amount_tax'] + res[invoice.id]['amount_untaxed'] + other_charges
+        return res
+
+    def _get_invoice_line(self, cr, uid, ids, context=None):
+        result = {}
+        for line in self.pool.get('account.invoice.line').browse(cr, uid, ids, context=context):
+            result[line.invoice_id.id] = True
+        return result.keys()
+
+    def _get_invoice_tax(self, cr, uid, ids, context=None):
+        result = {}
+        for tax in self.pool.get('account.invoice.tax').browse(cr, uid, ids, context=context):
+            result[tax.invoice_id.id] = True
+        return result.keys()
+
     _columns = {
-            'do_id': fields.many2one('stock.picking', 'Delivery Order', readonly=True),
-            'do_address_id': fields.many2one('res.partner', 'Delivery Address'),
-            'so_date': fields.date('Sales Date'),
-            #'do_carrier_id': fields.many2one('delivery.carrier', 'Carrier'),
-            'do_name': fields.char('Delivery Name'),
-            'do_delivery_date': fields.datetime('Delivery Date'),
-            'so_id': fields.many2one('sale.order', 'Sale Order ID', readonly=True),
-            'do_dispatch_doc_no': fields.char('Dispatch Document No.', size=16),
-            'do_dispatch_doc_date': fields.date('Dispatch Document Date'),
+        'do_id': fields.many2one('stock.picking', 'Delivery Order', readonly=True),
+        'do_address_id': fields.many2one('res.partner', 'Delivery Address'),
+        'so_date': fields.date('Sales Date'),
+        #'do_carrier_id': fields.many2one('delivery.carrier', 'Carrier'),
+        'do_name': fields.char('Delivery Name'),
+        'do_delivery_date': fields.datetime('Delivery Date'),
+        'so_id': fields.many2one('sale.order', 'Sale Order ID', readonly=True),
+        'do_dispatch_doc_no': fields.char('Dispatch Document No.', size=16),
+        'do_dispatch_doc_date': fields.date('Dispatch Document Date'),
+
+        'package_and_forwording': fields.float('Packaging & Forwarding', states={'confirmed':[('readonly', True)], 'approved':[('readonly', True)], 'done':[('readonly', True)]}),
+        'insurance': fields.float('Insurance', states={'confirmed':[('readonly', True)], 'approved':[('readonly', True)], 'done':[('readonly', True)]}),
+        'freight': fields.float('Freight', states={'confirmed':[('readonly', True)], 'approved':[('readonly', True)], 'done':[('readonly', True)]}),
+        'extra_charges': fields.float('Other Charges', states={'confirmed':[('readonly', True)], 'approved':[('readonly', True)], 'done':[('readonly', True)]}),
+        'round_off': fields.float('Round Off', states={'confirmed':[('readonly', True)], 'approved':[('readonly', True)], 'done':[('readonly', True)]}, help="Round Off Amount"),
+
+        'amount_untaxed': fields.function(_amount_all, digits_compute=dp.get_precision('Account'), string='Subtotal', track_visibility='always',
+            store={
+                'account.invoice': (lambda self, cr, uid, ids, c={}: ids, ['package_and_forwording','insurance', 'freight' 'extra_charges','round_off','invoice_line'], 20),
+                'account.invoice.tax': (_get_invoice_tax, None, 20),
+                'account.invoice.line': (_get_invoice_line, ['price_unit', 'invoice_line_tax_id', 'quantity', 'discount', 'invoice_id', 'packaging_cost'], 20),
+            },
+            multi='all'),
+        'amount_tax': fields.function(_amount_all, digits_compute=dp.get_precision('Account'), string='Tax',
+            store={
+                'account.invoice': (lambda self, cr, uid, ids, c={}: ids, ['package_and_forwording','insurance', 'freight' 'extra_charges','round_off','invoice_line'], 20),
+                'account.invoice.tax': (_get_invoice_tax, None, 20),
+                'account.invoice.line': (_get_invoice_line, ['price_unit', 'invoice_line_tax_id', 'quantity', 'discount', 'invoice_id', 'packaging_cost'], 20),
+            },
+            multi='all'),
+        'amount_total': fields.function(_amount_all, digits_compute=dp.get_precision('Account'), string='Total',
+            store={
+                'account.invoice': (lambda self, cr, uid, ids, c={}: ids, ['package_and_forwording','insurance', 'freight' 'extra_charges','round_off','invoice_line'], 20),
+                'account.invoice.tax': (_get_invoice_tax, None, 20),
+                'account.invoice.line': (_get_invoice_line, ['price_unit', 'invoice_line_tax_id', 'quantity', 'discount', 'invoice_id', 'packaging_cost'], 20),
+            },
+            multi='all'),
             }
 
     def copy(self, cr, uid, id, default=None, context=None):

@@ -54,6 +54,18 @@
                     <field name="do_dispatch_doc_no"/>
                     <field name="do_dispatch_doc_date"/>
                 </field>
+                <field name="amount_tax" position="after">
+                    <field name="package_and_forwording" widget="monetary"
+                        options="{'currency_field': 'currency_id'}" />
+                    <field name="insurance" widget="monetary"
+                        options="{'currency_field': 'currency_id'}" />
+                    <field name="freight" widget="monetary"
+                        options="{'currency_field': 'currency_id'}" />
+                    <field name="extra_charges" widget="monetary"
+                        options="{'currency_field': 'currency_id'}" />
+                    <field name="round_off" widget="monetary"
+                        options="{'currency_field': 'currency_id'}" />
+                </field>
             </field>
         </record>
 

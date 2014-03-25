@@ -617,27 +617,16 @@
         </td>
       </tr>
     </blockTable>
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table5">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table5">
       <tr>
         <td>
           <para style="P21">Description Of Goods</para>
-        </td>
-        <td>
-          <para style="P22">
-            <font face="Helvetica">Tariff / HSN</font>
-          </para>
-          <para style="P22">
-            <font face="Helvetica">Classification</font>
-          </para>
         </td>
         <td>
           <para style="P20">Quantity</para>
         </td>
         <td>
           <para style="P3">Rate</para>
-        </td>
-        <td>
-          <para style="P3">Packing Cost</para>
         </td>
         <td>
           <para style="P4">
@@ -650,18 +639,8 @@
       </tr>
     </blockTable>
     
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table6">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table6">
       <tr>
-        <td>
-          <para style="terp_default_2">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="terp_default_2">
-            <font color="white"> </font>
-          </para>
-        </td>
         <td>
           <para style="terp_default_2">
             <font color="white"> </font>
@@ -691,13 +670,10 @@
     </blockTable>
     <section>
       <para style="P25">[[ repeatIn(o.invoice_line,'l') ]]</para>
-      <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table6">
+      <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table6">
         <tr>
           <td>
             <para style="P1">[[ l.name ]]</para>
-          </td>
-          <td>
-            <para style="terp_default_2"></para>
           </td>
           <td>
             <para style="P19">[[ convert_int(l.quantity)]] [[ (l.uos_id and l.uos_id.name) or '' ]]</para>
@@ -706,18 +682,15 @@
             <para style="P19">[[ formatLang(l.price_unit) ]]</para>
           </td>
           <td>
-            <para style="terp_default_2"></para>
-          </td>
-          <td>
             <para style="P19">[[ (l.uos_id and l.uos_id.name) or '' ]]</para>
           </td>
           <td>
-            <para style="P19">[[ o.currency_id.symbol ]] [[ formatLang(l.price_subtotal, digits=get_digits(dp='Account')) ]]</para>
+            <para style="P19">[[ formatLang(l.price_subtotal, digits=get_digits(dp='Account')) ]] [[ o.currency_id.symbol ]]</para>
           </td>
         </tr>
       </blockTable>
     </section>
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table6">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table6">
       <tr>
         <td>
           <para style="P92">Subtotal</para>
@@ -738,36 +711,16 @@
           </para>
         </td>
         <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P92">[[ formatLang(o.amount_untaxed, digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
+          <para style="P92">[[ formatLang(o.amount_untaxed, digits=get_digits(dp='Account')) ]] [[ o.currency_id.symbol ]] </para>
         </td>
       </tr>
     </blockTable>
     <section>
       <para style="P25">[[ repeatIn(o.tax_line,'t') ]]</para>
-      <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table61">
+      <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table61">
         <tr>
           <td>
             <para style="P91">[[ t.name ]] <font face="Helvetica">([[ t.tax_categ in ('excise', 'cess', 'cst', 'other') and removeParentNode('font') or ((t.base)) ]])</font></para>
-          </td>
-          <td>
-            <para style="P1">
-              <font color="white"> </font>
-            </para>
-          </td>
-          <td>
-            <para style="P1">
-              <font color="white"> </font>
-            </para>
           </td>
           <td>
             <para style="P1">
@@ -788,16 +741,11 @@
         </tr>
       </blockTable>
     </section>
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table7">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table7">
       <tr>
         <td>
           <para style="P92">
             <font face="Helvetica">Total</font>
-          </para>
-        </td>
-        <td>
-          <para style="P1">
-            <font color="white"> </font>
           </para>
         </td>
         <td>
@@ -808,15 +756,12 @@
           </para>
         </td>
         <td>
-          <para style="P92"><font color="white"> </font></para>
-        </td>
-        <td>
           <para style="P1">
             <font color="white"> </font>
           </para>
         </td>
         <td>
-          <para style="P92">[[ o.currency_id.symbol ]] [[ formatLang(o.amount_total, digits=get_digits(dp='Account')) ]]</para>
+          <para style="P92">[[ formatLang(o.amount_total, digits=get_digits(dp='Account')) ]] [[ o.currency_id.symbol ]] </para>
         </td>
       </tr>
     </blockTable>
@@ -1209,27 +1154,16 @@
         </td>
       </tr>
     </blockTable>
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table5">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table5">
       <tr>
         <td>
           <para style="P21">Description Of Goods</para>
-        </td>
-        <td>
-          <para style="P22">
-            <font face="Helvetica">Tariff / HSN</font>
-          </para>
-          <para style="P22">
-            <font face="Helvetica">Classification</font>
-          </para>
         </td>
         <td>
           <para style="P20">Quantity</para>
         </td>
         <td>
           <para style="P3">Rate</para>
-        </td>
-        <td>
-          <para style="P3">Packing Cost</para>
         </td>
         <td>
           <para style="P4">
@@ -1242,16 +1176,8 @@
       </tr>
     </blockTable>
     
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table6">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table6">
       <tr>
-        <td>
-          
-        </td>
-        <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
-        </td>
         <td>
           <para style="P1">
             <font color="white"> </font>
@@ -1282,13 +1208,10 @@
     
     <section>
       <para style="P25">[[ repeatIn(o.invoice_line,'l') ]]</para>
-      <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table6">
+      <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table6">
         <tr>
           <td>
             <para style="P1">[[ l.name ]]</para>
-          </td>
-          <td>
-            
           </td>
           <td>
             <para style="P19">[[ convert_int(l.quantity)]] [[ (l.uos_id and l.uos_id.name) or '' ]]</para>
@@ -1297,18 +1220,15 @@
             <para style="P19">[[ formatLang(l.price_unit) ]]</para>
           </td>
           <td>
-            
-          </td>
-          <td>
             <para style="P19">[[ (l.uos_id and l.uos_id.name) or '' ]]</para>
           </td>
           <td>
-            <para style="P19">[[ o.currency_id.symbol ]] [[ formatLang(l.price_subtotal, digits=get_digits(dp='Account')) ]]</para>
+            <para style="P19">[[ formatLang(l.price_subtotal, digits=get_digits(dp='Account')) ]] [[ o.currency_id.symbol ]] </para>
           </td>
         </tr>
       </blockTable>
     </section>
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table6">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table6">
       <tr>
         <td>
           <para style="P92">Subtotal</para>
@@ -1329,36 +1249,16 @@
           </para>
         </td>
         <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P92">[[ formatLang(o.amount_untaxed, digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
+          <para style="P92">[[ formatLang(o.amount_untaxed, digits=get_digits(dp='Account')) ]] [[ o.currency_id.symbol ]] </para>
         </td>
       </tr>
     </blockTable>
     <section>
       <para style="P25">[[ repeatIn(o.tax_line,'t') ]]</para>
-      <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table61">
+      <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table61">
         <tr>
           <td>
             <para style="P91">[[ t.name ]] <font face="Helvetica">([[ t.tax_categ in ('excise', 'cess', 'cst', 'other') and removeParentNode('font') or ((t.base)) ]])</font></para>
-          </td>
-          <td>
-            <para style="P1">
-              <font color="white"> </font>
-            </para>
-          </td>
-          <td>
-            <para style="P1">
-              <font color="white"> </font>
-            </para>
           </td>
           <td>
             <para style="P1">
@@ -1379,7 +1279,7 @@
         </tr>
       </blockTable>
     </section>
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table7">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table7">
       <tr>
         <td>
           <para style="P92">
@@ -1387,19 +1287,7 @@
           </para>
         </td>
         <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P92">[[ get_quantity(o) ]]</para>
-        </td>
-        <td>
-          <para style="P1"><font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P92"><font color="white"> </font></para>
+            <para style="P92">[[ get_quantity(o) ]]</para>
         </td>
         <td>
           <para style="P1">
@@ -1407,7 +1295,12 @@
           </para>
         </td>
         <td>
-          <para style="P92">[[ o.currency_id.symbol ]] [[ formatLang(o.amount_total, digits=get_digits(dp='Account')) ]]</para>
+          <para style="P1">
+            <font color="white"> </font>
+          </para>
+        </td>
+        <td>
+          <para style="P92">[[ formatLang(o.amount_total, digits=get_digits(dp='Account')) ]] [[ o.currency_id.symbol ]] </para>
         </td>
       </tr>
     </blockTable>
@@ -1800,27 +1693,16 @@
         </td>
       </tr>
     </blockTable>
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table5">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table5">
       <tr>
         <td>
           <para style="P21">Description Of Goods</para>
-        </td>
-        <td>
-          <para style="P22">
-            <font face="Helvetica">Tariff / HSN</font>
-          </para>
-          <para style="P22">
-            <font face="Helvetica">Classification</font>
-          </para>
         </td>
         <td>
           <para style="P20">Quantity</para>
         </td>
         <td>
           <para style="P3">Rate</para>
-        </td>
-        <td>
-          <para style="P3">Packing Cost</para>
         </td>
         <td>
           <para style="P4">
@@ -1833,16 +1715,8 @@
       </tr>
     </blockTable>
     
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table6">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table6">
       <tr>
-        <td>
-          
-        </td>
-        <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
-        </td>
         <td>
           <para style="P1">
             <font color="white"> </font>
@@ -1873,13 +1747,10 @@
     
     <section>
       <para style="P25">[[ repeatIn(o.invoice_line,'l') ]]</para>
-      <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table6">
+      <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table6">
         <tr>
           <td>
             <para style="P1">[[ l.name ]]</para>
-          </td>
-          <td>
-            
           </td>
           <td>
             <para style="P19">[[ convert_int(l.quantity)]] [[ (l.uos_id and l.uos_id.name) or '' ]]</para>
@@ -1888,18 +1759,15 @@
             <para style="P19">[[ formatLang(l.price_unit) ]]</para>
           </td>
           <td>
-            
-          </td>
-          <td>
             <para style="P19">[[ (l.uos_id and l.uos_id.name) or '' ]]</para>
           </td>
           <td>
-            <para style="P19"> [[ o.currency_id.symbol ]] [[ formatLang(l.price_subtotal, digits=get_digits(dp='Account')) ]]</para>
+            <para style="P19"> [[ formatLang(l.price_subtotal, digits=get_digits(dp='Account')) ]] [[ o.currency_id.symbol ]]</para>
           </td>
         </tr>
       </blockTable>
     </section>
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table6">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table6">
       <tr>
         <td>
           <para style="P92">Subtotal</para>
@@ -1920,36 +1788,16 @@
           </para>
         </td>
         <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P92">[[ formatLang(o.amount_untaxed, digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
+          <para style="P92">[[ formatLang(o.amount_untaxed, digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]] </para>
         </td>
       </tr>
     </blockTable>
     <section>
       <para style="P25">[[ repeatIn(o.tax_line,'t') ]]</para>
-      <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table61">
+      <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table61">
         <tr>
           <td>
             <para style="P91">[[ t.name ]] <font face="Helvetica">([[ t.tax_categ in ('excise', 'cess', 'cst', 'other') and removeParentNode('font') or ((t.base)) ]])</font></para>
-          </td>
-          <td>
-            <para style="P1">
-              <font color="white"> </font>
-            </para>
-          </td>
-          <td>
-            <para style="P1">
-              <font color="white"> </font>
-            </para>
           </td>
           <td>
             <para style="P1">
@@ -1970,7 +1818,7 @@
         </tr>
       </blockTable>
     </section>
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table7">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table7">
       <tr>
         <td>
           <para style="P92">
@@ -1978,19 +1826,7 @@
           </para>
         </td>
         <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P92">[[ get_quantity(o) ]]</para>
-        </td>
-        <td>
-          <para style="P1"><font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P92"><font color="white"> </font></para>
+            <para style="P92">[[ get_quantity(o) ]]</para>
         </td>
         <td>
           <para style="P1">
@@ -1998,7 +1834,12 @@
           </para>
         </td>
         <td>
-          <para style="P92"> [[ o.currency_id.symbol ]] [[ formatLang(o.amount_total, digits=get_digits(dp='Account')) ]]</para>
+          <para style="P1">
+            <font color="white"> </font>
+          </para>
+        </td>
+        <td>
+          <para style="P92">[[ formatLang(o.amount_total, digits=get_digits(dp='Account')) ]] [[ o.currency_id.symbol ]]</para>
         </td>
       </tr>
     </blockTable>
@@ -2391,27 +2232,16 @@
         </td>
       </tr>
     </blockTable>
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table5">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table5">
       <tr>
         <td>
           <para style="P21">Description Of Goods</para>
-        </td>
-        <td>
-          <para style="P22">
-            <font face="Helvetica">Tariff / HSN</font>
-          </para>
-          <para style="P22">
-            <font face="Helvetica">Classification</font>
-          </para>
         </td>
         <td>
           <para style="P20">Quantity</para>
         </td>
         <td>
           <para style="P3">Rate</para>
-        </td>
-        <td>
-          <para style="P3">Packing Cost</para>
         </td>
         <td>
           <para style="P4">
@@ -2424,16 +2254,8 @@
       </tr>
     </blockTable>
     
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table6">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table6">
       <tr>
-        <td>
-          
-        </td>
-        <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
-        </td>
         <td>
           <para style="P1">
             <font color="white"> </font>
@@ -2464,13 +2286,10 @@
     
     <section>
       <para style="P25">[[ repeatIn(o.invoice_line,'l') ]]</para>
-      <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table6">
+      <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table6">
         <tr>
           <td>
             <para style="P1">[[ l.name ]]</para>
-          </td>
-          <td>
-            
           </td>
           <td>
             <para style="P19">[[ convert_int(l.quantity)]] [[ (l.uos_id and l.uos_id.name) or '' ]]</para>
@@ -2479,18 +2298,15 @@
             <para style="P19">[[ formatLang(l.price_unit) ]]</para>
           </td>
           <td>
-            
-          </td>
-          <td>
             <para style="P19">[[ (l.uos_id and l.uos_id.name) or '' ]]</para>
           </td>
           <td>
-            <para style="P19">[[ o.currency_id.symbol ]] [[ formatLang(l.price_subtotal, digits=get_digits(dp='Account')) ]]</para>
+            <para style="P19">[[ formatLang(l.price_subtotal, digits=get_digits(dp='Account')) ]] [[ o.currency_id.symbol ]] </para>
           </td>
         </tr>
       </blockTable>
     </section>
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table6">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table6">
       <tr>
         <td>
           <para style="P92">Subtotal</para>
@@ -2511,36 +2327,16 @@
           </para>
         </td>
         <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P92">[[ formatLang(o.amount_untaxed, digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
+          <para style="P92">[[ formatLang(o.amount_untaxed, digits=get_digits(dp='Account')) ]] [[ o.currency_id.symbol ]] </para>
         </td>
       </tr>
     </blockTable>
     <section>
       <para style="P25">[[ repeatIn(o.tax_line,'t') ]]</para>
-      <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table61">
+      <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table61">
         <tr>
           <td>
             <para style="P91">[[ t.name ]] <font face="Helvetica">([[ t.tax_categ in ('excise', 'cess', 'cst', 'other') and removeParentNode('font') or ((t.base)) ]])</font></para>
-          </td>
-          <td>
-            <para style="P1">
-              <font color="white"> </font>
-            </para>
-          </td>
-          <td>
-            <para style="P1">
-              <font color="white"> </font>
-            </para>
           </td>
           <td>
             <para style="P1">
@@ -2561,7 +2357,7 @@
         </tr>
       </blockTable>
     </section>
-    <blockTable colWidths="210.0,58.0,42.0,49.0,50.0,26.0,64.0" style="Table7">
+    <blockTable colWidths="238.0,72.0,59.0,36.0,94.0" style="Table7">
       <tr>
         <td>
           <para style="P92">
@@ -2569,19 +2365,7 @@
           </para>
         </td>
         <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P92">[[ get_quantity(o) ]]</para>
-        </td>
-        <td>
-          <para style="P1"><font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P92"><font color="white"> </font></para>
+            <para style="P92">[[ get_quantity(o) ]]</para>
         </td>
         <td>
           <para style="P1">
@@ -2589,7 +2373,12 @@
           </para>
         </td>
         <td>
-          <para style="P92">[[ o.currency_id.symbol ]] [[ formatLang(o.amount_total, digits=get_digits(dp='Account')) ]]</para>
+          <para style="P1">
+            <font color="white"> </font>
+          </para>
+        </td>
+        <td>
+          <para style="P92">[[ formatLang(o.amount_total, digits=get_digits(dp='Account')) ]] [[ o.currency_id.symbol ]] </para>
         </td>
       </tr>
     </blockTable>

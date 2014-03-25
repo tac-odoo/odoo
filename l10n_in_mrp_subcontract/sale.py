@@ -251,7 +251,13 @@ class sale_order(osv.osv):
                     #'do_carrier_id': picking.carrier_id and picking.carrier_id.id,
                     'do_name': do_data.name,
                     'do_delivery_date': order.ex_work_date,
-                    'so_id': order.id
+                    'so_id': order.id,
+
+                    'package_and_forwording':order.package_and_forwording, 
+                    'insurance':order.insurance,
+                    'freight':order.freight,
+                    'extra_charges':order.extra_charges,
+                    'round_off':order.round_off,
                 })
         return res
 sale_order()

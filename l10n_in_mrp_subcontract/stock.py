@@ -320,7 +320,14 @@ class stock_picking(osv.osv):
                     'so_date': picking.sale_id.date_order,
                     'do_name': picking.name,
                     'do_delivery_date': picking.ex_work_date,
-                    'so_id': picking.sale_id.id
+                    'so_id': picking.sale_id.id,
+
+                    'package_and_forwording':picking.sale_id.package_and_forwording, 
+                    'insurance':picking.sale_id.insurance,
+                    'freight':picking.sale_id.freight,
+                    'extra_charges':picking.sale_id.extra_charges,
+                    'round_off':picking.sale_id.round_off,
+
                 })
         return res
 

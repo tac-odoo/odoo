@@ -79,6 +79,6 @@ report_sxw.report_sxw(
     'account.invoice',
     'addons/l10n_in_mrp_subcontract/report/account_print_invoice.rml',
     parser=account_l10n_in_mrp_subcontract,
-    header=False
+    header='internal'
 )
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
