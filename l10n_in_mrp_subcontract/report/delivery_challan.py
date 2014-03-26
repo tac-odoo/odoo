@@ -24,7 +24,6 @@ from openerp.tools.translate import _
 from openerp.report import report_sxw
 
 class delivery_challan(report_sxw.rml_parse):
-    print "******************************************************"
     def __init__(self, cr, uid, name, context=None):
         super(delivery_challan, self).__init__(cr, uid, name, context=context)
         self.localcontext.update({
