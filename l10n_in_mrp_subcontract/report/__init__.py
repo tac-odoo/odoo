@@ -21,5 +21,6 @@
 
 import sale_order
 import account_print_invoice
+import delivery_challan
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
