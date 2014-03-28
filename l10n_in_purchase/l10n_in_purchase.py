@@ -307,8 +307,9 @@ class purchase_order(osv.Model):
                 total_insurance = order.insurance
             
             for line in order.order_line:
+                if order.amount_untaxed == 0.0:
+                    raise osv.except_osv(_('Warning!'),_('Cannot proceed zero amount of purchase order'))
                 line_rario = round((line.price_subtotal * 100) / order.amount_untaxed,2)
-                
                 if order.package_and_forwording_type == 'per_unit' and order.package_and_forwording:
                     res_vals.update({'package_and_forwording':order.package_and_forwording})
                     total_pandf += order.package_and_forwording * line.product_qty

@@ -292,7 +292,7 @@ class process_qty_to_finished(osv.osv_memory):
                                   'state':'finished',
                                   'accepted_qty': already_accepted_qty + accepted_qty,
                                   'process_qty': process_qty - accepted_qty,
-                                  'end_date':time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                                  #'end_date':time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                                   })
         else:
             updt_prcs_mve.update({

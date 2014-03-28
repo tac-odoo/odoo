@@ -113,7 +113,7 @@ class all_in_once_qty_to_finished(osv.osv_memory):
             updt_prcs_mve.update({
                                   data.process_move_id.id:{
                                                            'state':'finished', 
-                                                           'end_date':time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                                                           #'end_date':time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                                                            'accepted_qty': data.total_qty + data.accepted_qty,
                                                            'process_qty':0.0
                                                            }})

@@ -666,7 +666,7 @@ class stock_moves_workorder(osv.osv):
         wf_service = netsvc.LocalService("workflow")
         self.write(cr, uid, ids, {
                                   'state':'in_progress',
-                                  'start_date':time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                                  #'start_date':time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                                   'process_qty':currnt_data.total_qty
                                   })
         #Start Work-Order Also.
@@ -1044,7 +1044,19 @@ class mrp_production_workcenter_line(osv.osv):
 
         self._check_for_process_none_qty(cr, uid, ids, 'start', context=context)
         self.modify_production_order_state(cr, uid, ids, 'start')
-        self.write(cr, uid, ids, {'state':'startworking', 'date_start': time.strftime('%Y-%m-%d %H:%M:%S')}, context=context)
+        #self.write(cr, uid, ids, {'state':'startworking', 'date_start': time.strftime('%Y-%m-%d %H:%M:%S')}, context=context)
+        #Always human dependance so be versatile not systamatic;).
+        self.write(cr, uid, ids, {'state':'startworking'}, context=context)
+        return True
+
+    def action_start_working(self, cr, uid, ids, context=None):
+        """ 
+        Process
+            -Just removed date updation when workcenter started.
+        """
+        self.modify_production_order_state(cr, uid, ids, 'start')
+        #self.write(cr, uid, ids, {'state':'startworking', 'date_start': time.strftime('%Y-%m-%d %H:%M:%S')}, context=context)
+        self.write(cr, uid, ids, {'state':'startworking'}, context=context)
         return True
 
     def _check_out_all_lines(self, cr, uid, current_data, context=None):
@@ -1253,16 +1265,18 @@ class mrp_production_workcenter_line(osv.osv):
         obj_line = self.browse(cr, uid, ids[0])
 
         delay = 0.0
-        date_start = datetime.strptime(obj_line.date_start,'%Y-%m-%d %H:%M:%S')
-        date_finished = datetime.strptime(date_now,'%Y-%m-%d %H:%M:%S')
-        delay += (date_finished-date_start).days * 24
-        delay += (date_finished-date_start).seconds / float(60*60)
+        if obj_line.date_start:
+            date_start = datetime.strptime(obj_line.date_start,'%Y-%m-%d %H:%M:%S')
+            date_finished = datetime.strptime(date_now,'%Y-%m-%d %H:%M:%S')
+            delay += (date_finished-date_start).days * 24
+            delay += (date_finished-date_start).seconds / float(60*60)
 
 #        days = ((date_finished-date_start).days * 24) + ((date_finished-date_start).seconds) // 3600
 #        minite = (((date_finished-date_start).seconds%3600) / float(60))/100
 #        delay = days + minite
 
-        self.write(cr, uid, ids, {'state':'done', 'date_finished': date_now,'delay':delay}, context=context)
+        self.write(cr, uid, ids, {'state':'done','delay':delay}, context=context)
+        #self.write(cr, uid, ids, {'state':'done', 'date_finished': date_now,'delay':delay}, context=context)
         #IMPORTANTE, Cannot done production order after processing of done workorder.
         #self.modify_production_order_state(cr,uid,ids,'done')
         return True
