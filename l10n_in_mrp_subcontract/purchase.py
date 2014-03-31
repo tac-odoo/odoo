@@ -111,11 +111,127 @@ class purchase_order(osv.osv):
                 po_expd_obj.create(cr, uid, c_line,context=context)
         return True
 
+    def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
+        cur_obj=self.pool.get('res.currency')
+        tax_obj = self.pool.get('account.tax')
+        
+        res = {}
+        untax_amount = 0
+        
+        for order in self.browse(cr, uid, ids, context=context):
+            res[order.id] = {
+                'amount_untaxed': 0.0,
+                'amount_tax': 0.0,
+                'amount_total': 0.0,
+                'other_charges':0.0,
+            }
+            order_total = val = val1 = tax_total = other_charges = included_price = 0.0
+            cur = order.pricelist_id.currency_id
+            for line in order.order_line:
+                order_total += line.price_subtotal
+
+            for line in order.order_line:
+                #price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+                price = line.purchase_unit_rate * (1 - (line.discount or 0.0) / 100.0)
+                val1 += (price * line.line_qty)
+                untax_amount += line.price_subtotal
+                if order.package_and_forwording_type == 'per_unit' and order.package_and_forwording:
+                    other_charges += (order.package_and_forwording * line.line_qty)
+                if order.freight_type == 'per_unit' and order.freight:
+                    other_charges += (order.freight * line.line_qty)
+                if order_total > 0:
+                    #Add fixed amount to order included in price
+                    pre_line = round((price * 100) / order_total,2)
+                    line_part = 0.0
+                    if order.package_and_forwording_type == 'include' and order.package_and_forwording:
+                        line_part = order.package_and_forwording * (pre_line / 100)
+                        price -= line_part
+                        
+                    if order.freight_type == 'include' and order.freight:
+                        line_part = order.freight  * (pre_line / 100)
+                        price -= line_part
+                        
+                    if order.insurance_type == 'include' and order.insurance:
+                        line_part = order.insurance  * (pre_line / 100)
+                        price -= line_part
+
+                taxes = tax_obj.compute_all(cr, uid, line.taxes_id, price, line.line_qty, line.product_id, line.order_id.partner_id)
+                tax_total += taxes.get('total_included', 0.0) - taxes.get('total', 0.0)
+            
+            #Add fixed amount to order included in price
+            if order.package_and_forwording_type == 'include' and order.package_and_forwording:
+                included_price += order.package_and_forwording
+                order_total -= order.package_and_forwording
+                
+            if order.freight_type == 'include' and order.freight:
+                included_price += order.freight
+                order_total -= order.freight
+                
+            if order.insurance_type == 'include' and order.insurance:
+                included_price += order.insurance
+                order_total -= order.insurance
+            
+            if order_total > 0:
+                #Add fixed amount to order percentage
+                if order.package_and_forwording_type == 'percentage' and order.package_and_forwording:
+                    other_charges += order_total * (order.package_and_forwording / 100)
+                
+                if order.freight_type == 'percentage' and order.freight:
+                    other_charges += order_total * (order.freight / 100)
+                    
+                if order.insurance_type == 'percentage' and order.insurance:
+                    other_charges += order_total * (order.insurance/100)
+
+            #Add fixed amount to order untax_amount
+            if order.package_and_forwording_type in ('fix', 'include') and order.package_and_forwording:
+                other_charges += order.package_and_forwording
+            if order.freight_type in ('fix', 'include') and order.freight:
+                other_charges += order.freight
+            if order.insurance_type in ('fix', 'include') and order.insurance:
+                other_charges += order.insurance
+
+            tax_total = cur_obj.round(cr, uid, cur, tax_total)
+            untax_amount = cur_obj.round(cr, uid, cur, untax_amount)  - included_price
+            order_total = other_charges + tax_total + untax_amount + order.round_off
+            res[order.id]['amount_tax'] = tax_total
+            res[order.id]['amount_untaxed'] = untax_amount
+            res[order.id]['other_charges'] = other_charges
+            res[order.id]['amount_total'] = order_total
+        return res
+
+    def _get_order(self, cr, uid, ids, context=None):
+        result = {}
+        for line in self.pool.get('purchase.order.line').browse(cr, uid, ids, context=context):
+            result[line.order_id.id] = True
+        return result.keys()
+
     _columns = {
         'service_order': fields.boolean('Service Order'),
         'workorder_id':  fields.many2one('mrp.production.workcenter.line', 'Work-Order'),
         'service_delivery_order':  fields.many2one('stock.picking', 'Service Delivery Order'),
-        'expected_date_by_production_order': fields.one2many('purchase.expected.date', 'order_id',string='Expected Dates By Production Order',readonly=True)
+        'expected_date_by_production_order': fields.one2many('purchase.expected.date', 'order_id',string='Expected Dates By Production Order',readonly=True),
+
+        'amount_untaxed': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Untaxed Amount',
+            store={
+                   'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['round_off','insurance', 'insurance_type', 'freight_type', 'freight', 'package_and_forwording_type', 'package_and_forwording', 'order_line'], 11),
+                   'purchase.order.line': (_get_order, None, 10),
+            }, multi="sums", help="The amount without tax", track_visibility='always'),
+        'amount_tax': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Taxes',
+            store={
+                'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['round_off','insurance', 'insurance_type', 'freight_type', 'freight', 'package_and_forwording_type', 'package_and_forwording', 'order_line'], 11),
+                'purchase.order.line': (_get_order, None, 10),
+            }, multi="sums", help="The tax amount"),
+        'amount_total': fields.function(_amount_all, digits_compute= dp.get_precision('Account'), string='Total',
+            store={
+                'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['round_off','insurance', 'insurance_type', 'freight_type', 'freight', 'package_and_forwording_type', 'package_and_forwording', 'order_line'], 11),
+                'purchase.order.line': (_get_order, None, 10),
+            }, multi="sums",help="The total amount"),
+        'other_charges': fields.function(_amount_all, digits_compute=dp.get_precision('Account'), string='Other Charges',
+            store={
+                'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['round_off','insurance', 'insurance_type', 'freight_type', 'freight', 'package_and_forwording_type', 'package_and_forwording', 'order_line'], 11),
+                'purchase.order.line': (_get_order, None, 10),
+            }, multi="sums", help="Computed as Packing & Forwarding + Freight + Insurance"),
+
     }
 
     def create(self, cr, uid, vals, context=None):
@@ -203,7 +319,13 @@ class purchase_order(osv.osv):
             -pass the purchase qty and Purchase Uom to invoice line
         """
         res = super(purchase_order, self)._prepare_inv_line(cr, uid, account_id, order_line, context=context)
-        res.update({'pur_line_qty': order_line.line_qty or 0.0,'pur_line_uom_id': order_line.line_uom_id.id or False})
+        res.update({
+                    'quantity':order_line.line_qty or 0.0,
+                    'price_unit':order_line.purchase_unit_rate,
+                    'uos_id': order_line.line_uom_id and order_line.line_uom_id.id or False,
+                    'pur_line_qty': order_line.product_qty or 0.0,
+                    'pur_line_uom_id': order_line.product_uom.id or False,
+                    })
         return res
 
     def onchange_warehouse_id(self, cr, uid, ids, warehouse_id):
@@ -320,13 +442,45 @@ class purchase_order_line(osv.osv):
         res = cr.fetchone()
         return res and res[0] or False
 
+    def _amount_line(self, cr, uid, ids, prop, arg, context=None):
+        """
+        Process
+            -Concept totally changed
+                Purchase Qty and Purchase Rate should be comes into the picture instead of base qty and base rate
+        """
+        res = {}
+        cur_obj=self.pool.get('res.currency')
+        tax_obj = self.pool.get('account.tax')
+        for line in self.browse(cr, uid, ids, context=context):
+            res[line.id] = {
+                'price_subtotal': 0.0,
+                'base_price_subtotal': 0.0,
+            }
+
+            #Calculate purchase value
+            price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            taxes = tax_obj.compute_all(cr, uid, line.taxes_id, price, line.product_qty, line.product_id, line.order_id.partner_id)
+            cur = line.order_id.pricelist_id.currency_id
+            res[line.id]['base_price_subtotal'] = cur_obj.round(cr, uid, cur, taxes['total'])
+
+            #Calculate base value
+            base_price = line.purchase_unit_rate * (1 - (line.discount or 0.0) / 100.0)
+            taxes = tax_obj.compute_all(cr, uid, line.taxes_id, base_price, line.line_qty, line.product_id, line.order_id.partner_id)
+            res[line.id]['price_subtotal'] = cur_obj.round(cr, uid, cur, taxes['total'])
+
+        return res
+
     _columns = {
-        'product_qty': fields.float('Issue Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), required=True),
-        'line_qty': fields.float('Purchase Quantity'),
+        'product_qty': fields.float('Required Qty', digits_compute=dp.get_precision('Product Unit of Measure'), required=True),
+        'line_qty': fields.float('Purchase Qty'),
         'line_uom_id':  fields.many2one('product.uom', 'Purchase UoM'),
+        'purchase_unit_rate': fields.float('Purchase Rate'),
         'consignment_variation': fields.char('Variation(±)'),
         'process_move_id':fields.many2one('stock.moves.workorder', 'Process Line'),
         'symbol': fields.related('order_id', 'currency_id','symbol', type="char",string="in",readonly=True),
+        'date_planned': fields.date('Required Date', required=True),#just overwrited for string
+        'price_subtotal': fields.function(_amount_line, multi="subt",string='Subtotal', digits_compute= dp.get_precision('Account')),
+        'base_price_subtotal': fields.function(_amount_line, multi="subt", string='Base Subtotal', digits_compute= dp.get_precision('Account')),
     }
 
     _defaults = {
@@ -349,7 +503,8 @@ class purchase_order_line(osv.osv):
             p_qty = res['value'].get('product_qty', 0.0)
             res['value'].update({
                         'line_qty': p_qty * p.p_coefficient,
-                        'line_uom_id':p.p_uom_id.id
+                        'line_uom_id':p.p_uom_id.id,
+                        'purchase_unit_rate':p.purchase_price 
                         })
         return res
 

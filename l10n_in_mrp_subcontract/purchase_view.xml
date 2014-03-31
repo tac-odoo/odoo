@@ -29,22 +29,33 @@
 					position="after">
 					<field name="line_qty" required="1" />
 					<field name="line_uom_id" required="1" />
-					<field name="consignment_variation" readonly="1" />
+					<field name="purchase_unit_rate" required="1" />
+					<!-- field name="consignment_variation" readonly="1" / -->
 					<field name="state" invisible="1" />
-					<button name="add_variations" string="Add Consignment Variation"
-						icon="gtk-execute" help="Add Consignment Variation" type="object"
-						attrs="{'invisible': [('state','=','draft')]}" />
+					<!-- button name="add_variations" string="Add Consignment Variation" 
+						icon="gtk-execute" help="Add Consignment Variation" type="object" attrs="{'invisible': 
+						[('state','=','draft')]}" / -->
 				</xpath>
-				<xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="after">
-				    <field name="symbol" nolabel="1"/>
+				<xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']"
+					position="after">
+					<field name="symbol" nolabel="1" />
 				</xpath>
+
+				<xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']"
+					position="replace" />
+
 				<xpath expr="//field[@name='order_line']/tree/field[@name='product_qty']"
 					position="attributes">
-					<attribute name="string">Issue Quantity</attribute>
+					<attribute name="string">Required Qty</attribute>
 				</xpath>
 				<xpath expr="//field[@name='order_line']/tree/field[@name='product_uom']"
 					position="attributes">
-					<attribute name="string">Issue UoM</attribute>
+					<attribute name="string">Base UoM</attribute>
+				</xpath>
+				<xpath expr="//field[@name='order_line']/tree/field[@name='product_uom']"
+					position="after">
+					<field name="price_unit" string="Base Rate" />
+					<field name="base_price_subtotal" string="Base SubTotal" />
 				</xpath>
 
 				<xpath
@@ -76,15 +87,19 @@
 			<field name="inherit_id" ref="purchase.purchase_order_line_form" />
 			<field name="arch" type="xml">
 				<field name="price_unit" position="before">
-					<field name="line_qty" required="1"/>
+					<field name="line_qty" required="1" />
 					<field name="line_uom_id" required="1" />
+					<field name="purchase_unit_rate" required="1" />
 					<field name="state" invisible="1" />
-					<field name="consignment_variation" readonly="1" />
+					<!-- field name="consignment_variation" readonly="1" / -->
 				</field>
 				<field name="taxes_id" position="attributes">
 					<attribute name="widget" />
 					<attribute name="nolabel">1</attribute>
 					<attribute name="colspan">4</attribute>
+				</field>
+				<field name="price_unit" position="attributes">
+				    <attribute name="string">Base Rate</attribute>
 				</field>
 
 			</field>

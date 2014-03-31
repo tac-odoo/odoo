@@ -44,8 +44,8 @@ class account_invoice_line(osv.osv):
         return res
 
     _columns = {
-        'pur_line_qty': fields.float('Purchase Quantity'),
-        'pur_line_uom_id':  fields.many2one('product.uom', 'Purchase UoM'),
+        'pur_line_qty': fields.float('Required Quantity'),
+        'pur_line_uom_id':  fields.many2one('product.uom', 'Base UoM'),
         'variation_amount': fields.float('Variation Amount(±)', digits_compute=dp.get_precision('Account')),
         'price_subtotal': fields.function(_amount_line, string='Amount', type="float",
             digits_compute= dp.get_precision('Account'), store=True),

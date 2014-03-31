@@ -29,10 +29,10 @@
                     <field name="variation_amount"/>
                 </xpath>
                 <xpath expr="//field[@name='invoice_line']/tree/field[@name='quantity']" position="attributes">
-                    <attribute name="string">Issue Qty.</attribute>
+                    <attribute name="string">Purchase Qty.</attribute>
                 </xpath>
                 <xpath expr="//field[@name='invoice_line']/tree/field[@name='uos_id']" position="attributes">
-                    <attribute name="string">Issue UoM</attribute>
+                    <attribute name="string">Purchase UoM</attribute>
                 </xpath>
             </field>
         </record>

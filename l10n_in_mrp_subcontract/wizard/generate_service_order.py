@@ -75,11 +75,15 @@ class generate_service_order(osv.osv_memory):
             -Dictionary
         """
         context = context or {}
+        uom_obj = self.pool.get('product.uom')
+        required_qty = data.total_qty
+        if data.move_id and data.product_id and data.move_id.product_uom.id <> data.product_id.uom_id.id:
+            required_qty = uom_obj._compute_qty(cr, uid, data.move_id.product_uom.id, data.total_qty, data.product_id.uom_id.id)
         return {
                 'name': data.product_id and data.product_id.name or '',
                 'product_id': data.product_id and  data.product_id.id or False,
-                'product_qty': data.total_qty,
-                'line_qty': data.product_id and (data.total_qty * data.product_id.p_coefficient) or data.total_qty,
+                'product_qty': required_qty,
+                'line_qty': data.product_id and (required_qty * data.product_id.p_coefficient) or required_qty,
                 'line_uom_id': data.product_id and (data.product_id.p_uom_id.id or data.product_id.uom_id.id) or 1,
                 'product_uom': data.product_id and data.product_id.uom_id.id or 1,
                 'price_unit': data.product_id and data.product_id.standard_price or 0.0,

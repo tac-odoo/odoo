@@ -9,6 +9,7 @@
 			<field name="arch" type="xml">
 				<field name="default_code" position="after">
 					<field name="p_coefficient" />
+					<field name="purchase_price" />
 					<field name="p_uom_id" />
 				</field>
 				<group name="procurement_uom" position="attributes">

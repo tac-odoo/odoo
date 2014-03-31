@@ -20,6 +20,7 @@
 ##############################################################################
 
 from openerp.osv import osv,fields
+import openerp.addons.decimal_precision as dp
 
 class product_product(osv.osv):
     _inherit = 'product.product'
@@ -32,11 +33,13 @@ class product_product(osv.osv):
     _columns = {
         'p_coefficient': fields.float('Purchase Coefficient'),
         'p_uom_id': fields.many2one('product.uom','Purchase UoM',required=True),
+        'purchase_price': fields.float('Purchase Price', digits_compute=dp.get_precision('Product Price'), help="Cost price of the product used for purchase price on purchase orders."),
     }
     _defaults = {
         'type':'product',
         'p_coefficient':1.0,
-        'p_uom_id':_get_p_uom_id
+        'p_uom_id':_get_p_uom_id,
+        'purchase_price':1.0
     }
 
     #Thats depends on industry
