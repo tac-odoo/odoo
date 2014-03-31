@@ -32,7 +32,7 @@
              'wizard/common_date_updation_view.xml','wizard/mrp_partially_close_view.xml',
              'mrp_view.xml','purchase_view.xml','product_view.xml', 'stock_view.xml','invoice_view.xml',
              'sale_view.xml','account_view.xml','res_company_view.xml',
-             #'partner_view.xml',
+             'partner_view.xml',
              'wizard/process_qty_to_reject_view.xml','wizard/process_qty_to_finished_view.xml',
              'wizard/all_in_once_qty_to_finished_view.xml','wizard/all_in_once_qty_to_cancelled_view.xml',
              'wizard/reallocate_rejected_move_view.xml','wizard/generate_service_order_view.xml',

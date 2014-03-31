@@ -15,6 +15,10 @@
                 name="picking.list.out.revise" string="Delivery Challan"
                 header="False" 
                 rml="l10n_in_mrp_subcontract/report/delivery_challan.rml"/>
-        
+
+        <report auto="False" id="purchase.report_purchase_quotation" model="purchase.order" 
+                name="purchase.quotation.revise" rml="l10n_in_mrp_subcontract/report/request_quotation.rml"
+                string="Request for Quotation"/>
+
     </data>
 </openerp>

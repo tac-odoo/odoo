@@ -623,7 +623,7 @@ class stock_moves_workorder(osv.osv):
         'total_qty': fields.float('Total Qty', digits_compute=dp.get_precision('Product Unit of Measure')),
         'process_qty': fields.float('InProcess Qty', digits_compute=dp.get_precision('Product Unit of Measure')),
         'accepted_qty': fields.float('Accept Qty', digits_compute=dp.get_precision('Product Unit of Measure')),
-        'accepted_date':fields.datetime('Material In-Date'),
+        'accepted_date':fields.datetime('Quality In-Date'),
         'rejected_qty': fields.float('Reject Qty', digits_compute=dp.get_precision('Product Unit of Measure')),
 
         'product_factor': fields.function(_semiproduct_calc, multi='semiproduct', type='float', string='Product Factor',digits_compute=dp.get_precision('Product Unit of Measure'),store=True),

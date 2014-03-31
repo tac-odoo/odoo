@@ -15,6 +15,7 @@
 				<group name="procurement_uom" position="attributes">
 					<attribute name="invisible">1</attribute>
 				</group>
+				<button string="update"  position="replace"/>
 			</field>
 		</record>
 

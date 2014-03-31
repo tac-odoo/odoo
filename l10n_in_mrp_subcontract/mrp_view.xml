@@ -348,7 +348,7 @@
 										<group string="General Information">
 											<group>
 												<field name="accepted_date" readonly="1"
-													string="Material In-Date" />
+													string="Quality In-Date" />
 												<field name="start_date" readonly="1" />
 												<field name="order_type" invisible="1" />
 												<field name="service_supplier_id"
@@ -549,7 +549,7 @@
 									</group>
 									<group string="General Information">
 										<group>
-											<field name="accepted_date" readonly="1" string="Material In-Date" />
+											<field name="accepted_date" readonly="1" string="Quality In-Date" />
 											<field name="start_date" readonly="1" />
 											<field name="order_type" invisible="1" />
 											<field name="service_supplier_id"
