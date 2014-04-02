@@ -24,5 +24,8 @@
                 name="purchase.order.revise" rml="l10n_in_mrp_subcontract/report/purchase_order.rml"
                 string="Purchase Order"/>
 
+        <report auto="False" id="stock.report_picking_list_in" model="stock.picking.in" 
+                name="stock.picking.list.in.revise" rml="l10n_in_mrp_subcontract/report/picking.rml" 
+                string="Receipt Slip" />
     </data>
 </openerp>
