@@ -105,6 +105,7 @@ class stock_return_picking(osv.osv_memory):
             if m.state == 'done':
                 return_history[m.id] = 0
                 for rec in m.move_history_ids2:
+                    if rec.state == 'cancel': continue
                     # only take into account 'product return' moves, ignoring any other
                     # kind of upstream moves, such as internal procurements, etc.
                     # a valid return move will be the exact opposite of ours:

@@ -47,6 +47,7 @@ class stock_move(osv.osv):
             if m.state == 'done':
                 return_history[m.id] = 0
                 for rec in m.move_history_ids2:
+                    if rec.state == 'cancel': continue
                     # only take into account 'product return' moves, ignoring any other
                     # kind of upstream moves, such as internal procurements, etc.
                     # a valid return move will be the exact opposite of ours:
@@ -100,7 +101,7 @@ class stock_move(osv.osv):
         'qc_completed': fields.boolean('QC Completed?'),
         'qc_ok_qty': fields.float('QC Qty ', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
         'is_qc': fields.boolean('Can be QC?'),
-        'returned_qty': fields.function(_return_history, string="Return Qty", digits_compute=dp.get_precision('Product Unit of Measure')),
+        'returned_qty': fields.function(_return_history, method=True,string="Return Qty", digits_compute=dp.get_precision('Product Unit of Measure')),
 
         #Fields here overwrites only for readonly process.
         'date': fields.datetime('Move Done Date', states={'done': [('readonly', True)]}, required=True, select=True, help="Move date: scheduled date until move is done, then date of actual move processing"),
