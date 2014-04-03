@@ -8,9 +8,9 @@
 			<field name="inherit_id" ref="product.product_normal_form_view" />
 			<field name="arch" type="xml">
 				<field name="default_code" position="after">
-					<field name="p_coefficient" />
-					<field name="purchase_price" />
-					<field name="p_uom_id" />
+					<field name="p_coefficient" attrs="{'invisible':[('purchase_ok', '=', False)]}" />
+					<field name="purchase_price" attrs="{'invisible':[('purchase_ok', '=', False)]}" />
+					<field name="p_uom_id" attrs="{'invisible':[('purchase_ok', '=', False)]}" />
 				</field>
 				<group name="procurement_uom" position="attributes">
 					<attribute name="invisible">1</attribute>
