@@ -71,6 +71,9 @@
 					<field name="dc_number" />
 					<field name="dc_date" />
 				</field>
+				<field name="min_date" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</field>
 				<field name="origin" position="after">
 					<label for="received_date" />
 					<div>
