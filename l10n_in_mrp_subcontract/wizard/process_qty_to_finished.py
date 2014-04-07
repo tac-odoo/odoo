@@ -144,24 +144,31 @@ class process_qty_to_finished(osv.osv_memory):
         """
         context = context or {}
         process_mv_obj = self.pool.get('stock.moves.workorder')
+        uom_obj = self.pool.get('product.uom')
         process_mv = process_mv_obj.browse(cr, uid, process_move_id, context=context)
         if not (process_mv.po_order_id or production_location_id):
             return True
 
         cr.execute("""
-                    SELECT sm.product_id,sum(sm.product_qty) as qty FROM stock_move sm 
+                    SELECT sm.product_id,sm.product_uom, sum(sm.product_qty) as qty FROM stock_move sm 
                     LEFT JOIN stock_picking sp on (sp.id = sm.picking_id or sp.id = sm.picking_qc_id)
                     WHERE sp.purchase_id = %s
                     AND sm.state = 'done'
                     AND sm.location_dest_id = %s
-                    GROUP BY sm.product_id
+                    GROUP BY sm.product_id,sm.product_uom
             """%(process_mv.po_order_id.id, production_location_id,))
-
-        inword_qty = [x['qty'] for x in cr.dictfetchall() if x['product_id'] == process_mv.product_id.id]
+        total_with_uom = cr.dictfetchall()
+        inword_qty = 0.0
+        for x in total_with_uom:
+            if x['product_id'] == process_mv.product_id.id:
+                if process_mv.move_id:
+                    inword_qty += uom_obj._compute_qty(cr, uid, x['product_uom'], x['qty'], process_mv.move_id.product_uom.id)
+                else:
+                    inword_qty += x['qty']
         if not inword_qty:
             raise osv.except_osv(_('Warning!'), _('Inword of purchase order(%s) haven"t recieved at production' % (process_mv.po_order_id.name)))
 
-        remain_to_process_qty = inword_qty[0] - already_accepted_qty
+        remain_to_process_qty = inword_qty - already_accepted_qty
         if accepted_qty > remain_to_process_qty:
             raise osv.except_osv(_('Accepted Qty Over The Limit!'), _('You cannot process outsource product(%s) \n\n Outsource Process Qty = %s \n Total Inword Qty = %s \n Remain To Process Qty = %s' % (process_mv.product_id.name, accepted_qty, inword_qty[0], remain_to_process_qty)))
         return True

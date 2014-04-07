@@ -1265,9 +1265,9 @@ class mrp_production_workcenter_line(osv.osv):
         obj_line = self.browse(cr, uid, ids[0])
 
         delay = 0.0
-        if obj_line.date_start:
+        if obj_line.date_start and obj_line.date_finished:
             date_start = datetime.strptime(obj_line.date_start,'%Y-%m-%d %H:%M:%S')
-            date_finished = datetime.strptime(date_now,'%Y-%m-%d %H:%M:%S')
+            date_finished = datetime.strptime(obj_line.date_finished,'%Y-%m-%d %H:%M:%S')
             delay += (date_finished-date_start).days * 24
             delay += (date_finished-date_start).seconds / float(60*60)
 
@@ -1279,6 +1279,7 @@ class mrp_production_workcenter_line(osv.osv):
         #self.write(cr, uid, ids, {'state':'done', 'date_finished': date_now,'delay':delay}, context=context)
         #IMPORTANTE, Cannot done production order after processing of done workorder.
         #self.modify_production_order_state(cr,uid,ids,'done')
+
         return True
 
 
