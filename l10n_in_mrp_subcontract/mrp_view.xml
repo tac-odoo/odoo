@@ -347,8 +347,7 @@
 										</group>
 										<group string="General Information">
 											<group>
-												<field name="accepted_date" readonly="1"
-													string="Quality In-Date" />
+												<field name="accepted_date" readonly="1" string="Quality In-Date" />
 												<field name="start_date" readonly="1" />
 												<field name="order_type" invisible="1" />
 												<field name="service_supplier_id"
@@ -938,6 +937,10 @@
 				</field>
 			</field>
 		</record>
+
+		<act_window context="{'group_by':'production_id'}"  domain="[('production_id','=',active_id)]" id="act_analytic_cost_lines"
+			name="Analytic Cost Lines" res_model="account.analytic.line"
+			src_model="mrp.production" />
 
 
 	</data>

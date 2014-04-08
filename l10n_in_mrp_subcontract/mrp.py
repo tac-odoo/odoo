@@ -531,7 +531,7 @@ class mrp_production(osv.osv):
         @return: Calculated amount.
         """
         amount = 0.0
-        amount_a = 0.0
+        #amount_a = 0.0
         analytic_line_obj = self.pool.get('account.analytic.line')
         for wc_line in production.workcenter_lines:
             wc = wc_line.workcenter_id
@@ -539,16 +539,17 @@ class mrp_production(osv.osv):
                 # Estimated Cost per hour
                 value = wc_line.hour * wc.costs_hour
                 # Actual Cost per hour
-                actual_value = wc_line.delay * wc.costs_hour
+                #actual_value = wc_line.delay * wc.costs_hour
                 account = wc.costs_hour_account_id.id
                 if value and account:
                     amount += value
-                    amount_a += actual_value
+                    #amount_a += actual_value
                     analytic_line_obj.create(cr, uid, {
                         'name': wc_line.name + ' (H)',
-                        'amount': amount_a,
-                        'planned_cost':value,
+                        'amount': wc_line.wo_actual_cost,
+                        'planned_cost':wc_line.wo_planned_cost,
                         'account_id': account,
+                        'production_id': wc_line.production_id and wc_line.production_id.id or False,
                         'general_account_id': wc.costs_general_account_id.id,
                         'journal_id': wc.costs_journal_id.id,
                         'ref': wc.code,
@@ -556,24 +557,27 @@ class mrp_production(osv.osv):
                         'unit_amount': wc_line.hour,
                         'product_uom_id': wc.product_id and wc.product_id.uom_id.id or False
                     } )
-                # Cost per cycle
-                value = wc_line.cycle * wc.costs_cycle
-                account = wc.costs_cycle_account_id.id
-                if value and account:
-                    amount += value
-                    amount_a += actual_value
-                    analytic_line_obj.create(cr, uid, {
-                        'name': wc_line.name+' (C)',
-                        'amount': amount_a,
-                        'account_id': account,
-                        'planned_cost':value,
-                        'general_account_id': wc.costs_general_account_id.id,
-                        'journal_id': wc.costs_journal_id.id,
-                        'ref': wc.code,
-                        'product_id': wc.product_id.id,
-                        'unit_amount': wc_line.cycle,
-                        'product_uom_id': wc.product_id and wc.product_id.uom_id.id or False
-                    } )
+
+                #We can't use cycle here. 
+#                # Cost per cycle
+#                value = wc_line.cycle * wc.costs_cycle
+#                account = wc.costs_cycle_account_id.id
+#                if value and account:
+#                    amount += value
+#                    amount_a += actual_value
+#                    analytic_line_obj.create(cr, uid, {
+#                        'name': wc_line.name+' (C)',
+#                        'amount': amount_a,
+#                        'account_id': account,
+#                        'production_id': wc_line.production_id and wc_line.production_id.id or False,
+#                        'planned_cost':value,
+#                        'general_account_id': wc.costs_general_account_id.id,
+#                        'journal_id': wc.costs_journal_id.id,
+#                        'ref': wc.code,
+#                        'product_id': wc.product_id.id,
+#                        'unit_amount': wc_line.cycle,
+#                        'product_uom_id': wc.product_id and wc.product_id.uom_id.id or False
+#                    } )
         return amount
 
 mrp_production()

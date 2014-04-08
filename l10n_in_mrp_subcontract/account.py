@@ -24,6 +24,7 @@ from openerp.osv import fields, osv
 class account_analytic_line(osv.osv):
     _inherit = 'account.analytic.line'
     _columns = {
+        'production_id':  fields.many2one('mrp.production','Production Order'),
         'planned_cost' : fields.float('Planned Cost'),
     }
 
