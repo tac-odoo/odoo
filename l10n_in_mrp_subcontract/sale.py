@@ -242,6 +242,7 @@ class sale_order(osv.osv):
         stock_obj = self.pool.get('stock.picking')
         res = super(sale_order, self)._prepare_invoice(cr, uid, order, lines, context=context)
         do_ids = stock_obj.search(cr, uid, [('sale_id','=',order.id)])
+        res.update({'comment':''})
         if do_ids:
             do_data = stock_obj.browse(cr, uid, do_ids[0])
             res.update({

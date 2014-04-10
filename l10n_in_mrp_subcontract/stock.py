@@ -315,6 +315,7 @@ class stock_picking(osv.osv):
 
     def _prepare_invoice(self, cr, uid, picking, partner, inv_type, journal_id, context=None):
         res = super(stock_picking, self)._prepare_invoice(cr, uid, picking, partner, inv_type, journal_id, context=context)
+        res.update({'comment':''})
         if picking.sale_id:
             res.update({
                     'do_id': picking.id,

@@ -28,8 +28,9 @@
 				<xpath expr="//field[@name='order_line']/tree/field[@name='product_uom']"
 					position="after">
 					<field name="line_qty" required="1" />
-					<field name="line_uom_id" required="1" />
+					<field name="line_uom_id" required="1" on_change="onchange_line_uom_id(line_uom_id)"/>
 					<field name="purchase_unit_rate" required="1" />
+					<field name="uom_char" invisible="1"/>
 					<!-- field name="consignment_variation" readonly="1" / -->
 					<field name="state" invisible="1" />
 					<!-- button name="add_variations" string="Add Consignment Variation" 
@@ -86,10 +87,17 @@
 			<field name="model">purchase.order.line</field>
 			<field name="inherit_id" ref="purchase.purchase_order_line_form" />
 			<field name="arch" type="xml">
-				<field name="price_unit" position="before">
-					<field name="line_qty" required="1" />
-					<field name="line_uom_id" required="1" />
-					<field name="purchase_unit_rate" required="1" />
+				<field name="price_unit" position="after">
+					<label for="line_qty" />
+					<div>
+						<field name="line_qty" required="1" class="oe_inline" />
+						<field name="line_uom_id" required="1" class="oe_inline" on_change="onchange_line_uom_id(line_uom_id)"/>
+					</div>
+					<label for="purchase_unit_rate" />
+					<div name="purchase_rate">
+						<field name="purchase_unit_rate" required="1"  class="oe_inline" />
+						<field name="uom_char"  class="oe_inline" />
+					</div>
 					<field name="state" invisible="1" />
 					<!-- field name="consignment_variation" readonly="1" / -->
 				</field>
@@ -99,7 +107,7 @@
 					<attribute name="colspan">4</attribute>
 				</field>
 				<field name="price_unit" position="attributes">
-				    <attribute name="string">Base Rate</attribute>
+					<attribute name="string">Base Rate</attribute>
 				</field>
 
 			</field>
@@ -114,6 +122,18 @@
 				<xpath expr="//filter[@name='draft']" position="before">
 					<filter string="Service Order" domain="[('service_order','=',True)]"
 						help="Service order generated from manufacturing order" />
+				</xpath>
+			</field>
+		</record>
+
+		<record
+			id="l10n_in_purchase.view_purchase_order_line_form_l10n_in_purchase"
+			model="ir.ui.view">
+			<field name="name">view.purchase.order.line.form.l10n.purchase</field>
+			<field name="model">purchase.order.line</field>
+			<field name="arch" type="xml">
+				<xpath expr="//div[@name='purchase_rate']" position="after">
+					<field name="discount" />
 				</xpath>
 			</field>
 		</record>

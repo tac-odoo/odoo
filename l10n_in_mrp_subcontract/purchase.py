@@ -474,6 +474,7 @@ class purchase_order_line(osv.osv):
         'product_qty': fields.float('Required Qty', digits_compute=dp.get_precision('Product Unit of Measure'), required=True),
         'line_qty': fields.float('Purchase Qty'),
         'line_uom_id':  fields.many2one('product.uom', 'Purchase UoM'),
+        'uom_char': fields.char('char',size=250),
         'purchase_unit_rate': fields.float('Purchase Rate'),
         'consignment_variation': fields.char('Variation(±)'),
         'process_move_id':fields.many2one('stock.moves.workorder', 'Process Line'),
@@ -485,8 +486,22 @@ class purchase_order_line(osv.osv):
 
     _defaults = {
         'line_uom_id':_get_p_uom_id,
-        'consignment_variation':'0.0'
+        'consignment_variation':'0.0',
+        
     }
+
+    def onchange_line_uom_id(self, cr, uid, ids, purchase_uom_id, context=None):
+        """
+        Attached Purchase Uom with Purchase rate like,
+            Purchase rate : 10.00 /kg
+                            25.00 /mtr
+        """
+        uom_obj = self.pool.get('product.uom')
+        res = {'value': {'uom_char': ''}}
+        if purchase_uom_id:
+            name = uom_obj.browse(cr, uid, purchase_uom_id).name
+            res['value'].update({'uom_char': name and '/'+ str(name) or ''})
+        return res
 
     def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
             partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
