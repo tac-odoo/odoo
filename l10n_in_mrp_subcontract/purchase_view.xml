@@ -144,9 +144,9 @@
 			<field name="name">view.purchase.order.line.form.l10n.purchase</field>
 			<field name="model">purchase.order.line</field>
 			<field name="arch" type="xml">
-				<xpath expr="//div[@name='purchase_rate']" position="after">
+				<field name="date_planned" position="after">
 					<field name="discount" />
-				</xpath>
+				</field>
 			</field>
 		</record>
 
