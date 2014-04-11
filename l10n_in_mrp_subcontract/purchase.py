@@ -205,8 +205,37 @@ class purchase_order(osv.osv):
             result[line.order_id.id] = True
         return result.keys()
 
+    def action_po_amendment(self, cr, uid, ids, context=None):
+        """
+        -Process: Purchase Order Amendment in one step
+            -Cancel picking First
+            -Cancel Purchase Order
+            -Reset to draft state
+            -Update that po as is_amendment True(Because to stop purchase order line onchange)
+        """
+        pickin_obj = self.pool.get('stock.picking.in')
+        wf_service = netsvc.LocalService("workflow")
+        if not ids: return True
+
+        picking_ids = pickin_obj.search(cr, uid, [('purchase_id', '=', ids[0])])
+        pickin_check = pickin_obj.read(cr, uid,picking_ids,['state'],context=context)
+        if 'done' in [x['state'] for x in pickin_check]:
+            raise osv.except_osv(_('Cannot Amendment!'), _('You have already received the Inward for this purchase order.'))
+
+        pickids_2_cancel = [x['id'] for x in pickin_check if x['state'] != 'cancel']
+        for cancel in pickids_2_cancel:
+            wf_service.trg_validate(uid, 'stock.picking', cancel, 'button_cancel', cr)
+
+        wf_service.trg_validate(uid, 'purchase.order', ids[0], 'purchase_cancel', cr)
+        self.action_cancel_draft(cr, uid, ids, context=context)
+        self.message_post(cr, uid, ids, body=_("In Amendment Process"), context=context)
+        self.write(cr, uid, ids, {'is_amendment':True}, context=context)
+
+        return True
+
     _columns = {
         'service_order': fields.boolean('Service Order'),
+        'is_amendment': fields.boolean('Is Amendment?'),
         'workorder_id':  fields.many2one('mrp.production.workcenter.line', 'Work-Order'),
         'service_delivery_order':  fields.many2one('stock.picking', 'Service Delivery Order'),
         'expected_date_by_production_order': fields.one2many('purchase.expected.date', 'order_id',string='Expected Dates By Production Order',readonly=True),
@@ -508,8 +537,14 @@ class purchase_order_line(osv.osv):
             name=False, price_unit=False, context=None):
         """
         onchange handler of product_id.
+        Process:
+            Onchange should not be fire when in Amendment Process, so i just stop it.
         """
         prod_obj = self.pool.get('product.product')
+        #Stop to fire onchange in Amendment Process
+        for go in self.browse(cr, uid, ids):
+            if go.order_id and go.order_id.is_amendment: return {}
+
         res = super(purchase_order_line, self).onchange_product_id(cr, uid, ids, pricelist_id, product_id, qty, uom_id,
             partner_id, date_order=date_order, fiscal_position_id=fiscal_position_id, date_planned=date_planned,
             name=name, price_unit=price_unit, context=context)

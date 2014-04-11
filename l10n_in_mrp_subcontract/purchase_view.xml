@@ -14,7 +14,11 @@
 						attrs="{'invisible':[('workorder_id', '=', False)]}" />
 					<field name="service_delivery_order" readonly="1"
 						attrs="{'invisible':[('workorder_id', '=', False)]}" />
+					<field name="is_amendment" invisible="1"/>
 				</field>
+
+				<button name="picking_ok" position="replace" />
+
 				<field name="location_id" position="replace" />
 				<xpath expr="//group" position="inside">
 					<group colspan="4" style="font-weight:bold;">
@@ -28,9 +32,10 @@
 				<xpath expr="//field[@name='order_line']/tree/field[@name='product_uom']"
 					position="after">
 					<field name="line_qty" required="1" />
-					<field name="line_uom_id" required="1" on_change="onchange_line_uom_id(line_uom_id)"/>
+					<field name="line_uom_id" required="1"
+						on_change="onchange_line_uom_id(line_uom_id)" />
 					<field name="purchase_unit_rate" required="1" />
-					<field name="uom_char" invisible="1"/>
+					<field name="uom_char" invisible="1" />
 					<!-- field name="consignment_variation" readonly="1" / -->
 					<field name="state" invisible="1" />
 					<!-- button name="add_variations" string="Add Consignment Variation" 
@@ -57,6 +62,12 @@
 					position="after">
 					<field name="price_unit" string="Base Rate" />
 					<field name="base_price_subtotal" string="Base SubTotal" />
+				</xpath>
+
+				<xpath expr="//header/button[@string='Receive Invoice']"
+					position="after">
+					<button name="action_po_amendment" string="Modify" type="object" states="approved"
+						class="oe_highlight" />
 				</xpath>
 
 				<xpath
@@ -91,12 +102,13 @@
 					<label for="line_qty" />
 					<div>
 						<field name="line_qty" required="1" class="oe_inline" />
-						<field name="line_uom_id" required="1" class="oe_inline" on_change="onchange_line_uom_id(line_uom_id)"/>
+						<field name="line_uom_id" required="1" class="oe_inline"
+							on_change="onchange_line_uom_id(line_uom_id)" />
 					</div>
 					<label for="purchase_unit_rate" />
 					<div name="purchase_rate">
-						<field name="purchase_unit_rate" required="1"  class="oe_inline" />
-						<field name="uom_char"  class="oe_inline" />
+						<field name="purchase_unit_rate" required="1" class="oe_inline" />
+						<field name="uom_char" class="oe_inline" />
 					</div>
 					<field name="state" invisible="1" />
 					<!-- field name="consignment_variation" readonly="1" / -->
