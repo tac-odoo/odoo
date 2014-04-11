@@ -34,6 +34,16 @@
 				<field name="min_date" position="attributes">
 					<attribute name="invisible">1</attribute>
 				</field>
+				<field name="move_lines" position="attributes">
+					<attribute name="context">{'address_out_id': partner_id,
+						'picking_type': 'out',
+						'qc_control':'no',
+						'service_order':service_order,
+						'form_view_ref':'stock.view_move_picking_form',
+						'tree_view_ref':'stock.view_move_picking_tree'
+						}
+					</attribute>
+				</field>
 			</field>
 		</record>
 
@@ -54,6 +64,7 @@
 				<field name="min_date" position="attributes">
 					<attribute name="invisible">1</attribute>
 				</field>
+
 			</field>
 		</record>
 
@@ -180,6 +191,13 @@
 					<!-- invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) 
 						== 'yes' or (not context.get('pass_to_qc',False))" / -->
 				</field>
+				<field name="product_qty" position="before">
+					<field name="srvc_ordr_qty"
+						invisible="context.get('picking_type',False) != 'out' or (not context.get('service_order',False))" />
+					<field name="srvc_ordr_uom"
+						invisible="context.get('picking_type',False) != 'out' or (not context.get('service_order',False))" />
+				</field>
+
 				<field name="product_uom" position="attributes">
 					<attribute name="string">UoM</attribute>
 				</field>

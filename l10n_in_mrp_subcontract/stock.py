@@ -100,6 +100,11 @@ class stock_move(osv.osv):
         'qc_approved': fields.boolean('QC Approved?'),
         'qc_completed': fields.boolean('QC Completed?'),
         'qc_ok_qty': fields.float('QC Qty ', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
+
+        'srvc_ordr_qty': fields.float('Deliver Qty ', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'srvc_ordr_uom': fields.many2one('product.uom', 'Deliver UoM'),
+        'qc_ok_qty': fields.float('QC Qty ', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
+
         'is_qc': fields.boolean('Can be QC?'),
         'returned_qty': fields.function(_return_history, method=True,string="Return Qty", digits_compute=dp.get_precision('Product Unit of Measure')),
 
@@ -302,7 +307,6 @@ class stock_picking(osv.osv):
         'ex_work_date': fields.date('Ex.work Delivery Date', help = "Date should be consider as date of Goods ready for delivery"),
         'shipping_time':  fields.integer('Shipping Time(In Days)'),
         'destination_date': fields.date('Destination  Delivery Date', help="Reaching date of delivery goods(Ex.work Delivery Date + Shipping Time)"),
-
     }
 
     def onchange_shipping_time(self, cr, uid, ids, ex_work_date, shipping_time, context=None):

@@ -401,6 +401,7 @@ class purchase_order(osv.osv):
             -Dictionary of move
         """
         context = context or {}
+        uom_obj = self.pool.get('product.uom')
         if not order.workorder_id:
             raise osv.except_osv(_('Warning!'), _('Can you check again, is this service order??!'))
         production = order.workorder_id.production_id
@@ -411,6 +412,12 @@ class purchase_order(osv.osv):
         list_data = []
         for l in order.order_line:
             if l.product_id and l.product_id.type <> 'service':
+
+
+                if l.line_uom_id:
+                    uom_data = uom_obj.browse(cr, uid, l.line_uom_id.id).name
+                    uom_char = uom_data and '/'+ str(uom_data) or ''
+
                 list_data.append(
                                     {
                                         'name': l.product_id.name,
@@ -428,7 +435,11 @@ class purchase_order(osv.osv):
                                         'tracking_id': False,
                                         'state': 'draft',
                                         'company_id': production.company_id.id,
-                                        'price_unit': l.product_id.standard_price or 0.0
+                                        'price_unit': l.product_id.standard_price or 0.0,
+
+                                        'srvc_ordr_qty':l.line_qty,
+                                        'srvc_ordr_uom':l.line_uom_id and l.line_uom_id.id or False,
+                                        'uom_char':uom_char,
                                     }
                                  )
         return list_data

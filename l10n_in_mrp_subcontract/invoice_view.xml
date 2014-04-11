@@ -13,6 +13,9 @@
                     <field name="pur_line_uom_id"/>
                     <field name="variation_amount"/>
                 </field>
+                <field name="uos_id" position="attributes">
+                    <attribute name="on_change"></attribute>
+                </field>
             </field>
         </record>
 
@@ -33,6 +36,9 @@
                 </xpath>
                 <xpath expr="//field[@name='invoice_line']/tree/field[@name='uos_id']" position="attributes">
                     <attribute name="string">Purchase UoM</attribute>
+                </xpath>
+                <xpath expr="//field[@name='invoice_line']/tree/field[@name='uos_id']" position="attributes">
+                    <attribute name="on_change"></attribute>
                 </xpath>
             </field>
         </record>
