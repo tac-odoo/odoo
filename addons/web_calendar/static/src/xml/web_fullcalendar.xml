@@ -57,7 +57,7 @@
   
   <div t-name="CalendarView.sidebar.button_add_contact" class="oe_calendar_buttons_add_contact">
         <button class='oe_button oe_form_button oe_link add_contacts_link_btn' style='margin-top:10px'>
-            <span class='add_contacts_link'>See Employee's Meeting</span>
+            <span class='add_contacts_link'>Add Contact...</span>
         </button>
   </div>
 

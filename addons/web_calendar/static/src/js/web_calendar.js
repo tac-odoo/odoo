@@ -341,6 +341,12 @@ openerp.web_calendar = function(instance) {
                         self.open_event(event._id,event.title);
                     }
                 },
+                eventDblClick: function(event, jsEvent, view) {
+                    if (self.popover) {
+                        self.popover.hide();
+                    }
+                    self.open_event(event.id, event.title);
+                },
                 select: function (start_date, end_date, all_day, _js_event, _view) {
                     var data_template = self.get_event_data({
                         start: start_date,
