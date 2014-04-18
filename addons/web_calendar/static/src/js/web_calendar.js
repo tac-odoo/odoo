@@ -988,6 +988,7 @@ openerp.web_calendar = function(instance) {
             this.event_source = {
                 events: function(start, end, callback) {
                     var current_event_source = self.event_source;
+
                     self.dataset.read_slice(_.keys(self.fields), {
                         offset: 0,
                         domain: self.get_range_domain(domain, start, end),
@@ -1148,7 +1149,7 @@ openerp.web_calendar = function(instance) {
                 );
                 //final -> (A & B) | (C & D) | (E & F) ->  | | & A B & C D & E F
             }
-            return new instance.web.CompoundDomain(domain, extend_domain);
+            return new instance.web.CompoundDomain(extend_domain);
         },
 
         /**
@@ -1196,7 +1197,7 @@ openerp.web_calendar = function(instance) {
                     view_id: +this.open_popup_action,
                     res_id: id,
                     target: 'new',
-                    readonly:true
+                    readonly: (event_objs && event_objs.access.edit && !this.get("effective_readonly")) ? false : true,
                 });
 
                var form_controller = pop.view_form;
