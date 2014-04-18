@@ -816,6 +816,8 @@ class stock_moves_rejection(osv.osv):
         'rejected_date':fields.datetime('Rejected Date', readonly=True),
         'reallocate_date':fields.datetime('Reallocate Date', readonly=True),
         'rejected_qty': fields.float('Rejected Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+        's_product_id': fields.many2one('product.product', 'Product', readonly=True),
+        's_rejected_qty': fields.float('Rejected Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
         'reason': fields.text('Reason'),
         'state': fields.selection([('rejected', 'Rejected')], 'Status', readonly=True),
         'is_reallocate':  fields.boolean('Re-Allocated?')
@@ -888,14 +890,47 @@ class mrp_production_workcenter_line(osv.osv):
         result[wo.id]['operator_efficiency'] = int(operator_efficiency)
         return result
 
+#    def onchange_log_entry(self,cr, uid, ids, log_entry_ids, context=None):
+#        res = {'value':{'delay':0.0}}
+#        diff_list = []
+#        if not log_entry_ids: return {}
+#        for rec in log_entry_ids:
+#            if rec and rec[2]:
+#                time_df = (datetime.strptime(rec[2]['end_date'],'%Y-%m-%d %H:%M:%S')-datetime.strptime(rec[2]['start_date'],'%Y-%m-%d %H:%M:%S')).total_seconds()
+#                diff_list.append(time_df)
+#        if diff_list:
+#            res['value'].update({'delay':sum(diff_list)})
+#        return res
+
+    def _count_log_delay(self, cr, uid, ids, name, args, context=None):
+        """
+        Process
+            -count log entry delay and set to actual time
+        """
+
+        result = dict([(id, {'log_delay': 0.0}) for id in ids])
+        for wo in self.browse(cr, uid, ids, context=context):
+            delay = 0.0
+            for rec in wo.log_entry_ids:
+                dt_df = datetime.strptime(rec.end_date,'%Y-%m-%d %H:%M:%S') - datetime.strptime(rec.start_date,'%Y-%m-%d %H:%M:%S')
+                delay += dt_df.days * 24
+                delay += dt_df.seconds / float(60*60)
+            result[wo.id]['log_delay'] = delay
+            cr.execute(""" UPDATE mrp_production_workcenter_line SET delay = %s WHERE id = %s"""%(delay, wo.id))
+        return result
+
     _inherit = 'mrp.production.workcenter.line'
     _columns = {
         'sequence': fields.integer('Sequence', required=True, help="Gives the sequence order when displaying a list of work orders.",readonly=True, states={'draft':[('readonly', False)]}),
         'user_id': fields.many2one('res.users', 'Responsible',readonly=False, states={'done':[('readonly', True)]}),
         'moves_workorder': fields.one2many('stock.moves.workorder', 'workorder_id', 'Raw Material To Process'),
         'moves_rejection': fields.one2many('stock.moves.rejection', 'rejected_workorder_id', 'Rejected Raw Material'),
+        #For labour log entry.
+        'log_entry_ids': fields.one2many('log.entry','workorder_id', 'Log Entry'),
+
         'hour': fields.float('Est.Time(HH:MM)', digits=(16,2),readonly=True, states={'draft':[('readonly', False)]}),
-        'delay': fields.float('Actual Time(HH:MM)',help="The elapsed time between operation start and stop in this Work Center",readonly=True),
+        'delay': fields.float('Actual Time(HH:MM)',help="The elapsed time between day to day log entry by user",readonly=True),
+        'log_delay': fields.function(_count_log_delay, method=True, multi='log', type='float', string='Workorder Actual Cost',store=True),
         #'service_product_id': fields.many2one('product.product', 'Service Product'),
         #'service_supplier_id': fields.many2one('res.partner', 'Partner',domain=[('supplier','=',True)]),
         #'service_description': fields.text('Description'),
@@ -943,6 +978,7 @@ class mrp_production_workcenter_line(osv.osv):
         if a_seconds > 0:
             operator_efficiency =  (float(p_seconds) / float(a_seconds)) * 100
         return {'value':{'wo_planned_cost':wo_planned_cost,'wo_actual_cost':wo_actual_cost,'operator_efficiency':operator_efficiency}}
+
 
     def modify_production_order_state(self, cr, uid, ids, action):
         """
@@ -1257,7 +1293,7 @@ class mrp_production_workcenter_line(osv.osv):
                 delay += (finished-start).seconds / float(60*60)
 #                days = ((finished-start).days * 24) + ((finished-start).seconds) // 3600
 #                minite = (((finished-start).seconds%3600) / float(60))/100
-                vals.update({'delay': delay})
+                #vals.update({'delay': delay})
         return super(mrp_production_workcenter_line, self).write(cr, uid, ids, vals, context=context)
 
     def action_done(self, cr, uid, ids, context=None):
@@ -1374,6 +1410,72 @@ class mrp_bom(osv.osv):
         return result, result2
 
 mrp_bom()
+
+class log_entry(osv.osv):
+    """ Log entry fill by labours """
+    _name = 'log.entry'
+
+
+    def onchange_date(self,cr, uid, ids, start_date, end_date, context=None):
+        """
+        Process
+            - set Log Time on onchange
+        """
+        delay = 0.0
+        if start_date and end_date:
+            dt_df = datetime.strptime(end_date,'%Y-%m-%d %H:%M:%S') - datetime.strptime(start_date,'%Y-%m-%d %H:%M:%S')
+            delay += dt_df.days * 24
+            delay += dt_df.seconds / float(60*60)
+        return {'value': {'log_time': delay}}
+
+    def create(self, cr, uid, vals, context=None):
+        """
+        Procecss
+            -Log time shawn in HH:MM on creation
+        """
+        if vals and vals.get('start_date') and vals.get('end_date'):
+            dt_df = datetime.strptime(vals['end_date'],'%Y-%m-%d %H:%M:%S') - datetime.strptime(vals['start_date'],'%Y-%m-%d %H:%M:%S')
+            delay = dt_df.days * 24
+            delay += dt_df.seconds / float(60*60)
+            vals.update({'log_time':delay})
+        return super(log_entry, self).create(cr, uid, vals, context=context)
+
+    def write(self, cr, uid, ids, vals, context=None):
+        """
+        Procecss
+            -Log time shawn in HH:MM on write object
+        """
+        if vals.get('start_date', False) or vals.get('end_date', False):
+            start_date, end_date = False,False
+            if isinstance(ids, (int, long)):
+                ids = [ids]
+            if vals.get('start_date'):
+                end_date = self.browse(cr, uid, ids[0], context=context).end_date
+                start_date = vals['start_date']
+            if vals.get('end_date'):
+                start_date = self.browse(cr, uid, ids[0], context=context).start_date
+                end_date = vals['end_date']
+            if start_date and end_date:
+                delay = 0.0
+                start = datetime.strptime(start_date,'%Y-%m-%d %H:%M:%S')
+                finished = datetime.strptime(end_date,'%Y-%m-%d %H:%M:%S')
+                delay += (finished-start).days * 24
+                delay += (finished-start).seconds / float(60*60)
+                vals.update({'log_time': delay})
+        return super(log_entry, self).write(cr, uid, ids, vals, context=context)
+
+    _columns = {
+        'employee_id': fields.many2one('hr.employee','Employee',required=True),
+        'workorder_id': fields.many2one('mrp.production.workcenter.line', 'WorkOrder'),
+        'start_date':fields.datetime('Start Date', required=True),
+        'end_date':fields.datetime('End Date', required=True),
+        'log_time': fields.float('Time(HH:MM)',readonly=True),
+        'qty': fields.float('Qty',required=True)
+    }
+
+    _sql_constraints = [('wo_date_greater_log','check(end_date >= start_date)','Log Entry Error ! End Date cannot be set before Starting Date.')]
+
+log_entry()
 
 
 class mrp_routing(osv.osv):

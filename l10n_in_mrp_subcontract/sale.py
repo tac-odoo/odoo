@@ -154,9 +154,20 @@ class sale_order(osv.osv):
     def onchange_shipping_time(self, cr, uid, ids, ex_work_date, shipping_time, context=None):
         return {'value':{'destination_date':(datetime.strptime(ex_work_date, '%Y-%m-%d') + relativedelta(days=shipping_time)).strftime('%Y-%m-%d')}}
 
+
     _defaults = {
         'ex_work_date': fields.date.context_today,
         'shipping_time': 7,
+        'note': """
+·Price : 
+·Incoterm : 
+·Payment terms : 
+·Insurance : 
+·Packing & Forwarding Charges : 
+·Freight : 
+·Taxes : 
+·Insurance: 
+"""
     }
 
     def write(self, cr, uid, ids, vals, context=None):

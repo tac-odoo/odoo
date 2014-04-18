@@ -143,6 +143,8 @@ class process_qty_to_update_reject(osv.osv_memory):
                         'product_id': product_id,
                         'rejected_date':time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                         'rejected_qty': rejected_qty,
+                        's_product_id': wizard_rec.s_product_id and wizard_rec.s_product_id.id or False,
+                        's_rejected_qty': wizard_rec.s_rejected_qty,
                         'reason': reason,
                         'state': 'rejected',
                         }

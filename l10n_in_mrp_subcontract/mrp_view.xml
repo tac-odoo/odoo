@@ -364,6 +364,21 @@
 								</field>
 							</group>
 						</page>
+
+						<page string="Log Entry">
+							<group string="Employee Day to Day Activity" colspan="4">
+								<field name="log_entry_ids" nolabel="1" mode='tree'>
+									<tree string="Log Entry" editable="bottom">
+										<field name="employee_id" widget="selection" />
+										<field name="start_date" on_change="onchange_date(start_date, end_date)"/>
+										<field name="end_date" on_change="onchange_date(start_date, end_date)"/>
+										<field name="log_time" widget="float_time"/>
+										<field name="qty" />
+									</tree>
+								</field>
+							</group>
+						</page>
+
 						<page string="Time/Costing Calculation">
 							<group>
 								<group string="Time Calculation">
@@ -372,6 +387,8 @@
 										on_change="onchange_planned_cost(hour,delay,wo_actual_cost,workcenter_id)" />
 									<field name="delay" readonly="1" widget="float_time"
 										string="Workorder Actual Time(HH:MM)" />
+									<field name="log_delay" readonly="1" widget="float_time"
+										string="Workorder Log Actual Time(HH:MM)" invisible="1"/>
 									<field name="operator_efficiency" readonly="1" />
 
 								</group>
@@ -391,8 +408,7 @@
 								<field name="moves_rejection" nolabel="1" colspan="4"
 									mode="tree" options="{'always_reload': True,'reload_on_button': True}">
 									<tree string="Rejected Raw Materials" create="false"
-										delete="false" editable="bottom"
-										colors="red:state in ('cancelled','rejected')">
+										delete="false" colors="red:state in ('cancelled','rejected')">
 										<field name="move_id" invisible="1" />
 										<field name="rejected_workorder_id" invisible="1" />
 										<field name="name" invisible="1" />
@@ -409,6 +425,34 @@
 											icon="terp-gtk-go-back-rtl" help="Process fresh quantity to re-allocate"
 											attrs="{'invisible':[('is_reallocate', '=', True)]}" type="object" />
 									</tree>
+
+									<form string="Rejected Raw Materials" version="7.0">
+										<header colspan="8">
+											<field name="state" widget="statusbar"
+												statusbar_visible="rejected" />
+										</header>
+										<group>
+											<group string="Semi-Finished Products Movements">
+												<field name="s_product_id" readonly="1" />
+												<field name="s_rejected_qty" readonly="1" />
+											</group>
+											<group string="Rejected Raw Materials Movements">
+												<field name="product_id" readonly="1" />
+												<field name="rejected_qty" readonly="1" />
+											</group>
+										</group>
+										<group string="General Information">
+											<group>
+												<field name="rejected_location_id" readonly="1" />
+												<field name="rejected_date" readonly="1" />
+											</group>
+											<group>
+												<field name="is_reallocate" readonly="1" />
+												<field name="reallocate_date" readonly="1" />
+											</group>
+										</group>
+									</form>
+
 								</field>
 							</group>
 						</page>
@@ -938,8 +982,8 @@
 			</field>
 		</record>
 
-		<act_window context="{'group_by':'production_id'}"  domain="[('production_id','=',active_id)]" id="act_analytic_cost_lines"
-			name="Analytic Cost Lines" res_model="account.analytic.line"
+		<act_window context="{'group_by':'production_id'}" domain="[('production_id','=',active_id)]"
+			id="act_analytic_cost_lines" name="Analytic Cost Lines" res_model="account.analytic.line"
 			src_model="mrp.production" />
 
 

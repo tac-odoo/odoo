@@ -27,7 +27,7 @@
 		Extend the flow of manufacturing process
     ''',
     'author': 'OpenERP SA',
-    'depends': ['base','sale_stock','mrp_jit','mrp_operations','l10n_in_account_tax'],
+    'depends': ['base','sale_stock','mrp_jit','mrp_operations','l10n_in_account_tax','hr'],
     'data': ['wizard/change_receiveddate_inward_view.xml','wizard/change_qcapproved_date_view.xml',
              'wizard/common_date_updation_view.xml','wizard/mrp_partially_close_view.xml',
              'mrp_view.xml','purchase_view.xml','product_view.xml', 'stock_view.xml','invoice_view.xml',
