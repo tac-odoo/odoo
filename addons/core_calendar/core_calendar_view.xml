@@ -113,36 +113,47 @@
             <field name="name">core.calendar.event.calendar</field>
             <field name="model">core.calendar.event</field>
             <field name="arch" type="xml">
-                <calendar string="Agenda" date_start="date_start" color="organizer_id" date_stop="date_end" date_delay="duration" mode="week">
+                <calendar string="Agenda" date_start="date_start" color="organizer_id" date_stop="date_end" date_delay="duration" mode="week" use_contacts="true" attendee="attendee_ids" avatar_model="res.partner" use_intermediate_popover="true">
                     <field name="name"/>
                     <field name="organizer_id"/>
                     <field name="recurrent" options="{'calendar_recurrent_field': true}"/>
                     <field name="state"/>
                     <field name="location"/>
-                    <field name="attendee_ids"/>
                     <templates>
-                        <t t-name="calendar-text-box">
-                            <field name="name"/>
-                            <t t-if="record.recurrent.raw_value">
-                                <span class="oe_i oe_calendar_event_attr">Q</span>
-                            </t>
+                        <t t-name="calendar-event-title">
+                            <b><field name="name"/></b>
                             <t t-if="record.state.raw_value == 'confirm'">
-                                <span class="oe_e oe_calendar_event_attr">U</span>
+                                <span class="oe_i oe_calendar_event_attr"> W</span>
+                            </t>
+                            <t t-if="record.recurrent.raw_value">
+                                <span class="oe_i oe_calendar_event_attr"> Q</span>
+                            </t>
+                            <t t-if="!display_short">
+                                <ul class="oe_calendar_event_fields_list">
+                                    <t t-if="record.location.raw_value">
+                                        <li><span class="oe_i oe_calendar_event_attr">~</span><field name="location"/></li>
+                                    </t>
+                                    <t t-if="record.main_speaker_id.raw_value">
+                                        <li><span class="oe_i oe_calendar_event_attr">x</span><field name="main_speaker_id"/></li>
+                                    </t>
+                                </ul>
                             </t>
                         </t>
-                        <t t-name="calendar-info-box">
-                            <t t-if="record.organizer_id.raw_value">
-                                <span> Responsible: <field name="organizer_id"/></span><br/>
-                            </t>
-                            <t t-if="record.location.raw_value">
-                                <span> Location: <field name="location"/></span><br/>
-                            </t>
-                            <t t-if="record.attendee_ids.raw_value.length">
-                                <span> Participants: #<t t-esc="record.attendee_ids.raw_value.length"/></span><br/>
-                            </t>
-                            <t t-if="!record.attendee_ids.raw_value.length">
-                                <span> No participant!</span><br/>
-                            </t>
+                        <t t-name="calendar-event-description">
+                            <ul class="oe_calendar_event_fields_list">
+                                <t t-if="record.organizer_id.raw_value">
+                                    <li><u>Responsible:</u> <field name="organizer_id"/></li>
+                                </t>
+                                <t t-if="record.location.raw_value">
+                                    <li><u>Location:</u> <field name="location"/></li>
+                                </t>
+                                <t t-if="record.main_speaker_id.raw_value">
+                                    <li><u>Main Speaker:</u> <field name="main_speaker_id"/></li>
+                                </t>
+                                <li><u>Participant(s):</u> <t t-esc="record.attendee_ids.raw_value.length"/></li>
+                            </ul>
+                            <div>
+                            </div>
                         </t>
                     </templates>
                 </calendar>
@@ -177,7 +188,7 @@
             <field name="view_mode">calendar,tree</field>
             <field name="view_id" ref="view_core_calendar_event_calendar"/>
             <field name="search_view_id" ref="view_core_calendar_event_search"/>
-            <field name="context">{'search_default_my_agenda': 1}</field>
+            <field name="context">{}</field>
         </record>
 
         <record id="view_partner_tree_availibility" model="ir.ui.view">

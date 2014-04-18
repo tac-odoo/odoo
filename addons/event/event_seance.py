@@ -576,6 +576,41 @@ class EventSeance(osv.Model):
         ids = [x['res_id'] for x in conflicts_method(cr, uid, [(self._name, False)], context=context)]
         return [('id', 'in', ids)]
 
+    def _get_has_conflicts(self, cr, uid, ids, fieldname, args, context=None):
+        if not ids:
+            return {}
+        CoreCalendarEvent = self.pool.get('core.calendar.event')
+        conflicts_method = CoreCalendarEvent._get_user_has_overlapping_events
+        result = dict.fromkeys(ids, False)
+        for conflict in conflicts_method(cr, uid, [(self._name, ids)], context=context):
+            result[conflict['res_id']] = True
+        return result
+
+    def _search_has_conflicts(self, cr, uid, model, fieldname, domain, context=None):
+        if context is None:
+            context = {}
+        preset_ids = False
+        if context.get('args_no_conflicts'):
+            # TODO: remove that tricks one the speed of query getting event
+            #       get into some resonable times
+            preset_ids = self.search(cr, uid, context['args_no_conflicts'], context=context)
+
+        search_in_conflicts = None
+        for a in domain:
+            if isinstance(a, (list, tuple)) and len(a) == 3 and a[0] == fieldname:
+                if a[1] in ('=', '!='):
+                    sic = bool(a[2])
+                    if a[1] == '!=':
+                        sic = not sic
+                    search_in_conflicts = sic
+                    break
+        if search_in_conflicts is None:
+            return []
+        CoreCalendarEvent = self.pool.get('core.calendar.event')
+        conflicts_method = CoreCalendarEvent._get_user_has_overlapping_events
+        ids = [x['res_id'] for x in conflicts_method(cr, uid, [(self._name, preset_ids)], context=context)]
+        return [('id', 'in', ids)]
+
     def _needaction_domain_get(self, cr, uid, context=None):
         return False
         # return [('event_conflict_ids','!=',False)]
@@ -656,6 +691,9 @@ class EventSeance(osv.Model):
         'event_conflict_ids': fields.function(_get_event_conflicts, type='one2many',
                                                relation='core.calendar.event', readonly=True,
                                                fnct_search=_search_event_conflicts),
+        'has_conflicts': fields.function(_get_has_conflicts, type='boolean',
+                                         string='Has Conflicts', readonly=True,
+                                         fnct_search=_search_has_conflicts),
     }
 
     _defaults = {
@@ -721,6 +759,23 @@ class EventSeance(osv.Model):
             ('state', 'in', ['confirm', 'inprogress', 'closed'])
         ])
         self.button_set_done(cr, uid, seance_to_terminate, context=context)
+
+    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+        if context is None:
+            context = {}
+
+        search_for_conflicts = False
+        args_no_conflicts = []
+        for x in args:
+            if expression.is_leaf(x) and x[0] == 'has_conflicts':
+                search_for_conflicts = True
+                x = expression.TRUE_LEAF
+            args_no_conflicts.append(x)
+
+        if search_for_conflicts:
+            context = dict(context, args_no_conflicts=args_no_conflicts)
+        return super(EventSeance, self).search(cr, user, args, offset=offset, limit=limit,
+                                               order=order, context=context, count=count)
 
     def create(self, cr, uid, values, context=None):
         new_record_id = super(EventSeance, self).create(cr, uid, values, context=context)

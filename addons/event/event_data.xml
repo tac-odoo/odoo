@@ -47,16 +47,17 @@
             <field name="model">core.calendar.event</field>
             <field name="inherit_id" ref="core_calendar.view_core_calendar_event_calendar"/>
             <field name="arch" type="xml">
-                <field name="attendee_ids" position="after">
+                <field name="location" position="after">
                     <field name="event_ids"/>
+                    <field name="events_code"/>
                 </field>
-                <xpath expr="//templates/t[@t-name='calendar-info-box']/t[2]" position="after">
+                <xpath expr="//templates//ul[@class='oe_calendar_event_fields_list']" position="inside">
                     <t t-if="record.event_ids.raw_value.length">
                         <t t-if="record.event_ids.raw_value.length &lt;= 8">
-                            <span>Events: <field name="event_ids"/></span>
+                            <li><span class="oe_i oe_calendar_event_attr">G</span><field name="events_code"/></li>
                         </t>
                         <t t-if="record.event_ids.raw_value.length > 8">
-                            <span>Events: #<t t-esc="record.event_ids.raw_value.length"/></span>
+                            <span><span class="oe_i oe_calendar_event_attr">G</span> #<t t-esc="record.event_ids.raw_value.length"/></span>
                         </t>
                     </t>
                 </xpath>

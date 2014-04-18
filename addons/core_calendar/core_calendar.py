@@ -876,6 +876,50 @@ class CoreCalendarEvent(osv.Model):
             result.append(v)
         return result
 
+    def _get_user_has_overlapping_events(self, cr, uid, filter_sets, context=None, count=False):
+        union_all_fields = ['id', 'model', 'calendar_id', 'res_id',
+                            'date_start', 'date_end', 'attendee_ids']
+        union_all_query = self._get_user_query(cr, uid, union_all_fields,
+                                               attendee_list=True, context=context)
+        where_filter = []
+        where_params = []
+        for (model, ids) in filter_sets:
+            if not ids:
+                where_filter.append('a.model = %s')
+                where_params.append(model)
+            else:
+                where_filter.append('a.model = %s AND a.res_id IN %s')
+                where_params += [model, tuple(ids)]
+        where_clause = ' AND ' + ' AND '.join(where_filter) if where_filter else ''
+
+        query = """
+            WITH events AS (%s)
+            SELECT a.id, a.model, a.res_id, a.attendee_ids AS partner_id
+            FROM events AS a
+            LEFT JOIN res_partner p ON (a.attendee_ids = p.id)
+            WHERE p.avoid_double_allocation = true
+              AND EXISTS(
+                SELECT 1
+                FROM events AS b
+                WHERE b.attendee_ids = a.attendee_ids
+                  AND (b.calendar_id != a.calendar_id
+                       OR b.res_id != a.res_id)
+                  AND (b.date_start, b.date_end) OVERLAPS (a.date_start, a.date_end)
+              )
+              %s
+        """ % (union_all_query, where_clause)
+        cr.execute(query, where_params)
+        logger = logging.getLogger('core.calendar.event')
+        logger.debug('event overlapping query\n%s' % cr.query)
+        result = []
+        for r in cr.fetchall():
+            result.append({
+                'id': r[0],
+                'model': r[1],
+                'res_id': r[2]
+            })
+        return result
+
     def _get_attendees(self, cr, uid, ids, field_name, args, context=None):
         return self._compute_attendees(cr, uid, ids, field_name, args, context=context)
 
