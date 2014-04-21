@@ -37,17 +37,22 @@ class mrp_partially_close(osv.osv_memory):
         res = super(mrp_partially_close, self).default_get(cr, uid, fields, context=context)
         assert production_id, "Production Id should be specified in context as a Active ID."
         prod = prod_obj.browse(cr, uid, production_id, context=context)
+        scrapped_qty = 0.0
+        for wo in prod.workcenter_lines:
+            for mrej in wo.moves_rejection:
+                scrapped_qty += mrej.s_rejected_qty or 0.0
 
         already_produced_qty = prod.already_produced_qty
         if 'qty' in fields:
-            res.update({'qty': prod.product_qty - already_produced_qty})
+            res.update({'qty': prod.product_qty - (already_produced_qty + scrapped_qty)})
         if 'total_qty' in fields:
             res.update({'total_qty': prod.product_qty})
         if 'already_produced_qty' in fields:
             res.update({'already_produced_qty': already_produced_qty})
         if 'remain_qty' in fields:
-            res.update({'remain_qty': prod.product_qty - already_produced_qty})
-
+            res.update({'remain_qty': prod.product_qty - (already_produced_qty + scrapped_qty)})
+        if 'scraped_qty' in fields:
+            res.update({'scraped_qty': scrapped_qty})
         return res
 
     _columns = {
@@ -58,12 +63,12 @@ class mrp_partially_close(osv.osv_memory):
         'remain_qty': fields.float('Remain Produce Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
     }
 
-    def onchange_qty(self, cr, uid, ids, scraped_qty, remain_qty, qty, context=None):
-        """
-        Process
-            - To update scraped quantity.
-        """
-        return {'value':{'scraped_qty': remain_qty - qty}}
+#    def onchange_qty(self, cr, uid, ids, scraped_qty, remain_qty, qty, context=None):
+#        """
+#        Process
+#            - To update scraped quantity.
+#        """
+#        return {'value':{'scraped_qty': remain_qty - qty}}
 
     def _prepare_order_line_move(self, cr, uid, production, picking_id, scrap_qty, context=None):
         """

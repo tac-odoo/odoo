@@ -19,7 +19,7 @@
                     </group>
                     <group string="Enter Partially Quantity">
                         <group>
-                            <field name="qty" on_change="onchange_qty(scraped_qty, remain_qty, qty, context)"/>
+                            <field name="qty" readonly="1"/> <!-- on_change="onchange_qty(scraped_qty, remain_qty, qty, context)"/ -->
                             <label string="After confirmation, you should check all workorder lines to process." colspan="4"/>
                         </group>
                         <group>

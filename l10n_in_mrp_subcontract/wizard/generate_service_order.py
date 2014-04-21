@@ -89,7 +89,8 @@ class generate_service_order(osv.osv_memory):
                 'price_unit': data.product_id and data.product_id.standard_price or 0.0,
                 'date_planned': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                 'order_id':po_id,
-                'process_move_id':data.id
+                'process_move_id':data.id,
+                'uom_char':data.product_id and (data.product_id.p_uom_id) and '/'+ str(data.product_id.p_uom_id.name) or ''
                 }
 
     def _create_delivery_picking(self, cr, uid, data, context=None):
