@@ -336,6 +336,10 @@ class stock_picking(osv.osv):
                     'round_off':picking.sale_id.round_off,
 
                 })
+        if picking.purchase_id:
+            res.update({
+                    'reference': picking.name,
+                })
         return res
 
     def action_done(self, cr, uid, ids, context=None):

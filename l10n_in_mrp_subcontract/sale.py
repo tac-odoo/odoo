@@ -166,7 +166,6 @@ class sale_order(osv.osv):
 ·Packing & Forwarding Charges : 
 ·Freight : 
 ·Taxes : 
-·Insurance: 
 """
     }
 
