@@ -395,7 +395,7 @@
         <para style="terp_default_6_vat_tin_cst">VAT No.: [[ o.company_id.vat_no or '']] | CST No.: [[ o.company_id.cst_no or '']] | ECC No.: [[ o.company_id.excise_no or '']]</para>
        </td>
         <td>
-            <para style="terp_header_climb"><b>Request for Quotation N° [[ o.name ]]</b></para>
+            <para style="terp_header_climb"><b>Purchase Order N° [[ o.name ]]</b></para>
             <para style="terp_default_Right_9">Quotation Date: : [[ time.strftime('%d-%b-%Y', time.strptime(o.date_order, '%Y-%m-%d')) ]]</para>
         </td>
       </tr>
@@ -478,7 +478,7 @@
           <para style="terp_default_Bold_Right_9" textColor="white">Required Qty</para>
         </td>
         <td>
-          <para style="terp_default_Bold_Right_9" textColor="white">Purchase Qty</para>
+          <para style="terp_default_Bold_Right_9" textColor="white">Approx. Purchase Qty</para>
         </td>
         <td>
           <para style="terp_default_Bold_Right_9" textColor="white">Price</para>
@@ -514,9 +514,7 @@
       </tr>
     </blockTable>
    </section>
-
-
-   <spacer length="0.05cm"/>
+   <spacer length="0.01cm"/>
    <blockTable colWidths="600.0" style="club">
    <tr>
     <td>

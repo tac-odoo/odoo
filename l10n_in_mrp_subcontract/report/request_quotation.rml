@@ -458,7 +458,7 @@
     </blockTable>
     <para style="terp_default_8"><font color="white"> </font></para>
 
-    <blockTable colWidths="120.0,300.0,90.0,90.0" style="Table6">
+    <blockTable colWidths="120.0,260.0,90.0,130.0" style="Table6">
       <tr>
         <td>
           <para style="terp_default_Bold_9" textColor="white">Product Code</para>
@@ -470,13 +470,13 @@
           <para style="terp_default_Bold_Right_9" textColor="white">Required Qty</para>
         </td>
         <td>
-          <para style="terp_default_Bold_Right_9" textColor="white">Purchase Qty</para>
+          <para style="terp_default_Bold_Right_9" textColor="white">Approx. Purchase Qty</para>
         </td>
       </tr>
     </blockTable>
     <section>
     <para style="terp_default_2">[[ repeatIn(o.order_line,'l') ]]</para>
-    <blockTable colWidths="120.0,300.0,90.0,90.0" style="Table7">
+    <blockTable colWidths="120.0,260.0,90.0,130.0" style="Table7">
       <tr>
         <td>
           <para style="terp_default_9">[[ l.product_id and l.product_id.default_code  or '' ]]</para>
