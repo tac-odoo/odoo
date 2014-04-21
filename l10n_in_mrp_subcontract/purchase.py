@@ -450,7 +450,7 @@ class purchase_order(osv.osv):
             -super call()
             -if service order then at the time of confirmation , it will generate Delivery order from production.
         """
-        out_pick_obj = self.pool.get('stock.picking')
+        out_pick_obj = self.pool.get('stock.picking.out')
         move_obj = self.pool.get('stock.move')
         wf_service = netsvc.LocalService("workflow")
         res = super(purchase_order,self).action_picking_create(cr, uid, ids, context=context)

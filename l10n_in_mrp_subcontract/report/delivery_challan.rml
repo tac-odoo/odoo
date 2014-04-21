@@ -259,6 +259,10 @@
       <lineStyle kind="LINEBEFORE" colorName="#A4A4A4" start="3,0" stop="3,-1"/>
       <lineStyle kind="LINEABOVE" colorName="#A4A4A4" start="3,0" stop="3,0"/>
       <lineStyle kind="LINEBELOW" colorName="#A4A4A4" start="3,-1" stop="3,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#A4A4A4" start="3,0" stop="4,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#A4A4A4" start="3,0" stop="4,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#A4A4A4" start="3,0" stop="4,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#A4A4A4" start="3,-1" stop="4,-1"/>
 
       <blockBackground colorName="#A4A4A4" start="0,0" stop="-1,-1"/>
 
@@ -282,6 +286,10 @@
       <lineStyle kind="LINEBEFORE" colorName="#A4A4A4" start="3,0" stop="3,-1"/>
       <lineStyle kind="LINEABOVE" colorName="#A4A4A4" start="3,0" stop="3,0"/>
       <lineStyle kind="LINEBELOW" colorName="#A4A4A4" start="3,-1" stop="3,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#A4A4A4" start="2,0" stop="4,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#A4A4A4" start="2,0" stop="4,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#A4A4A4" start="2,0" stop="4,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#A4A4A4" start="2,-1" stop="4,-1"/>
       <blockBackground ROWBACKGROUNDS="#cccfff;#fffccc" start="0,1" stop="-1,-1"/>
 
     </blockTableStyle>
@@ -439,6 +447,7 @@
 
 
     <blockTable colWidths="100.0,400.0,100.0" style="Table6">
+    <para style="terp_default_2">[[ (o.service_order and  removeParentNode('blockTable')) ]]</para>
       <tr>
         <td>
           <para style="terp_default_Bold_9" textColor="white">Product Code</para>
@@ -453,8 +462,9 @@
       </tr>
     </blockTable>
     <section>
-      <para style="terp_default_2">[[ repeatIn(o.move_lines,'l') ]]</para>
+    <para style="terp_default_2">[[ repeatIn(o.move_lines,'l') ]]</para>
     <blockTable colWidths="100.0,400.0,100.0" style="Table7">
+    <para style="terp_default_2">[[ (o.service_order and  removeParentNode('blockTable')) ]]</para>
       <tr>
       	<td>
           <para style="terp_default_9">[[ l.product_id and l.product_id.default_code  or '' ]]</para>
@@ -470,6 +480,50 @@
       </tr>
     </blockTable>
    </section>
+
+
+    <blockTable colWidths="100.0,300.0,100.0,100.0" style="Table6">
+    <para style="terp_default_2">[[ ((not o.service_order) and  removeParentNode('blockTable')) ]]</para>
+      <tr>
+        <td>
+          <para style="terp_default_Bold_9" textColor="white">Product Code</para>
+        </td>
+        <td>
+          <para style="terp_default_Bold_9" textColor="white">Description</para>
+        </td>
+
+        <td>
+          <para style="terp_default_Bold_9" textColor="white">Qty.</para>
+        </td>
+
+        <td>
+          <para style="terp_default_Bold_9" textColor="white">Deliver Qty.</para>
+        </td>
+      </tr>
+    </blockTable>
+    <section>
+    <para style="terp_default_2">[[ repeatIn(o.move_lines,'l') ]]</para>
+    <blockTable colWidths="100.0,300.0,100.0,100.0" style="Table7">
+    <para style="terp_default_2">[[ ((not o.service_order) and  removeParentNode('blockTable')) ]]</para>
+      <tr>
+        <td>
+          <para style="terp_default_9">[[ l.product_id and l.product_id.default_code  or '' ]]</para>
+        </td>
+        <td>
+          <para style="terp_default_Bold_9">[[ l.product_id and l.product_id.name  or '' ]]</para>
+          <para style="terp_default_9">[[ l.product_id and l.product_id.description  or '' ]]</para>
+          <image x="0.0cm" y="0.0cm" width="80.0" height="40.0" >[[ l.product_id and l.product_id.image or removeParentNode('image') ]]</image>
+        </td>
+        <td>
+          <para style="terp_default_Right_9">[[ formatLang(l.product_qty)]] [[ l.product_uom and l.product_uom.name or '' ]] </para>
+        </td>
+        <td>
+          <para style="terp_default_Right_9">[[ formatLang(l.srvc_ordr_qty)]] [[ l.product_uom and l.srvc_ordr_uom.name or '' ]] </para>
+        </td>
+      </tr>
+    </blockTable>
+   </section>
+
     <para style="Standard">
       <font color="white"> </font>
     </para>
