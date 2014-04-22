@@ -374,6 +374,7 @@ class mrp_production(osv.osv):
                 'move_id': move.id,
                 'workorder_id': shortest_wrkorder,
                 'product_id': move.product_id.id,
+                'uom_id': move.product_uom.id,
                 'prodlot_id': move.prodlot_id and move.prodlot_id.id or False,
                 'start_date':False,
                 'end_date':False,
@@ -612,6 +613,7 @@ class stock_moves_workorder(osv.osv):
             result[smv.id]['s_process_qty'] = smv.process_qty / factor
             result[smv.id]['s_accepted_qty'] = smv.accepted_qty / factor
             result[smv.id]['s_rejected_qty'] = smv.rejected_qty / factor
+            result[smv.id]['s_uom_id'] = smv.workorder_id and smv.workorder_id.production_id and smv.workorder_id.production_id.product_uom.id or False
         return result
 
     _columns = {
@@ -622,6 +624,7 @@ class stock_moves_workorder(osv.osv):
         #'prodlot_id': fields.related('move_id', 'prodlot_id', type='many2one', relation='stock.production.lot', string='Serial Number', readonly=True),
         'prodlot_id': fields.many2one('stock.production.lot', 'Serial Number', readonly=True), 
         'product_id': fields.many2one('product.product', 'Product', readonly=True),
+        'uom_id': fields.many2one('product.uom', 'UoM', readonly=True),
         'start_date':fields.datetime('Start Date', help="Time when Product goes to start for workorder", readonly=True),
         'end_date':fields.datetime('End Date', help="Time when Product goes to finish or cancel for workorder", readonly=True),
         'total_qty': fields.float('Total Qty', digits_compute=dp.get_precision('Product Unit of Measure')),
@@ -633,6 +636,7 @@ class stock_moves_workorder(osv.osv):
         'product_factor': fields.function(_semiproduct_calc, multi='semiproduct', type='float', string='Product Factor',digits_compute=dp.get_precision('Product Unit of Measure'),store=True),
         's_product_id': fields.function(_semiproduct_calc, multi='semiproduct', type='many2one', relation='product.product', string="Product"), 
         's_total_qty': fields.function(_semiproduct_calc, multi='semiproduct', type='float', string='Total Qty',digits_compute=dp.get_precision('Product Unit of Measure'),store=True),
+        's_uom_id': fields.function(_semiproduct_calc, multi='semiproduct', type='many2one', relation='product.uom', string="UoM"),
         's_process_qty': fields.function(_semiproduct_calc, multi='semiproduct', type='float', string='InProcess Qty',digits_compute=dp.get_precision('Product Unit of Measure'),store=True),
         's_accepted_qty': fields.function(_semiproduct_calc, multi='semiproduct', type='float', string='Accept Qty',digits_compute=dp.get_precision('Product Unit of Measure'),store=True),
         's_rejected_qty': fields.function(_semiproduct_calc, multi='semiproduct', type='float', string='Reject Qty',digits_compute=dp.get_precision('Product Unit of Measure'),store=True),
@@ -813,11 +817,13 @@ class stock_moves_rejection(osv.osv):
         'rejected_location_id': fields.many2one('stock.location', 'Rejection Location', readonly=True),
         'rejected_from_process_move_id': fields.many2one('stock.moves.workorder', 'Rejection From', readonly=True),
         'product_id': fields.many2one('product.product', 'Product', readonly=True),
+        'uom_id': fields.many2one('product.uom', 'UoM', readonly=True),
         'rejected_date':fields.datetime('Rejected Date', readonly=True),
         'reallocate_date':fields.datetime('Reallocate Date', readonly=True),
         'rejected_qty': fields.float('Rejected Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
         's_product_id': fields.many2one('product.product', 'Product', readonly=True),
         's_rejected_qty': fields.float('Rejected Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+        's_uom_id': fields.many2one('product.uom', 'UoM', readonly=True),
         'reason': fields.text('Reason'),
         'state': fields.selection([('rejected', 'Rejected')], 'Status', readonly=True),
         'is_reallocate':  fields.boolean('Re-Allocated?')

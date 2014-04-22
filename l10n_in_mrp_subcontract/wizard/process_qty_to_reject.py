@@ -126,7 +126,7 @@ class process_qty_to_update_reject(osv.osv_memory):
         rejected_location_id = wizard_rec.rejected_location_id.id
         rejected_qty = wizard_rec.rejected_qty
         rejected_from_process_move_id = wizard_rec.process_move_id.id
-        workorder_id = wizard_rec.process_move_id.workorder_id.id
+        workorder = wizard_rec.process_move_id.workorder_id
         name = wizard_rec.process_move_id.move_id.name
         real_move_from_reject = wizard_rec.process_move_id.move_id.id
         reason= wizard_rec.reason
@@ -136,15 +136,17 @@ class process_qty_to_update_reject(osv.osv_memory):
         res = move_obj.action_scrap(cr, uid, [real_move_from_reject], rejected_qty, rejected_location_id, context=context)
         rj_move_dict = {
                         'name': name + ':Rejected:'+ str(rejected_qty),
-                        'rejected_workorder_id': workorder_id,
+                        'rejected_workorder_id': workorder.id,
                         'move_id': res and res[0] or False,#Todo Create New scrap moves
                         'rejected_location_id': rejected_location_id,
                         'rejected_from_process_move_id': rejected_from_process_move_id,
                         'product_id': product_id,
+                        'uom_id':wizard_rec.process_move_id.move_id and wizard_rec.process_move_id.move_id.product_uom.id or False,
                         'rejected_date':time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                         'rejected_qty': rejected_qty,
                         's_product_id': wizard_rec.s_product_id and wizard_rec.s_product_id.id or False,
                         's_rejected_qty': wizard_rec.s_rejected_qty,
+                        's_uom_id': workorder and workorder.production_id and workorder.production_id.product_uom.id or False,
                         'reason': reason,
                         'state': 'rejected',
                         }

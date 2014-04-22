@@ -16,7 +16,16 @@
 							<field name="returned_qty" string="Already Returned Quantity" />
 						</group>
 						<group>
-							<field name="process_qty" string="Approve Quantity" />
+							<label for="process_qty" string="Approve Quantity" />
+							<div>
+								<field name="process_qty" class="oe_inline" />
+								<field name="process_uom_id" class="oe_inline" />
+							</div>
+							<label for="pur_process_qty" string="Purchase Quantity" />
+							<div>
+								<field name="pur_process_qty" class="oe_inline" />
+								<field name="pur_process_uom_id" class="oe_inline" />
+							</div>
 							<field name="qc_approved_date" />
 						</group>
 					</group>

@@ -324,7 +324,7 @@ class purchase_order(osv.osv):
         """
         res = super(purchase_order, self)._prepare_order_line_move(cr, uid, order, order_line, picking_id, context=context)
         location_id, pass_to_qc = self._check_warehouse_input_stock(cr, uid, order)
-        res.update({'location_dest_id': location_id,'is_qc':pass_to_qc})
+        res.update({'location_dest_id': location_id,'is_qc':pass_to_qc,'purchase_qty':order_line.line_qty or 0.0,'purchase_uom_id':order_line.line_uom_id and order_line.line_uom_id.id or False})
         return res
 
     def _prepare_order_picking(self, cr, uid, order, context=None):

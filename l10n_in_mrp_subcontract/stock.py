@@ -101,6 +101,9 @@ class stock_move(osv.osv):
         'qc_completed': fields.boolean('QC Completed?'),
         'qc_ok_qty': fields.float('QC Qty ', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
 
+        'purchase_qty': fields.float('Purchase Qty', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'purchase_uom_id': fields.many2one('product.uom', 'Purchase UoM'),
+
         'srvc_ordr_qty': fields.float('Deliver Qty ', digits_compute=dp.get_precision('Product Unit of Measure')),
         'srvc_ordr_uom': fields.many2one('product.uom', 'Deliver UoM'),
         'qc_ok_qty': fields.float('QC Qty ', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),

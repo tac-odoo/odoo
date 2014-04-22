@@ -44,8 +44,11 @@ class qc2xlocation(osv.osv_memory):
         product_id = context and context.get('product_id', False) or False
         move_id = context and context.get('active_id',False) or False
         returned_qty = 0.0
+        process_uom_id, pur_process_uom_id = False,False
         if move_id:
             move = move_obj.browse(cr, uid, move_id)
+            process_uom_id = move.product_uom and move.product_uom.id or False
+            pur_process_uom_id = move.product_uom and move.purchase_uom_id and move.purchase_uom_id.id or False
             if move.picking_id:
                 return_history = self.get_return_history(cr, uid, move.picking_id.id, context)
                 returned_qty = return_history.get(move_id, 0)
@@ -57,7 +60,10 @@ class qc2xlocation(osv.osv_memory):
             res.update({'to_qc_qty': to_qc_qty})
         if 'returned_qty' in fields:
             res.update({'returned_qty': returned_qty})
-            
+        if 'process_uom_id' in fields:
+            res.update({'process_uom_id': process_uom_id})
+        if 'pur_process_uom_id' in fields:
+            res.update({'pur_process_uom_id': pur_process_uom_id})
         return res
 
     def get_return_history(self, cr, uid, pick_id, context=None):
@@ -92,6 +98,9 @@ class qc2xlocation(osv.osv_memory):
         'to_qc_qty': fields.float('In QC Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
         'returned_qty': fields.float('Return Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
         'process_qty': fields.float('Process Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'process_uom_id': fields.many2one('product.uom', 'UoM', readonly=True),
+        'pur_process_qty': fields.float('Purchase Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'pur_process_uom_id': fields.many2one('product.uom', 'UoM', readonly=True),
         'qc_approved_date': fields.datetime('QC Approved Date',required=True),
     }
 
@@ -174,11 +183,15 @@ class qc2xlocation(osv.osv_memory):
         to_qc_qty = wizard_rec.to_qc_qty
         process_qty = wizard_rec.process_qty
         returned_qty = wizard_rec.returned_qty
+        pur_process_qty = wizard_rec.pur_process_qty or 0.0
+        pur_process_uom_id = wizard_rec.pur_process_uom_id and wizard_rec.pur_process_uom_id.id or False
 
         self._check_validation_process_qty(cr, uid, to_qc_qty, process_qty, context=context)
         default_val = {
                         'product_qty': process_qty,
                         'product_uos_qty': process_qty,
+                        'purchase_qty': pur_process_qty,
+                        'purchase_uom_id': pur_process_uom_id,
                         'location_id':move_data.location_dest_id.id,
                         'location_dest_id':move_data.picking_id.purchase_id.location_id.id,
                         'state': 'draft',

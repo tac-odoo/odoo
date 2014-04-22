@@ -333,12 +333,14 @@
 										<group>
 											<group string="Semi-Finished Products Movements">
 												<field name="s_product_id" readonly="1" />
+												<field name="s_uom_id" readonly="1" />
 												<field name="s_total_qty" readonly="1" />
 												<field name="s_accepted_qty" readonly="1" />
 												<field name="s_rejected_qty" readonly="1" />
 											</group>
 											<group string="Raw Materials Movements">
 												<field name="product_id" readonly="1" />
+												<field name="uom_id" readonly="1" />
 												<field name="name" invisible="1" />
 												<field name="total_qty" readonly="1" />
 												<field name="accepted_qty" readonly="1" />
@@ -417,13 +419,14 @@
 										<field name="rejected_qty" readonly="1" />
 										<field name="rejected_location_id" readonly="1" />
 										<field name="rejected_date" readonly="1" />
-										<field name="reallocate_date" readonly="1" />
+										<field name="reallocate_date" invisible="1" />
 										<field name="reason" readonly="1" />
 										<field name="state" readonly="1" />
-										<field name="is_reallocate" readonly="1" />
+										<field name="is_reallocate" invisible="1" />
 										<button name="button_to_reallocate" string="Re-Allocate"
 											icon="terp-gtk-go-back-rtl" help="Process fresh quantity to re-allocate"
-											attrs="{'invisible':[('is_reallocate', '=', True)]}" type="object" />
+											 invisible="1" type="object"/>
+											 <!-- attrs="{'invisible':[('is_reallocate', '=', True)]}" -->
 									</tree>
 
 									<form string="Rejected Raw Materials" version="7.0">
@@ -435,10 +438,12 @@
 											<group string="Semi-Finished Products Movements">
 												<field name="s_product_id" readonly="1" />
 												<field name="s_rejected_qty" readonly="1" />
+												<field name="s_uom_id" readonly="1" />
 											</group>
 											<group string="Rejected Raw Materials Movements">
 												<field name="product_id" readonly="1" />
 												<field name="rejected_qty" readonly="1" />
+												<field name="uom_id" readonly="1" />
 											</group>
 										</group>
 										<group string="General Information">
@@ -447,8 +452,8 @@
 												<field name="rejected_date" readonly="1" />
 											</group>
 											<group>
-												<field name="is_reallocate" readonly="1" />
-												<field name="reallocate_date" readonly="1" />
+												<field name="is_reallocate" invisible="1" />
+												<field name="reallocate_date" invisible="1" />
 											</group>
 										</group>
 									</form>
@@ -577,6 +582,7 @@
 									<group>
 										<group string="Semi-Finished Products Movements">
 											<field name="s_product_id" readonly="1" />
+											<field name="s_uom_id" readonly="1" />
 											<field name="s_total_qty" readonly="1" />
 											<field name="s_accepted_qty" readonly="1" />
 											<field name="s_rejected_qty" readonly="1" />
@@ -584,6 +590,7 @@
 										</group>
 										<group string="Raw Materials Movements">
 											<field name="product_id" readonly="1" />
+											<field name="uom_id" readonly="1" />
 											<field name="name" invisible="1" />
 											<field name="total_qty" readonly="1" />
 											<field name="accepted_qty" readonly="1" />
@@ -621,13 +628,14 @@
 									<field name="rejected_qty" readonly="1" />
 									<field name="rejected_location_id" readonly="1" />
 									<field name="rejected_date" readonly="1" />
-									<field name="reallocate_date" readonly="1" />
+									<field name="reallocate_date" invisible="1" />
 									<field name="reason" readonly="1" />
 									<field name="state" readonly="1" />
-									<field name="is_reallocate" readonly="1" />
+									<field name="is_reallocate" invisible="1" />
 									<button name="button_to_reallocate" string="Re-Allocate"
 										icon="terp-gtk-go-back-rtl" help="Process fresh quantity to re-allocate"
-										attrs="{'invisible':[('is_reallocate', '=', True)]}" type="object" />
+										 invisible="1" type="object" />
+										 <!-- attrs="{'invisible':[('is_reallocate', '=', True)]}" -->
 								</tree>
 							</field>
 						</group>
@@ -823,12 +831,14 @@
 											<group>
 												<group string="Semi-Finished Products Movements">
 													<field name="s_product_id" readonly="1" />
+													<field name="s_uom_id" readonly="1" />
 													<field name="s_total_qty" readonly="1" />
 													<field name="s_accepted_qty" readonly="1" />
 													<field name="s_rejected_qty" readonly="1" />
 												</group>
 												<group string="Raw Materials Movements">
 													<field name="product_id" readonly="1" />
+													<field name="uom_id" readonly="1" />
 													<field name="name" invisible="1" />
 													<field name="total_qty" readonly="1" />
 													<field name="accepted_qty" readonly="1" />
@@ -866,13 +876,14 @@
 											<field name="rejected_qty" readonly="1" />
 											<field name="rejected_location_id" readonly="1" />
 											<field name="rejected_date" readonly="1" />
-											<field name="reallocate_date" readonly="1" />
+											<field name="reallocate_date" invisible="1" />
 											<field name="reason" readonly="1" />
 											<field name="state" readonly="1" />
-											<field name="is_reallocate" readonly="1" />
+											<field name="is_reallocate" invisible="1" />
 											<button name="button_to_reallocate" string="Re-Allocate"
 												icon="terp-gtk-go-back-rtl" help="Process fresh quantity to re-allocate"
-												attrs="{'invisible':[('is_reallocate', '=', True)]}" type="object" />
+												 invisible="1" type="object" />
+												<!-- attrs="{'invisible':[('is_reallocate', '=', True)]}" -->
 										</tree>
 									</field>
 								</group>
