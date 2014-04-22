@@ -274,3 +274,30 @@ class PurchaseOrderImportLineFromSeance(osv.TransientModel):
                                     {'purchase_order_line_id': new_order_line_id},
                                     context=context)
         return True
+
+
+class PurchaseOrderLine(osv.Model):
+    _inherit = 'purchase.order.line'
+
+    def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+                            partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
+                            name=False, price_unit=False, context=None):
+
+        _super = super(PurchaseOrderLine, self).onchange_product_id
+        result = _super(cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+                        partner_id, date_order=date_order,
+                        fiscal_position_id=fiscal_position_id,
+                        date_planned=date_planned, name=name,
+                        price_unit=price_unit, context=context)
+        if ids:
+            Participation = self.pool.get('event.participation')
+            participation_ids = Participation.search(cr, uid, [
+                ('partner_id', '=', partner_id),
+                ('purchase_order_line_id', 'in', ids)
+            ], context=context)
+            if participation_ids:
+                price_unit = max(x.purchase_price
+                                 for x in Participation.browse(cr, uid, participation_ids, context=context))
+                result.setdefault('value', {})
+                result['value']['price_unit'] = price_unit
+        return result
