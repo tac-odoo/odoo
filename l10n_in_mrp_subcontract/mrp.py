@@ -952,7 +952,7 @@ class mrp_production_workcenter_line(osv.osv):
             planned_qty = wo.production_id.product_qty - rejected_qty
             hour = self._calculated_hour(cr, uid, wo, planned_qty, context=context)
             planned_cost = round(wo.hour,2) * wo.workcenter_id.costs_hour
-            cr.execute(""" UPDATE mrp_production_workcenter_line SET hour = %s, wo_planned_cost=%s  WHERE id = %s"""%(hour, planned_cost, wo.id))
+            cr.execute(""" UPDATE mrp_production_workcenter_line SET hour = %s WHERE id = %s"""%(hour, wo.id))
             
             #Here we cannot call write method to update auto next workorder.
 #            cr.execute(""" SELECT id FROM mrp_production_workcenter_line 
@@ -985,9 +985,9 @@ class mrp_production_workcenter_line(osv.osv):
         'temp_date_finished':fields.related('date_finished', type="datetime",store=True),
 
         'currency_id': fields.related('production_id', 'currency_id', type="many2one", relation="res.currency", string="Currency", readonly=True),
-        'wo_planned_cost': fields.function(_mrp_wo_costing, multi='cost', type='float', string='Workorder Planned Cost',store=True),
+        'wo_planned_cost': fields.function(_mrp_wo_costing, multi='cost', type='float', string='Workorder Planned Cost'),
         'wo_actual_cost': fields.function(_mrp_wo_costing, multi='cost', type='float', string='Workorder Actual Cost',store=True),
-        'operator_efficiency': fields.function(_mrp_wo_costing, multi='cost', type='integer', string='Operator Efficiency(%)',group_operator="avg",store=True),
+        'operator_efficiency': fields.function(_mrp_wo_costing, multi='cost', type='integer', string='Operator Efficiency(%)',group_operator="avg"),
         't_rejection_qty': fields.function(_mrp_rejctd_qty, multi='rj', type='float', string='Rejection Qty'),
         'hour_nbr': fields.float('Line Hour'),
 
