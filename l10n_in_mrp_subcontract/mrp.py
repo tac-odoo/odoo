@@ -883,8 +883,8 @@ class mrp_production_workcenter_line(osv.osv):
         for wo in self.browse(cr, uid, ids, context=context):
             wo_planned_cost = wo_actual_cost = operator_efficiency = 0.0
             #if wo.state == 'cancel': continue
-            wo_planned_cost += wo.hour * wo.workcenter_id.costs_hour
-            wo_actual_cost += wo.delay * wo.workcenter_id.costs_hour
+            wo_planned_cost += round(wo.hour,2) * wo.workcenter_id.costs_hour
+            wo_actual_cost += round(wo.delay,2) * wo.workcenter_id.costs_hour
             p_hour,p_min = float_time_convert(wo.hour)
             a_hour,a_min = float_time_convert(wo.delay)
             p_seconds = p_hour * 3600 + p_min * 60
@@ -925,6 +925,45 @@ class mrp_production_workcenter_line(osv.osv):
             cr.execute(""" UPDATE mrp_production_workcenter_line SET delay = %s WHERE id = %s"""%(delay, wo.id))
         return result
 
+    def _calculated_hour(self, cr, uid, wo, qty, context=None):
+        wc = wo.workcenter_id
+        hour = float((wo.hour_nbr * qty + ((wc.time_start or 0.0)+(wc.time_stop or 0.0))) / float(wc.time_efficiency or 1.0))
+        return hour
+
+    def _mrp_rejctd_qty(self, cr, uid, ids, name, args, context=None):
+        """
+        Process
+            -count log entry delay and set to actual time
+        """
+
+        result = dict([(id, {'t_rejection_qty': 0.0}) for id in ids])
+        for wo in self.browse(cr, uid, ids, context=context):
+            qty = 0.0
+            if wo.production_id:
+                cr.execute("""  SELECT sum(s_rejected_qty) FROM stock_moves_rejection 
+                                WHERE rejected_workorder_id in 
+                                (SELECT id FROM mrp_production_workcenter_line 
+                                WHERE sequence < %s 
+                                AND production_id = %s
+                                ) """%(wo.sequence, wo.production_id.id))
+                qty = cr.fetchone()[0]
+            rejected_qty = qty or 0.0
+            result[wo.id]['t_rejection_qty'] = rejected_qty
+            planned_qty = wo.production_id.product_qty - rejected_qty
+            hour = self._calculated_hour(cr, uid, wo, planned_qty, context=context)
+            planned_cost = round(wo.hour,2) * wo.workcenter_id.costs_hour
+            cr.execute(""" UPDATE mrp_production_workcenter_line SET hour = %s, wo_planned_cost=%s  WHERE id = %s"""%(hour, planned_cost, wo.id))
+            
+            #Here we cannot call write method to update auto next workorder.
+#            cr.execute(""" SELECT id FROM mrp_production_workcenter_line 
+#                            WHERE sequence > %s 
+#                            AND production_id = %s """%(wo.sequence, wo.production_id.id)
+#                                )
+#            update_all = [x[0] for x in cr.fetchall() if x]
+#            self.dummy_button(cr, uid, update_all, context)
+        return result
+
+
     _inherit = 'mrp.production.workcenter.line'
     _columns = {
         'sequence': fields.integer('Sequence', required=True, help="Gives the sequence order when displaying a list of work orders.",readonly=True, states={'draft':[('readonly', False)]}),
@@ -949,12 +988,15 @@ class mrp_production_workcenter_line(osv.osv):
         'wo_planned_cost': fields.function(_mrp_wo_costing, multi='cost', type='float', string='Workorder Planned Cost',store=True),
         'wo_actual_cost': fields.function(_mrp_wo_costing, multi='cost', type='float', string='Workorder Actual Cost',store=True),
         'operator_efficiency': fields.function(_mrp_wo_costing, multi='cost', type='integer', string='Operator Efficiency(%)',group_operator="avg",store=True),
+        't_rejection_qty': fields.function(_mrp_rejctd_qty, multi='rj', type='float', string='Rejection Qty'),
+        'hour_nbr': fields.float('Line Hour'),
 
     }
     _sql_constraints = [('sequence_uniq', 'unique(sequence, production_id)', "You cannot assign same sequence on current production order")] 
     _sql_constraints = [('wo_date_greater','check(date_finished >= date_start)','Error ! Stop Date cannot be set before Beginning Date.')] 
     _defaults = {
-        'order_type': 'in'
+        'order_type': 'in',
+        'hour_nbr':0.0
         }
 
     def onchange_planned_cost(self,cr, uid, ids, planned_hour, actual_hour, actual_cost, workcenter_id, context=None):
@@ -1404,6 +1446,7 @@ class mrp_bom(osv.osv):
                         'order_type':wc_use.order_type,
                         'sequence': level+(wc_use.sequence or 0),
                         'cycle': cycle,
+                        'hour_nbr':wc_use.hour_nbr,
                         #'hour': float(wc_use.hour_nbr*mult + ((wc.time_start or 0.0)+(wc.time_stop or 0.0)+cycle*(wc.time_cycle or 0.0)) * (wc.time_efficiency or 1.0)),
                         #Estimatated Hours = (Before P Stat+Before P Stop + total hours(define in routing) ) / effieciency
                         #Engineering manufacturing company dosent consider cycle loop, Its alwys work on hours basis.

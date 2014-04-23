@@ -392,7 +392,8 @@
 									<field name="log_delay" readonly="1" widget="float_time"
 										string="Workorder Log Actual Time(HH:MM)" invisible="1"/>
 									<field name="operator_efficiency" readonly="1" />
-
+									<field name="t_rejection_qty" invisible="1"/>
+									<field name="hour_nbr" widget="float_time" invisible="1"/>
 								</group>
 								<group string="Cost Calculation">
 									<field name="wo_planned_cost" widget='monetary'
