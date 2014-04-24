@@ -1141,6 +1141,10 @@ class EventParticipation(osv.Model):
         Participation = self.pool.get('event.participation')
         return Participation.search(cr, uid, [('seance_id', 'in', ids)], context=context)
 
+    _store_func_compute_purchase_price = lambda s, *a, **kw: s._compute_purchase_price(*a, **kw)
+    _store_func_compute_purchase_product = lambda s, *a, **kw: s._compute_purchase_product(*a, **kw)
+    _store_func_compute_purchase_amount = lambda s, *a, **kw: s._compute_purchase_amount(*a, **kw)
+
     _columns = {
         'name': fields.char('Participant Name', size=128, required=True),
         'role': fields.selection(ROLES, 'Role', required=True, select=True),
@@ -1164,14 +1168,14 @@ class EventParticipation(osv.Model):
                                             string='Presence Summary'),
         'arrival_time': fields.datetime('Arrival Time'),
         'departure_time': fields.datetime('Departure Time'),
-        'purchase_product_id': fields.function(_compute_purchase_product, string='Purchase Product',
-                                               type='many2one', relation='product.product'),
-        'purchase_price': fields.function(_compute_purchase_price, string='Purchase Price', type='float',
+        'purchase_product_id': fields.function(_store_func_compute_purchase_product, string='Purchase Product',
+                                               type='many2one', relation='product.product', store=True),
+        'purchase_price': fields.function(_store_func_compute_purchase_price, string='Purchase Price', type='float',
                                           digits_compute=dp.get_precision('Product Price')),
-        'purchase_qty': fields.function(_compute_purchase_amount, type='float',
+        'purchase_qty': fields.function(_store_func_compute_purchase_amount, type='float',
                                         string='Quantity', multi='purchase-amount',
                                         digits_compute=dp.get_precision('Purchase Price')),
-        'purchase_subtotal': fields.function(_compute_purchase_amount, type='float',
+        'purchase_subtotal': fields.function(_store_func_compute_purchase_amount, type='float',
                                              string='Total', multi='purchase-amout',
                                              digits_compute=dp.get_precision('Account')),
     }

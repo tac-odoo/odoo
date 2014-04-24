@@ -47,6 +47,23 @@ class EventParticipation(osv.Model):
         'cancel': 'cancel',
     }
 
+    def _compute_purchase_price(self, cr, uid, ids, fieldname, args, context=None):
+        result = super(EventParticipation, self)._compute_purchase_price(cr, uid, ids, fieldname, args, context=context)
+        for p in self.browse(cr, uid, ids, context=context):
+            if p.purchase_order_line_id:
+                result[p.id] = p.purchase_order_line_id.price_unit
+        return result
+
+    def _compute_purchase_amount(self, cr, uid, ids, fieldname, args, context=None):
+        result = super(EventParticipation, self)._compute_purchase_amount(cr, uid, ids, fieldname, args, context=context)
+        for p in self.browse(cr, uid, ids, context=context):
+            if p.purchase_order_line_id:
+                result[p.id] = {
+                    'purchase_qty': p.purchase_order_line_id.product_qty,
+                    'purchase_subtotal': p.purchase_order_line_id.price_subtotal,
+                }
+        return result
+
     def _store_get_participations_self(self, cr, uid, ids, context=None):
         return ids
 
