@@ -141,7 +141,7 @@ class report_event_resource(osv.Model):
 
         di = (dates_interval or '').strip()
         if di:
-            diparts = [x.strip() for x in di.split(' - ', 2)]
+            diparts = [x.strip() for x in di.split('-', 2)]
             start = try_parse(diparts[0], formats).replace(hour=0, minute=0, second=0, microsecond=0)
             start = Timeline.datetime_tz_convert(start, tz, 'UTC')
             if len(diparts) > 1:
