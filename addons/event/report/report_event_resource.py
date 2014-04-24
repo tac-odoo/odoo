@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+import re
 import time
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta, MO
@@ -115,11 +116,16 @@ class report_event_resource(osv.Model):
         lang_ids = Lang.search(cr, uid, [('code', '=', lang)], context=context)
         if lang_ids:
             lang_record = Lang.browse(cr, uid, lang_ids[0], context=context)
-            formats[:0] = [
-                '%s %s' % (lang_record.date_format, lang_record.time_format),
-                lang_record.date_format,
-            ]
-            # TODO
+            dt_format = '%s %s' % (lang_record.date_format, lang_record.time_format)
+            dt_parts = re.findall('.*?%.', dt_format)
+            dt_formats = []
+            for i in xrange(len(dt_parts)):
+                lastitem = -i if i else None  # convert 0 to None to get a correct splice expr.
+                partial_format = ''.join(dt_parts[:lastitem])
+                dt_formats.append(partial_format)
+                if partial_format == lang_record.date_format:
+                    break  # stop here
+            formats[:0] = dt_formats
         return formats
 
     def _parse_user_dates_interval(self, cr, uid, dates_interval, context=None):
@@ -142,10 +148,10 @@ class report_event_resource(osv.Model):
         di = (dates_interval or '').strip()
         if di:
             diparts = [x.strip() for x in di.split('-', 2)]
-            start = try_parse(diparts[0], formats).replace(hour=0, minute=0, second=0, microsecond=0)
+            start = try_parse(diparts[0], formats).replace()
             start = Timeline.datetime_tz_convert(start, tz, 'UTC')
             if len(diparts) > 1:
-                stop = try_parse(diparts[1], formats).replace(hour=0, minute=0, second=0, microsecond=0)
+                stop = try_parse(diparts[1], formats).replace()
                 stop += relativedelta(days=1)
                 stop = Timeline.datetime_tz_convert(stop, tz, 'UTC')
             else:
