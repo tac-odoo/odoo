@@ -570,10 +570,6 @@
                                         <field name="purchase_qty"/>
                                         <field name="purchase_subtotal"/>
                                         <field name="state"/>
-                                        <button name="button_set_draft"
-                                            states="confirm,cancel"
-                                            string="Set Draft" type="object"
-                                            icon="terp-crm"/>
                                         <button name="button_set_confirm" string="Confirm"
                                             states="draft,cancel"
                                             type="object" icon="gtk-apply"/>
