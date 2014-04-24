@@ -74,10 +74,14 @@ class EventParticipation(osv.Model):
         for p in self.browse(cr, uid, part_ids, context=context):
             order = p.purchase_order_id
             cached_state = result[p.id]
-            part_state = self.PO_STATE_2_PART_STATE[order.state]
-            result[p.id] = part_state
-            if cached_state != part_state:
-                actions[part_state].append(p.id)
+            new_state = self.PO_STATE_2_PART_STATE[order.state]
+            result[p.id] = new_state
+            if order.invoice_method == 'manual' and \
+                    new_state in ('confirm', 'done') and \
+                    p.state in ('cancel', 'done'):
+                continue  # this is controlled by resource participation state.
+            if cached_state != new_state:
+                actions[new_state].append(p.id)
 
         # trigger states changes for all item in batch mode
         if actions:
@@ -104,6 +108,76 @@ class EventParticipation(osv.Model):
                                      'purchase.order': (_store_get_participations_from_purchase_order, ['state'], 10),
                                  })
     }
+
+    def unlink(self, cr, uid, ids, context=None):
+        pol_to_cancel = []
+        for p in self.browse(cr, uid, ids, context=context):
+            if p.purchase_order_id and p.purchase_order_id.invoice_method == 'manual':
+                pol_to_cancel.append(p.purchase_order_line_id.id)
+        if pol_to_cancel:
+            self.pool.get('purchase.order.line').write(cr, uid, pol_to_cancel, {'state': 'cancel'}, context=context)
+        return super(EventParticipation, self).unlink(cr, uid, ids, context=context)
+
+    def button_set_draft(self, cr, uid, ids, context=None):
+        for p in self.browse(cr, uid, ids, context=context):
+            if p.purchase_order_id:
+                invoice_method = p.purchase_order_id.invoice_method
+                expected_part_state = self.PO_STATE_2_PART_STATE[p.purchase_order_id.state]
+                if expected_part_state != 'draft':
+                    raise osv.except_osv(
+                        _('Error'),
+                        _('You can not reset-to-draft a resource participation '
+                          'related to a purchase order, which are not in a '
+                          'draft state'))
+        return super(EventParticipation, self).button_set_draft(cr, uid, ids, context=context)
+
+    def button_set_confirm(self, cr, uid, ids, context=None):
+        pol_to_confirm = []
+        for p in self.browse(cr, uid, ids, context=context):
+            if p.purchase_order_id:
+                invoice_method = p.purchase_order_id.invoice_method
+                expected_part_state = self.PO_STATE_2_PART_STATE[p.purchase_order_id.state]
+                if expected_part_state != 'confirm':
+                    raise osv.except_osv(
+                        _('Error!'),
+                        _('You can not confirm a resource participation '
+                          'related to a purchase order, which are not in'
+                          ' a confirmed state'))
+
+                if invoice_method == 'manual':
+                    # purchase order line need to follow participation state
+                    pol_to_confirm.append(p.purchase_order_line_id.id)
+        if pol_to_confirm:
+            self.pool.get('purchase.order.line').write(cr, uid, pol_to_confirm, {'state': 'confirmed'}, context=context)
+        return super(EventParticipation, self).button_set_confirm(cr, uid, ids, context=context)
+
+    def button_set_done(self, cr, uid, ids, context=None):
+        pol_to_terminate = []
+        for p in self.browse(cr, uid, ids, context=context):
+            if p.purchase_order_id and p.purchase_order_id.invoice_method == 'manual':
+                pol_to_terminate.append(p.id)
+        if pol_to_terminate:
+            self.pool.get('purchase.order.line').write(cr, uid, pol_to_terminate, {'state': 'done'}, context=context)
+        return super(EventParticipation, self).button_set_done(cr, uid, ids, context=context)
+
+    def button_set_cancel(self, cr, uid, ids, context=None):
+        pol_to_cancel = []
+        for p in self.browse(cr, uid, ids, context=context):
+            if p.purchase_order_id:
+                invoice_method = p.purchase_order_id.invoice_method
+                expected_part_state = self.PO_STATE_2_PART_STATE[p.purchase_order_id.state]
+                # allow to individually cancel a participation linked to a PO, only
+                # if the PO's invoicing method is set to manual (i.e. per purchase order line)
+                if expected_part_state != 'cancel' and invoice_method != 'manual':
+                    raise osv.except_osv(
+                        _('Error'),
+                        _('You can not cancel a resource participation '
+                          'related to a purchase order, which are not in'
+                          ' a cancelled state'))
+                pol_to_cancel.append(p.purchase_order_line_id.id)
+        if pol_to_cancel:
+            self.pool.get('purchase.order.line').write(cr, uid, pol_to_cancel, {'state': 'cancel'}, context=context)
+        return super(EventParticipation, self).button_set_cancel(cr, uid, ids, context=context)
 
 
 class EventSeance(osv.Model):

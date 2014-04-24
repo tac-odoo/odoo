@@ -42,15 +42,6 @@
                 <field name="purchase_product_id" position="before">
                     <field name="purchase_order_id"/>
                 </field>
-                <xpath expr="//button[@name='button_set_draft']" position="attributes">
-                    <attribute name="attrs">{'invisible': [('purchase_order_id', '!=', False)]}</attribute>
-                </xpath>
-                <xpath expr="//button[@name='button_set_confirm']" position="attributes">
-                    <attribute name="attrs">{'invisible': [('purchase_order_id', '!=', False)]}</attribute>
-                </xpath>
-                <xpath expr="//button[@name='button_set_cancel']" position="attributes">
-                    <attribute name="attrs">{'invisible': [('purchase_order_id', '!=', False)]}</attribute>
-                </xpath>
             </field>
         </record>
 
@@ -62,15 +53,6 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='resource_participation_ids']/tree/field[@name='purchase_product_id']" position="before">
                     <field name="purchase_order_id"/>
-                </xpath>
-                <xpath expr="//field[@name='resource_participation_ids']/tree/button[@name='button_set_draft']" position="attributes">
-                    <attribute name="attrs">{'invisible': [('purchase_order_id', '!=', False)]}</attribute>
-                </xpath>
-                <xpath expr="//field[@name='resource_participation_ids']/tree/button[@name='button_set_confirm']" position="attributes">
-                    <attribute name="attrs">{'invisible': [('purchase_order_id', '!=', False)]}</attribute>
-                </xpath>
-                <xpath expr="//field[@name='resource_participation_ids']/tree/button[@name='button_set_cancel']" position="attributes">
-                    <attribute name="attrs">{'invisible': [('purchase_order_id', '!=', False)]}</attribute>
                 </xpath>
             </field>
         </record>
