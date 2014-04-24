@@ -30,6 +30,7 @@
     'depends': ['base','sale_stock','mrp_jit','mrp_operations','l10n_in_account_tax','hr'],
     'data': ['wizard/change_receiveddate_inward_view.xml','wizard/change_qcapproved_date_view.xml',
              'wizard/common_date_updation_view.xml','wizard/mrp_partially_close_view.xml',
+             'wizard/qc2reject_view.xml','wizard/stock_return_picking_view.xml',
              'mrp_view.xml','purchase_view.xml','product_view.xml', 'stock_view.xml','invoice_view.xml',
              'sale_view.xml','account_view.xml','res_company_view.xml',
              'partner_view.xml',

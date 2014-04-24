@@ -38,4 +38,5 @@ import split_production_order_qty
 import mrp_partially_close
 import costing_analysis_report
 import mrp_product_produce
+import qc2reject
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

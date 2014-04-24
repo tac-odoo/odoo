@@ -159,17 +159,23 @@
 			<field name="arch" type="xml">
 				<field name="product_qty" position="after">
 					<field name="is_qc" invisible="1" />
-					<field name="qc_ok_qty" readonly="1" string="QC Approved Qty"
+					<field name="qc_ok_qty" readonly="1" string="Approved Qty"
 						invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'yes' or (not context.get('pass_to_qc',False))" />
-					<field name="returned_qty" readonly="1" string="QC Returned Qty"
+					<field name="qc_rejected_qty" readonly="1" string="Rejected Qty"
+						invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'yes' or (not context.get('pass_to_qc',False))" />
+					<field name="returned_qty" readonly="1" string="Returned Qty"
 						invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'yes' or (not context.get('pass_to_qc',False))" />
 					<field name="qc_approved" invisible="1" />
 					<!-- invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) 
 						== 'no'" / -->
 				</field>
 				<field name="state" position="after">
-					<field name="qc_completed"
-						invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) == 'yes' or (not context.get('pass_to_qc',False))" />
+					<field name="qc_completed" invisible="1" />
+					<!-- invisible="context.get('picking_type',False) != 'in' or context.get('qc_control',False) 
+						== 'yes' or (not context.get('pass_to_qc',False))" / -->
+					<button name="action_process_qc2reject" string="Rejection Material"
+						type="object" icon="gtk-stop"
+						attrs="{'invisible':['|','|','|',('state','not in',('done')),('qc_completed','=',True),('qc_approved','=', True),('is_qc','=', False)]}" />
 					<button name="action_process_qc2x" string="Process to move"
 						type="object" icon="gtk-go-forward"
 						attrs="{'invisible':['|','|','|',('state','not in',('done')),('qc_completed','=',True),('qc_approved','=', True),('is_qc','=', False)]}" />
@@ -262,6 +268,9 @@
 						<field name="purchase_uom_id" class="oe_inline" />
 					</div>
 				</field>
+				<xpath expr="//sheet" position="inside">
+					<field name="note" nolabel="1" colspan="4" />
+				</xpath>
 			</field>
 		</record>
 

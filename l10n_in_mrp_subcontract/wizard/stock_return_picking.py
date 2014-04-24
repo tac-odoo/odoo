@@ -50,10 +50,10 @@ class stock_return_picking(osv.osv_memory):
             valid_lines = 0
             return_history = self.get_return_history(cr, uid, record_id, context)
             for m  in pick.move_lines:
-                if m.state == 'done' and (m.product_qty * m.product_uom.factor - m.qc_ok_qty * m.product_uom.factor) > return_history.get(m.id, 0):
+                if m.state == 'done' and (m.qc_rejected_qty * m.product_uom.factor) > return_history.get(m.id, 0):
                     valid_lines += 1
             if not valid_lines:
-                raise osv.except_osv(_('Warning!'), _("No products to return (only lines in Done state and not fully returned yet can be returned)!"))
+                raise osv.except_osv(_('Warning!'), _("No products to return, you should check rejected qty for lines!"))
         return res
 
     def default_get(self, cr, uid, fields, context=None):
@@ -79,9 +79,9 @@ class stock_return_picking(osv.osv_memory):
                     res.update({'invoice_state': '2binvoiced'})
                 else:
                     res.update({'invoice_state': 'none'})
-            return_history = self.get_return_history(cr, uid, record_id, context)       
+            return_history = self.get_return_history(cr, uid, record_id, context)
             for line in pick.move_lines:
-                qty = (line.product_qty - line.qc_ok_qty) - return_history.get(line.id, 0)
+                qty = line.qc_rejected_qty - return_history.get(line.id, 0)
                 if qty > 0:
                     result1.append({'product_id': line.product_id.id, 'quantity': qty,'move_id':line.id, 'prodlot_id': line.prodlot_id and line.prodlot_id.id or False})
             if 'product_return_moves' in fields:
@@ -169,6 +169,12 @@ class stock_return_picking(osv.osv_memory):
             move = move_obj.browse(cr, uid, mov_id, context=context)
             new_location = move.location_dest_id.id
             returned_qty = move.product_qty
+
+            alrdy_returned_qty = move.returned_qty or 0.0
+            rejected_qty = move.qc_rejected_qty - alrdy_returned_qty
+            if new_qty > rejected_qty:
+                raise osv.except_osv(_('Warning !'), _("You cannot allow to proceed quantity(%s) of product(%s) more then rejected qty(%s - %s)"%(new_qty,move.product_id.name, move.qc_rejected_qty,alrdy_returned_qty)))
+
             for rec in move.move_history_ids2:
                 returned_qty -= rec.product_qty
 

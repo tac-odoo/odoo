@@ -43,60 +43,57 @@ class qc2xlocation(osv.osv_memory):
         to_qc_qty = context and context.get('to_qc_qty', 0.0) or 0.0
         product_id = context and context.get('product_id', False) or False
         move_id = context and context.get('active_id',False) or False
-        returned_qty = 0.0
+        qc_rejected_qty =  context and context.get('qc_rejected_qty',False) or False
         process_uom_id, pur_process_uom_id = False,False
         if move_id:
             move = move_obj.browse(cr, uid, move_id)
             process_uom_id = move.product_uom and move.product_uom.id or False
             pur_process_uom_id = move.product_uom and move.purchase_uom_id and move.purchase_uom_id.id or False
-            if move.picking_id:
-                return_history = self.get_return_history(cr, uid, move.picking_id.id, context)
-                returned_qty = return_history.get(move_id, 0)
-                to_qc_qty = to_qc_qty - returned_qty
+
         res = {}
         if 'product_id' in fields:
             res.update({'product_id': product_id})
         if 'to_qc_qty' in fields:
             res.update({'to_qc_qty': to_qc_qty})
-        if 'returned_qty' in fields:
-            res.update({'returned_qty': returned_qty})
+        if 'qc_rejected_qty' in fields:
+            res.update({'qc_rejected_qty': qc_rejected_qty})
         if 'process_uom_id' in fields:
             res.update({'process_uom_id': process_uom_id})
         if 'pur_process_uom_id' in fields:
             res.update({'pur_process_uom_id': pur_process_uom_id})
         return res
 
-    def get_return_history(self, cr, uid, pick_id, context=None):
-        """ 
-         Get  return_history.
-         @param self: The object pointer.
-         @param cr: A database cursor
-         @param uid: ID of the user currently logged in
-         @param pick_id: Picking id
-         @param context: A standard dictionary
-         @return: A dictionary which of values.
-        """
-        pick_obj = self.pool.get('stock.picking')
-        pick = pick_obj.browse(cr, uid, pick_id, context=context)
-        return_history = {}
-        for m  in pick.move_lines:
-            if m.state == 'done':
-                return_history[m.id] = 0
-                for rec in m.move_history_ids2:
-                    if rec.state == 'cancel': continue
-                    # only take into account 'product return' moves, ignoring any other
-                    # kind of upstream moves, such as internal procurements, etc.
-                    # a valid return move will be the exact opposite of ours:
-                    #     (src location, dest location) <=> (dest location, src location))
-                    if rec.location_dest_id.id == m.location_id.id \
-                        and rec.location_id.id == m.location_dest_id.id:
-                        return_history[m.id] += (rec.product_qty * rec.product_uom.factor)
-        return return_history
+#    def get_return_history(self, cr, uid, pick_id, context=None):
+#        """ 
+#         Get  return_history.
+#         @param self: The object pointer.
+#         @param cr: A database cursor
+#         @param uid: ID of the user currently logged in
+#         @param pick_id: Picking id
+#         @param context: A standard dictionary
+#         @return: A dictionary which of values.
+#        """
+#        pick_obj = self.pool.get('stock.picking')
+#        pick = pick_obj.browse(cr, uid, pick_id, context=context)
+#        return_history = {}
+#        for m  in pick.move_lines:
+#            if m.state == 'done':
+#                return_history[m.id] = 0
+#                for rec in m.move_history_ids2:
+#                    if rec.state == 'cancel': continue
+#                    # only take into account 'product return' moves, ignoring any other
+#                    # kind of upstream moves, such as internal procurements, etc.
+#                    # a valid return move will be the exact opposite of ours:
+#                    #     (src location, dest location) <=> (dest location, src location))
+#                    if rec.location_dest_id.id == m.location_id.id \
+#                        and rec.location_id.id == m.location_dest_id.id:
+#                        return_history[m.id] += (rec.product_qty * rec.product_uom.factor)
+#        return return_history
 
     _columns = {
         'product_id': fields.many2one('product.product', 'Product', readonly=True),
         'to_qc_qty': fields.float('In QC Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
-        'returned_qty': fields.float('Return Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
+        'qc_rejected_qty': fields.float('Rejected Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
         'process_qty': fields.float('Process Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
         'process_uom_id': fields.many2one('product.uom', 'UoM', readonly=True),
         'pur_process_qty': fields.float('Purchase Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
@@ -182,7 +179,7 @@ class qc2xlocation(osv.osv_memory):
         move_data = move_obj.browse(cr, uid, move_id)
         to_qc_qty = wizard_rec.to_qc_qty
         process_qty = wizard_rec.process_qty
-        returned_qty = wizard_rec.returned_qty
+        qc_rejected_qty = wizard_rec.qc_rejected_qty
         pur_process_qty = wizard_rec.pur_process_qty or 0.0
         pur_process_uom_id = wizard_rec.pur_process_uom_id and wizard_rec.pur_process_uom_id.id or False
 
@@ -208,7 +205,7 @@ class qc2xlocation(osv.osv_memory):
         #qc_completed== True if total == QC 
         total_qc_qty = move_data.qc_ok_qty + process_qty
         dict_to = {'qc_ok_qty': total_qc_qty}
-        if move_data.product_qty == total_qc_qty + returned_qty:
+        if move_data.product_qty == total_qc_qty + qc_rejected_qty:
             dict_to.update({'qc_completed':True})
         move_data.write(dict_to)
         return True

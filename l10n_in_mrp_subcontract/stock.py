@@ -100,6 +100,7 @@ class stock_move(osv.osv):
         'qc_approved': fields.boolean('QC Approved?'),
         'qc_completed': fields.boolean('QC Completed?'),
         'qc_ok_qty': fields.float('QC Qty ', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
+        'qc_rejected_qty': fields.float('Rejected Qty ', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
 
         'purchase_qty': fields.float('Purchase Qty', digits_compute=dp.get_precision('Product Unit of Measure')),
         'purchase_uom_id': fields.many2one('product.uom', 'Purchase UoM'),
@@ -181,12 +182,33 @@ class stock_move(osv.osv):
         data = self.browse(cr, uid, ids[0])
         if not (data.picking_id and data.picking_id.purchase_id):
             raise osv.except_osv(_('Warning!'), _('You cannot process this move to transfer another location')) 
-        context.update({'product_id':data.product_id.id, 'to_qc_qty': data.product_qty - data.qc_ok_qty, 'qc_ok_qty':data.qc_ok_qty, 'returned_qty': data.returned_qty})
+        context.update({'product_id':data.product_id.id, 'to_qc_qty': data.product_qty - (data.qc_ok_qty + data.qc_rejected_qty) , 
+                        'qc_ok_qty':data.qc_ok_qty, 'qc_rejected_qty': data.qc_rejected_qty})
         return {
                 'name': 'Transfer Quantity from QC to X location',
                 'view_mode': 'form',
                 'view_type': 'form',
                 'res_model': 'qc2xlocation',
+                'type': 'ir.actions.act_window',
+                'target':'new',
+                'context':context
+                }
+
+    def action_process_qc2reject(self, cr, uid, ids, context=None):
+        """
+        -Process
+            Call wizard for rejection quantity of product
+        """
+        context = context or {}
+        data = self.browse(cr, uid, ids[0])
+        if not (data.picking_id and data.picking_id.purchase_id):
+            raise osv.except_osv(_('Warning!'), _('You cannot process this move for rejection quantity')) 
+        context.update({'product_id':data.product_id.id, 'to_qc_qty': data.product_qty - (data.qc_ok_qty+data.qc_rejected_qty), 'qc_ok_qty':data.qc_ok_qty, 'already_rejected_qty': data.qc_rejected_qty})
+        return {
+                'name': 'QC Rejection Process',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'res_model': 'qc2reject',
                 'type': 'ir.actions.act_window',
                 'target':'new',
                 'context':context
