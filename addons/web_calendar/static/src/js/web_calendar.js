@@ -437,55 +437,7 @@ openerp.web_calendar = function(instance) {
 
                 if (this.useContacts) {
                     //Get my Partner ID
-                    
-                    new instance.web.Model("res.users").query(["partner_id"]).filter([["id", "=",this.dataset.context.uid]]).first()
-                        .done(
-                            function(result) {
-                                var sidebar_items = {};
-                                var filter_value = result.partner_id[0];
-                                var filter_item = {
-                                    value: filter_value,
-                                    label: result.partner_id[1] + _lt(" [Me]"),
-                                    color: self.get_color(filter_value),
-                                    avatar_model: self.avatar_model,
-                                    is_checked: true
-                                };
-
-                                sidebar_items[filter_value] = filter_item ;
-                                filter_item = {
-                                        value: -1,
-                                        label: _lt("Everybody's calendars"),
-                                        color: self.get_color(-1),
-                                        avatar_model: self.avatar_model,
-                                        is_checked: false
-                                    };
-                                sidebar_items[-1] = filter_item ;
-                                //Get my coworkers/contacts
-                                new instance.web.Model("calendar.contacts").query(["partner_id"]).filter([["user_id", "=",self.dataset.context.uid]]).all().then(function(result) {
-                                    _.each(result, function(item) {
-                                        filter_value = item.partner_id[0];
-                                        filter_item = {
-                                            value: filter_value,
-                                            label: item.partner_id[1],
-                                            color: self.get_color(filter_value),
-                                            avatar_model: self.avatar_model,
-                                            is_checked: true
-                                        };
-                                        sidebar_items[filter_value] = filter_item ;
-                                    });
-
-                                    self.all_filters = sidebar_items;
-                                    self.now_filter_ids = $.map(self.all_filters, function(o) { return o.value; });
-                                    
-                                    self.sidebar.filter.events_loaded(self.all_filters);
-                                    self.sidebar.filter.set_filters();
-                                                                        
-                                    self.sidebar.filter.addUpdateButton();
-                                }).done(function () {
-                                    self.$calendar.fullCalendar('refetchEvents');
-                                });
-                            }
-                         );
+                    this.load_calendar_contacts();
                 }
                 this.extraSideBar();                
             }
@@ -493,7 +445,68 @@ openerp.web_calendar = function(instance) {
             
             return $.when();
         },
+
+        load_calendar_contacts: function() {
+            var self = this;
+            var when = new instance.web.Model("res.users").query(["partner_id"]).filter([["id", "=",this.dataset.context.uid]]).first()
+                .done(
+                    function(result) {
+                        var sidebar_items = {};
+                        var filter_value = result.partner_id[0];
+                        var filter_item = {
+                            value: filter_value,
+                            label: result.partner_id[1] + _lt(" [Me]"),
+                            color: self.get_color(filter_value),
+                            avatar_model: self.avatar_model,
+                            is_checked: true
+                        };
+
+                        sidebar_items[filter_value] = filter_item ;
+                        filter_item = {
+                                value: -1,
+                                label: _lt("Everybody's calendars"),
+                                color: self.get_color(-1),
+                                avatar_model: self.avatar_model,
+                                is_checked: false
+                            };
+                        sidebar_items[-1] = filter_item ;
+                        //Get my coworkers/contacts
+                        new instance.web.Model("calendar.contacts").query(["partner_id"]).filter([["user_id", "=",self.dataset.context.uid]]).all().then(function(result) {
+                            _.each(result, function(item) {
+                                filter_value = item.partner_id[0];
+                                filter_item = {
+                                    value: filter_value,
+                                    label: item.partner_id[1],
+                                    color: self.get_color(filter_value),
+                                    avatar_model: self.avatar_model,
+                                    is_checked: true
+                                };
+                                sidebar_items[filter_value] = filter_item ;
+                            });
+
+                            self.all_filters = sidebar_items;
+                            self.now_filter_ids = $.map(self.all_filters, function(o) { return o.value; });
+
+                            self.sidebar.filter.events_loaded(self.all_filters);
+                            self.sidebar.filter.set_filters();
+
+                            self.sidebar.filter.addUpdateButton();
+                        }).done(function () {
+                            self.$calendar.fullCalendar('refetchEvents');
+                        });
+                    }
+                 );
+            return when;
+        },
+
         extraSideBar: function() {
+        },
+
+        reload: function () {
+            if (this.useContacts) {
+                return this.load_calendar_contacts();
+            }
+            return $.when();
         },
 
         open_quick_create: function(data_template) {
@@ -1818,9 +1831,11 @@ openerp.web_calendar = function(instance) {
             var self=this;
             this.$('div.oe_calendar_all_responsibles').append(QWeb.render('CalendarView.sidebar.button_add_contact'));
             this.$(".add_contacts_link_btn").on('click', function() {
-                self.rpc("/web/action/load", {
-                    action_id: "core_calendar.action_calendar_contacts"
-                }).then( function(result) { return self.do_action(result); });
+                return self.do_action("core_calendar.action_calendar_contacts", {
+                    on_reverse_breadcrumb: function () {
+                        self.view.reload();
+                    }
+                });
             });
             
         },
