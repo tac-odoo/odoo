@@ -917,6 +917,22 @@ openerp.web_calendar = function(instance) {
             else  { // if form all, get color -1
                   r.className = 'cal_opacity calendar_color_'+ self.all_filters[-1].color;
             }
+
+            if (!!self.qweb.templates['calendar-event-title'] && !!r.record) {
+                var qweb_context = _.extend({}, this.qweb_context || {}, {
+                    widget: this,
+                    display_short: true,
+                    record: r.record,
+                    event_start: r.start,
+                    event_end: r.end,
+                    event_title: r.title,
+                    event_is_allday: r.allDay,
+                    event_access: r.access,
+                    custom_title: true
+                });
+                r.title = this.qweb.render('calendar-event-title', qweb_context);
+            }
+
             return r;
         },
         
