@@ -214,3 +214,23 @@ msgstr ""
 msgid "Calendar view has not defined 'date_start' attribute."
 msgstr ""
 
+#. module: web_calendar
+#. openerp-web
+#: code:addons/web_calendar/static/src/xml/web_fullcalendar.xml:60
+#, python-format
+msgid "Add Contact..."
+msgstr ""
+
+#. module: web_calendar
+#. openerp-web
+#: code:addons/web_calendar/static/src/js/web_calendar.js:457
+#, python-format
+msgid " [Me]"
+msgstr ""
+
+#. module: web_calendar
+#. openerp-web
+#: code:addons/web_calendar/static/src/js/web_calendar.js:466
+#, python-format
+msgid "Everybody's calendars"
+msgstr ""
