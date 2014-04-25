@@ -268,7 +268,7 @@
 				<xpath expr="//button[@name='action_cancel']" position="before">
 					<button name="set_to_draft_order" string="Continue" states="split_order"
 						help="Directly go to draft stage to process" type="object" class="oe_highlight" />
-					<button name="split_qty_order" string="Split Order" states="split_order"
+					<button name="split_qty_order" string="Split Order" attrs="{'invisible': ['|',('state','not in', ['split_order','ready']), ('moves_to_workorder','=',True)]}"
 						help="You can process partially quantity of order" type="object" />
 					<button name="open_procurements" string="Open Procurements"
 						states="confirmed" help="Procurments to check for waiting materials.."

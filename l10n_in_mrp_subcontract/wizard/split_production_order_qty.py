@@ -18,6 +18,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import netsvc
 
 from openerp.osv import fields, osv, orm
 import openerp.addons.decimal_precision as dp
@@ -58,16 +59,27 @@ class split_production_order_qty(osv.osv_memory):
 
         production_id = context and context.get('active_id', False)
         assert production_id, _('Production ID is not set in Context')
-        wizard_rec = self.browse(cr, uid, ids[0], context=context)
+
         prod_obj = self.pool.get('mrp.production')
+        uom_obj = self.pool.get('product.uom')
+        wf_service = netsvc.LocalService("workflow")
+
+        wizard_rec = self.browse(cr, uid, ids[0], context=context)
         update_qty = wizard_rec.qty
-        
         prod_rec = prod_obj.browse(cr, uid, production_id, context=context)
+        state = prod_rec.state
+        mvd_2_wrkctr = prod_rec.moves_to_workorder
+
+        if state not in ('ready','split_order') or mvd_2_wrkctr:
+            raise osv.except_osv(_('Cannot Split!'), _('You cannot split order.\n1)Products already moved into workcenter.2)Production not in "Ready to Produce" or "Split Order" state.'))
         if update_qty < 0:
             raise osv.except_osv(_('Warning!'), _('Quantity cannot be negative.'))
-        if update_qty > prod_rec.product_qty:
-            raise osv.except_osv(_('Warning!'), _('Split quantity(%s) cannot greater then real quantity(%s).'%(update_qty,prod_rec.product_qty)))
+        if update_qty >= prod_rec.product_qty:
+            raise osv.except_osv(_('Warning!'), _('Split quantity(%s) cannot greater then or equal to real quantity(%s).'%(update_qty,prod_rec.product_qty)))
+
         context.update({'split_qty':True})
+        original_qty = prod_rec.product_qty
+
         man_dict = {
                     'name': self.pool.get('ir.sequence').get(cr, uid, 'mrp.production'),
                     'origin': prod_rec.origin,
@@ -82,10 +94,19 @@ class split_production_order_qty(osv.osv_memory):
                     'bom_id': prod_rec.bom_id and prod_rec.bom_id.id or False,
                     'date_planned': prod_rec.date_planned,
                     'company_id': prod_rec.company_id.id,
+                    'customer_id': prod_rec.customer_id and prod_rec.customer_id.id or False,
+                    'sale_order_id': prod_rec.sale_order_id and prod_rec.sale_order_id.id or False,
                     'state':'draft'
                     }
-        prod_obj.create(cr, uid, man_dict)
-        prod_rec.write({'product_qty': prod_rec.product_qty - update_qty})
+        new_id = prod_obj.create(cr, uid, man_dict)
+        prod_rec.write({'product_qty': original_qty - update_qty})
+        if state == 'ready':
+            wf_service.trg_validate(uid, 'mrp.production', new_id, 'button_confirm', cr)
+            prod_obj.force_production(cr, uid, [new_id])
+            for mvl in prod_rec.move_lines:
+                factor = float(mvl.product_qty) / (float(original_qty) or 1.0)
+                nxt_mv_qty = update_qty * factor
+                mvl.write({'product_qty': mvl.product_qty - nxt_mv_qty,'product_uos_qty': uom_obj._compute_qty(cr, uid, mvl.product_uom.id, mvl.product_qty - nxt_mv_qty, mvl.product_uos.id),})
         return {}
     
 split_production_order_qty()
