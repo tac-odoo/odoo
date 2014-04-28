@@ -525,7 +525,7 @@
             <font face="Helvetica">Dispatched through:</font>
           </para>
           <para style="P8">
-            
+            <font color="white"> </font>
           </para>
         </td>
         <td>
@@ -558,7 +558,7 @@
             <font face="Helvetica">Motor Vehicle No.</font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
         </td>
       </tr>
@@ -586,13 +586,13 @@
       <tr>
         <td>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
             <font face="Helvetica">VAT TIN :</font>
@@ -609,10 +609,10 @@
             <font face="Helvetica">[[ (o.payment_term.name) or '' ]]</font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
         </td>
       </tr>
@@ -837,7 +837,7 @@
       </tr>
     </blockTable>
     <para style="P24">
-      <font face="Helvetica"/>
+      <font color="white"> </font>
     </para>
   </story>
   
@@ -1095,7 +1095,7 @@
             <font face="Helvetica">Motor Vehicle No.</font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
         </td>
       </tr>
@@ -1123,13 +1123,13 @@
       <tr>
         <td>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
             <font face="Helvetica">VAT TIN :</font>
@@ -1146,10 +1146,10 @@
             <font face="Helvetica">[[ (o.payment_term.name) or '' ]]</font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
         </td>
       </tr>
@@ -1376,7 +1376,7 @@
       </tr>
     </blockTable>
     <para style="P24">
-      <font face="Helvetica"/>
+      <font color="white"> </font>
     </para>
   </story>
   
@@ -1634,7 +1634,7 @@
             <font face="Helvetica">Motor Vehicle No.</font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
         </td>
       </tr>
@@ -1662,13 +1662,13 @@
       <tr>
         <td>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
             <font face="Helvetica">VAT TIN :</font>
@@ -1685,10 +1685,10 @@
             <font face="Helvetica">[[ (o.payment_term.name) or '' ]]</font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
         </td>
       </tr>
@@ -1915,7 +1915,7 @@
       </tr>
     </blockTable>
     <para style="P24">
-      <font face="Helvetica"/>
+      <font color="white"> </font>
     </para>
   </story>
   
@@ -2173,7 +2173,7 @@
             <font face="Helvetica">Motor Vehicle No.</font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
         </td>
       </tr>
@@ -2201,13 +2201,13 @@
       <tr>
         <td>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
             <font face="Helvetica">VAT TIN :</font>
@@ -2224,10 +2224,10 @@
             <font face="Helvetica">[[ (o.payment_term.name) or '' ]]</font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
           <para style="P9">
-            <font face="Helvetica"/>
+            <font color="white"> </font>
           </para>
         </td>
       </tr>
@@ -2454,7 +2454,7 @@
       </tr>
     </blockTable>
     <para style="P24">
-      <font face="Helvetica"/>
+      <font color="white"> </font>
     </para>
   </story>
 </document>
