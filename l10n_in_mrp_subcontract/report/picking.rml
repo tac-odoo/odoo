@@ -14,27 +14,27 @@
     <blockTable colWidths="400.0,200.0" style="Table12">
       <tr>
         <td>
-          <para style="P16">
+          <para style="terp_default_8">
             <font color="white"> </font>
           </para>
-          <para style="P17">
+          <para style="terp_default_8">
             <font color="white"> </font>
           </para>
         </td>
         <td>
-          <para style="P18">
+          <para style="terp_default_8_center">
             <font face="Helvetica-Bold">For Motif Engineers Pvt. Ltd</font>
           </para>
-          <para style="P18">
+          <para style="terp_default_8">
             <font color="white"> </font>
           </para>
-          <para style="P18">
+          <para style="terp_default_8">
             <font color="white"> </font>
           </para>
-          <para style="P18">
+          <para style="terp_default_8">
             <font color="white"> </font>
           </para>
-          <para style="terp_default_Centre_9">
+          <para style="terp_default_8_center">
             <font face="Helvetica">Authorised Signatory</font>
           </para>
         </td>
@@ -473,7 +473,9 @@
     <para style="terp_default_8">
 	    <font color="white"> </font>
 	  </para>
-
+    <para style="terp_default_8">
+        <font color="white"> </font>
+      </para>
 
     <blockTable colWidths="90.0,210.0,90.0,210.0" style="Table16">
       <tr>

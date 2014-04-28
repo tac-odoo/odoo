@@ -155,19 +155,31 @@ class mrp_production(osv.osv):
         if not data.procurement_generated:
             procurment_obj._procure_orderpoint_confirm(cr, uid, context=context)
 
-        search_args = (data.origin or '')+':'+(data.name or '')
         raw_material_ids = list(set([x.product_id.id for x in data.move_lines]))
-        filter_rm_ids = orderp_obj.search(cr, uid, [('product_id', 'in' ,raw_material_ids)])
-        for op_data in orderp_obj.browse(cr, uid, filter_rm_ids):
-            search_args += '|'+op_data.name
-        cr.execute("""
-                        SELECT id FROM procurement_order 
-                        WHERE origin SIMILAR TO %s
-                        AND state not in ('done','cancel')
-                        AND product_id in %s
-                    """,
-            [search_args, tuple(raw_material_ids)])
-        procurments_ids = [x[0] for x in cr.fetchall()]
+#        search_args = (data.origin or '')+':'+(data.name or '')
+#        filter_rm_ids = orderp_obj.search(cr, uid, [('product_id', 'in' ,raw_material_ids)])
+#        for op_data in orderp_obj.browse(cr, uid, filter_rm_ids):
+#            search_args += '|'+op_data.name
+#        if search_args:
+#            search_args += '%('+search_args+')%'
+#        print "search_args",search_args
+#        cr.execute("""
+#                        SELECT id FROM procurement_order 
+#                        WHERE origin SIMILAR TO %s
+#                        AND state not in ('done','cancel')
+#                        AND product_id in %s
+#                    """,
+#            [search_args, tuple(raw_material_ids)])
+        procurments_ids = []
+        if raw_material_ids:
+            cr.execute("""
+                            SELECT id FROM procurement_order
+                            WHERE 
+                            state not in ('done','cancel')
+                            AND product_id in %s
+                        """,
+                [tuple(raw_material_ids)])
+            procurments_ids = [x[0] for x in cr.fetchall()]
         #procurments_ids = procurment_obj.search(cr, uid, [('origin','ilike',':'+data.name)], context=context)
         # Get opportunity views
         dummy, form_view = models_data.get_object_reference(cr, uid, 'procurement', 'procurement_form_view')
