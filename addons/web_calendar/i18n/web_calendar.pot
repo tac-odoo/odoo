@@ -234,3 +234,10 @@ msgstr ""
 #, python-format
 msgid "Everybody's calendars"
 msgstr ""
+
+#. module: web_calendar
+#. openerp-web
+#: code:addons/web_calendar/static/src/js/web_calendar.js:25
+#, python-format
+msgid "all-day"
+msgstr ""
