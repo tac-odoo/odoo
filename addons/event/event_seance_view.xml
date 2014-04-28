@@ -101,10 +101,9 @@
                     <field name="module_id"/>
                     <field name="duration" sum="Duration" widget="float_time"/>
                     <field name="slot_info"/>
+                    <field name="remaining_count" groups="event.group_event_planning,event.group_event_manager"/>
+                    <field name="remaining_duration" groups="event.group_event_planning,event.group_event_manager"/>
                     <field name="is_divided" invisible="1"/>
-                    <field name="course_id" invisible="1"/>
-                    <field name="speaker_id" invisible="1"/>
-                    <field name="room_id" invisible="1"/>
                     <button type="object" name="button_open_group_registration_dispatch"
                             icon="terp-personal"
                             string="Dispatch registration between groups"
@@ -139,7 +138,7 @@
                                         </group>
                                     <group>
                                         <field name="sequence" invisible="1"/>
-                                        <field name="event_ids" widget="many2many_tags" readonly="1" invisible="context.get('from_event')"/>
+                                        <field name="event_ids" widget="many2many_tags"/>
                                         <field name="type_id" on_change="onchange_type(type_id)"/>
                                         <field name="lang_id"/>
                                         <field name="module_id"/>
@@ -169,13 +168,16 @@
             <field name="arch" type="xml">
                 <search string="Contents">
                     <field name="name"/>
-                    <field name="event_ids"/>
                     <field name="course_id"/>
                     <field name="speaker_id"/>
                     <field name="room_id"/>
+                    <filter string="My Content" name="my_content" domain="['|',('speaker_id.user_ids', '=', uid),('other_resource_ids.user_ids', '=', uid)]"/>
+                    <separator/>
                     <filter string="Divided" name="divided" domain="[('is_divided','=',True)]"/>
                     <group string="Group By...">
+                        <filter string="Language" name="group_lang" context="{'group_by': 'lang_id'}"/>
                         <filter string="Course" name="group_course" context="{'group_by': 'course_id'}"/>
+                        <filter string="Module" name="group_module" context="{'group_by': 'module_id'}"/>
                         <filter string="Default Speaker" name="group_speaker" context="{'group_by': 'speaker_id'}"/>
                         <filter string="Default room" name="group_room" context="{'group_by': 'room_id'}"/>
                     </group>
@@ -265,6 +267,15 @@
             <field name="domain">[]</field>
         </record>
 
+        <record id="action_event_2_content_link" model="ir.actions.act_window">
+            <field name="name">Program</field>
+            <field name="res_model">event.content</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'default_event_ids': [active_id]}</field>
+            <field name="domain">[('event_ids', '=', active_id)]</field>
+        </record>
+
         <record id="view_event_form_seance" model="ir.ui.view">
             <field name="name">event.event.form.seance</field>
             <field name="model">event.event</field>
@@ -274,6 +285,9 @@
                     <button type="action" name="%(action_event_2_seance_link)d" string="Seances"
                             attrs="{'invisible': [('has_program','=',False)]}" states="template,draft,confirm,done"
                             groups="event.group_event_manager,event.group_event_planning"/>
+                    <button type="object" name="open_program" string="Program"
+                            attrs="{'invisible': [('has_program','=',False)]}" states="template,draft,confirm,done"
+                            />
                 </xpath>
                 <xpath expr="//div[@class='options_active']" position="inside">
                     <field name="has_program" on_change="onchange_has_program(has_program, date_begin, content_ids, context)"/><label for="has_program"/>
@@ -282,10 +296,18 @@
                     <attribute name="attrs">{'readonly': ['|',('state','!=','draft'),('has_program','=',True)],
                                              'required': [('has_program','=',False)]}</attribute>
                 </field>
-                <page string="Information" position="after">
-                    <page string="Program &amp; Schedule" attrs="{'invisible': [('has_program','=',False)]}">
+                <xpath expr="//page[@string='Configuration']/group[1]" position="replace">
                         <group>
                             <group>
+                                <field name="tz"/>
+                                <label for="content_planification" string="Schedule mode"/>
+                                <div>
+                                    <field name="content_planification" class="oe_inline"/>
+                                    <button type="object" name="recompute_seances" class="oe_link" string="(recompute seances)"
+                                            attrs="{'invisible': [('content_planification', '!=', 'linear')]}" states="draft,confirm" groups="event.group_event_manager,event.group_event_planning"/>
+                                    <button type="object" name="open_preplanning" class="oe_link" string="(=> open preplanning)"
+                                            attrs="{'invisible': [('content_planification', '!=', 'preplanning')]}" states="draft,confirm,done" groups="event.group_event_manager,event.group_event_planning,event.group_event_professor"/>
+                                </div>
                                 <label for="calendar_id" string="Schedule"/>
                                 <div>
                                     <field name="calendar_id" context="{'show_week_hours': 1}" options="{'always_reload': True}"/>
@@ -296,20 +318,14 @@
                                 </div>
                             </group>
                             <group>
-                                <label for="content_planification" string="Schedule mode"/>
-                                <div>
-                                    <field name="content_planification" class="oe_inline"/>
-                                    <button type="object" name="recompute_seances" class="oe_link" string="(recompute seances)"
-                                            attrs="{'invisible': [('content_planification', '!=', 'linear')]}" states="draft,confirm" groups="event.group_event_manager,event.group_event_planning"/>
-                                    <button type="object" name="open_preplanning" class="oe_link" string="(=> open preplanning)"
-                                            attrs="{'invisible': [('content_planification', '!=', 'preplanning')]}" states="draft,confirm,done" groups="event.group_event_manager,event.group_event_planning,event.group_event_professor"/>
-                                </div>
+                                    <field name="template_id" attrs="{'invisible': [('state','=','template')]}"/>
+                                    <field name="user_id"/>
+                                    <field name="reply_to"/>
+                                    <field name="email_registration_id"/>
+                                    <field name="email_confirmation_id"/>
                             </group>
                         </group>
-                        <field name="content_ids" widget="one2many" attrs="{'readonly': [('state','not in',['template',  'draft', 'confirm'])]}"
-                               context="{'calendar_id': calendar_id, 'from_event': 1}"/>
-                    </page>
-                </page>
+                </xpath>
             </field>
         </record>
 
@@ -324,6 +340,11 @@
                 </field>
                 <xpath expr="//templates/t[@t-name='kanban-box']//div[@class='oe_module_desc']/h4" position="after">
                     <p groups="base.group_user">
+                        <t t-if="record.has_program.raw_value and ['draft', 'confirm', 'done'].indexOf(record.state.raw_value) != -1">
+                            <a type="object" name="open_program" string="Program">
+                                <img src="/web/static/src/img/icons/gtk-justify-fill.png"/>
+                            </a>
+                        </t>
                         <t t-if="record.content_planification.raw_value == 'preplanning' and ['draft', 'confirm', 'done'].indexOf(record.state.raw_value) != -1">
                             <a type="object" name="open_preplanning" string="Open preplanning">
                                 <img src="/web/static/src/img/icons/terp-calendar.png"/>

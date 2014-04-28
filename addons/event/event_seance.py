@@ -22,6 +22,7 @@
 import time
 import math
 import logging
+from lxml import etree
 from datetime import datetime, timedelta
 from collections import defaultdict
 from functools import partial
@@ -259,6 +260,26 @@ class EventContent(osv.Model):
             'CHECK(slot_duration > 0 AND duration > 0)',
             'Duration and Slot duration fields must be stictly positive'),
     ]
+
+    def fields_view_get(self, cr, user, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
+        if context is None:
+            context = {}
+        result = super(EventContent, self).fields_view_get(cr, user, view_id=view_id, view_type=view_type,
+                                                           context=context, toolbar=toolbar, submenu=submenu)
+        event_ids = context.get('default_event_ids')
+        if event_ids and isinstance(event_ids, (tuple, list)):
+            Event = self.pool.get('event.event')
+            is_readonly = any(e['state'] not in ['template', 'draft', 'confirm']
+                              for e in Event.read(cr, user, event_ids, ['state'], context=context))
+            if is_readonly:
+                # force readonly mode, if any content is linked to a non-editable event
+                arch = etree.fromstring(result['arch'])
+                arch.set('create', '0')
+                arch.set('edit', '0')
+                arch.set('delete', '0')
+                result['arch'] = etree.tostring(arch, encoding='utf-8')
+
+        return result
 
     def create(self, cr, uid, values, context=None):
         new_id = super(EventContent, self).create(cr, uid, values, context=context)
@@ -1862,6 +1883,18 @@ class EventEvent(osv.Model):
         #     EstimateEndDate = self.pool.get('event.event.estimate_end_date.wizard')
         #     ed = EstimateEndDate._compute_end_date(self, cr, uid, )
         return {'value': values}
+
+    def open_program(self, cr, uid, ids, context=None):
+        if not ids:
+            return {}
+        if context is None:
+            context = {}
+        ActWindow = self.pool.get('ir.actions.act_window')
+        action = ActWindow.for_xml_id(cr, uid, 'event', 'action_event_2_content_link', context)
+        if context.get('active_model', '') == 'event.event' and context.get('active_id'):
+            event = self.pool.get('event.event').browse(cr, uid, context['active_id'], context)
+            action['name'] = _('Program: %s') % (event.name,)
+        return action
 
     def open_preplanning(self, cr, uid, ids, context=None):
         if not ids:
