@@ -1891,8 +1891,8 @@ class EventEvent(osv.Model):
             context = {}
         ActWindow = self.pool.get('ir.actions.act_window')
         action = ActWindow.for_xml_id(cr, uid, 'event', 'action_event_2_content_link', context)
-        if context.get('active_model', '') == 'event.event' and context.get('active_id'):
-            event = self.pool.get('event.event').browse(cr, uid, context['active_id'], context)
+        if ids and isinstance(ids, (list, tuple)):
+            event = self.pool.get('event.event').browse(cr, uid, ids[0], context)
             action['name'] = _('Program: %s') % (event.name,)
         return action
 
