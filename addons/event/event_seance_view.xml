@@ -325,6 +325,7 @@
                                     <field name="email_confirmation_id"/>
                             </group>
                         </group>
+                        <field name="content_ids" invisible="1"/>
                 </xpath>
             </field>
         </record>
