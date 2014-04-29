@@ -18,5 +18,21 @@
             <field name="groups" eval="[(4, ref('event.group_event_professor'))]"/>
         </record>
 
+        <record model="ir.rule" id="event_purchase_user_purchase_order_line">
+            <field name="name">Purchase User - see all purchase order line</field>
+            <field name="model_id" ref="purchase.model_purchase_order_line"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">[]</field>
+            <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+        </record>
+
+        <record model="ir.rule" id="event_purchase_user_purchase_order">
+            <field name="name">Purchase User - sell all purchase order</field>
+            <field name="model_id" ref="purchase.model_purchase_order"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">[]</field>
+            <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+        </record>
+
     </data>
 </openerp>

@@ -49,10 +49,18 @@
             <field name="name">event.seance.form.purchase</field>
             <field name="model">event.seance</field>
             <field name="priority">100</field>
+            <field name="groups_id" eval="[(6, 0, [ref('event.group_event_manager'),ref('purchase.group_purchase_user')])]"/>
             <field name="inherit_id" ref="event.view_event_seance_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='resource_participation_ids']/tree/field[@name='purchase_product_id']" position="before">
+                <xpath expr="//page[@string='Configuration']" position="attributes">
+                    <attribute name="groups">event.group_event_manager,event.group_event_planning,purchase.group_purchase_user</attribute>
+                </xpath>
+                <xpath expr="//field[@name='resource_participation_ids']/tree/field[@name='name']" position="after">
                     <field name="purchase_order_id"/>
+                    <field name="purchase_product_id"/>
+                    <field name="purchase_price"/>
+                    <field name="purchase_qty"/>
+                    <field name="purchase_subtotal"/>
                 </xpath>
             </field>
         </record>
