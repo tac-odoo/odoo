@@ -41,6 +41,7 @@
              'wizard/consignment_variation_po_view.xml','wizard/qc2xlocation_view.xml',
              'wizard/split_production_order_qty_view.xml','wizard/mrp_product_produce_view.xml',
              'wizard/costing_analysis_report_view.xml','report/report_view.xml',
+             'report/export_report_view.xml','report/export_sequence.xml'
              ],
     'demo': [],
     'installable': True,

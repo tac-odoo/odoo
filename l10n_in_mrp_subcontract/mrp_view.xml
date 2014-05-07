@@ -268,7 +268,8 @@
 				<xpath expr="//button[@name='action_cancel']" position="before">
 					<button name="set_to_draft_order" string="Continue" states="split_order"
 						help="Directly go to draft stage to process" type="object" class="oe_highlight" />
-					<button name="split_qty_order" string="Split Order" attrs="{'invisible': ['|',('state','not in', ['split_order','ready']), ('moves_to_workorder','=',True)]}"
+					<button name="split_qty_order" string="Split Order"
+						attrs="{'invisible': ['|',('state','not in', ['split_order','ready']), ('moves_to_workorder','=',True)]}"
 						help="You can process partially quantity of order" type="object" />
 					<button name="open_procurements" string="Open Procurements"
 						states="confirmed" help="Procurments to check for waiting materials.."
@@ -372,9 +373,9 @@
 								<field name="log_entry_ids" nolabel="1" mode='tree'>
 									<tree string="Log Entry" editable="bottom">
 										<field name="employee_id" widget="selection" />
-										<field name="start_date" on_change="onchange_date(start_date, end_date)"/>
-										<field name="end_date" on_change="onchange_date(start_date, end_date)"/>
-										<field name="log_time" widget="float_time"/>
+										<field name="start_date" on_change="onchange_date(start_date, end_date)" />
+										<field name="end_date" on_change="onchange_date(start_date, end_date)" />
+										<field name="log_time" widget="float_time" />
 										<field name="qty" />
 									</tree>
 								</field>
@@ -390,10 +391,10 @@
 									<field name="delay" readonly="1" widget="float_time"
 										string="Workorder Actual Time(HH:MM)" />
 									<field name="log_delay" readonly="1" widget="float_time"
-										string="Workorder Log Actual Time(HH:MM)" invisible="1"/>
+										string="Workorder Log Actual Time(HH:MM)" invisible="1" />
 									<field name="operator_efficiency" readonly="1" />
-									<field name="t_rejection_qty" invisible="1"/>
-									<field name="hour_nbr" widget="float_time" invisible="1"/>
+									<field name="t_rejection_qty" invisible="1" />
+									<field name="hour_nbr" widget="float_time" invisible="1" />
 								</group>
 								<group string="Cost Calculation">
 									<field name="wo_planned_cost" widget='monetary'
@@ -426,8 +427,8 @@
 										<field name="is_reallocate" invisible="1" />
 										<button name="button_to_reallocate" string="Re-Allocate"
 											icon="terp-gtk-go-back-rtl" help="Process fresh quantity to re-allocate"
-											 invisible="1" type="object"/>
-											 <!-- attrs="{'invisible':[('is_reallocate', '=', True)]}" -->
+											invisible="1" type="object" />
+										<!-- attrs="{'invisible':[('is_reallocate', '=', True)]}" -->
 									</tree>
 
 									<form string="Rejected Raw Materials" version="7.0">
@@ -635,8 +636,21 @@
 									<field name="is_reallocate" invisible="1" />
 									<button name="button_to_reallocate" string="Re-Allocate"
 										icon="terp-gtk-go-back-rtl" help="Process fresh quantity to re-allocate"
-										 invisible="1" type="object" />
-										 <!-- attrs="{'invisible':[('is_reallocate', '=', True)]}" -->
+										invisible="1" type="object" />
+									<!-- attrs="{'invisible':[('is_reallocate', '=', True)]}" -->
+								</tree>
+							</field>
+						</group>
+					</page>
+					<page string="Log Entry">
+						<group string="Employee Day to Day Activity" colspan="4">
+							<field name="log_entry_ids" nolabel="1" mode='tree'>
+								<tree string="Log Entry" editable="bottom">
+									<field name="employee_id" widget="selection" />
+									<field name="start_date" on_change="onchange_date(start_date, end_date)" />
+									<field name="end_date" on_change="onchange_date(start_date, end_date)" />
+									<field name="log_time" widget="float_time" />
+									<field name="qty" />
 								</tree>
 							</field>
 						</group>
@@ -677,6 +691,10 @@
 					<field name="order_type" readonly="1" />
 				</field>
 
+				<button name="button_start_working" position="after">
+					<button name="dummy_button" string="⟳ (Update)" help="Take-In to WorkCenter"
+						type="object" class="oe_highlight" />
+				</button>
 				<button name="button_start_working" position="replace" />
 				<button name="button_resume" position="replace" />
 				<button name="button_done" position="replace" />
@@ -883,8 +901,8 @@
 											<field name="is_reallocate" invisible="1" />
 											<button name="button_to_reallocate" string="Re-Allocate"
 												icon="terp-gtk-go-back-rtl" help="Process fresh quantity to re-allocate"
-												 invisible="1" type="object" />
-												<!-- attrs="{'invisible':[('is_reallocate', '=', True)]}" -->
+												invisible="1" type="object" />
+											<!-- attrs="{'invisible':[('is_reallocate', '=', True)]}" -->
 										</tree>
 									</field>
 								</group>
