@@ -1112,6 +1112,10 @@ openerp.web_calendar = function(instance) {
                             return self.perform_necessary_name_gets(events).then(callback);
                         }
                         else { //WE USE CONTACT
+                            if (self.sidebar) {
+                                self.sidebar.filter.events_loaded();
+                            }
+
                             if (self.attendee_people !== undefined) {
                                 //if we don't filter on 'Everybody's Calendar
                                 if (!self.all_filters[-1] || !self.all_filters[-1].is_checked) {
