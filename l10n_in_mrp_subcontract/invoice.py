@@ -92,8 +92,10 @@ class account_invoice(osv.osv):
         'do_name': fields.char('Delivery Name'),
         'do_delivery_date': fields.datetime('Delivery Date'),
         'so_id': fields.many2one('sale.order', 'Sale Order ID', readonly=True),
-        'do_dispatch_doc_no': fields.char('Dispatch Document No.', size=16),
-        'do_dispatch_doc_date': fields.date('Dispatch Document Date'),
+        'desc_of_pkg': fields.char('Description of Package', size=256),
+        'total_pkg': fields.char('Package and Qty', size=50),
+        'tarrif_no': fields.integer('Tarrif No.'),
+        'total_net_weight':  fields.char('Total Net Weight', size=50),
 
         'package_and_forwording': fields.float('Packaging & Forwarding', states={'confirmed':[('readonly', True)], 'approved':[('readonly', True)], 'done':[('readonly', True)]}),
         'insurance': fields.float('Insurance', states={'confirmed':[('readonly', True)], 'approved':[('readonly', True)], 'done':[('readonly', True)]}),
@@ -134,8 +136,9 @@ class account_invoice(osv.osv):
             'do_name': False,
             'do_delivery_date': False,
             'so_id': False,
-            'do_dispatch_doc_no': False,
-            'do_dispatch_doc_date': False,
+            'desc_of_pkg': False,
+            'total_pkg': False,
+            'total_net_weight':False
         })
         return super(account_invoice, self).copy(cr, uid, id, default, context)
 

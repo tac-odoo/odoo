@@ -18,6 +18,8 @@
                         <group>
                             <field name="excise_no"/>
                             <field name="excise_date"/>
+                            <field name="range"/>
+                            <field name="division"/>
                         </group>
                     </group>
                  </xpath>

@@ -56,9 +56,13 @@
                     <field name="do_address_id"/>
                     <field name="do_id"/>
                 </field>
+                <field name="account_id" position="after">
+                    <field name="tarrif_no"/>
+                </field>
                 <field name="date_due" position="after">
-                    <field name="do_dispatch_doc_no"/>
-                    <field name="do_dispatch_doc_date"/>
+                    <field name="desc_of_pkg"/>
+                    <field name="total_pkg"/>
+                    <field name="total_net_weight"/>
                 </field>
                 <field name="amount_tax" position="after">
                     <field name="package_and_forwording" widget="monetary"

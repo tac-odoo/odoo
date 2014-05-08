@@ -30,6 +30,8 @@ class res_company(osv.osv):
         'vat_date': fields.date('VAT Number Issue Date', help='VAT Number Issue Date'),
         'excise_no': fields.char('Excise Control Code', size=32, help="Excise Control Code"),
         'excise_date': fields.date('Excise Code Issue Date',  help="Excise Code Issue Date"),
+        'range': fields.char('Range', size=64),
+        'division': fields.char('Division', size=64),
     }
 res_company()
 
