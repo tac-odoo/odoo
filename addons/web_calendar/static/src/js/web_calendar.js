@@ -489,6 +489,7 @@ openerp.web_calendar = function(instance) {
 
                             self.sidebar.filter.events_loaded(self.all_filters);
                             self.sidebar.filter.set_filters();
+                            self.sidebar.after_events_loaded();
 
                             self.sidebar.filter.addUpdateButton();
                         }).done(function () {
@@ -1090,6 +1091,7 @@ openerp.web_calendar = function(instance) {
                             if (self.sidebar) {
                                 self.sidebar.filter.events_loaded();
                                 self.sidebar.filter.set_filters();
+                                self.sidebar.after_events_loaded();
                                 
                                 events = $.map(events, function (e) {
                                     filter_value = e[self.color_field];
@@ -1113,7 +1115,7 @@ openerp.web_calendar = function(instance) {
                         }
                         else { //WE USE CONTACT
                             if (self.sidebar) {
-                                self.sidebar.filter.events_loaded();
+                                self.sidebar.after_events_loaded();
                             }
 
                             if (self.attendee_people !== undefined) {
@@ -1786,6 +1788,8 @@ openerp.web_calendar = function(instance) {
             this._super();
             this.filter = new instance.web_calendar.SidebarFilter(this, this.getParent());
             this.filter.appendTo(this.$el.find('.oe_calendar_filter'));
+        },
+        after_events_loaded: function() {
         }
     });
     instance.web_calendar.SidebarFilter = instance.web.Widget.extend({
