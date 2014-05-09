@@ -32,6 +32,7 @@ class res_company(osv.osv):
         'excise_date': fields.date('Excise Code Issue Date',  help="Excise Code Issue Date"),
         'range': fields.char('Range', size=64),
         'division': fields.char('Division', size=64),
+        'postal_address': fields.text('Full Postal Address'),
     }
 res_company()
 

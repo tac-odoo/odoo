@@ -20,6 +20,7 @@
                             <field name="excise_date"/>
                             <field name="range"/>
                             <field name="division"/>
+                            <field name="postal_address"/>
                         </group>
                     </group>
                  </xpath>

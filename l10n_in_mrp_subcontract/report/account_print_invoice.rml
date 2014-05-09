@@ -731,10 +731,10 @@
     <para style="terp_default_1">[[ l['action'] =='break' or removeParentNode('blockTable') ]]</para>
       <tr>
         <td>
-          <para style="terp_default_6">Amount of Duty Payable **</para>
+          <para style="terp_default_6">Amount of Duty Payable: [[ formatLang(payable_amounts(o.tax_line)) ]]</para>
           <para style="terp_default_6">Range:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.range or '' ]]</font></para>
           <para style="terp_default_6">Division:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.division or '' ]]</font></para>
-          <para style="terp_default_6">Full Postal Address: </para>
+          <para style="terp_default_6">Full Postal Address: [[ o.company_id and o.company_id.postal_address or '' ]]</para>
           <para style="terp_default_6">G.S.T. Tin No.:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.vat_no or '' ]]</font></para>
           <para style="terp_default_6">C.S.T. Tin No.:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.cst_no or '' ]]</font></para>
         </td>
@@ -969,10 +969,10 @@
     <blockTable colWidths="238.0,261.0" style="Table11">
       <tr>
         <td>
-          <para style="terp_default_6">Amount of Duty Payable **</para>
+          <para style="terp_default_6">Amount of Duty Payable: [[ formatLang(payable_amounts(o.tax_line)) ]]</para>
           <para style="terp_default_6">Range:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.range or '' ]]</font></para>
           <para style="terp_default_6">Division:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.division or '' ]]</font></para>
-          <para style="terp_default_6">Full Postal Address: </para>
+          <para style="terp_default_6">Full Postal Address: [[ o.company_id and o.company_id.postal_address or '' ]]</para>
           <para style="terp_default_6">G.S.T. Tin No.:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.vat_no or '' ]]</font></para>
           <para style="terp_default_6">C.S.T. Tin No.:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.cst_no or '' ]]</font></para>
         </td>
@@ -1242,10 +1242,10 @@
     <para style="terp_default_1">[[ l['action'] =='break' or removeParentNode('blockTable') ]]</para>
       <tr>
         <td>
-          <para style="terp_default_6">Amount of Duty Payable **</para>
+          <para style="terp_default_6">Amount of Duty Payable:  [[ formatLang(payable_amounts(o.tax_line)) ]]</para>
           <para style="terp_default_6">Range:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.range or '' ]]</font></para>
           <para style="terp_default_6">Division:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.division or '' ]]</font></para>
-          <para style="terp_default_6">Full Postal Address: </para>
+          <para style="terp_default_6">Full Postal Address: [[ o.company_id and o.company_id.postal_address or '' ]]</para>
           <para style="terp_default_6">G.S.T. Tin No.:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.vat_no or '' ]]</font></para>
           <para style="terp_default_6">C.S.T. Tin No.:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.cst_no or '' ]]</font></para>
         </td>
@@ -1480,10 +1480,10 @@
     <blockTable colWidths="238.0,261.0" style="Table11">
       <tr>
         <td>
-          <para style="terp_default_6">Amount of Duty Payable **</para>
+          <para style="terp_default_6">Amount of Duty Payable:  [[ formatLang(payable_amounts(o.tax_line)) ]]</para>
           <para style="terp_default_6">Range:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.range or '' ]]</font></para>
           <para style="terp_default_6">Division:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.division or '' ]]</font></para>
-          <para style="terp_default_6">Full Postal Address: </para>
+          <para style="terp_default_6">Full Postal Address: [[ o.company_id and o.company_id.postal_address or '' ]]</para>
           <para style="terp_default_6">G.S.T. Tin No.:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.vat_no or '' ]]</font></para>
           <para style="terp_default_6">C.S.T. Tin No.:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.cst_no or '' ]]</font></para>
         </td>
@@ -1750,10 +1750,10 @@
     <para style="terp_default_1">[[ l['action'] =='break' or removeParentNode('blockTable') ]]</para>
       <tr>
         <td>
-          <para style="terp_default_6">Amount of Duty Payable **</para>
+          <para style="terp_default_6">Amount of Duty Payable:  [[ formatLang(payable_amounts(o.tax_line)) ]]</para>
           <para style="terp_default_6">Range:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.range or '' ]]</font></para>
           <para style="terp_default_6">Division:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.division or '' ]]</font></para>
-          <para style="terp_default_6">Full Postal Address: </para>
+          <para style="terp_default_6">Full Postal Address: [[ o.company_id and o.company_id.postal_address or '' ]]</para>
           <para style="terp_default_6">G.S.T. Tin No.:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.vat_no or '' ]]</font></para>
           <para style="terp_default_6">C.S.T. Tin No.:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.cst_no or '' ]]</font></para>
         </td>
@@ -1988,10 +1988,10 @@
     <blockTable colWidths="238.0,261.0" style="Table11">
       <tr>
         <td>
-          <para style="terp_default_6">Amount of Duty Payable **</para>
+          <para style="terp_default_6">Amount of Duty Payable: [[ formatLang(payable_amounts(o.tax_line)) ]]</para>
           <para style="terp_default_6">Range:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.range or '' ]]</font></para>
           <para style="terp_default_6">Division:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.division or '' ]]</font></para>
-          <para style="terp_default_6">Full Postal Address: </para>
+          <para style="terp_default_6">Full Postal Address: [[ o.company_id and o.company_id.postal_address or '' ]]</para>
           <para style="terp_default_6">G.S.T. Tin No.:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.vat_no or '' ]]</font></para>
           <para style="terp_default_6">C.S.T. Tin No.:<font face="Helvetica-Bold">[[ o.company_id and o.company_id.cst_no or '' ]]</font></para>
         </td>

@@ -35,7 +35,8 @@ class account_l10n_in_mrp_subcontract(report_sxw.rml_parse):
             'get_quantity': self._get_quantity,
             'get_excise': self._get_excise_cess,
             'convert_int': self._convert_int,
-            'get_lines':self._get_lines
+            'get_lines':self._get_lines,
+            'payable_amounts':self._payable_amounts
         })
 
     def _add(self,address):
@@ -101,7 +102,14 @@ class account_l10n_in_mrp_subcontract(report_sxw.rml_parse):
         account_invoice_obj = self.pool.get('account.invoice')
         val = account_invoice_obj._get_qty_total(self.cr, self.uid, self.ids)
         return int(val[id.id])
-    
+
+    def _payable_amounts(self, tax_line):
+        pay_amt = 0.0
+        for line in tax_line:
+            if line.tax_categ in ('excise','cess','hedu_cess'):
+                pay_amt += line.amount
+        return pay_amt
+
     def _get_excise_cess(self, ids):
         cess_excise_amount = []
         account_invoice_obj = self.pool.get('account.invoice')
