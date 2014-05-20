@@ -13,25 +13,25 @@ class Forum(osv.Model):
     _name = 'forum.forum'
     _description = 'Forums'
     _inherit = ['website.seo.metadata']
-    # karma values
-    _karma_upvote = 5  # done
-    _karma_downvote = 50  # done
-    _karma_answer_accept_own = 20  # done
-    _karma_answer_accept_own_now = 50
-    _karma_answer_accept_all = 500
-    _karma_editor_link_files = 30  # done
-    _karma_editor_clickable_link = 50
-    _karma_comment = 1
+    # Badge values
+    _badge_to_upvote = 'website_forum.badge_a_1' # done
+    _badge_to_downvote = 'website_forum.badge_a_9' # done
+    _badge_to_accept_own_answer = 'website_forum.badge_a_9' # done
+    _badge_to_accept_answer = 'website_forum.badge_a_10' # done
+    _badge_editor_link_files = 'website_forum.badge_a_9' # done
+
+    _badge_comment = 'website_forum.badge_q_11'
     _karma_modo_retag = 75
-    _karma_modo_flag = 100
-    _karma_modo_flag_see_all = 300
-    _karma_modo_unlink_comment = 750
-    _karma_modo_edit_own = 1  # done
-    _karma_modo_edit_all = 300  # done
-    _karma_modo_close_own = 100  # done
-    _karma_modo_close_all = 900  # done
-    _karma_modo_unlink_own = 500  # done
-    _karma_modo_unlink_all = 1000  # done
+    _badge_modo_flag = 'website_forum.badge_24'
+    _badge_modo_flag_see_all = 'website_forum.badge_25'
+    _badge_modo_unlink_comment = 'website_forum.badge_26'
+    _badge_modo_edit_own = 'website_forum.badge_q_11'  # done
+    _badge_modo_edit_all = 'website_forum.badge_25'  # done
+    _badge_modo_close_own = 'website_forum.badge_a_10'  # done
+    _badge_modo_close_all = 'website_forum.badge_26'  # done
+    _badge_modo_unlink_own = 'website_forum.badge_a_11'  # done
+    _badge_modo_unlink_all = 'website_forum.badge_26'  # done
+
     # karma generation
     _karma_gen_quest_new = 2  # done
     _karma_gen_upvote_quest = 5  # done
@@ -298,12 +298,17 @@ class Vote(osv.Model):
     }
 
     def create(self, cr, uid, vals, context=None):
-        vote_id = super(Vote, self).create(cr, uid, vals, context=context)
-        if vals.get('vote', '1') == '1':
-            karma = self.pool['forum.forum']._karma_upvote
-        elif vals.get('vote', '1') == '-1':
-            karma = self.pool['forum.forum']._karma_downvote
         post = self.pool['forum.post'].browse(cr, uid, vals['post_id'], context=context)
+        vote_id = super(Vote, self).create(cr, uid, vals, context=context)
+        if vals.get('vote', '1') == '1' and post.parent_id:
+            karma = self.pool['forum.forum']._karma_gen_upvote_ans
+        elif vals.get('vote', '1') == '1' and not post.parent_id:
+            karma = self.pool['forum.forum']._karma_gen_upvote_quest
+        elif vals.get('vote', '1') == '-1' and post.parent_id:
+            karma = self.pool['forum.forum']._karma_gen_downvote_ans
+        elif vals.get('vote', '1') == '-1' and not post.parent_id:
+            karma = self.pool['forum.forum']._karma_gen_downvote_quest
+
         self.pool['res.users'].add_karma(cr, SUPERUSER_ID, [post.create_uid.id], karma, context=context)
         return vote_id
 

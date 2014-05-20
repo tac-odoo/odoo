@@ -40,13 +40,13 @@ class WebsiteForum(http.Controller):
                   'header': kwargs.get('header', dict()),
                   'searches': kwargs.get('searches', dict()),
                   'can_edit_own': True,
-                  'can_edit_all': user.karma > Forum._karma_modo_edit_all,
-                  'can_close_own': user.karma > Forum._karma_modo_close_own,
-                  'can_close_all': user.karma > Forum._karma_modo_close_all,
-                  'can_unlink_own': user.karma > Forum._karma_modo_unlink_own,
-                  'can_unlink_all': user.karma > Forum._karma_modo_unlink_all,
-                  'can_unlink_comment': user.karma > Forum._karma_modo_unlink_comment,
-                  }
+                  'can_edit_all': self._check_granted_badge(['_badge_modo_edit_all'])[0],
+                  'can_close_own': self._check_granted_badge(['_badge_modo_close_own'])[0],
+                  'can_close_all': self._check_granted_badge(['_badge_modo_close_all'])[0],
+                  'can_unlink_own': self._check_granted_badge(['_badge_modo_unlink_own'])[0],
+                  'can_unlink_all': self._check_granted_badge(['_badge_modo_unlink_all'])[0],
+                  'can_unlink_comment':self._check_granted_badge(['_badge_modo_unlink_comment'])[0],
+        }
         if forum:
             values['forum'] = forum
         elif kwargs.get('forum_id'):
@@ -54,13 +54,20 @@ class WebsiteForum(http.Controller):
         values.update(kwargs)
         return values
 
-    def _has_enough_karma(self, karma_name, uid=None):
+    def _check_granted_badge(self, badge_names, user_id=None):
+        def ref(xml_id):
+            mod, xml = xml_id.split('.', 1)
+            return request.registry['ir.model.data'].get_object(request.cr, SUPERUSER_ID, mod, xml, request.context)
+        if not user_id:
+            user_id = request.uid
         Forum = request.registry['forum.forum']
-        karma = hasattr(Forum, karma_name) and getattr(Forum, karma_name) or 0
-        user = request.registry['res.users'].browse(request.cr, SUPERUSER_ID, uid or request.uid, context=request.context)
-        if user.karma < karma:
-            return False, {'error': 'not_enough_karma', 'karma': karma}
+        for badge_name in badge_names:
+            badge_xml_id = hasattr(Forum, badge_name) and getattr(Forum, badge_name) or False
+            badge = ref(badge_xml_id)
+            if not user_id in [owner.id for owner in badge.owner_ids]:
+                return False, {'error': 'not_have_badge', 'badge': badge.name, 'badge_id': badge.id}
         return True, {}
+
 
     # Forum
     # --------------------------------------------------
@@ -330,10 +337,17 @@ class WebsiteForum(http.Controller):
             return {'error': 'anonymous_user'}
         user = request.registry['res.users'].browse(request.cr, SUPERUSER_ID, request.uid, context=request.context)
         if post.parent_id.create_uid.id != uid:
-            return {'error': 'own_post'}
-        if post.create_uid.id == user.id and user.karma < request.registry['forum.forum']._karma_answer_accept_own:
-            return {'error': 'not_enough_karma', 'karma': 20}
-
+            return {'error': 'not_own_post'}
+        if post.create_uid.id == user.id:
+            check_res = self._check_granted_badge(['_badge_to_accept_own_answer'])
+            if not check_res[0]:
+                check_res[1].update({'forum': slug(forum)})
+                return check_res[1]
+        else:
+            check_res = self._check_granted_badge(['_badge_to_accept_answer'])
+            if not check_res[0]:
+                check_res[1].update({'forum': slug(forum)})
+                return check_res[1]
         # set all answers to False, only one can be accepted
         request.registry['forum.post'].write(cr, uid, [c.id for c in post.parent_id.child_ids], {'is_correct': False}, context=context)
         request.registry['forum.post'].write(cr, uid, [post.id], {'is_correct': not post.is_correct}, context=context)
@@ -398,8 +412,9 @@ class WebsiteForum(http.Controller):
             return {'error': 'anonymous_user'}
         if request.uid == post.create_uid.id:
             return {'error': 'own_post'}
-        check_res = self._has_enough_karma('_karma_upvote')
+        check_res = self._check_granted_badge(['_badge_to_upvote'])
         if not check_res[0]:
+            check_res[1].update({'forum': slug(forum)})
             return check_res[1]
         upvote = True if not post.user_vote > 0 else False
         return request.registry['forum.post'].vote(request.cr, request.uid, [post.id], upvote=upvote, context=request.context)
@@ -410,8 +425,9 @@ class WebsiteForum(http.Controller):
             return {'error': 'anonymous_user'}
         if request.uid == post.create_uid.id:
             return {'error': 'own_post'}
-        check_res = self._has_enough_karma('_karma_downvote')
+        check_res = self._check_granted_badge(['_badge_to_downvote'])
         if not check_res[0]:
+            check_res[1].update({'forum': slug(forum)})
             return check_res[1]
         upvote = True if post.user_vote < 0 else False
         return request.registry['forum.post'].vote(request.cr, request.uid, [post.id], upvote=upvote, context=request.context)

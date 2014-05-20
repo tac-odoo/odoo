@@ -292,6 +292,111 @@ for post in Post.browse(cr, uid, user_posts, context=context):
             <field name="target_goal">1</field>
             <field name="challenge_id" eval="ref('challenge_self_learner')"/>
         </record>
+        <!-- Mortarboard: at least 5 accepted answers -->
+        <record id="badge_a_9" model="gamification.badge">
+            <field name="name">Mortarboard</field>
+            <field name="description">at least 5 accepted answers</field>
+            <field name="level">bronze</field>
+            <field name="rule_auth">nobody</field>
+        </record>
+        <record model="gamification.goal.definition" id="definition_Mortarboard">
+            <field name="name">Mortarboard</field>
+            <field name="description">at least 5 accepted answers</field>
+            <field name="computation_mode">count</field>
+            <field name="display_mode">boolean</field>
+            <field name="model_id" eval="ref('website_forum.model_forum_post')" />
+            <field name="condition">higher</field>
+            <field name="domain">[('parent_id', '!=', False), ('is_correct', '=', True)]</field>
+            <field name="batch_mode">True</field>
+            <field name="batch_distinctive_field" eval="ref('website_forum.field_forum_post_create_uid')" />
+            <field name="batch_user_expression">user.id</field>            
+        </record>
+        <record model="gamification.challenge" id="challenge_Mortarboard">
+            <field name="name">Mortarboard</field>
+            <field name="period">once</field>
+            <field name="visibility_mode">personal</field>
+            <field name="report_message_frequency">never</field>
+            <field name="reward_id" eval="ref('badge_a_9')" />
+            <field name="reward_realtime">True</field>
+            <field name="user_domain">[('karma', '>', 0)]</field>
+            <field name="state">inprogress</field>
+            <field name="category">forum</field>
+        </record>
+        <record model="gamification.challenge.line" id="line_Mortarboard">
+            <field name="definition_id" eval="ref('definition_Mortarboard')"/>
+            <field name="target_goal">5</field>
+            <field name="challenge_id" eval="ref('challenge_Mortarboard')"/>
+        </record>
+        <!-- Epic: at least 20 accepted answers -->
+        <record id="badge_a_10" model="gamification.badge">
+            <field name="name">Epic</field>
+            <field name="description">at least 20 accepted answers</field>
+            <field name="level">silver</field>
+            <field name="rule_auth">nobody</field>
+        </record>
+        <record model="gamification.goal.definition" id="definition_Epic">
+            <field name="name">Epic</field>
+            <field name="description">at least 20 accepted answers</field>
+            <field name="computation_mode">count</field>
+            <field name="display_mode">boolean</field>
+            <field name="model_id" eval="ref('website_forum.model_forum_post')" />
+            <field name="condition">higher</field>
+            <field name="domain">[('parent_id', '!=', False), ('is_correct', '=', True)]</field>
+            <field name="batch_mode">True</field>
+            <field name="batch_distinctive_field" eval="ref('website_forum.field_forum_post_create_uid')" />
+            <field name="batch_user_expression">user.id</field>            
+        </record>
+        <record model="gamification.challenge" id="challenge_Epic">
+            <field name="name">Epic</field>
+            <field name="period">once</field>
+            <field name="visibility_mode">personal</field>
+            <field name="report_message_frequency">never</field>
+            <field name="reward_id" eval="ref('badge_a_10')" />
+            <field name="reward_realtime">True</field>
+            <field name="user_domain">[('karma', '>', 0)]</field>
+            <field name="state">inprogress</field>
+            <field name="category">forum</field>
+        </record>
+        <record model="gamification.challenge.line" id="line_Epic">
+            <field name="definition_id" eval="ref('definition_Epic')"/>
+            <field name="target_goal">20</field>
+            <field name="challenge_id" eval="ref('challenge_Epic')"/>
+        </record>
+        <!-- Legendary: at least 50 accepted answers -->
+        <record id="badge_a_11" model="gamification.badge">
+            <field name="name">Legendary</field>
+            <field name="description">at least 50 accepted answers</field>
+            <field name="level">gold</field>
+            <field name="rule_auth">nobody</field>
+        </record>
+        <record model="gamification.goal.definition" id="definition_Legendary">
+            <field name="name">Legendary</field>
+            <field name="description">at least 50 accepted answers</field>
+            <field name="computation_mode">count</field>
+            <field name="display_mode">boolean</field>
+            <field name="model_id" eval="ref('website_forum.model_forum_post')" />
+            <field name="condition">higher</field>
+            <field name="domain">[('parent_id', '!=', False), ('is_correct', '=', True)]</field>
+            <field name="batch_mode">True</field>
+            <field name="batch_distinctive_field" eval="ref('website_forum.field_forum_post_create_uid')" />
+            <field name="batch_user_expression">user.id</field>            
+        </record>
+        <record model="gamification.challenge" id="challenge_Legendary">
+            <field name="name">Legendary</field>
+            <field name="period">once</field>
+            <field name="visibility_mode">personal</field>
+            <field name="report_message_frequency">never</field>
+            <field name="reward_id" eval="ref('badge_a_11')" />
+            <field name="reward_realtime">True</field>
+            <field name="user_domain">[('karma', '>', 0)]</field>
+            <field name="state">inprogress</field>
+            <field name="category">forum</field>
+        </record>
+        <record model="gamification.challenge.line" id="line_Legendary">
+            <field name="definition_id" eval="ref('definition_Legendary')"/>
+            <field name="target_goal">50</field>
+            <field name="challenge_id" eval="ref('challenge_Legendary')"/>
+        </record>
 
     </data>
 </openerp>

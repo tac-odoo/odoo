@@ -358,6 +358,41 @@
             <field name="target_goal">1</field>
             <field name="challenge_id" eval="ref('challenge_great_question')" />
         </record>
+        <!-- Great: at least one question -->
+        <record id="badge_q_11" model="gamification.badge">
+            <field name="name">Participant</field>
+            <field name="description">asked first question (at least one question)</field>
+            <field name="level">bronze</field>
+            <field name="rule_auth">nobody</field>
+        </record>
+        <record model="gamification.goal.definition" id="definition_one_question">
+            <field name="name">asked first question</field>
+            <field name="description">Asked first question (at least one question)</field>
+            <field name="computation_mode">count</field>
+            <field name="display_mode">boolean</field>
+            <field name="model_id" eval="ref('website_forum.model_forum_post')" />
+            <field name="domain">[('parent_id', '=', False)]</field>
+            <field name="condition">higher</field>
+            <field name="batch_mode">True</field>
+            <field name="batch_distinctive_field" eval="ref('website_forum.field_forum_post_create_uid')" />
+            <field name="batch_user_expression">user.id</field>
+        </record>
+        <record model="gamification.challenge" id="challenge_one_question">
+            <field name="name">Participant</field>
+            <field name="period">once</field>
+            <field name="visibility_mode">personal</field>
+            <field name="report_message_frequency">never</field>
+            <field name="reward_id" eval="ref('badge_q_11')" />
+            <field name="reward_realtime">True</field>
+            <field name="user_domain">[('karma', '>', 0)]</field>
+            <field name="state">inprogress</field>
+            <field name="category">forum</field>
+        </record>
+        <record model="gamification.challenge.line" id="line_one_question">
+            <field name="definition_id" eval="ref('definition_one_question')" />
+            <field name="target_goal">1</field>
+            <field name="challenge_id" eval="ref('challenge_one_question')" />
+        </record>
 
         <!-- Question + Answer -->
         <record id="badge_26" model="gamification.badge">

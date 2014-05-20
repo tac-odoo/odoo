@@ -292,6 +292,111 @@ result = int(len(data) >= 15)</field>
             <field name="target_goal">1</field>
             <field name="challenge_id" eval="ref('challenge_peer_pressure')" />
         </record>
+        
+        <record id="badge_24" model="gamification.badge">
+            <field name="name">Nice Reputation</field>
+            <field name="description">at least 100 karma</field>
+            <field name="level">bronze</field>
+            <field name="rule_auth">nobody</field>
+        </record>
+        <record model="gamification.goal.definition" id="definition_low_karma">
+            <field name="name">Nice Reputation</field>
+            <field name="description">at least 100 karma</field>
+            <field name="computation_mode">count</field>
+            <field name="display_mode">boolean</field>
+            <field name="model_id" eval="ref('website_forum.model_forum_post')" />
+            <field name="condition">higher</field>
+            <field name="domain">[]</field>
+            <field name="batch_mode">True</field>
+            <field name="batch_distinctive_field" eval="ref('base.field_res_users_id')"/>
+            <field name="batch_user_expression">user.id</field>
+        </record>
+        <record model="gamification.challenge" id="challenge_low_karma">
+            <field name="name">Nice Reputation</field>
+            <field name="period">once</field>
+            <field name="visibility_mode">personal</field>
+            <field name="report_message_frequency">never</field>
+            <field name="reward_id" eval="ref('badge_24')" />
+            <field name="reward_realtime">True</field>
+            <field name="user_domain">[('karma', '>', 100)]</field>
+            <field name="state">inprogress</field>
+            <field name="category">forum</field>
+        </record>
+        <record model="gamification.challenge.line" id="line_low_karma">
+            <field name="definition_id" eval="ref('definition_low_karma')" />
+            <field name="target_goal">0</field>
+            <field name="challenge_id" eval="ref('challenge_low_karma')" />
+        </record>
+
+        <record id="badge_25" model="gamification.badge">
+            <field name="name">Good Reputation</field>
+            <field name="description">at least 300 karma</field>
+            <field name="level">silver</field>
+            <field name="rule_auth">nobody</field>
+        </record>
+        <record model="gamification.goal.definition" id="definition_medium_karma">
+            <field name="name">Good Reputation</field>
+            <field name="description">at least 300 karma</field>
+            <field name="computation_mode">count</field>
+            <field name="display_mode">boolean</field>
+            <field name="model_id" eval="ref('website_forum.model_forum_post')" />
+            <field name="condition">higher</field>
+            <field name="domain">[]</field>
+            <field name="batch_mode">True</field>
+            <field name="batch_distinctive_field" eval="ref('base.field_res_users_id')"/>
+            <field name="batch_user_expression">user.id</field>
+        </record>
+        <record model="gamification.challenge" id="challenge_medium_karma">
+            <field name="name">Good Reputation</field>
+            <field name="period">once</field>
+            <field name="visibility_mode">personal</field>
+            <field name="report_message_frequency">never</field>
+            <field name="reward_id" eval="ref('badge_25')" />
+            <field name="reward_realtime">True</field>
+            <field name="user_domain">[('karma', '>', 300)]</field>
+            <field name="state">inprogress</field>
+            <field name="category">forum</field>
+        </record>
+        <record model="gamification.challenge.line" id="line_medium_karma">
+            <field name="definition_id" eval="ref('definition_medium_karma')" />
+            <field name="target_goal">0</field>
+            <field name="challenge_id" eval="ref('challenge_medium_karma')" />
+        </record>
+
+        <record id="badge_26" model="gamification.badge">
+            <field name="name">Great Reputation</field>
+            <field name="description">at least 1000 karma</field>
+            <field name="level">gold</field>
+            <field name="rule_auth">nobody</field>
+        </record>
+        <record model="gamification.goal.definition" id="definition_high_karma">
+            <field name="name">Great Reputation</field>
+            <field name="description">at least 1000 karma</field>
+            <field name="computation_mode">count</field>
+            <field name="display_mode">boolean</field>
+            <field name="model_id" eval="ref('website_forum.model_forum_post')" />
+            <field name="condition">higher</field>
+            <field name="domain">[]</field>
+            <field name="batch_mode">True</field>
+            <field name="batch_distinctive_field" eval="ref('base.field_res_users_id')"/>
+            <field name="batch_user_expression">user.id</field>
+        </record>
+        <record model="gamification.challenge" id="challenge_high_karma">
+            <field name="name">Great Reputation</field>
+            <field name="period">once</field>
+            <field name="visibility_mode">personal</field>
+            <field name="report_message_frequency">never</field>
+            <field name="reward_id" eval="ref('badge_26')" />
+            <field name="reward_realtime">True</field>
+            <field name="user_domain">[('karma', '>', 1000)]</field>
+            <field name="state">inprogress</field>
+            <field name="category">forum</field>
+        </record>
+        <record model="gamification.challenge.line" id="line_high_karma">
+            <field name="definition_id" eval="ref('definition_high_karma')" />
+            <field name="target_goal">0</field>
+            <field name="challenge_id" eval="ref('challenge_high_karma')" />
+        </record>
 
     </data>
 </openerp>
