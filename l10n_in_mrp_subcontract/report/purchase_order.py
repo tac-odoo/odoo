@@ -28,14 +28,30 @@ from operator import itemgetter
 class purchase_order_revise(report_sxw.rml_parse):
     def __init__(self, cr, uid, name, context):
         super(purchase_order_revise, self).__init__(cr, uid, name, context=context)
+        self.t_pkg_frwrd = 0.0
+        self.t_freight = 0.0
+        self.t_insurance = 0.0
         self.localcontext.update({
             'time': time,
             'line_address': self.line_address,
             'calculate_price': self.calculate_price,
             'calculate_tax': self.calculate_tax,
             'convert': self.convert,
+            'other_charges':self._other_charges,
+            'pkg_frwrd':self._pkg_frwrd,
+            'freight':self._freight,
+            'insurance':self._insurance,
             'user': self.pool.get('res.users').browse(cr, uid, uid, context)
         })
+
+    def _pkg_frwrd(self):
+        return self.t_pkg_frwrd
+
+    def _freight(self):
+        return self.t_freight
+
+    def _insurance(self):
+        return self.t_insurance
 
     def convert(self, amount, cur):
         amt_en = amount_to_text_en.amount_to_text(amount, 'en', cur)
@@ -46,6 +62,17 @@ class purchase_order_revise(report_sxw.rml_parse):
         if line:
             price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
         return price
+
+    def _other_charges(self, order):
+        pur_obj=self.pool.get('purchase.order')
+        cr, uid = self.cr, self.uid
+        #method to get all extra charges individualy
+        pkg_frwrd, freight, insurance = pur_obj.other_charges(cr, uid, order)
+
+        self.t_pkg_frwrd = pkg_frwrd
+        self.t_freight = freight
+        self.t_insurance = insurance
+        return True
 
     def line_address(self, company):
         if not company:
