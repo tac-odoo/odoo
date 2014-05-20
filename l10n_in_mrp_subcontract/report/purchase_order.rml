@@ -378,6 +378,7 @@
     <paraStyle name="Table Contents" fontName="Helvetica-Bold" fontSize="9.0" />
     <paraStyle name="P5" fontName="Helvetica-Bold" fontsize="9.0"/>
     <paraStyle name="terp_default_2" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="2.0" leading="3" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_1" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="1.0" leading="0" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_header" fontSize="15.0" leading="19" alignment="RIGHT" spaceBefore="12.0" spaceAfter="6.0"/>
     <paraStyle name="terp_header_climb" fontSize="13.0" leading="19" alignment="RIGHT" spaceBefore="12.0" spaceAfter="6.0"/>
     <paraStyle name="terp_header_LEFT" fontSize="15.0" leading="19" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
@@ -553,15 +554,16 @@
         </td>
       </tr>
     </blockTable>
+      <para style="terp_default_1">[[ (other_charges(o)) ]]</para>
       <spacer length="0.01cm"/>
       <blockTable colWidths="485.0,115.0" style="Table99">
-      <para style="terp_default_2">[[ (o.package_and_forwording == 0.0 and  removeParentNode('blockTable')) ]]</para>
+      <para style="terp_default_2">[[ (o.package_and_forwording == 0.0 and removeParentNode('blockTable')) ]]</para>
         <tr>
           <td>
             <para style="terp_default_Right_9">Packaging &amp; Forwarding</para>
           </td>
           <td>
-            <para style="terp_default_Right_9">[[ formatLang(o.package_and_forwording, digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
+            <para style="terp_default_Right_9">[[ formatLang(pkg_frwrd(), digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
           </td>
         </tr>
       </blockTable>
@@ -573,7 +575,7 @@
             <para style="terp_default_Right_9">Insurance</para>
           </td>
           <td>
-            <para style="terp_default_Right_9">[[ formatLang(o.insurance, digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
+            <para style="terp_default_Right_9">[[ formatLang(insurance(), digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
           </td>
         </tr>
       </blockTable>
@@ -585,7 +587,7 @@
             <para style="terp_default_Right_9">Freight</para>
           </td>
           <td>
-            <para style="terp_default_Right_9">[[ formatLang(o.freight, digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
+            <para style="terp_default_Right_9">[[ formatLang(freight(), digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
           </td>
         </tr>
       </blockTable>

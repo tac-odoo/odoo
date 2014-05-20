@@ -472,6 +472,84 @@ class purchase_order(osv.osv):
                 
         return res
 
+    def other_charges(self, cr, uid, order):
+        """
+        Process
+            -Calculate pakaging & forwarding, freight and insurance charges 
+        """
+        tax_obj = self.pool.get('account.tax')
+        untax_amount = 0
+
+        order_total = val1 = tax_total = included_price = 0.0
+        pkg_frwrd = freight = insurance = 0.0
+
+        for line in order.order_line:
+            order_total += line.price_subtotal
+
+        for line in order.order_line:
+            #price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            price = line.purchase_unit_rate * (1 - (line.discount or 0.0) / 100.0)
+            val1 += (price * line.line_qty)
+            untax_amount += line.price_subtotal
+
+            if order.package_and_forwording_type == 'per_unit' and order.package_and_forwording:
+                pkg_frwrd += (order.package_and_forwording * line.line_qty)
+            if order.freight_type == 'per_unit' and order.freight:
+                freight += (order.freight * line.line_qty)
+
+            if order_total > 0:
+                #Add fixed amount to order included in price
+                pre_line = round((price * 100) / order_total,2)
+                line_part = 0.0
+                if order.package_and_forwording_type == 'include' and order.package_and_forwording:
+                    line_part = order.package_and_forwording * (pre_line / 100)
+                    price -= line_part
+
+                if order.freight_type == 'include' and order.freight:
+                    line_part = order.freight  * (pre_line / 100)
+                    price -= line_part
+
+                if order.insurance_type == 'include' and order.insurance:
+                    line_part = order.insurance  * (pre_line / 100)
+                    price -= line_part
+
+            taxes = tax_obj.compute_all(cr, uid, line.taxes_id, price, line.line_qty, line.product_id, line.order_id.partner_id)
+            tax_total += taxes.get('total_included', 0.0) - taxes.get('total', 0.0)
+
+        #Add fixed amount to order included in price
+        if order.package_and_forwording_type == 'include' and order.package_and_forwording:
+            included_price += order.package_and_forwording
+            order_total -= order.package_and_forwording
+
+        if order.freight_type == 'include' and order.freight:
+            included_price += order.freight
+            order_total -= order.freight
+
+        if order.insurance_type == 'include' and order.insurance:
+            included_price += order.insurance
+            order_total -= order.insurance
+
+        if order_total > 0:
+            #Add fixed amount to order percentage
+            if order.package_and_forwording_type == 'percentage' and order.package_and_forwording:
+                pkg_frwrd += order_total * (order.package_and_forwording / 100)
+
+            if order.freight_type == 'percentage' and order.freight:
+                freight += order_total * (order.freight / 100)
+
+            if order.insurance_type == 'percentage' and order.insurance:
+                insurance += order_total * (order.insurance/100)
+
+        #Add fixed amount to order untax_amount
+        if order.package_and_forwording_type in ('fix', 'include') and order.package_and_forwording:
+            pkg_frwrd += order.package_and_forwording
+        if order.freight_type in ('fix', 'include') and order.freight:
+            freight += order.freight
+        if order.insurance_type in ('fix', 'include') and order.insurance:
+            insurance += order.insurance
+
+        return pkg_frwrd,freight,insurance
+
     def action_invoice_create(self, cr, uid, ids, context=None):
         """Generates invoice for given ids of purchase orders and links that invoice ID to purchase order.
         :param ids: list of ids of purchase orders.
@@ -513,6 +591,9 @@ class purchase_order(osv.osv):
 
                 po_line.write({'invoice_lines': [(4, inv_line_id)]}, context=context)
 
+            #method to get all extra charges individualy
+            pkg_frwrd, freight, insurance = self.other_charges(cr, uid, order)
+
             # get invoice data and create invoice
             inv_data = {
                 'name': order.partner_ref or order.name,
@@ -527,6 +608,9 @@ class purchase_order(osv.osv):
                 'fiscal_position': order.fiscal_position.id or False,
                 'payment_term': order.payment_term_id.id or False,
                 'company_id': order.company_id.id,
+                'package_and_forwording':pkg_frwrd or 0.0,
+                'insurance':insurance or 0.0,
+                'freight':freight or 0.0,
             }
             inv_id = inv_obj.create(cr, uid, inv_data, context=context)
 
