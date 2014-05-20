@@ -44,7 +44,8 @@
         'board',
         'mail',
         'resource',
-        'web_kanban'
+        'web_kanban',
+        'web_kanban_sparkline',
     ],
     'description': """
 Track multi-level projects, tasks, work done on tasks
@@ -72,8 +73,11 @@ Dashboard / Reports for Project Management will include:
         'report/project_cumulative.xml',
         'res_config_view.xml',
         'views/project.xml',
+        'project_onboarding_data.xml',
     ],
-    'demo': ['project_demo.xml'],
+    'demo': [
+        'project_demo.xml'
+    ],
     'test': [
     ],
     'installable': True,

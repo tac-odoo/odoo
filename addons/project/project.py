@@ -22,7 +22,8 @@
 from datetime import datetime, date
 from lxml import etree
 import time
-
+import calendar
+from dateutil import relativedelta
 from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.addons.resource.faces import task as Task
@@ -65,6 +66,7 @@ class project(osv.osv):
     _inherits = {'account.analytic.account': "analytic_account_id",
                  "mail.alias": "alias_id"}
     _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _period_number = 5
 
     def _auto_init(self, cr, context=None):
         """ Installation hook: aliases, project.project """
@@ -219,6 +221,64 @@ class project(osv.osv):
             'limit': 80,
             'context': "{'default_res_model': '%s','default_res_id': %d}" % (self._name, res_id)
         }
+    
+    def __get_bar_values(self, cr, uid, obj, domain, read_fields, value_field, groupby_field, context=None):
+        """ Generic method to generate data for bar chart values using SparklineBarWidget.
+            This method performs obj.read_group(cr, uid, domain, read_fields, groupby_field).
+
+            :param obj: the target model (i.e. project_project)
+            :param domain: the domain applied to the read_group
+            :param list read_fields: the list of fields to read in the read_group
+            :param str value_field: the field used to compute the value of the bar slice
+            :param str groupby_field: the fields used to group
+
+            :return list section_result: a list of dicts: [
+                                                {   'value': (int) bar_column_value,
+                                                    'tootip': (str) bar_column_tooltip,
+                                                }
+                                            ]
+        """
+        month_begin = date.today().replace(day=1)
+        section_result = [{
+                          'value': 0,
+                          'tooltip': (month_begin + relativedelta.relativedelta(months=-i)).strftime('%B %Y'),
+                          } for i in range(self._period_number - 1, -1, -1)]
+        group_obj = obj.read_group(cr, uid, domain, read_fields, groupby_field, context=context)
+        pattern = tools.DEFAULT_SERVER_DATE_FORMAT if obj.fields_get(cr, uid, groupby_field)[groupby_field]['type'] == 'date' else tools.DEFAULT_SERVER_DATETIME_FORMAT
+        for group in group_obj:
+            group_begin_date = datetime.strptime(group['__domain'][0][2], pattern)
+            month_delta = relativedelta.relativedelta(month_begin, group_begin_date)
+            section_result[self._period_number - (month_delta.months + 1)] = {'value': group.get(value_field, 0), 'tooltip': group.get(groupby_field, 0)}
+        return section_result
+
+    def _get_task_data(self, cr, uid, ids, field_name, arg, context=None):
+        """ Get task-related data for project kanban view
+            monthly_open_task: number of open task during the last months
+        """
+        Task = self.pool.get('project.task')
+        res = dict.fromkeys(ids, False)
+        month_begin = date.today().replace(day=1)
+        date_begin = month_begin - relativedelta.relativedelta(months=self._period_number - 1)
+        date_end = month_begin.replace(day=calendar.monthrange(month_begin.year, month_begin.month)[1])
+        project_pre_domain = [('create_date', '>=', date_begin.strftime(tools.DEFAULT_SERVER_DATE_FORMAT)), 
+                              ('create_date', '<=', date_end.strftime(tools.DEFAULT_SERVER_DATE_FORMAT))
+                              ]
+        for id in ids:
+            res[id] = dict()
+            project_domain = project_pre_domain + [('project_id', '=', id)]
+            res[id] = self.__get_bar_values(cr, uid, Task, project_domain, ['create_date'], 'create_date_count', 'create_date', context=context)
+        return res
+
+    def _get_tasks_per_user(self, cr, uid, ids, field_name, arg, context=None):
+        Task = self.pool['project.task']
+        res = dict.fromkeys(ids, False)
+        for project in self.browse(cr, uid, ids, context=context):
+            data = []
+            group_obj = Task.read_group(cr, uid, [('project_id','=',project.id)], ['user_id'], 'user_id', context=context)
+            for group in group_obj:
+                data.append({'label' : group['user_id'] and group['user_id'][1] or 'Unassigned', 'value': group['user_id_count']})
+            res[project.id] = data
+        return res
 
     # Lambda indirection method to avoid passing a copy of the overridable method when declaring the field
     _alias_models = lambda self, *args, **kwargs: self._get_alias_models(*args, **kwargs)
@@ -256,6 +316,8 @@ class project(osv.osv):
             }),
         'resource_calendar_id': fields.many2one('resource.calendar', 'Working Time', help="Timetable working hours to adjust the gantt diagram report", states={'close':[('readonly',True)]} ),
         'type_ids': fields.many2many('project.task.type', 'project_task_type_rel', 'project_id', 'type_id', 'Tasks Stages', states={'close':[('readonly',True)], 'cancelled':[('readonly',True)]}),
+        'monthly_task':fields.function(_get_task_data,type='string',string="monthly task",readonly=True),
+        
         'task_count': fields.function(_task_count, type='integer', string="Tasks",),
         'task_ids': fields.one2many('project.task', 'project_id',
                                     domain=[('stage_id.fold', '=', False)]),
@@ -267,19 +329,21 @@ class project(osv.osv):
                                         help="The kind of document created when an email is received on this project's email alias"),
         'privacy_visibility': fields.selection(_visibility_selection, 'Privacy / Visibility', required=True,
             help="Holds visibility of the tasks or issues that belong to the current project:\n"
-                    "- Public: everybody sees everything; if portal is activated, portal users\n"
-                    "   see all tasks or issues; if anonymous portal is activated, visitors\n"
-                    "   see all tasks or issues\n"
-                    "- Portal (only available if Portal is installed): employees see everything;\n"
-                    "   if portal is activated, portal users see the tasks or issues followed by\n"
+                    "- Public Project: everybody sees everything; if portal is activated, portal users\n"
+                    "  can see all tasks or issues; if anonymous portal is activated, visitors\n"
+                    "   can see all tasks or issues\n"
+                    "-Customer Related Project: employees can see everything;\n"
+                    "   if portal is activated, portal users can see the tasks or issues followed by\n"
                     "   them or by someone of their company\n"
-                    "- Employees Only: employees see all tasks or issues\n"
-                    "- Followers Only: employees see only the followed tasks or issues; if portal\n"
+                    "- Internal Project: employees can see all tasks or issues\n"
+                    "- Private Project: employees see only the followed tasks or issues; if portal\n"
                     "   is activated, portal users see the followed tasks or issues."),
-        'state': fields.selection([('template', 'Template'),('draft','New'),('open','In Progress'), ('cancelled', 'Cancelled'),('pending','Pending'),('close','Closed')], 'Status', required=True,),
+        'state': fields.selection([('template', 'Template'),('draft','New'),('open','In Progress'),('pending','Pending'),('close','Closed'),('cancelled', 'Cancelled')], 'Status', required=True,),
         'doc_count': fields.function(
             _get_attached_docs, string="Number of documents attached", type='integer'
-        )
+        ),
+        'task_per_user':fields.function(_get_tasks_per_user,type='string',string="monthly issue",readonly=True),
+        
      }
 
     def _get_type_common(self, cr, uid, context):
@@ -310,7 +374,7 @@ class project(osv.osv):
     ]
 
     def set_template(self, cr, uid, ids, context=None):
-        return self.setActive(cr, uid, ids, value=False, context=context)
+        return self.setActive(cr, uid, ids, value=False, state=False, context=context)
 
     def set_done(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'close'}, context=context)
@@ -325,7 +389,15 @@ class project(osv.osv):
         return self.write(cr, uid, ids, {'state': 'open'}, context=context)
 
     def reset_project(self, cr, uid, ids, context=None):
-        return self.setActive(cr, uid, ids, value=True, context=context)
+        return self.setActive(cr, uid, ids, value=True, state=False, context=context)
+
+    def set_inactive(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'active': False}, context=context)
+        return self.setActive(cr, uid, ids, value=False, state=True, context=context)
+
+    def set_active(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'active': True}, context=context)
+        return self.setActive(cr, uid, ids, value=True, state=True, context=context)
 
     def map_tasks(self, cr, uid, old_project_id, new_project_id, context=None):
         """ copy and map tasks from old to new project """
@@ -412,17 +484,17 @@ class project(osv.osv):
             }
 
     # set active value for a project, its sub projects and its tasks
-    def setActive(self, cr, uid, ids, value=True, context=None):
+    def setActive(self, cr, uid, ids, value=True, state=False, context=None):
         task_obj = self.pool.get('project.task')
         for proj in self.browse(cr, uid, ids, context=None):
-            self.write(cr, uid, [proj.id], {'state': value and 'open' or 'template'}, context)
+            self.write(cr, uid, [proj.id], {'state': state and 'close' or value and 'open' or 'template'}, context)
             cr.execute('select id from project_task where project_id=%s', (proj.id,))
             tasks_id = [x[0] for x in cr.fetchall()]
             if tasks_id:
                 task_obj.write(cr, uid, tasks_id, {'active': value}, context=context)
             child_ids = self.search(cr, uid, [('parent_id','=', proj.analytic_account_id.id)])
             if child_ids:
-                self.setActive(cr, uid, child_ids, value, context=None)
+                self.setActive(cr, uid, child_ids, value, state, context=None)
         return True
 
     def _schedule_header(self, cr, uid, ids, force_members=True, context=None):
@@ -737,6 +809,20 @@ class task(osv.osv):
             if work.task_id: result[work.task_id.id] = True
         return result.keys()
 
+    def _get_attachments(self, cr, uid, ids, field_name, arg, context):
+        res = {}
+        allow_extensions = ['.jpg','.png','jpeg','.gif']
+        message_obj = self.pool['mail.message']
+        #show only image type attachments order by votes.
+        for result in self.browse(cr, uid, ids, context=context):
+            messages = message_obj.search(cr, uid, [('res_id','=',result.id),('model','=','project.task'),('attachment_ids', '!=', False)], context=context)
+            attacments = []
+            for message in message_obj.browse(cr, uid, messages, context=context):
+                attacments += [(attachment.id,len(message.vote_user_ids)) for attachment in message.attachment_ids if attachment.datas_fname[-4:].lower() in allow_extensions]
+            attachment_ids = sorted(attacments, key=lambda element: (element[1]), reverse=True)
+            res[result.id] = [attachment[0] for attachment in attachment_ids]
+        return res
+
     _columns = {
         'active': fields.function(_is_template, store=True, string='Not a Template Task', type='boolean', help="This field is computed automatically and have the same behavior than the boolean 'active' field: if the task is linked to a template or unactivated project, it will be hidden unless specifically asked."),
         'name': fields.char('Task Summary', track_visibility='onchange', size=128, required=True, select=True),
@@ -794,6 +880,7 @@ class task(osv.osv):
         'id': fields.integer('ID', readonly=True),
         'color': fields.integer('Color Index'),
         'user_email': fields.related('user_id', 'email', type='char', string='User Email', readonly=True),
+        'attachment_ids':fields.function(_get_attachments, type='many2many', relation="ir.attachment", string="Attachments", readonly=True),
     }
     _defaults = {
         'stage_id': _get_default_stage_id,

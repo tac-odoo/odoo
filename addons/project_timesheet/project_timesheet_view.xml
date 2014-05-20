@@ -13,8 +13,8 @@
                     <field name="currency_id"/>
                     <field name="partner_id"/>
                 </field>
-                <xpath expr="//div[contains(@class, 'oe_kanban_project_list')]" position="inside">
-                    <a t-if="record.use_timesheets.raw_value" style="margin-right: 10px"
+                <xpath expr="//div[@name='docs']" position="inside">
+                    <a t-if="record.use_timesheets.raw_value and record.hours_quantity.raw_value > 0"
                         name="open_timesheets" type="object"><field name="hours_quantity"/> Hours</a>
                 </xpath>
             </field>
@@ -32,6 +32,9 @@
                 <xpath expr='//div[@name="buttons"]' position="inside">
                     <button class="oe_inline oe_stat_button" name="open_timesheets" type="object" attrs="{'invisible':[('use_timesheets','=', 0)]}"
                         icon="fa-calendar" string="Timesheets"/>
+                </xpath>
+                <xpath expr='//div[@name="options_active"]' position="attributes"> 
+                    <attribute name="invisible">False</attribute>
                 </xpath>
             </field>
         </record>

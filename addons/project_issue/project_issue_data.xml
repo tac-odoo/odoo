@@ -92,6 +92,30 @@ Access all issues from the top Project menu, and access the issues of a specific
             <field name="parent_id" eval="ref('mt_issue_stage')"/>
             <field name="relation_field">project_id</field>
         </record>
-        
+
+        <!--Onboarding data -->
+        <record id="project.project_project_onboard" model="project.project">
+            <field name="use_issues" eval="True"/>
+        </record>
+
+        <record id="project_issue_onboard_cate_1" model="project.category">
+            <field name="name">Little problem</field>
+        </record>
+
+        <record id="project_issue_onboard_1" model="project.issue">
+            <field name="date" eval="DateTime.today()"/>
+            <field name="priority">0</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field eval="1" name="active"/>
+            <field name="project_id" ref="project.project_project_onboard"/>
+            <field eval="15.0" name="duration"/>
+            <field name="name">Manage issues</field>
+            <field name="description">To efficiantly manage things like internal requests, software development bugs, customer complaints, project troubles you can do it same way as task drag and drop, follow, invite users, block issue and in the end set as done.</field>
+            <field name="email_from">issue@openerp.com</field>
+            <field name="stage_id" ref="project.project_tt_specification"/>
+            <field name="categ_ids" eval="[(6, 0, [
+                    ref('project_issue_onboard_cate_1')])]"/>
+        </record>
+
     </data>
 </openerp>

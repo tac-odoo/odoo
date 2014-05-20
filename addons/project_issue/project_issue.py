@@ -19,8 +19,9 @@
 #
 ##############################################################################
 
-from datetime import datetime
-
+from datetime import datetime, date
+import calendar
+from dateutil import relativedelta
 from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.addons.crm import crm
@@ -474,13 +475,45 @@ class project(osv.Model):
             project_id: Issue.search_count(cr,uid, [('project_id', '=', project_id), ('stage_id.fold', '=', False)], context=context)
             for project_id in ids
         }
+
+    def _get_issue_data(self, cr, uid, ids, field_name, arg, context=None):
+        """ Get task-related data for project kanban view
+            monthly_open_issue: number of open task during the last months
+        """
+        Issue = self.pool.get('project.issue')
+        res = dict.fromkeys(ids, False)
+        month_begin = date.today().replace(day=1)
+        date_begin = month_begin - relativedelta.relativedelta(months=self._period_number - 1)
+        date_end = month_begin.replace(day=calendar.monthrange(month_begin.year, month_begin.month)[1])
+        project_pre_domain = [('date_closed', '>=', date_begin.strftime(tools.DEFAULT_SERVER_DATE_FORMAT)), 
+                              ('date_closed', '<=', date_end.strftime(tools.DEFAULT_SERVER_DATE_FORMAT))
+                              ]
+        for id in ids:
+            res[id] = dict()
+            project_domain = project_pre_domain + [('project_id', '=', id)]
+            res[id] = self.__get_bar_values(cr, uid, Issue, project_domain, ['date_closed'], 'date_closed_count', 'date_closed', context=context)
+        return res
+
+    def _get_issues_per_user(self, cr, uid, ids, field_name, arg, context=None):
+        res = dict.fromkeys(ids, False)
+        Issue = self.pool.get('project.issue')
+        for project in self.browse(cr, uid, ids, context=context):
+            data = []
+            group_obj = Issue.read_group(cr, uid, [('project_id','=',project.id)], ['user_id'], 'user_id', context=context)
+            for group in group_obj:
+                data.append({'label' : group['user_id'] and group['user_id'][1] or 'Unassigned', 'value': group['user_id_count']})
+            res[project.id] = data
+        return res
+
     _columns = {
         'project_escalation_id': fields.many2one('project.project', 'Project Escalation',
             help='If any issue is escalated from the current Project, it will be listed under the project selected here.',
             states={'close': [('readonly', True)], 'cancelled': [('readonly', True)]}),
         'issue_count': fields.function(_issue_count, type='integer', string="Issues",),
         'issue_ids': fields.one2many('project.issue', 'project_id',
-                                     domain=[('stage_id.fold', '=', False)])
+                                     domain=[('stage_id.fold', '=', False)]),
+        'monthly_issue':fields.function(_get_issue_data,type='string',string="Monthly issue",readonly=True),
+        'issue_per_user':fields.function(_get_issues_per_user,type='string',string="Issue per User",readonly=True),
     }
 
     def _check_escalation(self, cr, uid, ids, context=None):
@@ -547,6 +580,14 @@ class project_project(osv.Model):
     def write(self, cr, uid, ids, vals, context=None):
         self._check_create_write_values(cr, uid, vals, context=context)
         return super(project_project, self).write(cr, uid, ids, vals, context=context)
+
+    def setActive(self, cr, uid, ids, value=True, state=False, context=None):
+        super(project_project, self).setActive(cr, uid, ids, value, state, context=context)
+        issue_obj = self.pool['project.issue']
+        issue_ids = issue_obj.search(cr, uid, [('project_id','in', ids),'|',('active','=',True),('active','=',False)], context=context)
+        if issue_ids:
+            issue_obj.write(cr, uid, issue_ids, {'active': value}, context=context)
+        return True
 
 class res_partner(osv.osv):
     def _issue_count(self, cr, uid, ids, field_name, arg, context=None):

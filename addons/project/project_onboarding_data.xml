@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+        <!-- Users -->
+        <record id="project_onboarding_user1" model="res.users">
+            <field name="name">Stefi</field>
+            <field name="login">stefi</field>
+        </record>
+        <record id="project_onboarding_user2" model="res.users">
+            <field name="name">Jyan</field>
+            <field name="login">jyan</field>
+        </record>
+
+        <!-- Onboarding Project-->
+        <record id="project_project_onboard" model="project.project">
+            <field name="sequence">1</field>
+            <field name="name">Let's Discover the app: Click to enter in project</field>
+            <field name="alias_model">project.task</field>
+            <field name="privacy_visibility">followers</field>
+            <field name="date" eval="DateTime.today()"/>
+            <field name="members" eval="[(6, 0, [ ref('base.user_root'), ref('project_onboarding_user1'), ref('project_onboarding_user2')])]"/>
+        </record>
+
+        <!-- Tasks -->
+        <record id="project_onboard_task_1" model="project.task">
+            <field name="project_id" ref="project.project_project_onboard"/>
+            <field name="name">Drag the sticker anyway</field>
+            <field name="description">Edit column to match your project process. You can edit or delete column directly from the column view. Then drag and drop any task through your process.</field>
+            <field name="stage_id" ref="project_tt_analysis"/>
+            <field name="planned_hours">1</field>
+            <field name="user_id" ref="project_onboarding_user1"/>
+            <field name="color">3</field>
+        </record>
+
+        <!-- Attachment in comment -->
+        <record id="message_onboard_task_1_attachment" model="ir.attachment">
+            <field name="datas_fname">project_dragdrop.jpeg</field>
+            <field name="name">project_dragdrop</field>
+            <field name="datas" type="base64" file="project/static/src/img/project_dragdrop.jpeg"/>
+            <field name="res_id" ref="project_onboard_task_1"/>
+            <field name="res_model">project.task</field>
+        </record>
+        
+        <record id="message_onboard_task_1" model="mail.message">
+            <field name="model">project.task</field>
+            <field name="res_id" ref="project_onboard_task_1"/>
+            <field name="type">comment</field>
+            <field name="author_id" ref="base.partner_root"/>
+            <field name="attachment_ids" eval="[(6, 0, [ref('message_onboard_task_1_attachment')])]"/>
+        </record>
+
+        <record id="project_onboard_task_2" model="project.task">
+            <field name="project_id" ref="project.project_project_onboard"/>
+            <field name="name">Invite people to your project</field>
+            <field name="description">invite people to your project by just adding them as the follower of the project</field>
+            <field name="stage_id" ref="project_tt_analysis"/>
+            <field name="planned_hours">1</field>
+            <field name="color">3</field>
+        </record>
+
+        <record id="project_onboard_task_3" model="project.task">
+            <field name="project_id" ref="project.project_project_onboard"/>
+            <field name="name">Collaborate with your team and track history</field>
+            <field name="description">By following the project, you follow each task of this project. You never loose the information and discussion. Add some note to remember what to do at a next stage. And keep your customer informed about the project advancement. </field>
+            <field name="stage_id" ref="project_tt_specification"/>
+            <field name="planned_hours">1</field>
+            <field name="user_id" ref="project_onboarding_user1"/>
+            <field name="color">3</field>
+        </record>
+
+        <record id="project_onboard_task_4" model="project.task">
+            <field name="project_id" ref="project.project_project_onboard"/>
+            <field name="name">Track blocking state</field>
+            <field name="description">If one of your collaborator is blocked as well as ready to chnage the stage of the task, the little collored bullet allow him to tell he is blocking and the history let him write the reason. </field>
+            <field name="stage_id" ref="project_tt_specification"/>
+            <field name="planned_hours">1</field>
+            <field name="color">3</field>
+        </record>
+
+        <record id="project_onboard_task_5" model="project.task">
+            <field name="project_id" ref="project.project_project_onboard"/>
+            <field name="name">Add some features from Settings -> Configuration -> Project</field>
+            <field name="description">The application allows you to organize your work process. You can also track time, invoice project and describe the work in a collaborative note pad.</field>
+            <field name="stage_id" ref="project_tt_development"/>
+            <field name="user_id" ref="project_onboarding_user2"/>
+            <field name="planned_hours">1</field>
+            <field name="color">3</field>
+        </record>
+
+        <!-- Attachment in comment -->
+        <record id="message_onboard_task_5_attachment" model="ir.attachment">
+            <field name="datas_fname">project_dragdrop.jpeg</field>
+            <field name="name">project_dragdrop</field>
+            <field name="datas" type="base64" file="project/static/src/img/more_feature.jpeg"/>
+            <field name="res_id" ref="project_onboard_task_5"/>
+            <field name="res_model">project.task</field>
+        </record>
+        
+        <record id="message_onboard_task_5" model="mail.message">
+            <field name="model">project.task</field>
+            <field name="res_id" ref="project_onboard_task_5"/>
+            <field name="type">comment</field>
+            <field name="author_id" ref="base.partner_root"/>
+            <field name="attachment_ids" eval="[(6, 0, [ref('message_onboard_task_5_attachment')])]"/>
+        </record>
+
+        <record id="project_onboard_task_6" model="project.task">
+            <field name="project_id" ref="project.project_project_onboard"/>
+            <field name="name">Create your own project</field>
+            <field name="description">Quick start to create new project and easily mange it.</field>
+            <field name="stage_id" ref="project_tt_development"/>
+            <field name="planned_hours">1</field>
+            <field name="user_id" ref="project_onboarding_user1"/>
+            <field name="color">3</field>
+        </record>
+
+        <record id="project_onboard_task_7" model="project.task">
+            <field name="project_id" ref="project.project_project_onboard"/>
+            <field name="name">Desactivate a project</field>
+            <field name="description">When your project is completed then Desactivate the Project.</field>
+            <field name="stage_id" ref="project_tt_testing"/>
+            <field name="planned_hours">1</field>
+            <field name="color">3</field>
+        </record>
+
+        <record id="project_onboard_task_8" model="project.task">
+            <field name="project_id" ref="project.project_project_onboard"/>
+            <field name="name">Worklog entry</field>
+            <field name="description">Users can do worklog entrys on task and issue from which you can create direct invoice.</field>
+            <field name="stage_id" ref="project_tt_design"/>
+            <field name="planned_hours">1</field>
+            <field name="user_id" ref="project_onboarding_user2"/>
+            <field name="sequence">10</field>
+            <field name="color">3</field>
+        </record>
+
+        <record id="project_onboard_task_9" model="project.task">
+            <field name="project_id" ref="project.project_project_onboard"/>
+            <field name="name">Manage accounting based on work entrys</field>
+            <field name="description">When you will create new project new analytic account for that project will be create to simply manage accounting. you can directly create invoice  from worklog entrys.</field>
+            <field name="stage_id" ref="project_tt_design"/>
+            <field name="user_id" ref="project_onboarding_user1"/>
+            <field name="planned_hours">20</field>
+            <field name="sequence">1</field>
+            <field name="color">3</field>
+        </record>
+
+        <record id="project_onboard_task_10" model="project.task">
+            <field name="project_id" ref="project.project_project_onboard"/>
+            <field name="name">Contract with customer</field>
+            <field name="description">You can directly create contract with your customer and mange task,issue and timesheets.</field>
+            <field name="stage_id" ref="project_tt_design"/>
+            <field name="planned_hours">1</field>
+            <field name="sequence">30</field>
+            <field name="color">3</field>
+        </record>
+
+    </data>
+</openerp>

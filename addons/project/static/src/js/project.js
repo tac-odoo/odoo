@@ -1,4 +1,5 @@
 openerp.project = function(openerp) {
+    openerp.project.GraphKanban(openerp);
     openerp.web_kanban.KanbanView.include({
         project_display_members_names: function() {
             /*
