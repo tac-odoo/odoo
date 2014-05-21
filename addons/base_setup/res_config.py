@@ -43,13 +43,21 @@ class base_config_settings(osv.osv_memory):
                                               help="""This installs the module google_calendar."""),
         'font': fields.many2one('res.font', string="Report Font", domain=[('mode', 'in', ('Normal', 'Regular', 'all', 'Book'))],
             help="Set the font into the report header, it will be used as default font in the RML reports of the user company"),
+        'group_multi_company': fields.boolean('User Multi Companies ', implied_group="base.group_multi_company", 
+                     help="Multi Companies group to all users."),
 
     }
     
     _defaults= {
         'font': lambda self,cr,uid,c: self.pool.get('res.users').browse(cr, uid, uid, c).company_id.font.id,
     }
-    
+
+    def onchange_multi_company(self, cr, uid, ids, multi_company, context=None):
+         """ module_multi_company implies group_multi_company """
+         if multi_company:
+             return {'value': {'group_multi_company': True}}
+         return {'value': {'group_multi_company': False}}
+
     def open_company(self, cr, uid, ids, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context)
         return {
