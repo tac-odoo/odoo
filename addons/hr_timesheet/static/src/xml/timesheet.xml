@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <templates>
-    <t t-name="hr_timesheet_sheet.WeeklyTimesheet">
+    <t t-name="hr_timesheet.WeeklyTimesheet">
         <div class="oe_timesheet_weekly">
             <table>
                 <tr>

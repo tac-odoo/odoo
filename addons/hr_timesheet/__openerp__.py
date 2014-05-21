@@ -41,14 +41,19 @@ up a management by affair.
     'author': 'OpenERP SA',
     'website': 'http://www.openerp.com',
     'images': ['images/hr_timesheet_lines.jpeg'],
-    'depends': ['account', 'hr', 'base', 'hr_attendance'],
+    'depends': ['account', 'hr', 'base'],
     'data': [
         'security/ir.model.access.csv',
         'security/hr_timesheet_security.xml',
         'hr_timesheet_view.xml',
+        'report/hr_timesheet_report_view.xml',
         'wizard/hr_timesheet_sign_in_out_view.xml',
+        'wizard/hr_timesheet_current_view.xml',
+        'hr_timesheet_workflow.xml',
         'hr_timesheet_installer.xml',
-        'hr_timesheet_data.xml'
+        'hr_timesheet_data.xml',
+        'res_config_view.xml',
+        'views/hr_timesheet.xml',
     ],
     'demo': ['hr_timesheet_demo.xml'],
     'test': [
@@ -58,5 +63,8 @@ up a management by affair.
     ],
     'installable': True,
     'auto_install': False,
+    'qweb': ['static/src/xml/timesheet.xml',
+             'static/src/xml/timesheet_day.xml'
+             ],
 }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

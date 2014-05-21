@@ -20,6 +20,7 @@
 ##############################################################################
 
 import hr_timesheet_sign_in_out
+import hr_timesheet_current
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

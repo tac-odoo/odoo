@@ -1,9 +1,10 @@
 
-openerp.hr_timesheet_sheet = function(instance) {
+openerp.hr_timesheet_week = function(instance) {
     var QWeb = instance.web.qweb;
     var _t = instance.web._t;
 
-    instance.hr_timesheet_sheet.WeeklyTimesheet = instance.web.form.FormWidget.extend(instance.web.form.ReinitializeWidgetMixin, {
+    //TODO: Add weekly navigation in proper way
+    instance.hr_timesheet.WeeklyTimesheet = instance.web.form.FormWidget.extend(instance.web.form.ReinitializeWidgetMixin, {
         events: {
             "click .oe_timesheet_weekly_account a": "go_to",
         },
@@ -187,7 +188,7 @@ openerp.hr_timesheet_sheet = function(instance) {
         },
         display_data: function() {
             var self = this;
-            self.$el.html(QWeb.render("hr_timesheet_sheet.WeeklyTimesheet", {widget: self}));
+            self.$el.html(QWeb.render("hr_timesheet.WeeklyTimesheet", {widget: self}));
             _.each(self.accounts, function(account) {
                 _.each(_.range(account.days.length), function(day_count) {
                     if (!self.get('effective_readonly')) {
@@ -353,6 +354,6 @@ openerp.hr_timesheet_sheet = function(instance) {
         },
     });
 
-    instance.web.form.custom_widgets.add('weekly_timesheet', 'instance.hr_timesheet_sheet.WeeklyTimesheet');
+    instance.web.form.custom_widgets.add('weekly_timesheet', 'instance.hr_timesheet.WeeklyTimesheet');
 
 };

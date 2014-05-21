@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- vim:fdn=3:
+-->
+<openerp>
+    <data>
+        <template id="assets_backend" name="hr_timesheet assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet" href="/hr_timesheet/static/src/css/timesheet.css"/>
+                <link rel="stylesheet" href="/hr_timesheet/static/src/css/timesheet_day.css"/>
+                <script type="text/javascript" src="/hr_timesheet/static/src/js/timesheet.js"></script>
+                <script type="text/javascript" src="/hr_timesheet/static/src/js/timesheet_week.js"></script>
+                <script type="text/javascript" src="/hr_timesheet/static/src/js/timesheet_day.js"></script>
+            </xpath>
+        </template>
+    </data>
+</openerp>
