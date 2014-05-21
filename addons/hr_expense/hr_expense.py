@@ -419,7 +419,7 @@ class hr_expense_line(osv.osv):
         'total_amount': fields.function(_amount, string='Total', digits_compute=dp.get_precision('Account')),
         'unit_amount': fields.float('Unit Price', digits_compute=dp.get_precision('Product Price')),
         'unit_quantity': fields.float('Quantities', digits_compute= dp.get_precision('Product Unit of Measure')),
-        'product_id': fields.many2one('product.product', 'Product', domain=[('hr_expense_ok','=',True)]),
+        'product_id': fields.many2one('product.product', 'Expense Product', domain=[('hr_expense_ok','=',True)]),
         'uom_id': fields.many2one('product.uom', 'Unit of Measure', required=True),
         'description': fields.text('Description'),
         'analytic_account': fields.many2one('account.analytic.account','Analytic account'),

@@ -1,0 +1,82 @@
+-
+  Create demo record that follow the workflow for Accountant 
+-
+  !record {model: hr.expense.expense, id: approved_expenses2}:
+    name: 'Meal expenses'
+    employee_id: hr.employee_niv
+    date: '2014-09-12'
+    line_ids:
+      - date_value: '2014-09-10'
+        name: 'Meal'
+        analytic_account: account.analytic_nebula
+        unit_amount: 960.00
+        uom_id: product.product_uom_unit
+        unit_quantity: 1.0
+-
+  !workflow {model: hr.expense.expense, action: confirm, ref: approved_expenses2}
+-
+  !workflow {model: hr.expense.expense, action: validate, ref: approved_expenses2}
+-
+  !record {model: hr.expense.expense, id: approved_expenses1}:
+    name: 'My expenses'
+    employee_id: hr.employee_al
+    date: '2014-06-01'
+    line_ids:
+      - date_value: '2014-05-23'
+        product_id: hotel_rent
+        name: 'Hotel Expense'
+        analytic_account: account.analytic_nebula
+        unit_amount: 1850.00
+        uom_id: product.product_uom_unit
+        unit_quantity: 1.0
+-
+  !workflow {model: hr.expense.expense, action: confirm, ref: approved_expenses1}
+-
+  !workflow {model: hr.expense.expense, action: validate, ref: approved_expenses1}
+
+-
+  Create demo record that is submitted to the HR
+-
+  !record {model: hr.expense.expense, id: submitted_expense1}:
+    name: 'Product Training'
+    employee_id: hr.employee_qdp
+    date: '2014-02-26'
+    line_ids:
+      -  date_value: '2014-02-12'
+         product_id: hotel_rent
+         name: 'Hotel Expense during training'
+         analytic_account: account.analytic_nebula
+         unit_amount: 1250.0
+         uom_id: product.product_uom_unit
+         unit_quantity: 1.0
+      -  date_value: '2014-02-12'
+         product_id: car_travel
+         name: 'Travelling'
+         analytic_account: account.analytic_nebula
+         uom_id: product.product_uom_km
+         unit_amount: 0.25
+         unit_quantity: 350.0
+-
+  !workflow {model: hr.expense.expense, action: confirm, ref: submitted_expense1}
+-
+  !record {model: hr.expense.expense, id: submitted_expense2}:
+    name: 'Going Abroad'
+    employee_id: hr.employee_fme
+    date: '2014-03-04'
+    line_ids:
+      -  date_value: '2014-02-20'
+         product_id: hotel_rent
+         name: 'Hotel Rent'
+         analytic_account: account.analytic_nebula
+         unit_amount: 2200.0
+         uom_id: product.product_uom_unit
+         unit_quantity: 1.0
+      -  date_value: '2014-02-20'
+         product_id: air_ticket
+         name: 'Air ticket'
+         analytic_account: account.analytic_consultancy
+         unit_amount: 3600.0
+         uom_id: product.product_uom_unit
+         unit_quantity: 2.0
+-
+  !workflow {model: hr.expense.expense, action: confirm, ref: submitted_expense2}

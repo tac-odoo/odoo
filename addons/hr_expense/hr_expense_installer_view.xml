@@ -1,10 +1,15 @@
 <openerp>
   <data noupdate="1">
-      <!-- After installation of the module, open the related menu -->
-      <record id="base.open_menu" model="ir.actions.todo">
-          <field name="action_id" ref="hr.action_client_hr_menu"/>
-          <field name="state">open</field>
-      </record>
+        <!-- After installation of the module, open the related menu -->
+        <record id="action_client_hr_expense_menu" model="ir.actions.client">
+            <field name="name">Open Hr Expense Menu</field>
+            <field name="tag">reload</field>
+            <field name="params" eval="{'menu_id': ref('menu_expense_all')}"/>
+        </record>
+        <record id="base.open_menu" model="ir.actions.todo">
+            <field name="action_id" ref="action_client_hr_expense_menu"/>
+            <field name="state">open</field>
+        </record>
   </data>
   <data>
         <record id="product_expense_installer_tree_view" model="ir.ui.view">

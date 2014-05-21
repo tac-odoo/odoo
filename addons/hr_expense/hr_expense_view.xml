@@ -72,6 +72,12 @@
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirm,accepted,done,paid" statusbar_colors='{"confirm":"blue","cancelled":"red"}'/>
                 </header>
                 <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Expense Name" class="oe_edit_only" />
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
                     <group>
                         <group>
                             <field name="employee_id" on_change="onchange_employee_id(employee_id)"/>
@@ -128,13 +134,19 @@
                                 </tree>
                             </field>
                             <group>
+                                <group string="Accounting Information">
+                                    <field name="journal_id" widget="selection" domain="[('type', '=', 'purchase')]"/>
+                                    <field name="account_move_id" />
+                                </group>
+                            </group>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}" class="oe_subtotal_footer_separator"/>
+                            </group>
+                            <group>
                                 <div>
-                                    <separator string="Description"/>
+                                    <separator string="Notes"/>
                                     <field name="note" placeholder="Free Notes"/>
                                 </div>
-                                <group class="oe_subtotal_footer oe_right">
-                                    <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}" class="oe_subtotal_footer_separator"/>
-                                </group>
                             </group>
                         </page>
                     </notebook>
@@ -147,6 +159,27 @@
             </field>
         </record>
 
+        <record id="view_hr_expense_graph" model="ir.ui.view">
+             <field name="name">hr.expense.graph</field>
+             <field name="model">hr.expense.expense</field>
+             <field name="arch" type="xml">
+                 <graph string="Expenses Analysis" type="pivot" >
+                    <field name="employee_id" type="row"/>
+                    <field name="amount" type="measure"/>
+                </graph>
+             </field>
+        </record>
+
+        <record id="view_hr_expense_calendar" model="ir.ui.view">
+            <field name="name">hr.expense.calendar</field>
+            <field name="model">hr.expense.expense</field>
+            <field name="arch" type="xml">
+                <calendar string="Expenses" color="employee_id" date_start="date">
+                    <field name="employee_id"/>
+                    <field name="amount"/>
+                </calendar>
+            </field>
+        </record>
 
         <record id="view_hr_expense_filter" model="ir.ui.view">
             <field name="name">hr.expense.expense.filter</field>
@@ -163,11 +196,17 @@
                     <separator />
                     <filter domain="[('user_id', '=', uid)]" string="My Expenses"/>
                     <separator />
+                    <field name="state"/>
+                    <field name="user_valid"/>
+                    <separator />
                     <filter string="New Mail" name="message_unread" domain="[('message_unread','=',True)]"/>
                     <group expand="0" string="Group By">
                         <filter string="Employee" domain="[]" context="{'group_by':'employee_id'}"/>
                         <filter string="Department" domain="[]" context="{'group_by':'department_id'}"/>
                         <filter string="Expenses Month" domain="[]" context="{'group_by':'date'}" help="Expenses by Month"/>
+                        <!--<filter string="Month" icon="terp-go-month" domain="[]" context="{'group_by':'date'}" help="Expenses by Month"/>-->
+                        <filter string="State" domain="[]" context="{'group_by':'state'}" help="Expenses By State"/>
+                        <filter string="Validated By" domain="[]" context="{'group_by':'user_valid'}"/>
                     </group>
                 </search>
             </field>
@@ -177,6 +216,7 @@
             <field name="name">Expenses</field>
             <field name="res_model">hr.expense.expense</field>
             <field name="view_type">form</field>
+            <field name="view_mode">form,tree,calendar,graph</field>
             <field name="search_view_id" ref="view_hr_expense_filter"/>
             <field name="view_id" ref="view_expenses_tree"/>
             <field name="help" type="html">
@@ -228,7 +268,7 @@
             <field name="view_id" ref="view_expenses_tree"/>
             <field name="domain">[('state','=','accepted')]</field> 
         </record>
-        
+
         <record id="action_request_approve_expense" model="ir.actions.act_window">
             <field name="name">Expenses to Approve</field>
             <field name="res_model">hr.expense.expense</field>
@@ -247,12 +287,35 @@
               </p>
             </field>
         </record>
-        
+
         <menuitem id="menu_expense_approved" parent="account.menu_finance_payables" action="action_approved_expense" sequence="8"/> 
         <menuitem id="menu_hr_product" name="Expense Products" parent="hr.menu_hr_configuration_expenses" action="hr_expense_product" groups="base.group_hr_manager"/>
         <menuitem id="next_id_49" name="Expenses" sequence="15" parent="hr.menu_hr_root"/>
         <menuitem action="expense_all" id="menu_expense_all" name="Expenses" parent="next_id_49"/>
         <menuitem action="action_request_approve_expense" id="menu_expense_to_approve" name="Expenses to Approve" parent="next_id_49" groups="base.group_hr_user"/>
-        
+
+        <record id="finance_expense_approved" model="ir.actions.act_window">
+            <field name="name">Approved Expenses</field>
+            <field name="res_model">hr.expense.expense</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_expenses_tree"/>
+            <field name="domain">[('state','=','accepted')]</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to register new expenses. 
+                </p><p>
+                    OpenERP will ensure the whole process is followed; the expense
+                    sheet is validated by manager(s), the employee is reimbursed
+                    from his expenses, some expenses must be re-invoiced to the
+                    customers.
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_finance_expenses" name="Expenses" parent="account.menu_finance" sequence="3" 
+                groups="account.group_account_user"/>
+        <menuitem id="menu_account_expenses_approved" name="Approved Expenses"
+                parent="menu_finance_expenses" action="finance_expense_approved"/>
+
     </data>
 </openerp>

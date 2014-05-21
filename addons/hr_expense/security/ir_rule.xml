@@ -1,5 +1,15 @@
 <?xml version="1.0" ?>
 <openerp>
+    <data noupdate="0">
+
+        <record id="group_account_accountant" model="res.groups">
+            <field name="name">Generate Accounting Entries for Expense</field>
+            <field name="category_id" ref="base.module_category_hidden"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_hr_user'))]"/>
+        </record>
+
+    </data>
+
     <data noupdate="1">
 
         <record id="property_rule_expense_manager" model="ir.rule">
