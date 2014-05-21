@@ -1803,6 +1803,29 @@
             <field name="model">product.product</field>
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="arch" type="xml">
+                <group name="status" position="before" version="7.0">
+                    <group string="Stock and Expected Variations" attrs="{'invisible': [('type', '=', 'service')]}" groups="base.group_user">
+                        <label for="qty_available"/>
+                            <div>
+                                <field name="qty_available" class="oe_inline"/>
+                                <button name="%(action_view_change_product_quantity)d" string="⇒ Update"
+                                    type="action"
+                                    class="oe_link"/>
+                            </div>
+                        <label for="incoming_qty"/>
+                        <div>
+                            <field name="incoming_qty" class="oe_inline"/>
+                            <button string="⇒ Request Procurement" name="%(act_make_procurement)d" type="action" class="oe_link"/>
+                        </div>
+                        <field name="outgoing_qty" class="oe_inline"/>
+                        <field name="virtual_available" class="oe_inline"/>
+                    </group>
+                    <group name="lot" groups="stock.group_tracking_lot,stock.group_production_lot" string="Lots">
+                        <field name="track_all" groups="stock.group_production_lot"/>
+                        <field name="track_incoming" groups="stock.group_production_lot" attrs="{'invisible': [('track_all', '=', True)]}"/>
+                        <field name="track_outgoing" groups="stock.group_production_lot" attrs="{'invisible': [('track_all', '=', True)]}"/>
+                    </group>
+                </group>
                 
                 <xpath expr="//group[@name='procurement_uom']" position="after" >
                    <newline/>
@@ -1845,36 +1868,14 @@
             </field>
         </record>
 
-        <record model="ir.ui.view" id="product_form_view_procurement_button">
+        <!--<record model="ir.ui.view" id="product_form_view_procurement_button">
             <field name="name">product.product.procurement</field>
             <field name="model">product.product</field>
             <field name="inherit_id" ref="view_normal_procurement_locations_form"/>
             <field name="arch" type="xml">
-                <group name="status" position="before" version="7.0">
-                    <group string="Stock and Expected Variations" attrs="{'invisible': [('type', '=', 'service')]}" groups="base.group_user">
-                        <label for="qty_available"/>
-                            <div>
-                                <field name="qty_available" class="oe_inline"/>
-                                <button name="%(action_view_change_product_quantity)d" string="⇒ Update"
-                                    type="action"
-                                    class="oe_link"/>
-                            </div>
-                        <label for="incoming_qty"/>
-                        <div>
-                            <field name="incoming_qty" class="oe_inline"/>
-                            <button string="⇒ Request Procurement" name="%(act_make_procurement)d" type="action" class="oe_link"/>
-                        </div>
-                        <field name="outgoing_qty" class="oe_inline"/>
-                        <field name="virtual_available" class="oe_inline"/>
-                    </group>
-                    <group name="lot" groups="stock.group_tracking_lot,stock.group_production_lot" string="Lots">
-                        <field name="track_all" groups="stock.group_production_lot"/>
-                        <field name="track_incoming" groups="stock.group_production_lot" attrs="{'invisible': [('track_all', '=', True)]}"/>
-                        <field name="track_outgoing" groups="stock.group_production_lot" attrs="{'invisible': [('track_all', '=', True)]}"/>
-                    </group>
-                </group>
+                
             </field>
-        </record>
+        </record>-->
         
         <record model="ir.ui.view" id="view_quant_package_form">
             <field name="name">stock.quant.package.form</field>

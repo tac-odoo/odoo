@@ -297,6 +297,7 @@
         location_dest_id: stock.stock_location_customers
 -
  !python {model: stock.picking}: |
+    import pdb; pdb.set_trace()
     self.action_confirm(cr, uid, [ref('outgoing_shipment_main_warehouse'),ref('outgoing_shipment_main_warehouse1'),ref('incomming_shipment2'),ref('incomming_shipment1'),ref('incomming_shipment3'),ref('outgoing_chicago_warehouse3'),ref('outgoing_chicago_warehouse2'),ref('outgoing_chicago_warehouse1'),ref('incomming_chicago_warehouse1'),ref('incomming_chicago_warehouse2'),ref('incomming_chicago_warehouse3')], context=context)
     record = self.browse(cr, uid, ref('outgoing_shipment_main_warehouse1'), context=context)
     record_chi_in = self.browse(cr, uid, ref('incomming_chicago_warehouse1'), context=context)

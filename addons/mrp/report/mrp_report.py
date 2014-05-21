@@ -67,36 +67,38 @@ class report_mrp_inout(osv.osv):
     }
 
     def init(self, cr):
-        cr.execute("""
-            create or replace view report_mrp_inout as (
-                select
-                    min(sm.id) as id,
-                    to_char(sm.date,'YYYY:IW') as date,
-                    sum(case when (sl.usage='internal') then
-                        sm.price_unit * sm.product_qty
-                    else
-                        0.0
-                    end - case when (sl2.usage='internal') then
-                        sm.price_unit * sm.product_qty
-                    else
-                        0.0
-                    end) as value, 
-                    sm.company_id
-                from
-                    stock_move sm
-                left join product_product pp
-                    on (pp.id = sm.product_id)
-                left join product_template pt
-                    on (pt.id = pp.product_tmpl_id)
-                left join stock_location sl
-                    on ( sl.id = sm.location_id)
-                left join stock_location sl2
-                    on ( sl2.id = sm.location_dest_id)
-                where
-                    sm.state = 'done'
-                group by
-                    to_char(sm.date,'YYYY:IW'), sm.company_id
-            )""")
+#         cr.execute("""
+#             create or replace view report_mrp_inout as (
+#                 select
+#                     min(sm.id) as id,
+#                     to_char(sm.date,'YYYY:IW') as date,
+#                     sum(case when (sl.usage='internal') then
+#                         sm.price_unit * sm.product_qty
+#                     else
+#                         0.0
+#                     end - case when (sl2.usage='internal') then
+#                         sm.price_unit * sm.product_qty
+#                     else
+#                         0.0
+#                     end) as value, 
+#                     sm.company_id
+#                 from
+#                     stock_move sm
+#                 left join product_product pp
+#                     on (pp.id = sm.product_id)
+#                 left join product_template pt
+#                     on (pt.id = pp.product_tmpl_id)
+#                 left join stock_location sl
+#                     on ( sl.id = sm.location_id)
+#                 left join stock_location sl2
+#                     on ( sl2.id = sm.location_dest_id)
+#                 where
+#                     sm.state = 'done'
+#                 group by
+#                     to_char(sm.date,'YYYY:IW'), sm.company_id
+            #)
+#             """)
+        pass
 
 
 

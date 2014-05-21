@@ -541,7 +541,6 @@ class pos_order(osv.osv):
         for tmp_order in orders_to_save:
             to_invoice = tmp_order['to_invoice']
             order = tmp_order['data']
-
             order_id = self.create(cr, uid, {
                 'name': order['name'],
                 'user_id': order['user_id'] or False,
@@ -742,7 +741,7 @@ class pos_order(osv.osv):
         picking_obj = self.pool.get('stock.picking')
         partner_obj = self.pool.get('res.partner')
         move_obj = self.pool.get('stock.move')
-
+        
         for order in self.browse(cr, uid, ids, context=context):
             if not order.state=='draft':
                 continue
