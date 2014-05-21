@@ -87,6 +87,20 @@ class hr_applicant(osv.Model):
             'hr_recruitment.mt_applicant_stage_changed': lambda self, cr, uid, obj, ctx=None: obj.stage_id and obj.stage_id.sequence > 1,
         },
     }
+    _mail_actions = [{
+        'name': 'applicant_first_interview',
+        'type': 'object',
+        'string': 'Approve',
+        'condition': lambda self, obj, context=None: obj.stage_id.name == 'Initial Qualification',
+        'button_type': 'success'
+    },
+    {
+        'name': 'applicant_refused',
+        'type': 'object',
+        'string': 'Refuse',
+        'condition': lambda self, obj, context=None: obj.stage_id.name == 'Initial Qualification',
+        'button_type': 'warning'
+    }]
     _mail_mass_mailing = _('Applicants')
 
     def _get_default_department_id(self, cr, uid, context=None):
@@ -239,6 +253,16 @@ class hr_applicant(osv.Model):
     _group_by_full = {
         'stage_id': _read_group_stage_ids
     }
+
+    def applicant_first_interview(self, cr, uid, ids, context=None):
+        stage_id = self.pool['hr.recruitment.stage'].search(cr, uid, [('name','=','First Interview')], context=context)
+        if stage_id:
+            self.pool['hr.applicant'].write(cr, uid, ids, {'stage_id':stage_id[0]}, context=context)
+
+    def applicant_refused(self, cr, uid, ids, context=None):
+        stage_id = self.pool['hr.recruitment.stage'].search(cr, uid, [('name','=','Refused')], context=context)
+        if stage_id:
+            self.pool['hr.applicant'].write(cr, uid, ids, {'stage_id':stage_id[0]}, context=context)
 
     def onchange_job(self, cr, uid, ids, job_id=False, context=None):
         department_id = False

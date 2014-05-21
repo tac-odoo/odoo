@@ -568,6 +568,13 @@ class task(osv.osv):
             'project.mt_task_ready': lambda self, cr, uid, obj, ctx=None: obj.kanban_state == 'done',
         },
     }
+    _mail_actions = [{
+        'name': 'set_user',
+        'type': 'object',
+        'string': 'I will do it',
+        'condition': lambda self, obj, context=None: not obj.user_id,
+        'button_type': 'success'
+    }]
 
     def _get_default_partner(self, cr, uid, context=None):
         project_id = self._get_default_project_id(cr, uid, context)
@@ -665,6 +672,9 @@ class task(osv.osv):
             if task.stage_id and task.stage_id.fold:
                 res[task.id]['progress'] = 100.0
         return res
+
+    def set_user(self, cr, uid, ids, context=None):
+        self.pool['project.task'].write(cr, uid, ids, {'user_id':uid})
 
     def onchange_remaining(self, cr, uid, ids, remaining=0.0, planned=0.0):
         if remaining and not planned:

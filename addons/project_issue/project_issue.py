@@ -60,6 +60,21 @@ class project_issue(osv.Model):
             'project_issue.mt_issue_ready': lambda self, cr, uid, obj, ctx=None: obj.kanban_state == 'done',
         },
     }
+    _mail_actions = [{
+        'name': 'set_user',
+        'type': 'object',
+        'string': 'I will do it',
+        'condition': lambda self, obj, context=None: not obj.user_id,
+        'button_type': 'success'
+    },
+    {
+        'type': 'action',
+        'string': 'Not interested',
+        'condition': lambda self, obj, context=None: not obj.user_id,
+        'button_type': 'warning',
+        'action_xml_id': 'action_view_issues',
+        'module': 'project_issue'
+    }]
 
     def _get_default_partner(self, cr, uid, context=None):
         project_id = self._get_default_project_id(cr, uid, context)
@@ -305,6 +320,9 @@ class project_issue(osv.Model):
     _group_by_full = {
         'stage_id': _read_group_stage_ids
     }
+
+    def set_user(self, cr, uid, ids, context=None):
+        self.pool['project.issue'].write(cr, uid, ids, {'user_id':uid})
 
     def copy(self, cr, uid, id, default=None, context=None):
         issue = self.read(cr, uid, id, ['name'], context=context)

@@ -79,6 +79,21 @@ class crm_lead(format_address, osv.osv):
             'crm.mt_lead_lost': lambda self, cr, uid, obj, ctx=None: obj.probability == 0 and obj.stage_id and obj.stage_id.fold and obj.stage_id.sequence > 1,
         },
     }
+    _mail_actions = [{
+        'name': 'set_user',
+        'type': 'object',
+        'string': 'I will manage it',
+        'condition': lambda self, obj, context=None: not obj.user_id,
+        'button_type': 'success'
+    },
+    {
+        'type': 'action',
+        'string': 'Not interested',
+        'condition': lambda self, obj, context=None: not obj.user_id,
+        'button_type': 'warning',
+        'action_xml_id': 'crm_case_category_act_oppor11',
+        'module': 'crm'
+    }]
     _mail_mass_mailing = _('Leads / Opportunities')
 
     def get_empty_list_help(self, cr, uid, help, context=None):
@@ -313,6 +328,9 @@ class crm_lead(format_address, osv.osv):
     _sql_constraints = [
         ('check_probability', 'check(probability >= 0 and probability <= 100)', 'The probability of closing the deal should be between 0% and 100%!')
     ]
+
+    def set_user(self, cr, uid, ids, context=None):
+        self.pool['crm.lead'].write(cr, uid, ids, {'user_id':uid})
 
     def onchange_stage_id(self, cr, uid, ids, stage_id, context=None):
         if not stage_id:

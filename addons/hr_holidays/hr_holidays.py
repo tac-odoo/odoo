@@ -111,6 +111,21 @@ class hr_holidays(osv.osv):
             'hr_holidays.mt_holidays_confirmed': lambda self, cr, uid, obj, ctx=None: obj.state == 'confirm',
         },
     }
+    _mail_actions = [{
+         'name': 'holidays_validate',
+         'type': 'object',
+         'string': 'Approve',
+         'condition': lambda self, obj, context=None: obj.state == 'confirm',
+         'button_type': 'success'
+     },
+     {
+         'name': 'holidays_refuse',
+         'type': 'object',
+         'string': 'Refuse',
+         'condition': lambda self, obj, context=None: obj.state == 'confirm' or obj.state == 'validate',
+         'button_type': 'warning'
+     }]
+
 
     def _employee_get(self, cr, uid, context=None):        
         emp_id = context.get('default_employee_id', False)

@@ -306,6 +306,20 @@ class event_registration(osv.osv):
     }
     _order = 'name, create_date desc'
 
+    _mail_actions = [{
+        'name': 'registration_open',
+        'type': 'object',
+        'string': 'Confirm',
+        'condition': lambda self, obj, context=None: obj.state == 'draft',
+        'button_type': 'success'
+    },
+    {
+        'name': 'button_reg_cancel',
+        'type': 'object',
+        'string': 'Cancel',
+        'condition': lambda self, obj, context=None: obj.state == 'draft' or obj.state == 'open',
+        'button_type': 'warning'
+    }]
 
     def _check_seats_limit(self, cr, uid, ids, context=None):
         for registration in self.browse(cr, uid, ids, context=context):

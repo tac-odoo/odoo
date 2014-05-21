@@ -225,6 +225,21 @@ class account_invoice(osv.osv):
             'account.mt_invoice_validated': lambda self, cr, uid, obj, ctx=None: obj.state == 'open' and obj.type in ('out_invoice', 'out_refund'),
         },
     }
+    _mail_actions = [{
+        'name': 'invoice_validate',
+        'type': 'object',
+        'string': 'Validate',
+        'condition': lambda self, obj, context=None: obj.state == 'draft',
+        'button_type': 'success'
+    },
+    {
+        'name': 'action_cancel',
+        'type': 'object',
+        'string': 'Cancel',
+        'condition': lambda self, obj, context=None: obj.state == 'draft',
+        'button_type': 'warning'
+    }]
+
     _columns = {
         'name': fields.char('Reference/Description', size=64, select=True, readonly=True, states={'draft':[('readonly',False)]}),
         'origin': fields.char('Source Document', size=64, help="Reference of the document that produced this invoice.", readonly=True, states={'draft':[('readonly',False)]}),

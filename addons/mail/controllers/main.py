@@ -1,5 +1,6 @@
 import base64
 import psycopg2
+import werkzeug
 
 import openerp
 from openerp import SUPERUSER_ID
@@ -42,3 +43,17 @@ class MailController(http.Controller):
             except psycopg2.Error:
                 pass
         return True
+
+    @http.route('/mail_action/<model>/<int:id>', type='http', auth='user')
+    def mail_action(self, model, id, action_name=None, action_type=None, action_id=None):
+        if not request.session.uid:
+            return login_redirect()
+        redirect_url = "/web?db=%s#id=%s&model=%s" %(request.db, id, model)
+        object_pool = request.registry.get(model)
+        if action_type in ['workflow','object']:
+            action = getattr(object_pool,action_name)
+            action(request.cr, request.uid, [id], context=request.context)
+            redirect_url += "&view_type=form"
+        if action_type == 'action':
+            redirect_url += "&action=%s" % action_id
+        return werkzeug.utils.redirect(redirect_url)

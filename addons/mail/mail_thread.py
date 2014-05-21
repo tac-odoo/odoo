@@ -24,6 +24,8 @@ from collections import OrderedDict
 import datetime
 import dateutil
 import email
+import jinja2
+import sys
 try:
     import simplejson as json
 except ImportError:
@@ -46,6 +48,14 @@ from openerp.tools.translate import _
 
 _logger = logging.getLogger(__name__)
 
+if hasattr(sys, 'frozen'):
+    # When running on compiled windows binary, we don't have access to package loader.
+    path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'views'))
+    loader = jinja2.FileSystemLoader(path)
+else:
+    loader = jinja2.PackageLoader('openerp.addons.mail', "views")
+
+env = jinja2.Environment(loader=loader, autoescape=True)
 
 def decode_header(message, header, separator=' '):
     return separator.join(map(decode, filter(None, message.get_all(header, []))))
@@ -96,6 +106,14 @@ class mail_thread(osv.AbstractModel):
     #   :param obj: is a browse_record
     #   :param function lambda: returns whether the tracking should record using this subtype
     _track = {}
+    _default_mail_actions = [{
+    'name': 'message_unsubscribe_users',
+    'type': 'object',
+    'string': 'Mute',
+    'condition': lambda self, obj, context=None: True,
+    'button_type': 'info'
+    }]
+    _mail_actions = []
 
     # Mass mailing feature
     _mail_mass_mailing = False
@@ -346,6 +364,23 @@ class mail_thread(osv.AbstractModel):
             res['arch'] = etree.tostring(doc)
         return res
 
+    def _prepare_body_mail_action(self, cr, uid, obj, context=None):
+        mail_actions = []
+        data_pool = self.pool['ir.model.data']
+        for mail_action in self._mail_actions + self._default_mail_actions:
+            condition_fn = mail_action['condition']
+            if mail_action.get('action_xml_id'):
+                dummy, act_id = data_pool.get_object_reference(cr, uid, mail_action['module'], mail_action['action_xml_id'])
+                mail_action['xml_id'] = act_id
+            if condition_fn(self, obj, context=context):
+                mail_actions.append(mail_action)
+        mail_actions_body = env.get_template("mail_actions_button.html").render({
+            'mail_actions': mail_actions,
+            'model': self._name,
+            'res_id': obj.id
+        })
+        return mail_actions_body
+
     #------------------------------------------------------
     # CRUD overrides for automatic subscription and logging
     #------------------------------------------------------
@@ -370,10 +405,17 @@ class mail_thread(osv.AbstractModel):
             message_follower_ids.append([4, pid])
             values['message_follower_ids'] = message_follower_ids
         thread_id = super(mail_thread, self).create(cr, uid, values, context=context)
-
+        message_body = ''
+        mail_actions_body = ''
+        if thread_id:
+            obj = self.browse(cr, uid, thread_id, context=context)
+            mail_actions_body = self._prepare_body_mail_action(cr, uid, obj)
         # automatic logging unless asked not to (mainly for various testing purpose)
         if not context.get('mail_create_nolog'):
-            self.message_post(cr, uid, thread_id, body=_('%s created') % (self._description), context=context)
+            message_body +=_('%s created %s') % (self._description, mail_actions_body)
+        else:
+            message_body += mail_actions_body
+        self.message_post(cr, uid, thread_id, body=message_body, context=context)
 
         # auto_subscribe: take values and defaults into account
         create_values = dict(values)
@@ -414,6 +456,12 @@ class mail_thread(osv.AbstractModel):
             records = self.browse(cr, uid, ids, context=track_ctx)
             initial_values = dict((record.id, dict((key, getattr(record, key)) for key in tracked_fields))
                                   for record in records)
+
+        if ids:
+            obj = self.browse(cr, uid, ids[0], context=context)
+            mail_actions_body = self._prepare_body_mail_action(cr, uid, obj)
+            message_body = mail_actions_body
+            self.message_post(cr, uid, ids[0], body=message_body, context=context)
 
         # Perform write, update followers
         result = super(mail_thread, self).write(cr, uid, ids, values, context=context)

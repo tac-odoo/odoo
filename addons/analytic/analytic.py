@@ -38,6 +38,27 @@ class account_analytic_account(osv.osv):
             'analytic.mt_account_opened': lambda self, cr, uid, obj, ctx=None: obj.state == 'open',
         },
     }
+    _mail_actions = [{
+        'name': 'set_pending',
+        'type': 'object',
+        'string': 'Renew',
+        'condition': lambda self, obj, context=None: obj.state == 'open',
+        'button_type': 'success'
+    },
+    {
+        'name': 'set_close',
+        'type': 'object',
+        'string': 'Close',
+        'condition': lambda self, obj, context=None: obj.state == 'open' or obj.state == 'pending',
+        'button_type': 'warning'
+    },
+    {
+        'name': 'set_cancel',
+        'type': 'object',
+        'string': 'Cancel',
+        'condition': lambda self, obj, context=None: obj.state == 'open' or obj.state == 'pending',
+        'button_type': 'warning'
+    }]
 
     def _compute_level_tree(self, cr, uid, ids, child_ids, res, field_names, context=None):
         currency_obj = self.pool.get('res.currency')

@@ -792,10 +792,25 @@ class fleet_vehicle_log_contract(osv.Model):
             res[contract.id] = totalsum
         return res
 
+    _inherit = ['mail.thread']
     _inherits = {'fleet.vehicle.cost': 'cost_id'}
     _name = 'fleet.vehicle.log.contract'
     _description = 'Contract information on a vehicle'
     _order='state desc,expiration_date'
+    _mail_actions = [{
+        'name': 'act_renew_contract',
+        'type': 'object',
+        'string': 'Renew',
+        'condition': lambda self, obj, context=None: obj.state == 'open' or obj.state == 'closed',
+        'button_type': 'success'
+    },
+    {
+        'name': 'contract_close',
+        'type': 'object',
+        'string': 'Terminate',
+        'condition': lambda self, obj, context=None: obj.state == 'open',
+        'button_type': 'warning'
+    }]
     _columns = {
         'name': fields.function(_vehicle_contract_name_get_fnc, type="text", string='Name', store=True),
         'start_date': fields.date('Contract Start Date', help='Date when the coverage of the contract begins'),
