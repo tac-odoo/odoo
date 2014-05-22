@@ -3,7 +3,7 @@
 <templates>
     <t t-name="hr_timesheet_day.DailyTimesheet">
     <div class="oe_timesheet_daily">
-    <table>
+    <table t-if="widget.days.length != 0">
            <tr>
                 <td>
                     <div id="tdate">

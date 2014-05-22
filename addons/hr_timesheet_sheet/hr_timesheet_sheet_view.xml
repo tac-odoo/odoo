@@ -10,11 +10,17 @@
         </record>
 
         <!-- hr_timesheet inheritancy -->
-        <record model="ir.ui.view" id="hr_timesheet_sheet_form_inherit">
+        <record model="ir.ui.view" id="hr_timesheet_form_inherit">
             <field name="name">view_hr_timesheet_sheet_inherit</field>
             <field name="model">hr_timesheet_sheet.sheet</field>
-            <field name="inherit_id" ref="hr_timesheet.hr_timesheet_sheet_form" />
+            <field name="inherit_id" ref="hr_timesheet.hr_timesheet_form" />
             <field name="arch" type="xml">
+                <xpath expr="//header/button[@name='button_confirm']" position="after">
+                    <button name="button_confirm" states="draft" string="Submit to Manager" type="object" class="oe_highlight"/>
+                    <button name="done" states="confirm" string="Approve" type="workflow" groups="base.group_hr_user" class="oe_highlight"/>
+                    <button name="action_set_to_draft" states="done" string="Set to Draft" type="object" />
+                    <button name="cancel" states="confirm" string="Refuse" type="workflow" groups="base.group_hr_user" />
+                </xpath>
                 <xpath expr="//div[@class='oe_right oe_button_box']" position="inside">
                     <button type="action" groups="base.group_hr_attendance"
                         class="oe_stat_button" icon="fa-users"
@@ -67,16 +73,30 @@
             </field>
         </record>
 
-        <record model="ir.ui.view" id="hr_timesheet_sheet_tree_simplified_inherit">
+        <record model="ir.ui.view" id="hr_timesheet_tree_simplified_inherit">
             <field name="name">hr.timesheet.sheet.tree.inherit</field>
             <field name="model">hr_timesheet_sheet.sheet</field>
-            <field name="inherit_id" ref="hr_timesheet.hr_timesheet_sheet_tree_simplified" />
+            <field name="inherit_id" ref="hr_timesheet.hr_timesheet_tree_simplified" />
             <field name="arch" type="xml">
                 <field name="department_id" position="after">
                     <field name="total_attendance" widget="float_time" groups="base.group_hr_attendance"/>
                     <field name="total_timesheet" widget="float_time"/>
                     <field name="total_difference" widget="float_time" groups="base.group_hr_attendance"/>
                 </field>
+            </field>
+        </record>
+
+        <!--
+            Company inheritancy
+        -->
+        <record id="hr_timesheet_sheet_company" model="ir.ui.view">
+            <field name="name">res.company.timesheet.sheet</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='timesheets_grp']" position="inside">
+                    <field name="timesheet_max_difference"/>
+                </xpath>
             </field>
         </record>
 

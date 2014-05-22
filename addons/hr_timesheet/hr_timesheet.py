@@ -114,11 +114,7 @@ class hr_timesheet_sheet(osv.osv):
         for sheet in self.browse(cr, uid, ids, context=context):
             if sheet.employee_id and sheet.employee_id.parent_id and sheet.employee_id.parent_id.user_id:
                 self.message_subscribe_users(cr, uid, [sheet.id], user_ids=[sheet.employee_id.parent_id.user_id.id], context=context)
-            di = sheet.user_id.company_id.timesheet_max_difference
-            if (abs(sheet.total_difference) < di) or not di:
-                self.signal_confirm(cr, uid, [sheet.id])
-            else:
-                raise osv.except_osv(_('Warning!'), _('Please verify that the total difference of the sheet is lower than %.2f.') %(di,))
+            self.signal_confirm(cr, uid, [sheet.id])
         return True
 
     def _count_timesheet(self, cr, uid, ids, field_name, arg, context=None):
@@ -509,13 +505,9 @@ class res_company(osv.osv):
         'timesheet_range': fields.selection(
             [('day','Day'),('week','Week'),('month','Month')], 'Timesheet range',
             help="Periodicity on which you validate your timesheets."),
-        'timesheet_max_difference': fields.float('Timesheet allowed difference(Hours)',
-            help="Allowed difference in hours between the sign in/out and the timesheet " \
-                 "computation for one sheet. Set this to 0 if you do not want any control."),
     }
     _defaults = {
         'timesheet_range': lambda *args: 'week',
-        'timesheet_max_difference': lambda *args: 0.0
     }
 
 

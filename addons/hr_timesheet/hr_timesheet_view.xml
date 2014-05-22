@@ -194,31 +194,26 @@
         <menuitem id="menu_hr_timesheet_reports" parent="hr.menu_hr_reporting" sequence="5" name="Timesheet"/>
 
 
-
-
-        <record model="ir.actions.act_window" id="act_hr_timesheet_sheet_sheet_2_hr_analytic_timesheet">
+        <record model="ir.actions.act_window" id="act_hr_timesheet_sheet_2_hr_analytic_timesheet">
             <field name="context">{'search_default_sheet_id': [active_id]}</field>
             <field name="name">Timesheet Activities</field>
             <field name="res_model">hr.analytic.timesheet</field>
             <field name="src_model">hr_timesheet_sheet.sheet</field>
         </record>
 
-        <record id="hr_timesheet_sheet_form" model="ir.ui.view">
-            <field name="name">hr.timesheet.sheet.form</field>
+        <record id="hr_timesheet_form" model="ir.ui.view">
+            <field name="name">hr.timesheet.form</field>
             <field name="model">hr_timesheet_sheet.sheet</field>
             <field name="arch" type="xml">
                 <form string="Timesheet" version="7.0">
                 <header>
-                    <button name="button_confirm" states="draft" string="Submit to Manager" type="object" class="oe_highlight"/>
-                    <button name="done" states="confirm" string="Approve" type="workflow" groups="base.group_hr_user" class="oe_highlight"/>
-                    <button name="action_set_to_draft" states="done" string="Set to Draft" type="object" />
-                    <button name="cancel" states="confirm" string="Refuse" type="workflow" groups="base.group_hr_user" />
+                    <button name="button_confirm" states="draft" string="Freeze Timesheet" type="object" groups="base.group_hr_manager" class="oe_highlight"/>
                     <field name="state" widget="statusbar" statusbar_visible="new,confirm,done"/>
                 </header>
                 <sheet>
                     <div class="oe_right oe_button_box" name="buttons">
                         <button type="action"
-                            name="%(act_hr_timesheet_sheet_sheet_2_hr_analytic_timesheet)d"
+                            name="%(act_hr_timesheet_sheet_2_hr_analytic_timesheet)d"
                             class="oe_stat_button"
                             icon="fa-clock-o">
                             <field name="timesheet_activity_count" widget="statinfo" string="Timesheet" help="Timesheet Activities"/>
@@ -287,8 +282,8 @@
             </field>
         </record>
 
-        <record id="view_hr_timesheet_sheet_filter" model="ir.ui.view">
-            <field name="name">hr_timesheet_sheet.sheet.filter</field>
+        <record id="view_hr_timesheet_filter" model="ir.ui.view">
+            <field name="name">hr_timesheet.filter</field>
             <field name="model">hr_timesheet_sheet.sheet</field>
             <field name="arch" type="xml">
                 <search string="Search Timesheet">
@@ -305,14 +300,14 @@
             </field>
         </record>
 
-        <record id="act_hr_timesheet_sheet_form" model="ir.actions.act_window">
+        <record id="act_hr_timesheet_form" model="ir.actions.act_window">
             <field name="name">Timesheets to Validate</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">hr_timesheet_sheet.sheet</field>
             <field name="view_type">form</field>
             <field name="view_id" eval="False"/>
             <field name="context">{'search_default_to_approve':1}</field>
-            <field name="search_view_id" ref="view_hr_timesheet_sheet_filter"/>
+            <field name="search_view_id" ref="view_hr_timesheet_filter"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 New timesheet to approve.
@@ -331,21 +326,20 @@
 
         <menuitem id="menu_hr_working_hours" parent="menu_hr_time_tracking" action="act_hr_timesheet_line_evry1_all_form"/>
 
-        <menuitem action="act_hr_timesheet_sheet_form" id="menu_act_hr_timesheet_sheet_form" parent="menu_hr_time_tracking"
+        <menuitem action="act_hr_timesheet_form" id="menu_act_hr_timesheet_form" parent="menu_hr_time_tracking"
              sequence="2" groups="base.group_hr_user"/>
 
         <!--
             Company inheritancy
         -->
-        <record id="hr_timesheet_sheet_company" model="ir.ui.view">
-            <field name="name">res.company.sheet</field>
+        <record id="hr_timesheet_company" model="ir.ui.view">
+            <field name="name">res.company.timesheet</field>
             <field name="model">res.company</field>
             <field name="inherit_id" ref="base.view_company_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//group[@name='account_grp']" position="after">
                     <group name="timesheets_grp" string="Timesheets">
                         <field name="timesheet_range"/>
-                        <field name="timesheet_max_difference"/>
                     </group>
                 </xpath>
             </field>
@@ -377,8 +371,8 @@
         </record>
         -->
 
-        <record id="hr_timesheet_sheet_tree_simplified" model="ir.ui.view">
-            <field name="name">hr.timesheet.sheet.tree</field>
+        <record id="hr_timesheet_tree_simplified" model="ir.ui.view">
+            <field name="name">hr.timesheet.tree</field>
             <field name="model">hr_timesheet_sheet.sheet</field>
             <field eval="10" name="priority"/>
             <field name="arch" type="xml">
@@ -391,25 +385,6 @@
                 </tree>
             </field>
         </record>
-
-         <!--
-        <record id="hr_timesheet_sheet_employee_extd_form" model="ir.ui.view">
-            <field name="name">hr.timesheet.sheet.employee.extd_form</field>
-            <field name="model">hr.employee</field>
-            <field name="inherit_id" ref="hr_timesheet.hr_timesheet_employee_extd_form"/>
-            <field name="arch" type="xml">
-                <xpath expr="//div[@name='button_box']" position="inside">
-                    <button name="%(act_hr_employee_2_hr_timesheet)d" 
-                        type="action"
-                        class="oe_stat_button"
-                        icon="fa-clock-o" 
-                        groups="base.group_hr_manager">
-                        <field name="timesheet_count" widget="statinfo" string="Timesheets"/>
-                    </button>
-                </xpath>
-            </field>
-        </record>
-        -->
 
     </data>
 </openerp>

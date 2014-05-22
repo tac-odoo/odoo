@@ -107,36 +107,38 @@ openerp.hr_timesheet_day = function(instance) {
         display_data: function() {
             var self = this;
             this.$el.html(QWeb.render("hr_timesheet_day.DailyTimesheet", {widget: self}));
-            var day_count = self.count;
-             _.each(self.days[self.count].account_group, function(account){
-                if (!self.get('effective_readonly')){
-                    self.get_box(account).val(self.sum_box(account, true)).change(function() {
-                        var num = $(this).val();
-                        if(!self.is_valid_value(num)){
-                                num = (num == 0)?0:Number(self.parse_client(num));
-                        }
-                        if (isNaN(num)) {
-                            $(this).val(self.sum_box(account, true));
-                        } else {
-                            account[0].unit_amount += num - self.sum_box(account);
-                            var product = (account[0].product_id instanceof Array) ? account[0].product_id[0] : account[0].product_id
-                            var journal = (account[0].journal_id instanceof Array) ? account[0].journal_id[0] : account[0].journal_id
-                            self.defs.push(new instance.web.Model("hr.analytic.timesheet").call("on_change_unit_amount", [[], product, account[0].unit_amount, false, false, journal]).then(function(res) {
-                                account[0].amount = res.value.amount || 0;
-                                self.display_totals();
-                                self.sync();
-                            }));
-                            if(!isNaN($(this).val())){
-                                $(this).val(self.sum_box(account, true));
+            if (self.days.length) {
+                var day_count = self.count;
+                 _.each(self.days[self.count].account_group, function(account){
+                    if (!self.get('effective_readonly')){
+                        self.get_box(account).val(self.sum_box(account, true)).change(function() {
+                            var num = $(this).val();
+                            if(!self.is_valid_value(num)){
+                                    num = (num == 0)?0:Number(self.parse_client(num));
                             }
-                        }
-                    });
-                } else {
-                    self.get_box(account).html(self.sum_box(account, true));
-                }
-            });
-            self.display_totals();
-            self.$(".oe_timesheet_daily_adding button").click(_.bind(this.init_add_account, this));
+                            if (isNaN(num)) {
+                                $(this).val(self.sum_box(account, true));
+                            } else {
+                                account[0].unit_amount += num - self.sum_box(account);
+                                var product = (account[0].product_id instanceof Array) ? account[0].product_id[0] : account[0].product_id
+                                var journal = (account[0].journal_id instanceof Array) ? account[0].journal_id[0] : account[0].journal_id
+                                self.defs.push(new instance.web.Model("hr.analytic.timesheet").call("on_change_unit_amount", [[], product, account[0].unit_amount, false, false, journal]).then(function(res) {
+                                    account[0].amount = res.value.amount || 0;
+                                    self.display_totals();
+                                    self.sync();
+                                }));
+                                if(!isNaN($(this).val())){
+                                    $(this).val(self.sum_box(account, true));
+                                }
+                            }
+                        });
+                    } else {
+                        self.get_box(account).html(self.sum_box(account, true));
+                    }
+                });
+                self.display_totals();
+                self.$(".oe_timesheet_daily_adding button").click(_.bind(this.init_add_account, this));
+            }
         },
         get_desc: function(account,day_count){
             var input_box = this.$('.oe_edit_input')[day_count];

@@ -94,10 +94,16 @@ class hr_timesheet_sheet(osv.osv):
         return [att[2] for att in date_attendances]
 
     def button_confirm(self, cr, uid, ids, context=None):
-        res = super(hr_timesheet_sheet, self).button_confirm(cr, uid, ids, context=context)
         for sheet in self.browse(cr, uid, ids, context=context):
+            if sheet.employee_id and sheet.employee_id.parent_id and sheet.employee_id.parent_id.user_id:
+                self.message_subscribe_users(cr, uid, [sheet.id], user_ids=[sheet.employee_id.parent_id.user_id.id], context=context)
             self.check_employee_attendance_state(cr, uid, sheet.id, context=context)
-        return res
+            di = sheet.user_id.company_id.timesheet_max_difference
+            if (abs(sheet.total_difference) < di) or not di:
+                self.signal_confirm(cr, uid, [sheet.id])
+            else:
+                raise osv.except_osv(_('Warning!'), _('Please verify that the total difference of the sheet is lower than %.2f.') %(di,))
+        return True
 
     def attendance_action_change(self, cr, uid, ids, context=None):
         hr_employee = self.pool.get('hr.employee')
@@ -372,4 +378,17 @@ class hr_timesheet_sheet_sheet_account(osv.osv):
                     on (l.id = hrt.line_id)
             group by l.account_id, s.id, l.to_invoice
         )""")
+
+
+class res_company(osv.osv):
+    _inherit = 'res.company'
+    _columns = {
+        'timesheet_max_difference': fields.float('Timesheet allowed difference(Hours)',
+            help="Allowed difference in hours between the sign in/out and the timesheet " \
+                 "computation for one sheet. Set this to 0 if you do not want any control."),
+    }
+    _defaults = {
+        'timesheet_max_difference': lambda *args: 0.0
+    }
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
