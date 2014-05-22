@@ -839,6 +839,7 @@
         <li class="dropdown-submenu">
             <a tabindex="-1" href="#">Style</a>
             <ul class="dropdown-menu">
+                <li data-value=""><a>Normal</a></li>
                 <li data-value="para_large"><a>Bigger Text</a></li>
                 <li data-value="readable"><a>Narrow</a></li>
             </ul>
@@ -963,6 +964,7 @@
         <li class="dropdown-submenu">
             <a tabindex="-1" href="#">Style</a>
             <ul class="dropdown-menu" name="parallax-scroll">
+                <li data-value=""><a>Normal</a></li>
                 <li data-value="img-rounded"><a>Rounded corners</a></li>
                 <li data-value="img-thumbnail"><a>Box</a></li>
                 <li data-value="img-circle"><a>Circle</a></li>

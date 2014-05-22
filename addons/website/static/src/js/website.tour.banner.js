@@ -103,16 +103,22 @@
                 placement: 'right',
                 title:     _t("Check Mobile Preview"),
                 content:   _t("Scroll to check rendering and then close the mobile preview."),
-                popover:   { next: _t("Continue") },
+                popover:   { fixed: true },
             },
             {
                 waitNot:   '.modal',
                 element:   '#content-menu-button',
-                placement: 'left',
+                placement: 'bottom',
                 title:     _t("Add new pages and menus"),
                 content:   _t("The 'Content' menu allows you to add pages or add the top menu."),
-                popover:   { next: _t("Close Tutorial") },
+                popover:   { next: _t("Continue") },
             },
+            {
+                waitNot:   '.popover.tour',
+                title:     _t("Close"),
+                content:   _t("The tutorial is now over, you're ready to create your own website"),
+                popover:   { next: _t("Skip It") },
+             },
         ]
     });
 

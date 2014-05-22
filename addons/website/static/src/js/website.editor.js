@@ -621,6 +621,8 @@
             new $.Deferred(function (d) {
                 var $dialog = $(openerp.qweb.render('website.editor.discard')).appendTo(document.body);
                 $dialog.on('click', '.btn-danger', function () {
+                    if (website.Tour['timer'])
+                        website.Tour.endTour();
                     d.resolve();
                 }).on('hidden.bs.modal', function () {
                     d.reject();
@@ -1397,8 +1399,13 @@
                 var selection = this.editor.getSelection();
                 var range = selection.getRanges(true)[0];
                 this.media = new CKEDITOR.dom.element("img");
-                range.insertNode(this.media);
-                range.selectNodeContents(this.media);
+                if(range){
+                    range.insertNode(this.media);
+                    range.selectNodeContents(this.media);
+                }
+                else{
+                    alert(_t("Please select a position where you want to place an image."))
+                }
                 this.active.media = this.media;
             }
 
