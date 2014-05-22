@@ -7,6 +7,8 @@ openerp.hr_timesheet_week = function(instance) {
     instance.hr_timesheet.WeeklyTimesheet = instance.web.form.FormWidget.extend(instance.web.form.ReinitializeWidgetMixin, {
         events: {
             "click .oe_timesheet_weekly_account a": "go_to",
+            "click #prweek" : "navigatePrevWeek",
+            "click #neweek" : "navigateNextWeek",
         },
         init: function() {
             this._super.apply(this, arguments);
@@ -161,6 +163,8 @@ openerp.hr_timesheet_week = function(instance) {
             })).then(function(result) {
                 // we put all the gathered data in self, then we render
                 self.dates = dates;
+                self.week = self.dates[0].getWeek();
+                self.last_week = self.dates[self.dates.length-1].getWeek();
                 self.accounts = accounts;
                 self.account_names = account_names;
                 self.default_get = default_get;
@@ -351,6 +355,22 @@ openerp.hr_timesheet_week = function(instance) {
                 });
             });
             return ops;
+        },
+        navigatePrevWeek: function(){
+            var self = this;
+            if(self.week != self.dates[0].getWeek())
+                self.week -= 1;
+            else
+               self.week = self.last_week; 
+            self.display_data();
+        },
+        navigateNextWeek: function(){
+            var self = this;
+            if(self.week == self.last_week)
+                self.week = self.dates[0].getWeek();
+            else
+                self.week += 1;
+            self.display_data();
         },
     });
 

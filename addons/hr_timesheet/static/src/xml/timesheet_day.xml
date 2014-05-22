@@ -19,12 +19,12 @@
                     <div class="oe_nav">
                         <ul>
                             <t t-if="widget.days[0].week!=widget.last_week">
-                                <li id="prweek" class=" oe_nav_button oe_day_button">Prev Week</li>
+                                <li id="prweek" class="oe_day_button oe_nav_button">Prev Week</li>
                                 <li id="neweek" class="oe_day_button oe_nav_button">Next Week</li>
                                 <li class="oe_nav_button"></li>
                             </t>
                             <li id="prev" class="oe_day_button oe_nav_button">Prev</li>
-                            <li id="fday" class=" oe_nav_button oe_day_button">First Day</li>
+                            <li id="fday" class="oe_day_button oe_nav_button">First Day</li>
                             <li id="next" class="oe_day_button oe_nav_button">Next</li>
                         </ul>
                     </div>
@@ -95,17 +95,15 @@
                                 <span class="oe_daily_total" t-att-data-day-total="widget.count"></span>
                             </div>
                         </div>
-                        <t t-if="_.isEmpty(days.account_group)">
-                            <div class="oe_view_nocontent">
-                                <p class="oe_view_nocontent_create">
-                                    Click to add projects, contracts or analytic accounts.
-                                </p>
-                                <p>
-                                    You will be able to register your working hours and
-                                    activities.
-                                </p>
-                            </div>
-                        </t>
+                        <div t-if="_.isEmpty(days.account_group)" class="oe_view_nocontent">
+                            <p class="oe_view_nocontent_create">
+                                Click to add projects, contracts or analytic accounts.
+                            </p>
+                            <p>
+                                You will be able to register your working hours and
+                                activities.
+                            </p>
+                        </div>
                         </div>
                 </td>
             </tr> 
