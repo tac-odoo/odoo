@@ -1,5 +1,5 @@
 <div name="mail_actions_group">
-    {% set button_style = {'info': 'background: gray', 'warning': 'background: red', 'success': 'background:green'} %}
+    {% set button_style = {'info': 'background: gray', 'warning': 'background: #d9534f', 'success': 'background:#5cb85c'} %}
     {% for button in mail_actions %}
         <a class="btn btn-default" name="mail_action" style="color:BLACK;{{ button_style[button.button_type] }}" href="/mail_action/{{ model }}/{{ res_id }}?action_name={{ button.name }}&action_type={{ button.type }}&action_id={{ button.xml_id }}"> {{ button.string }} </a>
     {% endfor %}
