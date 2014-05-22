@@ -15,6 +15,6 @@ Link module to map leads to issues
     'data': [
         'project_issue_view.xml'
     ],
-    'depends': ['crm', 'project_issue'],
+    'depends': ['project_issue'],
     'installable': True,
 }
