@@ -297,7 +297,7 @@ instance.web_calendar.CalendarView = instance.web_calendar.CalendarView.extend({
                 self.$calendar.fullCalendar('refetchEvents');
             });
         } else {
-            this._super(event_id, event_obj);
+            this._super.apply(this, arguments);
         }
     },
     open_event: function(event_id, title) {
