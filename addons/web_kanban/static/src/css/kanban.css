@@ -69,8 +69,6 @@
 }
 .openerp .oe_kanban_view .oe_kanban_content {
   word-wrap: break-word;
-  margin-right: 15px;
-  margin-left: 15px;
 }
 .openerp .oe_kanban_view .oe_kanban_content .oe_star_on, .openerp .oe_kanban_view .oe_kanban_content .oe_star_off {
   color: #cccccc;

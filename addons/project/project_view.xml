@@ -258,7 +258,7 @@
                                         <li><ul class="oe_kanban_colorpicker" data-field="color"/></li>
                                     </ul>
                                 </div>
-                                <div class="oe_kanban_content">
+                                <div class="oe_project_kanban_content">
                                     <div class="row">
                                         <h4><field name="name"/></h4>
                                         <div class="row oe_kanban_alias" t-if="record.alias_id.value">
