@@ -45,7 +45,7 @@
                                     </t>
                                     <t t-set="day_number" t-value="day_number + 1"/>
                                 </t>
-                                <td id="" class=" oe_day_button oe_header_total ">Total</td>
+                                <td id="" class=" oe_day_button oe_header_total ">Total : </td>
                             </tr>
                         </table>
                         <div class="oe_container">
@@ -66,7 +66,7 @@
                                         
                                         <span t-if="widget.get('effective_readonly')" class="oe_timesheet_daily_box" t-att-data-account="days.account_group[data][0].account_id" 
                                         t-att-data-day-count="day_count"></span>
-                                        <span t-if="!widget.get('effective_readonly')" class="oe_edit">
+                                        <span t-if="!widget.get('effective_readonly')" class="oe_timesheet_edit_description">
                                         <i  class="fa fa-pencil fa-fw" title="edit description" t-att-data-account="data" t-att-data-day-count="index"></i>
                                         </span>
                                         <input class="oe_edit_input" t-att-data-account="data" data-day-count="index" style="display:none"></input>
@@ -90,9 +90,11 @@
                                     <button>Add a Line</button>
                                 </div>
                             </div>
-                            <div t-if="!(_.isEmpty(days.account_group))">
-                                <span  style="font-weight:bold;margin-left:400px">Total</span>
-                                <span class="oe_daily_total" t-att-data-day-total="widget.count"></span>
+                            <div class="oe_timesheet_daily_footer" t-if="!(_.isEmpty(days.account_group))">
+                                <div>
+                                    <span>Total : </span>
+                                    <span class="oe_daily_total" t-att-data-day-total="widget.count"></span>
+                                </div>
                             </div>
                         </div>
                         <div t-if="_.isEmpty(days.account_group)" class="oe_view_nocontent">

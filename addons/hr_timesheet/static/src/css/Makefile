@@ -1,3 +1,5 @@
-timesheet.css: timesheet.sass
-	sass -t expanded timesheet.sass timesheet.css
-
+all: *.css
+%.css: %.sass
+    sass -t expanded --compass --unix-newlines $< $@
+watch:
+    sass -t expanded --compass --unix-newlines --watch .:.

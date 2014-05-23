@@ -10,7 +10,7 @@ openerp.hr_timesheet_day = function(instance) {
             "click #prweek" : "navigatePrevWeek",
             "click #neweek" : "navigateNextWeek",
             "click .oe_header" : "navigateDays",
-            "click .oe_edit" : "addDescription",
+            "click .oe_timesheet_edit_description" : "addDescription",
             "click .oe_copy_accounts a": "copyAccounts",
             "click .oe_timesheet_goto a": "go_to"
         },
