@@ -4,8 +4,8 @@
     <t t-name="hr_timesheet.WeeklyTimesheet">
         <div class="oe_timesheet_weekly">
             <div class="oe_timesheet_weekly_navigation"  t-if="widget.dates and widget.dates[0].getWeek() != widget.last_week">
-                <li id="prweek" class=" oe_nav_button oe_day_button">Prev Week</li>
-                <li id="neweek" class="oe_day_button oe_nav_button">Next Week</li>
+                <li class="prev_week oe_nav_button oe_day_button">Prev Week</li>
+                <li class="next_week oe_day_button oe_nav_button">Next Week</li>
             </div>
             <table>
                 <tr>

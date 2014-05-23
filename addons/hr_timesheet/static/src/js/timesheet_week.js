@@ -4,11 +4,11 @@ openerp.hr_timesheet_week = function(instance) {
     var _t = instance.web._t;
 
     //TODO: Add weekly navigation in proper way
-    instance.hr_timesheet.WeeklyTimesheet = instance.web.form.FormWidget.extend(instance.web.form.ReinitializeWidgetMixin, {
+    instance.hr_timesheet.WeeklyTimesheet = instance.hr_timesheet.BaseTimesheet.extend({
         events: {
             "click .oe_timesheet_weekly_account a": "go_to",
-            "click #prweek" : "navigatePrevWeek",
-            "click #neweek" : "navigateNextWeek",
+            "click .oe_timesheet_weekly .prev_week": "navigatePrevWeek",
+            "click .oe_timesheet_weekly .next_week": "navigateNextWeek",
         },
         init: function() {
             this._super.apply(this, arguments);

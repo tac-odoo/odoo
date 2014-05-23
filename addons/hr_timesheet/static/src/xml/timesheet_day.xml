@@ -18,14 +18,9 @@
                 <td>
                     <div class="oe_nav">
                         <ul>
-                            <t t-if="widget.days[0].week!=widget.last_week">
-                                <li id="prweek" class="oe_day_button oe_nav_button">Prev Week</li>
-                                <li id="neweek" class="oe_day_button oe_nav_button">Next Week</li>
-                                <li class="oe_nav_button"></li>
-                            </t>
-                            <li id="prev" class="oe_day_button oe_nav_button">Prev</li>
-                            <li id="fday" class="oe_day_button oe_nav_button">First Day</li>
-                            <li id="next" class="oe_day_button oe_nav_button">Next</li>
+                            <li class="prev_day oe_day_button oe_nav_button">Prev</li>
+                            <li class="first_day oe_day_button oe_nav_button">First Day</li>
+                            <li class="next_day oe_day_button oe_nav_button">Next</li>
                         </ul>
                     </div>
                 </td>
@@ -45,7 +40,7 @@
                                     </t>
                                     <t t-set="day_number" t-value="day_number + 1"/>
                                 </t>
-                                <td id="" class=" oe_day_button oe_header_total ">Total : </td>
+                                <td id="" class="oe_day_button oe_header_total ">Total : </td>
                             </tr>
                         </table>
                         <div class="oe_container">

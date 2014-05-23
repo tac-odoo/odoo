@@ -4,14 +4,12 @@ openerp.hr_timesheet_day = function(instance) {
 
     instance.hr_timesheet.DailyTimesheet = instance.hr_timesheet.BaseTimesheet.extend({
          events: {
-            "click #next" : "navigateNext",
-            "click #prev" : "navigatePrev",
-            "click #fday" : "navigateFirstDay",
-            "click #prweek" : "navigatePrevWeek",
-            "click #neweek" : "navigateNextWeek",
+            "click .oe_timesheet_daily .next_day": "navigateNext",
+            "click .oe_timesheet_daily .prev_day": "navigatePrev",
+            "click .oe_timesheet_daily .first_day": "navigateFirstDay",
             "click .oe_header" : "navigateDays",
             "click .oe_timesheet_edit_description" : "addDescription",
-            "click .oe_copy_accounts a": "copyAccounts",
+            "click .oe_copy_accounts a": "copy_accounts",
             "click .oe_timesheet_goto a": "go_to"
         },
         init: function() {
@@ -100,8 +98,7 @@ openerp.hr_timesheet_day = function(instance) {
                 self.default_get = default_get;
                 //real rendering
                 self.display_data();
-                $(".oe_daily_header").children(":first").removeClass("oe_day_button").addClass("oe_day_active_button")
-                    .children().removeClass("oe_day_active_button").removeClass("oe_display_day_total").addClass("oe_display_day_total_active");
+                self.toggle_active(self.count);
             });
         },
         display_data: function() {
@@ -150,8 +147,8 @@ openerp.hr_timesheet_day = function(instance) {
         get_total: function(account) {
             return this.$('[data-account-total = "' + account + '"]');
         },
-        get_day_total: function(day_count) {
-            return this.$('[data-day-total = "' + day_count + '"]');
+        set_day_total: function(day_count, total) {
+            return this.$el.find('.oe_daily_header .oe_display_day_total[data-day-total = "' + day_count + '"]').html(this.format_client(total));;
         },
         get_super_total: function() {
             return this.$('.oe_header_total');
@@ -177,7 +174,7 @@ openerp.hr_timesheet_day = function(instance) {
                 });
             });
             _.each(_.range(self.days.length), function(day_count) {
-                self.get_day_total(day_count).html(self.format_client(day_tots[day_count]));
+                self.set_day_total(day_count, day_tots[day_count]);
             });
             self.get_super_total().html("Total: " + (self.format_client(super_tot)));
         },
@@ -260,28 +257,10 @@ openerp.hr_timesheet_day = function(instance) {
                 });
             });
         },
-        navigatePrevWeek: function(){
+        copy_accounts: function(e) {
             var self = this;
-            if(self.week != self.days[0].week)
-                self.week -= 1;
-            else
-               self.week = self.last_week; 
-            self.display_data();
-            $(".oe_daily_header").children(":first").trigger("click");
-        },
-        navigateNextWeek: function(){
-            var self = this;
-            if(self.week == self.last_week)
-                self.week = self.days[0].week;
-            else
-                self.week += 1;
-            self.display_data();
-            $(".oe_daily_header").children(":first").trigger("click");
-        },
-        copyAccounts: function(e){
-            var self = this;
-            var index = self.count;
-            _.each(self.days[index],function(){
+            var index = this.count;
+            _.each(this.days[index],function(){
                 if(_.isEmpty(self.days[index].account_group)){
                     if(index == 0)
                         return;
@@ -289,83 +268,69 @@ openerp.hr_timesheet_day = function(instance) {
                         index -= 1;
                 }
             });
-            self.days[self.count].account_group = JSON.parse(JSON.stringify(self.days[index].account_group));
-            _.each(self.days[self.count].account_group,function(account){
+            this.days[this.count].account_group = JSON.parse(JSON.stringify(this.days[index].account_group));
+            _.each(this.days[this.count].account_group,function(account) {
                 var d = self.days[self.count].day.toString("yyyy-MM-dd")
-                _.each(account,function(account){
+                _.each(account,function(account) {
                     account.date = d;
                     account.unit_amount = 0;
                     account.name = self.description_line;
                 });
             });
-            self.sync();
-            self.display_data();
+            this.sync();
+            this.display_data();
         },
-        addDescription: function(e){
+        addDescription: function(e) {
             var self=this;
-            var index = self.$(e.target).attr("data-day-count") || self.$(e.srcElement).attr("data-day-count"); 
-            var input = self.$(".oe_edit_input")[index];
-            var act_id = self.$(e.target).attr("data-account");
-            var account = self.days[self.count].account_group[act_id];
-            self.$(".oe_edit_input").hide(); 
-            if(self.$(input).attr("data-account")==act_id)
-                self.$(input).show();
-            self.get_desc(account,index)
+            var index = this.$(e.target).attr("data-day-count") || this.$(e.srcElement).attr("data-day-count"); 
+            var input = this.$(".oe_edit_input")[index];
+            var act_id = this.$(e.target).attr("data-account");
+            var account = this.days[self.count].account_group[act_id];
+            this.$(".oe_edit_input").hide(); 
+            if(this.$(input).attr("data-account")==act_id)
+                this.$(input).show();
+            this.get_desc(account,index)
             .change(function(){
                 var text = $(this).val();
                 account[0].name = text;
                 self.sync();
             });
         },
-        navigateNext: function(){
-            var self=this;
-            if(self.count == self.days.length-1){
-                self.week = self.days[0].week;
-                self.count = 0;
-                self.display_data();
-                $("[data-day-counter|="+self.count+"]").removeClass("oe_day_button").addClass("oe_day_active_button")
-                    .children().removeClass("oe_day_active_button").removeClass("oe_display_day_total").addClass("oe_display_day_total_active");
-                $("#fday").removeClass("oe_day_button").addClass("oe_fday_button");
-            }
-            else{
-                self.count+=1;
-                self.week = self.days[self.count].week;
-                self.display_data();
-                $("[data-day-counter|="+self.count+"]").removeClass("oe_day_button").addClass("oe_day_active_button")
-                    .children().removeClass("oe_day_active_button").removeClass("oe_display_day_total").addClass("oe_display_day_total_active");
-            }   
+        toggle_active: function(day_count) {
+            this.$el.find(".oe_day_button[data-day-counter|="+day_count+"]").addClass("oe_active_day").siblings().removeClass("oe_active_day")
+            this.$el.find(".oe_day_button[data-day-counter|="+day_count+"] span").removeClass("oe_display_day_total").siblings().addClass("oe_display_day_total");
+            if(this.count == 0)
+                this.$el.find(".first_day").removeClass("oe_day_button").addClass("oe_fday_button");
         },
-        navigatePrev: function(e){
-            var self=this;
-            if(self.count==0){
-                self.count = self.days.length-1;
-                self.week = self.days[self.count].week;
-                self.display_data();
-                $("[data-day-counter|="+self.count+"]").removeClass("oe_day_button").addClass("oe_day_active_button")
-                    .children().removeClass("oe_day_active_button").removeClass("oe_display_day_total").addClass("oe_display_day_total_active");
+        navigateNext: function() {
+            if(this.count == this.days.length-1){
+                this.week = this.days[0].week;
+                this.count = 0;
+            } else {
+                this.count+=1;
+                this.week = this.days[this.count].week;
             }
-            else{
-                self.count -= 1;
-                self.week = self.days[self.count].week;
-                self.display_data();
-                $("[data-day-counter|="+self.count+"]").removeClass("oe_day_button").addClass("oe_day_active_button")
-                    .children().removeClass("oe_day_active_button").removeClass("oe_display_day_total").addClass("oe_display_day_total_active"); 
-                if(self.count == 0)
-                    $("#fday").removeClass("oe_day_button").addClass("oe_fday_button");
-            }    
+            this.display_data();
+            this.toggle_active(this.count);
         },
-        navigateFirstDay: function(){
-            var self=this;
-            $(".oe_daily_header").children(":first").trigger("click");
+        navigatePrev: function(e) {
+            if (this.count==0)
+                this.count = self.days.length-1;
+            else
+                this.count -= 1;
+            this.week = self.days[self.count].week;
+            this.display_data();
+            this.toggle_active(this.count);
+        },
+        navigateFirstDay: function() {
+            this.count = 0;
+            this.display_data();
+            this.toggle_active(this.count);
         },
         navigateDays: function(e){
-            var self=this;
-            self.count = parseInt($(e.target).attr("data-day-counter"), 10);
-            self.display_data();
-            $("[data-day-counter|="+self.count+"]").removeClass("oe_day_button").addClass("oe_day_active_button")
-                .children().removeClass("oe_day_active_button").removeClass("oe_display_day_total").addClass("oe_display_day_total_active");
-            if(self.count == 0)
-                $("#fday").removeClass("oe_day_button").addClass("oe_fday_button");
+            this.count = parseInt($(e.target).attr("data-day-counter"), 10);
+            this.display_data();
+            this.toggle_active(this.count);
         },
     });
     instance.web.form.custom_widgets.add('daily_timesheet', 'instance.hr_timesheet.DailyTimesheet');

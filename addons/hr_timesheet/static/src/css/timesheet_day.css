@@ -1,9 +1,9 @@
 @charset "utf-8";
 .openerp .oe_timesheet_daily {
-   width: 100%;
+  width: 100%;
 }
 .openerp .oe_timesheet_daily table {
-   width: 100%;
+  width: 100%;
 }
 .openerp .timesheet_days {
   position: relative;
@@ -14,10 +14,12 @@
 .openerp .timesheet_days table {
   width: 100%;
 }
+
 #tdate {
   margin-top: 10px;
   margin-bottom: 20px;
 }
+
 .openerp .timesheet_days table td:first-child {
   border-radius: 5px 0px 0px 0px;
 }
@@ -28,44 +30,27 @@
   padding: 20px;
   min-width: auto;
   min-height: auto;
-  background-image: -webkit-gradient(
-      linear,
-      left top,
-      left bottom,
-      color-stop(0, #FFFFFF),
-      color-stop(1, #EEEEEE)
-  );
-  background-image: -o-linear-gradient(bottom, #FFFFFF 0%, #EEEEEE 100%);
-  background-image: -moz-linear-gradient(bottom, #FFFFFF 0%, #EEEEEE 100%);
-  background-image: -webkit-linear-gradient(bottom, #FFFFFF 0%, #EEEEEE 100%);
-  background-image: -ms-linear-gradient(bottom, #FFFFFF 0%, #EEEEEE 100%);
-  background-image: linear-gradient(to bottom, #FFFFFF 0%, #EEEEEE 100%);
-  -webkit-box-shadow: 0 1px 0 #FFF inset, 0 0 5px rgba(0, 0, 0, .1) inset, 0 1px 1px rgba(0, 0, 0, .3);
-  box-shadow: 0 1px 0 #FFF inset, 0 0 5px rgba(0, 0, 0, .1) inset, 0 1px 1px rgba(0, 0, 0, .3);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, white), color-stop(1, #eeeeee));
+  background-image: -o-linear-gradient(bottom, white 0%, #eeeeee 100%);
+  background-image: -moz-linear-gradient(bottom, white 0%, #eeeeee 100%);
+  background-image: -webkit-linear-gradient(bottom, white 0%, #eeeeee 100%);
+  background-image: -ms-linear-gradient(bottom, white 0%, #eeeeee 100%);
+  background-image: linear-gradient(to bottom, white 0%, #eeeeee 100%);
+  -webkit-box-shadow: 0 1px 0 white inset, 0 0 5px rgba(0, 0, 0, 0.1) inset, 0 1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 0 white inset, 0 0 5px rgba(0, 0, 0, 0.1) inset, 0 1px 1px rgba(0, 0, 0, 0.3);
   -webkit-border-radius: 0 0 5px 5px;
   border-radius: 0 0 5px 5px;
 }
-.openerp .oe_day_active_button {
-  color: #FFFFFF;
-  font-size: 12px;
-  font-weight: bold; 
-  border-right: 1px solid #D5D5D5;
-  border-top: 1px solid #D5D5D5;
-  border-bottom: 1px solid #D5D5D5;   
-  background-image: -webkit-gradient(
-      linear,
-      left top,
-      left bottom,
-      color-stop(0, #7C7BAD),
-      color-stop(1, #616094)
-  );
-  background-image: -o-linear-gradient(bottom, #7C7BAD 0%, #616094 100%);
-  background-image: -moz-linear-gradient(bottom, #7C7BAD 0%, #616094 100%);
-  background-image: -webkit-linear-gradient(bottom, #7C7BAD 0%, #616094 100%);
-  background-image: -ms-linear-gradient(bottom, #7C7BAD 0%, #616094 100%);
-  background-image: linear-gradient(to bottom, #7C7BAD 0%, #616094 100%);
-  -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .7) inset, 0 1px 0 0 #888;
-  box-shadow: 2px 2px 2px rgba(0, 0, 0, .7) inset, 0px 1px 1px 1px #888;
+.openerp .oe_active_day {
+  color: white !important;
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #7c7bad), color-stop(1, #616094)) !important;
+  background-image: -o-linear-gradient(bottom, #7c7bad 0%, #616094 100%) !important;
+  background-image: -moz-linear-gradient(bottom, #7c7bad 0%, #616094 100%) !important;
+  background-image: -webkit-linear-gradient(bottom, #7c7bad 0%, #616094 100%) !important;
+  background-image: -ms-linear-gradient(bottom, #7c7bad 0%, #616094 100%) !important;
+  background-image: linear-gradient(to bottom, #7c7bad 0%, #616094 100%) !important;
+  -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7) inset, 0 1px 0 0 #888888 !important;
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7) inset, 0px 1px 1px 1px #888888 !important;
 }
 .openerp .oe_nav {
   float: right;
@@ -80,55 +65,49 @@
 }
 .openerp .oe_nav_button:active {
   font-size: 13px;
-  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f1f1f1), to(#EAEAEA));
-  background-image: -moz-linear-gradient(bottom, #F1f1f1 22%, #eaeaea 61%);
-  text-shadow: 0 -1px 0 #fff, 0 0 7px #f1f1f1;
-  border-right: 1px solid #D5D5D5;
-  border-top: 1px solid #D5D5D5;
-  border-bottom: 1px solid #D5D5D5;
-  -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, .7) inset, 0 1px 0 0 #888;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .7) inset, 0 1px 0 0 #888;
+  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f1f1f1), to(#eaeaea));
+  background-image: -moz-linear-gradient(bottom, #f1f1f1 22%, #eaeaea 61%);
+  text-shadow: 0 -1px 0 white, 0 0 7px #f1f1f1;
+  border-right: 1px solid #d5d5d5;
+  border-top: 1px solid #d5d5d5;
+  border-bottom: 1px solid #d5d5d5;
+  -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.7) inset, 0 1px 0 0 #888888;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.7) inset, 0 1px 0 0 #888888;
 }
-.openerp .oe_fday_button  {
+.openerp .oe_fday_button {
   font-size: 13px;
   font-weight: bold;
-  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f1f1f1), to(#EAEAEA));
-  background-image: -moz-linear-gradient(bottom, #F1f1f1 22%, #eaeaea 61%);
-  text-shadow: 0 -1px 0 #fff, 0 0 7px #f1f1f1;
-  border-right: 1px solid #D5D5D5;
-  border-top: 1px solid #D5D5D5;
-  border-bottom: 1px solid #D5D5D5;
-  -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, .7) inset, 0 1px 0 0 #888;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .7) inset, 0 1px 0 0 #888;
+  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f1f1f1), to(#eaeaea));
+  background-image: -moz-linear-gradient(bottom, #f1f1f1 22%, #eaeaea 61%);
+  text-shadow: 0 -1px 0 white, 0 0 7px #f1f1f1;
+  border-right: 1px solid #d5d5d5;
+  border-top: 1px solid #d5d5d5;
+  border-bottom: 1px solid #d5d5d5;
+  -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.7) inset, 0 1px 0 0 #888888;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.7) inset, 0 1px 0 0 #888888;
 }
 .openerp .oe_day_button {
   font-size: 12px;
-  font-weight: bold;    
-  border-right: 1px solid #D5D5D5;
-  border-top: 1px solid #D5D5D5;
-  border-bottom: 1px solid #D5D5D5;
-  background-image: -webkit-gradient(
-      linear,
-      left top,
-      left bottom,
-      color-stop(0, #FFFFFF),
-      color-stop(1, #EEEEEE)
-  );
-  background-image: -o-linear-gradient(bottom, #FFFFFF 0%, #EEEEEE 100%);
-  background-image: -moz-linear-gradient(bottom, #FFFFFF 0%, #EEEEEE 100%);
-  background-image: -webkit-linear-gradient(bottom, #FFFFFF 0%, #EEEEEE 100%);
-  background-image: -ms-linear-gradient(bottom, #FFFFFF 0%, #EEEEEE 100%);
-  background-image: linear-gradient(to bottom, #FFFFFF 0%, #EEEEEE 100%);
-  text-shadow: 0 1px 0 #FFF;
-  -webkit-box-shadow: 0 1px 0 #FFF inset, 0 0 5px rgba(0, 0, 0, .1) inset, 0 1px 1px rgba(0, 0, 0, .3);
-  box-shadow: 0 1px 0 #FFF inset, 0 0 5px rgba(0, 0, 0, .1) inset, 0 1px 1px rgba(0, 0, 0, .3);
+  font-weight: bold;
+  border-right: 1px solid #d5d5d5;
+  border-top: 1px solid #d5d5d5;
+  border-bottom: 1px solid #d5d5d5;
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, white), color-stop(1, #eeeeee));
+  background-image: -o-linear-gradient(bottom, white 0%, #eeeeee 100%);
+  background-image: -moz-linear-gradient(bottom, white 0%, #eeeeee 100%);
+  background-image: -webkit-linear-gradient(bottom, white 0%, #eeeeee 100%);
+  background-image: -ms-linear-gradient(bottom, white 0%, #eeeeee 100%);
+  background-image: linear-gradient(to bottom, white 0%, #eeeeee 100%);
+  text-shadow: 0 1px 0 white;
+  -webkit-box-shadow: 0 1px 0 white inset, 0 0 5px rgba(0, 0, 0, 0.1) inset, 0 1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 0 white inset, 0 0 5px rgba(0, 0, 0, 0.1) inset, 0 1px 1px rgba(0, 0, 0, 0.3);
 }
 .openerp .oe_header {
   padding: 5px 20px 5px 10px;
   cursor: pointer;
-  color: #4C4C4C;
-  margin-right: -4px;  
-  font-family: "Helvetica Neue", Arial, Verdana, "Nimbus Sans L", sans-serif;     
+  color: #4c4c4c;
+  margin-right: -4px;
+  font-family: "Helvetica Neue", Arial, Verdana, "Nimbus Sans L", sans-serif;
 }
 .openerp .oe_header_total {
   padding: 12px 20px 5px 0px;
@@ -140,7 +119,7 @@
   padding-right: 2px !important;
   margin-left: 230px;
   text-align: right;
-  color: #4C4C4C;
+  color: #4c4c4c;
 }
 .openerp .oe_timesheet_daily input.oe_timesheet_daily_box {
   width: 50px;
@@ -151,7 +130,7 @@
   cursor: pointer;
 }
 .openerp .oe_timesheet_daily_footer {
-  border-top: 1px solid #BBBBBB;
+  border-top: 1px solid #bbbbbb;
   margin-top: 3px;
 }
 .openerp .oe_timesheet_daily_footer div {
@@ -178,9 +157,6 @@
 .openerp .oe_display_day_total {
   font-weight: normal;
   color: #777474;
-}
-.openerp .oe_display_day_total_active {
-  color: #FFFFFF;
 }
 .openerp .oe_form_readonly .oe_timesheet_daily div.oe_view_nocontent {
   display: none;
