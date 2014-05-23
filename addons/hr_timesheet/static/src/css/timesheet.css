@@ -21,39 +21,27 @@
   font-family: "Helvetica Neue", Arial, Verdana, "Nimbus Sans L", sans-serif;
   font-size: 12px;
   min-width: 52px;
-  background-image: -webkit-gradient(
-        linear,
-        left top,
-        left bottom,
-        color-stop(0, #EEEEEE),
-        color-stop(1, #F1F1F1)
-    );
-    background-image: -o-linear-gradient(bottom, #EEEEEE 0%, #F1F1F1 100%);
-    background-image: -moz-linear-gradient(bottom, #EEEEEE 0%, #F1F1F1 100%);
-    background-image: -webkit-linear-gradient(bottom, #EEEEEE 0%, #F1F1F1 100%);
-    background-image: -ms-linear-gradient(bottom, #EEEEEE 0%, #F1F1F1 100%);
-    background-image: linear-gradient(to bottom, #EEEEEE 0%, #F1F1F1 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #eeeeee), color-stop(1, #f1f1f1));
+  background-image: -o-linear-gradient(bottom, #eeeeee 0%, #f1f1f1 100%);
+  background-image: -moz-linear-gradient(bottom, #eeeeee 0%, #f1f1f1 100%);
+  background-image: -webkit-linear-gradient(bottom, #eeeeee 0%, #f1f1f1 100%);
+  background-image: -ms-linear-gradient(bottom, #eeeeee 0%, #f1f1f1 100%);
+  background-image: linear-gradient(to bottom, #eeeeee 0%, #f1f1f1 100%);
 }
 .openerp .oe_timesheet_weekly .oe_timesheet_total {
-  background-image: -webkit-gradient(
-        linear,
-        left top,
-        left bottom,
-        color-stop(0, #F1F1F1),
-        color-stop(1, #EEEEEE)
-    );
-    background-image: -o-linear-gradient(bottom, #F1F1F1 0%, #EEEEEE 100%);
-    background-image: -moz-linear-gradient(bottom, #F1F1F1 0%, #EEEEEE 100%);
-    background-image: -webkit-linear-gradient(bottom, #F1F1F1 0%, #EEEEEE 100%);
-    background-image: -ms-linear-gradient(bottom, #F1F1F1 0%, #EEEEEE 100%);
-    background-image: linear-gradient(to bottom, #F1F1F1 0%, #EEEEEE 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #f1f1f1), color-stop(1, #eeeeee));
+  background-image: -o-linear-gradient(bottom, #f1f1f1 0%, #eeeeee 100%);
+  background-image: -moz-linear-gradient(bottom, #f1f1f1 0%, #eeeeee 100%);
+  background-image: -webkit-linear-gradient(bottom, #f1f1f1 0%, #eeeeee 100%);
+  background-image: -ms-linear-gradient(bottom, #f1f1f1 0%, #eeeeee 100%);
+  background-image: linear-gradient(to bottom, #f1f1f1 0%, #eeeeee 100%);
 }
 .openerp .oe_timesheet_weekly .oe_timesheet_weekly_account {
   text-align: left;
 }
 .openerp .oe_timesheet_weekly .oe_timesheet_first_col {
   min-width: 130px;
-  min-height:50px;
+  min-height: 50px;
 }
 .openerp .oe_timesheet_weekly td input.oe_timesheet_weekly_input {
   padding-right: 2px !important;
@@ -64,7 +52,7 @@
 .openerp .oe_timesheet_weekly td.oe_timesheet_total {
   font-weight: bold;
   padding: 5px 3px !important;
-  min-height:50px;
+  min-height: 50px;
 }
 .openerp .oe_timesheet_weekly .oe_timesheet_weekly_adding_tot {
   display: table;
@@ -87,9 +75,9 @@
 .openerp .oe_timesheet_weekly .oe_timesheet_weekly_today {
   background: #ffddee;
 }
-.openerp .oe_timesheet_weekly_navigation{
-    float:right;
-    padding-bottom: 10px;
-    padding-right: 5px;
-    cursor: pointer;
+.openerp .oe_timesheet_weekly .oe_timesheet_weekly_navigation {
+  float: right;
+  padding-bottom: 10px;
+  padding-right: 5px;
+  cursor: pointer;
 }
