@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+import time
 from openerp import tools
 import openerp.addons.decimal_precision as dp
 from openerp.osv import fields,osv
@@ -28,30 +29,6 @@ class account_invoice_report(osv.osv):
     _description = "Invoices Statistics"
     _auto = False
     _rec_name = 'date'
-
-    def _compute_amounts_in_user_currency(self, cr, uid, ids, field_names, args, context=None):
-        """Compute the amounts in the currency of the user
-        """
-        if context is None:
-            context={}
-        currency_obj = self.pool.get('res.currency')
-        currency_rate_obj = self.pool.get('res.currency.rate')
-        user_currency_id = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.currency_id.id
-        currency_rate_id = currency_rate_obj.search(cr, uid, [('rate', '=', 1)], limit=1, context=context)[0]
-        base_currency_id = currency_rate_obj.browse(cr, uid, currency_rate_id, context=context).currency_id.id
-        res = {}
-        ctx = context.copy()
-        for item in self.browse(cr, uid, ids, context=context):
-            ctx['date'] = item.date
-            price_total = currency_obj.compute(cr, uid, base_currency_id, user_currency_id, item.price_total, context=ctx)
-            price_average = currency_obj.compute(cr, uid, base_currency_id, user_currency_id, item.price_average, context=ctx)
-            residual = currency_obj.compute(cr, uid, base_currency_id, user_currency_id, item.residual, context=ctx)
-            res[item.id] = {
-                'user_currency_price_total': price_total,
-                'user_currency_price_average': price_average,
-                'user_currency_residual': residual,
-            }
-        return res
 
     _columns = {
         'date': fields.date('Date', readonly=True),
@@ -69,10 +46,7 @@ class account_invoice_report(osv.osv):
         'company_id': fields.many2one('res.company', 'Company', readonly=True),
         'user_id': fields.many2one('res.users', 'Salesperson', readonly=True),
         'price_total': fields.float('Total Without Tax', readonly=True),
-        'user_currency_price_total': fields.function(_compute_amounts_in_user_currency, string="Total Without Tax", type='float', digits_compute=dp.get_precision('Account'), multi="_compute_amounts"),
         'price_average': fields.float('Average Price', readonly=True, group_operator="avg"),
-        'user_currency_price_average': fields.function(_compute_amounts_in_user_currency, string="Average Price", type='float', digits_compute=dp.get_precision('Account'), multi="_compute_amounts"),
-        'currency_rate': fields.float('Currency Rate', readonly=True),
         'nbr':fields.integer('# of Lines', readonly=True),
         'type': fields.selection([
             ('out_invoice','Customer Invoice'),
@@ -93,10 +67,18 @@ class account_invoice_report(osv.osv):
         'account_line_id': fields.many2one('account.account', 'Account Line',readonly=True),
         'partner_bank_id': fields.many2one('res.partner.bank', 'Bank Account',readonly=True),
         'residual': fields.float('Total Residual', readonly=True),
-        'user_currency_residual': fields.function(_compute_amounts_in_user_currency, string="Total Residual", type='float', digits_compute=dp.get_precision('Account'), multi="_compute_amounts"),
         'country_id': fields.many2one('res.country', 'Country of the Partner Company'),
     }
     _order = 'date desc'
+
+    def _prepare_flist(self, cr, uid, group_operator, field, context=None):
+        user_currency = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.currency_id.id
+        fields = ['price_total', 'residual', 'price_average']
+        if field in fields:
+            flist = '''sum(currency_conversation("%s"."%s", %s, "%s"."%s", "%s"."%s")) AS %s''' % (self._table, 'currency_id', user_currency, self._table, field, self._table, 'date', field)
+        else:
+                flist = super(account_invoice_report,self)._prepare_flist(cr, uid, group_operator, field, context=context)
+        return flist
 
     def _select(self):
         select_str = """
@@ -104,8 +86,7 @@ class account_invoice_report(osv.osv):
                 sub.payment_term, sub.period_id, sub.uom_name, sub.currency_id, sub.journal_id,
                 sub.fiscal_position, sub.user_id, sub.company_id, sub.nbr, sub.type, sub.state,
                 sub.categ_id, sub.date_due, sub.account_id, sub.account_line_id, sub.partner_bank_id,
-                sub.product_qty, sub.price_total / cr.rate as price_total, sub.price_average /cr.rate as price_average,
-                cr.rate as currency_rate, sub.residual / cr.rate as residual, sub.commercial_partner_id as commercial_partner_id
+                sub.product_qty, sub.price_total, sub.price_average, sub.residual, sub.commercial_partner_id as commercial_partner_id
         """
         return select_str
 
@@ -194,19 +175,22 @@ class account_invoice_report(osv.osv):
     def init(self, cr):
         # self._table = account_invoice_report
         tools.drop_view_if_exists(cr, self._table)
+        
+        cr.execute("""CREATE or REPLACE FUNCTION currency_conversation (from_currency_id integer, to_currency_id integer, from_amount float, cdate date)
+                            RETURNS float AS $$
+                            SELECT $3*(to_currency.rate/from_currency.rate)
+                            FROM res_currency_rate as to_currency, res_currency_rate as from_currency
+                            WHERE 
+                                to_currency.currency_id = $2 AND to_currency.name <= $4 AND
+                                from_currency.currency_id = $1 AND from_currency.name <= $4
+                            ORDER BY to_currency.name desc LIMIT 1
+                            $$ LANGUAGE SQL;""")
+        
         cr.execute("""CREATE or REPLACE VIEW %s as (
             %s
             FROM (
                 %s %s %s
             ) AS sub
-            JOIN res_currency_rate cr ON (cr.currency_id = sub.currency_id)
-            WHERE
-                cr.id IN (SELECT id
-                          FROM res_currency_rate cr2
-                          WHERE (cr2.currency_id = sub.currency_id)
-                              AND ((sub.date IS NOT NULL AND cr2.name <= sub.date)
-                                    OR (sub.date IS NULL AND cr2.name <= NOW()))
-                          ORDER BY name DESC LIMIT 1)
         )""" % (
                     self._table, 
                     self._select(), self._sub_select(), self._from(), self._group_by()))
