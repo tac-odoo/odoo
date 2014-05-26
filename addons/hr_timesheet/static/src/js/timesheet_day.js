@@ -92,8 +92,8 @@ openerp.hr_timesheet_day = function(instance) {
                 self.days = days;
                 //TODO: Need to improve this logic of week(developed by NJA)
                 if(self.days.length) {
-                    self.week = self.days[0].week;
-                    self.last_week = self.days[self.days.length-1].week;
+                    self.week = _.first(self.days).week;
+                    self.last_week = _.last(self.days).week;
                 }
                 self.default_get = default_get;
                 //real rendering
@@ -303,8 +303,8 @@ openerp.hr_timesheet_day = function(instance) {
                 this.$el.find(".first_day").removeClass("oe_day_button").addClass("oe_fday_button");
         },
         navigateNext: function() {
-            if(this.count == this.days.length-1){
-                this.week = this.days[0].week;
+            if(this.count == _.last(this.days)){
+                this.week = _.first(this.days).week;
                 this.count = 0;
             } else {
                 this.count+=1;
@@ -315,10 +315,10 @@ openerp.hr_timesheet_day = function(instance) {
         },
         navigatePrev: function(e) {
             if (this.count==0)
-                this.count = self.days.length-1;
+                this.count = this.days.length-1;
             else
                 this.count -= 1;
-            this.week = self.days[self.count].week;
+            this.week = this.days[this.count].week;
             this.display_data();
             this.toggle_active(this.count);
         },

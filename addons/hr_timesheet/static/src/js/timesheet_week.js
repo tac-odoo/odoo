@@ -12,28 +12,6 @@ openerp.hr_timesheet_week = function(instance) {
         },
         init: function() {
             this._super.apply(this, arguments);
-            var self = this;
-            this.set({
-                sheets: [],
-                date_to: false,
-                date_from: false,
-            });
-            this.updating = false;
-            this.defs = [];
-            this.field_manager.on("field_changed:timesheet_ids", this, this.query_sheets);
-            this.field_manager.on("field_changed:date_from", this, function() {
-                this.set({"date_from": instance.web.str_to_date(this.field_manager.get_field_value("date_from"))});
-            });
-            this.field_manager.on("field_changed:date_to", this, function() {
-                this.set({"date_to": instance.web.str_to_date(this.field_manager.get_field_value("date_to"))});
-            });
-            this.field_manager.on("field_changed:user_id", this, function() {
-                this.set({"user_id": this.field_manager.get_field_value("user_id")});
-            });
-            this.on("change:sheets", this, this.update_sheets);
-            this.res_o2m_drop = new instance.web.DropMisordered();
-            this.render_drop = new instance.web.DropMisordered();
-            this.description_line = _t("/");
             // Original save function is overwritten in order to wait all running deferreds to be done before actually applying the save.
             this.view.original_save = _.bind(this.view.save, this.view);
             this.view.save = function(prepend_on_create){
@@ -42,46 +20,6 @@ openerp.hr_timesheet_week = function(instance) {
                     return self.view.original_save(self.prepend_on_create);
                 });
             };
-        },
-        go_to: function(event) {
-            var id = JSON.parse($(event.target).data("id"));
-            this.do_action({
-                type: 'ir.actions.act_window',
-                res_model: "account.analytic.account",
-                res_id: id,
-                views: [[false, 'form']],
-                target: 'current'
-            });
-        },
-        query_sheets: function() {
-            var self = this;
-            if (self.updating)
-                return;
-            var commands = this.field_manager.get_field_value("timesheet_ids");
-            this.res_o2m_drop.add(new instance.web.Model(this.view.model).call("resolve_2many_commands", ["timesheet_ids", commands, [], 
-                    new instance.web.CompoundContext()]))
-                .done(function(result) {
-                self.querying = true;
-                self.set({sheets: result});
-                self.querying = false;
-            });
-        },
-        update_sheets: function() {
-            var self = this;
-            if (self.querying)
-                return;
-            self.updating = true;
-            self.field_manager.set_values({timesheet_ids: self.get("sheets")}).done(function() {
-                self.updating = false;
-            });
-        },
-        initialize_field: function() {
-            instance.web.form.ReinitializeWidgetMixin.initialize_field.call(this);
-            var self = this;
-            self.on("change:sheets", self, self.initialize_content);
-            self.on("change:date_to", self, self.initialize_content);
-            self.on("change:date_from", self, self.initialize_content);
-            self.on("change:user_id", self, self.initialize_content);
         },
         initialize_content: function() {
             var self = this;
@@ -163,8 +101,10 @@ openerp.hr_timesheet_week = function(instance) {
             })).then(function(result) {
                 // we put all the gathered data in self, then we render
                 self.dates = dates;
-                self.week = self.dates[0].getWeek();
-                self.last_week = self.dates[self.dates.length-1].getWeek();
+                if(self.dates.length){
+                    self.week = self.dates[0].getWeek();
+                    self.last_week = self.dates[self.dates.length-1].getWeek();
+                }
                 self.accounts = accounts;
                 self.account_names = account_names;
                 self.default_get = default_get;
@@ -172,24 +112,7 @@ openerp.hr_timesheet_week = function(instance) {
                 self.display_data();
             });
         },
-        destroy_content: function() {
-            if (this.dfm) {
-                this.dfm.destroy();
-                this.dfm = undefined;
-            }
-        },
-        is_valid_value:function(value){
-            var split_value = value.split(":");
-            var valid_value = true;
-            if (split_value.length > 2)
-                return false;
-            _.detect(split_value,function(num){
-                if(isNaN(num)){
-                    valid_value = false;
-                }
-            });
-            return valid_value;
-        },
+        
         display_data: function() {
             var self = this;
             self.$el.html(QWeb.render("hr_timesheet.WeeklyTimesheet", {widget: self}));
@@ -311,20 +234,6 @@ openerp.hr_timesheet_week = function(instance) {
             });
             self.get_super_total().html(self.format_client(super_tot));
         },
-        sync: function() {
-            var self = this;
-            self.setting = true;
-            self.set({sheets: this.generate_o2m_value()});
-            self.setting = false;
-        },
-        //converts hour value to float
-        parse_client: function(value) {
-            return instance.web.parse_value(value, { type:"float_time" });
-        },
-        //converts float value to hour
-        format_client:function(value){
-            return instance.web.format_value(value, { type:"float_time" });
-        },
         generate_o2m_value: function() {
             var self = this;
             var ops = [];
@@ -357,23 +266,20 @@ openerp.hr_timesheet_week = function(instance) {
             return ops;
         },
         navigatePrevWeek: function(){
-            var self = this;
-            if(self.week != self.dates[0].getWeek())
-                self.week -= 1;
+            if(this.week != this.dates[0].getWeek())
+                this.week -= 1;
             else
-               self.week = self.last_week; 
-            self.display_data();
+               this.week = this.last_week; 
+            this.display_data();
         },
         navigateNextWeek: function(){
-            var self = this;
-            if(self.week == self.last_week)
-                self.week = self.dates[0].getWeek();
+            if(this.week == this.last_week)
+                this.week = this.dates[0].getWeek();
             else
-                self.week += 1;
-            self.display_data();
+                this.week += 1;
+            this.display_data();
         },
     });
-
     instance.web.form.custom_widgets.add('weekly_timesheet', 'instance.hr_timesheet.WeeklyTimesheet');
 
 };
