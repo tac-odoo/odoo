@@ -98,7 +98,6 @@ openerp.hr_timesheet_day = function(instance) {
                 self.default_get = default_get;
                 //real rendering
                 self.display_data();
-                self.toggle_active(self.count);
             });
         },
         display_data: function() {
@@ -134,6 +133,7 @@ openerp.hr_timesheet_day = function(instance) {
                     }
                 });
                 self.display_totals();
+                self.toggle_active(self.count);
                 self.$(".oe_timesheet_daily_adding button").click(_.bind(this.init_add_account, this));
             }
         },
@@ -311,7 +311,6 @@ openerp.hr_timesheet_day = function(instance) {
                 this.week = this.days[this.count].week;
             }
             this.display_data();
-            this.toggle_active(this.count);
         },
         navigatePrev: function(e) {
             if (this.count==0)
@@ -320,17 +319,14 @@ openerp.hr_timesheet_day = function(instance) {
                 this.count -= 1;
             this.week = this.days[this.count].week;
             this.display_data();
-            this.toggle_active(this.count);
         },
         navigateFirstDay: function() {
             this.count = 0;
             this.display_data();
-            this.toggle_active(this.count);
         },
         navigateDays: function(e){
             this.count = parseInt($(e.target).attr("data-day-counter"), 10);
             this.display_data();
-            this.toggle_active(this.count);
         },
     });
     instance.web.form.custom_widgets.add('daily_timesheet', 'instance.hr_timesheet.DailyTimesheet');
