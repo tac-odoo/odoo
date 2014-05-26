@@ -377,7 +377,8 @@ class mail_thread(osv.AbstractModel):
         mail_actions_body = env.get_template("mail_actions_button.html").render({
             'mail_actions': mail_actions,
             'model': self._name,
-            'res_id': obj.id
+            'res_id': obj.id,
+            'base_url': self.pool['ir.config_parameter'].get_param(cr, uid, 'web.base.url', default='http://localhost:8069', context=context)
         })
         return mail_actions_body
 
@@ -405,17 +406,10 @@ class mail_thread(osv.AbstractModel):
             message_follower_ids.append([4, pid])
             values['message_follower_ids'] = message_follower_ids
         thread_id = super(mail_thread, self).create(cr, uid, values, context=context)
-        message_body = ''
-        mail_actions_body = ''
-        if thread_id:
-            obj = self.browse(cr, uid, thread_id, context=context)
-            mail_actions_body = self._prepare_body_mail_action(cr, uid, obj)
+
         # automatic logging unless asked not to (mainly for various testing purpose)
         if not context.get('mail_create_nolog'):
-            message_body +=_('%s created %s') % (self._description, mail_actions_body)
-        else:
-            message_body += mail_actions_body
-        self.message_post(cr, uid, thread_id, body=message_body, context=context)
+            self.message_post(cr, uid, thread_id, body=_('%s created') % (self._description), context=context)
 
         # auto_subscribe: take values and defaults into account
         create_values = dict(values)
@@ -456,12 +450,6 @@ class mail_thread(osv.AbstractModel):
             records = self.browse(cr, uid, ids, context=track_ctx)
             initial_values = dict((record.id, dict((key, getattr(record, key)) for key in tracked_fields))
                                   for record in records)
-
-        if ids:
-            obj = self.browse(cr, uid, ids[0], context=context)
-            mail_actions_body = self._prepare_body_mail_action(cr, uid, obj)
-            message_body = mail_actions_body
-            self.message_post(cr, uid, ids[0], body=message_body, context=context)
 
         # Perform write, update followers
         result = super(mail_thread, self).write(cr, uid, ids, values, context=context)
@@ -1595,7 +1583,9 @@ class mail_thread(osv.AbstractModel):
                     processed_list.append(message.parent_id.id)
                     message = message.parent_id
                 parent_id = message.id
-
+        if type == 'notification':
+            obj = self.browse(cr, uid, thread_id, context=context)
+            body += self._prepare_body_mail_action(cr, uid, obj)
         values = kwargs
         values.update({
             'author_id': author_id,
