@@ -45,15 +45,14 @@ class actions(osv.osv):
     _name = 'ir.actions.actions'
     _table = 'ir_actions'
     _order = 'name'
-    
+
     def get_help_helpid(self, cr, uid, ids,field_name, args, context=None):
         res = {}
         for action in self.browse(cr, uid, ids, context=context):
             if action.help_id:
                 res[action.id] = action.help_id.render(context=context)
-                return res
-        return {}
-            
+        return res
+
     def set_help(self, cr, uid, ids, field_name, field_value, arg, context=None):
         if not field_value: return False
         if type(ids)!=type([]):
@@ -61,7 +60,7 @@ class actions(osv.osv):
             for id in ids:
                 cr.execute("update ir_actions set help =%s where id=%s",(field_value, id))
         return True
-        
+
     _columns = {
         'name': fields.char('Name', size=64, required=True),
         'type': fields.char('Action Type', required=True, size=32),
