@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+       <!-- Bill of Materials -->
+        <record id="view_product_mrp_bom_form" model="ir.ui.view">
+            <field name="name">product.mrp.bom.form</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+            <field name="arch" type="xml">
+                <field name="product_id" position="replace">
+                    <field name="product_id" on_change="onchange_product_id(product_id, name, product_qty, context)" class="oe_inline" invisible="1"/>
+                    <field name="template_id" on_change="onchange_template_id(template_id, context)" context="{'default_supply_method':'produce'}" class="oe_inline" required="1"/>
+                </field>
+                <field name="product_qty" position="replace">
+                    <field name="product_qty" class="oe_inline" on_change="onchange_product_id(product_id, name, product_qty, context)" invisible="1"/>
+                </field>
+                <field name="product_uom" position="replace">
+                    <field name="product_uom" class="oe_inline" on_change="onchange_uom(product_id, product_uom)" groups="product.group_uom" invisible="1"/>
+                </field>
+            </field>
+        </record>
+
+        <!-- Bill of Materials Tree View-->
+        <record id="view_product_mrp_bom_tree" model="ir.ui.view">
+            <field name="name">product.mrp.bom.tree</field>
+            <field name="model">mrp.bom</field>
+            <field name="field_parent">child_complete_ids</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="product_id" position="replace">
+                    <field name="template_id" on_change="onchange_template_id(template_id, context)" context="{'default_supply_method':'produce'}"/>
+                </field>
+            </field>
+        </record>
+
+        <!-- Bill of Materials Search View-->
+        <record id="view_product_mrp_bom_search" model="ir.ui.view">
+            <field name="name">product.mrp.bom.search</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.view_mrp_bom_filter"/>
+            <field name="arch" type="xml">
+                <field name="product_id" position="replace">
+                    <field name="template_id"/>
+                </field>
+                <filter string="Product" position="replace">
+                    <filter string="Template" icon="terp-accessories-archiver" domain="[]" context="{'group_by':'template_id'}"/>
+                </filter>
+            </field>
+        </record>
+
+    </data>
+</openerp>
