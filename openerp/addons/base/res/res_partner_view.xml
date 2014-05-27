@@ -233,10 +233,9 @@
                                                 </a>
                                                     <div class="oe_module_desc">
                                                         <div class="oe_kanban_box_content oe_kanban_color_bglight oe_kanban_color_border">
-                                                            <table class="oe_kanban_table">
-                                                                <tr>
-                                                                    <td class="oe_kanban_title1" align="left" valign="middle">
-                                                                        <h4><a type="open"><field name="name"/></a></h4>
+                                                            <div class="col-md-12">
+                                                                <div>
+                                                                    <h4><a type="open"><field name="name"/></a></h4>
                                                                         <i><div t-if="record.function.raw_value">
                                                                             <field name="function"/></div></i>
                                                                         <div><a t-if="record.email.raw_value" title="Mail" t-att-href="'mailto:'+record.email.value">
@@ -245,9 +244,8 @@
                                                                         <div t-if="record.phone.raw_value">Phone: <field name="phone"/></div>
                                                                         <div t-if="record.mobile.raw_value">Mobile: <field name="mobile"/></div>
                                                                         <div t-if="record.fax.raw_value">Fax: <field name="fax"/></div>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>

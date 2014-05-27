@@ -126,7 +126,7 @@
                                 <a type="open" href="#" class="oe_kanban_action oe_kanban_action_a">
                                     <img t-att-src="kanban_image('fleet.vehicle.model.brand', 'image_small', record.id.value)" class="oe_employee_picture"/>
                                 </a>
-                                <div style="text-align:center;">
+                                <div class="text-center">
                                     <h4 class="oe_partner_heading">
                                         <a type="open">
                                             <field name="name"/>

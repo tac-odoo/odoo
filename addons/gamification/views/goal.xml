@@ -149,9 +149,9 @@
                                         <img t-att-src="kanban_image('res.users', 'image_small', record.user_id.raw_value)" t-att-title="record.user_id.value" width="24" height="24" />
                                     </div>
                                     <field name="user_id" />
-                                    <div class="oe_goal_state_block">
+                                    <div>
                                         <t t-if="record.definition_display.raw_value == 'boolean'">
-                                            <div class="oe_goal_state oe_e">
+                                            <div >
                                                 <t t-if="record.state.raw_value=='reached'"><span class="oe_green" title="Goal Reached">W</span></t>
                                                 <t t-if="record.state.raw_value=='inprogress'"><span title="Goal in Progress">N</span></t>
                                                 <t t-if="record.state.raw_value=='failed'"><span class="oe_red" title="Goal Failed">X</span></t>
@@ -170,7 +170,7 @@
                                         </t>
                                         
                                     </div>
-                                    <p>
+                                    <p class="text-center">
                                         <t t-if="record.start_date.value">
                                             From <t t-esc="record.start_date.value" />
                                         </t>

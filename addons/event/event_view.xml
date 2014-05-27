@@ -200,12 +200,14 @@
                     <t t-name="kanban-box">
                       <div class="oe_module_vignette">
                         <a type="open" class="oe_module_icon">
-                            <div class="oe_event_date "><t t-esc="record.date_begin.raw_value.getDate()"/></div>
-                            <div class="oe_event_month_year">
-                                <t t-esc="record.date_begin.raw_value.toString('MMM')"/>
-                                <t t-esc="record.date_begin.raw_value.getFullYear()"/>
+                            <div class="oe_event_date text-center"><strong><t t-esc="record.date_begin.raw_value.getDate()"/></strong></div>
+                            <div class="oe_event_month_year text-center">
+                                <strong>
+                                    <t t-esc="record.date_begin.raw_value.toString('MMM')"/>
+                                    <t t-esc="record.date_begin.raw_value.getFullYear()"/>
+                                </strong>
                             </div>
-                            <div class="oe_event_time"><t t-esc="record.date_begin.raw_value.toString('hh:mm tt')"/></div>
+                            <div class="oe_event_time text-center"><strong><t t-esc="record.date_begin.raw_value.toString('hh:mm tt')"/></strong></div>
                         </a>
                         <div class="oe_module_desc">
                             <h4><a type="open"><field name="name"/></a></h4>

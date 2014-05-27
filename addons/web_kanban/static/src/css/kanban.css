@@ -361,19 +361,6 @@
 .openerp .oe_kanban_view .oe_kanban_action_a:hover {
   text-decoration: none;
 }
-.openerp .oe_kanban_view .oe_kanban_table {
-  width: 100%;
-  border: none;
-  border-collapse: collapse;
-  margin: 0;
-  padding: 0;
-}
-.openerp .oe_kanban_view .oe_kanban_table tr td {
-  padding: 0;
-}
-.openerp .oe_kanban_view .oe_kanban_table tr td.oe_kanban_title {
-  padding: 2px;
-}
 .openerp .oe_kanban_view .oe_kanban_box_content {
   padding: 4px;
   font-size: 90%;
