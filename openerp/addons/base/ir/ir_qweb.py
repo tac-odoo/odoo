@@ -415,6 +415,7 @@ class QWeb(orm.AbstractModel):
 
         d = qwebcontext.copy()
         d.context['inherit_branding'] = False
+        d.context['bundle_view'] = True
         content = self.render_tag_call(
             element, {'call': name}, generated_attributes, d)
         bundle = AssetsBundle(name, html=content)

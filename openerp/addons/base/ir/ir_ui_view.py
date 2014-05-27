@@ -28,6 +28,7 @@ import logging
 import os
 import time
 from operator import itemgetter
+import itertools
 
 import simplejson
 import werkzeug
@@ -258,6 +259,34 @@ class view(osv.osv):
             return False
         return ids[0]
 
+    def lookup_module_for_view(self, cr, uid, view_dict, view_ids, context=None):
+        modules = []
+        for view in self.browse(cr, uid, view_ids, context=context):
+            if view.model_data_id:
+                view_dict[view.model_data_id.module] = view.id
+                modules.append(view.model_data_id.module)
+        return view_dict, modules
+
+    #TODO: set a class variable and assign that topological order of all installed module once when class body is executed, do not calculate on each fields_view_get for bundle_view
+    def get_topological_views(self, cr, uid, inherit_view_ids, view_id=None, context=None):
+        view_dict = {}
+        view_dict, modules = self.lookup_module_for_view(cr, uid, view_dict, inherit_view_ids, context=context)
+        Modules = self.pool.get('ir.module.module')
+        domain = [('state','=','installed'), ('name','in', modules)]
+        module_ids = Modules.search(cr, openerp.SUPERUSER_ID, domain, context=context)
+        modules_dict = {}
+        for module in Modules.read(cr, openerp.SUPERUSER_ID, module_ids, ['name', 'dependencies_id']):
+            modules_dict[module['name']] = []
+            deps = module.get('dependencies_id')
+            if deps:
+                deps_read = self.pool.get('ir.module.module.dependency').read(cr, openerp.SUPERUSER_ID, deps, ['name'])
+                dependencies = [i['name'] for i in deps_read]
+                modules_dict[module['name']] = dependencies
+        from openerp.addons.web.controllers.main import module_topological_sort
+        sorted_modules = module_topological_sort(modules_dict)
+        sorted_view_ids = [view_dict[x] for x in sorted_modules if x in view_dict]
+        return sorted_view_ids
+
     #------------------------------------------------------
     # Inheritance mecanism
     #------------------------------------------------------
@@ -289,6 +318,16 @@ class view(osv.osv):
                 ['id', 'in', check_view_ids],
             ])
         view_ids = self.search(cr, uid, conditions, context=context)
+
+        #Current issue with get topological order based on view_id is as below:
+        #We can identify module from view_id using ir_model_data but what if someone creates view from front end UI, at this time we wan't having ir_model_data entry for such views
+        #One more thing we can not differenciate when we should call get_topological_view, it is called when fields_view_get is called but we don't want this every time.
+        
+        #Second solution to find module name from model by checking the entry model in ir_model_data and for which module that model stands for but template never having model in ir.ui.view(proposed solution is to have ir.qweb ass a model)
+        
+        #As per's FME's suggestion pass special context from js_bundle method of main.py, and call this method when that special key is available in context
+        if request.context.get('bundle_view'):
+            view_ids = self.get_topological_views(cr, uid, view_ids, view_id=view_id, context=context)
 
         return [(view.arch, view.id)
                 for view in self.browse(cr, 1, view_ids, context)

@@ -552,6 +552,7 @@ class Home(http.Controller):
         # manifest backward compatible mode, to be removed
         values = {'manifest_list': manifest_list}
         try:
+            request.context.update({'bundle_view': True})
             assets_html = request.render(xmlid, lazy=False, qcontext=values)
         except QWebTemplateNotFound:
             return request.not_found()
@@ -568,6 +569,7 @@ class Home(http.Controller):
     def css_bundle(self, xmlid, **kw):
         values = {'manifest_list': manifest_list} # manifest backward compatible mode, to be removed
         try:
+            request.context.update({'bundle_view': True})
             assets_html = request.render(xmlid, lazy=False, qcontext=values)
         except QWebTemplateNotFound:
             return request.not_found()
