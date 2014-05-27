@@ -269,7 +269,7 @@
                         </ul>
                     </t>
                     <t t-name="kanban-box">
-                        <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click oe_semantic_html_override">
+                        <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click oe_applicant_kanaban oe_semantic_html_override">
                             <div class="oe_dropdown_toggle oe_dropdown_kanban">
                                 <span class="oe_e">i</span>
                                 <ul class="oe_dropdown_menu">
@@ -277,33 +277,26 @@
                                     <li><a name="action_makeMeeting" type="object">Schedule Interview</a></li>
                                     <li><ul class="oe_kanban_colorpicker" data-field="color"/></li>
                                 </ul>
-
                             </div>
                             <div class="oe_kanban_content" tooltip="kanban-tooltip">
-                                <div>
-                                    <t t-if="record.partner_name.raw_value"><b><field name="partner_name"/></b><br/></t>
-                                    <i><field name="name"/></i><br/>
-                                    <field name="job_id"/><br/>
-                                    <t t-if="record.partner_mobile.raw_value">Mobile: <field name="partner_mobile"/><br/></t>
-                                </div>
-                                <div style="padding-left: 0.5em">
-                                    <t t-if="record.date_action.raw_value and record.date_action.raw_value lt (new Date())" t-set="red">oe_kanban_text_red</t>
-                                    <span t-attf-class="#{red || ''}"><field name="date_action"/></span>
-                                        <t t-if="record.date_action.raw_value"> : </t>
-                                        <field name="title_action"/>
-                                </div>
-                                <div style="width:240px"><field name="categ_ids"/></div>
+                                <t t-if="record.partner_name.raw_value"><b><field name="partner_name"/></b><br/></t>
+                                <i><field name="name"/></i><br/>
+                                <field name="job_id"/><br/>
+                                <t t-if="record.partner_mobile.raw_value">Mobile: <field name="partner_mobile"/><br/></t>
+                                <t t-if="record.date_action.raw_value and record.date_action.raw_value lt (new Date())" t-set="red">oe_kanban_text_red</t>
+                                <span t-attf-class="#{red || ''}"><field name="date_action"/></span>
+                                <t t-if="record.date_action.raw_value"> : </t> <field name="title_action"/>
+                                <field name="categ_ids" class="mt4"/>
                                 <div class="oe_kanban_bottom_right">
                                     <img t-att-src="kanban_image('res.users', 'image_small', record.user_id.raw_value)" t-att-title="record.user_id.value" width="24" height="24" class="oe_kanban_avatar pull-right"/>
                                     <div class="pull-left" groups="base.group_user">
                                         <field name="priority" widget="priority"/>
                                     </div>
                                 </div>
-                                <div class="oe_kanban_footer_left" style="margin-top:5px;">
+                                <div class="oe_kanban_footer_left mt4">
                                     <t t-raw="record.message_summary.raw_value"/>
-                                    <a t-if="record.attachment_number" name="action_get_attachment_tree_view" type="object" style="margin-right: 10px"> <field name="attachment_number"/> Documents</a>
+                                    <a t-if="record.attachment_number" name="action_get_attachment_tree_view" type="object"> <field name="attachment_number"/> Documents</a>
                                 </div>
-
                             </div>
                             <div class="oe_clear"></div>
                         </div>
@@ -411,7 +404,7 @@
                     <field name="user_id"/>
                     <templates>
                         <t t-name="kanban-box">
-                            <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_job oe_kanban_card oe_kanban_global_click">
+                            <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_job oe_kanban_card oe_kanban_global_click oe_semantic_html_overrides">
                                 <div class="oe_dropdown_toggle oe_dropdown_kanban oe_custom">
                                     <span class="oe_e">í</span>
                                     <ul class="oe_dropdown_menu">
@@ -424,41 +417,38 @@
                                         <li><ul class="oe_kanban_colorpicker" data-field="color"/></li>
                                     </ul>
                                 </div>
-                                <div class = "oe_kanban_content">
-                                    <t t-if="record.user_id.raw_value">
-                                        <img t-att-src="kanban_image('res.users', 'image_medium', record.user_id.raw_value[0])" t-att-title="record.user_id.value" class="oe_kanban_avatar oe_job_avatar"/>
-                                    </t>
-                                    <t t-if="record.user_id.raw_value === false">
-                                        <img t-att-src='_s + "/base/static/src/img/avatar.png"' class="oe_kanban_avatar oe_job_avatar"/>
-                                    </t>
-                                    <div class="oe_job_detail">
-                                        <div class="oe_job oe_name oe_kanban_ellipsis">
-                                            <field name="name"/>
+                                <div class="oe_kanban_content">
+                                    <div class="row">
+                                        <div class="col-md-10 oe_job_font oe_kanban_ellipsis">
+                                            <b><field name="name"/></b>
                                         </div>
-                                        <div class="oe_job oe_department oe_kanban_ellipsis">
-                                            <field name="department_id"/>
-                                            <span t-if="record.manager_id.value" class="oe_manager_name">
-                                                (<t t-esc="record.manager_id.value"/>)
-                                            </span>
+                                        <div class="col-md-1">
+                                            <img t-if="record.user_id.raw_value" t-att-src="kanban_image('res.users', 'image_medium', record.user_id.raw_value[0])" t-att-title="record.user_id.value" class="oe_kanban_avatar" width="24"/>
+                                            <img t-if="record.user_id.raw_value === false" t-att-src='_s + "/base/static/src/img/avatar.png"' class="oe_kanban_avatar" width="24"/>
                                         </div>
-                                        <div class="oe_job_alias oe_kanban_ellipsis" t-if=" record.alias_id.value and record.state.raw_value == 'recruit'">
-                                            <span class="oe_e">%%</span><small><field name="alias_id"/></small>
-                                        </div>
-
+                                    </div>
+                                    <div class="oe_kanban_ellipsis oe_job_font">
+                                        <field name="department_id"/>
+                                        <span t-if="record.manager_id.value" class="oe_gray oe_manager_name">
+                                            (<t t-esc="record.manager_id.value"/>)
+                                        </span>
+                                    </div>
+                                    <div class="oe_kanban_ellipsis" t-if=" record.alias_id.value and record.state.raw_value == 'recruit'">
+                                        <span class="oe_e oe_e_alias">%%</span><small><field name="alias_id"/></small>
                                     </div>
                                     <t t-if="record.state.raw_value == 'recruit'">
-                                        <div class="oe_applications">
-                                            <a name="%(action_hr_job_applications)d" type="action">
-                                                <span t-if="record.application_ids.raw_value.length gt 1"><t t-esc="record.application_ids.raw_value.length"/> Applications</span>
-                                                <span t-if="record.application_ids.raw_value.length lt 2"><t t-esc="record.application_ids.raw_value.length"/> Application</span>
+                                        <div class="col-md-6 mt32">
+                                            <a name="%(action_hr_job_applications)d" type="action" class="oe_job_font oe_link_hover">
+                                                <t t-if="record.application_ids.raw_value.length gt 1" t-esc="record.application_ids.raw_value.length"> Applications</t>
+                                                <t t-if="record.application_ids.raw_value.length lt 2" t-esc="record.application_ids.raw_value.length"> Application</t>
                                             </a>
                                             <br/>
-                                            <a t-if="record.document_ids.raw_value.length gt 0" name="action_get_attachment_tree_view" type="object">
-                                                <span t-if="record.document_ids.raw_value.length gt 1"><t t-esc="record.document_ids.raw_value.length"/> Documents</span>
-                                                <span t-if="record.document_ids.raw_value.length lt 2"><t t-esc="record.document_ids.raw_value.length"/> Document</span>
+                                            <a t-if="record.document_ids.raw_value.length gt 0" name="action_get_attachment_tree_view" type="object" class="oe_job_font oe_link_hover">
+                                                <t t-if="record.document_ids.raw_value.length gt 1" t-esc="record.document_ids.raw_value.length"> Documents</t>
+                                                <t t-if="record.document_ids.raw_value.length lt 2" t-esc="record.document_ids.raw_value.length"> Document</t>
                                             </a>
                                         </div>
-                                        <div class="oe_job_justgage">
+                                        <div class="col-md-6">
                                             <field state="recruit" name="no_of_hired_employee" widget="gauge"
                                                 style="width:160px; height: 120px;"
                                                 options="{
@@ -473,17 +463,19 @@
                                             </field>
                                         </div>
                                     </t>
-                                    <t t-if="record.state.raw_value == 'open'">
-                                        <div class="oe_start_recruitment">
-                                            <p><b>click here</b>, To start the recruitment</p>
-                                            <img src="/hr_recruitment/static/src/img/down1.png"/>
+                                    <div class="mt32" t-if="record.state.raw_value == 'open'">
+                                        <div class="col-md-1 mt16">
+                                            <img src="/hr_recruitment/static/src/img/down1.png" width="32" height="34"/>
                                         </div>
-                                    </t>
-                                    <div class="oe_launch_recruitment">
-                                        <a t-if="record.state.raw_value == 'open'" data-name="job_recruitment" data-type="object" class="oe_kanban_action">Launch Recruitment</a>
-                                        <a t-if="record.state.raw_value == 'recruit'" data-name="job_open" data-type="object" class="oe_kanban_action">Recruitment Done</a>
+                                        <div class="col-md-10 oe_gray">
+                                            <p ><b>click here</b>, To start the recruitment</p>
+                                        </div>
+                                    </div>
+                                    <div class="mb8 col-md-12">
+                                        <a t-if="record.state.raw_value == 'open'" data-name="job_recruitment" data-type="object" class="oe_link_hover">Launch Recruitment</a>
+                                        <a t-if="record.state.raw_value == 'recruit'" data-name="job_open" data-type="object" class="oe_link_hover">Recruitment Done</a>
                                         <a t-if="record.survey_id.raw_value"> | </a>
-                                        <a t-if="record.survey_id.raw_value" data-name="action_print_survey" data-type="object" class="oe_kanban_action">Print Interview</a>
+                                        <a t-if="record.survey_id.raw_value" data-name="action_print_survey" data-type="object" class="oe_link_hover">Print Interview</a>
                                     </div>
                                 </div>
                             </div>
