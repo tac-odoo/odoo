@@ -61,8 +61,6 @@ openerp.hr_timesheet_day = function(instance) {
                 })
                 .flatten(true)
                 .union().value();
-
-                //TODO: Process on account_groups instead of day.lines
                 return new instance.web.Model("hr.analytic.timesheet").call("multi_on_change_account_id", [[], new_account_ids,
                     new instance.web.CompoundContext({'user_id': self.get('user_id')})]).then(function(accounts_defaults) {
                     account_defaults = _.extend({}, default_get, (accounts_defaults[new_account_ids] || {}).value || {});
@@ -109,7 +107,7 @@ openerp.hr_timesheet_day = function(instance) {
                     if (!self.get('effective_readonly')){
                         self.get_box(account).val(self.sum_box(account, true)).change(function() {
                             var num = $(this).val();
-                            if(!self.is_valid_value(num)){
+                            if(self.is_valid_value(num)){
                                     num = (num == 0)?0:Number(self.parse_client(num));
                             }
                             if (isNaN(num)) {
@@ -148,7 +146,7 @@ openerp.hr_timesheet_day = function(instance) {
             return this.$('[data-account-total = "' + account + '"]');
         },
         set_day_total: function(day_count, total) {
-            return this.$el.find('.oe_daily_header .oe_display_day_total[data-day-total = "' + day_count + '"]').html(this.format_client(total));;
+            return this.$el.find('[data-day-total = "' + day_count + '"]').html(this.format_client(total));;
         },
         get_super_total: function() {
             return this.$('.oe_header_total');
@@ -285,7 +283,7 @@ openerp.hr_timesheet_day = function(instance) {
             var index = this.$(e.target).attr("data-day-count") || this.$(e.srcElement).attr("data-day-count"); 
             var input = this.$(".oe_edit_input")[index];
             var act_id = this.$(e.target).attr("data-account");
-            var account = this.days[self.count].account_group[act_id];
+            var account = this.days[this.count].account_group[act_id];
             this.$(".oe_edit_input").hide(); 
             if(this.$(input).attr("data-account")==act_id)
                 this.$(input).show();
@@ -303,7 +301,7 @@ openerp.hr_timesheet_day = function(instance) {
                 this.$el.find(".first_day").removeClass("oe_day_button").addClass("oe_fday_button");
         },
         navigateNext: function() {
-            if(this.count == _.last(this.days)){
+            if(this.count == this.days.length-1){
                 this.week = _.first(this.days).week;
                 this.count = 0;
             } else {
@@ -322,6 +320,7 @@ openerp.hr_timesheet_day = function(instance) {
         },
         navigateFirstDay: function() {
             this.count = 0;
+            this.week = this.days[this.count].week;
             this.display_data();
         },
         navigateDays: function(e){

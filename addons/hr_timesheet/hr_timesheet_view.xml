@@ -234,7 +234,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Summary">
+                        <page string="Weekly Timesheet">
                             <widget type="weekly_timesheet" attrs="{'readonly': [['state', 'not in', ['new', 'draft']]]}">
                             </widget>
                         </page>

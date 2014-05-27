@@ -1,11 +1,8 @@
-
 openerp.hr_timesheet_week = function(instance) {
     var QWeb = instance.web.qweb;
     var _t = instance.web._t;
 
-    //TODO: Add weekly navigation in proper way
     instance.hr_timesheet.WeeklyTimesheet = instance.hr_timesheet.BaseTimesheet.extend({
-    //instance.hr_timesheet.WeeklyTimesheet = instance.web.form.FormWidget.extend(instance.web.form.ReinitializeWidgetMixin, {
         events: {
             "click .oe_timesheet_weekly_account a": "go_to",
             "click .oe_timesheet_weekly .prev_week": "navigatePrevWeek",
@@ -30,7 +27,6 @@ openerp.hr_timesheet_week = function(instance) {
             if (!self.get("date_to") || !self.get("date_from"))
                 return;
             this.destroy_content();
-
             // it's important to use those vars to avoid race conditions
             var dates;
             var accounts;
@@ -57,9 +53,7 @@ openerp.hr_timesheet_week = function(instance) {
                     return el;
                 })
                 .groupBy("account_id").value();
-
                 var account_ids = _.map(_.keys(accounts), function(el) { return el === "false" ? false : Number(el) });
-
                 return new instance.web.Model("hr.analytic.timesheet").call("multi_on_change_account_id", [[], account_ids,
                     new instance.web.CompoundContext({'user_id': self.get('user_id')})]).then(function(accounts_defaults) {
                     accounts = _(accounts).chain().map(function(lines, account_id) {
@@ -103,8 +97,8 @@ openerp.hr_timesheet_week = function(instance) {
                 // we put all the gathered data in self, then we render
                 self.dates = dates;
                 if(self.dates.length){
-                    self.week = self.dates[0].getWeek();
-                    self.last_week = self.dates[self.dates.length-1].getWeek();
+                    self.week = _.first(self.dates).getWeek();
+                    self.last_week = _.last(self.dates).getWeek();
                 }
                 self.accounts = accounts;
                 self.account_names = account_names;
@@ -113,7 +107,6 @@ openerp.hr_timesheet_week = function(instance) {
                 self.display_data();
             });
         },
-        
         display_data: function() {
             var self = this;
             self.$el.html(QWeb.render("hr_timesheet.WeeklyTimesheet", {widget: self}));
@@ -282,5 +275,4 @@ openerp.hr_timesheet_week = function(instance) {
         },
     });
     instance.web.form.custom_widgets.add('weekly_timesheet', 'instance.hr_timesheet.WeeklyTimesheet');
-
 };

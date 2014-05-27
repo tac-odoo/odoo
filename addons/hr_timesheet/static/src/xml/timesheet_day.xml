@@ -62,7 +62,7 @@
                                         <span t-if="widget.get('effective_readonly')" class="oe_timesheet_daily_box" t-att-data-account="days.account_group[data][0].account_id" 
                                         t-att-data-day-count="day_count"></span>
                                         <span t-if="!widget.get('effective_readonly')" class="oe_timesheet_edit_description">
-                                        <i  class="fa fa-pencil fa-fw" title="edit description" t-att-data-account="data" t-att-data-day-count="index"></i>
+                                            <i  class="fa fa-pencil fa-fw" title="edit description" t-att-data-account="data" t-att-data-day-count="index"></i>
                                         </span>
                                         <input class="oe_edit_input" t-att-data-account="data" data-day-count="index" style="display:none"></input>
                                         <br/><br/>

@@ -14,12 +14,10 @@
 .openerp .timesheet_days table {
   width: 100%;
 }
-
 #tdate {
   margin-top: 10px;
   margin-bottom: 20px;
 }
-
 .openerp .timesheet_days table td:first-child {
   border-radius: 5px 0px 0px 0px;
 }
@@ -98,7 +96,6 @@
   background-image: -webkit-linear-gradient(bottom, white 0%, #eeeeee 100%);
   background-image: -ms-linear-gradient(bottom, white 0%, #eeeeee 100%);
   background-image: linear-gradient(to bottom, white 0%, #eeeeee 100%);
-  text-shadow: 0 1px 0 white;
   -webkit-box-shadow: 0 1px 0 white inset, 0 0 5px rgba(0, 0, 0, 0.1) inset, 0 1px 1px rgba(0, 0, 0, 0.3);
   box-shadow: 0 1px 0 white inset, 0 0 5px rgba(0, 0, 0, 0.1) inset, 0 1px 1px rgba(0, 0, 0, 0.3);
 }
@@ -117,9 +114,9 @@
 .openerp .oe_timesheet_daily .oe_timesheet_daily_box {
   font-weight: bold;
   padding-right: 2px !important;
-  margin-left: 230px;
-  text-align: right;
+  margin-right: 250px;
   color: #4c4c4c;
+  float: right;
 }
 .openerp .oe_timesheet_daily input.oe_timesheet_daily_box {
   width: 50px;
@@ -128,6 +125,12 @@
 }
 .openerp .oe_timesheet_edit_description {
   cursor: pointer;
+  float:right;
+  margin-right: -70px;
+}
+.openerp .oe_edit_input{
+    float:right;
+    margin-right: -250px;
 }
 .openerp .oe_timesheet_daily_footer {
   border-top: 1px solid #bbbbbb;
@@ -143,7 +146,7 @@
 }
 .openerp .oe_timesheet_daily .oe_timesheet_daily_add_row .oe_form_field_many2one {
   display: inline-block;
-  width: 300px;
+  width: 250px;
 }
 .openerp .oe_timesheet_daily_adding {
   display: table-cell;
