@@ -15,24 +15,38 @@
             },
             {
                 waitNot:   'a[href*="/event"]:contains("Conference on Business Applications")',
-                title:     "select 2 Standard tickets",
+                title:     "select 1 Standard ticket",
                 element:   'select:eq(0)',
-                sampleText: '2',
+                sampleText: '1',
             },
             {
-                title:     "select 3 VIP tickets",
-                waitFor:   'select:eq(0) option:contains(2):selected',
+                title:     "select 1 VIP ticket",
+                waitFor:   'select:eq(0) option:contains(1):selected',
                 element:   'select:eq(1)',
-                sampleText: '3',
+                sampleText: '1',
             },
             {
-                title:     "Order Now",
-                waitFor:   'select:eq(1) option:contains(3):selected',
-                element:   '.btn-primary:contains("Order Now")',
+                title:     "Select Attendees and Order",
+                waitFor:   'select:eq(1) option:contains(1):selected',
+                element:   '.btn-primary:contains("Select Attendees and Order")',
+            },
+            {
+                title:     "Fill attendees details",
+                waitFor:   '#top_menu .my_cart_quantity:contains(2)',
+                element:   'form[action="/event/cart/update?event_id=3"] .btn:contains("Order Now")',
+                autoComplete: function (tour) {
+                    if ($("input[name='attendee-name-4-1-1-Standard']").val() === "")
+                        $("input[name='attendee-name-4-1-1-Standard']").val("StandardAttendee1");
+                    if ($("input[name='attendee-email-4-1-1-Standard']").val() === "")
+                        $("input[name='attendee-email-4-1-1-Standard']").val("standardattende1@eventoptenerp.com");
+                    if ($("input[name='attendee-name-5-1-1-VIP']").val() === "")
+                        $("input[name='attendee-name-5-1-1-VIP']").val("VIPAttendee1");
+                    if ($("input[name='attendee-email-5-1-1-VIP']").val() === "")
+                        $("input[name='attendee-email-5-1-1-VIP']").val("vipattende1@eventoptenerp.com");
+                },
             },
             {
                 title:     "Complete checkout",
-                waitFor:   '#top_menu .my_cart_quantity:contains(5)',
                 element:   'form[action="/shop/confirm_order"] .btn:contains("Confirm")',
                 autoComplete: function (tour) {
                     if ($("input[name='name']").val() === "")

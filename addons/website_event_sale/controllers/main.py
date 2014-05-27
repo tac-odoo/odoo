@@ -24,12 +24,13 @@ from openerp.addons.web import http
 from openerp.addons.web.http import request
 from openerp.addons.website_event.controllers.main import website_event
 from openerp.tools.translate import _
+from collections import OrderedDict, defaultdict
 
 
 class website_event(website_event):
 
-    @http.route(['/event/cart/update'], type='http', auth="public", methods=['POST'], website=True)
-    def cart_update(self, event_id, **post):
+    @http.route(['/event/register/attendee'], type='http', auth="public", methods=['POST'], website=True)
+    def register_attendee(self, event_id, **post):
         cr, uid, context = request.cr, request.uid, request.context
         ticket_obj = request.registry.get('event.event.ticket')
 
@@ -46,6 +47,30 @@ class website_event(website_event):
 
         if not sale:
             return request.redirect("/event/%s" % event_id)
+
+        return request.website.render("website_event_sale.event_attendee_registration", {'post': OrderedDict(sorted(post.items())), 'event_id': event_id})
+
+    @http.route(['/event/cart/update'], type='http', auth="public", methods=['POST'], website=True)
+    def cart_update(self, event_id, **post):
+        cr, uid, context = request.cr, request.uid, request.context
+        attendee_obj = request.registry.get('event.registration_attendee')
+
+        dict_attendee = {}
+        for key, value in post.items():
+            if key.partition('-')[0] == "attendee":
+                dict_attendee[key] = value
+
+        # Attendee creation
+        attendees = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+        for key, value in dict_attendee.items():
+            splitted_key = key.rsplit('-')
+            attendees[splitted_key[2]][splitted_key[3]][splitted_key[1]] = value
+
+        for key1, value1 in attendees.items():
+            for key2, value2 in value1.items():
+                value2['event_id'] = event_id
+                attendee_id = attendee_obj.create(request.cr, SUPERUSER_ID, value2, context=request.context)
+
         return request.redirect("/shop/checkout")
 
     def _add_event(self, event_name="New Event", context={}, **kwargs):
@@ -61,6 +86,3 @@ class website_event(website_event):
         except ValueError:
             pass
         return super(website_event, self)._add_event(event_name, context, **kwargs)
-
-
-
