@@ -1075,7 +1075,7 @@ class CoreCalendarEvent(osv.Model):
         calendar_obj = self.pool.get('core.calendar')
         calendar_ids = self.get_calendars(cr, user, context=context)
         for calendar in calendar_obj.browse(cr, user, calendar_ids, context=context):
-            calendar_args = calendar_obj.get_search_args(cr, user, calendar.id, args)
+            calendar_args = calendar_obj.get_search_args(cr, user, calendar.id, args, context=context)
             calendar_model = self.pool.get(calendar.model.model)
             ids_by_calendar.append(['%s-%s' % (calendar.id, id)
                                     for id in calendar_model.search(cr, user, calendar_args, context=context)])
