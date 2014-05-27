@@ -192,9 +192,10 @@ class report_event_resource(osv.Model):
             get_hours = self._compute_resource_hours
             # Get timeline & hours as SUPERUSER to get correct result
             # even if ir.rule are applied
+            timeline_context = dict(context, freebusy=True)
             for partner_id, timeline in get_timelines(cr, SUPERUSER_ID, ids,
                                                       date_from=start, date_to=end,
-                                                      context=context).iteritems():
+                                                      context=timeline_context).iteritems():
                 result[partner_id] = get_hours(cr, SUPERUSER_ID, partner_id, timeline,
                                                start, end, context=context)
             return result
