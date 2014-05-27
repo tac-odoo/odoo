@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!-- Layout and common templates -->
+        <template id="products_option_add_to_cart" inherit_id="website_sale.products_add_to_cart" name="Select More Options and Add to Cart">
+            <xpath expr="//form[@action='/shop/cart/update']" position="replace">
+                <t t-if="product.optional_product_ids">
+                    <a class="btn btn-xs btn-success" data-toggle="modal" data-target="#modeloptions">
+                        Add Options
+                    </a>
+                </t>
+                <t t-if="not product.optional_product_ids">
+                    <form action="/shop/cart/update" method="post" style="display: inline-block;">
+                        <input name="product_id" t-att-value="product.product_variant_ids[0].id" type="hidden"/>
+                        <a class="btn btn-default btn-xs fa fa-shopping-cart a-submit"/>
+                    </form>
+                </t>
+            </xpath>
+        </template>
+
+        <template id="product_options_modal" inherit_id="website_sale.products_item" name="Select More Options">
+            <xpath expr="//section" position="after">
+                <div class="modal fade" id="modeloptions" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <form id="optional_product" method="POST" t-attf-action="/shop/options/#{product.id}" class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&amp;times;</button>
+                                <h4 class="modal-title">Add Options</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="table-responsive">
+                                    <table id="mytable" class="table table-bordred table-striped">
+                                        <thead>
+                                            <th><input type="checkbox" id="checkall"/></th>
+                                            <th>Name</th>
+                                            <th>Qty.</th>
+                                            <th>Price</th>
+                                        </thead>
+                                        <tbody>
+                                            <tr t-foreach="product.optional_product_ids" t-as="option">
+                                                <td><input t-att-name="option.product_id.id" type="checkbox"/></td>
+                                                <td t-esc="option.product_id.name"></td>
+                                                <td t-esc="option.quantity"></td>
+                                                <td t-esc="option.price_unit"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" t-attf-class="btn btn-primary">Add to Cart</button> or
+                                <button type="button" class="btn btn-link" data-dismiss="modal" style="padding: 0">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+
+    </data>
+</openerp>

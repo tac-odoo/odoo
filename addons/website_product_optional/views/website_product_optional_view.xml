@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <!-- Product Form View -->
+        <record id="view_optional_product_form_inherited" model="ir.ui.view">
+            <field name="name">optional.product.form.inherited</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page[@string='Sales']" position="after">
+                    <page string="Optional Products">
+                        <field name="optional_product_ids" string="Optional Products" nolabel="1"  colspan="4">
+                            <tree string="Optional Products">
+                                <field name="category_id"/>
+                                <field name="product_id"/>
+                                <field name="quantity"/>
+                                <field name="price_unit"/>
+                            </tree>
+                        </field>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Product Category Form View -->
+        <record id="view_optional_product_category_form" model="ir.ui.view">
+            <field name="name">optional.product.category.form</field>
+            <field name="model">product.category.optional</field>
+            <field name="arch" type="xml">
+                <form string="Product Category" version="7.0">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                            </group>
+                            <group>
+                                <field name="code"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Product Category Tree View -->
+        <record id="view_optional_product_category_tree" model="ir.ui.view">
+            <field name="name">optional.product.category.tree</field>
+            <field name="model">product.category.optional</field>
+            <field name="arch" type="xml">
+                <tree string="Product Category" editable="top" version="7.0">
+                    <field name="name"/>
+                    <field name="code"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Product Category Action -->
+        <record id='action_optional_product_category' model='ir.actions.act_window'>
+            <field name="name">Optional Categories</field>
+            <field name="res_model">product.category.optional</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to create a new optional product category.
+                </p>
+            </field>
+        </record>
+
+        <!-- Product Category Menu -->
+        <menuitem id="menu_optional_product_category" action="action_optional_product_category" name="Optional Categories" parent="product.prod_config_main" sequence="30"/>
+
+       <!-- Optional Product Form View -->
+        <record id='view_optional_product_form' model='ir.ui.view'>
+            <field name="name">optional.product.form</field>
+            <field name="model">product.optional</field>
+            <field name="arch" type="xml">
+                <form string="Optional Products" version="7.0">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="product_id"/>
+                                <field name="category_id"/>
+                            </group>
+                            <group>
+                                <field name="quantity"/>
+                                <field name="price_unit"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Optional Product Tree View -->
+        <record id="view_optional_product_tree" model="ir.ui.view">
+            <field name="name">optional.product.tree</field>
+            <field name="model">product.optional</field>
+            <field name="arch" type="xml">
+                <tree string="Optional Product" version="7.0">
+                    <field name="product_id"/>
+                    <field name="category_id"/>
+                    <field name="quantity"/>
+                    <field name="price_unit"/>
+                </tree>
+            </field>
+        </record>
+
+    </data>
+</openerp>
