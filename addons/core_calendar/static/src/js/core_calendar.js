@@ -414,7 +414,7 @@ instance.web_calendar.CalendarView = instance.web_calendar.CalendarView.extend({
             var evi = self.virtual_event_id_to_real(evt.id);
             _.each(self.subscribed_calendars, function(calendar) {
                 if (!!evi && calendar.id == evi.calendar_id) {
-                    converted_event.access.edit = converted_event.access.delete && !!calendar.access.write;
+                    converted_event.access.edit = converted_event.access.edit && !!calendar.access.write;
                     converted_event.access.delete = converted_event.access.delete && !!calendar.access.unlink;
                     if (!converted_event.access.edit) {
                         // force event as readonly

@@ -25,6 +25,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 from openerp.osv import osv, fields, expression
 import openerp.tools as tools
+from openerp import SUPERUSER_ID
 from openerp.tools.misc import flatten
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FMT
 from openerp.tools.safe_eval import safe_eval
@@ -467,7 +468,7 @@ class CoreCalendar(osv.Model):
             r['access'] = {}
             for mode in ['read', 'write', 'create', 'unlink']:
                 has_mode_access = ModelAccess.check(cr, uid, calendar_model, mode, False)
-                if mode != 'read' and r['readonly']:
+                if mode != 'read' and r['readonly'] and uid != SUPERUSER_ID:
                     # if calendar is forced as readonly,
                     # disable write/create/unlink access
                     has_mode_access = False
