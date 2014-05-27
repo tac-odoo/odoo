@@ -1585,7 +1585,7 @@ class mail_thread(osv.AbstractModel):
                 parent_id = message.id
         if type == 'notification':
             obj = self.browse(cr, uid, thread_id, context=context)
-            body += self._prepare_body_mail_action(cr, uid, obj)
+            body += self._prepare_body_mail_action(cr, uid, obj).encode('utf-8')
         values = kwargs
         values.update({
             'author_id': author_id,
