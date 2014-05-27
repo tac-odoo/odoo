@@ -69,7 +69,7 @@ class project_issue_report(osv.osv):
                     to_char(c.date_open, 'YYYY-MM-DD') as opening_date,
                     to_char(c.create_date, 'YYYY-MM-DD') as creation_date,
                     date_trunc('day',c.date_last_stage_update) as date_last_stage_update,
-                    c.user_id,
+                    c.user_partner_id,
                     c.working_hours_open,
                     c.working_hours_close,
                     c.section_id,

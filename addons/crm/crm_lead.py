@@ -40,7 +40,7 @@ CRM_LEAD_FIELDS_TO_MERGE = ['name',
     'state_id',
     'stage_id',
     'type_id',
-    'user_id',
+    'user_partner_id',
     'title',
     'city',
     'contact_name',
@@ -190,8 +190,8 @@ class crm_lead(format_address, osv.osv):
                         ans = date_close - date_create
                 if ans:
                     resource_id = False
-                    if lead.user_id:
-                        resource_ids = res_obj.search(cr, uid, [('user_id','=',lead.user_id.id)])
+                    if lead.user_partner_id:
+                        resource_ids = res_obj.search(cr, uid, [('user_partner_id','=',lead.user_partner_id.id)])
                         if len(resource_ids):
                             resource_id = resource_ids[0]
 
@@ -252,7 +252,7 @@ class crm_lead(format_address, osv.osv):
         'date_closed': fields.datetime('Closed', readonly=True),
         'stage_id': fields.many2one('crm.case.stage', 'Stage', track_visibility='onchange', select=True,
                         domain="['&', ('section_ids', '=', section_id), '|', ('type', '=', type), ('type', '=', 'both')]"),
-        'user_id': fields.many2one('res.users', 'Salesperson', select=True, track_visibility='onchange'),
+        'user_partner_id': fields.many2one('res.partner', 'Salesperson', select=True, track_visibility='onchange'),
         'referred': fields.char('Referred By', size=64),
         'date_open': fields.datetime('Assigned', readonly=True),
         'day_open': fields.function(_compute_day, string='Days to Open', \
@@ -276,8 +276,8 @@ class crm_lead(format_address, osv.osv):
         'partner_address_name': fields.related('partner_id', 'name', type='char', string='Partner Contact Name', readonly=True),
         'partner_address_email': fields.related('partner_id', 'email', type='char', string='Partner Contact Email', readonly=True),
         'company_currency': fields.related('company_id', 'currency_id', type='many2one', string='Currency', readonly=True, relation="res.currency"),
-        'user_email': fields.related('user_id', 'email', type='char', string='User Email', readonly=True),
-        'user_login': fields.related('user_id', 'login', type='char', string='User Login', readonly=True),
+        'user_partner_email': fields.related('user_partner_id', 'email', type='char', string='User Email', readonly=True),
+#        'user_login': fields.related('user_id', 'login', type='char', string='User Login', readonly=True),
 
         # Fields for address, due to separation from crm and res.partner
         'street': fields.char('Street', size=128),
@@ -301,7 +301,7 @@ class crm_lead(format_address, osv.osv):
     _defaults = {
         'active': 1,
         'type': 'lead',
-        'user_id': lambda s, cr, uid, c: uid,
+        'user_partner_id': lambda s, cr, uid, c: uid,
         'stage_id': lambda s, cr, uid, c: s._get_default_stage_id(cr, uid, c),
         'section_id': lambda s, cr, uid, c: s._get_default_section_id(cr, uid, c),
         'company_id': lambda s, cr, uid, c: s.pool.get('res.company')._company_default_get(cr, uid, 'crm.lead', context=c),
@@ -344,12 +344,12 @@ class crm_lead(format_address, osv.osv):
             }
         return {'value': values}
 
-    def on_change_user(self, cr, uid, ids, user_id, context=None):
+    def on_change_user_partner(self, cr, uid, ids, user_partner_id, context=None):
         """ When changing the user, also set a section_id or restrict section id
-            to the ones user_id is member of. """
+            to the ones user_partner_id is member of. """
         section_id = self._get_default_section_id(cr, uid, context=context) or False
-        if user_id and not section_id:
-            section_ids = self.pool.get('crm.case.section').search(cr, uid, ['|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context)
+        if user_partner_id and not section_id:
+            section_ids = self.pool.get('crm.case.section').search(cr, uid, ['|', ('user_partner_id', '=', user_partner_id), ('member_ids', '=', user_partner_id)], context=context)
             if section_ids:
                 section_id = section_ids[0]
         return {'value': {'section_id': section_id}}
@@ -448,8 +448,8 @@ class crm_lead(format_address, osv.osv):
             if case.section_id.parent_id:
                 data['section_id'] = case.section_id.parent_id.id
                 if case.section_id.parent_id.change_responsible:
-                    if case.section_id.parent_id.user_id:
-                        data['user_id'] = case.section_id.parent_id.user_id.id
+                    if case.section_id.parent_id.user_partner_id:
+                        data['user_partner_id'] = case.section_id.parent_id.user_partner_id.id
             else:
                 raise osv.except_osv(_('Error!'), _("You are already at the top level of your sales-team category.\nTherefore you cannot escalate furthermore."))
             self.write(cr, uid, [case.id], data, context=context)
@@ -610,7 +610,7 @@ class crm_lead(format_address, osv.osv):
                 attachment.write(values)
         return True
 
-    def merge_opportunity(self, cr, uid, ids, user_id=False, section_id=False, context=None):
+    def merge_opportunity(self, cr, uid, ids, user_partner_id=False, section_id=False, context=None):
         """
         Different cases of merge:
         - merge leads together = 1 new lead
@@ -647,8 +647,8 @@ class crm_lead(format_address, osv.osv):
         fields = list(CRM_LEAD_FIELDS_TO_MERGE)
         merged_data = self._merge_data(cr, uid, ids, highest, fields, context=context)
 
-        if user_id:
-            merged_data['user_id'] = user_id
+        if user_partner_id:
+            merged_data['user_partner_id'] = user_partner_id
         if section_id:
             merged_data['section_id'] = section_id
 
@@ -685,7 +685,7 @@ class crm_lead(format_address, osv.osv):
             'probability': lead.probability,
             'name': lead.name,
             'partner_id': customer and customer.id or False,
-            'user_id': (lead.user_id and lead.user_id.id),
+            'user_partner_id': (lead.user_partner_id and lead.user_partner_id.id),
             'type': 'opportunity',
             'date_action': fields.datetime.now(),
             'date_open': fields.datetime.now(),
@@ -696,7 +696,7 @@ class crm_lead(format_address, osv.osv):
             val['stage_id'] = self.stage_find(cr, uid, [lead], section_id, [('type', 'in', ('opportunity', 'both'))], context=context)
         return val
 
-    def convert_opportunity(self, cr, uid, ids, partner_id, user_ids=False, section_id=False, context=None):
+    def convert_opportunity(self, cr, uid, ids, partner_id, user_partner_ids=False, section_id=False, context=None):
         customer = False
         if partner_id:
             partner = self.pool.get('res.partner')
@@ -708,15 +708,15 @@ class crm_lead(format_address, osv.osv):
             vals = self._convert_opportunity_data(cr, uid, lead, customer, section_id, context=context)
             self.write(cr, uid, [lead.id], vals, context=context)
 
-        if user_ids or section_id:
-            self.allocate_salesman(cr, uid, ids, user_ids, section_id, context=context)
+        if user_partner_ids or section_id:
+            self.allocate_salesman(cr, uid, ids, user_partner_ids, section_id, context=context)
 
         return True
 
     def _lead_create_contact(self, cr, uid, lead, name, is_company, parent_id=False, context=None):
         partner = self.pool.get('res.partner')
         vals = {'name': name,
-            'user_id': lead.user_id.id,
+            'user_partner_id': lead.user_partner_id.id,
             'comment': lead.description,
             'section_id': lead.section_id.id or False,
             'parent_id': parent_id,
@@ -783,7 +783,7 @@ class crm_lead(format_address, osv.osv):
             partner_ids[lead.id] = partner_id
         return partner_ids
 
-    def allocate_salesman(self, cr, uid, ids, user_ids=None, team_id=False, context=None):
+    def allocate_salesman(self, cr, uid, ids, user_partner_ids=None, team_id=False, context=None):
         """
         Assign salesmen and salesteam to a batch of leads.  If there are more
         leads than salesmen, these salesmen will be assigned in round-robin.
@@ -792,7 +792,7 @@ class crm_lead(format_address, osv.osv):
         L5 - S1, L6 - S2.
 
         :param list ids: leads/opportunities ids to process
-        :param list user_ids: salesmen to assign
+        :param list user_partner_ids: salesmen to assign
         :param int team_id: salesteam to assign
         :return bool
         """
@@ -802,15 +802,15 @@ class crm_lead(format_address, osv.osv):
             value = {}
             if team_id:
                 value['section_id'] = team_id
-            if user_ids:
-                value['user_id'] = user_ids[index]
-                # Cycle through user_ids
-                index = (index + 1) % len(user_ids)
+            if user_partner_ids:
+                value['user_partner_id'] = user_partner_ids[index]
+                # Cycle through user_partner_ids
+                index = (index + 1) % len(user_partner_ids)
             if value:
                 self.write(cr, uid, [lead_id], value, context=context)
         return True
 
-    def schedule_phonecall(self, cr, uid, ids, schedule_time, call_summary, desc, phone, contact_name, user_id=False, section_id=False, categ_id=False, action='schedule', context=None):
+    def schedule_phonecall(self, cr, uid, ids, schedule_time, call_summary, desc, phone, contact_name, user_partner_id=False, section_id=False, categ_id=False, action='schedule', context=None):
         """
         :param string action: ('schedule','Schedule a call'), ('log','Log a call')
         """
@@ -826,12 +826,12 @@ class crm_lead(format_address, osv.osv):
         for lead in self.browse(cr, uid, ids, context=context):
             if not section_id:
                 section_id = lead.section_id and lead.section_id.id or False
-            if not user_id:
-                user_id = lead.user_id and lead.user_id.id or False
+            if not user_partner_id:
+                user_partner_id = lead.user_partner_id and lead.user_partner_id.id or False
             vals = {
                 'name': call_summary,
                 'opportunity_id': lead.id,
-                'user_id': user_id or False,
+                'user_partner_id': user_partner_id or False,
                 'categ_id': categ_id or False,
                 'description': desc or '',
                 'date': schedule_time,
@@ -896,7 +896,7 @@ class crm_lead(format_address, osv.osv):
         """
         lead = self.browse(cr, uid, ids[0], context)
         res = self.pool.get('ir.actions.act_window').for_xml_id(cr, uid, 'calendar', 'action_calendar_event', context)
-        partner_ids = [self.pool['res.users'].browse(cr, uid, uid, context=context).partner_id.id]
+        partner_ids = [self.pool['res.partner'].browse(cr, uid, uid, context=context).id]
         if lead.partner_id:
             partner_ids.append(lead.partner_id.id)
         res['context'] = {
@@ -996,7 +996,7 @@ class crm_lead(format_address, osv.osv):
             'email_from': msg.get('from'),
             'email_cc': msg.get('cc'),
             'partner_id': msg.get('author_id', False),
-            'user_id': False,
+            'user_partner_id': False,
         }
         if msg.get('author_id'):
             defaults.update(self.on_change_partner_id(cr, uid, None, msg.get('author_id'), context=context)['value'])

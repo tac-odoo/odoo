@@ -659,7 +659,7 @@ class resource_resource(osv.osv):
         'active' : fields.boolean('Active', help="If the active field is set to False, it will allow you to hide the resource record without removing it."),
         'company_id' : fields.many2one('res.company', 'Company'),
         'resource_type': fields.selection([('user','Human'),('material','Material')], 'Resource Type', required=True),
-        'user_id' : fields.many2one('res.users', 'User', help='Related user name for the resource to manage its access.'),
+        'user_partner_id' : fields.many2one('res.partner', 'Partner', help='Related Partner name for the resource to manage its access.'),
         'time_efficiency' : fields.float('Efficiency Factor', size=8, required=True, help="This field depict the efficiency of the resource to complete tasks. e.g  resource put alone on a phase of 5 days with 5 tasks assigned to him, will show a load of 100% for this phase by default, but if we put a efficiency of 200%, then his load will only be 50%."),
         'calendar_id' : fields.many2one("resource.calendar", "Working Time", help="Define the schedule of resource"),
     }
@@ -678,29 +678,29 @@ class resource_resource(osv.osv):
             default.update(name=_('%s (copy)') % (self.browse(cr, uid, id, context=context).name))
         return super(resource_resource, self).copy(cr, uid, id, default, context)
 
-    def generate_resources(self, cr, uid, user_ids, calendar_id, context=None):
+    def generate_resources(self, cr, uid, partner_ids, calendar_id, context=None):
         """
         Return a list of  Resource Class objects for the resources allocated to the phase.
 
         NOTE: Used in project/project.py
         """
         resource_objs = {}
-        user_pool = self.pool.get('res.users')
-        for user in user_pool.browse(cr, uid, user_ids, context=context):
-            resource_objs[user.id] = {
-                 'name' : user.name,
+        partner_pool = self.pool.get('res.partner')
+        for partner in partner_pool.browse(cr, uid, partner_ids, context=context):
+            resource_objs[partner.id] = {
+                 'name' : partner.name,
                  'vacation': [],
                  'efficiency': 1.0,
             }
 
-            resource_ids = self.search(cr, uid, [('user_id', '=', user.id)], context=context)
+            resource_ids = self.search(cr, uid, [('user_partner_id', '=', partner.id)], context=context)
             if resource_ids:
                 for resource in self.browse(cr, uid, resource_ids, context=context):
-                    resource_objs[user.id]['efficiency'] = resource.time_efficiency
+                    resource_objs[partner.id]['efficiency'] = resource.time_efficiency
                     resource_cal = resource.calendar_id.id
                     if resource_cal:
                         leaves = self.compute_vacation(cr, uid, calendar_id, resource.id, resource_cal, context=context)
-                        resource_objs[user.id]['vacation'] += list(leaves)
+                        resource_objs[partner.id]['vacation'] += list(leaves)
         return resource_objs
 
     def compute_vacation(self, cr, uid, calendar_id, resource_id=False, resource_calendar=False, context=None):

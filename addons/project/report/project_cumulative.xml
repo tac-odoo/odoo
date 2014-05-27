@@ -22,16 +22,16 @@
                 <search string="Task's Analysis">
                     <field name="date"/>
                     <field name="project_id"/>
-                    <field name="user_id"/>
+                    <field name="partner_id"/>
                     <filter name="new" string="New" domain="[('type_id.sequence', '=', 1)]"/>
                     <separator/>
                     <filter name="kanban_blocked" string="Blocked" domain="[('kanban_state','=','blocked')]"/>
                     <filter name="kanban_ready" string="Ready" domain="[('kanban_state','=','done')]"/>
                     <separator/>
-                    <filter string="My Tasks" domain="[('user_id','=',uid)]"/>
-                    <filter string="Unassigned Tasks" domain="[('user_id','=',False)]"/>
+<!--                    <filter string="My Tasks" domain="[('user_id','=',uid)]"/>-->
+                    <filter string="Unassigned Tasks" domain="[('partner_id','=',False)]"/>
                     <separator/>
-                    <filter string="My Projects" domain="[('project_id.user_id','=',uid)]"/>
+<!--                    <filter string="My Projects" domain="[('project_id.user_id','=',uid)]"/>-->
                 </search>
             </field>
         </record>

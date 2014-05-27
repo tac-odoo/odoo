@@ -76,11 +76,12 @@ class project(osv.osv):
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         if user == 1:
             return super(project, self).search(cr, user, args, offset=offset, limit=limit, order=order, context=context, count=count)
+        user_partner_id  = self.pool.get("res.users").browse(cr, user, user, context=context).partner_id.id
         if context and context.get('user_preference'):
                 cr.execute("""SELECT project.id FROM project_project project
-                           LEFT JOIN account_analytic_account account ON account.id = project.analytic_account_id
+                           LEFT JOIN project_partner_rel rel ON rel.project_id = project.id
                            LEFT JOIN project_user_rel rel ON rel.project_id = project.id
-                           WHERE (account.user_id = %s or rel.uid = %s)"""%(user, user))
+                           WHERE (account.user_partner_id = %s or rel.partner_id = %s)"""%(user_partner_id, user_partner_id))
                 return [(r[0]) for r in cr.fetchall()]
         return super(project, self).search(cr, user, args, offset=offset, limit=limit, order=order,
             context=context, count=count)
@@ -231,7 +232,7 @@ class project(osv.osv):
         'priority': fields.integer('Sequence (deprecated)',
             deprecated='Will be removed with OpenERP v8; use sequence field instead',
             help="Gives the sequence order when displaying the list of projects"),
-        'members': fields.many2many('res.users', 'project_user_rel', 'project_id', 'uid', 'Project Members',
+        'members': fields.many2many('res.partner', 'project_partner_rel', 'project_id', 'partner_id', 'Project Members',
             help="Project's members are users who can have an access to the tasks related to this project.", states={'close':[('readonly',True)], 'cancelled':[('readonly',True)]}),
         'tasks': fields.one2many('project.task', 'project_id', "Task Activities"),
         'planned_hours': fields.function(_progress_rate, multi="progress", string='Planned Time', help="Sum of planned hours of all tasks related to this project and its child projects.",
@@ -440,14 +441,14 @@ class project(osv.osv):
         result = "from openerp.addons.resource.faces import *\n"
         result += "import datetime\n"
         for project in self.browse(cr, uid, ids, context=context):
-            u_ids = [i.id for i in project.members]
-            if project.user_id and (project.user_id.id not in u_ids):
-                u_ids.append(project.user_id.id)
+            p_ids = [i.id for i in project.members]
+            if project.user_partner_id and (project.user_partner_id.id not in p_ids):
+                p_ids.append(project.user_partner_id.id)
             for task in project.tasks:
-                if task.user_id and (task.user_id.id not in u_ids):
-                    u_ids.append(task.user_id.id)
+                if task.user_partner_id and (task.user_partner_id.id not in p_ids):
+                    p_ids.append(task.user_partner_id.id)
             calendar_id = project.resource_calendar_id and project.resource_calendar_id.id or False
-            resource_objs = resource_pool.generate_resources(cr, uid, u_ids, calendar_id, context=context)
+            resource_objs = resource_pool.generate_resources(cr, uid, p_ids, calendar_id, context=context)
             for key, vals in resource_objs.items():
                 result +='''
 class User_%s(Resource):
@@ -465,8 +466,8 @@ def Project():
         working_days = resource_pool.compute_working_calendar(cr, uid, calendar_id, context=context)
         # TODO: check if we need working_..., default values are ok.
         puids = [x.id for x in project.members]
-        if project.user_id:
-            puids.append(project.user_id.id)
+        if project.user_partner_id:
+            puids.append(project.user_partner_id.id)
         result = """
   def Project_%d():
     start = \'%s\'
@@ -517,9 +518,9 @@ def Project():
                     'date_start': p.start.strftime('%Y-%m-%d %H:%M:%S'),
                     'date_end': p.end.strftime('%Y-%m-%d %H:%M:%S')
                 }, context=context)
-                if (not task.user_id) and (p.booked_resource):
+                if (not task.user_partner_id) and (p.booked_resource):
                     self.pool.get('project.task').write(cr, uid, [task.id], {
-                        'user_id': int(p.booked_resource[0].name[5:]),
+                        'user_partner_id': int(p.booked_resource[0].name[5:]),
                     }, context=context)
         return True
 
@@ -560,8 +561,8 @@ class task(osv.osv):
             'project.mt_task_new': lambda self, cr, uid, obj, ctx=None: obj.stage_id and obj.stage_id.sequence <= 1,
             'project.mt_task_stage': lambda self, cr, uid, obj, ctx=None: obj.stage_id.sequence > 1,
         },
-        'user_id': {
-            'project.mt_task_assigned': lambda self, cr, uid, obj, ctx=None: obj.user_id and obj.user_id.id,
+        'user_partner_id': {
+            'project.mt_task_assigned': lambda self, cr, uid, obj, ctx=None: obj.user_partner_id and obj.user_partner_id.id,
         },
         'kanban_state': {
             'project.mt_task_blocked': lambda self, cr, uid, obj, ctx=None: obj.kanban_state == 'blocked',
@@ -624,25 +625,25 @@ class task(osv.osv):
         return result, fold
 
     def _read_group_user_id(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
-        res_users = self.pool.get('res.users')
+        res_partner = self.pool.get('res.partner')
         project_id = self._resolve_project_id_from_context(cr, uid, context=context)
         access_rights_uid = access_rights_uid or uid
         if project_id:
             ids += self.pool.get('project.project').read(cr, access_rights_uid, project_id, ['members'], context=context)['members']
             order = res_users._order
             # lame way to allow reverting search, should just work in the trivial case
-            if read_group_order == 'user_id desc':
+            if read_group_order == 'user_partner_id desc':
                 order = '%s desc' % order
             # de-duplicate and apply search order
-            ids = res_users._search(cr, uid, [('id','in',ids)], order=order, access_rights_uid=access_rights_uid, context=context)
-        result = res_users.name_get(cr, access_rights_uid, ids, context=context)
+            ids = res_partner._search(cr, uid, [('id','in',ids)], order=order, access_rights_uid=access_rights_uid, context=context)
+        result = res_partner.name_get(cr, access_rights_uid, ids, context=context)
         # restore order of the search
         result.sort(lambda x,y: cmp(ids.index(x[0]), ids.index(y[0])))
         return result, {}
 
     _group_by_full = {
         'stage_id': _read_group_stage_ids,
-        'user_id': _read_group_user_id,
+        'user_partner_id': _read_group_user_id,
     }
 
     def _str_get(self, task, level=0, border='***', context=None):
@@ -785,15 +786,15 @@ class task(osv.osv):
                 'project.task': (lambda self, cr, uid, ids, c={}: ids, ['work_ids', 'remaining_hours', 'planned_hours'], 10),
                 'project.task.work': (_get_task, ['hours'], 10),
             }),
-        'user_id': fields.many2one('res.users', 'Assigned to', select=True, track_visibility='onchange'),
-        'delegated_user_id': fields.related('child_ids', 'user_id', type='many2one', relation='res.users', string='Delegated To'),
+        'user_partner_id': fields.many2one('res.partner', 'Assigned to', select=True, track_visibility='onchange'),
+        'delegated_user_id': fields.related('child_ids', 'user_partner_id', type='many2one', relation='res.partner', string='Delegated To'),
         'partner_id': fields.many2one('res.partner', 'Customer'),
         'work_ids': fields.one2many('project.task.work', 'task_id', 'Work done'),
-        'manager_id': fields.related('project_id', 'analytic_account_id', 'user_id', type='many2one', relation='res.users', string='Project Manager'),
+        'manager_id': fields.related('project_id', 'analytic_account_id', 'user_partner_id', type='many2one', relation='res.partner', string='Project Manager'),
         'company_id': fields.many2one('res.company', 'Company'),
         'id': fields.integer('ID', readonly=True),
         'color': fields.integer('Color Index'),
-        'user_email': fields.related('user_id', 'email', type='char', string='User Email', readonly=True),
+        'partner_email': fields.related('user_partner_id', 'email', type='char', string='Partner Email', readonly=True),
     }
     _defaults = {
         'stage_id': _get_default_stage_id,
@@ -804,7 +805,7 @@ class task(osv.osv):
         'progress': 0,
         'sequence': 10,
         'active': True,
-        'user_id': lambda obj, cr, uid, ctx=None: uid,
+        'user_partner_id': lambda obj, cr, uid, ctx=None: obj.pool.get('res.users').browse(cr, uid, uid, context=ctx).partner_id.id,
         'company_id': lambda self, cr, uid, ctx=None: self.pool.get('res.company')._company_default_get(cr, uid, 'project.task', context=ctx),
         'partner_id': lambda self, cr, uid, ctx=None: self._get_default_partner(cr, uid, context=ctx),
     }
@@ -947,18 +948,18 @@ class task(osv.osv):
 
     def do_delegate(self, cr, uid, ids, delegate_data=None, context=None):
         """
-        Delegate Task to another users.
+        Delegate Task to another Partners.
         """
         if delegate_data is None:
             delegate_data = {}
-        assert delegate_data['user_id'], _("Delegated User should be specified")
+        assert delegate_data['partner_id'], _("Delegated Partner should be specified")
         delegated_tasks = {}
         for task in self.browse(cr, uid, ids, context=context):
             delegated_task_id = self.copy(cr, uid, task.id, {
                 'name': delegate_data['name'],
                 'project_id': delegate_data['project_id'] and delegate_data['project_id'][0] or False,
                 'stage_id': delegate_data.get('stage_id') and delegate_data.get('stage_id')[0] or False,
-                'user_id': delegate_data['user_id'] and delegate_data['user_id'][0] or False,
+                'user_partner_id': delegate_data['partner_id'] and delegate_data['partner_id'][0] or False,
                 'planned_hours': delegate_data['planned_hours'] or 0.0,
                 'parent_ids': [(6, 0, [task.id])],
                 'description': delegate_data['new_task_description'] or '',
@@ -1002,7 +1003,7 @@ class task(osv.osv):
                 'planned_hours': task.planned_hours,
                 'kanban_state': task.kanban_state,
                 'type_id': task.stage_id.id,
-                'user_id': task.user_id.id
+                'partner_id': task.user_partner_id.id
 
             }, context=context)
         return True
@@ -1019,7 +1020,7 @@ class task(osv.osv):
         if vals.get('project_id') and not context.get('default_project_id'):
             context['default_project_id'] = vals.get('project_id')
         # user_id change: update date_start
-        if vals.get('user_id') and not vals.get('start_date'):
+        if vals.get('user_partner_id') and not vals.get('start_date'):
             vals['date_start'] = fields.datetime.now()
 
         # context: no_log, because subtype already handle this
@@ -1036,7 +1037,7 @@ class task(osv.osv):
         if 'stage_id' in vals:
             vals['date_last_stage_update'] = fields.datetime.now()
         # user_id change: update date_start
-        if vals.get('user_id') and 'date_start' not in vals:
+        if vals.get('user_partner_id') and 'date_start' not in vals:
             vals['date_start'] = fields.datetime.now()
 
         # Overridden to reset the kanban_state to normal whenever
@@ -1051,7 +1052,7 @@ class task(osv.osv):
         else:
             result = super(task, self).write(cr, uid, ids, vals, context=context)
 
-        if any(item in vals for item in ['stage_id', 'remaining_hours', 'user_id', 'kanban_state']):
+        if any(item in vals for item in ['stage_id', 'remaining_hours', 'user_partner_id', 'kanban_state']):
             self._store_history(cr, uid, ids, context=context)
         return result
 
@@ -1081,10 +1082,10 @@ class task(osv.osv):
 %s  start = max(%s)
 ''' % (ident,','.join(start))
 
-            if task.user_id:
+            if task.user_partner_id:
                 result += '''
 %s  resource = %s
-''' % (ident, 'User_'+str(task.user_id.id))
+''' % (ident, 'User_'+str(task.user_partner_id.id))
 
         result += "\n"
         return result
@@ -1137,12 +1138,12 @@ class project_work(osv.osv):
         'date': fields.datetime('Date', select="1"),
         'task_id': fields.many2one('project.task', 'Task', ondelete='cascade', required=True, select="1"),
         'hours': fields.float('Time Spent'),
-        'user_id': fields.many2one('res.users', 'Done by', required=True, select="1"),
+        'partner_id': fields.many2one('res.partner', 'Done by', required=True, select="1"),
         'company_id': fields.related('task_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True)
     }
 
     _defaults = {
-        'user_id': lambda obj, cr, uid, context: uid,
+#        'partner_id': lambda obj, cr, uid, context=None: obj.pool.get(cr, uid, uid, context=context).partner_id.id,
         'date': lambda *a: time.strftime('%Y-%m-%d %H:%M:%S')
     }
 
@@ -1304,7 +1305,7 @@ class project_task_history(osv.osv):
         }),
         'remaining_hours': fields.float('Remaining Time', digits=(16, 2)),
         'planned_hours': fields.float('Planned Time', digits=(16, 2)),
-        'user_id': fields.many2one('res.users', 'Responsible'),
+        'partner_id': fields.many2one('res.partner', 'Responsible'),
     }
     _defaults = {
         'date': fields.date.context_today,
@@ -1333,7 +1334,7 @@ class project_task_history_cumulative(osv.osv):
                 SELECT
                     h.id AS history_id,
                     h.date+generate_series(0, CAST((coalesce(h.end_date, DATE 'tomorrow')::date - h.date) AS integer)-1) AS date,
-                    h.task_id, h.type_id, h.user_id, h.kanban_state,
+                    h.task_id, h.type_id, h.partner_id, h.kanban_state,
                     greatest(h.remaining_hours, 1) AS remaining_hours, greatest(h.planned_hours, 1) AS planned_hours,
                     t.project_id
                 FROM

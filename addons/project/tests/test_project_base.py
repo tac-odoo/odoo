@@ -89,11 +89,11 @@ class TestProjectBase(TestMail):
         # Already-existing tasks in Pigs
         self.task_1_id = self.project_task.create(cr, uid, {
             'name': 'Pigs UserTask',
-            'user_id': self.user_projectuser_id,
+            'user_partner_id': self.user_projectuser_id,
             'project_id': self.project_pigs_id,
         }, {'mail_create_nolog': True})
         self.task_2_id = self.project_task.create(cr, uid, {
             'name': 'Pigs ManagerTask',
-            'user_id': self.user_projectmanager_id,
+            'user_partner_id': self.user_projectmanager_id,
             'project_id': self.project_pigs_id,
         }, {'mail_create_nolog': True})

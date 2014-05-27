@@ -30,7 +30,7 @@ class crm_phonecall2phonecall(osv.osv_memory):
 
     _columns = {
         'name' : fields.char('Call summary', size=64, required=True, select=1),
-        'user_id' : fields.many2one('res.users',"Assign To"),
+        'user_partner_id' : fields.many2one('res.partner',"Assign To"),
         'contact_name':fields.char('Contact', size=64),
         'phone':fields.char('Phone', size=64),
         'categ_id': fields.many2one('crm.case.categ', 'Category', \
@@ -58,7 +58,7 @@ class crm_phonecall2phonecall(osv.osv_memory):
         phonecall_ids = context and context.get('active_ids') or []
         for this in self.browse(cr, uid, ids, context=context):
             phocall_ids = phonecall.schedule_another_phonecall(cr, uid, phonecall_ids, this.date, this.name, \
-                    this.user_id and this.user_id.id or False, \
+                    this.user_partner_id and this.user_partner_id.id or False, \
                     this.section_id and this.section_id.id or False, \
                     this.categ_id and this.categ_id.id or False, \
                     action=this.action, context=context)
@@ -72,9 +72,13 @@ class crm_phonecall2phonecall(osv.osv_memory):
         """
         res = super(crm_phonecall2phonecall, self).default_get(cr, uid, fields, context=context)
         record_id = context and context.get('active_id', False) or False
+        print record_id
+        print 'Record ID<<'+'*'*25
         res.update({'action': 'schedule', 'date': time.strftime('%Y-%m-%d %H:%M:%S')})
         if record_id:
             phonecall = self.pool.get('crm.phonecall').browse(cr, uid, record_id, context=context)
+            print phonecall
+            print 'Phonecall<<'+'*'*25
 
             categ_id = False
             data_obj = self.pool.get('ir.model.data')
@@ -86,8 +90,8 @@ class crm_phonecall2phonecall(osv.osv_memory):
 
             if 'name' in fields:
                 res.update({'name': phonecall.name})
-            if 'user_id' in fields:
-                res.update({'user_id': phonecall.user_id and phonecall.user_id.id or False})
+            if 'user_partner_id' in fields:
+                res.update({'user_partner_id': phonecall.user_partner_id and phonecall.user_partner_id.id or False})
             if 'date' in fields:
                 res.update({'date': False})
             if 'section_id' in fields:

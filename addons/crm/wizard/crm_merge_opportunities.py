@@ -34,7 +34,7 @@ class crm_merge_opportunity(osv.osv_memory):
     _description = 'Merge opportunities'
     _columns = {
         'opportunity_ids': fields.many2many('crm.lead', rel='merge_opportunity_rel', id1='merge_id', id2='opportunity_id', string='Leads/Opportunities'),
-        'user_id': fields.many2one('res.users', 'Salesperson', select=True),
+        'user_partner_id': fields.many2one('res.partner', 'Salesperson', select=True),
         'section_id': fields.many2one('crm.case.section', 'Sales Team', select=True),
     }
 
@@ -49,7 +49,7 @@ class crm_merge_opportunity(osv.osv_memory):
         #TODO: why is this passed through the context ?
         context['lead_ids'] = [opportunity2merge_ids[0].id]
 
-        merge_id = lead_obj.merge_opportunity(cr, uid, [x.id for x in opportunity2merge_ids], wizard.user_id.id, wizard.section_id.id, context=context)
+        merge_id = lead_obj.merge_opportunity(cr, uid, [x.id for x in opportunity2merge_ids], wizard.user_partner_id.id, wizard.section_id.id, context=context)
 
         # The newly created lead might be a lead or an opp: redirect toward the right view
         merge_result = lead_obj.browse(cr, uid, merge_id, context=context)
@@ -80,17 +80,17 @@ class crm_merge_opportunity(osv.osv_memory):
 
         return res
 
-    def on_change_user(self, cr, uid, ids, user_id, section_id, context=None):
+    def on_change_user_partner(self, cr, uid, ids, user_partner_id, section_id, context=None):
         """ When changing the user, also set a section_id or restrict section id
-            to the ones user_id is member of. """
-        if user_id:
+            to the ones user_partner_id is member of. """
+        if user_partner_id:
             if section_id:
-                user_in_section = self.pool.get('crm.case.section').search(cr, uid, [('id', '=', section_id), '|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context, count=True)
+                user_in_section = self.pool.get('crm.case.section').search(cr, uid, [('id', '=', section_id), '|', ('user_partner_id', '=', user_partner_id), ('member_ids', '=', user_partner_id)], context=context, count=True)
             else:
                 user_in_section = False
             if not user_in_section:
                 section_id = False
-                section_ids = self.pool.get('crm.case.section').search(cr, uid, ['|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context)
+                section_ids = self.pool.get('crm.case.section').search(cr, uid, ['|', ('user_partner_id', '=', user_partner_id), ('member_ids', '=', user_partner_id)], context=context)
                 if section_ids:
                     section_id = section_ids[0]
         return {'value': {'section_id': section_id}}

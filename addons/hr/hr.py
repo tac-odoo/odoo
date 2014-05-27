@@ -235,8 +235,8 @@ class hr_employee(osv.osv):
         'passport_id': fields.char('Passport No', size=64),
         'color': fields.integer('Color Index'),
         'city': fields.related('address_id', 'city', type='char', string='City'),
-        'login': fields.related('user_id', 'login', type='char', string='Login', readonly=1),
-        'last_login': fields.related('user_id', 'date', type='datetime', string='Latest Connection', readonly=1),
+#        'login': fields.related('user_id', 'login', type='char', string='Login', readonly=1),
+#        'last_login': fields.related('user_id', 'date', type='datetime', string='Latest Connection', readonly=1),
     }
 
     def _get_default_image(self, cr, uid, context=None):
@@ -256,12 +256,12 @@ class hr_employee(osv.osv):
         return super(hr_employee, self).copy_data(cr, uid, ids, default, context=context)
         
     def _broadcast_welcome(self, cr, uid, employee_id, context=None):
-        """ Broadcast the welcome message to all users in the employee company. """
+        """ Broadcast the welcome message to all partners in the employee company. """
         employee = self.browse(cr, uid, employee_id, context=context)
         partner_ids = []
         _model, group_id = self.pool['ir.model.data'].get_object_reference(cr, uid, 'base', 'group_user')
-        if employee.user_id:
-            company_id = employee.user_id.company_id.id
+        if employee.user_partner_id:
+            company_id = employee.user_partner_id.company_id.id
         elif employee.company_id:
             company_id = employee.company_id.id
         elif employee.job_id:
@@ -324,10 +324,10 @@ class hr_employee(osv.osv):
             value['parent_id'] = department.manager_id.id
         return {'value': value}
 
-    def onchange_user(self, cr, uid, ids, user_id, context=None):
+    def onchange_partner(self, cr, uid, ids, partner_id, context=None):
         work_email = False
-        if user_id:
-            work_email = self.pool.get('res.users').browse(cr, uid, user_id, context=context).email
+        if user_partner_id:
+            work_email = self.pool.get('res.partner').browse(cr, uid, user_partner_id, context=context).email
         return {'value': {'work_email': work_email}}
 
     def action_follow(self, cr, uid, ids, context=None):
@@ -434,9 +434,9 @@ class hr_department(osv.osv):
         return super(hr_department, self).copy_data(cr, uid, ids, default, context=context)
 
 
-class res_users(osv.osv):
-    _name = 'res.users'
-    _inherit = 'res.users'
+class res_partner(osv.osv):
+    _name = 'res.partner'
+    _inherit = 'res.partner'
 
     def copy_data(self, cr, uid, ids, default=None, context=None):
         if default is None:
@@ -445,7 +445,7 @@ class res_users(osv.osv):
         return super(res_users, self).copy_data(cr, uid, ids, default, context=context)
     
     _columns = {
-        'employee_ids': fields.one2many('hr.employee', 'user_id', 'Related employees'),
+        'employee_ids': fields.one2many('hr.employee', 'user_partner_id', 'Related employees'),
     }
 
 

@@ -38,7 +38,7 @@ class crm_phonecall(osv.osv):
         'create_date': fields.datetime('Creation Date' , readonly=True),
         'section_id': fields.many2one('crm.case.section', 'Sales Team', \
                         select=True, help='Sales team to which Case belongs to.'),
-        'user_id': fields.many2one('res.users', 'Responsible'),
+        'user_partner_id': fields.many2one('res.partner', 'Responsible'),
         'partner_id': fields.many2one('res.partner', 'Contact'),
         'company_id': fields.many2one('res.company', 'Company'),
         'description': fields.text('Description'),
@@ -77,7 +77,7 @@ class crm_phonecall(osv.osv):
         'date': fields.datetime.now,
         'priority': '1',
         'state':  _get_default_state,
-        'user_id': lambda self, cr, uid, ctx: uid,
+        'user_partner_id': lambda self, cr, uid, ctx: uid,
         'active': 1
     }
 
@@ -111,7 +111,7 @@ class crm_phonecall(osv.osv):
         return True
 
     def schedule_another_phonecall(self, cr, uid, ids, schedule_time, call_summary, \
-                    user_id=False, section_id=False, categ_id=False, action='schedule', context=None):
+                    user_partner_id=False, section_id=False, categ_id=False, action='schedule', context=None):
         """
         action :('schedule','Schedule a call'), ('log','Log a call')
         """
@@ -126,13 +126,13 @@ class crm_phonecall(osv.osv):
         for call in self.browse(cr, uid, ids, context=context):
             if not section_id:
                 section_id = call.section_id and call.section_id.id or False
-            if not user_id:
-                user_id = call.user_id and call.user_id.id or False
+            if not user_partner_id:
+                user_partner_id = call.user_partner_id and call.user_partner_id.id or False
             if not schedule_time:
                 schedule_time = call.date
             vals = {
                     'name' : call_summary,
-                    'user_id' : user_id or False,
+                    'user_partner_id' : user_partner_id or False,
                     'categ_id' : categ_id or False,
                     'description' : call.description or False,
                     'date' : schedule_time,
@@ -152,7 +152,7 @@ class crm_phonecall(osv.osv):
         partner = self.pool.get('res.partner')
         partner_id = partner.create(cr, uid, {
                     'name': phonecall.name,
-                    'user_id': phonecall.user_id.id,
+                    'user_partner_id': phonecall.user_partner_id.id,
                     'comment': phonecall.description,
                     'address': []
         })
@@ -273,7 +273,7 @@ class crm_phonecall(osv.osv):
         res['context'] = {
             'default_phonecall_id': phonecall.id,
             'default_partner_ids': partner_ids,
-            'default_user_id': uid,
+            'default_user_partner_id': uid,
             'default_email_from': phonecall.email_from,
             'default_name': phonecall.name,
         }

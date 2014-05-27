@@ -40,7 +40,7 @@ class crm_phonecall_report(osv.osv):
     _auto = False
     
     _columns = {
-        'user_id':fields.many2one('res.users', 'User', readonly=True),
+        'user_partner_id':fields.many2one('res.partner', 'User', readonly=True),
         'section_id':fields.many2one('crm.case.section', 'Section', readonly=True),
         'priority': fields.selection([('0','Low'), ('1','Normal'), ('2','High')], 'Priority'),
         'nbr': fields.integer('# of Cases', readonly=True),
@@ -73,7 +73,7 @@ class crm_phonecall_report(osv.osv):
                     to_char(c.date_open, 'YYYY-MM-DD') as opening_date,
                     to_char(c.date_closed, 'YYYY-mm-dd') as date_closed,
                     c.state,
-                    c.user_id,
+                    c.user_partner_id,
                     c.section_id,
                     c.categ_id,
                     c.partner_id,

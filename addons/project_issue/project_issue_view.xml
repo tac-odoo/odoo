@@ -63,7 +63,7 @@
                     <field name="categ_ids" widget="many2many_tags"/>
                     <group>
                         <group>
-                            <field name="user_id" 
+                            <field name="user_partner_id" 
                                 context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'project.group_project_user']}"/>
                             <field name="partner_id" on_change="onchange_partner_id(partner_id)"/>
                             <field name="email_from"/>
@@ -125,7 +125,7 @@
                     <field name="priority" string="Priority" groups="base.group_user"/>
                     <field name="create_date"/>
                     <field name="version_id" widget="selection"/>
-                    <field name="user_id"/>
+                    <field name="user_partner_id"/>
                     <field name="progress" widget="progressbar" attrs="{'invisible':[('task_id','=',False)]}"/>
                     <field name="stage_id" widget="selection" readonly="1"/>
                     <field name="categ_ids" invisible="1"/>
@@ -142,17 +142,17 @@
                     <field name="name" string="Issue" filter_domain="['|', '|', '|', ('partner_id','child_of',self), ('description','ilike',self),('email_from','ilike',self),('name','ilike',self)]"/>
                     <field name="id"/>
                     <field name="partner_id" operator="child_of"/>
-                    <filter string="Unassigned" name="unassigned" domain="[('user_id', '=', False)]"/>
+                    <filter string="Unassigned" name="unassigned" domain="[('user_partner_id', '=', False)]"/>
                     <filter string="New" name="draft" domain="[('stage_id.sequence', '=', 1)]"/>
                     <separator/>
                     <filter string="Unread Messages" name="message_unread" domain="[('message_unread','=',True)]"/>
                     <separator/>
-                    <field name="user_id"/>
+                    <field name="user_partner_id"/>
                     <field name="project_id"/>
                     <field name="categ_ids"/>
                     <field name="stage_id" domain="[]"/>
                     <group expand="0" string="Group By..." >
-                        <filter string="Responsible" name="group_user_id" icon="terp-personal" domain="[]" context="{'group_by':'user_id'}"/>
+                        <filter string="Responsible" name="group_user_id" icon="terp-personal" domain="[]" context="{'group_by':'user_partner_id'}"/>
                         <filter string="Contact" name="group_partner_id" icon="terp-partner" domain="[]" context="{'group_by':'partner_id'}"/>
                         <filter string="Project" name="group_project_id" icon="terp-folder-violet" domain="[]" context="{'group_by':'project_id'}"/>
                         <filter string="Version" name="group_version" icon="terp-gtk-jump-to-rtl" domain="[]" context="{'group_by':'version_id'}"/>
@@ -170,7 +170,7 @@
             <field name="model">project.issue</field>
             <field name="priority" eval="2"/>
             <field name="arch" type="xml">
-                <calendar string="Issues" date_start="date" color="user_id" date_delay="duration">
+                <calendar string="Issues" date_start="date" color="user_partner_id" date_delay="duration">
                     <field name="name"/>
                     <field name="partner_id"/>
                 </calendar>
@@ -189,7 +189,7 @@
                     <field name="color"/>
                     <field name="priority"/>
                     <field name="user_email"/>
-                    <field name="user_id"/>
+                    <field name="user_partner_id"/>
                     <field name="date_deadline"/>
                     <field name="kanban_state"/>
                     <field name="message_summary"/>
@@ -249,7 +249,7 @@
                     <field name="partner_id"/>
                     <field name="priority" string="Priority"/>
                     <field name="version_id"/>
-                    <field name="user_id"/>
+                    <field name="user_partner_id"/>
                     <field name="stage_id" widget="selection" readonly="1"/>
                 </tree>
             </field>

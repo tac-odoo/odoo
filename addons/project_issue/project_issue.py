@@ -52,8 +52,8 @@ class project_issue(osv.Model):
             'project_issue.mt_issue_new': lambda self, cr, uid, obj, ctx=None: obj.stage_id and obj.stage_id.sequence <= 1,
             'project_issue.mt_issue_stage': lambda self, cr, uid, obj, ctx=None: obj.stage_id and obj.stage_id.sequence > 1,
         },
-        'user_id': {
-            'project_issue.mt_issue_assigned': lambda self, cr, uid, obj, ctx=None: obj.user_id and obj.user_id.id,
+        'user_partner_id': {
+            'project_issue.mt_issue_assigned': lambda self, cr, uid, obj, ctx=None: obj.user_partner_id and obj.user_partner_id.id,
         },
         'kanban_state': {
             'project_issue.mt_issue_blocked': lambda self, cr, uid, obj, ctx=None: obj.kanban_state == 'blocked',
@@ -157,7 +157,7 @@ class project_issue(osv.Model):
                         hours = cal_obj._interval_hours_get(cr, uid, working_hours,
                                                            date_create,
                                                            date_open,
-                                                           timezone_from_uid=issue.user_id.id or uid,
+                                                           timezone_from_uid=issue.user_partner_id.id or uid,
                                                            exclude_leaves=False,
                                                            context=context)
                 elif field in ['working_hours_close','day_close']:
@@ -169,7 +169,7 @@ class project_issue(osv.Model):
                         hours = cal_obj._interval_hours_get(cr, uid, working_hours,
                                                            date_create,
                                                            date_close,
-                                                           timezone_from_uid=issue.user_id.id or uid,
+                                                           timezone_from_uid=issue.user_partner_id.id or uid,
                                                            exclude_leaves=False,
                                                            context=context)
                 elif field in ['days_since_creation']:
@@ -186,8 +186,8 @@ class project_issue(osv.Model):
                     continue
                 if ans:
                     resource_id = False
-                    if issue.user_id:
-                        resource_ids = res_obj.search(cr, uid, [('user_id','=',issue.user_id.id)])
+                    if issue.user_partner_id:
+                        resource_ids = res_obj.search(cr, uid, [('user_partner_id','=',issue.user_partner_id.id)])
                         if resource_ids and len(resource_ids):
                             resource_id = resource_ids[0]
                     duration = float(ans.days) + float(ans.seconds)/(24*3600)
@@ -273,7 +273,7 @@ class project_issue(osv.Model):
                                 multi='compute_day', type="float", store=True),
         'day_close': fields.function(_compute_day, string='Days to Close', \
                                 multi='compute_day', type="float", store=True),
-        'user_id': fields.many2one('res.users', 'Assigned to', required=False, select=1, track_visibility='onchange'),
+        'user_partner_id': fields.many2one('res.partner', 'Assigned to', required=False, select=1, track_visibility='onchange'),
         'working_hours_open': fields.function(_compute_day, string='Working Hours to Open the Issue', \
                                 multi='compute_day', type="float", store=True),
         'working_hours_close': fields.function(_compute_day, string='Working Hours to Close the Issue', \
@@ -281,7 +281,7 @@ class project_issue(osv.Model):
         'inactivity_days': fields.function(_compute_day, string='Days since last action', \
                                 multi='compute_day', type="integer", help="Difference in days between last action and current date"),
         'color': fields.integer('Color Index'),
-        'user_email': fields.related('user_id', 'email', type='char', string='User Email', readonly=True),
+        'user_email': fields.related('user_partner_id', 'email', type='char', string='User Email', readonly=True),
         'date_action_last': fields.datetime('Last Action', readonly=1),
         'date_action_next': fields.datetime('Next Action', readonly=1),
         'progress': fields.function(_hours_get, string='Progress (%)', multi='hours', group_operator="avg", help="Computed as: Time Spent / Total Time.",
@@ -331,8 +331,8 @@ class project_issue(osv.Model):
             vals['date_last_stage_update'] = fields.datetime.now()
             if 'kanban_state' not in vals:
                 vals['kanban_state'] = 'normal'
-        # user_id change: update date_start
-        if vals.get('user_id'):
+        # user_partner_id change: update date_start
+        if vals.get('user_partner_id'):
             vals['date_start'] = fields.datetime.now()
 
         return super(project_issue, self).write(cr, uid, ids, vals, context)
@@ -341,7 +341,7 @@ class project_issue(osv.Model):
         if not task_id:
             return {'value': {}}
         task = self.pool.get('project.task').browse(cr, uid, task_id, context=context)
-        return {'value': {'user_id': task.user_id.id, }}
+        return {'value': {'user_partner_id': task.user_partner_id.id, }}
 
     def onchange_partner_id(self, cr, uid, ids, partner_id, context=None):
         """ This function returns value of partner email address based on partner
@@ -400,12 +400,12 @@ class project_issue(osv.Model):
                 raise osv.except_osv(_('Warning!'), _('You cannot escalate this issue.\nThe relevant Project has not configured the Escalation Project!'))
 
             data['project_id'] = esc_proj.id
-            if esc_proj.user_id:
-                data['user_id'] = esc_proj.user_id.id
+            if esc_proj.user_partner_id:
+                data['user_partner_id'] = esc_proj.user_partner_id.id
             issue.write(data)
 
             if issue.task_id:
-                issue.task_id.write({'project_id': esc_proj.id, 'user_id': False})
+                issue.task_id.write({'project_id': esc_proj.id, 'user_partner_id': False})
         return True
 
     # -------------------------------------------------------
@@ -444,7 +444,7 @@ class project_issue(osv.Model):
             'email_from': msg.get('from'),
             'email_cc': msg.get('cc'),
             'partner_id': msg.get('author_id', False),
-            'user_id': False,
+            'user__partner_id': False,
         }
         defaults.update(custom_values)
         res_id = super(project_issue, self).message_new(cr, uid, msg, custom_values=defaults, context=context)

@@ -52,7 +52,7 @@
                                     </group>
                                     <group>
                                         <field name="company_id" groups="base.group_multi_company" on_change="onchange_company(company_id)"/>
-                                        <field name="user_id" on_change="onchange_user(user_id)" string="Related User"
+                                        <field name="user_partner_id" on_change="onchange_partner(user_partner_id)" string="Related Partner"
                                             context="{'default_groups_ref': ['base.group_user']}"/>
                                     </group>
                                 </group>
@@ -139,7 +139,7 @@
         <field name="priority">10</field>
         <field name="arch" type="xml">
             <kanban>
-                <field name="last_login"/>
+<!--                <field name="last_login"/>-->
                 <field name="message_is_follower"/>
                 <field name="message_follower_ids"/>
                 <field name="message_ids"/>
@@ -151,14 +151,14 @@
                             </div>
                             <div class="oe_employee_details">
                                 <h4>
-                                    <a type="open"><field name="name"/><t t-if="record.login.raw_value"> (<field name="login"/>)</t></a>
+                                    <a type="open"><field name="name"/></a>
                                 </h4>
                                 <ul>
-                                    <li id="last_login">
-                                        <span t-if="record.last_login.raw_value &amp;&amp; record.last_login.raw_value.is().today()" class="oe_kanban_button" style="font-size: 100%%">
-                                              <t t-esc="record.last_login.raw_value.toString('HH:mm')"/>
-                                        </span>
-                                    </li>
+<!--                                    <li id="last_login">-->
+<!--                                        <span t-if="record.last_login.raw_value &amp;&amp; record.last_login.raw_value.is().today()" class="oe_kanban_button" style="font-size: 100%%">-->
+<!--                                              <t t-esc="record.last_login.raw_value.toString('HH:mm')"/>-->
+<!--                                        </span>-->
+<!--                                    </li>-->
                                     <li t-if="record.job_id.raw_value"><field name="job_id"/></li>
                                     <li t-if="record.work_location.raw_value"><field name="work_location"/></li>
                                     <li t-if="record.work_email.raw_value"><a t-attf-href="mailto:#{record.work_email.value}"><field name="work_email"/></a></li>

@@ -9,7 +9,7 @@
             <field name="model">crm.lead.report</field>
             <field name="arch" type="xml">
                 <graph string="Leads Analysis" type="pivot" stacked="True">
-                    <field name="user_id" type="row"/>
+                    <field name="user_partner_id" type="row"/>
                     <field name="create_date" interval="year" type="col"/>
                 </graph>
             </field>
@@ -21,7 +21,7 @@
             <field name="arch" type="xml">
                 <graph string="Leads Analysis" type="pivot" stacked="True">
                     <field name="create_date" type="row"/>
-                    <field name="user_id" type="col"/>
+                    <field name="user_partner_id" type="col"/>
                 </graph>
             </field>
         </record>
@@ -55,13 +55,13 @@
                     <filter string="Lost" name="lost"
                             domain="[('probability', '=', 0), ('stage_id.sequence', '!=', 1)]"/>
                     <separator/>
-                    <filter string="My Sales Team(s)" icon="terp-personal+" context="{'invisible_section': False}" domain="[('section_id.user_id','=',uid)]"
+                    <filter string="My Sales Team(s)" icon="terp-personal+" context="{'invisible_section': False}" domain="[('section_id.user_partner_id','=',uid)]"
                             help="Leads/Opportunities that are assigned to one of the sale teams I manage" groups="base.group_multi_salesteams"/>
                     <separator/>
-                    <filter icon="terp-personal" string="My Case(s)" help="Leads/Opportunities that are assigned to me" domain="[('user_id','=',uid)]"/>
+                    <filter icon="terp-personal" string="My Case(s)" help="Leads/Opportunities that are assigned to me" domain="[('user_partner_id','=',uid)]"/>
                     <field name="section_id" context="{'invisible_section': False}"
                             groups="base.group_multi_salesteams"/>
-                    <field name="user_id" string="Salesperson"/>
+                    <field name="user_partner_id" string="Salesperson"/>
                     <group expand="0" string="Extended Filters...">
                         <field name="partner_id" filter_domain="[('partner_id','child_of',self)]"/>
                         <field name="stage_id" domain="[('section_ids', '=', 'section_id')]" />
@@ -80,7 +80,7 @@
                         <field name="date_closed"/>
                     </group>
                     <group expand="1" string="Group By...">
-                        <filter string="Salesperson" domain="[]" context="{'group_by':'user_id'}" />
+                        <filter string="Salesperson" domain="[]" context="{'group_by':'user_partner_id'}" />
                         <filter string="Sales Team" domain="[]" context="{'group_by':'section_id'}" />
                         <filter string="Partner" context="{'group_by':'partner_id'}" />
                         <filter string="Country" context="{'group_by':'country_id'}" />

@@ -57,7 +57,7 @@ class crm_lead_report(osv.osv):
         'delay_close': fields.float('Delay to Close',digits=(16,2),readonly=True, group_operator="avg",help="Number of Days to close the case"),
         'delay_expected': fields.float('Overpassed Deadline',digits=(16,2),readonly=True, group_operator="avg"),
 
-        'user_id':fields.many2one('res.users', 'User', readonly=True),
+        'user_partner_id':fields.many2one('res.partner', 'User', readonly=True),
         'country_id':fields.many2one('res.country', 'Country', readonly=True),
         'section_id':fields.many2one('crm.case.section', 'Sales Team', readonly=True),
         'channel_id':fields.many2one('crm.case.channel', 'Channel', readonly=True),
@@ -94,7 +94,7 @@ class crm_lead_report(osv.osv):
 
                     date_trunc('day',c.date_last_stage_update) as date_last_stage_update,
 
-                    c.user_id,
+                    c.user_partner_id,
                     c.probability,
                     c.stage_id,
                     c.type,

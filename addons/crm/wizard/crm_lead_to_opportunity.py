@@ -35,7 +35,7 @@ class crm_lead2opportunity_partner(osv.osv_memory):
                 ('merge', 'Merge with existing opportunities')
             ], 'Conversion Action', required=True),
         'opportunity_ids': fields.many2many('crm.lead', string='Opportunities'),
-        'user_id': fields.many2one('res.users', 'Salesperson', select=True),
+        'user_partner_id': fields.many2one('res.partner', 'Salesperson', select=True),
         'section_id': fields.many2one('crm.case.section', 'Sales Team', select=True),
     }
 
@@ -89,22 +89,22 @@ class crm_lead2opportunity_partner(osv.osv_memory):
                 res.update({'name' : len(tomerge) >= 2 and 'merge' or 'convert'})
             if 'opportunity_ids' in fields and len(tomerge) >= 2:
                 res.update({'opportunity_ids': tomerge})
-            if lead.user_id:
-                res.update({'user_id': lead.user_id.id})
+            if lead.user_partner_id:
+                res.update({'user_partner_id': lead.user_partner_id.id})
             if lead.section_id:
                 res.update({'section_id': lead.section_id.id})
         return res
 
-    def on_change_user(self, cr, uid, ids, user_id, section_id, context=None):
+    def on_change_user_partner(self, cr, uid, ids, user_partner_id, section_id, context=None):
         """ When changing the user, also set a section_id or restrict section id
-            to the ones user_id is member of. """
-        if user_id:
+            to the ones user_partner_id is member of. """
+        if user_partner_id:
             if section_id:
-                user_in_section = self.pool.get('crm.case.section').search(cr, uid, [('id', '=', section_id), '|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context, count=True)
+                user_in_section = self.pool.get('crm.case.section').search(cr, uid, [('id', '=', section_id), '|', ('user_partner_id', '=', user_partner_id), ('member_ids', '=', user_partner_id)], context=context, count=True)
             else:
                 user_in_section = False
             if not user_in_section:
-                result = self.pool['crm.lead'].on_change_user(cr, uid, ids, user_id, context=context)
+                result = self.pool['crm.lead'].on_change_user_partner(cr, uid, ids, user_partner_id, context=context)
                 section_id = result.get('value') and result['value'].get('section_id') and result['value']['section_id'] or False
         return {'value': {'section_id': section_id}}
 
@@ -132,13 +132,13 @@ class crm_lead2opportunity_partner(osv.osv_memory):
         for lead_id in leads:
             partner_id = self._create_partner(cr, uid, lead_id.id, data.action, lead_id.partner_id.id, context=context)
             res = lead.convert_opportunity(cr, uid, [lead_id.id], partner_id, [], False, context=context)
-        user_ids = vals.get('user_ids', False)
+        user_partner_ids = vals.get('user_partner_ids', False)
         if context.get('no_force_assignation'):
-            leads_to_allocate = [lead_id.id for lead_id in leads if not lead_id.user_id]
+            leads_to_allocate = [lead_id.id for lead_id in leads if not lead_id.user_partner_id]
         else:
             leads_to_allocate = lead_ids
-        if user_ids:
-            lead.allocate_salesman(cr, uid, leads_to_allocate, user_ids, team_id=team_id, context=context)
+        if user_partner_ids:
+            lead.allocate_salesman(cr, uid, leads_to_allocate, user_partner_ids, team_id=team_id, context=context)
         return res
 
     def action_apply(self, cr, uid, ids, context=None):
@@ -156,15 +156,15 @@ class crm_lead2opportunity_partner(osv.osv_memory):
         if w.name == 'merge':
             lead_id = lead_obj.merge_opportunity(cr, uid, opp_ids, context=context)
             lead_ids = [lead_id]
-            lead = lead_obj.read(cr, uid, lead_id, ['type', 'user_id'], context=context)
+            lead = lead_obj.read(cr, uid, lead_id, ['type', 'user_partner_id'], context=context)
             if lead['type'] == "lead":
                 context.update({'active_ids': lead_ids})
-                self._convert_opportunity(cr, uid, ids, {'lead_ids': lead_ids, 'user_ids': [w.user_id.id], 'section_id': w.section_id.id}, context=context)
-            elif not context.get('no_force_assignation') or not lead['user_id']:
-                lead_obj.write(cr, uid, lead_id, {'user_id': w.user_id.id, 'section_id': w.section_id.id}, context=context)
+                self._convert_opportunity(cr, uid, ids, {'lead_ids': lead_ids, 'user_partner_ids': [w.user_partner_id.id], 'section_id': w.section_id.id}, context=context)
+            elif not context.get('no_force_assignation') or not lead['user_partner_id']:
+                lead_obj.write(cr, uid, lead_id, {'user_partner_id': w.user_partner_id.id, 'section_id': w.section_id.id}, context=context)
         else:
             lead_ids = context.get('active_ids', [])
-            self._convert_opportunity(cr, uid, ids, {'lead_ids': lead_ids, 'user_ids': [w.user_id.id], 'section_id': w.section_id.id}, context=context)
+            self._convert_opportunity(cr, uid, ids, {'lead_ids': lead_ids, 'user_partner_ids': [w.user_partner_id.id], 'section_id': w.section_id.id}, context=context)
 
         return self.pool.get('crm.lead').redirect_opportunity_view(cr, uid, lead_ids[0], context=context)
 
@@ -193,7 +193,7 @@ class crm_lead2opportunity_mass_convert(osv.osv_memory):
     _inherit = 'crm.lead2opportunity.partner'
 
     _columns = {
-        'user_ids':  fields.many2many('res.users', string='Salesmen'),
+        'user_partner_ids':  fields.many2many('res.partner', string='Salesmen'),
         'section_id': fields.many2one('crm.case.section', 'Sales Team'),
         'deduplicate': fields.boolean('Apply deduplication', help='Merge with existing leads/opportunities of each partner'),        
         'action': fields.selection([
@@ -255,9 +255,9 @@ class crm_lead2opportunity_mass_convert(osv.osv_memory):
         data = self.browse(cr, uid, ids, context=context)[0]
         salesteam_id = data.section_id and data.section_id.id or False
         salesmen_ids = []
-        if data.user_ids:
-            salesmen_ids = [x.id for x in data.user_ids]
-        vals.update({'user_ids': salesmen_ids, 'section_id': salesteam_id})
+        if data.user_partner_ids:
+            salesmen_ids = [x.id for x in data.user_partner_ids]
+        vals.update({'user_partner_ids': salesmen_ids, 'section_id': salesteam_id})
         return super(crm_lead2opportunity_mass_convert, self)._convert_opportunity(cr, uid, ids, vals, context=context)
 
     def mass_convert(self, cr, uid, ids, context=None):
