@@ -1227,23 +1227,28 @@ openerp.web_calendar = function(instance) {
             else {
                 var def = $.Deferred();
                 var pop = new instance.web.form.FormOpenPopup(this);
+                var pop_readonly = (event_objs && event_objs.access.edit && !this.get("effective_readonly")) ? false : true;
                 pop.show_element(this.dataset.model, id, this.dataset.get_context(), {
                     title: _.str.sprintf(_t("View: %s"),title),
                     view_id: +this.open_popup_action,
                     res_id: id,
                     target: 'new',
-                    readonly: (event_objs && event_objs.access.edit && !this.get("effective_readonly")) ? false : true,
+                    readonly: pop_readonly
                 });
 
                var form_controller = pop.view_form;
                form_controller.on("load_record", self, function(){
                     button_delete = _.str.sprintf("<button class='oe_button oe_bold delme'><span> %s </span></button>",_t("Delete"));
                     button_edit = _.str.sprintf("<button class='oe_button oe_bold editme oe_highlight'><span> %s </span></button>",_t("Edit Event"));
-                    
-                    if (event_objs && event_objs.access.edit) {
-                        pop.$el.closest(".ui-dialog").find(".ui-dialog-buttonpane").prepend(button_delete);
+                    if (event_objs && event_objs.access.delete && pop.$el.closest('.ui-dialog').find('.ui-dialog-buttonpane').find('.delme').length === 0) {
+                        if (pop.$el.closest('.ui-dialog').find('.ui-dialog-buttonpane').find('.oe_abstractformpopup-form-save').length > 0) {
+                            pop.$el.closest('.ui-dialog').find('.ui-dialog-buttonpane').find('.oe_abstractformpopup-form-save').after(button_delete);
+                        }
+                        else {
+                            pop.$el.closest(".ui-dialog").find(".ui-dialog-buttonpane").prepend(button_delete);
+                        }
                     }
-                    if (event_objs && event_objs.access.unlink) {
+                    if (pop_readonly && event_objs && event_objs.access.edit && pop.$el.closest('.ui-dialog').find('.ui-dialog-buttonpane').find('.editme').length === 0) {
                         pop.$el.closest(".ui-dialog").find(".ui-dialog-buttonpane").prepend(button_edit);
                     }
 
