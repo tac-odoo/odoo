@@ -761,3 +761,169 @@
     margin-bottom: 10px;
 }
 
+/*View with no content dispaly image with help points*/
+
+.openerp .oe_view_nocontent .image-wrapper{
+    position: relative; 
+}
+
+.openerp .oe_view_nocontent .helper-image{
+    box-shadow: 2px 5px 10px 2px rgba(119, 119, 119, 0.75);
+    -moz-box-shadow: 2px 5px 10px 2px rgba(119, 119, 119, 0.75);
+    -webkit-box-shadow: 2px 5px 10px 2px rgba(119, 119, 119, 0.75);
+}
+
+.openerp .oe_view_nocontent .action-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.openerp .oe_view_nocontent .pointer{
+    width:0px;
+    height: 0px;
+    position: absolute;
+}
+
+.openerp .oe_view_nocontent .point {
+    width: 30px;
+    height: 30px;
+    -webkit-border-radius: 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    border: 3px solid #107fc9;
+    background: #107fc9;
+    -webkit-box-shadow: inset 0 0 0 3px #fff;
+    box-shadow: inset 0 0 0 3px #fff;
+    z-index: 100;
+    -webkit-animation: pulse-background-blue 1.25s infinite;
+    -moz-animation: pulse-background-blue 1.25s infinite;
+    -ms-animation: pulse-background-blue 1.25s infinite;
+    -o-animation: pulse-background-blue 1.25s infinite;
+    animation: pulse-background-blue 1.25s infinite;
+}
+
+@-webkit-keyframes pulse-background-blue {
+    50% {
+        -webkit-transform: scale(1.3);
+        opacity: .4;
+    }
+}
+
+@-moz-keyframes pulse-background-blue {
+    50% {
+        -moz-transform: scale(0.7);
+        opacity: .4;
+    }
+}
+
+@-ms-keyframes pulse-background-blue {
+    50% {
+        -ms-transform: scale(0.7);
+        opacity: .4;
+    }
+}
+
+@keyframes pulse-background-blue {
+    50% {
+        transform: scale(0.7);
+        opacity: .4;
+    }
+}
+
+.openerp .oe_view_nocontent .mail{
+    top: 252px;
+    left: 370px;
+}
+
+.openerp .oe_view_nocontent .reply{
+    top: 100px;
+    left: 100px;
+}
+
+.openerp .oe_view_nocontent .number{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    text-align: center;
+    color: white;
+    display: block;
+    line-height: 25px;
+}
+
+.openerp .oe_view_nocontent .tooltips {
+    cursor: default;
+    -ms-filter: "alpha(opacity=0)";
+    filter: alpha(opacity=0);
+    opacity: 0;
+    -webkit-transform: translateY(-1500px);
+    -moz-transform: translateY(-1500px);
+    -ms-transform: translateY(-1500px);
+    -o-transform: translateY(-1500px);
+    transform: translateY(-1500px);
+    background: #fff;
+    width: 300px;
+    padding: 15px;
+    bottom: 120px;
+    left: 0;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    margin-left: -135px;
+    margin-top: 7px;
+    font-size: 12px;
+}
+
+.openerp .oe_view_nocontent .tooltips:before {
+    position: absolute;
+    top: -7px;
+    left: 143px;
+    display: inline-block;
+    border-right: 7px solid transparent;
+    border-bottom: 7px solid #fff;
+    border-left: 7px solid transparent;
+    border-bottom-color: rgba(0, 0, 0, 0.2);
+    content: '';
+}
+
+.openerp .oe_view_nocontent .tooltips:after {
+    position: absolute;
+    top: -6px;
+    left: 144px;
+    display: inline-block;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #fff;
+    border-left: 6px solid transparent;
+    content: '';
+}
+
+.openerp .oe_view_nocontent .point:hover {
+    -webkit-animation: none;
+    -moz-animation: none;
+    -ms-animation: none;
+    -o-animation: none;
+    animation: none;
+    z-index: 1000;
+}
+
+.openerp .oe_view_nocontent .point:hover + .tooltips{
+    display: block;
+    -ms-filter: "alpha(opacity=100)";
+    filter: alpha(opacity=100);
+    opacity: 1;
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -o-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-transition: all 250ms;
+    -moz-transition: all 250ms;
+    -ms-transition: all 250ms;
+    -o-transition: all 250ms;
+    transition: all 250ms;
+}

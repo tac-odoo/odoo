@@ -18,17 +18,40 @@
                 'view_mailbox': True,
                 'view_inbox': True,
                 'read_action': 'read',
-                'show_compose_message': False
+                'show_compose_message': True
             }&quot;"/>
             <field name="help" type="html">
                 <p>
                     <b>Good Job!</b> Your inbox is empty.
-                </p><p>
+                    </p><p>
                     Your inbox contains private messages or emails sent to you
                     as well as information related to documents or people you
                     follow.
                 </p>
-            </field>
+                <div class="image-wrapper">
+                    <img class="helper-image" src="/mail/static/img/inbox.png"/>
+                    <div class="action-layer">
+                        <div class="pointer mail">
+                            <div class="point">
+                                <span class="number">1</span>
+                            </div>
+                            <div class="tooltips">
+                                <strong>1. Welcome to your board</strong>
+                                <p>Work with Conceptboard just like with pen and paper, except everything is happening live! Your board is saved automatically, so when you’re done you can simply exit by clicking the back-arrow to the left.</p>
+                            </div>
+                        </div>
+                        <div class="pointer reply">
+                            <div class="point">
+                                <span class="number">2</span>
+                            </div>
+                            <div class="tooltips">
+                                <strong>2. Insert and revise content</strong>
+                                <p>your own content to the board with either drag and drop or by clicking on “Insert”. Access tools for comments, sticky notes, and scribbling by clicking on “Review” or “Create”.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+             </field>
         </record>
 
         <record id="action_mail_to_me_feeds" model="ir.actions.client">
