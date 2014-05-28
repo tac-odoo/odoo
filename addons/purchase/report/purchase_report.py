@@ -66,7 +66,7 @@ class purchase_report(osv.osv):
     
     def _prepare_flist(self, cr, uid, group_operator, field, context=None):
         user_currency = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.currency_id.id
-        fields = ['price_total']
+        fields = ['price_total','price_average']
         if field in fields:
             flist = '''sum(currency_conversation("%s"."%s", %s, "%s"."%s", "%s"."%s")) AS %s''' % (self._table, 'currency_id', user_currency, self._table, field, self._table, 'date', field)
         else:
