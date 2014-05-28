@@ -1,4 +1,7 @@
-openerp.base = function(instance) {
+(function () {
+    "use strict";
+    var instance = openerp;
+    openerp.base = {};
 
     instance.base.apps_remote = null;
     instance.base.apps_client = null;
@@ -118,4 +121,4 @@ openerp.base = function(instance) {
     instance.web.client_actions.add("apps", "instance.base.Apps");
     instance.web.client_actions.add("apps.updates", "instance.base.AppsUpdates");
 
-};
+})();
