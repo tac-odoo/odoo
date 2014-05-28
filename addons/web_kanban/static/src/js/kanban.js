@@ -1,5 +1,8 @@
-openerp.web_kanban = function (instance) {
+(function () {
+"use strict";
 
+var instance = openerp;
+openerp.web_kanban = {};
 var _t = instance.web._t,
    _lt = instance.web._lt;
 var QWeb = instance.web.qweb;
@@ -1348,6 +1351,6 @@ instance.web_kanban.KanbanSelection = instance.web_kanban.AbstractField.extend({
 instance.web_kanban.fields_registry = new instance.web.Registry({});
 instance.web_kanban.fields_registry.add('priority','instance.web_kanban.Priority');
 instance.web_kanban.fields_registry.add('kanban_state_selection','instance.web_kanban.KanbanSelection');
-};
+})();
 
 // vim:et fdc=0 fdl=0 foldnestmax=3 fdm=syntax:

@@ -1,4 +1,7 @@
-openerp.board = function(instance) {
+(function () {
+"use strict";
+
+var instance = openerp;
 var QWeb = instance.web.qweb,
     _t = instance.web._t;
 
@@ -320,7 +323,6 @@ instance.web.form.DashBoardLegacy = instance.web.form.DashBoard.extend({
         this._super(this);
     }
 });
-
 instance.web.form.tags.add('hpaned', 'instance.web.form.DashBoardLegacy');
 instance.web.form.tags.add('vpaned', 'instance.web.form.DashBoardLegacy');
 instance.web.form.tags.add('board', 'instance.web.form.DashBoard');
@@ -427,4 +429,4 @@ instance.web.SearchView.include({
     }
 });
 
-};
+})();

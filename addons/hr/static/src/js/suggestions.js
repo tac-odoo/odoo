@@ -1,4 +1,7 @@
-openerp.hr = function(session) {
+(function() {
+    "use strict";
+
+    var session = openerp;
     var _t = session.web._t;
     var QWeb = session.web.qweb;
 
@@ -75,4 +78,4 @@ openerp.hr = function(session) {
         },
     });
 
-};
+})();

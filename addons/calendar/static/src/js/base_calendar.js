@@ -1,4 +1,7 @@
-openerp.calendar = function(instance) {
+(function () {
+    "use strict";
+
+    var instance = openerp;
     var _t = instance.web._t;
     var QWeb = instance.web.qweb;
 
@@ -153,5 +156,5 @@ openerp.calendar = function(instance) {
     
     
    
-};
+}());
 

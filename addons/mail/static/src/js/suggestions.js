@@ -1,4 +1,8 @@
-openerp.mail.suggestions = function(session, mail) {
+(function() {
+    "use strict";
+
+    var session = openerp;
+    var mail = openerp.mail;
     var _t = session.web._t;
     var QWeb = session.web.qweb;
 
@@ -75,4 +79,4 @@ openerp.mail.suggestions = function(session, mail) {
         },
     });
 
-};
+})();

@@ -1,7 +1,11 @@
 
 var _gaq = _gaq || [];  // asynchronous stack used by google analytics
 
-openerp.web_analytics = function(instance) {
+(function () {
+    "use strict";
+
+    var instance = openerp; 
+    openerp.web_analytics = {};
 
     /*
     *  The Web Analytics Module inserts the Google Analytics JS Snippet
@@ -287,4 +291,4 @@ openerp.web_analytics = function(instance) {
         },
     });
  
-};
+}());

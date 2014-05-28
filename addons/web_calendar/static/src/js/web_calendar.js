@@ -10,7 +10,10 @@ _.str.toBoolElse = function (str, elseValues, trueValues, falseValues) {
     return ret;
 };
 
-openerp.web_calendar = function(instance) {
+(function() {
+    "use strict";
+    var instance = openerp;
+    openerp.web_calendar = {};
     var _t = instance.web._t,
         _lt = instance.web._lt,
         QWeb = instance.web.qweb;
@@ -20,7 +23,7 @@ openerp.web_calendar = function(instance) {
     }
 
     function get_fc_defaultOptions() {
-        shortTimeformat = Date.CultureInfo.formatPatterns.shortTime;
+        var shortTimeformat = Date.CultureInfo.formatPatterns.shortTime;
         return {
             weekNumberTitle: _t("W"),
             allDayText: _t("All day"),
@@ -307,7 +310,7 @@ openerp.web_calendar = function(instance) {
             var self = this;
              
             if (!this.sidebar && this.options.$sidebar) {
-                translate = get_fc_defaultOptions();
+                var translate = get_fc_defaultOptions();
                 this.sidebar = new instance.web_calendar.Sidebar(this);
                 this.sidebar.appendTo(this.$el.find('.oe_calendar_sidebar_container'));
 
@@ -507,7 +510,7 @@ openerp.web_calendar = function(instance) {
                 all_day = this.all_day ? evt[this.all_day] : false,
                 res_computed_text = '',
                 the_title = '',
-                attendees = [];
+                attendees = [], date_start = null, date_stop = null;
 
             if (!all_day) {
                 date_start = instance.web.auto_str_to_date(evt[this.date_start]);
@@ -564,7 +567,7 @@ openerp.web_calendar = function(instance) {
                 the_title = _.escape(the_title);
                 
                 
-                the_title_avatar = '';
+                var the_title_avatar = '';
                 
                 if (! _.isUndefined(this.attendee_people)) {
                     var MAX_ATTENDEES = 3;
@@ -631,7 +634,7 @@ openerp.web_calendar = function(instance) {
          * Transform fullcalendar event object to OpenERP Data object
          */
         get_event_data: function(event) {
-
+            var date_start_day, date_stop_day, diff_seconds;
             // Normalize event_end without changing fullcalendars event.
             var data = {
                 name: event.title
@@ -794,7 +797,7 @@ openerp.web_calendar = function(instance) {
         get_range_domain: function(domain, start, end) {
             var format = instance.web.date_to_str;
             
-            extend_domain = [[this.date_start, '>=', format(start.clone())],
+            var extend_domain = [[this.date_start, '>=', format(start.clone())],
                      [this.date_start, '<=', format(end.clone())]];
 
             if (this.date_stop) {
@@ -838,6 +841,7 @@ openerp.web_calendar = function(instance) {
         },
         open_event: function(id, title) {
             var self = this;
+            var button_delete, button_edit;
             if (! this.open_popup_action) {
                 var index = this.dataset.get_id_index(id);
                 this.dataset.index = index;
@@ -1436,4 +1440,4 @@ openerp.web_calendar = function(instance) {
         },
     });
 
-};
+})();

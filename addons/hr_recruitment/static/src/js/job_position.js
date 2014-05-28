@@ -1,4 +1,4 @@
-openerp.hr_recruitment = function (openerp) {
+(function () {
   "use strict";
 
   openerp.web_kanban.KanbanRecord.include({
@@ -11,4 +11,4 @@ openerp.hr_recruitment = function (openerp) {
       },
   });
 
-};
+})();

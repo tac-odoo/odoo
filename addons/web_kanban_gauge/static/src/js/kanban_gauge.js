@@ -1,4 +1,5 @@
-openerp.web_kanban_gauge = function (instance) {
+(function () {
+"use strict";
 
 /**
  * Kanban widgets: GaugeWidget
@@ -17,6 +18,7 @@ openerp.web_kanban_gauge = function (instance) {
  * - on_click_label: optional label of the input displayed when clicking
  *
  */
+var instance = openerp;
 var _t = instance.web._t,
    _lt = instance.web._lt;
 
@@ -155,4 +157,4 @@ instance.web_kanban.GaugeWidget = instance.web_kanban.AbstractField.extend({
 
 instance.web_kanban.fields_registry.add("gauge", "instance.web_kanban.GaugeWidget");
 
-}
+})();

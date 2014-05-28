@@ -1,12 +1,13 @@
-openerp.mail = function (session) {
+(function () {
+    "use strict";
+
+    var session = openerp;
+    session.mail = {};
     var _t = session.web._t,
        _lt = session.web._lt;
 
     var mail = session.mail;
 
-    openerp_mail_followers(session, mail);          // import mail_followers.js
-    openerp_FieldMany2ManyTagsEmail(session);       // import manyy2many_tags_email.js
-    openerp_announcement(session);
 
     /**
      * ------------------------------------------------------------
@@ -1394,7 +1395,7 @@ openerp.mail = function (session) {
             if (! this.context.mail_read_set_read) return;
             var self = this;
             this.render_mutex.exec(function() {
-                msg_ids = _.pluck(message_list, 'id');
+                var msg_ids = _.pluck(message_list, 'id');
                 return self.ds_message.call('set_message_read', [msg_ids, true, false, self.context])
                     .then(function (nb_read) {
                         if (nb_read) {
@@ -1569,7 +1570,6 @@ openerp.mail = function (session) {
                 // create a expandable message
                 var expandable = new mail.ThreadExpandable(this, {
                     'model': message.model,
-                    'parent_id': message.parent_id,
                     'nb_messages': 1,
                     'thread_level': message.thread_level,
                     'parent_id': message.parent_id,
@@ -1995,16 +1995,4 @@ openerp.mail = function (session) {
             });
         },
     });
-
-
-    /**
-     * ------------------------------------------------------------
-     * Sub-widgets loading
-     * ------------------------------------------------------------
-     * 
-     * Load here widgets that could depend on widgets defined in mail.js
-     */
-
-    openerp.mail.suggestions(session, mail);        // import suggestion.js (suggestion widget)
-
-};
+})();

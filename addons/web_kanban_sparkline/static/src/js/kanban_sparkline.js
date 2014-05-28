@@ -1,10 +1,10 @@
-openerp.web_kanban_sparkline = function (instance) {
-
+(function () {
+"use strict";
 /**
  * Kanban widgets: Sparkline
  *
  */
-
+var instance = openerp;
 instance.web_kanban.SparklineBarWidget = instance.web_kanban.AbstractField.extend({
     className: "oe_sparkline_bar",
     start: function() {
@@ -17,7 +17,6 @@ instance.web_kanban.SparklineBarWidget = instance.web_kanban.AbstractField.exten
             var tooltipFormat = self.options.type == 'tristate' && '{{offset:offset}}' + suffix || '{{offset:offset}} {{value:value}}' + suffix
             var sparkline_options = _.extend({
                     type: 'bar',
-                    barWidth: 5,
                     height: '20px',
                     barWidth: 4,
                     barSpacing: 1,
@@ -37,4 +36,4 @@ instance.web_kanban.SparklineBarWidget = instance.web_kanban.AbstractField.exten
 instance.web_kanban.fields_registry.add("sparkline_bar", "instance.web_kanban.SparklineBarWidget");
 
 
-}
+})();

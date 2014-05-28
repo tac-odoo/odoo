@@ -1,4 +1,6 @@
-openerp.crm = function(openerp) {
+(function() {
+    "use strict";
+
     openerp.web_kanban.KanbanView.include({
         crm_display_members_names: function() {
             /*
@@ -42,4 +44,4 @@ openerp.crm = function(openerp) {
             }
         },
     });
-};
+})();

@@ -1,4 +1,7 @@
-openerp_announcement = function(instance) {
+(function() {
+    "use strict";
+
+    var instance = openerp;
     instance.web.WebClient.include({
         show_application: function() {
             return $.when(this._super.apply(this, arguments)).then(this.proxy('show_annoucement_bar'));
@@ -39,4 +42,4 @@ openerp_announcement = function(instance) {
             });
         }
     });
-};
+})();

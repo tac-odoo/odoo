@@ -1,5 +1,6 @@
 
 (function() {
+"use strict";
 
 var instance = openerp;
 openerp.web.search = {};

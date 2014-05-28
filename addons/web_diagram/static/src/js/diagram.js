@@ -2,12 +2,16 @@
  * OpenERP diagram library
  *---------------------------------------------------------*/
 
-openerp.web_diagram = function (instance) {
+(function() {
+"use strict";
+
+var instance = openerp;
+openerp.web_diagram = {};
 var QWeb = instance.web.qweb,
       _t = instance.web._t,
      _lt = instance.web._lt;
-instance.web.views.add('diagram', 'instance.web.DiagramView');
-instance.web.DiagramView = instance.web.View.extend({
+instance.web.views.add('diagram', 'instance.web_diagram.DiagramView');
+instance.web_diagram.DiagramView = instance.web.View.extend({
     display_name: _lt('Diagram'),
     view_type: 'diagram',
     searchable: false,
@@ -429,6 +433,6 @@ instance.web.DiagramView = instance.web.View.extend({
         return $.when(this._super(), this.execute_pager_action('reload'));
     }
 });
-};
+})();
 
 // vim:et fdc=0 fdl=0 foldnestmax=3 fdm=syntax:

@@ -1,5 +1,8 @@
-function openerp_pos_db(instance, module){ 
+(function() {
+    "use strict";
 
+    var instance = openerp;
+    var module = instance.point_of_sale;
     /* The PosDB holds reference to data that is either
      * - static: does not change between pos reloads
      * - persistent : must stay between reloads ( orders )
@@ -292,4 +295,4 @@ function openerp_pos_db(instance, module){
             return undefined;
         },
     });
-}
+})();

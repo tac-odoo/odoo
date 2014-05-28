@@ -4,8 +4,11 @@
 
 /* jshint undef: false  */
 
-openerp.web_graph = function (instance) {
-'use strict';
+(function () {
+"use strict";
+
+var instance = openerp;
+openerp.web_graph = {};
 
 var _lt = instance.web._lt;
 var _t = instance.web._t;
@@ -225,7 +228,7 @@ instance.web_graph.GraphView = instance.web.View.extend({
         });
     },
 });
-};
+})();
 
 
 

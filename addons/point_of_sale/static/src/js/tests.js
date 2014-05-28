@@ -1,5 +1,8 @@
-function openerp_pos_tests(instance, module){ //module is instance.point_of_sale
+(function() {
+    "use strict";
 
+    var instance = openerp;
+    var module = instance.point_of_sale;
     // Various UI Tests to measure performance and memory leaks.
     module.UiTester = function(){
         var running = false;
@@ -90,4 +93,4 @@ function openerp_pos_tests(instance, module){ //module is instance.point_of_sale
         window.pos_test_ui = new module.UiTester();
     }
 
-}
+})();

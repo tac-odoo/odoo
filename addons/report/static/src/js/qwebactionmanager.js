@@ -1,4 +1,8 @@
-openerp.report = function(instance) {
+(function () {
+    "use strict";
+
+    var instance = openerp;    
+    openerp.report = {};
     var wkhtmltopdf_state;
 
     var trigger_download = function(session, response, c) {
@@ -87,4 +91,4 @@ openerp.report = function(instance) {
             }
         }
     });
-};
+}());

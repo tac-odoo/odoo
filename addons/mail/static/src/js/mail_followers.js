@@ -1,4 +1,8 @@
-openerp_mail_followers = function(session, mail) {
+(function() {
+    "use strict";
+
+    var session = openerp;
+    var mail = session.mail;
     var _t = session.web._t,
        _lt = session.web._lt;
 
@@ -208,6 +212,7 @@ openerp_mail_followers = function(session, mail) {
             self.message_is_follower = _.indexOf(this.followers.map(function (rec) { return rec[2]['is_uid']}), true) != -1;
             // truncate number of displayed followers
             var truncated = this.followers.slice(0, this.displayed_nb);
+            var partner = {};
             _(truncated).each(function (record) {
                 partner = {
                     'id': record[0],
@@ -355,4 +360,4 @@ openerp_mail_followers = function(session, mail) {
             }
         },
     });
-};
+})();

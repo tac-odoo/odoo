@@ -15,7 +15,11 @@
 // that only one screen is shown at the same time and that show() is called after all
 // hide()s
 
-function openerp_pos_screens(instance, module){ //module is instance.point_of_sale
+(function() {
+    "use strict";
+
+    var instance = openerp;
+    var module = instance.point_of_sale;
     var QWeb = instance.web.qweb,
     _t = instance.web._t;
 
@@ -1224,4 +1228,4 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             }
         },
     });
-}
+})();

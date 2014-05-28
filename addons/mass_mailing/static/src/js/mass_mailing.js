@@ -1,4 +1,5 @@
-openerp.mass_mailing = function (instance) {
+(function () {
+    "use strict";
     var _t = instance.web._t;
 
     openerp.web_kanban.KanbanRecord.include({
@@ -10,4 +11,4 @@ openerp.mass_mailing = function (instance) {
             }
         },
     });
-};
+})();

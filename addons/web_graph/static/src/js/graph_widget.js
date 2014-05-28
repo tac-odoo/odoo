@@ -2,7 +2,7 @@
 /* jshint undef: false  */
 
 (function () {
-'use strict';
+"use strict";
 var QWeb = openerp.web.qweb;
 var _lt = openerp.web._lt;
 var _t = openerp.web._t;

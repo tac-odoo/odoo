@@ -1,4 +1,8 @@
-openerp.google_spreadsheet = function(instance) {
+(function () {
+    "use strict";
+
+    var instance = openerp;
+    openerp.google_spreadsheet = {};
     var _t = instance.web._t;
     instance.web.FormView.include({
     	on_processed_onchange: function(result, processed) {
@@ -51,4 +55,4 @@ openerp.google_spreadsheet = function(instance) {
 	        }
 	    }
 	});
-};
+})();

@@ -1,5 +1,6 @@
 
-openerp.share = function(session) {
+(function() {
+    var session = openerp;
     var _t = session.web._t;
     var has_action_id = false;
 
@@ -118,5 +119,5 @@ openerp.share = function(session) {
             launch_wizard(this, this.views[this.active_view].controller, 'emails', true);
         },
     });
-};
+})();
 

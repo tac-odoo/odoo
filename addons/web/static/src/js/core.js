@@ -1,5 +1,6 @@
 
 (function() {
+"use strict";
 
 if (typeof(console) === "undefined") {
     // Even IE9 only exposes console object if debug window opened

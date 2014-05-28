@@ -1,4 +1,7 @@
-openerp.edi = function(instance) {
+(function () {
+"use strict";
+
+var instance = openerp;
 var _t = instance.web._t;
 instance.edi = {};
 
@@ -74,5 +77,5 @@ instance.edi.edi_import = function (url) {
     });
 }
 
-};
+}());
 // vim:et fdc=0 fdl=0 foldnestmax=3 fdm=syntax:

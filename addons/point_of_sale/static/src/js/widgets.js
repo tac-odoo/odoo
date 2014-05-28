@@ -1,4 +1,8 @@
-function openerp_pos_widgets(instance, module){ //module is instance.point_of_sale
+(function() {
+    "use strict";
+
+    var instance = openerp;
+    var module = instance.point_of_sale;
     var QWeb = instance.web.qweb;
 	var _t = instance.web._t;
 
@@ -1249,4 +1253,4 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
             this._super();
         }
     });
-}
+})();

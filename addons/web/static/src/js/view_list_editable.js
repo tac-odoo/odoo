@@ -3,6 +3,7 @@
  * @namespace
  */
 (function() {
+    "use strict";
 
     var instance = openerp;
     openerp.web.list_editable = {};

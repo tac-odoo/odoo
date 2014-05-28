@@ -1,4 +1,8 @@
-openerp.gamification = function(instance) {
+(function() {
+    "use strict";
+
+    var instance = openerp;
+    instance.gamification = {};
     var QWeb = instance.web.qweb;
 
     instance.gamification.Sidebar = instance.web.Widget.extend({
@@ -137,4 +141,4 @@ openerp.gamification = function(instance) {
         },
     });
     
-};
+})();

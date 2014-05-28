@@ -1,4 +1,7 @@
-openerp.google_drive = function (instance, m) {
+(function () {
+    "use strict";
+
+    var instance = openerp;
     var _t = instance.web._t,
         QWeb = instance.web.qweb;
 
@@ -73,4 +76,4 @@ openerp.google_drive = function (instance, m) {
         },
 
     });
-};
+})();

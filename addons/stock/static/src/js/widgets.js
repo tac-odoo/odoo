@@ -1,5 +1,7 @@
-function openerp_picking_widgets(instance){
+(function(){
+    "use strict";
 
+    var instance = openerp;
     var module = instance.stock;
     var _t     = instance.web._t;
     var QWeb   = instance.web.qweb;
@@ -1023,4 +1025,4 @@ function openerp_picking_widgets(instance){
 openerp.stock = function(openerp) {
     openerp.stock = openerp.stock || {};
     openerp_picking_widgets(openerp);
-}
+})();

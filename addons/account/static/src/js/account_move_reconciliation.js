@@ -1,5 +1,9 @@
-openerp.account = function (instance) {
-    openerp.account.quickadd(instance);
+(function () {
+"use strict";
+
+    var instance = openerp;
+    openerp.account = {};
+
     var _t = instance.web._t,
         _lt = instance.web._lt;
     var QWeb = instance.web.qweb;
@@ -127,4 +131,4 @@ openerp.account = function (instance) {
         },
     });
     
-};
+}());

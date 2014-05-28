@@ -2,7 +2,11 @@
  * OpenERP web_linkedin (module)
  *---------------------------------------------------------*/
 
-openerp.web_linkedin = function(instance) {
+(function () {
+    "use strict";
+
+    var instance = openerp;
+    openerp.web_linkedin = {};
     var QWeb = instance.web.qweb;
     var _t = instance.web._t;
     
@@ -524,5 +528,5 @@ openerp.web_linkedin = function(instance) {
             }
         },
     });
-};
+}());
 // vim:et fdc=0 fdl=0:

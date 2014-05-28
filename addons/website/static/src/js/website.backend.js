@@ -1,5 +1,8 @@
-openerp.website = function(instance) {
+(function () {
+"use strict";
+var instance = openerp;
 var _t = instance.web._t;
+openerp.website = {};
 
 instance.web.form.WidgetWebsiteButton = instance.web.form.AbstractField.extend({
     template: 'WidgetWebsiteButton',
@@ -29,4 +32,4 @@ instance.web.form.widgets = instance.web.form.widgets.extend({
     'website_button': 'instance.web.form.WidgetWebsiteButton',
 });
 
-};
+}());

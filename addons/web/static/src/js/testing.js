@@ -1,6 +1,8 @@
 // Test support structures and methods for OpenERP
 openerp.testing = {};
 (function (testing) {
+    "use strict";
+
     var dependencies = {
         pyeval: [],
         core: ['pyeval'],

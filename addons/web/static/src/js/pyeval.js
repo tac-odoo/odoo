@@ -2,6 +2,7 @@
  * py.js helpers and setup
  */
 (function() {
+    "use strict";
 
     var instance = openerp;
 

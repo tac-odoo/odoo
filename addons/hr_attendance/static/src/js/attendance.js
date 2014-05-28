@@ -1,6 +1,9 @@
 
-openerp.hr_attendance = function (instance) {
-    
+(function () {
+    "use strict";
+
+    var instance = openerp;
+    instance.hr_attendance = {};
     var QWeb = instance.web.qweb;
     var _t = instance.web._t;
     var _lt = instance.web._lt;
@@ -91,4 +94,4 @@ openerp.hr_attendance = function (instance) {
             });
         },
     });
-};
+}());

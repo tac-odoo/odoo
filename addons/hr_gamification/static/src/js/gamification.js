@@ -1,4 +1,7 @@
-openerp.hr_gamification = function(instance) {
+(function() {
+    "use strict";
+
+    var instance = openerp;
     instance.web_kanban.KanbanRecord.include({
         on_card_clicked: function() {
             if (this.view.dataset.model === 'gamification.badge.user') {
@@ -16,4 +19,4 @@ openerp.hr_gamification = function(instance) {
             }
         }
     });
-};
+})();

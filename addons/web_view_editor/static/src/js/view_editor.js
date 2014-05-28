@@ -1,4 +1,8 @@
-openerp.web_view_editor = function(instance) {
+(function() {
+"use strict";
+
+var instance = openerp;
+instance.web_view_editor = {};
 var _t = instance.web._t;
 var QWeb = instance.web.qweb;
 instance.web.ViewManagerAction.include({
@@ -1227,4 +1231,4 @@ instance.web_view_editor.ViewEditor.property_widget = new instance.web.Registry(
     'char' : 'instance.web_view_editor.ViewEditor.FieldChar',
     'float' : 'instance.web_view_editor.ViewEditor.FieldFloat'
 });
-};
+})();

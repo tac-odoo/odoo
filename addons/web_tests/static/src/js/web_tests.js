@@ -1,4 +1,7 @@
-openerp.web_tests = function (instance) {
+(function () {
+    "use strict";
+
+    var instance = openerp;
     instance.web.client_actions.add(
         'buncha-forms', 'instance.web_tests.BunchaForms');
     instance.web_tests = {};
@@ -34,4 +37,4 @@ openerp.web_tests = function (instance) {
             }, this);
         }
     });
-};
+})();

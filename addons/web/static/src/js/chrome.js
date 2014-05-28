@@ -2,6 +2,7 @@
  * OpenERP Web chrome
  *---------------------------------------------------------*/
 (function() {
+"use strict";
 
 var instance = openerp;
 openerp.web.chrome = {};

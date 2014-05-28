@@ -1,7 +1,11 @@
 /*---------------------------------------------------------
  * OpenERP web_gantt
  *---------------------------------------------------------*/
-openerp.web_gantt = function (instance) {
+(function () {
+"use strict";
+
+var instance = openerp;
+openerp.web_gantt = {};
 var _t = instance.web._t,
    _lt = instance.web._lt;
 var QWeb = instance.web.qweb;
@@ -246,4 +250,4 @@ instance.web_gantt.GanttView = instance.web.View.extend({
     },
 });
 
-};
+})();

@@ -1,4 +1,8 @@
-openerp.base_import = function (instance) {
+(function () {
+    "use strict";
+
+    var instance = openerp;
+    openerp.base_import = {};
     var QWeb = instance.web.qweb;
     var _t = instance.web._t;
     var _lt = instance.web._lt;
@@ -486,4 +490,4 @@ openerp.base_import = function (instance) {
             { name: 'import_failed', from: 'importing', to: 'results' }
         ]
     })
-};
+})();

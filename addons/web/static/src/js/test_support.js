@@ -1,4 +1,5 @@
 (function() {
+"use strict";
 
 openerp.test_support = {
 

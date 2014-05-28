@@ -1,4 +1,6 @@
-openerp.project = function(openerp) {
+(function() {
+    "use strict";
+
     openerp.web_kanban.KanbanView.include({
         project_display_members_names: function() {
             /*
@@ -42,4 +44,4 @@ openerp.project = function(openerp) {
             }
         },
     });
-};
+})();

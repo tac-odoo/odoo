@@ -1,5 +1,8 @@
 
-function openerp_pos_devices(instance,module){ //module is instance.point_of_sale
+(function() {
+    "use strict";
+    var instance = openerp;
+    var module = instance.point_of_sale;
 
     // the JobQueue schedules a sequence of 'jobs'. each job is
     // a function returning a deferred. the queue waits for each job to finish 
@@ -814,4 +817,4 @@ function openerp_pos_devices(instance,module){ //module is instance.point_of_sal
         },
     });
 
-}
+})();

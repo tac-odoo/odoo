@@ -1,4 +1,5 @@
 (function() {
+"use strict";
 
 var instance = openerp;
 openerp.web.list = {};
@@ -177,6 +178,7 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
         var i;
         var pair;
         var expression;
+        var len;
         if (this.fonts) {
             for(i=0, len=this.fonts.length; i<len; ++i) {
                 pair = this.fonts[i];

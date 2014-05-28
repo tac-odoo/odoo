@@ -1,4 +1,7 @@
-openerp.document = function (instance) {
+(function() {
+    "use strict";
+
+    var instance = openerp;
     _t = instance.web._t;
     instance.web.Sidebar.include({
         init : function(){
@@ -20,4 +23,4 @@ openerp.document = function (instance) {
             self._super(attachments);
         },
     });
-};
+})();

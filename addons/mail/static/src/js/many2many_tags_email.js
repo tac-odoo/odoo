@@ -1,4 +1,7 @@
-openerp_FieldMany2ManyTagsEmail = function(instance) {
+(function() {
+"use strict";
+
+var instance = openerp;
 var _t = instance.web._t;
 
 /**
@@ -85,4 +88,4 @@ instance.web.form.widgets = instance.web.form.widgets.extend({
     'many2many_tags_email' : 'instance.web.form.FieldMany2ManyTagsEmail',
 });
 
-};
+})();

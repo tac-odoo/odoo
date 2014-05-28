@@ -1,4 +1,8 @@
-openerp.pad = function(instance) {
+(function () {
+"use strict";
+
+    var instance = openerp;
+    instance.pad = {};
     var _t = instance.web._t;
     
     instance.web.form.FieldPad = instance.web.form.AbstractField.extend(instance.web.form.ReinitializeWidgetMixin, {
@@ -84,4 +88,4 @@ openerp.pad = function(instance) {
     instance.web.form.widgets = instance.web.form.widgets.extend({
         'pad': 'instance.web.form.FieldPad',
     });
-};
+})();

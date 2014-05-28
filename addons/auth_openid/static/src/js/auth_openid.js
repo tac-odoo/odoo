@@ -1,6 +1,8 @@
+(function() {
+"use strict";
 
-openerp.auth_openid = function(instance) {
-
+var instance = openerp;
+openerp.auth_openid = {};
 var QWeb = instance.web.qweb;
 
 /* TODO: make this a server side controller
@@ -153,4 +155,4 @@ instance.web.Login = instance.web.Login.extend({
 */
 
 
-};
+}());

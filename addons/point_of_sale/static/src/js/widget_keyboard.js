@@ -1,5 +1,10 @@
 
-function openerp_pos_keyboard(instance, module){ //module is instance.point_of_sale
+(function() {
+    "use strict";
+
+    var instance = openerp;
+    var module = instance.point_of_sale;
+
 // ---------- OnScreen Keyboard Widget ----------
 
     // A Widget that displays an onscreen keyboard.
@@ -198,4 +203,4 @@ function openerp_pos_keyboard(instance, module){ //module is instance.point_of_s
             });
         },
     });
-}
+})();

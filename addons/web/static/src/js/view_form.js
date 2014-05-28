@@ -1,4 +1,5 @@
 (function() {
+"use strict";
 
 var instance = openerp;
 var _t = instance.web._t,
