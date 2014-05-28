@@ -30,9 +30,9 @@
                                     t-att-data-day-count="day_count" type="text"/>
                                 <span t-if="widget.get('effective_readonly')" t-att-data-account="account.account"
                                     t-att-data-day-count="day_count" class="oe_timesheet_weekly_box"/>
-                                <t t-set="day_count" t-value="day_count + 1"/>
                             </td>
                         </t>
+                        <t t-set="day_count" t-value="day_count + 1"/>
                     </t>
                     <td t-att-data-account-total="account.account" class="oe_timesheet_total"> </td>
                 </tr>
@@ -50,13 +50,13 @@
                     </td>
                     <t t-set="day_count" t-value="0"/>
                     <t t-foreach="widget.dates" t-as="date">
-                        <t t-if="(widget.week==date.getWeek())">
+                      <t t-if="(widget.week==date.getWeek())">
                             <td class="oe_timesheet_total">
                                 <span class="oe_timesheet_weekly_box" t-att-data-day-total="day_count">
                                 </span>
                                 <t t-set="day_count" t-value="day_count + 1"/>
                             </td>
-                        </t>
+                      </t>
                     </t>
                     <td class="oe_timesheet_weekly_supertotal oe_timesheet_total"> </td>
                 </tr>

@@ -17,7 +17,14 @@ openerp.hr_timesheet_day = function(instance) {
             this.account_id = [];
             this.count = 0;
             this.week = 0;
-            this.flag = 0;
+        },
+        renderElement: function(){
+            this._super.apply(this, arguments);
+            this.reset();
+        },
+        reset: function(){
+            this.count = 0;
+            this.week = 0;
         },
         initialize_content: function() {
             var self = this;
@@ -100,6 +107,7 @@ openerp.hr_timesheet_day = function(instance) {
         },
         display_data: function() {
             var self = this;
+            self.week = self.days[self.count].week;
             this.$el.html(QWeb.render("hr_timesheet_day.DailyTimesheet", {widget: self}));
             if (self.days.length) {
                 var day_count = self.count;
@@ -301,16 +309,14 @@ openerp.hr_timesheet_day = function(instance) {
                 this.$el.find(".first_day").removeClass("oe_day_button").addClass("oe_fday_button");
         },
         navigateNext: function() {
-            if(this.count == this.days.length-1){
-                this.week = _.first(this.days).week;
+            if(this.count == this.days.length-1)
                 this.count = 0;
-            } else {
+            else 
                 this.count+=1;
-                this.week = this.days[this.count].week;
-            }
+            this.week = this.days[this.count].week;
             this.display_data();
         },
-        navigatePrev: function(e) {
+        navigatePrev: function() {
             if (this.count==0)
                 this.count = this.days.length-1;
             else

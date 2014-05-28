@@ -10,6 +10,7 @@ openerp.hr_timesheet_week = function(instance) {
         },
         init: function() {
             this._super.apply(this, arguments);
+            var self = this;
             // Original save function is overwritten in order to wait all running deferreds to be done before actually applying the save.
             this.view.original_save = _.bind(this.view.save, this.view);
             this.view.save = function(prepend_on_create){

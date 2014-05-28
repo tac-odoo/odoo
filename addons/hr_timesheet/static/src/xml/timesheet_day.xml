@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <templates>
     <t t-name="hr_timesheet_day.DailyTimesheet">
     <div class="oe_timesheet_daily">
-    <table t-if="widget.days.length != 0">
+        <table t-if="widget.days.length != 0">
            <tr>
                 <td>
                     <div id="tdate">
                         <h1>
                             <span>
-                                <!-- TODO: It throws error when simply start date is changed, Need to improve this -->
                                 <t t-esc="widget.days[widget.count].day.toString('dddd MM/dd/yyyy')"/>
                             </span>
                         </h1>
@@ -58,19 +56,16 @@
                                         </span>
                                         <input t-if="!widget.get('effective_readonly')" class="oe_timesheet_daily_box" t-att-data-account="days.account_group[data][0].account_id" 
                                         t-att-data-day-count="day_count" />
-                                        
                                         <span t-if="widget.get('effective_readonly')" class="oe_timesheet_daily_box" t-att-data-account="days.account_group[data][0].account_id" 
                                         t-att-data-day-count="day_count"></span>
-                                        <span t-if="!widget.get('effective_readonly')" class="oe_timesheet_edit_description">
-                                            <i  class="fa fa-pencil fa-fw" title="edit description" t-att-data-account="data" t-att-data-day-count="index"></i>
+                                        <span t-if="!widget.get('effective_readonly')">
+                                            <i  class="fa fa-pencil fa-fw oe_timesheet_edit_description" title="edit description" t-att-data-account="data" t-att-data-day-count="index"></i>
                                         </span>
                                         <input class="oe_edit_input" t-att-data-account="data" data-day-count="index" style="display:none"></input>
                                         <br/><br/>
-                                        <!-- <t t-set="day_count" t-value="day_count + 1"/> -->
                                     </div>
                                     <t t-set="index" t-value="index + 1"/>
                                 </t>
-                                
                             </t>
                             <div class="oe_timesheet_daily_add_row" style="display: none">
                                 <span t-att-colspan="widget.days.length + 2">
@@ -101,10 +96,10 @@
                                 activities.
                             </p>
                         </div>
-                        </div>
+                    </div>
                 </td>
             </tr> 
         </table>
-        </div>
+      </div>
     </t>
 </templates>
