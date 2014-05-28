@@ -1,0 +1,22 @@
+.openerp .oe_kanban_view .oe_journal_card {
+  width: 500px;
+}
+.openerp .oe_kanban_view .oe_journal_title {
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  padding: 5px;
+  background: #f0eeee;
+  color: #666666;
+}
+.openerp .oe_kanban_view .oe_journal_title p{
+  margin: 0px;
+}
+.openerp .oe_kanban_view .oe_journal_data {
+  margin-left:10px;
+}
+.openerp .oe_kanban_view .oe_journal_card_title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

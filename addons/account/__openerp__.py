@@ -114,6 +114,7 @@ for a particular financial year and for preparation of vouchers there is a modul
         'res_config_view.xml',
         'account_tip_data.xml',
         'account_pre_install.yml',
+        'account_journal_view.xml',
         'views/report_vat.xml',
         'views/report_invoice.xml',
         'views/report_trialbalance.xml',

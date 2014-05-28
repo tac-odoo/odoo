@@ -752,6 +752,7 @@ class account_journal(osv.osv):
         'internal_account_id' : fields.many2one('account.account', 'Internal Transfers Account', select=1),
         'cash_control' : fields.boolean('Cash Control', help='If you want the journal should be control at opening/closing, check this option'),
         'analytic_journal_id':fields.many2one('account.analytic.journal','Analytic Journal', help="Journal for analytic entries"),
+        'refund_journal_id': fields.many2one('account.journal', 'Refund Journal'),
     }
 
     _defaults = {
@@ -780,6 +781,13 @@ class account_journal(osv.osv):
         (_check_currency, 'Configuration error!\nThe currency chosen should be shared by the default accounts too.', ['currency','default_debit_account_id','default_credit_account_id']),
     ]
 
+    def onchange_type(self, cr, uid, ids, journal_type, context=None):
+        refund_journal_id = False
+        if journal_type in ('sale', 'purchase'):
+            refund_journal_ids = self.search(cr, uid, [('type', '=', journal_type+'_refund')], context=context)
+            refund_journal_id = refund_journal_ids and refund_journal_ids[0] or False
+        return {'value': {'refund_journal_id': refund_journal_id}}
+
     def copy(self, cr, uid, id, default=None, context=None):
         default = dict(context or {})
         journal = self.browse(cr, uid, id, context=context)
@@ -798,6 +806,14 @@ class account_journal(osv.osv):
                 move_lines = self.pool.get('account.move.line').search(cr, uid, [('journal_id', 'in', ids)])
                 if move_lines:
                     raise osv.except_osv(_('Warning!'), _('This journal already contains items, therefore you cannot modify its company field.'))
+            if (vals.get('type',False) in ('sale', 'purchase') or (not vals.get('type', False) and journal.type in ('sale', 'purchase'))):
+                #find corresponding refund_journal
+                if not vals.get('refund_journal_id', False):
+                    if journal.refund_journal_id:
+                        vals['refund_journal_id'] = journal.refund_journal_id.id
+                    else:
+                        refund_journal_ids = self.search(cr, uid, [('type', '=', (vals.get('type',False) or journal.type)+'_refund')], context=context)
+                        vals['refund_journal_id'] = refund_journal_ids and refund_journal_ids[0] or False
         return super(account_journal, self).write(cr, uid, ids, vals, context=context)
 
     def create_sequence(self, cr, uid, vals, context=None):
@@ -823,6 +839,11 @@ class account_journal(osv.osv):
             # if we have the right to create a journal, we should be able to
             # create it's sequence.
             vals.update({'sequence_id': self.create_sequence(cr, SUPERUSER_ID, vals, context)})
+        if vals.get('type',False) in ('sale', 'purchase'):
+            #find corresponding refund_journal
+            if not vals.get('refund_journal_id', False):
+                refund_journal_ids = self.search(cr, uid, [('type', '=', vals.get('type')+'_refund')], context=context)
+                vals['refund_journal_id'] = refund_journal_ids and refund_journal_ids[0] or False
         return super(account_journal, self).create(cr, uid, vals, context)
 
     def name_get(self, cr, user, ids, context=None):
