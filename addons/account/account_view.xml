@@ -2139,7 +2139,7 @@
                                 <field name="purchase_tax_rate" class="oe_inline"/> %%
                             </div>
                         </group>
-                        <group groups="account.group_account_user">
+                        <group groups="account.group_account_invoice">
                             <field name="code_digits"/>
                         </group>
                     </group>
