@@ -2424,7 +2424,9 @@ class BaseModel(object):
             if self._all_columns[f].column._type in ('integer', 'float')
             if getattr(self._all_columns[f].column, '_classic_write')]
 
-        select_terms = [self._prepare_flist(cr, uid, self._all_columns[f].column.group_operator or 'sum', f, context=context)]
+        select_terms = []
+        for f in aggregated_fields :
+            select_terms = [self._prepare_flist(cr, uid, self._all_columns[f].column.group_operator or 'sum', f, context=context)]
         for gb in annotated_groupbys:
             select_terms.append('%s as "%s" ' % (gb['qualified_field'], gb['groupby']))
 
