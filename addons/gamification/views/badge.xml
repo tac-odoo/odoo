@@ -114,7 +114,7 @@
                         <t t-name="kanban-box">
                             <div t-attf-class="#{record.stat_my.raw_value ? 'oe_kanban_color_5' : 'oe_kanban_color_white'} oe_kanban_card oe_kanban_global_click oe_kanban_badge">
                                 <div class="oe_kanban_content">
-                                    <div class="oe_kanban_left">
+                                    <div class="pull-left">
                                         <a type="open"><img t-att-src="kanban_image('gamification.badge', 'image', record.image.raw_value)" t-att-title="record.name.value" width="90" height="90" /></a>
                                     </div>
                                     <div class="oe_no_overflow">
@@ -173,7 +173,7 @@
                         <t t-name="kanban-box">
                             <div class="oe_kanban_card oe_kanban_global_click oe_kanban_badge oe_kanban_color_white">
                                 <div class="oe_kanban_content">
-                                    <div class="oe_kanban_left">
+                                    <div class="pull-left">
                                         <a type="open"><img t-att-src="kanban_image('gamification.badge', 'image', record.badge_id.raw_value)" t-att-title="record.badge_name.value" width="24" height="24" /></a>
                                     </div>
                                     <h4>
