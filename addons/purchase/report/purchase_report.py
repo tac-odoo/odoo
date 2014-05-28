@@ -58,10 +58,21 @@ class purchase_report(osv.osv):
         'negociation': fields.float('Purchase-Standard Price', readonly=True, group_operator="avg"),
         'price_standard': fields.float('Products Value', readonly=True, group_operator="sum"),
         'nbr': fields.integer('# of Lines', readonly=True),
-        'category_id': fields.many2one('product.category', 'Category', readonly=True)
+        'category_id': fields.many2one('product.category', 'Category', readonly=True),
+        'currency_id': fields.many2one('res.currency', 'Currency', readonly=True),
 
     }
     _order = 'date desc, price_total desc'
+    
+    def _prepare_flist(self, cr, uid, group_operator, field, context=None):
+        user_currency = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.currency_id.id
+        fields = ['price_total']
+        if field in fields:
+            flist = '''sum(currency_conversation("%s"."%s", %s, "%s"."%s", "%s"."%s")) AS %s''' % (self._table, 'currency_id', user_currency, self._table, field, self._table, 'date', field)
+        else:
+                flist = super(purchase_report,self)._prepare_flist(cr, uid, group_operator, field, context=context)
+        return flist
+
     def init(self, cr):
         tools.sql.drop_view_if_exists(cr, 'purchase_report')
         cr.execute("""
@@ -83,6 +94,7 @@ class purchase_report(osv.osv):
                     t.categ_id as category_id,
                     t.uom_id as product_uom,
                     s.location_id as location_id,
+                    s.currency_id as currency_id,
                     sum(l.product_qty/u.factor*u2.factor) as quantity,
                     extract(epoch from age(s.date_approve,s.date_order))/(24*60*60)::decimal(16,2) as delay,
                     extract(epoch from age(l.date_planned,s.date_order))/(24*60*60)::decimal(16,2) as delay_pass,
