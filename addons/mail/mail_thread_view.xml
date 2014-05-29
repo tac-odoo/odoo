@@ -36,18 +36,38 @@
                                 <span class="number">1</span>
                             </div>
                             <div class="tooltips">
-                                <strong>1. Welcome to your board</strong>
-                                <p>Work with Conceptboard just like with pen and paper, except everything is happening live! Your board is saved automatically, so when you’re done you can simply exit by clicking the back-arrow to the left.</p>
+                                <strong>1. Insert or Revise a message to share with followers</strong>
+                                <p>Add your message that you want to send to the followers of the document or give a reply to the message you got. Access the attach file option which will allow you to attach the document that you want to send with this message.</p>
                             </div>
                         </div>
-                        <div class="pointer reply">
+                        <div class="pointer compose">
                             <div class="point">
                                 <span class="number">2</span>
                             </div>
                             <div class="tooltips">
-                                <strong>2. Insert and revise content</strong>
-                                <p>your own content to the board with either drag and drop or by clicking on “Insert”. Access tools for comments, sticky notes, and scribbling by clicking on “Review” or “Create”.</p>
+                                <strong>2. Compose an email. </strong>
+                                <p> Compose an email to the followers of the documents as well as other contacts you want to notify with the given email composer with all email editing functionalities like Bold , Italic , Underline , Bullets , Numbering , Justification etc.You can also use the predefined email template from the given templates or create your own template as per your need.</p>
                             </div>
+                        </div>
+                        <div class="pointer send">
+                            <div class="point">
+                                <span class="number">3</span>
+                            </div>
+                            <div class="tooltips">
+                                <strong>3. Send contents to followers</strong>
+                                <p>Clicking on this button will send the written content to the followers of the document.</p>
+                            </div>
+                        </div>
+                        <div class="pointer mark">
+                            <div class="point">
+                                <span class="number">4</span>
+                            </div>
+                            <div class="tooltips">
+                                <p><span class="oe_e">7</span> <b>To Do</b> will shift message to the To Do list and you can perform action later.<br/>
+                                    <span class="oe_e">(</span> <b>Reply</b> for instant inline reply to the incoming message<br/>
+                                    <span class="oe_e">W</span> <b>Done</b> Message will moved from the Inbox to the Archives list for later use.
+                                </p>
+                           </div>
                         </div>
                     </div>
                 </div>
