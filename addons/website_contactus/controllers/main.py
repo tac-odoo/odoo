@@ -26,15 +26,17 @@ class contactus(http.Controller):
         print values
         return request.website.render("website.contactus", values)
 
-    @http.route(['/crm/contactus'], type='http', auth="public", website=True, multilang=True)
-    def contactus(self, description=None, partner_name=None, phone=None, contact_name=None, email_from=None, name=None, **kwargs):
-        post = {}
+    @http.route(['/contactus'], type='http', auth="public", website=True, multilang=True)
+    def contactus(self, description=None, partner_name=None, phone=None, contact_name=None, email_from=None, name=None, model=None, **kwargs):
+        post = msg_dict = {}
         post['description'] = description
         post['partner_name'] = partner_name
         post['phone'] = phone
         post['contact_name'] = contact_name
         post['email_from'] = email_from
         post['name'] = name
+        post['model'] = model
+        msg_dict ['from'] = contact_name + '<' + email_from + '>'
 
         required_fields = ['contact_name', 'email_from', 'description']
         error = set()
@@ -55,11 +57,6 @@ class contactus(http.Controller):
             
         post['user_id'] = False
 
-        try:
-            post['channel_id'] = request.registry['ir.model.data'].get_object_reference(request.cr, SUPERUSER_ID, 'crm', 'crm_case_channel_website')[1]
-        except ValueError:
-            pass
-
         environ = request.httprequest.headers.environ
         post['description'] = "%s\n-----------------------------\nIP: %s\nUSER_AGENT: %s\nACCEPT_LANGUAGE: %s\nREFERER: %s" % (
             post['description'],
@@ -71,7 +68,7 @@ class contactus(http.Controller):
             if not hasattr(field_value, 'filename'):
                 post['description'] = "%s\n%s: %s" % (post['description'], field_name, field_value)
 
-        lead_id = request.registry['crm.lead'].create(request.cr, SUPERUSER_ID, post, request.context)
+        lead_id = request.registry[model].message_new(request.cr, SUPERUSER_ID, msg_dict, post, request.context)
 
         for field_name, field_value in kwargs.items():
             if hasattr(field_value, 'filename'):
@@ -89,4 +86,4 @@ class contactus(http.Controller):
         values = {
             'google_map_url': self.generate_google_map_url(company.street, company.city, company.zip, company.country_id and company.country_id.name_get()[0][1] or ''),
         }
-        return request.website.render("website_crm.contactus_thanks", values)
+        return request.website.render("website_contactus.contactus_thanks", values)

@@ -1,7 +1,7 @@
 {
-    'name': 'Contact Form',
+    'name': 'Contactus Form',
     'category': 'Website',
-    'summary': 'Create Leads From Contact Form',
+    'summary': 'Public Contactus Form',
     'version': '1.0',
     'description': """
 OpenERP Contact Form
@@ -9,10 +9,9 @@ OpenERP Contact Form
 
         """,
     'author': 'OpenERP SA',
-    'depends': ['website_contactus', 'website_partner', 'crm'],
+    'depends': ['website'],
     'data': [
-        'data/website_crm_data.xml',
-        'views/website_crm.xml',
+        'views/website_contactus.xml',
     ],
     'installable': True,
     'auto_install': False,

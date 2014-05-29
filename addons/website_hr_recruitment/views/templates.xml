@@ -272,5 +272,13 @@
     </xpath>
 </template>
 
+<!-- create Applicant in hr_recruitment -->
+<template id="job_form" name="Job Form" inherit_id="website.contactus" inherit_option_id="website.contactus">
+    <xpath expr="//select[@name='model']" position="inside">
+        <option value="hr.applicant">You would like to join a dynamic team and work with us</option>
+    </xpath>
+</template>
+
+
 </data>
 </openerp>

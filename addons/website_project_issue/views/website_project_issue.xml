@@ -2,10 +2,10 @@
 <openerp>
 <data>
 
-<!-- Create Leads in crm-->
+<!-- create issue in project_issue-->
 <template id="issue_form" name="Issue Form" inherit_id="website.contactus" inherit_option_id="website.contactus">
     <xpath expr="//select[@name='model']" position="inside">
-        <option value="crm.lead">You are interrested in the product</option>
+        <option value="project.issue">You encountered an issue in OpenERP</option>
     </xpath>
 </template>
 
