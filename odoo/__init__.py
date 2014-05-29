@@ -30,6 +30,10 @@ evented = False
 if sys.modules.get("gevent") is not None:
     evented = True
 
+
+# Mock deprecated openerp module
+sys.modules['openerp'] = sys.modules['odoo']
+
 # Is the server running in pefork mode (e.g. behind Gunicorn).
 # If this is True, the processes have to communicate some events,
 # e.g. database update or cache invalidation. Each process has also

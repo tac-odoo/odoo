@@ -153,8 +153,8 @@ def main():
     elif len(sys.argv) == 2 and sys.argv[1] in cmds:
         cmds[sys.argv[1]]()
     else:
-        import openerp
-        openerp.cli.main()
+        import odoo
+        odoo.cli.main()
 
 if __name__ == "__main__":
     main()
