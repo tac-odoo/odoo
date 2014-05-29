@@ -65,7 +65,7 @@ class invite_wizard(osv.osv_memory):
                 user_id = self.pool.get("res.users").read(cr, uid, [uid], fields=["signature"], context=context)[0]
                 signature = user_id and user_id["signature"] or ''
                 if signature:
-                    wizard.message = tools.append_content_to_html(wizard.message, signature, plaintext=True, container_tag='div')
+                    wizard.message = tools.append_content_to_html(wizard.message, signature, plaintext=True, preserve=True, container_tag='div')
                 # FIXME 8.0: use notification_email_send, send a wall message and let mail handle email notification + message box
                 for follower_id in new_follower_ids:
                     mail_mail = self.pool.get('mail.mail')
