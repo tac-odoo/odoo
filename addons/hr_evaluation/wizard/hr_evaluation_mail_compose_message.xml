@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+        <!--Survey send invitation by email: template -->
+        <record id="hr_evaluation_template_survey" model="email.template">
+            <field name="name">Hr Appraisal Template</field>
+            <field name="model_id" ref="model_hr_evaluation_category" />
+            <field name="auto_delete" eval="True" />
+            <field name="body_html">
+                <![CDATA[
+                <div style="font-family: 'Lucida Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); ">
+                    <p>Hello,</p>
+                    <p>We are conducting a survey, and your response would be appreciated.</p>
+                    <p><a href="__URL__">Please, click here to start survey</a></p>
+                    <p>Thanks for your participation!</p>
+                </div>
+                ]]>
+            </field>
+        </record>
+
+
+        <act_window name="Employee Evaluation Mail Message" res_model="hr_evaluation.mail.compose.message" src_model="hr.employee" view_mode="form" multi="True" target="new" key2="client_action_multi" id="hr_evaluation.action_hr_evaluation_mail_compose_form" context="{'default_use_template': True, 'default_template_id': ref('hr_evaluation_template_survey')}"  /> 
+
+    <record model="ir.ui.view" id="view_hr_evaluation_mail_message_compose_form">
+      <field name="name">hr_evaluation.mail.compose.message.form</field>
+      <field name="model">hr_evaluation.mail.compose.message</field>
+      <field name="arch" type="xml">
+        <form string="Compose Mail Message" version="7.0">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+            </div>
+            <div class="panel-body">
+              <group>
+                <field name="survey_id" readonly="1" />
+                <field name="partner_ids" widget="many2many_tags_email"/>
+                <field name="subject" />
+              </group>
+              <field name="body" />
+              <footer>
+                <button name="send_email_responce" string="Send" type="object" class="oe_highlite" />
+                <button name="cancel_close" string="Close" class="oe_link" special="cancel" />
+              </footer>
+            </div>
+          </div>
+        </form>
+      </field>
+    </record>
+  </data> 
+</openerp>
