@@ -349,6 +349,7 @@ openerp.web_calendar = function(instance) {
                         this.quick.destroy();
                         delete this.quick;
                         this.$calendar.fullCalendar('unselect');
+                        this.$calendar.fullCalendar('refetchEvents');
                     });
             this.quick.replace(this.$el.find('.oe_calendar_qc_placeholder'));
             this.quick.focus();
