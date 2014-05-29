@@ -172,14 +172,14 @@ class mail_group(osv.Model):
         mail_alias = self.pool.get('mail.alias')
         alias_ids = [group.alias_id.id for group in groups if group.alias_id]
         # Delete 
-        mail_grp = self.pool.get('ir.model.data')
-        data_ids = []
-        data_ids.append(mail_grp.get_object_reference(cr, uid, 'mail', 'group_all_employees')[1])
-        data_ids.append(mail_grp.get_object_reference(cr, uid, 'portal', 'company_news_feed')[1])
-        data_ids.append(mail_grp.get_object_reference(cr, uid, 'portal', 'company_jobs')[1])
-        data_ids =  [id for id in data_ids if id in ids]
-        if data_ids:
-            raise osv.except_osv(_('Warning!'), _('You can not delete this group because some other modules are depend on it')) 
+        ir_model_data = self.pool.get('ir.model.data')
+        group_ids = []
+        group_ids.append(ir_model_data.get_object_reference(cr, uid, 'mail', 'group_all_employees')[1])
+        group_ids.append(ir_model_data.get_object_reference(cr, uid, 'portal', 'company_news_feed')[1])
+        group_ids.append(ir_model_data.get_object_reference(cr, uid, 'portal', 'company_jobs')[1])
+        group_ids = [group_id for group_id in group_ids if group_id in ids]        
+        if group_ids:
+                raise osv.except_osv(_('Warning!'), _('You can not delete this group because some other modules are depend on it'))
         res = super(mail_group, self).unlink(cr, uid, ids, context=context)
         # Delete alias
         mail_alias.unlink(cr, SUPERUSER_ID, alias_ids, context=context)
