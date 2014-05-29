@@ -5,8 +5,7 @@ openerp.hr_timesheet_week = function(instance) {
     instance.hr_timesheet.WeeklyTimesheet = instance.hr_timesheet.BaseTimesheet.extend({
         events: {
             "click .oe_timesheet_weekly_account a": "go_to",
-            "click .oe_timesheet_weekly .prev_week": "navigatePrevWeek",
-            "click .oe_timesheet_weekly .next_week": "navigateNextWeek",
+            "click .oe_timesheet_weekly .oe_timesheet_weekly_navigation": "navigateAll",
         },
         init: function() {
             this._super.apply(this, arguments);
@@ -110,6 +109,7 @@ openerp.hr_timesheet_week = function(instance) {
         },
         display_data: function() {
             var self = this;
+            console.log(self.accounts);
             self.$el.html(QWeb.render("hr_timesheet.WeeklyTimesheet", {widget: self}));
             _.each(self.accounts, function(account) {
                 _.each(_.range(account.days.length), function(day_count) {
@@ -260,19 +260,26 @@ openerp.hr_timesheet_week = function(instance) {
             });
             return ops;
         },
+        navigateAll: function(e){
+            if(this.dfm)
+                this.destroy_content();
+            if($(e.target).hasClass("prev_week"))
+                this.navigatePrevWeek();
+            if($(e.target).hasClass("next_week"))
+                this.navigateNextWeek();
+            this.display_data();
+        },
         navigatePrevWeek: function(){
             if(this.week != this.dates[0].getWeek())
                 this.week -= 1;
             else
                this.week = this.last_week; 
-            this.display_data();
         },
         navigateNextWeek: function(){
             if(this.week == this.last_week)
                 this.week = this.dates[0].getWeek();
             else
                 this.week += 1;
-            this.display_data();
         },
     });
     instance.web.form.custom_widgets.add('weekly_timesheet', 'instance.hr_timesheet.WeeklyTimesheet');

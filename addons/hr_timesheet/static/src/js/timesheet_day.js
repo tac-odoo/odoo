@@ -4,10 +4,7 @@ openerp.hr_timesheet_day = function(instance) {
 
     instance.hr_timesheet.DailyTimesheet = instance.hr_timesheet.BaseTimesheet.extend({
          events: {
-            "click .oe_timesheet_daily .next_day": "navigateNext",
-            "click .oe_timesheet_daily .prev_day": "navigatePrev",
-            "click .oe_timesheet_daily .first_day": "navigateFirstDay",
-            "click .oe_header" : "navigateDays",
+            "click .oe_nav, .oe_header": "navigateAll",
             "click .oe_timesheet_edit_description" : "addDescription",
             "click .oe_copy_accounts a": "copy_accounts",
             "click .oe_timesheet_goto a": "go_to"
@@ -16,7 +13,6 @@ openerp.hr_timesheet_day = function(instance) {
             this._super.apply(this, arguments);
             this.account_id = [];
             this.count = 0;
-            this.week = 0;
         },
         renderElement: function(){
             this._super.apply(this, arguments);
@@ -24,7 +20,6 @@ openerp.hr_timesheet_day = function(instance) {
         },
         reset: function(){
             this.count = 0;
-            this.week = 0;
         },
         initialize_content: function() {
             var self = this;
@@ -95,7 +90,6 @@ openerp.hr_timesheet_day = function(instance) {
                 self.new_dates = dates;
                 self.account_names = new_account_names;
                 self.days = days;
-                //TODO: Need to improve this logic of week(developed by NJA)
                 if(self.days.length) {
                     self.week = _.first(self.days).week;
                     self.last_week = _.last(self.days).week;
@@ -107,7 +101,8 @@ openerp.hr_timesheet_day = function(instance) {
         },
         display_data: function() {
             var self = this;
-            self.week = self.days[self.count].week;
+            if(self.days.length)
+                self.week = self.days[self.count].week;
             this.$el.html(QWeb.render("hr_timesheet_day.DailyTimesheet", {widget: self}));
             if (self.days.length) {
                 var day_count = self.count;
@@ -308,30 +303,37 @@ openerp.hr_timesheet_day = function(instance) {
             if(this.count == 0)
                 this.$el.find(".first_day").removeClass("oe_day_button").addClass("oe_fday_button");
         },
+        navigateAll: function(e){
+            if(this.dfm)
+                this.destroy_content();
+            if($(e.target).hasClass("prev_day"))
+                this.navigatePrev();
+            if($(e.target).hasClass("next_day"))
+                this.navigateNext();
+            if($(e.target).hasClass("first_day"))
+                this.navigateFirstDay();
+            if($(e.target).hasClass("oe_header") || $(e.target).hasClass("oe_display_day_total"))
+                this.navigateDays(e);
+            this.week = this.days[this.count].week;
+            this.display_data();
+        },
         navigateNext: function() {
             if(this.count == this.days.length-1)
                 this.count = 0;
             else 
                 this.count+=1;
-            this.week = this.days[this.count].week;
-            this.display_data();
         },
         navigatePrev: function() {
             if (this.count==0)
                 this.count = this.days.length-1;
             else
                 this.count -= 1;
-            this.week = this.days[this.count].week;
-            this.display_data();
         },
         navigateFirstDay: function() {
             this.count = 0;
-            this.week = this.days[this.count].week;
-            this.display_data();
         },
         navigateDays: function(e){
             this.count = parseInt($(e.target).attr("data-day-counter"), 10);
-            this.display_data();
         },
     });
     instance.web.form.custom_widgets.add('daily_timesheet', 'instance.hr_timesheet.DailyTimesheet');
