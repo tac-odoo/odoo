@@ -20,11 +20,11 @@
             website.form(this.pathname, 'POST');
         });
 
-        $(document).on('click', '.cke_editable label', function (ev) {
+        $(document).on('click', '.note-editable label', function (ev) {
             ev.preventDefault();
         });
 
-        $(document).on('submit', '.cke_editable form', function (ev) {
+        $(document).on('submit', '.note-editable form', function (ev) {
             // Disable form submition in editable mode
             ev.preventDefault();
         });
@@ -55,7 +55,6 @@
      */
     function is_editable_node(element) {
         return !(element.data('oe-model') === 'ir.ui.view'
-              || element.data('cke-realelement')
               || (is_editing_host(element) && element.getAttribute('attributeEditable') !== 'true')
               || element.isReadOnly());
     }
@@ -67,359 +66,7 @@
         return new website.editor.MediaDialog(editor, image).appendTo(document.body);
     }
 
-    // only enable editors manually
-    CKEDITOR.disableAutoInline = true;
-    // EDIT ALL THE THINGS
-    CKEDITOR.dtd.$editable = _.omit(
-        $.extend({}, CKEDITOR.dtd.$block, CKEDITOR.dtd.$inline),
-        // well maybe not *all* the things
-        'ul', 'ol', 'li', 'table', 'tr', 'th', 'td');
-    // Disable removal of empty elements on CKEDITOR activation. Empty
-    // elements are used for e.g. support of FontAwesome icons
-    CKEDITOR.dtd.$removeEmpty = {};
-
     website.init_editor = function () {
-        CKEDITOR.plugins.add('customdialogs', {
-            // requires: 'link,image',
-            init: function (editor) {
-                editor.on('doubleclick', function (evt) {
-                    var element = evt.data.element;
-                    if ((element.is('img') || element.$.className.indexOf(' fa-') != -1) && is_editable_node(element)) {
-                        image_dialog(editor, element);
-                        return;
-                    }
-                    var parent = new CKEDITOR.dom.element(element.$.parentNode);
-                    if (parent.$.className.indexOf('media_iframe_video') != -1 && is_editable_node(parent)) {
-                        image_dialog(editor, parent);
-                        return;
-                    }
-
-                    element = get_selected_link(editor) || evt.data.element;
-                    if (!(element.is('a') && is_editable_node(element))) {
-                        return;
-                    }
-
-                    editor.getSelection().selectElement(element);
-                    link_dialog(editor);
-                }, null, null, 500);
-
-                //noinspection JSValidateTypes
-                editor.addCommand('link', {
-                    exec: function (editor) {
-                        link_dialog(editor);
-                        return true;
-                    },
-                    canUndo: false,
-                    editorFocus: true,
-                    context: 'a',
-                });
-                //noinspection JSValidateTypes
-                editor.addCommand('cimage', {
-                    exec: function (editor) {
-                        image_dialog(editor);
-                        return true;
-                    },
-                    canUndo: false,
-                    editorFocus: true,
-                    context: 'img',
-                });
-
-                editor.ui.addButton('Link', {
-                    label: 'Link',
-                    command: 'link',
-                    toolbar: 'links,10',
-                });
-                editor.ui.addButton('Image', {
-                    label: 'Image',
-                    command: 'cimage',
-                    toolbar: 'insert,10',
-                });
-
-                editor.setKeystroke(CKEDITOR.CTRL + 76 /*L*/, 'link');
-            }
-        });
-        CKEDITOR.plugins.add( 'tablebutton', {
-            requires: 'panelbutton,floatpanel',
-            init: function( editor ) {
-                var label = "Table";
-
-                editor.ui.add('TableButton', CKEDITOR.UI_PANELBUTTON, {
-                    label: label,
-                    title: label,
-                    // use existing 'table' icon
-                    icon: 'table',
-                    modes: { wysiwyg: true },
-                    editorFocus: true,
-                    // panel opens in iframe, @css is CSS file <link>-ed within
-                    // frame document, @attributes are set on iframe itself.
-                    panel: {
-                        css: '/website/static/src/css/editor.css',
-                        attributes: { 'role': 'listbox', 'aria-label': label, },
-                    },
-
-                    onBlock: function (panel, block) {
-                        block.autoSize = true;
-                        block.element.setHtml(openerp.qweb.render('website.editor.table.panel', {
-                            rows: 5,
-                            cols: 5,
-                        }));
-
-                        var $table = $(block.element.$).on('mouseenter', 'td', function (e) {
-                            var $e = $(e.target);
-                            var y = $e.index() + 1;
-                            var x = $e.closest('tr').index() + 1;
-
-                            $table
-                                .find('td').removeClass('selected').end()
-                                .find('tr:lt(' + String(x) + ')')
-                                .children().filter(function () { return $(this).index() < y; })
-                                .addClass('selected');
-                        }).on('click', 'td', function (e) {
-                            var $e = $(e.target);
-
-                            //noinspection JSPotentiallyInvalidConstructorUsage
-                            var table = new CKEDITOR.dom.element(
-                                $(openerp.qweb.render('website.editor.table', {
-                                    rows: $e.closest('tr').index() + 1,
-                                    cols: $e.index() + 1,
-                                }))[0]);
-
-                            editor.insertElement(table);
-                            setTimeout(function () {
-                                //noinspection JSPotentiallyInvalidConstructorUsage
-                                var firstCell = new CKEDITOR.dom.element(table.$.rows[0].cells[0]);
-                                var range = editor.createRange();
-                                range.moveToPosition(firstCell, CKEDITOR.POSITION_AFTER_START);
-                                range.select();
-                            }, 0);
-                        });
-
-                        block.element.getDocument().getBody().setStyle('overflow', 'hidden');
-                        CKEDITOR.ui.fire('ready', this);
-                    },
-                });
-            }
-        });
-
-        CKEDITOR.plugins.add('linkstyle', {
-            requires: 'panelbutton,floatpanel',
-            init: function (editor) {
-                var label = "Link Style";
-
-                editor.ui.add('LinkStyle', CKEDITOR.UI_PANELBUTTON, {
-                    label: label,
-                    title: label,
-                    icon: '/website/static/src/img/bglink.png',
-                    modes: { wysiwyg: true },
-                    editorFocus: true,
-                    context: 'a',
-                    panel: {
-                        css: '/web/static/lib/bootstrap/css/bootstrap.css',
-                        attributes: { 'role': 'listbox', 'aria-label': label },
-                    },
-
-                    types: {
-                        'btn-default': _t("Basic"),
-                        'btn-primary': _t("Primary"),
-                        'btn-success': _t("Success"),
-                        'btn-info': _t("Info"),
-                        'btn-warning': _t("Warning"),
-                        'btn-danger': _t("Danger"),
-                    },
-                    sizes: {
-                        'btn-xs': _t("Extra Small"),
-                        'btn-sm': _t("Small"),
-                        '': _t("Default"),
-                        'btn-lg': _t("Large")
-                    },
-
-                    onRender: function () {
-                        var self = this;
-                        editor.on('selectionChange', function (e) {
-                            var path = e.data.path, el;
-
-                            if (!(e = path.contains('a')) || e.isReadOnly()) {
-                                self.disable();
-                                return;
-                            }
-
-                            self.enable();
-                        });
-                        // no hook where button is available, so wait
-                        // "some time" after render.
-                        setTimeout(function () {
-                            self.disable();
-                        }, 0)
-                    },
-                    enable: function () {
-                        this.setState(CKEDITOR.TRISTATE_OFF);
-                    },
-                    disable: function () {
-                        this.setState(CKEDITOR.TRISTATE_DISABLED);
-                    },
-
-                    onOpen: function () {
-                        var link = get_selected_link(editor);
-                        var id = this._.id;
-                        var block = this._.panel._.panel._.blocks[id];
-                        var $root = $(block.element.$);
-                        $root.find('button').removeClass('active').removeProp('disabled');
-
-                        // enable buttons matching link state
-                        for (var type in this.types) {
-                            if (!this.types.hasOwnProperty(type)) { continue; }
-                            if (!link.hasClass(type)) { continue; }
-
-                            $root.find('button[data-type=types].' + type)
-                                 .addClass('active');
-                        }
-                        var found;
-                        for (var size in this.sizes) {
-                            if (!this.sizes.hasOwnProperty(size)) { continue; }
-                            if (!size || !link.hasClass(size)) { continue; }
-                            found = true;
-                            $root.find('button[data-type=sizes].' + size)
-                                 .addClass('active');
-                        }
-                        if (!found && link.hasClass('btn')) {
-                            $root.find('button[data-type="sizes"][data-set-class=""]')
-                                 .addClass('active');
-                        }
-                    },
-
-                    onBlock: function (panel, block) {
-                        var self = this;
-                        block.autoSize = true;
-
-                        var html = ['<div style="padding: 5px">'];
-                        html.push('<div style="white-space: nowrap">');
-                        _(this.types).each(function (label, key) {
-                            html.push(_.str.sprintf(
-                                '<button type="button" class="btn %s" ' +
-                                        'data-type="types" data-set-class="%s">%s</button>',
-                                key, key, label));
-                        });
-                        html.push('</div>');
-                        html.push('<div style="white-space: nowrap; margin: 5px 0; text-align: center">');
-                        _(this.sizes).each(function (label, key) {
-                            html.push(_.str.sprintf(
-                                '<button type="button" class="btn btn-default %s" ' +
-                                        'data-type="sizes" data-set-class="%s">%s</button>',
-                                key, key, label));
-                        });
-                        html.push('</div>');
-                        html.push('<button type="button" class="btn btn-link btn-block" ' +
-                                          'data-type="reset">Reset</button>');
-                        html.push('</div>');
-
-                        block.element.setHtml(html.join(' '));
-                        var $panel = $(block.element.$);
-                        $panel.on('click', 'button', function () {
-                            self.clicked(this);
-                        });
-                    },
-                    clicked: function (button) {
-                        editor.focus();
-                        editor.fire('saveSnapshot');
-
-                        var $button = $(button),
-                              $link = $(get_selected_link(editor).$);
-                        if (!$link.hasClass('btn')) {
-                            $link.addClass('btn btn-default');
-                        }
-                        switch($button.data('type')) {
-                        case 'reset':
-                            $link.removeClass('btn')
-                                 .removeClass(_.keys(this.types).join(' '))
-                                 .removeClass(_.keys(this.sizes).join(' '));
-                            break;
-                        case 'types':
-                            $link.removeClass(_.keys(this.types).join(' '))
-                                 .addClass($button.data('set-class'));
-                            break;
-                        case 'sizes':
-                            $link.removeClass(_.keys(this.sizes).join(' '))
-                                 .addClass($button.data('set-class'));
-                        }
-                        this._.panel.hide();
-
-                        editor.fire('saveSnapshot');
-                    },
-
-                });
-            }
-        });
-
-        CKEDITOR.plugins.add('oeref', {
-            requires: 'widget',
-
-            init: function (editor) {
-                var specials = {
-                    // Can't find the correct ACL rule to only allow img tags
-                    image: { content: '*' },
-                    html: { text: '*' },
-                    monetary: {
-                        text: {
-                            selector: 'span.oe_currency_value',
-                            allowedContent: { }
-                        }
-                    }
-                };
-                _(specials).each(function (editable, type) {
-                    editor.widgets.add(type, {
-                        draggable: false,
-                        editables: editable,
-                        upcast: function (el) {
-                            return  el.attributes['data-oe-type'] === type;
-
-                        }
-                    });
-                });
-                editor.widgets.add('oeref', {
-                    draggable: false,
-                    editables: {
-                        text: {
-                            selector: '*',
-                            allowedContent: { }
-                        },
-                    },
-                    upcast: function (el) {
-                        var type = el.attributes['data-oe-type'];
-                        if (!type || (type in specials)) {
-                            return false;
-                        }
-                        if (el.attributes['data-oe-original']) {
-                            while (el.children.length) {
-                                el.children[0].remove();
-                            }
-                            el.add(new CKEDITOR.htmlParser.text(
-                                el.attributes['data-oe-original']
-                            ));
-                        }
-                        return true;
-                    }
-                });
-
-                editor.widgets.add('icons', {
-                    draggable: false,
-
-                    init: function () {
-                        this.on('edit', function () {
-                            new website.editor.MediaDialog(editor, this.element)
-                                .appendTo(document.body);
-                        });
-                    },
-                    upcast: function (el) {
-                        return el.hasClass('fa')
-                            // ignore ir.ui.view (other data-oe-model should
-                            // already have been matched by oeref and
-                            // monetary?
-                            && !el.attributes['data-oe-model'];
-                    }
-                });
-            }
-        });
-
         var editor = new website.EditorBar();
         var $body = $(document.body);
         editor.prependTo($body).then(function () {
@@ -508,7 +155,6 @@
             this.rte = new website.RTE(this);
             this.rte.on('change', this, this.proxy('rte_changed'));
             this.rte.on('rte:ready', this, function () {
-                self.setup_hover_buttons();
                 self.trigger('rte:ready');
                 self.check_height();
             });
@@ -551,10 +197,7 @@
 
             observer.disconnect();
             var editor = this.rte.editor;
-            var root = editor.element && editor.element.$;
-            editor.destroy();
-            // FIXME: select editables then filter by dirty?
-            var defs = this.rte.fetch_editables(root)
+            var defs = this.rte.fetch_editables(editor)
                 .filter('.oe_dirty')
                 .removeAttr('contentEditable')
                 .removeClass('oe_dirty oe_editable cke_focus oe_carlos_danger')
@@ -683,83 +326,12 @@
                 });
             }
             return $div;
-        },
-        /**
-         * For UI clarity, during RTE edition when the user hovers links and
-         * images a small button should appear to make the capability clear,
-         * as not all users think of double-clicking the image or link.
-         */
-        setup_hover_buttons: function () {
-            var editor = this.rte.editor;
-            var $link_button = this.make_hover_button_link(function () {
-                var sel = new CKEDITOR.dom.element(previous);
-                editor.getSelection().selectElement(sel);
-                if(sel.hasClass('fa')) {
-                    new website.editor.MediaDialog(editor, previous)
-                        .appendTo(document.body);
-                } else if (previous.tagName.toUpperCase() === 'A') {
-                    link_dialog(editor);
-                }
-                $link_button.hide();
-                previous = null;
-            });
-
-            function is_icons_widget(element) {
-                var w = editor.widgets.getByElement(element);
-                return w && w.name === 'icons';
-            }
-
-            // previous is the state of the button-trigger: it's the
-            // currently-ish hovered element which can trigger a button showing.
-            // -ish, because when moving to the button itself ``previous`` is
-            // still set to the element having triggered showing the button.
-            var previous;
-            $(editor.element.$).on('mouseover', 'a', function () {
-                // Back from edit button -> ignore
-                if (previous && previous === this) { return; }
-
-                // hover button should appear for "editable" links and images
-                // (img and a nodes whose *attributes* are editable, they
-                // can not be "editing hosts") *or* for non-editing-host
-                // elements bearing an ``fa`` class. These should have been
-                // made into CKE widgets which are editing hosts by
-                // definition, so instead check if the element has been
-                // converted/upcasted to an fa widget
-                var selected = new CKEDITOR.dom.element(this);
-                if (!(is_editable_node(selected) || is_icons_widget(selected))) {
-                    return;
-                }
-
-                previous = this;
-                var $selected = $(this);
-                var position = $selected.offset();
-                $link_button.show().offset({
-                    top: $selected.outerHeight()
-                            + position.top,
-                    left: $selected.outerWidth() / 2
-                            + position.left
-                            - $link_button.outerWidth() / 2
-                })
-            }).on('mouseleave', 'a, img, .fa', function (e) {
-                var current = document.elementFromPoint(e.clientX, e.clientY);
-                if (current === $link_button[0] || $(current).parent()[0] === $link_button[0]) {
-                    return;
-                }
-                $link_button.hide();
-                previous = null;
-            });
         }
     });
 
     var blocks_selector = _.keys(CKEDITOR.dtd.$block).join(',');
     /* ----- RICH TEXT EDITOR ---- */
     website.RTE = openerp.Widget.extend({
-        tagName: 'li',
-        id: 'oe_rte_toolbar',
-        className: 'oe_right oe_rte_toolbar',
-        // editor.ui.items -> possible commands &al
-        // editor.applyStyle(new CKEDITOR.style({element: "span",styles: {color: "#(color)"},overrides: [{element: "font",attributes: {color: null}}]}, {color: '#ff0000'}));
-
         init: function (EditorBar) {
             this.EditorBar = EditorBar;
             this._super.apply(this, arguments);
@@ -882,45 +454,25 @@
                 this.tableNavigation(root);
             }
             var def = $.Deferred();
-            var editor = this.editor = CKEDITOR.inline(root, self._config());
-            editor.on('instanceReady', function () {
-                editor.setReadOnly(false);
-                // ckeditor set root to editable, disable it (only inner
-                // sections are editable)
-                // FIXME: are there cases where the whole editor is editable?
-                editor.editable().setReadOnly(true);
-
-                self.setup_editables(root);
-
-                try {
-                    // disable firefox's broken table resizing thing
-                    document.execCommand("enableObjectResizing", false, "false");
-                    document.execCommand("enableInlineTableEditing", false, "false");
-                } catch (e) {}
-
-                // detect & setup any CKEDITOR widget within a newly dropped
-                // snippet. There does not seem to be a simple way to do it for
-                // HTML not inserted via ckeditor APIs:
-                // https://dev.ckeditor.com/ticket/11472
-                $(document.body)
-                    .off('snippet-dropped')
-                    .on('snippet-dropped', function (e, el) {
-                        // CKEDITOR data processor extended by widgets plugin
-                        // to add wrappers around upcasting elements
-                        el.innerHTML = editor.dataProcessor.toHtml(el.innerHTML, {
-                            fixForBody: false,
-                            dontFilter: true,
-                        });
-                        // then repository.initOnAll() handles the conversion
-                        // from wrapper to actual widget instance (or something
-                        // like that).
-                        setTimeout(function () {
-                            editor.widgets.initOnAll();
-                        }, 0);
-                    });
-
-                self.trigger('rte:ready');
-                def.resolve();
+            this.editor = root;
+            $('#wrapwrap').summernote({
+                airMode : true,
+                airPopover: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'italic', 'underline', 'clear']],
+                    ['fontname', ['fontname']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture', 'video']],
+                    ['help', ['help']]
+                ],
+                oninit: function($editable, sHtml) {
+                    self.setup_editables(root);
+                    self.trigger('rte:ready');
+                }
             });
             return def;
         },
@@ -962,81 +514,6 @@
                     return $this.data('oe-model') === 'ir.ui.view'
                        || !$this.closest('[data-oe-model = "ir.ui.view"]').length;
                 });
-        },
-
-        _current_editor: function () {
-            return CKEDITOR.currentInstance;
-        },
-        _config: function () {
-            // base plugins minus
-            // - magicline (captures mousein/mouseout -> breaks draggable)
-            // - contextmenu & tabletools (disable contextual menu)
-            // - bunch of unused plugins
-            var plugins = [
-                'a11yhelp', 'basicstyles', 'blockquote',
-                'clipboard', 'colorbutton', 'colordialog', 'dialogadvtab',
-                'elementspath', /*'enterkey',*/ 'entities', 'filebrowser',
-                'find', 'floatingspace','format', 'htmlwriter', 'iframe',
-                'indentblock', 'indentlist', 'justify',
-                'list', 'pastefromword', 'pastetext', 'preview',
-                'removeformat', 'resize', 'save', 'selectall', 'stylescombo',
-                'table', 'templates', 'toolbar', 'undo', 'wysiwygarea'
-            ];
-            return {
-                // FIXME
-                language: 'en',
-                // Disable auto-generated titles
-                // FIXME: accessibility, need to generate user-sensible title, used for @title and @aria-label
-                title: false,
-                plugins: plugins.join(','),
-                uiColor: '',
-                // FIXME: currently breaks RTE?
-                // Ensure no config file is loaded
-                customConfig: '',
-                // Disable ACF
-                allowedContent: true,
-                // Don't insert paragraphs around content in e.g. <li>
-                autoParagraph: false,
-                // Don't automatically add &nbsp; or <br> in empty block-level
-                // elements when edition starts
-                fillEmptyBlocks: false,
-                filebrowserImageUploadUrl: "/website/attach",
-                // Support for sharedSpaces in 4.x
-                extraPlugins: 'sharedspace,customdialogs,tablebutton,oeref,linkstyle',
-                // Place toolbar in controlled location
-                sharedSpaces: { top: 'oe_rte_toolbar' },
-                toolbar: [{
-                        name: 'basicstyles', items: [
-                        "Bold", "Italic", "Underline", "Strike", "Subscript",
-                        "Superscript", "TextColor", "BGColor", "RemoveFormat"
-                    ]},{
-                    name: 'span', items: [
-                        "Link", "LinkStyle", "Blockquote", "BulletedList",
-                        "NumberedList", "Indent", "Outdent"
-                    ]},{
-                    name: 'justify', items: [
-                        "JustifyLeft", "JustifyCenter", "JustifyRight", "JustifyBlock"
-                    ]},{
-                    name: 'special', items: [
-                        "Image", "TableButton"
-                    ]},{
-                    name: 'styles', items: [
-                        "Styles"
-                    ]}
-                ],
-                // styles dropdown in toolbar
-                stylesSet: [
-                    {name: "Normal", element: 'p'},
-                    {name: "Heading 1", element: 'h1'},
-                    {name: "Heading 2", element: 'h2'},
-                    {name: "Heading 3", element: 'h3'},
-                    {name: "Heading 4", element: 'h4'},
-                    {name: "Heading 5", element: 'h5'},
-                    {name: "Heading 6", element: 'h6'},
-                    {name: "Formatted", element: 'pre'},
-                    {name: "Address", element: 'address'}
-                ],
-            };
         },
     });
 
@@ -2102,17 +1579,6 @@
                 while (child = node.firstChild) {
                     parent.insertBefore(child, node);
                 }
-                parent.removeChild(node);
-                // chances are we had e.g.
-                //  <p>foo</p>
-                //  <p>bar</p>
-                // merged the lines getting this in webkit
-                //  <p>foo<span>bar</span></p>
-                // after unwrapping the span, we have 2 text nodes
-                //  <p>[foo][bar]</p>
-                // where we probably want only one. Normalize will merge
-                // adjacent text nodes. However, does not merge text and cdata
-                parent.normalize();
             }
         }
     }
