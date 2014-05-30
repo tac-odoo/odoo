@@ -63,7 +63,7 @@
             <field name="name">hr.timesheet.sheet.form.tree</field>
             <field name="model">hr_timesheet_sheet.sheet</field>
             <field name="priority" eval="18"/>
-            <field name="inherit_id" ref="hr_timesheet_sheet.hr_timesheet_sheet_form"/>
+            <field name="inherit_id" ref="hr_timesheet.hr_timesheet_sheet_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='timesheet_ids']/tree/field[@name='account_id']" position="replace">
                     <field name="account_id" domain="[('type','=','normal'),('state', '&lt;&gt;', 'close')]" on_change="on_change_account_id(account_id, user_id, unit_amount)" context="{'default_use_timesheets': 1}"/>
@@ -76,7 +76,7 @@
             <field name="name">hr.timesheet.sheet.form.form</field>
             <field name="model">hr_timesheet_sheet.sheet</field>
             <field name="priority" eval="19"/>
-            <field name="inherit_id" ref="hr_timesheet_sheet.hr_timesheet_sheet_form"/>
+            <field name="inherit_id" ref="hr_timesheet.hr_timesheet_sheet_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='timesheet_ids']/form/field[@name='account_id']" position="replace">
                     <field name="account_id" domain="[('type','=','normal'),('state', '&lt;&gt;', 'close')]" on_change="on_change_account_id(account_id, user_id, unit_amount)" context="{'default_use_timesheets': 1}"/>

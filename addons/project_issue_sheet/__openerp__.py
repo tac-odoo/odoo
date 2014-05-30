@@ -35,7 +35,7 @@ Worklogs can be maintained to signify number of hours spent by users to handle a
     'images': ['images/project_issue_sheet_worklog.jpeg'],
     'depends': [
         'project_issue',
-        'hr_timesheet_sheet',
+        'hr_timesheet',
     ],
     'data': [
         'project_issue_sheet_view.xml',

@@ -109,7 +109,6 @@ openerp.hr_timesheet_week = function(instance) {
         },
         display_data: function() {
             var self = this;
-            console.log(self.accounts);
             self.$el.html(QWeb.render("hr_timesheet.WeeklyTimesheet", {widget: self}));
             _.each(self.accounts, function(account) {
                 _.each(_.range(account.days.length), function(day_count) {

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-
         <record id="hr_timesheet_line_tree" model="ir.ui.view">
             <field name="name">hr.analytic.timesheet.tree</field>
             <field name="model">hr.analytic.timesheet</field>
@@ -108,7 +107,6 @@
               </p>
             </field>
         </record>
-
  
         <record id="account_analytic_account_timesheet_form" model="ir.ui.view">
             <field name="name">account.analytic.account.invoice.form</field>
@@ -193,7 +191,6 @@
 
         <menuitem id="menu_hr_timesheet_reports" parent="hr.menu_hr_reporting" sequence="5" name="Timesheet"/>
 
-
         <record model="ir.actions.act_window" id="act_hr_timesheet_sheet_2_hr_analytic_timesheet">
             <field name="context">{'search_default_sheet_id': [active_id]}</field>
             <field name="name">Timesheet Activities</field>
@@ -249,7 +246,6 @@
                                     <field domain="[('type','in',['normal', 'contract']), ('state', '&lt;&gt;', 'close'),('use_timesheets','=',1)]" name="account_id" on_change="on_change_account_id(account_id, user_id)" context="{'default_use_timesheets': 1}"/>
                                     <field name="name"/>
                                     <field name="unit_amount" on_change="on_change_unit_amount(product_id, unit_amount, False, product_uom_id,journal_id)" widget="float_time" string="Hours" sum="Hours"/>
-                                    <!-- <field name="to_invoice" widget="selection"/> -->
                                     <field invisible="1" name="journal_id"/>
                                     <field invisible="1" name="product_id" domain="[('type','=','service')]" on_change="on_change_unit_amount(product_id, unit_amount, False, product_uom_id,journal_id)"/>
                                     <field invisible="1" name="product_uom_id" on_change="on_change_unit_amount(product_id, unit_amount, False, product_uom_id,journal_id)"/>
@@ -262,7 +258,6 @@
                                     <field domain="[('type','=','normal'), ('state', '&lt;&gt;', 'close')]" name="account_id" on_change="on_change_account_id(account_id, user_id)"/>
                                     <field name="name"/>
                                     <field name="unit_amount" on_change="on_change_unit_amount(product_id, unit_amount, False, product_uom_id,journal_id)" widget="float_time"/>
-                                    <!-- <field name="to_invoice"/> -->
                                     <field name="journal_id"/>
                                     <field name="product_id" domain="[('type','=','service')]" on_change="on_change_unit_amount(product_id, unit_amount, False, product_uom_id,journal_id)"/>
                                     <field name="product_uom_id" on_change="on_change_unit_amount(product_id, unit_amount, False, product_uom_id,journal_id)"/>
@@ -344,32 +339,6 @@
                 </xpath>
             </field>
         </record>
-
-        <!--
-            hr.analytic.timesheet inheritancy
-
-        <record id="hr_timesheet_line_form" model="ir.ui.view">
-            <field name="name">hr.analytic.timesheet.form</field>
-            <field name="model">hr.analytic.timesheet</field>
-            <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_form"/>
-            <field name="arch" type="xml">
-                <field name="date" position="after">
-                    <field name="sheet_id" />
-                </field>
-            </field>
-        </record>
-
-        <record id="hr_timesheet_line_search" model="ir.ui.view">
-            <field name="name">hr.analytic.timesheet.search</field>
-            <field name="model">hr.analytic.timesheet</field>
-            <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_search"/>
-            <field name="arch" type="xml">
-                <field name="date" position="before">
-                    <field name="sheet_id"/>
-                </field>
-            </field>
-        </record>
-        -->
 
         <record id="hr_timesheet_tree_simplified" model="ir.ui.view">
             <field name="name">hr.timesheet.tree</field>

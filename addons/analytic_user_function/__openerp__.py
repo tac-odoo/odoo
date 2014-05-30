@@ -40,7 +40,7 @@ compatible with older configurations.
     'author': 'OpenERP SA',
     'website': 'http://www.openerp.com',
     'images': ['images/analytic_user_function.jpeg'],
-    'depends': ['hr_timesheet_sheet'],
+    'depends': ['hr_timesheet'],
     'data': ['analytic_user_function_view.xml', 'security/ir.model.access.csv'],
     'demo': [],
     'installable': True,
