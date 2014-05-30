@@ -454,26 +454,7 @@
                 this.tableNavigation(root);
             }
             var def = $.Deferred();
-            this.editor = root;
-            $('#wrapwrap').summernote({
-                airMode : true,
-                airPopover: [
-                    ['style', ['style']],
-                    ['font', ['bold', 'italic', 'underline', 'clear']],
-                    ['fontname', ['fontname']],
-                    ['fontsize', ['fontsize']],
-                    ['color', ['color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['height', ['height']],
-                    ['table', ['table']],
-                    ['insert', ['link', 'picture', 'video']],
-                    ['help', ['help']]
-                ],
-                oninit: function($editable, sHtml) {
-                    self.setup_editables(root);
-                    self.trigger('rte:ready');
-                }
-            });
+            this.editor = $('#wrapwrap').summernote(self._config(root, def));
             return def;
         },
 
@@ -494,7 +475,6 @@
                     if ($node.data('oe-model') === 'ir.ui.view') {
                         node.contentEditable = true;
                     }
-
                     observer.observe(node, OBSERVER_CONFIG);
                     $node.one('content_changed', function () {
                         $node.addClass('oe_dirty');
@@ -515,6 +495,29 @@
                        || !$this.closest('[data-oe-model = "ir.ui.view"]').length;
                 });
         },
+        _config: function (root, def) {
+            var self = this;
+             return {
+                airMode : true,
+                airPopover: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'italic', 'underline', 'clear']],
+                    ['fontname', ['fontname']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture', 'video']],
+                    ['help', ['help']]
+                ],
+                oninit: function() {
+                    self.setup_editables(root);
+                    self.trigger('rte:ready');
+                    def.resolve();
+                }
+             }
+        }
     });
 
     website.editor = { };
