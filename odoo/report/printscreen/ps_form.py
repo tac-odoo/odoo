@@ -29,7 +29,7 @@ from lxml import etree
 import time, os
 
 
-class report_printscreen_list(report_int):
+class report_printscreen_form(report_int):
     def __init__(self, name):
         report_int.__init__(self, name)
 
@@ -131,7 +131,7 @@ class report_printscreen_list(report_int):
         self.obj = render.rml(rml, self.title)
         self.obj.render()
         return True
-report_printscreen_list('report.printscreen.form')
+report_printscreen_form('report.printscreen.form')
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

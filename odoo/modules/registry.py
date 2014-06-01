@@ -29,6 +29,7 @@ import threading
 
 import openerp.sql_db
 import openerp.osv.orm
+from openerp.osv.orm import MetaModel
 import openerp.tools
 import openerp.modules.db
 import openerp.tools.config
@@ -134,7 +135,8 @@ class Registry(Mapping):
         models_to_load = [] # need to preserve loading order
         # Instantiate registered classes (via the MetaModel automatic discovery
         # or via explicit constructor call), and add them to the pool.
-        for cls in openerp.osv.orm.MetaModel.module_to_models.get(module.name, []):
+        cls_models = MetaModel.module_to_models
+        for cls in cls_models.get(module.name, []):
             # models register themselves in self.models
             model = cls.create_instance(self, cr)
             if model._name not in models_to_load:

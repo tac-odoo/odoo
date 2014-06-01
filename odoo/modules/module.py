@@ -70,6 +70,7 @@ class AddonsImportHook(object):
         # Note: we don't support circular import.
         f, path, descr = imp.find_module(module_part, ad_paths)
         mod = imp.load_module('openerp.addons.' + module_part, f, path, descr)
+        sys.modules['odoo.addons.' + module_part] = mod
         sys.modules['openerp.addons.' + module_part] = mod
         return mod
 

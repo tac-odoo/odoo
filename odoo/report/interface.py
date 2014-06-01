@@ -50,8 +50,9 @@ class report_int(object):
         if register:
             assert openerp.conf.deprecation.allow_report_int_registration
             assert name.startswith('report.'), 'Report names should start with "report.".'
-            assert name not in self._reports, 'The report "%s" already exists.' % name
-            self._reports[name] = self
+            report_name = '%s.%s' % (self.__module__.split('.')[0], name)
+            assert report_name not in self._reports, 'The report "%s" already exists.' % name
+            self._reports[report_name] = self
         else:
             # The report is instanciated at each use site, which is ok.
             pass

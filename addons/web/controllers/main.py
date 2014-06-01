@@ -30,7 +30,9 @@ except ImportError:
     xlwt = None
 
 import openerp
-import openerp.modules.registry
+import odoo.modules.registry
+from odoo.modules.registry import RegistryManager
+from odoo.modules.registry import Registry
 from openerp.addons.base.ir.ir_qweb import AssetsBundle, QWebTemplateNotFound
 from openerp.tools.translate import _
 from openerp import http
@@ -206,7 +208,7 @@ def module_installed_bypass_session(dbname):
     loadable = http.addons_manifest.keys()
     modules = {}
     try:
-        registry = openerp.modules.registry.RegistryManager.get(dbname)
+        registry = RegistryManager.get(dbname)
         with registry.cursor() as cr:
             m = registry.get('ir.module.module')
             # TODO The following code should move to ir.module.module.list_installed_modules()
@@ -1299,7 +1301,7 @@ class Binary(http.Controller):
         else:
             try:
                 # create an empty registry
-                registry = openerp.modules.registry.Registry(dbname)
+                registry = Registry(dbname)
                 with registry.cursor() as cr:
                     cr.execute("""SELECT c.logo_web
                                     FROM res_users u

@@ -25,7 +25,7 @@ import unicodedata
 
 from openerp.osv import fields, osv
 from openerp.tools import ustr
-from openerp.modules.registry import RegistryManager
+from odoo.modules.registry import RegistryManager
 from openerp import SUPERUSER_ID
 from openerp.tools.translate import _
 

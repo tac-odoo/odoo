@@ -31,6 +31,7 @@ import sys
 import threading
 
 import openerp
+
 import openerp.modules.db
 import openerp.modules.graph
 import openerp.modules.migration
@@ -38,7 +39,7 @@ import openerp.modules.registry
 import openerp.osv as osv
 import openerp.tools as tools
 from openerp import SUPERUSER_ID
-
+from openerp.osv.orm import AbstractModel
 from openerp.tools.translate import _
 from openerp.modules.module import initialize_sys_path, \
     load_openerp_module, init_module_models, adapt_version
@@ -351,7 +352,7 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         if processed_modules:
             cr.execute("""select model,name from ir_model where id NOT IN (select distinct model_id from ir_model_access)""")
             for (model, name) in cr.fetchall():
-                if model in registry and not registry[model].is_transient() and not isinstance(registry[model], openerp.osv.orm.AbstractModel):
+                if model in registry and not registry[model].is_transient() and not isinstance(registry[model], AbstractModel):
                     _logger.warning('The model %s has no access rules, consider adding one. E.g. access_%s,access_%s,model_%s,,1,1,1,1',
                         model, model.replace('.', '_'), model.replace('.', '_'), model.replace('.', '_'))
 

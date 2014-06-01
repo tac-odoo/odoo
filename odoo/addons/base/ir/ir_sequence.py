@@ -23,17 +23,17 @@ import logging
 import time
 
 import openerp
-from openerp.osv import osv
+from openerp.osv import fields, osv
 from openerp.tools.translate import _
 
 _logger = logging.getLogger(__name__)
 
-class ir_sequence_type(openerp.osv.osv.osv):
+class ir_sequence_type(osv.osv):
     _name = 'ir.sequence.type'
     _order = 'name'
     _columns = {
-        'name': openerp.osv.fields.char('Name', size=64, required=True),
-        'code': openerp.osv.fields.char('Code', size=32, required=True),
+        'name': fields.char('Name', size=64, required=True),
+        'code': fields.char('Code', size=32, required=True),
     }
 
     _sql_constraints = [
@@ -44,7 +44,7 @@ def _code_get(self, cr, uid, context=None):
     cr.execute('select code, name from ir_sequence_type')
     return cr.fetchall()
 
-class ir_sequence(openerp.osv.osv.osv):
+class ir_sequence(osv.osv):
     """ Sequence model.
 
     The sequence model allows to define and use so-called sequence objects.
@@ -83,22 +83,22 @@ class ir_sequence(openerp.osv.osv.osv):
 
 
     _columns = {
-        'name': openerp.osv.fields.char('Name', size=64, required=True),
-        'code': openerp.osv.fields.selection(_code_get, 'Sequence Type', size=64),
-        'implementation': openerp.osv.fields.selection( # TODO update the view
+        'name': fields.char('Name', size=64, required=True),
+        'code': fields.selection(_code_get, 'Sequence Type', size=64),
+        'implementation': fields.selection( # TODO update the view
             [('standard', 'Standard'), ('no_gap', 'No gap')],
             'Implementation', required=True,
             help="Two sequence object implementations are offered: Standard "
             "and 'No gap'. The later is slower than the former but forbids any"
             " gap in the sequence (while they are possible in the former)."),
-        'active': openerp.osv.fields.boolean('Active'),
-        'prefix': openerp.osv.fields.char('Prefix', size=64, help="Prefix value of the record for the sequence"),
-        'suffix': openerp.osv.fields.char('Suffix', size=64, help="Suffix value of the record for the sequence"),
-        'number_next': openerp.osv.fields.integer('Next Number', required=True, help="Next number of this sequence"),
-        'number_next_actual': openerp.osv.fields.function(_get_number_next_actual, fnct_inv=_set_number_next_actual, type='integer', required=True, string='Next Number', help='Next number that will be used. This number can be incremented frequently so the displayed value might already be obsolete'),
-        'number_increment': openerp.osv.fields.integer('Increment Number', required=True, help="The next number of the sequence will be incremented by this number"),
-        'padding' : openerp.osv.fields.integer('Number Padding', required=True, help="OpenERP will automatically adds some '0' on the left of the 'Next Number' to get the required padding size."),
-        'company_id': openerp.osv.fields.many2one('res.company', 'Company'),
+        'active': fields.boolean('Active'),
+        'prefix': fields.char('Prefix', size=64, help="Prefix value of the record for the sequence"),
+        'suffix': fields.char('Suffix', size=64, help="Suffix value of the record for the sequence"),
+        'number_next': fields.integer('Next Number', required=True, help="Next number of this sequence"),
+        'number_next_actual': fields.function(_get_number_next_actual, fnct_inv=_set_number_next_actual, type='integer', required=True, string='Next Number', help='Next number that will be used. This number can be incremented frequently so the displayed value might already be obsolete'),
+        'number_increment': fields.integer('Increment Number', required=True, help="The next number of the sequence will be incremented by this number"),
+        'padding' : fields.integer('Number Padding', required=True, help="OpenERP will automatically adds some '0' on the left of the 'Next Number' to get the required padding size."),
+        'company_id': fields.many2one('res.company', 'Company'),
     }
     _defaults = {
         'implementation': 'standard',
@@ -134,7 +134,7 @@ class ir_sequence(openerp.osv.osv.osv):
              raise osv.except_osv(_('Warning!'),_("Increment number must not be zero."))
         assert isinstance(id, (int, long))
         sql = "CREATE SEQUENCE ir_sequence_%03d INCREMENT BY %%s START WITH %%s" % id
-        cr.execute(sql, (number_increment, number_next))
+        cr.execute(sql, (int(number_increment), int(number_next)))
 
     def _drop_sequence(self, cr, ids):
         """ Drop the PostreSQL sequence if it exists.

@@ -37,6 +37,7 @@ import werkzeug.wsgi
 import openerp
 from openerp.service import security, model as service_model
 from openerp.tools.func import lazy_property
+from odoo.modules.registry import RegistryManager
 
 _logger = logging.getLogger(__name__)
 
@@ -218,7 +219,7 @@ class WebRequest(object):
         The registry to the database linked to this request. Can be ``None``
         if the current request uses the ``none`` authentication.
         """
-        return openerp.modules.registry.RegistryManager.get(self.db) if self.db else None
+        return RegistryManager.get(self.db) if self.db else None
 
     @property
     def db(self):
@@ -1238,7 +1239,7 @@ class Root(object):
             with request:
                 db = request.session.db
                 if db:
-                    openerp.modules.registry.RegistryManager.check_registry_signaling(db)
+                    RegistryManager.check_registry_signaling(db)
                     try:
                         with openerp.tools.mute_logger('openerp.sql_db'):
                             ir_http = request.registry['ir.http']
@@ -1251,7 +1252,7 @@ class Root(object):
                         result = _dispatch_nodb()
                     else:
                         result = ir_http._dispatch()
-                        openerp.modules.registry.RegistryManager.signal_caches_change(db)
+                        RegistryManager.signal_caches_change(db)
                 else:
                     result = _dispatch_nodb()
 

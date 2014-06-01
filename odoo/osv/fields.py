@@ -45,6 +45,7 @@ import xmlrpclib
 from psycopg2 import Binary
 
 import openerp
+import openerp.osv.orm
 import openerp.tools as tools
 from openerp.tools.translate import _
 from openerp.tools import float_round, float_repr
@@ -1546,9 +1547,9 @@ class property(function):
             cr.execute('DELETE FROM ir_property WHERE id IN %s', (tuple(nids),))
 
         default_val = self._get_default(obj, cr, uid, prop_name, context)
-
         property_create = False
-        if isinstance(default_val, openerp.osv.orm.browse_record):
+        record = obj.browse(cr, uid, id, context=context)
+        if isinstance(default_val, type(record)):
             if default_val.id != id_val:
                 property_create = True
         elif default_val != id_val:
