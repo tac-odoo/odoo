@@ -106,33 +106,29 @@
                                         <li t-if="widget.view.is_action_enabled('edit')"><ul class="oe_kanban_colorpicker" data-field="color"/></li>
                                     </ul>
                                 </div>
-                                <div class="oe_salesteams_kanban_content">
-                                    <div class="row">
-                                        <h4 class="text-center"><field name="name"/></h4>
-                                        <div class="row oe_kanban_alias text-center" t-if="record.use_leads.raw_value and record.alias_id.value">
-                                            <small><span class="oe_e oe_e_alias" style="float: none;">%%</span><t t-raw="record.alias_id.raw_value[1]"/></small>
-                                        </div>
+                                <div class="oe_kanban_content">
+                                    <h4 class="oe_center"><field name="name"/></h4>
+                                    <div class="oe_kanban_alias oe_center" t-if="record.use_leads.raw_value and record.alias_id.value">
+                                        <small><span class="oe_e oe_e_alias" style="float: none;">%%</span><t t-raw="record.alias_id.raw_value[1]"/></small>
                                     </div>
-                                    <div class="oe_salesteams_leads row">
-                                        <div class="col-md-6 mt4" t-if="record.use_leads.raw_value">
-                                            <a name="%(crm_case_form_view_salesteams_lead)d" type="action" class="col-md-9">Leads</a>
-                                            <a name="%(action_report_crm_lead_salesteam)d" type="action" class="col-md-3">
+                                    <div class="oe_items_list">
+                                        <div class="oe_salesteams_leads" t-if="record.use_leads.raw_value">
+                                            <a name="%(crm_case_form_view_salesteams_lead)d" type="action">Leads</a>
+                                            <a name="%(action_report_crm_lead_salesteam)d" type="action" class="oe_sparkline_bar_link">
                                                 <field name="monthly_open_leads" widget="sparkline_bar"
                                                     options="{'height': '20px', 'barWidth': 4, 'barSpacing': 1, 'delayIn': '3000', 'tooltip_suffix': ' Leads'}">Open Leads per Month<br/>Click to see a detailed analysis of leads.</field>
                                             </a>
                                         </div>
-                                    </div>
-                                    <div class="oe_salesteams_opportunities row">
-                                        <div class="col-md-6 mt4">
-                                            <a name="%(crm_case_form_view_salesteams_opportunity)d" type="action" class="col-md-9">Opportunities</a>
-                                            <a name="%(action_report_crm_opportunity_salesteam)d" type="action" class="col-md-3">
+                                        <div class="oe_salesteams_opportunities">
+                                            <a name="%(crm_case_form_view_salesteams_opportunity)d" type="action">Opportunities</a>
+                                            <a name="%(action_report_crm_opportunity_salesteam)d" type="action">
                                                 <field name="monthly_planned_revenue" widget="sparkline_bar"
                                                     options="{'height': '20px', 'barWidth': '4', 'barSpacing': '1', 'delayIn': '3000', 'tooltip_suffix': ' (Planned Revenue)'}">Planned Revenue per Month<br/>Click to see a detailed analysis of opportunities.</field>
                                             </a>
                                         </div>
                                     </div>
                                     <div class="oe_clear"></div>
-                                    <div class="oe_kanban_salesteams_avatars mt4">
+                                    <div class="oe_kanban_salesteams_avatars">
                                         <t t-foreach="record.member_ids.raw_value.slice(0,10)" t-as="member">
                                             <img t-att-src="kanban_image('res.users', 'image_small', member)" t-att-data-member_id="member"/>
                                         </t>
