@@ -215,7 +215,7 @@
                                             <div t-att-class="color + (record.title.raw_value == 1 ? ' oe_kanban_color_alert' : '')" style="position: relative">
                                                 <a t-if="! read_only_mode" type="delete" style="position: absolute; right: 0; padding: 4px; diplay: inline-block">X</a>
                                                 <div class="oe_module_vignette">
-                                                <a type="open">
+                                                <a type="open" class="col-md-2">
                                                     <t t-if="record.has_image.raw_value === true">
                                                         <img t-att-src="kanban_image('res.partner', 'image', record.id.value, {'preview_image': 'image_small'})" class="oe_avatar oe_kanban_avatar_smallbox"/>
                                                     </t>
