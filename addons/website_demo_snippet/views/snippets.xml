@@ -1,0 +1,41 @@
+<openerp>
+<data>
+    <template id="contact_snippet" name="Contact Snippet" inherit_id="website.snippets">
+        <!-- Snippet body definition -->
+        <xpath expr="//div[@id='snippet_feature']" position="inside">
+            <div>
+                <div class="oe_snippet_thumbnail">
+                    <img class="oe_snippet_thumbnail_img" src="/website_demo_snippet/static/description/icon.png"/>
+                    <span class="oe_snippet_thumbnail_title">Contact Snippet</span>
+                </div>
+                <section class="oe_snippet_body js_contact">
+                    <div class="js_contact_form">
+                        <input type="hidden" class="js_contact_section_id" name="section_id" value="0"/>
+                        <textarea required="True" class="form-control js_contact_question" name="description"></textarea>
+                        <div class="input-group">
+                            <input type="email" name="email_from"
+                                   required="True"
+                                   class="form-control js_contact_email"
+                                   placeholder="your@email.address"/>
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-primary js_contact_btn">Contact Us</button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="js_contact_thanks hidden alert alert-success">Thanks for your question!
+                    </div>
+                </section>
+            </div>
+        </xpath>
+
+        <!-- Options: placement and snippet customization -->
+        <xpath expr="//div[@id='snippet_options']" position="inside">
+            <div data-snippet-option-id='contact_snippet'
+                data-selector=".js_contact"
+                data-selector-siblings="p, h1, h2, h3, blockquote, .well, .panel">
+                <li><a href="#" class="button js_contact_sales_team">Change Sales Team</a></li>
+            </div>
+        </xpath>
+    </template>
+</data>
+</openerp>
