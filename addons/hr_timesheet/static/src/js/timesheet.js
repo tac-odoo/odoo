@@ -27,7 +27,6 @@ openerp.hr_timesheet = function(instance) {
             this.res_o2m_drop = new instance.web.DropMisordered();
             this.render_drop = new instance.web.DropMisordered();
             this.description_line = _t("/");
-            
         },
         go_to: function(event) {
             var id = JSON.parse($(event.target).data("id"));
@@ -87,7 +86,6 @@ openerp.hr_timesheet = function(instance) {
             });
             return valid_value;
         },
-        
         sync: function() {
             var self = this;
             self.setting = true;
@@ -103,7 +101,6 @@ openerp.hr_timesheet = function(instance) {
             return instance.web.format_value(value, { type:"float_time" });
         },
     });
-
     //Import daily and weekly widget js
     instance.hr_timesheet_week(instance); //Import hr_timesheet_week
     instance.hr_timesheet_day(instance); //Import hr_timesheet_day

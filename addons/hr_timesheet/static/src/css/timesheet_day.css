@@ -114,7 +114,7 @@
 .openerp .oe_timesheet_daily .oe_timesheet_daily_box {
   font-weight: bold;
   padding-right: 2px !important;
-  margin-right: 250px;
+  margin-right: 265px;
   color: #4c4c4c;
   float: right;
 }
@@ -122,6 +122,7 @@
   width: 50px;
   height: 30px;
   font-weight: normal;
+  margin-right: 255px;
 }
 .openerp .oe_timesheet_edit_description {
   cursor: pointer;
@@ -139,7 +140,7 @@
 .openerp .oe_timesheet_daily_footer div {
   font-weight: bold;
   float: right;
-  margin-right: 220px;
+  margin-right: 265px;
 }
 .openerp .oe_timesheet_daily .oe_timesheet_daily_add_row {
   text-align: left;
