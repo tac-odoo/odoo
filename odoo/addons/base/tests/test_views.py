@@ -8,7 +8,6 @@ from lxml import etree as ET
 from lxml.builder import E
 
 from psycopg2 import IntegrityError
-Ma
 from openerp.tests import common
 import openerp.tools
 from odoo.modules.registry import RegistryManager

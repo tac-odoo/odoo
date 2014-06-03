@@ -35,8 +35,7 @@ import openerp
 import openerp.modules.db
 import openerp.modules.graph
 import openerp.modules.migration
-import odoo.modules.registry
-import odoo.modules.registry import RegistryManager
+import odoo
 import openerp.osv as osv
 import odoo.tools as tools
 from openerp import SUPERUSER_ID
@@ -74,7 +73,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True, skip_modules=
             else:
                 cr.rollback()
                 # avoid keeping stale xml_id, etc. in cache 
-                RegistryManager.clear_caches(cr.dbname)
+                odoo.modules.registry.RegistryManager.clear_caches(cr.dbname)
 
 
     def _get_files_of_kind(kind):
@@ -411,7 +410,7 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
                 # modules to remove next time
                 cr.commit()
                 _logger.info('Reloading registry once more after uninstalling modules')
-                return openerp.modules.registry.RegistryManager.new(cr.dbname, force_demo, status, update_module)
+                return odoo.modules.registry.RegistryManager.new(cr.dbname, force_demo, status, update_module)
 
         # STEP 7: verify custom views on every model
         if update_module:

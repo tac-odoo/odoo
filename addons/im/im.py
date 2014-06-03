@@ -27,7 +27,6 @@ import time
 import openerp
 import openerp.tools.config
 from odoo.modules.registry import RegistryManager
-import odoo.modules.registry import Reg
 from openerp import http
 from openerp.http import request
 from openerp.osv import osv, fields, expression

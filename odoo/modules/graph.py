@@ -28,7 +28,6 @@ import itertools
 import zipimport
 
 import openerp
-
 import openerp.osv as osv
 import openerp.tools as tools
 import openerp.tools.osutil as osutil
