@@ -26,7 +26,7 @@ from collections import Mapping
 from contextlib import contextmanager
 import logging
 import threading
-
+import openerp
 import openerp.sql_db
 import openerp.osv.orm
 from openerp.osv.orm import MetaModel

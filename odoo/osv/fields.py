@@ -46,12 +46,9 @@ from psycopg2 import Binary
 
 import openerp
 import openerp.osv.orm
-from odoo.modules.registry import RegistryManager
-import openerp.tools as tools
+from openerp.modules.registry import RegistryManager
 import odoo
 from openerp.tools.translate import _
-from openerp.tools import float_round, float_repr
-from openerp.tools import html_sanitize
 import simplejson
 from openerp import SUPERUSER_ID
 
@@ -152,7 +149,7 @@ class _column(object):
     def _as_display_name(cls, field, cr, uid, obj, value, context=None):
         # This needs to be a class method, in case a column type A as to delegate
         # to a column type B.
-        return tools.ustr(value)
+        return openerp.tools.ustr(value)
 
 # ---------------------------------------------------------
 # Simple fields
@@ -209,7 +206,7 @@ class reference(_column):
                 model = obj.pool[model_name]
                 names = model.name_get(cr, uid, [int(res_id)], context=context)
                 return names[0][1] if names else False
-        return tools.ustr(value)
+        return openerp.tools.ustr(value)
 
 # takes a string (encoded in utf8) and returns a string (encoded in utf8)
 def _symbol_set_char(self, symb):
@@ -223,7 +220,7 @@ def _symbol_set_char(self, symb):
 
     # we need to convert the string to a unicode object to be able
     # to evaluate its length (and possibly truncate it) reliably
-    u_symb = tools.ustr(symb)
+    u_symb = openerp.tools.ustr(symb)
     return u_symb[:self.size].encode('utf8')
 
 class char(_column):
@@ -249,7 +246,7 @@ class html(text):
             return None
         if not self._sanitize:
             return value
-        return html_sanitize(value)
+        return openerp.tools.html_sanitize(value)
 
     def __init__(self, string='unknown', sanitize=True, **args):
         super(html, self).__init__(string=string, **args)
@@ -278,7 +275,7 @@ class float(_column):
             self.digits = self.digits_compute(cr)
         if self.digits:
             precision, scale = self.digits
-            self._symbol_set = ('%s', lambda x: float_repr(float_round(__builtin__.float(x or 0.0),
+            self._symbol_set = ('%s', lambda x: openerp.tools.float_repr(openerp.tools.float_round(__builtin__.float(x or 0.0),
                                                                        precision_digits=scale),
                                                            precision_digits=scale))
 
@@ -309,7 +306,7 @@ class date(_column):
         should not be called.
         """
         return DT.date.today().strftime(
-            tools.DEFAULT_SERVER_DATE_FORMAT)
+            openerp.tools.DEFAULT_SERVER_DATE_FORMAT)
 
     @staticmethod
     def context_today(model, cr, uid, context=None, timestamp=None):
@@ -345,7 +342,7 @@ class date(_column):
                 _logger.debug("failed to compute context/client-specific today date, "
                               "using the UTC value for `today`",
                               exc_info=True)
-        return (context_today or today).strftime(tools.DEFAULT_SERVER_DATE_FORMAT)
+        return (context_today or today).strftime(openerp.tools.DEFAULT_SERVER_DATE_FORMAT)
 
     @staticmethod
     def date_to_datetime(model, cr, uid, userdate, context=None):
@@ -356,7 +353,7 @@ class date(_column):
         :param str userdate: date string in in user time zone
         :return: UTC datetime string for server-side use
         """
-        user_date = DT.datetime.strptime(userdate, tools.DEFAULT_SERVER_DATE_FORMAT)
+        user_date = DT.datetime.strptime(userdate, openerp.tools.DEFAULT_SERVER_DATE_FORMAT)
         if context and context.get('tz'):
             tz_name = context['tz']
         else:
@@ -367,8 +364,8 @@ class date(_column):
             user_datetime = user_date + DT.timedelta(hours=12.0)
             local_timestamp = context_tz.localize(user_datetime, is_dst=False)
             user_datetime = local_timestamp.astimezone(utc)
-            return user_datetime.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
-        return user_date.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
+            return user_datetime.strftime(openerp.tools.DEFAULT_SERVER_DATETIME_FORMAT)
+        return user_date.strftime(openerp.tools.DEFAULT_SERVER_DATETIME_FORMAT)
 
 
 class datetime(_column):
@@ -398,7 +395,7 @@ class datetime(_column):
         should not be called.
         """
         return DT.datetime.now().strftime(
-            tools.DEFAULT_SERVER_DATETIME_FORMAT)
+            openerp.tools.DEFAULT_SERVER_DATETIME_FORMAT)
 
     @staticmethod
     def context_timestamp(cr, uid, timestamp, context=None):
@@ -476,7 +473,7 @@ class binary(_column):
             # TODO: after 6.0 we should consider returning a dict with size and content instead of
             #       having an implicit convention for the value
             if val and context.get('bin_size_%s' % name, context.get('bin_size')):
-                res[i] = tools.human_size(long(val))
+                res[i] = openerp.tools.human_size(long(val))
             else:
                 res[i] = val
         return res
@@ -603,7 +600,7 @@ class many2one(_column):
     
     @classmethod
     def _as_display_name(cls, field, cr, uid, obj, value, context=None):
-        return value[1] if isinstance(value, tuple) else tools.ustr(value) 
+        return value[1] if isinstance(value, tuple) else openerp.tools.ustr(value) 
 
 
 class one2many(_column):
@@ -909,7 +906,7 @@ def get_nice_size(value):
         size = value
     elif value: # this is supposed to be a string
         size = len(value)
-    return tools.human_size(size)
+    return openerp.tools.human_size(size)
 
 # See http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char
 # and http://bugs.python.org/issue10066
@@ -932,7 +929,7 @@ def sanitize_binary_value(value):
     # XML-RPC, transparently encoded as UTF-8 by xmlrpclib.
     # (this works for _any_ byte values, thanks to the fallback
     #  to latin-1 passthrough encoding when decoding to unicode)
-    value = tools.ustr(value)
+    value = openerp.tools.ustr(value)
 
     # Due to Python bug #10066 this could still yield invalid XML
     # bytes, specifically in the low byte range, that will crash
@@ -1207,7 +1204,7 @@ class function(_column):
                 self.digits = self.digits_compute(cr)
             if self.digits:
                 precision, scale = self.digits
-                self._symbol_set = ('%s', lambda x: float_repr(float_round(__builtin__.float(x or 0.0),
+                self._symbol_set = ('%s', lambda x: openerp.tools.float_repr(float_round(__builtin__.float(x or 0.0),
                                                                            precision_digits=scale),
                                                                precision_digits=scale))
 

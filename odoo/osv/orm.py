@@ -61,10 +61,8 @@ from lxml import etree
 
 import fields
 import openerp
-import openerp.tools as tools
 from openerp.tools.config import config
 from openerp.tools.misc import CountingStream, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
-from openerp.tools.safe_eval import safe_eval as eval
 from openerp.tools.translate import _
 from openerp import SUPERUSER_ID
 from query import Query
@@ -103,7 +101,7 @@ def transfer_field_to_modifiers(field, modifiers):
 # For non-tree views, the context shouldn't be given.
 def transfer_node_to_modifiers(node, modifiers, context=None, in_tree_view=False):
     if node.get('attrs'):
-        modifiers.update(eval(node.get('attrs')))
+        modifiers.update(openerp.tools.safe_eval.safe_eval(node.get('attrs')))
 
     if node.get('states'):
         if 'invisible' in modifiers and isinstance(modifiers['invisible'], list):
@@ -114,7 +112,7 @@ def transfer_node_to_modifiers(node, modifiers, context=None, in_tree_view=False
 
     for a in ('invisible', 'readonly', 'required'):
         if node.get(a):
-            v = bool(eval(node.get(a), {'context': context or {}}))
+            v = bool(openerp.tools.safe_eval.safe_eval(node.get(a), {'context': context or {}}))
             if in_tree_view and a == 'invisible':
                 # Invisible in a tree view has a specific meaning, make it a
                 # new key in the modifiers attribute.
@@ -791,7 +789,7 @@ class BaseModel(object):
                 'field_description': f.string,
                 'ttype': f._type,
                 'relation': f._obj or '',
-                'select_level': tools.ustr(f.select or 0),
+                'select_level': openerp.tools.ustr(f.select or 0),
                 'readonly': (f.readonly and 1) or 0,
                 'required': (f.required and 1) or 0,
                 'selectable': (f.selectable and 1) or 0,
@@ -1049,7 +1047,7 @@ class BaseModel(object):
                 'string': field['field_description'],
                 'required': bool(field['required']),
                 'readonly': bool(field['readonly']),
-                'domain': eval(field['domain']) if field['domain'] else None,
+                'domain': openerp.tools.safe_eval.safe_eval(field['domain']) if field['domain'] else None,
                 'size': field['size'] or None,
                 'ondelete': field['on_delete'],
                 'translate': (field['translate']),
@@ -1065,9 +1063,9 @@ class BaseModel(object):
                     attrs.update({'relation': field['relation']})
                 self._columns[field['name']] = fields.sparse(**attrs)
             elif field['ttype'] == 'selection':
-                self._columns[field['name']] = fields.selection(eval(field['selection']), **attrs)
+                self._columns[field['name']] = fields.selection(openerp.tools.safe_eval.safe_eval(field['selection']), **attrs)
             elif field['ttype'] == 'reference':
-                self._columns[field['name']] = fields.reference(selection=eval(field['selection']), **attrs)
+                self._columns[field['name']] = fields.reference(selection=openerp.tools.safe_eval.safe_eval(field['selection']), **attrs)
             elif field['ttype'] == 'many2one':
                 self._columns[field['name']] = fields.many2one(field['relation'], **attrs)
             elif field['ttype'] == 'one2many':
@@ -1210,7 +1208,7 @@ class BaseModel(object):
                                             rr = rr[name_relation]
                                         rr_name = self.pool[rr._table_name].name_get(cr, uid, [rr.id], context=context)
                                         rr_name = rr_name and rr_name[0] and rr_name[0][1] or ''
-                                        dt += tools.ustr(rr_name or '') + ','
+                                        dt += openerp.tools.ustr(rr_name or '') + ','
                                     data[fpos] = dt[:-1]
                                     break
                                 lines += lines2[1:]
@@ -1227,11 +1225,11 @@ class BaseModel(object):
                     if raw_data and cols and cols._type in ('integer', 'boolean', 'float'):
                         data[fpos] = r
                     elif raw_data and cols and cols._type == 'date':
-                        data[fpos] = datetime.datetime.strptime(r, tools.DEFAULT_SERVER_DATE_FORMAT).date()
+                        data[fpos] = datetime.datetime.strptime(r, openerp.tools.DEFAULT_SERVER_DATE_FORMAT).date()
                     elif raw_data and cols and cols._type == 'datetime':
-                        data[fpos] = datetime.datetime.strptime(r, tools.DEFAULT_SERVER_DATETIME_FORMAT)
+                        data[fpos] = datetime.datetime.strptime(r, openerp.tools.DEFAULT_SERVER_DATETIME_FORMAT)
                     else:
-                        data[fpos] = tools.ustr(r or '')
+                        data[fpos] = openerp.tools.ustr(r or '')
         return [data] + lines
 
     def export_data(self, cr, uid, ids, fields_to_export, raw_data=False, context=None):
@@ -1337,7 +1335,7 @@ class BaseModel(object):
                     cr.commit()
         except Exception, e:
             cr.rollback()
-            return -1, {}, 'Line %d : %s' % (position + 1, tools.ustr(e)), ''
+            return -1, {}, 'Line %d : %s' % (position + 1, openerp.tools.ustr(e)), ''
 
         if context.get('defer_parent_store_computation'):
             self._parent_store_compute(cr)
@@ -1557,7 +1555,7 @@ class BaseModel(object):
             except Exception, e:
                 _logger.debug('Exception while validating constraint', exc_info=True)
                 valid = False
-                extra_error = tools.ustr(e)
+                extra_error = openerp.tools.ustr(e)
             if not valid:
                 # Check presence of __call__ directly instead of using
                 # callable() because it will be deprecated as of Python 3.0
@@ -3444,7 +3442,7 @@ class BaseModel(object):
                     '(a dictionary was expected).' % (val[0], self._name)
                 for pos in val:
                     for record in res:
-                        if isinstance(res2[record['id']], str): res2[record['id']] = eval(res2[record['id']]) #TOCHECK : why got string instend of dict in python2.6
+                        if isinstance(res2[record['id']], str): res2[record['id']] = openerp.tools.safe_eval.safe_eval(res2[record['id']]) #TOCHECK : why got string instend of dict in python2.6
                         multi_fields = res2.get(record['id'],{})
                         if multi_fields:
                             record[pos] = multi_fields.get(pos,[])

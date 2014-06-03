@@ -139,7 +139,6 @@ import openerp.modules
 import odoo
 from openerp.osv import fields
 from openerp.osv.orm import MAGIC_COLUMNS
-import openerp.tools as tools
 
 
 # Domain operators.
@@ -1240,6 +1239,6 @@ class expression(object):
         if joins:
             query = '(%s) AND %s' % (joins, query)
 
-        return query, tools.flatten(params)
+        return query, openerp.tools.flatten(params)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
