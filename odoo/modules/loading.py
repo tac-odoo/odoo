@@ -35,9 +35,8 @@ import openerp
 import openerp.modules.db
 import openerp.modules.graph
 import openerp.modules.migration
-import odoo
-import openerp.osv as osv
-import odoo.tools as tools
+
+from odoo.modules.registry import RegistryManager
 from openerp import SUPERUSER_ID
 from openerp.osv.orm import AbstractModel
 from openerp.tools.translate import _
@@ -68,12 +67,12 @@ def load_module_graph(cr, graph, status=None, perform_checks=True, skip_modules=
                 'module %s: an exception occurred in a test', module_name)
             return False
         finally:
-            if tools.config.options['test_commit']:
+            if openerp.tools.config.options['test_commit']:
                 cr.commit()
             else:
                 cr.rollback()
                 # avoid keeping stale xml_id, etc. in cache 
-                odoo.modules.registry.RegistryManager.clear_caches(cr.dbname)
+                RegistryManager.clear_caches(cr.dbname)
 
 
     def _get_files_of_kind(kind):
@@ -115,7 +114,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True, skip_modules=
                 noupdate = False
                 if kind in ('demo', 'demo_xml') or (filename.endswith('.csv') and kind in ('init', 'init_xml')):
                     noupdate = True
-                tools.convert_file(cr, module_name, filename, idref, mode, noupdate, kind, report)
+                openerp.tools.convert_file(cr, module_name, filename, idref, mode, noupdate, kind, report)
         finally:
             if kind in ('demo', 'test'):
                 threading.currentThread().testing = False
@@ -188,7 +187,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True, skip_modules=
 
             if has_demo:
                 # launch tests only in demo mode, allowing tests to use demo data.
-                if tools.config.options['test_enable']:
+                if openerp.tools.config.options['test_enable']:
                     # Yamel test
                     report.record_result(load_test(module_name, idref, mode))
                     # Python tests
@@ -266,16 +265,16 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         if not openerp.modules.db.is_initialized(cr):
             _logger.info("init db")
             openerp.modules.db.initialize(cr)
-            tools.config["init"]["all"] = 1
-            tools.config['update']['all'] = 1
-            if not tools.config['without_demo']:
-                tools.config["demo"]['all'] = 1
+            openerp.tools.config["init"]["all"] = 1
+            openerp.tools.config['update']['all'] = 1
+            if not openerp.tools.config['without_demo']:
+                openerp.tools.config["demo"]['all'] = 1
 
         # This is a brand new registry, just created in
         # openerp.modules.registry.RegistryManager.new().
         registry = openerp.registry(cr.dbname)
 
-        if 'base' in tools.config['update'] or 'all' in tools.config['update']:
+        if 'base' in openerp.tools.config['update'] or 'all' in openerp.tools.config['update']:
             cr.execute("update ir_module_module set state=%s where name=%s and state=%s", ('to upgrade', 'base', 'installed'))
 
         # STEP 1: LOAD BASE (must be done before module dependencies can be computed for later steps) 
@@ -283,33 +282,33 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         graph.add_module(cr, 'base', force)
         if not graph:
             _logger.critical('module base cannot be loaded! (hint: verify addons-path)')
-            raise osv.osv.except_osv(_('Could not load base module'), _('module base cannot be loaded! (hint: verify addons-path)'))
+            raise openerp.osv.osv.except_osv(_('Could not load base module'), _('module base cannot be loaded! (hint: verify addons-path)'))
 
         # processed_modules: for cleanup step after install
         # loaded_modules: to avoid double loading
         report = registry._assertion_report
         loaded_modules, processed_modules = load_module_graph(cr, graph, status, perform_checks=update_module, report=report)
 
-        if tools.config['load_language']:
-            for lang in tools.config['load_language'].split(','):
-                tools.load_language(cr, lang)
+        if openerp.tools.config['load_language']:
+            for lang in openerp.tools.config['load_language'].split(','):
+                openerp.tools.load_language(cr, lang)
 
         # STEP 2: Mark other modules to be loaded/updated
         if update_module:
             modobj = registry['ir.module.module']
-            if ('base' in tools.config['init']) or ('base' in tools.config['update']):
+            if ('base' in openerp.tools.config['init']) or ('base' in openerp.tools.config['update']):
                 _logger.info('updating modules list')
                 modobj.update_list(cr, SUPERUSER_ID)
 
-            _check_module_names(cr, itertools.chain(tools.config['init'].keys(), tools.config['update'].keys()))
+            _check_module_names(cr, itertools.chain(openerp.tools.config['init'].keys(), openerp.tools.config['update'].keys()))
 
-            mods = [k for k in tools.config['init'] if tools.config['init'][k]]
+            mods = [k for k in openerp.tools.config['init'] if openerp.tools.config['init'][k]]
             if mods:
                 ids = modobj.search(cr, SUPERUSER_ID, ['&', ('state', '=', 'uninstalled'), ('name', 'in', mods)])
                 if ids:
                     modobj.button_install(cr, SUPERUSER_ID, ids)
 
-            mods = [k for k in tools.config['update'] if tools.config['update'][k]]
+            mods = [k for k in openerp.tools.config['update'] if openerp.tools.config['update'][k]]
             if mods:
                 ids = modobj.search(cr, SUPERUSER_ID, ['&', ('state', '=', 'installed'), ('name', 'in', mods)])
                 if ids:
@@ -374,7 +373,7 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
             registry['ir.model.data']._process_end(cr, SUPERUSER_ID, processed_modules)
 
         for kind in ('init', 'demo', 'update'):
-            tools.config[kind] = {}
+            openerp.tools.config[kind] = {}
 
         cr.commit()
 
@@ -410,7 +409,7 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
                 # modules to remove next time
                 cr.commit()
                 _logger.info('Reloading registry once more after uninstalling modules')
-                return odoo.modules.registry.RegistryManager.new(cr.dbname, force_demo, status, update_module)
+                return RegistryManager.new(cr.dbname, force_demo, status, update_module)
 
         # STEP 7: verify custom views on every model
         if update_module:
