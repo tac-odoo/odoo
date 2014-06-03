@@ -91,14 +91,14 @@ class hr_applicant(osv.Model):
         'name': 'applicant_first_interview',
         'type': 'object',
         'string': 'Approve',
-        'condition': lambda self, obj, context=None: obj.stage_id.name == 'Initial Qualification',
+        'subtype': ['hr_recruitment.mt_applicant_new'],
         'button_type': 'success'
     },
     {
         'name': 'applicant_refused',
         'type': 'object',
         'string': 'Refuse',
-        'condition': lambda self, obj, context=None: obj.stage_id.name == 'Initial Qualification',
+        'subtype': ['hr_recruitment.mt_applicant_new'],
         'button_type': 'warning'
     }]
     _mail_mass_mailing = _('Applicants')

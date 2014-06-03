@@ -64,13 +64,13 @@ class project_issue(osv.Model):
         'name': 'set_user',
         'type': 'object',
         'string': 'I will do it',
-        'condition': lambda self, obj, context=None: not obj.user_id,
+        'subtype': ['project_issue.mt_issue_new'],
         'button_type': 'success'
     },
     {
         'type': 'action',
         'string': 'Not interested',
-        'condition': lambda self, obj, context=None: not obj.user_id,
+        'subtype': ['project_issue.mt_issue_new'],
         'button_type': 'warning',
         'action_xml_id': 'action_view_issues',
         'module': 'project_issue'

@@ -229,14 +229,14 @@ class account_invoice(osv.osv):
         'name': 'invoice_validate',
         'type': 'object',
         'string': 'Validate',
-        'condition': lambda self, obj, context=None: obj.state == 'draft',
+        'subtype': [],
         'button_type': 'success'
     },
     {
         'name': 'action_cancel',
         'type': 'object',
         'string': 'Cancel',
-        'condition': lambda self, obj, context=None: obj.state == 'draft',
+        'subtype': ['account.mt_invoice_validated'],
         'button_type': 'warning'
     }]
 

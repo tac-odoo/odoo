@@ -801,14 +801,14 @@ class fleet_vehicle_log_contract(osv.Model):
         'name': 'act_renew_contract',
         'type': 'object',
         'string': 'Renew',
-        'condition': lambda self, obj, context=None: obj.state == 'open' or obj.state == 'closed',
+        'subtype': [],
         'button_type': 'success'
     },
     {
         'name': 'contract_close',
         'type': 'object',
         'string': 'Terminate',
-        'condition': lambda self, obj, context=None: obj.state == 'open',
+        'subtype': [],
         'button_type': 'warning'
     }]
     _columns = {

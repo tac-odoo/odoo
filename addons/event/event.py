@@ -310,14 +310,14 @@ class event_registration(osv.osv):
         'name': 'registration_open',
         'type': 'object',
         'string': 'Confirm',
-        'condition': lambda self, obj, context=None: obj.state == 'draft',
+        'subtype': [],
         'button_type': 'success'
     },
     {
         'name': 'button_reg_cancel',
         'type': 'object',
         'string': 'Cancel',
-        'condition': lambda self, obj, context=None: obj.state == 'draft' or obj.state == 'open',
+        'subtype': [],
         'button_type': 'warning'
     }]
 

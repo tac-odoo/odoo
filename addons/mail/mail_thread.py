@@ -110,7 +110,7 @@ class mail_thread(osv.AbstractModel):
     'name': 'message_unsubscribe_users',
     'type': 'object',
     'string': 'Mute',
-    'condition': lambda self, obj, context=None: True,
+    'subtype':[],
     'button_type': 'info'
     }]
     _mail_actions = []
@@ -364,15 +364,14 @@ class mail_thread(osv.AbstractModel):
             res['arch'] = etree.tostring(doc)
         return res
 
-    def _prepare_body_mail_action(self, cr, uid, obj, context=None):
+    def _prepare_body_mail_action(self, cr, uid, subtype, obj, context=None):
         mail_actions = []
         data_pool = self.pool['ir.model.data']
         for mail_action in self._mail_actions + self._default_mail_actions:
-            condition_fn = mail_action['condition']
             if mail_action.get('action_xml_id'):
                 dummy, act_id = data_pool.get_object_reference(cr, uid, mail_action['module'], mail_action['action_xml_id'])
                 mail_action['xml_id'] = act_id
-            if condition_fn(self, obj, context=context):
+            if not mail_action['subtype'] or subtype in mail_action['subtype']:
                 mail_actions.append(mail_action)
         mail_actions_body = env.get_template("mail_actions_button.html").render({
             'mail_actions': mail_actions,
@@ -1585,7 +1584,7 @@ class mail_thread(osv.AbstractModel):
                 parent_id = message.id
         if type == 'notification':
             obj = self.browse(cr, uid, thread_id, context=context)
-            body += self._prepare_body_mail_action(cr, uid, obj).encode('utf-8')
+            body += self._prepare_body_mail_action(cr, uid, subtype,obj).encode('utf-8')
         values = kwargs
         values.update({
             'author_id': author_id,

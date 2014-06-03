@@ -115,14 +115,14 @@ class hr_holidays(osv.osv):
          'name': 'holidays_validate',
          'type': 'object',
          'string': 'Approve',
-         'condition': lambda self, obj, context=None: obj.state == 'confirm',
+         'subtype': ['hr_holidays.mt_holidays_confirmed', 'hr_holidays.mt_holidays_refused'],
          'button_type': 'success'
      },
      {
          'name': 'holidays_refuse',
          'type': 'object',
          'string': 'Refuse',
-         'condition': lambda self, obj, context=None: obj.state == 'confirm' or obj.state == 'validate',
+         'subtype': ['hr_holidays.mt_holidays_confirmed', 'hr_holidays.mt_holidays_approved'],
          'button_type': 'warning'
      }]
 

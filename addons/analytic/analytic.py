@@ -42,21 +42,21 @@ class account_analytic_account(osv.osv):
         'name': 'set_pending',
         'type': 'object',
         'string': 'Renew',
-        'condition': lambda self, obj, context=None: obj.state == 'open',
+        'subtype':['analytic.mt_account_opened','analytic.mt_account_closed'],
         'button_type': 'success'
     },
     {
         'name': 'set_close',
         'type': 'object',
         'string': 'Close',
-        'condition': lambda self, obj, context=None: obj.state == 'open' or obj.state == 'pending',
+        'subtype': ['analytic.mt_account_opened','analytic.mt_account_pending'],
         'button_type': 'warning'
     },
     {
         'name': 'set_cancel',
         'type': 'object',
         'string': 'Cancel',
-        'condition': lambda self, obj, context=None: obj.state == 'open' or obj.state == 'pending',
+        'subtype': ['analytic.mt_account_opened','analytic.mt_account_pending'],
         'button_type': 'warning'
     }]
 

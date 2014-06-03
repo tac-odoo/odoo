@@ -572,7 +572,7 @@ class task(osv.osv):
         'name': 'set_user',
         'type': 'object',
         'string': 'I will do it',
-        'condition': lambda self, obj, context=None: not obj.user_id,
+        'subtype': ['project.mt_task_new'],
         'button_type': 'success'
     }]
 
