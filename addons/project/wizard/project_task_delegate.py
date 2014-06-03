@@ -33,7 +33,7 @@ class project_task_delegate(osv.osv_memory):
         'name': fields.char('Delegated Title', size=64, required=True, help="New title of the task delegated to the user"),
         'prefix': fields.char('Your Task Title', size=64, help="Title for your validation task"),
         'project_id': fields.many2one('project.project', 'Project', help="User you want to delegate this task to"),
-        'partner_id': fields.many2one('res.partner', 'Assign To', required=True, help="User you want to delegate this task to"),
+        'assigned_partner_id': fields.many2one('res.partner', 'Assign To', required=True, help="User you want to delegate this task to"),
         'new_task_description': fields.text('New Task Description', help="Reinclude the description of the task in the task of the user"),
         'planned_hours': fields.float('Planned Hours',  help="Estimated time to close this task by the delegated user"),
         'planned_hours_me': fields.float('Hours to Validate', help="Estimated time for you to validate the work done by the user to whom you delegate this task"),
@@ -45,7 +45,7 @@ class project_task_delegate(osv.osv_memory):
         if not project_id:
             return {'value':{'partner_id': False}}
         project = project_project.browse(cr, uid, project_id, context=context)
-        return {'value': {'partner_id': project.user_partner_id and project.user_partner_id.id or False}}
+        return {'value': {'partner_id': project.project_manager_id and project.project_manager_id.id or False}}
         
 
     def default_get(self, cr, uid, fields, context=None):

@@ -260,8 +260,8 @@ class hr_employee(osv.osv):
         employee = self.browse(cr, uid, employee_id, context=context)
         partner_ids = []
         _model, group_id = self.pool['ir.model.data'].get_object_reference(cr, uid, 'base', 'group_user')
-        if employee.user_partner_id:
-            company_id = employee.user_partner_id.company_id.id
+        if employee.related_partner_id:
+            company_id = employee.related_partner_id.company_id.id
         elif employee.company_id:
             company_id = employee.company_id.id
         elif employee.job_id:
@@ -326,8 +326,8 @@ class hr_employee(osv.osv):
 
     def onchange_partner(self, cr, uid, ids, partner_id, context=None):
         work_email = False
-        if user_partner_id:
-            work_email = self.pool.get('res.partner').browse(cr, uid, user_partner_id, context=context).email
+        if related_partner_id:
+            work_email = self.pool.get('res.partner').browse(cr, uid, related_partner_id, context=context).email
         return {'value': {'work_email': work_email}}
 
     def action_follow(self, cr, uid, ids, context=None):
@@ -445,7 +445,7 @@ class res_partner(osv.osv):
         return super(res_users, self).copy_data(cr, uid, ids, default, context=context)
     
     _columns = {
-        'employee_ids': fields.one2many('hr.employee', 'user_partner_id', 'Related employees'),
+        'employee_ids': fields.one2many('hr.employee', 'related_partner_id', 'Related employees'),
     }
 
 

@@ -12,4 +12,4 @@
     address_id: base.main_partner
     company_id: base.main_company
     department_id: dep_rd
-    user_partner_id: base.partner_demo
+    related_partner_id: base.partner_demo

@@ -71,3 +71,10 @@ Setting up your database
 Point your browser to http://localhost:8069/ and click "Manage Databases", the
 default master password is "admin".
 
+=======
+Internal R&D repository
+=======================
+
+This is not the repository you are looking for!
+
+You probably want to fork/checkout https://github.com/odoo/odoo instead.

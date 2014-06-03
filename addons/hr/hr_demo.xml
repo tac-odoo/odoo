@@ -151,7 +151,7 @@ If you have development competencies, we can propose you specific traineeships</
 
       <record id="employee_fp" model="hr.employee">
           <field name="name">Pieter Parker</field>
-          <field name="user_partner_id" ref="base.partner_root"/>
+          <field name="related_partner_id" ref="base.partner_root"/>
           <field name="department_id" ref="dep_management"/>
           <field name="job_id" ref="hr.job_ceo"/>
           <field name="category_ids" eval="[(6, 0, [ref('employee_category_2')])]"/>
@@ -223,7 +223,7 @@ If you have development competencies, we can propose you specific traineeships</
 
       <record id="employee_qdp" model="hr.employee">
           <field name="name">Gilles Gravie</field>
-          <field name="user_partner_id" ref="base.partner_demo"/>
+          <field name="related_partner_id" ref="base.partner_demo"/>
           <field name="department_id" ref="dep_rd"/>
           <field name="parent_id" ref="employee_al"/>
           <field name="job_id" ref="hr.job_developer"/>

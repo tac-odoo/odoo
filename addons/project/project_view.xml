@@ -29,10 +29,10 @@
                         help="Show only tasks having a deadline"/>
                     <field name="partner_id"/>
                     <field name="project_id"/>
-                    <field name="user_partner_id"/>
+                    <field name="assigned_partner_id"/>
                     <field name="stage_id" domain="[]"/>
                     <group expand="0" string="Group By...">
-                        <filter string="Partner" name="group_user_id" icon="terp-personal" domain="[]"  context="{'group_by':'user_partner_id'}"/>
+                        <filter string="Partner" name="group_user_id" icon="terp-personal" domain="[]"  context="{'group_by':'assigned_partner_id'}"/>
                         <filter string="Project" name="group_project_id" icon="terp-folder-violet" domain="[]" context="{'group_by':'project_id'}"/>
                         <filter string="Stage" name="group_stage_id" icon="terp-stage" domain="[]" context="{'group_by':'stage_id'}"/>
                         <filter string="Last Stage Update" icon="terp-go-month" domain="[]" context="{'group_by':'date_last_stage_update'}"/>
@@ -103,7 +103,7 @@
                     </div>
                     <group>
                         <group col="4">
-                            <field name="user_partner_id" string="Project Manager" 
+                            <field name="project_manager_id" string="Project Manager" 
                                     attrs="{'readonly':[('state','in',['close', 'cancelled'])]}" 
                                     context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'project.group_project_manager']}"/>
                             <newline/>
@@ -197,10 +197,10 @@
 <!--                    <filter icon="terp-personal+" string="Member" domain="['|',('user_id', '=', uid),('members', '=', uid)]" help="Projects in which I am a member."/>-->
                     <separator/>
 <!--                    <filter string="Project(s) Manager" domain="[('user_id','=',uid)]" help="Projects in which I am a manager" icon="terp-personal"/>-->
-                    <field name="user_partner_id" string="Project Manager"/>
+                    <field name="project_manager_id" string="Project Manager"/>
                     <field name="partner_id" string="Contact" filter_domain="[('partner_id', 'child_of', self)]"/>
                     <group expand="0" string="Group By...">
-                        <filter string="Manager" name="Manager" icon="terp-personal" domain="[]" context="{'group_by':'user_partner_id'}"/>
+                        <filter string="Manager" name="Manager" icon="terp-personal" domain="[]" context="{'group_by':'project_manager_id'}"/>
                         <filter string="Contact" name="Partner" icon="terp-partner" domain="[]" context="{'group_by':'partner_id'}"/>
                         <filter string="Parent" name="Parent" help="Parent" icon="terp-folder-blue" domain = "[]" context="{'group_by':'parent_id'}"/>
                     </group>
@@ -218,7 +218,7 @@
                     <field name="message_unread" invisible="1"/>
                     <field name="date" invisible="1"/>
                     <field name="name" string="Project Name"/>
-                    <field name="user_partner_id" string="Project Manager"/>
+                    <field name="project_manager_id" string="Project Manager"/>
                     <field name="partner_id" string="Contact"/>
                     <field name="parent_id" string="Parent" invisible="1"/>
                     <field name="planned_hours" widget="float_time"/>
@@ -240,7 +240,7 @@
                     <field name="name"/>
                     <field name="members"/>
                     <field name="use_tasks"/>
-                    <field name="user_partner_id"/>
+                    <field name="project_manager_id"/>
                     <field name="date"/>
                     <field name="color"/>
                     <field name="task_count"/>
@@ -386,7 +386,7 @@
                     <group>
                         <group>
                             <field name="project_id" domain="[('state', '!=', 'close')]" on_change="onchange_project(project_id)" context="{'default_use_tasks':1}"/>
-                            <field name="user_partner_id"
+                            <field name="assigned_partner_id"
                                 options='{"no_open": True}'
                                 context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'project.group_project_user']}"/>
                             <field name="planned_hours" widget="float_time"
@@ -432,7 +432,7 @@
                             <field name="child_ids">
                                 <tree string="Delegated tasks">
                                     <field name="name"/>
-                                    <field name="user_partner_id"/>
+                                    <field name="assigned_partner_id"/>
                                     <field name="stage_id"/>
                                     <field name="effective_hours" widget="float_time"/>
                                     <field name="progress" widget="progressbar"/>
@@ -477,7 +477,7 @@
                     <field name="color"/>
                     <field name="priority"/>
                     <field name="stage_id"/>
-                    <field name="user_partner_id"/>
+                    <field name="assigned_partner_id"/>
                     <field name="partner_email"/>
                     <field name="description"/>
                     <field name="sequence"/>
@@ -525,7 +525,7 @@
                                     <field name="categ_ids"/>
                                 </div>
                                     <div class="oe_kanban_bottom_right">
-                                        <img t-att-src="kanban_image('res.partner', 'image_small', record.user_partner_id.raw_value)" t-att-title="record.user_partner_id.value" width="24" height="24" class="oe_kanban_avatar pull-right"/>
+                                        <img t-att-src="kanban_image('res.partner', 'image_small', record.assigned_partner_id.raw_value)" t-att-title="record.assigned_partner_id.value" width="24" height="24" class="oe_kanban_avatar pull-right"/>
                                         <div class="pull-left" groups="base.group_user">
                                             <field name="kanban_state" widget="kanban_state_selection"/>
                                             <field name="priority" widget="priority"/>
@@ -550,7 +550,7 @@
                     <field name="sequence" invisible="not context.get('seq_visible', False)"/>
                     <field name="name"/>
                     <field name="project_id" icon="gtk-indent" invisible="context.get('user_invisible', False)"/>
-                    <field name="user_partner_id" invisible="context.get('user_invisible', False)"/>
+                    <field name="assigned_partner_id" invisible="context.get('user_invisible', False)"/>
                     <field name="delegated_user_id" invisible="context.get('show_delegated', True)"/>
                     <field name="total_hours" invisible="1"/>
                     <field name="planned_hours" invisible="context.get('set_visible',False)" groups="project.group_time_work_estimation_tasks"/>
@@ -570,7 +570,7 @@
             <field name="model">project.task</field>
             <field eval="2" name="priority"/>
             <field name="arch" type="xml">
-                <calendar color="user_partner_id" date_start="date_deadline" string="Tasks">
+                <calendar color="assigned_partner_id" date_start="date_deadline" string="Tasks">
                     <field name="name"/>
                     <field name="project_id"/>
                 </calendar>
@@ -747,7 +747,7 @@
         </record>
 
         <!-- User Form -->
-        <act_window context="{'search_default_user_id': [active_id], 'default_user_partner_id': active_id}"
+        <act_window context="{'search_default_user_id': [active_id], 'default_assigned_partner_id': active_id}"
                     id="act_res_users_2_project_task_opened" name="Assigned Tasks"
                     res_model="project.task" src_model="res.partner" view_mode="tree,form,gantt,calendar,graph" view_type="form"/>
 

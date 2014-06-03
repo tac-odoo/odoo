@@ -81,7 +81,7 @@
 
         <record id="resource_analyst" model="resource.resource">
             <field eval="1.0" name="time_efficiency"/>
-            <field name="user_partner_id" ref="base.partner_root"/>
+            <field name="related_partner_id" ref="base.partner_root"/>
             <field name="name">Analyst</field>
             <field eval="1" name="active"/>
             <field name="calendar_id" ref="timesheet_group1"/>
@@ -90,7 +90,7 @@
 
         <record id="resource_designer" model="resource.resource">
             <field eval="1.0" name="time_efficiency"/>
-            <field name="user_partner_id" ref="base.partner_demo"/>
+            <field name="related_partner_id" ref="base.partner_demo"/>
             <field name="name">Designer</field>
             <field eval="1" name="active"/>
             <field name="calendar_id" ref="timesheet_group1"/>
@@ -99,7 +99,7 @@
 
         <record id="resource_developer" model="resource.resource">
             <field eval="1.0" name="time_efficiency"/>
-            <field name="user_partner_id" ref="base.partner_demo"/>
+            <field name="related_partner_id" ref="base.partner_demo"/>
             <field name="name">Developer</field>
             <field eval="1" name="active"/>
             <field name="calendar_id" ref="timesheet_group1"/>

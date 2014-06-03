@@ -152,7 +152,7 @@ class TestProjectFlow(TestProjectBase):
 
         # Open the delegation wizard
         delegate_id = self.project_task_delegate.create(cr, user_projectuser_id, {
-            'user_partner_id': user_projectuser_id,
+            'assigned_partner_id': user_projectuser_id,
             'planned_hours': 12.0,
             'planned_hours_me': 2.0,
         }, {'active_id': task.id})

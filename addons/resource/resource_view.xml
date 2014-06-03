@@ -12,10 +12,10 @@
                    <field name="name" string="Resource"/>
                    <field name="resource_type"/>
                    <filter string="Inactive" icon="terp-gdu-smart-failing" domain="[('active','=',False)]"/>
-                   <field name="user_partner_id" string="Partner"/>
+                   <field name="related_partner_id" string="Partner"/>
                    <field name="company_id" groups="base.group_multi_company"/>
                    <group expand="0" string="Group By...">
-                        <filter string="Partner" icon="terp-personal" domain="[]" context="{'group_by':'user_partner_id'}"/>
+                        <filter string="Partner" icon="terp-personal" domain="[]" context="{'group_by':'related_partner_id'}"/>
                         <filter string="Type" icon="terp-stock_symbol-selection" domain="[]" context="{'group_by':'resource_type'}"/>
                         <filter string="Company" icon="terp-go-home" domain="[]" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
                         <filter string="Working Period" icon="terp-go-today" domain="[]" context="{'group_by':'calendar_id'}"/>
@@ -166,7 +166,7 @@
                    <group>
                       <group>
                         <field name="name"/>
-                        <field name="user_partner_id" attrs="{'required':[('resource_type','=','user')], 'readonly':[('resource_type','=','material')]}"/>
+                        <field name="related_partner_id" attrs="{'required':[('resource_type','=','user')], 'readonly':[('resource_type','=','material')]}"/>
                         <field name="company_id" widget="selection" groups="base.group_multi_company"/>
                         <field name="active"/>
                        </group>
@@ -186,7 +186,7 @@
             <field name="arch" type="xml">
                 <tree string="Resources">
                     <field name="name" />
-                    <field name="user_partner_id" />
+                    <field name="related_partner_id" />
                     <field name="company_id" groups="base.group_multi_company"/>
                     <field name="resource_type" />
                     <field name="calendar_id"/>
