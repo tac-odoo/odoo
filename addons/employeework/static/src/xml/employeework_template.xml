@@ -1,0 +1,190 @@
+<?xml version="1.0" ?>
+<openerp>
+    <data>
+    	<template id='home' name="Employee Work Home">
+    		<t t-call="website.layout">
+    			<script type="text/javascript">
+					$(document).ready(function(){
+    					$(".weekview_txt").change(function(){
+    						hour = $(this).val();
+    						date_index = $(this).closest("td").index();
+    						current_date = $("input#hidden").val();
+    						$.ajax({url:"/employeework/editdata",data:'hour=' + hour + '&amp;project_id=' + this.id +'&amp;date_index=' + date_index + '&amp;current_date=' + current_date,success:function(result){
+    							window.location.reload();
+		                    }
+		                    });
+    					});
+    				});
+    			</script>
+			  	<div class="container">
+					<div class="row">
+						<div class="col-xs-5 col-md-4">
+		    				<h2 t-if="active=='date'">
+		    					
+				    			<t t-esc="current_date.strftime('%A')" /> 
+				    			<small t-esc="str(current_date.day)" />
+				    			<small t-esc="current_date.strftime('%B')" />
+							</h2>
+							<h3 t-if="active=='week'">
+								<t t-esc="start_date.strftime('%b')==end_date.strftime('%b') and start_date.strftime('%d') or start_date.strftime('%d %b')" /> - <t t-esc="end_date.strftime('%d %b %Y')" />
+			    			</h3>
+						</div>
+						<div class="col-xs-4 col-md-4">
+							<t t-call="employeework.employeework_navigation" />
+						</div>
+						<div class="col-xs-3 col-md-4" style="padding-top:20px;">
+							<div class="btn-group">
+								<a t-att-class="active=='date' and 'btn btn-primary active' or 'btn btn-primary'" t-attf-href="/employeework/dateview?current_date={{current_date.strftime('%Y-%m-%d')}}&amp;active=date"><span class="glyphicon glyphicon-calendar"></span> Date</a>
+				  				<a t-att-class="active=='week' and 'btn btn-primary active' or 'btn btn-primary'" t-attf-href="/employeework/weekview?current_date={{current_date.strftime('%Y-%m-%d')}}&amp;active=week"><span class="glyphicon glyphicon-th-list"></span> Week</a>
+							</div>
+						</div>
+			  		</div>
+					<div class="row">
+						<t t-if="active=='date'">
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<t t-call="employeework.employeework_selector" />
+								</div>
+								<div class="panel-body">
+									<t t-call="employeework.display" />
+								</div>
+							</div>
+						</t>
+						<t t-if="active=='week'">
+							<t t-call="employeework.display" />
+						</t>
+					</div>
+				</div>
+			</t>
+    	</template>
+    	<template id="employeework_navigation" name="Navigation">
+	    	<ul class="pagination">
+				<li>
+					<t t-if="active=='date'">
+						<a t-attf-href="/employeework/dateview?current_date={{(current_date-datetime.timedelta(days=1)).strftime('%Y-%m-%d')}}&amp;active={{active}}">&lt;</a>
+					</t>
+					<t t-if="active=='week'">
+						<a t-attf-href="/employeework/weekview?current_date={{(start_date-datetime.timedelta(days=1)).strftime('%Y-%m-%d')}}&amp;active={{active}}">&lt;</a>
+					</t>
+				</li>
+				<li>
+					<a t-attf-href="/employeework/{{active}}view?current_date={{datetime.datetime.now().strftime('%Y-%m-%d')}}&amp;active={{active}}"><t t-esc="active=='date' and 'Today' or 'This Week'"/></a>
+				</li>
+				<li>
+					<t t-if="active=='date'">
+						<a t-attf-href="/employeework/dateview?current_date={{(current_date+datetime.timedelta(days=1)).strftime('%Y-%m-%d')}}&amp;active={{active}}">&gt;</a>
+					</t>
+					<t t-if="active=='week'">
+						<a t-attf-href="/employeework/weekview?current_date={{(end_date+datetime.timedelta(days=1)).strftime('%Y-%m-%d')}}&amp;active={{active}}">&gt;</a>
+					</t>
+				</li>
+			</ul>
+		</template>
+		<template id="employeework_selector" name="Selector">
+			<t t-if="active=='date'">
+				<div class="btn-group btn-group-lg" style="width:100%;">
+					<t t-foreach="date_list" t-as="date">
+						<t t-if="date['dates']!=''">
+							<a style="width:12.5%;" t-att-class="date['dates']==current_date and 'btn btn-primary active' or 'btn btn-default'" t-attf-href="/employeework/dateview?current_date={{date['dates'].strftime('%Y-%m-%d')}}&amp;active={{active}}"><small class="text-right"><strong t-esc="date['dates'].strftime('%A')[:3]" /></small><br />
+							<small t-esc="date['count']" />
+							</a>
+						</t>
+					</t>
+					<span class="btn btn-primary" disabled="disabled" style="width:12.5%;">Total :<br />
+						<small t-foreach="date_list" t-as="date">
+							<t t-if="date['dates']==''">
+								<t t-esc="date['grand_total']" />
+							</t>
+						</small>
+					</span>
+				</div>
+			</t>
+		</template>
+    	<template id="display" name="Display Data">
+    		<t t-if="active=='date'">
+	    		<t t-if="data!=[]">
+	                <div class="table-responsive">
+			            <table class="table table-hover">
+			            	<t t-if="active=='date'">
+					        	<tr t-foreach='data' t-as='rec'>
+					        		<td>
+					        			<b t-esc="rec['account_id'][1]" /><br /><small t-esc="rec['name']" />
+					        		</td>
+					        		<td>
+					        			<h4><strong t-esc="rec['unit_amount']" /></h4>
+					        		</td>
+					        		<td>
+					        			<button type="button" class="btn btn-default btn-sm mt4">
+											<span class="glyphicon glyphicon-pencil"></span>
+										</button>
+					        		</td>
+								</tr>
+								<tr>
+					        		<td>
+					        			<h4><strong class="pull-right">Total : </strong></h4></td>
+					        		<td>
+					        			<t t-foreach="date_list" t-as="date">
+											<t t-if="date['dates']==current_date">
+												<h4 t-esc="date['count']" />
+											</t>
+										</t>
+					        		</td>
+					        		<td></td>
+								</tr>
+							</t>
+			        	</table>
+			        </div>
+		        </t>
+		        <t t-if="data==[]">
+		        	<h3 style="text-align:center;"><span class="label label-primary">No Data Available.</span></h3>
+		        </t>
+	    	</t>
+	    	<t t-if="active=='week'">
+	    		<div class="panel panel-default">
+	                <div class="table-responsive">
+			            <table class="table table-hover">
+			            	<thead>
+								<tr class="info">
+									<td><input id="hidden" type="hidden" t-att-value="current_date.strftime('%Y-%m-%d')" /></td>
+									<t t-foreach="date_list" t-as="date">
+										<td t-if="date['dates']!=''">
+											<a style="text-decoration:none;" t-attf-href="/employeework/dateview?current_date={{date['dates'].strftime('%Y-%m-%d')}}&amp;active=date"><small><strong><t t-esc="date['dates'].strftime('%A')[:3]" /></strong></small><br />
+											<small><t t-esc="date['dates'].strftime('%02d')" /> <t t-esc="date['dates'].strftime('%b')" /></small>
+											</a>
+										</td>
+									</t>
+									<td></td><td></td>
+								</tr>
+							</thead>
+							<t t-if="data!=[]">
+								<tr t-foreach='week_data' t-as='rec'>
+						        	<td t-esc="rec['project_name']" />
+						        	<t t-foreach="rec['duration']" t-as='r'>
+						        		<td><input t-att-id="rec['project_id']" class="weekview_txt form-control" type="text" t-att-value="r" /></td>
+						        	</t>
+						        	<td>
+						        		<h5><a style="text-decoration:none;"><t t-esc="rec['total']" /></a></h5>
+						        	</td>
+						        	<td>
+						        		<button type="button" class="btn btn-default btn-sm">
+											<span class="glyphicon glyphicon-remove"></span>
+										</button>
+						        	</td>
+								</tr>
+								<tr class="info">
+									<td class="text-align:center;"><h5><a style="text-decoration:none;">Total : </a></h5></td>
+									<t t-foreach="row_total" t-as='r'>
+						        		<td style="text-align:center;"><h5><a style="text-decoration:none;"><t t-esc="r" /></a></h5></td>
+						        	</t>
+						        	<td><h5><span class="label label-primary"><t t-esc="sum(row_total)" /></span></h5></td>
+						        	<td></td>
+								</tr>
+							</t>
+			        	</table>
+			        </div>
+		        <h3 t-if="data==[]" style="text-align:center;"><span class="label label-primary">No Data Available.</span></h3>
+		    	</div>
+	    	</t>
+    	</template>
+    </data>
+</openerp>
