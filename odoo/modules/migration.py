@@ -29,7 +29,6 @@ from os.path import join as opj
 
 import openerp
 import openerp.release as release
-import openerp.tools as tools
 from openerp.tools.parse_version import parse_version
 
 
@@ -155,7 +154,7 @@ class MigrationManager(object):
                         continue
                     mod = fp = fp2 = None
                     try:
-                        fp = tools.file_open(pyfile)
+                        fp = openerp.tools.file_open(pyfile)
 
                         # imp.load_source need a real file object, so we create
                         # one from the file-like object we get from file_open

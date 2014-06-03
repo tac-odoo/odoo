@@ -28,10 +28,6 @@ import itertools
 import zipimport
 
 import openerp
-import openerp.osv as osv
-import openerp.tools as tools
-import openerp.tools.osutil as osutil
-from openerp.tools.safe_eval import safe_eval as eval
 from openerp.tools.translate import _
 
 import zipfile
@@ -118,7 +114,7 @@ class Graph(dict):
                 node = self.add_node(package, info)
                 node.data = info
                 for kind in ('init', 'demo', 'update'):
-                    if package in tools.config[kind] or 'all' in tools.config[kind] or kind in force:
+                    if package in openerp.tools.config[kind] or 'all' in openerp.tools.config[kind] or kind in force:
                         setattr(node, kind, True)
             else:
                 later.add(package)
@@ -190,7 +186,7 @@ class Node(Singleton):
     def __setattr__(self, name, value):
         super(Singleton, self).__setattr__(name, value)
         if name in ('init', 'update', 'demo'):
-            tools.config[name][self.name] = 1
+            openerp.tools.config[name][self.name] = 1
             for child in self.children:
                 setattr(child, name, value)
         if name == 'depth':

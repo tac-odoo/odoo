@@ -61,10 +61,6 @@ from lxml import etree
 
 import fields
 import openerp
-import openerp.tools as tools
-from openerp.tools.config import config
-from openerp.tools.misc import CountingStream, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
-from openerp.tools.safe_eval import safe_eval as eval
 from openerp.tools.translate import _
 from openerp import SUPERUSER_ID
 from query import Query
@@ -103,7 +99,7 @@ def transfer_field_to_modifiers(field, modifiers):
 # For non-tree views, the context shouldn't be given.
 def transfer_node_to_modifiers(node, modifiers, context=None, in_tree_view=False):
     if node.get('attrs'):
-        modifiers.update(eval(node.get('attrs')))
+        modifiers.update(openerp.tools.safe_eval.safe_eval(node.get('attrs')))
 
     if node.get('states'):
         if 'invisible' in modifiers and isinstance(modifiers['invisible'], list):
@@ -114,7 +110,7 @@ def transfer_node_to_modifiers(node, modifiers, context=None, in_tree_view=False
 
     for a in ('invisible', 'readonly', 'required'):
         if node.get(a):
-            v = bool(eval(node.get(a), {'context': context or {}}))
+            v = bool(openerp.tools.safe_eval.safe_eval(node.get(a), {'context': context or {}}))
             if in_tree_view and a == 'invisible':
                 # Invisible in a tree view has a specific meaning, make it a
                 # new key in the modifiers attribute.
@@ -791,7 +787,7 @@ class BaseModel(object):
                 'field_description': f.string,
                 'ttype': f._type,
                 'relation': f._obj or '',
-                'select_level': tools.ustr(f.select or 0),
+                'select_level': openerp.tools.ustr(f.select or 0),
                 'readonly': (f.readonly and 1) or 0,
                 'required': (f.required and 1) or 0,
                 'selectable': (f.selectable and 1) or 0,
@@ -1049,7 +1045,7 @@ class BaseModel(object):
                 'string': field['field_description'],
                 'required': bool(field['required']),
                 'readonly': bool(field['readonly']),
-                'domain': eval(field['domain']) if field['domain'] else None,
+                'domain': openerp.tools.safe_eval.safe_eval(field['domain']) if field['domain'] else None,
                 'size': field['size'] or None,
                 'ondelete': field['on_delete'],
                 'translate': (field['translate']),
@@ -1065,9 +1061,9 @@ class BaseModel(object):
                     attrs.update({'relation': field['relation']})
                 self._columns[field['name']] = fields.sparse(**attrs)
             elif field['ttype'] == 'selection':
-                self._columns[field['name']] = fields.selection(eval(field['selection']), **attrs)
+                self._columns[field['name']] = fields.selection(openerp.tools.safe_eval.safe_eval(field['selection']), **attrs)
             elif field['ttype'] == 'reference':
-                self._columns[field['name']] = fields.reference(selection=eval(field['selection']), **attrs)
+                self._columns[field['name']] = fields.reference(selection=openerp.tools.safe_eval.safe_eval(field['selection']), **attrs)
             elif field['ttype'] == 'many2one':
                 self._columns[field['name']] = fields.many2one(field['relation'], **attrs)
             elif field['ttype'] == 'one2many':
@@ -1092,8 +1088,8 @@ class BaseModel(object):
         # Transience
         if self.is_transient():
             self._transient_check_count = 0
-            self._transient_max_count = config.get('osv_memory_count_limit')
-            self._transient_max_hours = config.get('osv_memory_age_limit')
+            self._transient_max_count = openerp.tools.config.get('osv_memory_count_limit')
+            self._transient_max_hours = openerp.tools.config.get('osv_memory_age_limit')
             assert self._log_access, "TransientModels must have log_access turned on, "\
                                      "in order to implement their access rights policy"
 
@@ -1210,7 +1206,7 @@ class BaseModel(object):
                                             rr = rr[name_relation]
                                         rr_name = self.pool[rr._table_name].name_get(cr, uid, [rr.id], context=context)
                                         rr_name = rr_name and rr_name[0] and rr_name[0][1] or ''
-                                        dt += tools.ustr(rr_name or '') + ','
+                                        dt += openerp.tools.ustr(rr_name or '') + ','
                                     data[fpos] = dt[:-1]
                                     break
                                 lines += lines2[1:]
@@ -1227,11 +1223,11 @@ class BaseModel(object):
                     if raw_data and cols and cols._type in ('integer', 'boolean', 'float'):
                         data[fpos] = r
                     elif raw_data and cols and cols._type == 'date':
-                        data[fpos] = datetime.datetime.strptime(r, tools.DEFAULT_SERVER_DATE_FORMAT).date()
+                        data[fpos] = datetime.datetime.strptime(r, openerp.tools.DEFAULT_SERVER_DATE_FORMAT).date()
                     elif raw_data and cols and cols._type == 'datetime':
-                        data[fpos] = datetime.datetime.strptime(r, tools.DEFAULT_SERVER_DATETIME_FORMAT)
+                        data[fpos] = datetime.datetime.strptime(r, openerp.tools.DEFAULT_SERVER_DATETIME_FORMAT)
                     else:
-                        data[fpos] = tools.ustr(r or '')
+                        data[fpos] = openerp.tools.ustr(r or '')
         return [data] + lines
 
     def export_data(self, cr, uid, ids, fields_to_export, raw_data=False, context=None):
@@ -1311,8 +1307,8 @@ class BaseModel(object):
             if m['type'] == 'error':
                 raise Exception(m['message'])
 
-        if config.get('import_partial') and filename:
-            with open(config.get('import_partial'), 'rb') as partial_import_file:
+        if openerp.tools.config.get('import_partial') and filename:
+            with open(openerp.tools.config.get('import_partial'), 'rb') as partial_import_file:
                 data = pickle.load(partial_import_file)
                 position = data.get(filename, 0)
 
@@ -1326,18 +1322,18 @@ class BaseModel(object):
                      current_module, res, mode=mode, xml_id=xml_id,
                      noupdate=noupdate, res_id=res_id, context=context)
                 position = info.get('rows', {}).get('to', 0) + 1
-                if config.get('import_partial') and filename and (not (position%100)):
-                    with open(config.get('import_partial'), 'rb') as partial_import:
+                if openerp.tools.config.get('import_partial') and filename and (not (position%100)):
+                    with open(openerp.tools.config.get('import_partial'), 'rb') as partial_import:
                         data = pickle.load(partial_import)
                     data[filename] = position
-                    with open(config.get('import_partial'), 'wb') as partial_import:
+                    with open(openerp.tools.config.get('import_partial'), 'wb') as partial_import:
                         pickle.dump(data, partial_import)
                     if context.get('defer_parent_store_computation'):
                         self._parent_store_compute(cr)
                     cr.commit()
         except Exception, e:
             cr.rollback()
-            return -1, {}, 'Line %d : %s' % (position + 1, tools.ustr(e)), ''
+            return -1, {}, 'Line %d : %s' % (position + 1, openerp.tools.ustr(e)), ''
 
         if context.get('defer_parent_store_computation'):
             self._parent_store_compute(cr)
@@ -1513,7 +1509,7 @@ class BaseModel(object):
                 record.update(exception.args[1])
             log(record)
 
-        stream = CountingStream(records)
+        stream = openerp.tools.misc.CountingStream(records)
         for record, extras in stream:
             dbid = False
             xid = False
@@ -1557,7 +1553,7 @@ class BaseModel(object):
             except Exception, e:
                 _logger.debug('Exception while validating constraint', exc_info=True)
                 valid = False
-                extra_error = tools.ustr(e)
+                extra_error = openerp.tools.ustr(e)
             if not valid:
                 # Check presence of __call__ directly instead of using
                 # callable() because it will be deprecated as of Python 3.0
@@ -2305,7 +2301,7 @@ class BaseModel(object):
         gb = groupby_dict.get(key)
         if gb and gb['type'] in ('date', 'datetime') and value:
             if isinstance(value, basestring):
-                dt_format = DEFAULT_SERVER_DATETIME_FORMAT if gb['type'] == 'datetime' else DEFAULT_SERVER_DATE_FORMAT
+                dt_format = openerp.tools.DEFAULT_SERVER_DATETIME_FORMAT if gb['type'] == 'datetime' else openerp.tools.DEFAULT_SERVER_DATE_FORMAT
                 value = datetime.datetime.strptime(value, dt_format)
             if gb['tz_convert']:
                 value =  pytz.timezone(context['tz']).localize(value)
@@ -2317,7 +2313,7 @@ class BaseModel(object):
             a given value. This is mostly relevant for date/datetime.
         """
         if groupby['type'] in ('date', 'datetime') and value:
-            dt_format = DEFAULT_SERVER_DATETIME_FORMAT if groupby['type'] == 'datetime' else DEFAULT_SERVER_DATE_FORMAT
+            dt_format = openerp.tools.DEFAULT_SERVER_DATETIME_FORMAT if groupby['type'] == 'datetime' else openerp.tools.DEFAULT_SERVER_DATE_FORMAT
             domain_dt_begin = value
             domain_dt_end = value + groupby['interval']
             if groupby['tz_convert']:
@@ -3444,7 +3440,7 @@ class BaseModel(object):
                     '(a dictionary was expected).' % (val[0], self._name)
                 for pos in val:
                     for record in res:
-                        if isinstance(res2[record['id']], str): res2[record['id']] = eval(res2[record['id']]) #TOCHECK : why got string instend of dict in python2.6
+                        if isinstance(res2[record['id']], str): res2[record['id']] = openerp.tools.safe_eval.safe_eval(res2[record['id']]) #TOCHECK : why got string instend of dict in python2.6
                         multi_fields = res2.get(record['id'],{})
                         if multi_fields:
                             record[pos] = multi_fields.get(pos,[])
@@ -4996,6 +4992,15 @@ class BaseModel(object):
         """
         return self._transient
 
+    # Absraction
+    def is_abstract(self):
+        """ Return whether the model is Abstract.
+
+        See :class:`AbstractModel`.
+
+        """
+        return self._abstract
+
     def _transient_clean_rows_older_than(self, cr, seconds):
         assert self._transient, "Model %s is not transient, it cannot be vacuumed!" % self._name
         # Never delete rows used in last 5 minutes
@@ -5171,6 +5176,7 @@ class Model(BaseModel):
     _auto = True
     _register = False # not visible in ORM registry, meant to be python-inherited only
     _transient = False # True in a TransientModel
+    _abstract = False
 
 class TransientModel(BaseModel):
     """Model super-class for transient records, meant to be temporarily
@@ -5184,6 +5190,7 @@ class TransientModel(BaseModel):
     _auto = True
     _register = False # not visible in ORM registry, meant to be python-inherited only
     _transient = True
+    _abstract = False
 
 class AbstractModel(BaseModel):
     """Abstract Model super-class for creating an abstract class meant to be
@@ -5198,6 +5205,7 @@ class AbstractModel(BaseModel):
     _auto = False # don't create any database backend for AbstractModels
     _register = False # not visible in ORM registry, meant to be python-inherited only
     _transient = False
+    _abstract = True
 
 def itemgetter_tuple(items):
     """ Fixes itemgetter inconsistency (useful in some cases) of not returning

@@ -33,9 +33,6 @@ from os.path import join as opj
 import unittest2
 
 import openerp
-import openerp.tools as tools
-import openerp.release as release
-from openerp.tools.safe_eval import safe_eval as eval
 
 _logger = logging.getLogger(__name__)
 
@@ -87,8 +84,8 @@ def initialize_sys_path():
     if ad_paths:
         return
 
-    ad_paths = [tools.config.addons_data_dir]
-    ad_paths += map(lambda m: os.path.abspath(tools.ustr(m.strip())), tools.config['addons_path'].split(','))
+    ad_paths = [openerp.tools.config.addons_data_dir]
+    ad_paths += map(lambda m: os.path.abspath(openerp.tools.ustr(m.strip())), openerp.tools.config['addons_path'].split(','))
 
     # add base module path
     base_path = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'addons'))
@@ -110,7 +107,7 @@ def get_module_path(module, downloaded=False, display_warning=True):
             return opj(adp, module)
 
     if downloaded:
-        return opj(tools.config.addons_data_dir, module)
+        return opj(openerp.tools.config.addons_data_dir, module)
     if display_warning:
         _logger.warning('module %s: module not found', module)
     return False
@@ -205,9 +202,9 @@ def load_information_from_description_file(module, mod_path=None):
                 'depends data demo test init_xml update_xml demo_xml'.split(),
                 iter(list, None)))
 
-            f = tools.file_open(terp_file)
+            f = openerp.tools.file_open(terp_file)
             try:
-                info.update(eval(f.read()))
+                info.update(openerp.tools.safe_eval.safe_eval(f.read()))
             finally:
                 f.close()
 
@@ -315,7 +312,7 @@ def get_modules_with_version():
     return res
 
 def adapt_version(version):
-    serie = release.major_version
+    serie = openerp.release.major_version
     if version == serie or not version.startswith(serie + '.'):
         version = '%s.%s' % (serie, version)
     return version
