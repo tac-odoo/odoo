@@ -2301,7 +2301,7 @@ class BaseModel(object):
         gb = groupby_dict.get(key)
         if gb and gb['type'] in ('date', 'datetime') and value:
             if isinstance(value, basestring):
-                dt_format = openerp.tools.DEFAULT_SERVER_DATETIME_FORMAT if gb['type'] == 'datetime' else openerp.tools.DEFAULT_SERVER_DATE_FORMAT
+                dt_format = openerp.tools.misc.DEFAULT_SERVER_DATETIME_FORMAT if gb['type'] == 'datetime' else openerp.tools.misc.DEFAULT_SERVER_DATE_FORMAT
                 value = datetime.datetime.strptime(value, dt_format)
             if gb['tz_convert']:
                 value =  pytz.timezone(context['tz']).localize(value)
@@ -2313,7 +2313,7 @@ class BaseModel(object):
             a given value. This is mostly relevant for date/datetime.
         """
         if groupby['type'] in ('date', 'datetime') and value:
-            dt_format = openerp.tools.DEFAULT_SERVER_DATETIME_FORMAT if groupby['type'] == 'datetime' else openerp.tools.DEFAULT_SERVER_DATE_FORMAT
+            dt_format = openerp.tools.misc.DEFAULT_SERVER_DATETIME_FORMAT if groupby['type'] == 'datetime' else openerp.tools.misc.DEFAULT_SERVER_DATE_FORMAT
             domain_dt_begin = value
             domain_dt_end = value + groupby['interval']
             if groupby['tz_convert']:
