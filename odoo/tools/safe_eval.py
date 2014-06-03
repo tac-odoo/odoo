@@ -32,6 +32,7 @@ condition/math builtins.
 #  - safe_eval in tryton http://hg.tryton.org/hgwebdir.cgi/trytond/rev/bbb5f73319ad
 
 from opcode import HAVE_ARGUMENT, opmap, opname
+from openerp.osv.orm import except_orm
 from types import CodeType
 import logging
 
@@ -309,7 +310,7 @@ def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval", nocopy=Fal
     c = test_expr(expr, _SAFE_OPCODES, mode=mode)
     try:
         return eval(c, globals_dict, locals_dict)
-    except openerp.osv.orm.except_orm:
+    except except_orm:
         raise
     except openerp.exceptions.Warning:
         raise

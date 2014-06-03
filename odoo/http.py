@@ -36,6 +36,7 @@ import werkzeug.wsgi
 
 import openerp
 from openerp.service import security, model as service_model
+from openerp.osv.orm import except_orm
 from openerp.tools.func import lazy_property
 from odoo.modules.registry import RegistryManager
 
@@ -103,7 +104,7 @@ def dispatch_rpc(service_name, method, params):
                 openerp.netsvc.log(rpc_request, logging.DEBUG, logline, replace_request_password(params), depth=1)
 
         return result
-    except (openerp.osv.orm.except_orm, openerp.exceptions.AccessError, \
+    except (except_orm, openerp.exceptions.AccessError, \
             openerp.exceptions.AccessDenied, openerp.exceptions.Warning, \
             openerp.exceptions.RedirectWarning):
         raise

@@ -42,6 +42,7 @@ import werkzeug.serving
 import werkzeug.contrib.fixers
 
 import openerp
+from openerp.osv.orm import except_orm
 import openerp.tools.config as config
 import websrv_lib
 
@@ -83,7 +84,7 @@ def xmlrpc_return(start_response, service, method, params, string_faultcode=Fals
     return [response]
 
 def xmlrpc_handle_exception_int(e):
-    if isinstance(e, openerp.osv.orm.except_orm): # legacy
+    if isinstance(e, except_orm): # legacy
         fault = xmlrpclib.Fault(RPC_FAULT_CODE_WARNING, openerp.tools.ustr(e.value))
         response = xmlrpclib.dumps(fault, allow_none=False, encoding=None)
     elif isinstance(e, openerp.exceptions.Warning) or isinstance(e, openerp.exceptions.RedirectWarning):
@@ -116,7 +117,7 @@ def xmlrpc_handle_exception_int(e):
     return response
 
 def xmlrpc_handle_exception_string(e):
-    if isinstance(e, openerp.osv.orm.except_orm):
+    if isinstance(e, except_orm):
         fault = xmlrpclib.Fault('warning -- ' + e.name + '\n\n' + e.value, '')
         response = xmlrpclib.dumps(fault, allow_none=False, encoding=None)
     elif isinstance(e, openerp.exceptions.Warning):

@@ -26,7 +26,6 @@ import openerp
 from odoo.modules.registry import RegistryManager
 from openerp import SUPERUSER_ID
 from openerp.osv import fields, osv
-
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 
 _logger = logging.getLogger(__name__)
@@ -237,7 +236,7 @@ class base_action_rule(osv.osv):
             ids = [ids]
         super(base_action_rule, self).write(cr, uid, ids, vals, context=context)
         self._register_hook(cr, ids)
-	RegistryManager.signal_registry_change(cr.dbname)
+        RegistryManager.signal_registry_change(cr.dbname)
         return True
 
     def onchange_model_id(self, cr, uid, ids, model_id, context=None):

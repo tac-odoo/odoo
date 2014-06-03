@@ -9,6 +9,7 @@ import openerp
 import openerp.report
 from odoo.modules.registry import RegistryManager
 from openerp import tools
+from openerp.osv.orm import except_orm
 
 import security
 
@@ -116,7 +117,7 @@ def _check_report(report_id):
     result = self_reports[report_id]
     exc = result['exception']
     if exc:
-        raise openerp.osv.orm.except_orm(exc.message, exc.traceback)
+        raise except_orm(exc.message, exc.traceback)
     res = {'state': result['state']}
     if res['state']:
         if tools.config['reportgz']:

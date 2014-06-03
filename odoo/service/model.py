@@ -127,7 +127,7 @@ def check(f):
                 registry = openerp.registry(dbname)
                 for key in registry._sql_error.keys():
                     if key in inst[0]:
-                        raise openerp.osv.orm.except_orm(_('Constraint Error'), tr(registry._sql_error[key], 'sql_constraint') or inst[0])
+                        raise except_orm(_('Constraint Error'), tr(registry._sql_error[key], 'sql_constraint') or inst[0])
                 if inst.pgcode in (errorcodes.NOT_NULL_VIOLATION, errorcodes.FOREIGN_KEY_VIOLATION, errorcodes.RESTRICT_VIOLATION):
                     msg = _('The operation cannot be completed, probably due to the following:\n- deletion: you may be trying to delete a record while other records still reference it\n- creation/update: a mandatory field is not correctly set')
                     _logger.debug("IntegrityError", exc_info=True)
@@ -147,9 +147,9 @@ def check(f):
                         msg += _('\n\n[object with reference: %s - %s]') % (model_name, model)
                     except Exception:
                         pass
-                    raise openerp.osv.orm.except_orm(_('Integrity Error'), msg)
+                    raise except_orm(_('Integrity Error'), msg)
                 else:
-                    raise openerp.osv.orm.except_orm(_('Integrity Error'), inst[0])
+                    raise except_orm(_('Integrity Error'), inst[0])
 
     return wrapper
 

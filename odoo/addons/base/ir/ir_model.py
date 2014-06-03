@@ -34,7 +34,7 @@ from openerp.osv.orm import Model, browse_null
 from openerp.tools.safe_eval import safe_eval as eval
 from openerp.tools import config
 from openerp.tools.translate import _
-from openerp.osv.orm import except_orm, browse_record, MAGIC_COLUMNS
+from openerp.osv.orm import except_orm, browse_record, MAGIC_COLUMNS, LOG_ACCESS_COLUMNS
 
 _logger = logging.getLogger(__name__)
 
@@ -1126,7 +1126,7 @@ class ir_model_data(osv.osv):
                         _logger.info('Deleting orphan external_ids %s', external_ids)
                         self.unlink(cr, uid, external_ids)
                         continue
-                    if field.name in openerp.osv.orm.LOG_ACCESS_COLUMNS and self.pool[field.model]._log_access:
+                    if field.name in LOG_ACCESS_COLUMNS and self.pool[field.model]._log_access:
                         continue
                     if field.name == 'id':
                         continue
