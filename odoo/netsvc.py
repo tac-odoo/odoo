@@ -30,6 +30,7 @@ import threading
 import psycopg2
 
 import openerp
+from odoo.modules.registry import RegistryManager
 import sql_db
 import tools
 
@@ -64,7 +65,7 @@ def LocalService(name):
         else:
             dbname = getattr(threading.currentThread(), 'dbname', None)
             if dbname:
-                registry = openerp.modules.registry.RegistryManager.get(dbname)
+                registry = RegistryManager.get(dbname)
                 with registry.cursor() as cr:
                     return registry['ir.actions.report.xml']._lookup_report(cr, name[len('report.'):])
 

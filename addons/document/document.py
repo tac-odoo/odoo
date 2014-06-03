@@ -39,7 +39,7 @@ import openerp.report.interface
 from openerp.tools.misc import ustr
 from openerp.tools.translate import _
 from openerp.tools.safe_eval import safe_eval
-
+from odoo.modules.registry import RegistryManager
 from content_index import cntIndex
 
 _logger = logging.getLogger(__name__)
@@ -2107,7 +2107,7 @@ class nodefd_db(StringIO, node_descriptor):
         # FIXME: this may be improved, for concurrency handling
         par = self._get_parent()
         # uid = par.context.uid
-        registry = openerp.modules.registry.RegistryManager.get(par.context.dbname)
+        registry = RegistryManager.get(par.context.dbname)
         with registry.cursor() as cr:
             data = self.getvalue().encode('base64')
             if self.mode in ('w', 'w+', 'r+'):

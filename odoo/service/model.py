@@ -9,6 +9,7 @@ import time
 
 import openerp
 from openerp.tools.translate import translate
+from odoo.modules.registry import RegistryManager
 from openerp.osv.orm import except_orm
 from contextlib import contextmanager
 
@@ -32,10 +33,10 @@ def dispatch(method, params):
     if method not in ['execute', 'execute_kw', 'exec_workflow']:
         raise NameError("Method not available %s" % method)
     security.check(db,uid,passwd)
-    openerp.modules.registry.RegistryManager.check_registry_signaling(db)
+    RegistryManager.check_registry_signaling(db)
     fn = globals()[method]
     res = fn(db, uid, *params)
-    openerp.modules.registry.RegistryManager.signal_caches_change(db)
+    RegistryManager.signal_caches_change(db)
     return res
 
 def check(f):

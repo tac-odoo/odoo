@@ -4,23 +4,24 @@ import unittest2
 
 import openerp
 from openerp import SUPERUSER_ID
+from odoo.modules.registry import RegistryManager
 import common
 
 DB = common.DB
 ADMIN_USER_ID = common.ADMIN_USER_ID
 
 def registry(model):
-    return openerp.modules.registry.RegistryManager.get(DB)[model]
+    return RegistryManager.get(DB)[model]
 
 def cursor():
-    return openerp.modules.registry.RegistryManager.get(DB).cursor()
+    return RegistryManager.get(DB).cursor()
 
 def get_module(module_name):
-    registry = openerp.modules.registry.RegistryManager.get(DB)
+    registry = RegistryManager.get(DB)
     return registry.get(module_name)
 
 def reload_registry():
-    openerp.modules.registry.RegistryManager.new(
+    RegistryManager.new(
         DB, update_module=True)
 
 def search_registry(model_name, domain):

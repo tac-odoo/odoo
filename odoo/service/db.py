@@ -13,6 +13,7 @@ import psycopg2
 
 import openerp
 from openerp import SUPERUSER_ID
+from odoo.modules.registry import RegistryManager
 import openerp.release
 import openerp.sql_db
 import openerp.tools
@@ -36,7 +37,7 @@ def _initialize_db(id, db_name, demo, lang, user_password):
             openerp.tools.config['lang'] = lang
             cr.commit()
 
-        registry = openerp.modules.registry.RegistryManager.new(
+        registry = RegistryManager.new(
             db_name, demo, self_actions[id], update_module=True)
 
         with closing(db.cursor()) as cr:
@@ -155,7 +156,7 @@ def exp_get_progress(id):
 def exp_drop(db_name):
     if db_name not in exp_list(True):
         return False
-    openerp.modules.registry.RegistryManager.delete(db_name)
+    RegistryManager.delete(db_name)
     openerp.sql_db.close_db(db_name)
 
     db = openerp.sql_db.db_connect('postgres')
@@ -227,7 +228,7 @@ def exp_dump(db_name):
 def dump_db(db, stream):
     """Dump database `db` into file-like object `stream`"""
     with openerp.tools.osutil.tempdir() as dump_dir:
-        registry = openerp.modules.registry.RegistryManager.get(db)
+        registry = RegistryManager.get(db)
         with registry.cursor() as cr:
             filestore = registry['ir.attachment']._filestore(cr, SUPERUSER_ID)
             if os.path.exists(filestore):
@@ -306,7 +307,7 @@ def restore_db(db, dump_file, copy=False):
         if openerp.tools.exec_pg_command(pg_cmd, *pg_args):
             raise Exception("Couldn't restore database")
 
-        registry = openerp.modules.registry.RegistryManager.new(db)
+        registry = RegistryManager.new(db)
         with registry.cursor() as cr:
             if copy:
                 # if it's a copy of a database, force generation of a new dbuuid
@@ -325,7 +326,7 @@ def restore_db(db, dump_file, copy=False):
     _logger.info('RESTORE DB: %s', db)
 
 def exp_rename(old_name, new_name):
-    openerp.modules.registry.RegistryManager.delete(old_name)
+    RegistryManager.delete(old_name)
     openerp.sql_db.close_db(old_name)
 
     db = openerp.sql_db.db_connect('postgres')
@@ -393,7 +394,7 @@ def exp_migrate_databases(databases):
     for db in databases:
         _logger.info('migrate database %s', db)
         openerp.tools.config['update']['base'] = True
-        openerp.modules.registry.RegistryManager.new(db, force_demo=False, update_module=True)
+        RegistryManager.new(db, force_demo=False, update_module=True)
     return True
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

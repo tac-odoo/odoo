@@ -7,6 +7,7 @@ import threading
 
 import openerp
 import openerp.report
+from odoo.modules.registry import RegistryManager
 from openerp import tools
 
 import security
@@ -29,10 +30,10 @@ def dispatch(method, params):
     if method not in ['report', 'report_get', 'render_report']:
         raise KeyError("Method not supported %s" % method)
     security.check(db,uid,passwd)
-    openerp.modules.registry.RegistryManager.check_registry_signaling(db)
+    RegistryManager.check_registry_signaling(db)
     fn = globals()['exp_' + method]
     res = fn(db, uid, *params)
-    openerp.modules.registry.RegistryManager.signal_caches_change(db)
+    RegistryManager.signal_caches_change(db)
     return res
 
 def exp_render_report(db, uid, object, ids, datas=None, context=None):

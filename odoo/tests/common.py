@@ -20,7 +20,7 @@ from datetime import datetime, timedelta
 import werkzeug
 
 import openerp
-from openerp.modules.registry import RegistryManager
+from odoo.modules.registry import RegistryManager
 
 _logger = logging.getLogger(__name__)
 

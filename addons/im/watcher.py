@@ -1,7 +1,7 @@
 
 import openerp
 import openerp.tools.config
-import openerp.modules.registry
+import odoo.modules.registry import RegistryManager
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 import datetime
 from openerp.osv import osv, fields
@@ -38,7 +38,7 @@ class ImWatcher(object):
         stop = False
         while not stop:
             try:
-                registry = openerp.modules.registry.RegistryManager.get(self.db_name)
+                registry = RegistryManager.get(self.db_name)
                 with registry.cursor() as cr:
                     listen_channel(cr, "im_channel", self.handle_message, self.check_stop)
                     stop = True

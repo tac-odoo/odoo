@@ -39,7 +39,7 @@ import traceback
 import time
 
 import openerp
-
+from odoo.modules.registry import RegistryManager
 from . import Command
 
 __author__ = openerp.release.author
@@ -113,7 +113,7 @@ def export_translation():
 
     fileformat = os.path.splitext(config["translate_out"])[-1][1:].lower()
     buf = file(config["translate_out"], "w")
-    registry = openerp.modules.registry.RegistryManager.new(dbname)
+    registry = RegistryManager.new(dbname)
     cr = registry.cursor()
     openerp.tools.trans_export(config["language"],
         config["translate_modules"] or ["all"], buf, fileformat, cr)
@@ -127,7 +127,7 @@ def import_translation():
     context = {'overwrite': config["overwrite_existing_translations"]}
     dbname = config['db_name']
 
-    registry = openerp.modules.registry.RegistryManager.new(dbname)
+    registry = RegistryManager.new(dbname)
     cr = registry.cursor()
     openerp.tools.trans_load( cr, config["translate_in"], config["language"],
         context=context)

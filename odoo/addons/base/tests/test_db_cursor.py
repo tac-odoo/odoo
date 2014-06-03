@@ -4,13 +4,14 @@ import unittest2
 
 import openerp
 from openerp.tools.misc import mute_logger
+from odoo.modules.registry import RegistryManager
 from openerp.tests import common
 
 DB = common.DB
 ADMIN_USER_ID = common.ADMIN_USER_ID
 
 def registry():
-    return openerp.modules.registry.RegistryManager.get(DB)
+    return RegistryManager.get(DB)
 
 
 class test_cr_execute(unittest2.TestCase):

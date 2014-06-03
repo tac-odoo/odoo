@@ -47,6 +47,7 @@ from psycopg2 import Binary
 import openerp
 import openerp.osv.orm
 import openerp.tools as tools
+from odoo.modules.registry import RegistryManager
 from openerp.tools.translate import _
 from openerp.tools import float_round, float_repr
 from openerp.tools import html_sanitize
@@ -419,7 +420,7 @@ class datetime(_column):
         if context and context.get('tz'):
             tz_name = context['tz']  
         else:
-            registry = openerp.modules.registry.RegistryManager.get(cr.dbname)
+            registry = RegistryManager.get(cr.dbname)
             tz_name = registry.get('res.users').read(cr, SUPERUSER_ID, uid, ['tz'])['tz']
         if tz_name:
             try:

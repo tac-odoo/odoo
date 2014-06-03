@@ -20,7 +20,7 @@
 ##############################################################################
 
 from reportlab.pdfbase import ttfonts
-from openerp.modules.registry import RegistryManager
+from odoo.modules.registry import RegistryManager
 from openerp.osv import fields, osv
 from openerp.report.render.rml2pdf import customfonts
 

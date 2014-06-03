@@ -16,6 +16,7 @@ from openerp.osv import fields, osv
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.tools.translate import _
 from openerp.http import request
+from odoo.modules.registry import RegistryManager
 from operator import itemgetter
 
 import logging
@@ -1700,7 +1701,7 @@ class ir_http(osv.AbstractModel):
         token = request.params['token']
         db = request.params['db']
 
-        registry = openerp.modules.registry.RegistryManager.get(db)
+        registry = RegistryManager.get(db)
         attendee_pool = registry.get('calendar.attendee')
         error_message = False
         with registry.cursor() as cr:

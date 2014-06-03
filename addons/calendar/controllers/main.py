@@ -2,6 +2,7 @@ import simplejson
 import openerp
 import openerp.addons.web.http as http
 from openerp.addons.web.http import request
+from odoo.modules.registry import RegistryManager
 import openerp.addons.web.controllers.main as webmain
 import json
 
@@ -10,7 +11,7 @@ class meeting_invitation(http.Controller):
 
     @http.route('/calendar/meeting/accept', type='http', auth="calendar")
     def accept(self, db, token, action, id, **kwargs):
-        registry = openerp.modules.registry.RegistryManager.get(db)
+        registry = RegistryManager.get(db)
         attendee_pool = registry.get('calendar.attendee')
         with registry.cursor() as cr:
             attendee_id = attendee_pool.search(cr, openerp.SUPERUSER_ID, [('access_token', '=', token), ('state', '!=', 'accepted')])
@@ -20,7 +21,7 @@ class meeting_invitation(http.Controller):
 
     @http.route('/calendar/meeting/decline', type='http', auth="calendar")
     def declined(self, db, token, action, id):
-        registry = openerp.modules.registry.RegistryManager.get(db)
+        registry = RegistryManager.get(db)
         attendee_pool = registry.get('calendar.attendee')
         with registry.cursor() as cr:
             attendee_id = attendee_pool.search(cr, openerp.SUPERUSER_ID, [('access_token', '=', token), ('state', '!=', 'declined')])
@@ -30,7 +31,7 @@ class meeting_invitation(http.Controller):
 
     @http.route('/calendar/meeting/view', type='http', auth="calendar")
     def view(self, db, token, action, id, view='calendar'):
-        registry = openerp.modules.registry.RegistryManager.get(db)
+        registry = RegistryManager.get(db)
         meeting_pool = registry.get('calendar.event')
         attendee_pool = registry.get('calendar.attendee')
         partner_pool = registry.get('res.partner')
@@ -54,7 +55,7 @@ class meeting_invitation(http.Controller):
     # Function used, in RPC to check every 5 minutes, if notification to do for an event or not
     @http.route('/calendar/notify', type='json', auth="none")
     def notify(self):
-        registry = openerp.modules.registry.RegistryManager.get(request.session.db)
+        registry = RegistryManager.get(request.session.db)
         uid = request.session.uid
         context = request.session.context
         with registry.cursor() as cr:
@@ -63,7 +64,7 @@ class meeting_invitation(http.Controller):
 
     @http.route('/calendar/notify_ack', type='json', auth="none")
     def notify_ack(self, type=''):
-        registry = openerp.modules.registry.RegistryManager.get(request.session.db)
+        registry = RegistryManager.get(request.session.db)
         uid = request.session.uid
         context = request.session.context
         with registry.cursor() as cr:

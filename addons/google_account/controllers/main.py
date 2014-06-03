@@ -2,6 +2,7 @@ import simplejson
 import urllib
 import openerp
 import openerp.addons.web.http as http
+from odoo.modules.registry import RegistryManager
 from openerp.addons.web.http import request
 import openerp.addons.web.controllers.main as webmain
 from openerp.addons.web.http import SessionExpiredException
@@ -19,7 +20,7 @@ class google_auth(http.Controller):
         service = state.get('s')
         url_return = state.get('f')
         
-        registry = openerp.modules.registry.RegistryManager.get(dbname)
+        registry = RegistryManager.get(dbname)
         with registry.cursor() as cr:
             if kw.get('code',False):
                 registry.get('google.%s' % service).set_all_tokens(cr,request.session.uid,kw['code'])

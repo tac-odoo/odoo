@@ -26,7 +26,8 @@ import time
 
 import openerp
 import openerp.tools.config
-import openerp.modules.registry
+from odoo.modules.registry import RegistryManager
+import odoo.modules.registry import Reg
 from openerp import http
 from openerp.http import request
 from openerp.osv import osv, fields, expression
@@ -106,7 +107,7 @@ class LongPollingController(http.Controller):
             uid = request.session.uid
             db = request.session.db
 
-        registry = openerp.modules.registry.RegistryManager.get(db)
+        registry = RegistryManager.get(db)
         with registry.cursor() as cr:
             registry.get('im.user').im_connect(cr, uid, uuid=uuid, context=request.context)
             my_id = registry.get('im.user').get_my_id(cr, uid, uuid, request.context)

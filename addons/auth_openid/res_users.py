@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp.modules.registry import RegistryManager
+from odoo.modules.registry import RegistryManager
 from openerp.osv import osv, fields
 import openerp.exceptions
 from openerp import tools

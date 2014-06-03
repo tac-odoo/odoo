@@ -27,7 +27,7 @@
 
 import logging
 import openerp.conf.deprecation
-from openerp.modules.registry import RegistryManager
+from odoo.modules.registry import RegistryManager
 
 _logger = logging.getLogger(__name__)
 

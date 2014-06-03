@@ -42,6 +42,7 @@ except ImportError:
     from StringIO import StringIO   # NOQA
 
 import openerp
+from odoo.modules.registry import RegistryManager
 import openerp.exceptions
 from openerp import modules, tools
 from openerp.modules.db import create_categories
@@ -485,7 +486,7 @@ class module(osv.osv):
         function(cr, uid, ids, context=context)
 
         cr.commit()
-        registry = openerp.modules.registry.RegistryManager.new(cr.dbname, update_module=True)
+        registry = RegistryManager.new(cr.dbname, update_module=True)
 
         config = registry['res.config'].next(cr, uid, [], context=context) or {}
         if config.get('type') not in ('ir.actions.act_window_close',):

@@ -26,7 +26,7 @@ import openerp.exceptions
 from openerp import tools
 from openerp.osv import fields, osv
 from openerp import SUPERUSER_ID
-from openerp.modules.registry import RegistryManager
+from odoo.modules.registry import RegistryManager
 _logger = logging.getLogger(__name__)
 
 class CompanyLDAP(osv.osv):

@@ -34,7 +34,7 @@ except ImportError:
     setproctitle = lambda x: None
 
 import openerp
-from openerp.modules.registry import RegistryManager
+from odoo.modules.registry import RegistryManager
 from openerp.release import nt_service_name
 import openerp.tools.config as config
 from openerp.tools.misc import stripped_sys_argv, dumpstacks
@@ -240,7 +240,7 @@ class ThreadedServer(CommonServer):
     def cron_thread(self, number):
         while True:
             time.sleep(SLEEP_INTERVAL + number)     # Steve Reich timing style
-            registries = openerp.modules.registry.RegistryManager.registries
+            registries = RegistryManager.registries
             _logger.debug('cron%d polling for jobs', number)
             for db_name, registry in registries.items():
                 while True and registry.ready:
@@ -327,7 +327,7 @@ class ThreadedServer(CommonServer):
                     time.sleep(0.05)
 
         _logger.debug('--')
-        openerp.modules.registry.RegistryManager.delete_all()
+        RegistryManager.delete_all()
         logging.shutdown()
 
     def run(self, preload=None, stop=False):
@@ -797,7 +797,7 @@ class WorkerCron(Worker):
 
             import openerp.addons.base as base
             base.ir.ir_cron.ir_cron._acquire_job(db_name)
-            openerp.modules.registry.RegistryManager.delete(db_name)
+            RegistryManager.delete(db_name)
 
             # dont keep cursors in multi database mode
             if len(db_names) > 1:

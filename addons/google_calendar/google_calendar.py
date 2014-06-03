@@ -7,6 +7,7 @@ import urllib2
 import openerp
 from openerp import tools
 from openerp import SUPERUSER_ID
+from odoo.modules.registry import RegistryManager
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.tools.translate import _
 from openerp.http import request
@@ -283,7 +284,7 @@ class google_calendar(osv.AbstractModel):
             if (e.code == 401):  # Token invalid / Acces unauthorized
                 error_msg = "Your token is invalid or has been revoked !"
 
-                registry = openerp.modules.registry.RegistryManager.get(request.session.db)
+                registry = RegistryManager.get(request.session.db)
                 with registry.cursor() as cur:
                     self.pool['res.users'].write(cur, uid, [uid], {'google_calendar_token': False, 'google_calendar_token_validity': False}, context=context)
 
@@ -646,7 +647,7 @@ class google_calendar(osv.AbstractModel):
                 if e.code == 410:  # GONE, Google is lost.
                     # we need to force the rollback from this cursor, because it locks my res_users but I need to write in this tuple before to raise.
                     cr.rollback()
-                    registry = openerp.modules.registry.RegistryManager.get(request.session.db)
+                    registry = RegistryManager.get(request.session.db)
                     with registry.cursor() as cur:
                         self.pool['res.users'].write(cur, uid, [uid], {'google_calendar_last_sync_date': False}, context=context)
                 error_key = simplejson.loads(e.read())

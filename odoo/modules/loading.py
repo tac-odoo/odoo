@@ -35,9 +35,10 @@ import openerp
 import openerp.modules.db
 import openerp.modules.graph
 import openerp.modules.migration
-import openerp.modules.registry
+import odoo.modules.registry
+import odoo.modules.registry import RegistryManager
 import openerp.osv as osv
-import openerp.tools as tools
+import odoo.tools as tools
 from openerp import SUPERUSER_ID
 from openerp.osv.orm import AbstractModel
 from openerp.tools.translate import _
@@ -73,7 +74,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True, skip_modules=
             else:
                 cr.rollback()
                 # avoid keeping stale xml_id, etc. in cache 
-                openerp.modules.registry.RegistryManager.clear_caches(cr.dbname)
+                RegistryManager.clear_caches(cr.dbname)
 
 
     def _get_files_of_kind(kind):

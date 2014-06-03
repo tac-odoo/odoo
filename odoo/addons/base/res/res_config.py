@@ -23,6 +23,7 @@ from operator import attrgetter
 import re
 
 import openerp
+from odoo.modules.registry import RegistryManager
 from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 from openerp.tools import ustr
@@ -549,7 +550,7 @@ class res_config_settings(osv.osv_memory, res_config_module_installation_mixin):
 
         # After the uninstall/install calls, the self.pool is no longer valid.
         # So we reach into the RegistryManager directly.
-        res_config = openerp.modules.registry.RegistryManager.get(cr.dbname)['res.config']
+        res_config = RegistryManager.get(cr.dbname)['res.config']
         config = res_config.next(cr, uid, [], context=context) or {}
         if config.get('type') not in ('ir.actions.act_window_close',):
             return config

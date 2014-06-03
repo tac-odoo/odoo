@@ -21,6 +21,7 @@
 import logging
 
 import openerp
+from odoo.modules.registry import RegistryManager
 
 _logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ _logger = logging.getLogger(__name__)
 
 def _edi_dispatch(db_name, method_name, *method_args):
     try:
-        registry = openerp.modules.registry.RegistryManager.get(db_name)
+        registry = RegistryManager.get(db_name)
         assert registry, 'Unknown database %s' % db_name
         with registry.cursor() as cr:
             edi = registry['edi.edi']

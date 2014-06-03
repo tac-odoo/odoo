@@ -3,6 +3,7 @@
 import openerp
 from openerp.http import request
 from openerp.osv import osv
+from odoo.modules.registry import RegistryManager
 from openerp import SUPERUSER_ID
 from openerp.tools.translate import _
 from datetime import datetime
@@ -119,7 +120,7 @@ class google_service(osv.osv_memory):
             st, res = self._do_request(cr, uid, uri, params=data, headers=headers, type='POST', preuri='', context=context)
         except urllib2.HTTPError, e:
             if e.code == 400:  # invalid grant
-                registry = openerp.modules.registry.RegistryManager.get(request.session.db)
+                registry = RegistryManager.get(request.session.db)
                 with registry.cursor() as cur:
                     self.pool['res.users'].write(cur, uid, [uid], {'google_%s_rtoken' % service: False}, context=context)
             error_key = simplejson.loads(e.read()).get("error", "nc")

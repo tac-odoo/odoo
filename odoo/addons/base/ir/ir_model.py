@@ -25,7 +25,8 @@ import time
 import types
 
 import openerp
-import openerp.modules.registry
+import odoo.modules.registry
+from odoo.modules.registry import RegistryManager
 from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.osv import fields,osv
@@ -170,8 +171,8 @@ class ir_model(osv.osv):
             # only reload pool for normal unlink. For module uninstall the
             # reload is done independently in openerp.modules.loading
             cr.commit() # must be committed before reloading registry in new cursor
-            openerp.modules.registry.RegistryManager.new(cr.dbname)
-            openerp.modules.registry.RegistryManager.signal_registry_change(cr.dbname)
+            RegistryManager.new(cr.dbname)
+            RegistryManager.signal_registry_change(cr.dbname)
 
         return res
 
@@ -199,7 +200,7 @@ class ir_model(osv.osv):
                 update_custom_fields=True)
             self.pool[vals['model']]._auto_init(cr, ctx)
             self.pool[vals['model']]._auto_end(cr, ctx) # actually create FKs!
-            openerp.modules.registry.RegistryManager.signal_registry_change(cr.dbname)
+            RegistryManager.signal_registry_change(cr.dbname)
         return res
 
     def instanciate(self, cr, user, model, context=None):
@@ -327,7 +328,7 @@ class ir_model_fields(osv.osv):
         res = super(ir_model_fields, self).unlink(cr, user, ids, context)
         if not context.get(MODULE_UNINSTALL_FLAG):
             cr.commit()
-            openerp.modules.registry.RegistryManager.signal_registry_change(cr.dbname)
+            RegistryManager.signal_registry_change(cr.dbname)
         return res
 
     def create(self, cr, user, vals, context=None):
@@ -362,7 +363,7 @@ class ir_model_fields(osv.osv):
                     update_custom_fields=True)
                 self.pool[vals['model']]._auto_init(cr, ctx)
                 self.pool[vals['model']]._auto_end(cr, ctx) # actually create FKs!
-                openerp.modules.registry.RegistryManager.signal_registry_change(cr.dbname)
+                RegistryManager.signal_registry_change(cr.dbname)
 
         return res
 
@@ -477,7 +478,7 @@ class ir_model_fields(osv.osv):
                     setattr(obj._columns[col_name], col_prop, val)
                 obj._auto_init(cr, ctx)
                 obj._auto_end(cr, ctx) # actually create FKs!
-            openerp.modules.registry.RegistryManager.signal_registry_change(cr.dbname)
+            RegistryManager.signal_registry_change(cr.dbname)
         return res
 
 class ir_model_constraint(Model):

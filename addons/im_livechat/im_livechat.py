@@ -28,6 +28,7 @@ import openerp.addons.im.im as im
 from openerp.osv import osv, fields
 from openerp import tools
 from openerp import http
+from odoo.modules.registry import RegistryManager
 from openerp.http import request
 
 env = jinja2.Environment(
@@ -39,7 +40,7 @@ env.filters["json"] = json.dumps
 class LiveChatController(http.Controller):
 
     def _auth(self, db):
-        reg = openerp.modules.registry.RegistryManager.get(db)
+        reg = RegistryManager.get(db)
         uid = request.uid
         return reg, uid
 

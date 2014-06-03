@@ -23,7 +23,7 @@ import openerp
 from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.osv import orm, fields
-from openerp.modules.registry import RegistryManager
+from odoo.modules.registry import RegistryManager
 
 class decimal_precision(orm.Model):
     _name = 'decimal.precision'

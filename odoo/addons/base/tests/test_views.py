@@ -8,9 +8,10 @@ from lxml import etree as ET
 from lxml.builder import E
 
 from psycopg2 import IntegrityError
-
+Ma
 from openerp.tests import common
 import openerp.tools
+from odoo.modules.registry import RegistryManager
 
 Field = E.field
 
@@ -449,7 +450,7 @@ class TestTemplating(ViewCase):
     def setUp(self):
         import openerp.modules
         super(TestTemplating, self).setUp()
-        self._pool = openerp.modules.registry.RegistryManager.get(common.DB)
+        self._pool = RegistryManager.get(common.DB)
         self._init = self._pool._init
         # fuck off
         self._pool._init = False
