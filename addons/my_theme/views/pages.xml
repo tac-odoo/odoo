@@ -3,13 +3,8 @@
  <data>
   <template id="website.homepage" name="Homepage" page="True">
    <t t-call="website.layout">
-    <div id="wrap" class="oe_structure">
-    <section>
-     <div class="container">
-      <h1> Hello, World!
-      </h1>
-     </div>
-    </section>
+    <div class="oe_structure">
+      <h1> Hello, World!</h1>
     </div>
    </t>
   </template>
