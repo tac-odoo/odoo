@@ -2,6 +2,7 @@ import unittest2
 from lxml import etree
 
 import openerp
+from openerp.osv.orm import except_orm
 from openerp.tools.misc import mute_logger
 from openerp.tests import common
 
@@ -69,9 +70,9 @@ class TestACL(common.TransactionCase):
 
         # Now restrict access to the field and check it's forbidden
         self.res_partner._columns['bank_ids'].groups = GROUP_TECHNICAL_FEATURES
-        with self.assertRaises(openerp.osv.orm.except_orm):
+        with self.assertRaises(except_orm):
             self.res_partner.read(self.cr, self.demo_uid, [1], ['bank_ids'])
-        with self.assertRaises(openerp.osv.orm.except_orm):
+        with self.assertRaises(except_orm):
             self.res_partner.write(self.cr, self.demo_uid, [1], {'bank_ids': []})
 
         # Add the restricted group, and check that it works again
@@ -95,7 +96,7 @@ class TestACL(common.TransactionCase):
             # accessing fields must no raise exceptions...
             part.name
             # ... except if they are restricted
-            with self.assertRaises(openerp.osv.orm.except_orm) as cm:
+            with self.assertRaises(except_orm) as cm:
                 with mute_logger('openerp.osv.orm'):
                     part.email
 
