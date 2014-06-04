@@ -93,20 +93,20 @@
                         <field name="monthly_planned_revenue"/>
                     </xpath>
                     <xpath expr="//h4[@name='name']" position="after">
-                        <div class="oe_kanban_alias oe_center" t-if="record.use_leads.raw_value and record.alias_id.value">
+                        <div class="text-center" t-if="record.use_leads.raw_value and record.alias_id.value">
                             <small><span class="oe_e oe_e_alias" style="float: none;">%%</span><t t-raw="record.alias_id.raw_value[1]"/></small>
                         </div>
-                        <div class="oe_items_list">
-                            <div class="oe_salesteams_leads" t-if="record.use_leads.raw_value">
-                                <a name="%(crm_case_form_view_salesteams_lead)d" type="action">Leads</a>
-                                <a name="%(action_report_crm_lead_salesteam)d" type="action" class="oe_sparkline_bar_link">
+                        <div class="row mt8">
+                            <div class="oe_salesteams_leads col-md-6 row" t-if="record.use_leads.raw_value">
+                                <a class="col-md-9" name="%(crm_case_form_view_salesteams_lead)d" type="action">Leads</a>
+                                <a class="col-md-3" name="%(action_report_crm_lead_salesteam)d" type="action">
                                     <field name="monthly_open_leads" widget="sparkline_bar"
                                         options="{'height': '20px', 'barWidth': 4, 'barSpacing': 1, 'delayIn': '3000', 'tooltip_suffix': ' Leads'}">Open Leads per Month<br/>Click to see a detailed analysis of leads.</field>
                                 </a>
                             </div>
-                            <div class="oe_salesteams_opportunities" t-if="record.use_opportunities.raw_value">
-                                <a name="%(crm_case_form_view_salesteams_opportunity)d" type="action">Opportunities</a>
-                                <a name="%(action_report_crm_opportunity_salesteam)d" type="action">
+                            <div class="oe_salesteams_opportunities col-md-6 row" t-if="record.use_opportunities.raw_value">
+                                <a class="col-md-9" name="%(crm_case_form_view_salesteams_opportunity)d" type="action">Opportunities</a>
+                                <a class="col-md-3" name="%(action_report_crm_opportunity_salesteam)d" type="action">
                                     <field name="monthly_planned_revenue" widget="sparkline_bar"
                                         options="{'height': '20px', 'barWidth': '4', 'barSpacing': '1', 'delayIn': '3000', 'tooltip_suffix': ' (Planned Revenue)'}">Planned Revenue per Month<br/>Click to see a detailed analysis of opportunities.</field>
                                 </a>
