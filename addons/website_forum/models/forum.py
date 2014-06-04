@@ -12,7 +12,7 @@ class Forum(osv.Model):
     _name = 'forum.forum'
     _description = 'Forums'
 
-    _inherit = ['website.seo.metadata']
+    _inherit = ['website.seo.metadata','mail.thread']
     # Badge values
     _badge_to_upvote = 'website_forum.badge_a_1' # done
     _badge_to_downvote = 'website_forum.badge_a_9' # done
@@ -70,7 +70,7 @@ class Forum(osv.Model):
 class Post(osv.Model):
     _name = 'forum.post'
     _description = 'Forum Post'
-    _inherit = ['mail.thread', 'website.seo.metadata']
+    _inherit = [ 'website.seo.metadata']
     _order = "is_correct DESC, vote_count DESC"
 
     def _get_user_vote(self, cr, uid, ids, field_name, arg, context):
