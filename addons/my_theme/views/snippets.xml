@@ -14,7 +14,6 @@
      <div>
       <!-- Thumbnail -->
       <div class="oe_snippet_thumbnail">
-       <img class="oe_snippet_thumbnail_img" src="/my_theme/static/src/img/snippet/snippet_thumbs.png" />
        <span class="oe_snippet_thumbnail_title">My Snippet</span>
       </div>
       <!-- HTML Snippet -->

@@ -4,7 +4,7 @@
   <template id="website.homepage" name="Homepage" page="True">
    <t t-call="website.layout">
     <div class="oe_structure">
-      <h1> Hello, World!</h1>
+     <!-- Your HTML code here -->
     </div>
    </t>
   </template>
