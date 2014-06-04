@@ -2055,6 +2055,8 @@ class account_tax(osv.osv):
                 amount = amount2
                 child_tax = self._unit_compute(cr, uid, tax.child_ids, amount, product, partner, quantity)
                 res.extend(child_tax)
+                for child in child_tax:
+                    amount2 += child.get('amount', 0.0)
                 if tax.child_depend:
                     for r in res:
                         for name in ('base','ref_base'):
@@ -2072,6 +2074,11 @@ class account_tax(osv.osv):
             if tax.include_base_amount:
                 cur_price_unit+=amount2
         return res
+
+    def compute_for_bank_reconciliation(self, cr, uid, tax_id, amount, context=None):
+        """ Called by RPC by the bank statement reconciliation widget """
+        tax = self.browse(cr, uid, tax_id, context=context)
+        return self.compute_all(cr, uid, [tax], amount, 1) # TOCHECK may use force_exclude parameter
 
     def compute_all(self, cr, uid, taxes, price_unit, quantity, product=None, partner=None, force_excluded=False):
         """

@@ -39,7 +39,7 @@ class ReportController(Controller):
     @route([
         '/report/<path:converter>/<reportname>',
         '/report/<path:converter>/<reportname>/<docids>',
-    ], type='http', auth='user', website=True, multilang=True)
+    ], type='http', auth='user', website=True)
     def report_routes(self, reportname, docids=None, converter=None, **data):
         report_obj = request.registry['report']
         cr, uid, context = request.cr, request.uid, request.context
@@ -66,7 +66,7 @@ class ReportController(Controller):
     # Misc. route utils
     #------------------------------------------------------
     @route(['/report/barcode', '/report/barcode/<type>/<path:value>'], type='http', auth="user")
-    def report_barcode(self, type, value, width=300, height=50):
+    def report_barcode(self, type, value, width=600, height=100):
         """Contoller able to render barcode images thanks to reportlab.
         Samples: 
             <img t-att-src="'/report/barcode/QR/%s' % o.name"/>

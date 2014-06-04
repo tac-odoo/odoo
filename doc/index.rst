@@ -4,6 +4,14 @@
 OpenERP Server Developers Documentation
 ========================================
 
+Howto
+'''''
+
+.. toctree::
+    :maxdepth: 1
+
+    howto/howto_website
+
 OpenERP Server
 ''''''''''''''
 
@@ -21,16 +29,6 @@ OpenERP Server
    deployment-mod-wsgi
    form-view-guidelines
    ir_actions
-
-OpenERP Command
-'''''''''''''''
-
-.. toctree::
-   :maxdepth: 1
-
-   openerp-command.rst
-   commands.rst
-   adding-command.rst
 
 OpenERP Server API
 ''''''''''''''''''

@@ -333,7 +333,8 @@ class gamification_goal(osv.Model):
 
                         if definition.computation_mode == 'sum':
                             field_name = definition.field_id.name
-                            res = obj.read_group(cr, uid, domain, [field_name], [field_name], context=context)
+                            # TODO for master: group on user field in batch mode
+                            res = obj.read_group(cr, uid, domain, [field_name], [], context=context)
                             new_value = res and res[0][field_name] or 0.0
 
                         else:  # computation mode = count
@@ -349,8 +350,8 @@ class gamification_goal(osv.Model):
                 goal = all_goals[goal_id]
 
                 # check goal target reached
-                if (goal.definition_condition == 'higher' and value.get('current', goal.current) >= goal.target_goal) \
-                  or (goal.definition_condition == 'lower' and value.get('current', goal.current) <= goal.target_goal):
+                if (goal.definition_id.condition == 'higher' and value.get('current', goal.current) >= goal.target_goal) \
+                  or (goal.definition_id.condition == 'lower' and value.get('current', goal.current) <= goal.target_goal):
                     value['state'] = 'reached'
 
                 # check goal failure

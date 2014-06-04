@@ -62,22 +62,33 @@ class account_analytic_invoice_line(osv.osv):
         context = context or {}
         uom_obj = self.pool.get('product.uom')
         company_id = company_id or False
-        context.update({'company_id': company_id, 'force_company': company_id, 'pricelist_id': pricelist_id})
+        local_context = dict(context, company_id=company_id, force_company=company_id, pricelist=pricelist_id)
 
         if not product:
             return {'value': {'price_unit': 0.0}, 'domain':{'product_uom':[]}}
         if partner_id:
-            part = self.pool.get('res.partner').browse(cr, uid, partner_id, context=context)
+            part = self.pool.get('res.partner').browse(cr, uid, partner_id, context=local_context)
             if part.lang:
-                context.update({'lang': part.lang})
+                local_context.update({'lang': part.lang})
 
         result = {}
-        res = self.pool.get('product.product').browse(cr, uid, product, context=context)
-        result.update({'name': name or res.description or False,'uom_id': uom_id or res.uom_id.id or False, 'price_unit': price_unit or res.list_price or 0.0})
+        res = self.pool.get('product.product').browse(cr, uid, product, context=local_context)
+        if price_unit is not False:
+            price = price_unit
+        elif pricelist_id:
+            price = res.price
+        else:
+            price = res.list_price
+        if not name:
+            name = self.pool.get('product.product').name_get(cr, uid, [res.id], context=local_context)[0][1]
+            if res.description_sale:
+                name += '\n'+res.description_sale
+
+        result.update({'name': name or False,'uom_id': uom_id or res.uom_id.id or False, 'price_unit': price})
 
         res_final = {'value':result}
         if result['uom_id'] != res.uom_id.id:
-            selected_uom = uom_obj.browse(cr, uid, result['uom_id'], context=context)
+            selected_uom = uom_obj.browse(cr, uid, result['uom_id'], context=local_context)
             new_price = uom_obj._compute_price(cr, uid, res.uom_id.id, res_final['value']['price_unit'], result['uom_id'])
             res_final['value']['price_unit'] = new_price
         return res_final
@@ -542,18 +553,17 @@ class account_analytic_account(osv.osv):
             'nodestroy': True,
         }
 
-    def on_change_template(self, cr, uid, ids, template_id, date_start=False, fix_price_invoices=False, invoice_on_timesheets=False, recurring_invoices=False, context=None):
+    def on_change_template(self, cr, uid, ids, template_id, date_start=False, context=None):
         if not template_id:
             return {}
-        obj_analytic_line = self.pool.get('account.analytic.invoice.line')
         res = super(account_analytic_account, self).on_change_template(cr, uid, ids, template_id, date_start=date_start, context=context)
 
         template = self.browse(cr, uid, template_id, context=context)
         
-        if not fix_price_invoices:
+        if not ids:
             res['value']['fix_price_invoices'] = template.fix_price_invoices
             res['value']['amount_max'] = template.amount_max
-        if not invoice_on_timesheets:
+        if not ids:
             res['value']['invoice_on_timesheets'] = template.invoice_on_timesheets
             res['value']['hours_qtt_est'] = template.hours_qtt_est
         
@@ -561,7 +571,7 @@ class account_analytic_account(osv.osv):
             res['value']['to_invoice'] = template.to_invoice.id
         if template.pricelist_id.id:
             res['value']['pricelist_id'] = template.pricelist_id.id
-        if not recurring_invoices:
+        if not ids:
             invoice_line_ids = []
             for x in template.recurring_invoice_line_ids:
                 invoice_line_ids.append((0, 0, {
@@ -746,8 +756,10 @@ class account_analytic_account(osv.osv):
                     new_date = next_date+relativedelta(days=+interval)
                 elif contract.recurring_rule_type == 'weekly':
                     new_date = next_date+relativedelta(weeks=+interval)
-                else:
+                elif contract.recurring_rule_type == 'monthly':
                     new_date = next_date+relativedelta(months=+interval)
+                else:
+                    new_date = next_date+relativedelta(years=+interval)
                 self.write(cr, uid, [contract.id], {'recurring_next_date': new_date.strftime('%Y-%m-%d')}, context=context)
                 if automatic:
                     cr.commit()

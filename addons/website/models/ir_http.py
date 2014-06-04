@@ -51,6 +51,8 @@ class ir_http(orm.AbstractModel):
             # in all cases, website processes them
             request.website_enabled = True
 
+        request.website_multilang = request.website_enabled and func and func.routing.get('multilang', True)
+
         if request.website_enabled:
             if func:
                 self._authenticate(func.routing['auth'])
@@ -67,6 +69,10 @@ class ir_http(orm.AbstractModel):
                 if path[1] in langs:
                     request.lang = request.context['lang'] = path.pop(1)
                     path = '/'.join(path) or '/'
+                    if request.lang == request.website.default_lang_code:
+                        # If language is in the url and it is the default language, redirect
+                        # to url without language so google doesn't see duplicate content
+                        return request.redirect(path + '?' + request.httprequest.query_string)
                     return self.reroute(path)
                 return self._handle_exception(code=404)
         return super(ir_http, self)._dispatch()
@@ -106,6 +112,8 @@ class ir_http(orm.AbstractModel):
             if generated_path != current_path:
                 if request.lang != request.website.default_lang_code:
                     path = '/' + request.lang + path
+                if request.httprequest.query_string:
+                    path += '?' + request.httprequest.query_string
                 return werkzeug.utils.redirect(path)
 
     def _serve_attachment(self):
@@ -133,49 +141,50 @@ class ir_http(orm.AbstractModel):
             return response
 
     def _handle_exception(self, exception=None, code=500):
-        if isinstance(exception, werkzeug.exceptions.HTTPException) and hasattr(exception, 'response') and exception.response:
-            return exception.response
+        try:
+            return super(ir_http, self)._handle_exception(exception)
+        except Exception:
 
-        attach = self._serve_attachment()
-        if attach:
-            return attach
+            attach = self._serve_attachment()
+            if attach:
+                return attach
 
-        if getattr(request, 'website_enabled', False) and request.website:
-            values = dict(
-                exception=exception,
-                traceback=traceback.format_exc(exception),
-            )
-            if exception:
-                code = getattr(exception, 'code', code)
-                if isinstance(exception, ir_qweb.QWebException):
-                    values.update(qweb_exception=exception)
-                    if isinstance(exception.qweb.get('cause'), openerp.exceptions.AccessError):
-                        code = 403
-            if code == 500:
-                logger.error("500 Internal Server Error:\n\n%s", values['traceback'])
-                if 'qweb_exception' in values:
-                    view = request.registry.get("ir.ui.view")
-                    views = view._views_get(request.cr, request.uid, exception.qweb['template'], request.context)
-                    to_reset = [v for v in views if v.model_data_id.noupdate is True]
-                    values['views'] = to_reset
-            elif code == 403:
-                logger.warn("403 Forbidden:\n\n%s", values['traceback'])
+            if getattr(request, 'website_enabled', False) and request.website:
+                values = dict(
+                    exception=exception,
+                    traceback=traceback.format_exc(exception),
+                )
+                if exception:
+                    code = getattr(exception, 'code', code)
+                    if isinstance(exception, ir_qweb.QWebException):
+                        values.update(qweb_exception=exception)
+                        if isinstance(exception.qweb.get('cause'), openerp.exceptions.AccessError):
+                            code = 403
+                if code == 500:
+                    logger.error("500 Internal Server Error:\n\n%s", values['traceback'])
+                    if 'qweb_exception' in values:
+                        view = request.registry.get("ir.ui.view")
+                        views = view._views_get(request.cr, request.uid, exception.qweb['template'], request.context)
+                        to_reset = [v for v in views if v.model_data_id.noupdate is True]
+                        values['views'] = to_reset
+                elif code == 403:
+                    logger.warn("403 Forbidden:\n\n%s", values['traceback'])
 
-            values.update(
-                status_message=werkzeug.http.HTTP_STATUS_CODES[code],
-                status_code=code,
-            )
+                values.update(
+                    status_message=werkzeug.http.HTTP_STATUS_CODES[code],
+                    status_code=code,
+                )
 
-            if not request.uid:
-                self._auth_method_public()
+                if not request.uid:
+                    self._auth_method_public()
 
-            try:
-                html = request.website._render('website.%s' % code, values)
-            except Exception:
-                html = request.website._render('website.http_error', values)
-            return werkzeug.wrappers.Response(html, status=code, content_type='text/html;charset=utf-8')
+                try:
+                    html = request.website._render('website.%s' % code, values)
+                except Exception:
+                    html = request.website._render('website.http_error', values)
+                return werkzeug.wrappers.Response(html, status=code, content_type='text/html;charset=utf-8')
 
-        return super(ir_http, self)._handle_exception(exception)
+            raise
 
 class ModelConverter(ir.ir_http.ModelConverter):
     def __init__(self, url_map, model=False, domain='[]'):

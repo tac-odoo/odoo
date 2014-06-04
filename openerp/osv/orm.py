@@ -672,11 +672,11 @@ class BaseModel(object):
 
     OpenERP models are created by inheriting from this class' subclasses:
 
-        * Model: for regular database-persisted models
-        * TransientModel: for temporary data, stored in the database but automatically
-                          vaccuumed every so often
-        * AbstractModel: for abstract super classes meant to be shared by multiple
-                        _inheriting classes (usually Models or TransientModels)
+    * Model: for regular database-persisted models
+    * TransientModel: for temporary data, stored in the database but automatically
+                      vaccuumed every so often
+    * AbstractModel: for abstract super classes meant to be shared by multiple
+                     _inheriting classes (usually Models or TransientModels)
 
     The system will later instantiate the class once per database (on
     which the class' module is installed).
@@ -729,7 +729,6 @@ class BaseModel(object):
     _all_columns = {}
 
     _table = None
-    _invalids = set()
     _log_create = False
     _sql_constraints = []
     _protected = ['read', 'write', 'create', 'default_get', 'perm_read', 'unlink', 'fields_get', 'fields_view_get', 'search', 'name_get', 'distinct_field_get', 'name_search', 'copy', 'import_data', 'search_count', 'exists']
@@ -1543,9 +1542,6 @@ class BaseModel(object):
 
             yield dbid, xid, converted, dict(extras, record=stream.index)
 
-    def get_invalid_fields(self, cr, uid):
-        return list(self._invalids)
-
     def _validate(self, cr, uid, ids, context=None):
         context = context or {}
         lng = context.get('lang')
@@ -1566,12 +1562,9 @@ class BaseModel(object):
                 # Check presence of __call__ directly instead of using
                 # callable() because it will be deprecated as of Python 3.0
                 if hasattr(msg, '__call__'):
-                    tmp_msg = msg(self, cr, uid, ids, context=context)
-                    if isinstance(tmp_msg, tuple):
-                        tmp_msg, params = tmp_msg
-                        translated_msg = tmp_msg % params
-                    else:
-                        translated_msg = tmp_msg
+                    translated_msg = msg(self, cr, uid, ids, context=context)
+                    if isinstance(translated_msg, tuple):
+                        translated_msg = translated_msg[0] % translated_msg[1]
                 else:
                     translated_msg = trans._get_source(cr, uid, self._name, 'constraint', lng, msg)
                 if extra_error:
@@ -1579,11 +1572,8 @@ class BaseModel(object):
                 error_msgs.append(
                         _("The field(s) `%s` failed against a constraint: %s") % (', '.join(fields), translated_msg)
                 )
-                self._invalids.update(fields)
         if error_msgs:
             raise except_orm('ValidateError', '\n'.join(error_msgs))
-        else:
-            self._invalids.clear()
 
     def default_get(self, cr, uid, fields_list, context=None):
         """
@@ -2459,7 +2449,7 @@ class BaseModel(object):
         fetched_data = cr.dictfetchall()
 
         if not groupby_fields:
-            return {r.pop('id'): r for r in fetched_data}
+            return fetched_data
 
         many2onefields = [gb['field'] for gb in annotated_groupbys if gb['type'] == 'many2one']
         if many2onefields:
@@ -3758,9 +3748,13 @@ class BaseModel(object):
                 ir_values_obj.unlink(cr, uid, ir_value_ids, context=context)
 
         for order, obj_name, store_ids, fields in result_store:
-            if obj_name != self._name:
+            if obj_name == self._name:
+                effective_store_ids = list(set(store_ids) - set(ids))
+            else:
+                effective_store_ids = store_ids
+            if effective_store_ids:
                 obj = self.pool[obj_name]
-                cr.execute('select id from '+obj._table+' where id IN %s', (tuple(store_ids),))
+                cr.execute('select id from '+obj._table+' where id IN %s', (tuple(effective_store_ids),))
                 rids = map(lambda x: x[0], cr.fetchall())
                 if rids:
                     obj._store_set_values(cr, uid, rids, fields, context)
@@ -5130,7 +5124,14 @@ class BaseModel(object):
             # shortcut read if we only want the ids
             return [{'id': id} for id in record_ids]
 
-        result = self.read(cr, uid, record_ids, fields, context=context)
+        # read() ignores active_test, but it would forward it to any downstream search call
+        # (e.g. for x2m or function fields), and this is not the desired behavior, the flag
+        # was presumably only meant for the main search().
+        # TODO: Move this to read() directly?                                                                                                
+        read_ctx = dict(context or {})                                                                                                       
+        read_ctx.pop('active_test', None)                                                                                                    
+                                                                                                                                             
+        result = self.read(cr, uid, record_ids, fields, context=read_ctx) 
         if len(result) <= 1:
             return result
 
@@ -5217,7 +5218,7 @@ def convert_pgerror_23502(model, fields, info, e):
     m = re.match(r'^null value in column "(?P<field>\w+)" violates '
                  r'not-null constraint\n',
                  str(e))
-    field_name = m.group('field')
+    field_name = m and m.group('field')
     if not m or field_name not in fields:
         return {'message': unicode(e)}
     message = _(u"Missing required value for the field '%s'.") % field_name
@@ -5232,7 +5233,7 @@ def convert_pgerror_23502(model, fields, info, e):
 def convert_pgerror_23505(model, fields, info, e):
     m = re.match(r'^duplicate key (?P<field>\w+) violates unique constraint',
                  str(e))
-    field_name = m.group('field')
+    field_name = m and m.group('field')
     if not m or field_name not in fields:
         return {'message': unicode(e)}
     message = _(u"The value for the field '%s' already exists.") % field_name
