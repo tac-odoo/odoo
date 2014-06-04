@@ -9,6 +9,6 @@ Create Themes for website presentation
         """,
     'author': 'fp@odoo.com',
     'depends': ['website'],
-    'views': [],
+    'data': [],
     'installable': True,
 }
