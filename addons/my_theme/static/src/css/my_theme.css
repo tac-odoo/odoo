@@ -6324,6 +6324,8 @@ button.close {
 .mt_simple_snippet h1 {
   font-family: "BebasNeue";
   font-size: 5em;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .mt_simple_snippet.tweed {
