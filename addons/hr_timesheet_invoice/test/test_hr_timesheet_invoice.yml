@@ -1,6 +1,6 @@
 -
   In order to test hr_timesheet_invoice in OpenERP, I create account line to manage invoice based on costs.
--
+
   I create an account analytic line.
 -
   !record {model: account.analytic.line, id: account_analytic_line_developyamlforhrmodule0 }:

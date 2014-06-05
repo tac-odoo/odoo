@@ -93,6 +93,7 @@ class hr_timesheet_sheet(osv.osv):
                 raise osv.except_osv(_('Error!'), _('In order to create a timesheet for this employee, you must link him/her to a user.'))
             if not self.pool.get('hr.employee').browse(cr, uid, vals['employee_id'], context=context).product_id:
                 raise osv.except_osv(_('Error!'), _('In order to create a timesheet for this employee, you must link the employee to a product, like \'Consultant\'.'))
+            result = self.pool.get('hr.employee').read(cr, uid, vals['employee_id'], context=context)
             if not self.pool.get('hr.employee').browse(cr, uid, vals['employee_id'], context=context).journal_id:
                 raise osv.except_osv(_('Configuration Error!'), _('In order to create a timesheet for this employee, you must assign an analytic journal to the employee, like \'Timesheet Journal\'.'))
         return super(hr_timesheet_sheet, self).create(cr, uid, vals, context=context)
