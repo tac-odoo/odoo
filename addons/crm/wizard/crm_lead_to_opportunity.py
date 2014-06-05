@@ -130,7 +130,6 @@ class crm_lead2opportunity_partner(osv.osv_memory):
         data = self.browse(cr, uid, ids, context=context)[0]
         leads = lead.browse(cr, uid, lead_ids, context=context)
         for lead_id in leads:
-            print ">>>> 3. going to create partner", vals
             lead_id.partner_name = vals['partner_name']
             lead.write(cr, uid, [lead_id.id], {"partner_name": vals['partner_name']})
             partner_id = self._create_partner(cr, uid, lead_id.id, data.action, lead_id.partner_id.id, context=context)
@@ -166,7 +165,6 @@ class crm_lead2opportunity_partner(osv.osv_memory):
             elif not context.get('no_force_assignation') or not lead['user_id']:
                 lead_obj.write(cr, uid, lead_id, {'user_id': w.user_id.id, 'section_id': w.section_id.id}, context=context)
         else:
-            print ">..... 1. reached here", w.partner_name
             lead_ids = context.get('active_ids', [])
             self._convert_opportunity(cr, uid, ids, {'lead_ids': lead_ids,'partner_name': w.partner_name, 'user_ids': [w.user_id.id], 'section_id': w.section_id.id}, context=context)
 
