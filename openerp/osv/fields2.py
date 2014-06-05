@@ -111,28 +111,30 @@ class Field(object):
     groups = False              # csv list of group xml ids
 
     def __init__(self, string=None, **kwargs):
-        self._free_attrs = []
         kwargs['string'] = string
-        # by default, computed fields are not stored and readonly
-        if 'compute' in kwargs:
-            kwargs['store'] = kwargs.get('store', False)
-            kwargs['readonly'] = kwargs.get('readonly', 'inverse' not in kwargs)
-        if 'related' in kwargs:
-            kwargs['store'] = kwargs.get('store', False)
-        for attr, value in kwargs.iteritems():
+        self._free_attrs = []
+        self._init(kwargs)
+        self.reset()
+
+    def _init(self, attrs):
+        """ Initialize `self` with dictionary `attrs`. """
+        if 'compute' in attrs:
+            # by default, computed fields are not stored and readonly
+            attrs['store'] = attrs.get('store', False)
+            attrs['readonly'] = attrs.get('readonly', 'inverse' not in attrs)
+        if 'related' in attrs:
+            # by default, related fields are not stored
+            attrs['store'] = attrs.get('store', False)
+        for attr, value in attrs.iteritems():
             if not hasattr(self, attr):
                 self._free_attrs.append(attr)
             setattr(self, attr, value)
-        self.reset()
 
     def copy(self, **kwargs):
         """ make a copy of `self`, possibly modified with parameters `kwargs` """
         field = copy(self)
         field._free_attrs = list(self._free_attrs)
-        for attr, value in kwargs.iteritems():
-            if not hasattr(self, attr):
-                self._free_attrs.append(attr)
-            setattr(field, attr, value)
+        field._init(kwargs)
         field.reset()
         return field
 
