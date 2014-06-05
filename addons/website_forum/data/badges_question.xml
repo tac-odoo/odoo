@@ -361,7 +361,7 @@
         <!-- Great: at least one question -->
         <record id="badge_q_11" model="gamification.badge">
             <field name="name">Participant</field>
-            <field name="description">asked first question (at least one question)</field>
+            <field name="description">Asked first question (at least one question)</field>
             <field name="level">bronze</field>
             <field name="rule_auth">nobody</field>
         </record>

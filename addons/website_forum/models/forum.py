@@ -70,7 +70,7 @@ class Forum(osv.Model):
 class Post(osv.Model):
     _name = 'forum.post'
     _description = 'Forum Post'
-    _inherit = [ 'website.seo.metadata']
+    _inherit = [ 'website.seo.metadata','mail.thread']
     _order = "is_correct DESC, vote_count DESC"
 
     def _get_user_vote(self, cr, uid, ids, field_name, arg, context):

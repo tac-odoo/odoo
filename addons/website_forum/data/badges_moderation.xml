@@ -295,13 +295,13 @@ result = int(len(data) >= 15)</field>
         
         <record id="badge_24" model="gamification.badge">
             <field name="name">Nice Reputation</field>
-            <field name="description">at least 100 karma</field>
+            <field name="description">At least 100 karma</field>
             <field name="level">bronze</field>
             <field name="rule_auth">nobody</field>
         </record>
         <record model="gamification.goal.definition" id="definition_low_karma">
             <field name="name">Nice Reputation</field>
-            <field name="description">at least 100 karma</field>
+            <field name="description">At least 100 karma</field>
             <field name="computation_mode">count</field>
             <field name="display_mode">boolean</field>
             <field name="model_id" eval="ref('website_forum.model_forum_post')" />
@@ -330,13 +330,13 @@ result = int(len(data) >= 15)</field>
 
         <record id="badge_25" model="gamification.badge">
             <field name="name">Good Reputation</field>
-            <field name="description">at least 300 karma</field>
+            <field name="description">At least 300 karma</field>
             <field name="level">silver</field>
             <field name="rule_auth">nobody</field>
         </record>
         <record model="gamification.goal.definition" id="definition_medium_karma">
             <field name="name">Good Reputation</field>
-            <field name="description">at least 300 karma</field>
+            <field name="description">At least 300 karma</field>
             <field name="computation_mode">count</field>
             <field name="display_mode">boolean</field>
             <field name="model_id" eval="ref('website_forum.model_forum_post')" />
@@ -365,13 +365,13 @@ result = int(len(data) >= 15)</field>
 
         <record id="badge_26" model="gamification.badge">
             <field name="name">Great Reputation</field>
-            <field name="description">at least 1000 karma</field>
+            <field name="description">At least 1000 karma</field>
             <field name="level">gold</field>
             <field name="rule_auth">nobody</field>
         </record>
         <record model="gamification.goal.definition" id="definition_high_karma">
             <field name="name">Great Reputation</field>
-            <field name="description">at least 1000 karma</field>
+            <field name="description">At least 1000 karma</field>
             <field name="computation_mode">count</field>
             <field name="display_mode">boolean</field>
             <field name="model_id" eval="ref('website_forum.model_forum_post')" />

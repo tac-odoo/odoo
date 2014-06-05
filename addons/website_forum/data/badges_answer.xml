@@ -295,13 +295,13 @@ for post in Post.browse(cr, uid, user_posts, context=context):
         <!-- Mortarboard: at least 5 accepted answers -->
         <record id="badge_a_9" model="gamification.badge">
             <field name="name">Mortarboard</field>
-            <field name="description">at least 5 accepted answers</field>
+            <field name="description">At least 5 accepted answers</field>
             <field name="level">bronze</field>
             <field name="rule_auth">nobody</field>
         </record>
         <record model="gamification.goal.definition" id="definition_Mortarboard">
             <field name="name">Mortarboard</field>
-            <field name="description">at least 5 accepted answers</field>
+            <field name="description">At least 5 accepted answers</field>
             <field name="computation_mode">count</field>
             <field name="display_mode">boolean</field>
             <field name="model_id" eval="ref('website_forum.model_forum_post')" />
@@ -330,13 +330,13 @@ for post in Post.browse(cr, uid, user_posts, context=context):
         <!-- Epic: at least 20 accepted answers -->
         <record id="badge_a_10" model="gamification.badge">
             <field name="name">Epic</field>
-            <field name="description">at least 20 accepted answers</field>
+            <field name="description">At least 20 accepted answers</field>
             <field name="level">silver</field>
             <field name="rule_auth">nobody</field>
         </record>
         <record model="gamification.goal.definition" id="definition_Epic">
             <field name="name">Epic</field>
-            <field name="description">at least 20 accepted answers</field>
+            <field name="description">At least 20 accepted answers</field>
             <field name="computation_mode">count</field>
             <field name="display_mode">boolean</field>
             <field name="model_id" eval="ref('website_forum.model_forum_post')" />
@@ -365,13 +365,13 @@ for post in Post.browse(cr, uid, user_posts, context=context):
         <!-- Legendary: at least 50 accepted answers -->
         <record id="badge_a_11" model="gamification.badge">
             <field name="name">Legendary</field>
-            <field name="description">at least 50 accepted answers</field>
+            <field name="description">At least 50 accepted answers</field>
             <field name="level">gold</field>
             <field name="rule_auth">nobody</field>
         </record>
         <record model="gamification.goal.definition" id="definition_Legendary">
             <field name="name">Legendary</field>
-            <field name="description">at least 50 accepted answers</field>
+            <field name="description">At least 50 accepted answers</field>
             <field name="computation_mode">count</field>
             <field name="display_mode">boolean</field>
             <field name="model_id" eval="ref('website_forum.model_forum_post')" />
