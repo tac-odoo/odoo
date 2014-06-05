@@ -202,10 +202,10 @@ class event_event(osv.osv):
         res = dict.fromkeys(ids, False)
         for event in self.browse(cr, uid, ids, context=context):
             data = []
-            group_obj = self.read_group(cr, uid, [('id','=',event.id)], ['seats_reserved', 'seats_available'], ['seats_reserved', 'seats_available'], context=context)
+            group_obj = self.read_group(cr, uid, [('id','=',event.id)], ['seats_reserved', 'seats_max'], ['seats_reserved', 'seats_max'], context=context)
             for group in group_obj:
                 data.append({'label' : 'Seat Reserved', 'value': group['seats_reserved']})
-                data.append({'label' : 'Seat Avalaible', 'value': group['seats_available']})
+                data.append({'label' : 'Seat Max', 'value': group['seats_max']})
             res[event.id] = data
         return res
 
@@ -324,8 +324,8 @@ class event_event(osv.osv):
         event_reminder_ids = False
         if event_type_id:
             type_info =  self.pool.get('event.type').browse(cr, uid, event_type_id, context)
-            template_id = type_info.default_email_event.id
-            event_reminder_ids = [(0, 0, {'email_template': template_id,'unit': 'days', 'element': 'after_subscription' })]
+            if type_info.default_email_event:
+                event_reminder_ids = [(0, 0, {'email_template': type_info.default_email_event.id,'unit': 'days', 'element': 'after_subscription' })]
         return {'value': {'event_reminder_ids': event_reminder_ids}}
 
     def onchange_start_date(self, cr, uid, ids, date_begin=False, date_end=False, context=None):
@@ -392,10 +392,12 @@ class event_registration_attendee(osv.osv):
         'email': fields.char('Email', size=64),
         'phone': fields.char('Phone', size=64),
         'name': fields.char('Name', size=128, select=True),
+        'reminder_sended' : fields.boolean('Reminder sended', help="For the reminder linked to a subscription"),
     }
     _defaults = {
         'nb_register': 1,
         'state': 'draft',
+        'reminder_sended': False,
     }
     _order = 'name, create_date desc'
 
@@ -526,7 +528,7 @@ class event_reminder(osv.osv):
                     for subs in event.attendee_ids:
                         time_to_send = datetime.max
                         if not subs.reminder_sended:
-                            time_to_send = datetime.strptime(subs.registration_date, '%Y-%m-%d') + timedelta(days=self._get_number_days(reminder))
+                            time_to_send = datetime.strptime(subs.create_date, '%Y-%m-%d') + timedelta(days=self._get_number_days(reminder))
                             if time_to_send < datetime.now():
                                 self.pool.get('event.event').send_reminder_mail(cr, uid, event.id, reminder.email_template.id, context=context)
                                 self.pool.get('event.registration_attendee').write(cr, uid, [subs.id], {'reminder_sended': True}, context=context)

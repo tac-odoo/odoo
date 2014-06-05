@@ -235,5 +235,33 @@
         <field name="nb_register">5</field>
     </record>
 
+    <record id="event_reminder_rec0" model="event.reminder">
+            <field name="email_template" ref="event.confirmation_event"/>
+            <field name="unit">days</field>
+            <field name="element">after_subscription</field>
+            <field name="event_id" ref="event_0"/>
+    </record>
+
+    <record id="event_reminder_rec1" model="event.reminder">
+            <field name="email_template" ref="event.confirmation_event"/>
+            <field name="unit">days</field>
+            <field name="element">after_subscription</field>
+            <field name="event_id" ref="event_1"/>
+    </record>
+
+    <record id="event_reminder_rec2" model="event.reminder">
+            <field name="email_template" ref="event.confirmation_event"/>
+            <field name="unit">days</field>
+            <field name="element">after_subscription</field>
+            <field name="event_id" ref="event_2"/>
+    </record>
+
+    <record id="event_reminder_rec3" model="event.reminder">
+            <field name="email_template" ref="event.confirmation_event"/>
+            <field name="unit">days</field>
+            <field name="element">after_subscription</field>
+            <field name="event_id" ref="event_3"/>
+    </record>
+
     </data>
 </openerp>

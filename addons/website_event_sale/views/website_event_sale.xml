@@ -109,8 +109,20 @@
 
 <template id="event_attendee_registration" name="Event Attendees">
     <t t-call="website.layout">
-        <div class="col-md-8 well">
-            <form t-attf-id="form_attendee_registration" t-attf-action="/event/cart/update?event_id=#{ event_id }" method="post">
+        <div class="col-md-offset-1 col-md-9 well" style="margin-bottom: 0px;">
+            <form t-attf-action="/event/cart/update?event_id=#{ event_id }" method="post">
+                <div itemscope="itemscope" itemtype="http://schema.org/Event">
+                    <h1 itemprop="name" class="text-center" t-field="event.name"></h1>
+                    <h4 class="text-center text-muted">
+                        <i class="fa fa-clock-o"></i> <span itemprop="startDate" t-field="event.date_begin" t-field-options='{"hide_seconds":"True"}'/> to
+                        <span itemprop="endDate" t-field="event.date_end" t-field-options='{"hide_seconds":"True"}'/>
+                    </h4>
+                    <h4 class="text-center text-muted"
+                        t-field="event.address_id" t-field-options='{
+                        "widget": "contact",
+                        "fields": ["city"]
+                        }'/>
+                </div>
                 <table class="table">
                     <t t-foreach="post" t-as="ticket">
                         <t t-set="split_ticket" t-value="ticket.split('-')"></t>
@@ -130,16 +142,18 @@
                                 <t t-foreach="range(1, int(post[ticket])+1)" t-as="attendee">
                                     <tr class='form-group'>
                                         <td>Attendee<t t-raw="attendee"/></td>
-                                        <td><input class='form-control input-sm' type='text' t-attf-name="attendee-name-#{split_ticket[1]}-#{attendee}-#{post[ticket]}-#{split_ticket[2]}"/></td>
-                                        <td><input class='form-control input-sm' type='tel' t-attf-name="attendee-phone-#{split_ticket[1]}-#{attendee}-#{post[ticket]}-#{split_ticket[2]}"/></td>
-                                        <td><input class='form-control input-sm' type='email' t-attf-name="attendee-email-#{split_ticket[1]}-#{attendee}-#{post[ticket]}-#{split_ticket[2]}" required="required"/></td>
-                                        <td><input t-if="split_ticket[2] != 'FREE'" class='hidden' type='text' t-attf-name="attendee-event_ticket_id-#{split_ticket[1]}-#{attendee}-#{post[ticket]}-#{split_ticket[2]}" t-attf-value="#{ split_ticket[1] }"/></td>
+                                        <td><input class='form-control input-sm' type='text' t-attf-name="attendee-name-#{split_ticket[1]}-#{attendee}" required="required"/></td>
+                                        <td><input class='form-control input-sm' type='tel' t-attf-name="attendee-phone-#{split_ticket[1]}-#{attendee}"/></td>
+                                        <td><input class='form-control input-sm' type='email' t-attf-name="attendee-email-#{split_ticket[1]}-#{attendee}" required="required"/></td>
+                                        <td><input t-if="split_ticket[2] != 'FREE'" class='hidden' type='text' t-attf-name="attendee-event_ticket_id-#{split_ticket[1]}-#{attendee}" t-attf-value="#{ split_ticket[1] }"/></td>
                                     </tr>
                                 </t>
                             </tbody>
                         </t>
                     </t>
                 </table>
+                <hr/>
+                <a t-attf-href="/event/#{ slug(event) }/#{(not event.menu_id) and 'register' or ''}" class="btn btn-default btn-lg"><span class="fa fa-long-arrow-left"/> Select Ticket</a>
                 <button type="submit" class="btn btn-primary btn-lg pull-right" >Order Now</button>
                 <div class="clearfix"/>
             </form>

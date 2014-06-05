@@ -11,7 +11,7 @@
         <field name="target">new</field>
     </record>
 
-    <record model="ir.ui.view" id="view_event_form">
+    <record model="ir.ui.view" id="view_event_sale_form">
         <field name="name">event.event.website.form</field>
         <field name="model">event.event</field>
         <field name="inherit_id" ref="event.view_event_form"/>

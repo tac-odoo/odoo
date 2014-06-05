@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+from openerp.addons.web.http import request
 from openerp.addons.event.event import event_event as Event
 from openerp.osv import fields, osv
 from openerp.tools.translate import _

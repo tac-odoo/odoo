@@ -5,7 +5,7 @@
         <record id="act_event_list_register_event" model="ir.actions.act_window">
             <field name="res_model">event.registration_attendee</field>
             <field name="view_type">form</field>
-            <field name="name">Attendees</field>
+            <field name="name">Registrations</field>
             <field name="view_mode">tree,form,calendar,graph</field>
             <field name="context">{'search_default_event_id': active_id, 'default_event_id': active_id}</field>
         </record>
@@ -75,7 +75,7 @@
                                 class="oe_stat_button oe_inline" 
                                 icon="fa-github" 
                                 help="Register with this event">
-                                <field name="count_registrations" widget="statinfo" string="Attendees"/>
+                                <field name="count_registrations" widget="statinfo" string="Registrations"/>
                             </button>
                         </div>
                         <group name="main_field_group">
@@ -94,7 +94,10 @@
                         <notebook>
                             <page string="Advanced">
                                 <group>
-                                    <field name="type" string="Type of Event" on_change="onchange_event_type(type)"/>
+                                    <group>
+                                        <field name="type" string="Type of Event" on_change="onchange_event_type(type)"/>
+                                    </group>
+                                    <group/>
                                 </group>
                                 <!-- Automate reminders -->
                                 <group>
@@ -199,11 +202,13 @@
                                         </p>
                                         <p>
                                             <t t-if="record.seats_reserved.raw_value">
-                                                <b><field name="seats_reserved"/></b>
-                                                <t t-if="record.seats_reserved.raw_value > 1">Attendees</t>
-                                                <t t-if="record.seats_reserved.raw_value lte 1">Attendee</t>
+                                                <a name="%(act_event_list_register_event)d" type="action">
+                                                    <b><field name="seats_reserved"/></b>
+                                                    <t t-if="record.seats_reserved.raw_value > 1">Attendees</t>
+                                                    <t t-if="record.seats_reserved.raw_value lte 1">Attendee</t>
+                                                </a>
                                             </t>
-                                            <a class="oe_right oe_sparkline_bar_link">
+                                            <a name="%(event.action_report_event_attendees)d" type="action" class="oe_right oe_sparkline_bar_link">
                                                 <field name="registration_per_day" widget="sparkline_bar"
                                                     options="{'barWidth': 6, 'barSpacing': 2, 'tooltip_suffix': 'Attendees'}"></field>
                                             </a>
@@ -211,18 +216,17 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <t t-js="record">console.log('ssss', record)</t>
-                                    <div t-if="record.seats_available.raw_value and record.seats_reserved.raw_value" class="row col-md-7">
+                                    <div t-if="record.seats_available.raw_value and record.seats_reserved.raw_value" class="row col-md-7" groups="event_sale.group_event_manage_tickets">
                                         <div>
                                             <field name="seats_registered" widget="event_graph"/>
                                         </div>
                                         <div class="row text-center oe_event_graph_description">
-                                            <strong><span>Reserved seats from maximum available</span></strong>
+                                            <strong><span>Real Attendees on Maximum Available</span></strong>
                                         </div>
                                     </div>
-                                    <div t-if="record.seats_reserved.raw_value or record.seats_unconfirmed.raw_value" class="row col-md-7">
+                                    <div t-if="record.seats_reserved.raw_value or record.seats_unconfirmed.raw_value" class="row col-md-7" groups="event_sale.group_event_manage_tickets">
                                         <div>
-                                            <field name="sold_ticket" widget="event_graph"></field>
+                                            <field name="sold_ticket" widget="event_graph"/>
                                         </div>
                                         <div class="row text-center oe_event_graph_description">
                                             <strong><span>Unconfirmed from sold tickets</span></strong>
@@ -409,7 +413,7 @@
 
         <!-- Search view of event registration -->
         <record model="ir.ui.view" id="view_registration_search">
-            <field name="name">Attendees</field>
+            <field name="name">Registrations</field>
             <field name="model">event.registration_attendee</field>
             <field name="arch" type="xml">
                 <search string="Event Registration">
