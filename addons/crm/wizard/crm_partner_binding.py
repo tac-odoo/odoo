@@ -83,7 +83,6 @@ class crm_partner_binding(osv.osv_memory):
                         ('name', 'ilike', '%'+active_model.contact_name+'%')], context=context)
                 if partner_ids:
                     partner_id = partner_ids[0]
-
         return partner_id
 
     def default_get(self, cr, uid, fields, context=None):
@@ -97,8 +96,7 @@ class crm_partner_binding(osv.osv_memory):
             res['partner_id'] = partner_id
         if 'partner_name' in fields and context.get('active_id'):
             lead_record = lead_obj.browse(cr, uid, context.get('active_id'), context=context)
-            res['partner_name'] = lead_record.contact_name or False           
-
+            res['partner_name'] = lead_record.contact_name or False
         return res
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

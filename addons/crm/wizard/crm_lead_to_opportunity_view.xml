@@ -56,7 +56,6 @@
                     <separator string="Conversion Options"/>
                     <group>
                         <field name="name" class="oe_inline" widget="radio"/>
-                        <field name="action" class="oe_inline" on_change="on_change_action(action)"/>
                         <field name="deduplicate" class="oe_inline" on_change="on_change_deduplicate(deduplicate, context)"/>
                     </group>
                     <group string="Assign opportunities to">
