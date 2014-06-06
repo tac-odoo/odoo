@@ -247,7 +247,7 @@ class WebsiteForum(http.Controller):
 
     @http.route('/forum/<model("forum.forum"):forum>/question/<model("forum.post"):question>/ask_for_close', type='http', auth="user", methods=['POST'], website=True)
     def question_ask_for_close(self, forum, question, **post):
-        check_res = self._has_enough_karma(question.create_uid.id == request.uid and '_karma_modo_close_own' or '_karma_modo_close_all')
+        check_res = self._check_granted_badge(['_badge_modo_close_own','_badge_modo_close_all'])
         if not check_res[0]:
             return werkzeug.utils.redirect("/forum/%s" % slug(forum))
 
@@ -275,7 +275,7 @@ class WebsiteForum(http.Controller):
 
     @http.route('/forum/<model("forum.forum"):forum>/question/<model("forum.post"):question>/close', type='http', auth="user", methods=['POST'], website=True)
     def question_close(self, forum, question, **post):
-        check_res = self._has_enough_karma(question.create_uid.id == request.uid and '_karma_modo_close_own' or '_karma_modo_close_all')
+        check_res = self._check_granted_badge(['_badge_modo_close_own','_badge_modo_close_all'])
         if not check_res[0]:
             return werkzeug.utils.redirect("/forum/%s" % slug(forum))
 
@@ -289,7 +289,7 @@ class WebsiteForum(http.Controller):
 
     @http.route('/forum/<model("forum.forum"):forum>/question/<model("forum.post"):question>/reopen', type='http', auth="user", methods=['POST'], website=True)
     def question_reopen(self, forum, question, **kwarg):
-        check_res = self._has_enough_karma(question.create_uid.id == request.uid and '_karma_modo_close_own' or '_karma_modo_close_all')
+        check_res = self._check_granted_badge(['_badge_modo_close_own','_badge_modo_close_all'])
         if not check_res[0]:
             return werkzeug.utils.redirect("/forum/%s" % slug(forum))
 
@@ -298,7 +298,7 @@ class WebsiteForum(http.Controller):
 
     @http.route('/forum/<model("forum.forum"):forum>/question/<model("forum.post"):question>/delete', type='http', auth="user", methods=['POST'], website=True)
     def question_delete(self, forum, question, **kwarg):
-        check_res = self._has_enough_karma(question.create_uid.id == request.uid and '_karma_modo_unlink_own' or '_karma_modo_unlink_all')
+        check_res = self._check_granted_badge(['_badge_modo_unlink_own','_badge_modo_unlink_all'])
         if not check_res[0]:
             return werkzeug.utils.redirect("/forum/%s" % slug(forum))
 
@@ -307,7 +307,7 @@ class WebsiteForum(http.Controller):
 
     @http.route('/forum/<model("forum.forum"):forum>/question/<model("forum.post"):question>/undelete', type='http', auth="user", methods=['POST'], website=True)
     def question_undelete(self, forum, question, **kwarg):
-        check_res = self._has_enough_karma(question.create_uid.id == request.uid and '_karma_modo_unlink_own' or '_karma_modo_unlink_all')
+        check_res = self._check_granted_badge(['_badge_modo_unlink_own','_badge_modo_unlink_all'])
         if not check_res[0]:
             return werkzeug.utils.redirect("/forum/%s" % slug(forum))
 
@@ -372,7 +372,7 @@ class WebsiteForum(http.Controller):
 
     @http.route('/forum/<model("forum.forum"):forum>/post/<model("forum.post"):post>/delete', type='http', auth="user", methods=['POST'], website=True)
     def post_delete(self, forum, post, **kwargs):
-        check_res = self._has_enough_karma(post.create_uid.id == request.uid and '_karma_modo_unlink_own' or '_karma_modo_unlink_all')
+        check_res = self._check_granted_badge(['_badge_modo_unlink_own','_badge_modo_unlink_all'])
         if not check_res[0]:
             return werkzeug.utils.redirect("/forum/%s" % slug(forum))
 
@@ -384,7 +384,7 @@ class WebsiteForum(http.Controller):
 
     @http.route('/forum/<model("forum.forum"):forum>/post/<model("forum.post"):post>/edit', type='http', auth="user", website=True)
     def post_edit(self, forum, post, **kwargs):
-        check_res = self._has_enough_karma(post.create_uid.id == request.uid and '_karma_modo_edit_own' or '_karma_modo_edit_all')
+        check_res = self._check_granted_badge(['_badge_modo_edit_all','_badge_modo_edit_own'])
         if not check_res[0]:
             return werkzeug.utils.redirect("/forum/%s" % slug(forum))
 
