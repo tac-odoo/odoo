@@ -5,7 +5,7 @@ from datetime import date, datetime
 from collections import defaultdict
 
 from openerp.tests import common
-
+from openerp.exceptions import Warning
 
 class TestNewFields(common.TransactionCase):
 
@@ -22,6 +22,26 @@ class TestNewFields(common.TransactionCase):
         # read it with method read()
         values = discussion.read(['name'])[0]
         self.assertEqual(values['name'], discussion.name)
+
+    def test_01_basic_set_assertion(self):
+        """ test item setter """
+        record = self.env.ref('test_new_api.message_0_0')
+        self.assertEqual(len(record), 1)
+        record.body = 'OK'
+        records = self.env['test_new_api.message'].search([])
+        assert len(records) > 1
+        with self.assertRaises(Warning):
+            records.body = 'Faulty'
+
+    def test_01_basic_get_assertion(self):
+        """ test item getter """
+        record = self.env.ref('test_new_api.message_0_0')
+        self.assertEqual(len(record), 1)
+        ok = record.body
+        records = self.env['test_new_api.message'].search([])
+        assert len(records) > 1
+        with self.assertRaises(Warning):
+            faulty = records.body
 
     def test_10_computed(self):
         """ check definition of computed fields """
