@@ -430,7 +430,9 @@ class Field(object):
         """ return the value of field `self` on `record` """
         if record is None:
             return self         # the field is accessed through the owner class
-
+        if len(record) > 1:
+            raise Warning("Muliple records properties % may not be accessed" %
+                          record)
         try:
             return record._cache[self]
         except KeyError:
@@ -454,7 +456,8 @@ class Field(object):
         """ set the value of field `self` on `record` """
         if not record:
             raise Warning("Null record %s may not be assigned" % record)
-
+        if len(record) > 1:
+            raise Warning("Muliple records % may not be assigned" % record)
         # only one record is updated
         env = record.env
         record = record[0]
@@ -713,7 +716,7 @@ class Date(Field):
             :param datetime timestamp: optional datetime value to use instead of
                 the current date and time (must be a datetime, regular dates
                 can't be converted between timezones.)
-            :rtype: str 
+            :rtype: str
         """
         today = timestamp or datetime.now()
         context_today = None
