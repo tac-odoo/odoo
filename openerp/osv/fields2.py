@@ -439,7 +439,8 @@ class Field(object):
         # cache miss, retrieve value
         if record.id:
             # normal record -> read or compute value for this field
-            self.determine_value(record[0])
+            (single_record,) = record   # Let the error propagate if > 1 record
+            self.determine_value(single_record)
         elif record:
             # new record -> compute default value for this field
             record.add_default_value(self)
@@ -457,7 +458,8 @@ class Field(object):
 
         # only one record is updated
         env = record.env
-        record = record[0]
+        # Let the error propagate if > 1 record
+        (record,) = record
 
         # adapt value to the cache level
         value = self.convert_to_cache(value, env)
@@ -1185,7 +1187,11 @@ class Id(Field):
     def __get__(self, instance, owner):
         if instance is None:
             return self         # the field is accessed through the class owner
-        return bool(instance._ids) and instance._ids[0]
+        if not instance_ids:
+            return False
+        # Let the error propagate if > 1 record
+        (instance_id,) = instance_ids
+        return instance_id
 
     def __set__(self, instance, value):
         raise NotImplementedError()
