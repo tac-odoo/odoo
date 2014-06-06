@@ -798,16 +798,18 @@ class fleet_vehicle_log_contract(osv.Model):
     _description = 'Contract information on a vehicle'
     _order='state desc,expiration_date'
     _mail_actions = [{
-        'name': 'act_renew_contract',
+        'method': 'act_renew_contract',
         'type': 'object',
         'string': 'Renew',
+        'recipients': lambda self, obj, context: [obj.message_follower_ids],
         'subtype': [],
         'button_type': 'success'
     },
     {
-        'name': 'contract_close',
+        'method': 'contract_close',
         'type': 'object',
         'string': 'Terminate',
+        'recipients': lambda self, obj, context: [obj.message_follower_ids],
         'subtype': [],
         'button_type': 'warning'
     }]

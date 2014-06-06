@@ -110,6 +110,7 @@ class mail_thread(osv.AbstractModel):
     'name': 'message_unsubscribe_users',
     'type': 'object',
     'string': 'Mute',
+    'recipients': lambda self, obj, context: [obj.message_follower_ids],
     'subtype':[],
     'button_type': 'info'
     }]
@@ -366,8 +367,14 @@ class mail_thread(osv.AbstractModel):
 
     def _prepare_body_mail_action(self, cr, uid, subtype, obj, context=None):
         mail_actions = []
+        recipients = []
         data_pool = self.pool['ir.model.data']
         for mail_action in self._mail_actions + self._default_mail_actions:
+            x = mail_action['recipients']
+            if x(self, obj, context):
+                for cc in x(self, obj, context)[0]:
+                    if cc.id not in recipients:
+                        recipients.append(cc.id)
             if mail_action.get('action_xml_id'):
                 dummy, act_id = data_pool.get_object_reference(cr, uid, mail_action['module'], mail_action['action_xml_id'])
                 mail_action['xml_id'] = act_id
@@ -379,7 +386,7 @@ class mail_thread(osv.AbstractModel):
             'res_id': obj.id,
             'base_url': self.pool['ir.config_parameter'].get_param(cr, uid, 'web.base.url', default='http://localhost:8069', context=context)
         })
-        return mail_actions_body
+        return [mail_actions_body,recipients]
 
     #------------------------------------------------------
     # CRUD overrides for automatic subscription and logging
@@ -1582,10 +1589,15 @@ class mail_thread(osv.AbstractModel):
                     processed_list.append(message.parent_id.id)
                     message = message.parent_id
                 parent_id = message.id
+        values = kwargs
+
         if type == 'notification':
             obj = self.browse(cr, uid, thread_id, context=context)
-            body += self._prepare_body_mail_action(cr, uid, subtype,obj).encode('utf-8')
-        values = kwargs
+            append_body,partner_to_notify = self._prepare_body_mail_action(cr, uid, subtype,obj)
+            body += append_body.encode('utf-8')
+            for ptn in partner_to_notify:
+                partner_ids.add(ptn)
+
         values.update({
             'author_id': author_id,
             'model': model,
@@ -1598,7 +1610,6 @@ class mail_thread(osv.AbstractModel):
             'subtype_id': subtype_id,
             'partner_ids': [(4, pid) for pid in partner_ids],
         })
-
         # Avoid warnings about non-existing fields
         for x in ('from', 'to', 'cc'):
             values.pop(x, None)

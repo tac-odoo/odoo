@@ -2,7 +2,7 @@
     {% set button_style = {'info': 'background: gray', 'warning': 'background: #d9534f', 'success': 'background:#5cb85c'} %}
     {% for button in mail_actions %}
         <div style="padding-top: 20px;display: inline-block">
-            <a name="mail_action" style="padding: 8px 20px 8px 20px;border-radius: 6px;border: 1px solid #CCCCCC;margin : 0 10px 0 0;text-decoration: none;color:#FFFFFF;{{ button_style[button.button_type] }}" href="{{ base_url }}/mail_action/{{ model }}/{{ res_id }}?action_name={{ button.name }}&action_type={{ button.type }}&action_id={{ button.xml_id }}"> {{ button.string }} </a>
+            <a name="mail_action" style="padding: 8px 20px 8px 20px;border-radius: 6px;border: 1px solid #CCCCCC;margin : 0 10px 0 0;text-decoration: none;color:#FFFFFF;{{ button_style[button.button_type] }}" href="{{ base_url }}/mail_action/{{ model }}/{{ res_id }}?action_name={{ button.method }}&action_type={{ button.type }}&action_id={{ button.xml_id }}"> {{ button.string }} </a>
         </div>
     {% endfor %}
 </div>
