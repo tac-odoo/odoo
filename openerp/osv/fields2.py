@@ -431,7 +431,7 @@ class Field(object):
         if record is None:
             return self         # the field is accessed through the owner class
         if len(record) > 1:
-            raise Warning("Muliple records properties %s may not be accessed" % record)
+            raise Warning("Multiple records properties %s may not be accessed" % record)
         try:
             return record._cache[self]
         except KeyError:
@@ -456,7 +456,7 @@ class Field(object):
         if not record:
             raise Warning('Null record %s may not be assigned' % record)
         if len(record) > 1:
-            raise Warning('Muliple records %s may not be assigned' % record)
+            raise Warning('Multiple records %s may not be assigned' % record)
         # only one record is updated
         env = record.env
         record = record[0]
