@@ -1187,10 +1187,10 @@ class Id(Field):
     def __get__(self, instance, owner):
         if instance is None:
             return self         # the field is accessed through the class owner
-        if not instance_ids:
+        if not instance._ids:
             return False
         # Let the error propagate if > 1 record
-        (instance_id,) = instance_ids
+        (instance_id,) = instance._ids
         return instance_id
 
     def __set__(self, instance, value):
