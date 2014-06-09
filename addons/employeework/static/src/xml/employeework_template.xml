@@ -3,30 +3,17 @@
     <data>
     	<template id='home' name="Employee Work Home">
     		<t t-call="website.layout">
-    			<script type="text/javascript">
-					$(document).ready(function(){
-    					$(".weekview_txt").change(function(){
-    						hour = $(this).val();
-    						date_index = $(this).closest("td").index();
-    						current_date = $("input#hidden").val();
-    						$.ajax({url:"/employeework/editdata",data:'hour=' + hour + '&amp;project_id=' + this.id +'&amp;date_index=' + date_index + '&amp;current_date=' + current_date,success:function(result){
-    							window.location.reload();
-		                    }
-		                    });
-    					});
-    				});
-    			</script>
+    			<script src="/employeework/static/src/js/employeework.js"></script>
 			  	<div class="container">
 					<div class="row">
 						<div class="col-xs-5 col-md-4">
 		    				<h2 t-if="active=='date'">
-		    					
 				    			<t t-esc="current_date.strftime('%A')" /> 
 				    			<small t-esc="str(current_date.day)" />
 				    			<small t-esc="current_date.strftime('%B')" />
 							</h2>
 							<h3 t-if="active=='week'">
-								<t t-esc="start_date.strftime('%b')==end_date.strftime('%b') and start_date.strftime('%d') or start_date.strftime('%d %b')" /> - <t t-esc="end_date.strftime('%d %b %Y')" />
+								<t t-esc="date_list[0].strftime('%b')==date_list[6].strftime('%b') and date_list[0].strftime('%d') or date_list[0].strftime('%d %b')" /> - <t t-esc="date_list[6].strftime('%d %b %Y')" />
 			    			</h3>
 						</div>
 						<div class="col-xs-4 col-md-4">
@@ -34,8 +21,8 @@
 						</div>
 						<div class="col-xs-3 col-md-4" style="padding-top:20px;">
 							<div class="btn-group">
-								<a t-att-class="active=='date' and 'btn btn-primary active' or 'btn btn-primary'" t-attf-href="/employeework/dateview?current_date={{current_date.strftime('%Y-%m-%d')}}&amp;active=date"><span class="glyphicon glyphicon-calendar"></span> Date</a>
-				  				<a t-att-class="active=='week' and 'btn btn-primary active' or 'btn btn-primary'" t-attf-href="/employeework/weekview?current_date={{current_date.strftime('%Y-%m-%d')}}&amp;active=week"><span class="glyphicon glyphicon-th-list"></span> Week</a>
+								<a t-att-class="active=='date' and 'btn btn-primary active' or 'btn btn-primary'" t-attf-href="/employeework/dateview?current_date={{current_date.strftime('%Y-%m-%d')}}&amp;active=date"><span class="fa fa-calendar"></span> Date</a>
+				  				<a t-att-class="active=='week' and 'btn btn-primary active' or 'btn btn-primary'" t-attf-href="/employeework/weekview?current_date={{current_date.strftime('%Y-%m-%d')}}&amp;active=week"><span class="fa fa-th-list"></span> Week</a>
 							</div>
 						</div>
 			  		</div>
@@ -61,10 +48,10 @@
 	    	<ul class="pagination">
 				<li>
 					<t t-if="active=='date'">
-						<a t-attf-href="/employeework/dateview?current_date={{(current_date-datetime.timedelta(days=1)).strftime('%Y-%m-%d')}}&amp;active={{active}}">&lt;</a>
+						<a t-attf-href="/employeework/dateview?current_date={{(current_date-datetime.timedelta(days=1)).strftime('%Y-%m-%d')}}&amp;active={{active}}"><i class="fa fa-angle-left" /></a>
 					</t>
 					<t t-if="active=='week'">
-						<a t-attf-href="/employeework/weekview?current_date={{(start_date-datetime.timedelta(days=1)).strftime('%Y-%m-%d')}}&amp;active={{active}}">&lt;</a>
+						<a t-attf-href="/employeework/weekview?current_date={{(date_list[0]-datetime.timedelta(days=1)).strftime('%Y-%m-%d')}}&amp;active={{active}}"><i class="fa fa-angle-left" /></a>
 					</t>
 				</li>
 				<li>
@@ -72,10 +59,10 @@
 				</li>
 				<li>
 					<t t-if="active=='date'">
-						<a t-attf-href="/employeework/dateview?current_date={{(current_date+datetime.timedelta(days=1)).strftime('%Y-%m-%d')}}&amp;active={{active}}">&gt;</a>
+						<a t-attf-href="/employeework/dateview?current_date={{(current_date+datetime.timedelta(days=1)).strftime('%Y-%m-%d')}}&amp;active={{active}}"><i class="fa fa-angle-right" /></a>
 					</t>
 					<t t-if="active=='week'">
-						<a t-attf-href="/employeework/weekview?current_date={{(end_date+datetime.timedelta(days=1)).strftime('%Y-%m-%d')}}&amp;active={{active}}">&gt;</a>
+						<a t-attf-href="/employeework/weekview?current_date={{(date_list[6]+datetime.timedelta(days=1)).strftime('%Y-%m-%d')}}&amp;active={{active}}"><i class="fa fa-angle-right" /></a>
 					</t>
 				</li>
 			</ul>
@@ -111,11 +98,20 @@
 					        			<b t-esc="rec['account_id'][1]" /><br /><small t-esc="rec['name']" />
 					        		</td>
 					        		<td>
-					        			<h4><strong t-esc="rec['unit_amount']" /></h4>
+					        			<h4><strong t-att-id="rec['id']" t-esc="rec['unit_amount']" /></h4>
 					        		</td>
 					        		<td>
-					        			<button type="button" class="btn btn-default btn-sm mt4">
-											<span class="glyphicon glyphicon-pencil"></span>
+					        			<button t-att-id="rec['id']" type="button" class="btn btn-default btn-md mt4 timer">
+						        			<span class="fa-stack fa-lg">
+									        	<i t-att-id="rec['id']" t-att-class="rec['date_counter'] and 'fa fa-clock-o fa-stack-2x text-success' or 'fa fa-clock-o fa-stack-2x'"></i>
+									        	<i t-att-id="rec['id']" t-att-class="rec['date_counter'] and 'fa fa-cog fa-stack-1x fa-spin' or 'fa fa-cog fa-stack-1x fa-spin hidden'" style="bottom: 0;right: 0px;left: initial;line-height: initial;width: initial;"></i>
+									    	</span>
+								    		<strong t-att-id="rec['id']" t-raw="rec['date_counter'] and get_diff(rec['id']) or '0H 0M'" />
+									    </button>
+					        		</td>
+					        		<td>
+					        			<button type="button" class="btn btn-default btn-gt mt4">
+											<span class="fa fa-pencil"></span>
 										</button>
 					        		</td>
 								</tr>
@@ -125,11 +121,11 @@
 					        		<td>
 					        			<t t-foreach="date_list" t-as="date">
 											<t t-if="date['dates']==current_date">
-												<h4 t-esc="date['count']" />
+												<h4 id="dateview_total"><t t-esc="date['count']" /></h4>
 											</t>
 										</t>
 					        		</td>
-					        		<td></td>
+					        		<td></td><td></td>
 								</tr>
 							</t>
 			        	</table>
@@ -145,11 +141,11 @@
 			            <table class="table table-hover">
 			            	<thead>
 								<tr class="info">
-									<td><input id="hidden" type="hidden" t-att-value="current_date.strftime('%Y-%m-%d')" /></td>
+									<td></td>
 									<t t-foreach="date_list" t-as="date">
-										<td t-if="date['dates']!=''">
-											<a style="text-decoration:none;" t-attf-href="/employeework/dateview?current_date={{date['dates'].strftime('%Y-%m-%d')}}&amp;active=date"><small><strong><t t-esc="date['dates'].strftime('%A')[:3]" /></strong></small><br />
-											<small><t t-esc="date['dates'].strftime('%02d')" /> <t t-esc="date['dates'].strftime('%b')" /></small>
+										<td t-if="date!=''">
+											<a style="text-decoration:none;" t-attf-href="/employeework/dateview?current_date={{date.strftime('%Y-%m-%d')}}&amp;active=date"><small><strong><t t-esc="date.strftime('%A')[:3]" /></strong></small><br />
+											<small><t t-esc="date.strftime('%02d')" /> <t t-esc="date.strftime('%b')" /></small>
 											</a>
 										</td>
 									</t>
@@ -160,7 +156,7 @@
 								<tr t-foreach='week_data' t-as='rec'>
 						        	<td t-esc="rec['project_name']" />
 						        	<t t-foreach="rec['duration']" t-as='r'>
-						        		<td><input t-att-id="rec['project_id']" class="weekview_txt form-control" type="text" t-att-value="r" /></td>
+						        		<td><input t-att-id="rec['project_id']" t-att-date="r['date']" class="weekview_txt form-control" type="text" t-att-value="r['total']" /></td>
 						        	</t>
 						        	<td>
 						        		<h5><a style="text-decoration:none;"><t t-esc="rec['total']" /></a></h5>
@@ -171,14 +167,16 @@
 										</button>
 						        	</td>
 								</tr>
-								<tr class="info">
-									<td class="text-align:center;"><h5><a style="text-decoration:none;">Total : </a></h5></td>
-									<t t-foreach="row_total" t-as='r'>
-						        		<td style="text-align:center;"><h5><a style="text-decoration:none;"><t t-esc="r" /></a></h5></td>
-						        	</t>
-						        	<td><h5><span class="label label-primary"><t t-esc="sum(row_total)" /></span></h5></td>
-						        	<td></td>
-								</tr>
+								<thead>
+									<tr class="info">
+										<td class="text-align:center;"><a id="save" class="btn btn-primary">Save</a> <span id="result" class="label label-primary" /></td>
+										<t t-foreach="row_total" t-as='r'>
+							        		<td style="text-align:center;"><h5><a style="text-decoration:none;"><t t-esc="r" /></a></h5></td>
+							        	</t>
+							        	<td><h5><span class="label label-primary" t-esc="sum(row_total)" /></h5></td>
+							        	<td></td>
+						        	</tr>
+								</thead>
 							</t>
 			        	</table>
 			        </div>
