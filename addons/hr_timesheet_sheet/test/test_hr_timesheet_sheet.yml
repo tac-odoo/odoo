@@ -2,30 +2,132 @@
   In order to test hr_timesheet_sheet module in OpenERP,
   I create Timesheet and check validation process done by manager.
 -
+  Create a user as 'HR timesheet Officer'
+-
+  !record {model: res.users, id: res_hr_timesheet_officer, view: False}:
+    company_id: base.main_company
+    name: HR timesheet Officer
+    login: hrto
+    password: hrto
+-
+  I added groups for HR timesheet Officer.
+-
+  !record {model: res.users, id: res_hr_timesheet_officer}:
+    groups_id:
+      - base.group_hr_user
+-
   I set TimeSheet allowed difference for company
 -
   !record {model: res.company, id: base.main_company}:
     timesheet_max_difference: 1.00
 -
+  Give the access rights of Hr Officer to create employee.
+-
+  !context
+    uid: 'res_hr_timesheet_officer'
+-
+  I create employee "Gilles Gravie" as "User".
+-
+  !record {model: hr.employee, id: hr.employee_msh}:
+    address_home_id: base.res_partner_address_8
+    name: Gilles Gravie
+    parent_id: 'hr.employee_al'
+    user_id: 'base.user_demo'
+    product_id: product.product_product_consultant
+    journal_id: hr_timesheet.analytic_journal
+-
+  I create a timesheet for employee "Gilles Gravie".
+-
+  !record {model: hr_timesheet_sheet.sheet, id: hr_timesheet_sheet_sheet_deddk0}:
+    date_from: !eval time.strftime('%Y-%m-01')
+    name: Pieter Parker
+    state: new
+    user_id: base.user_demo
+    employee_id: 'hr.employee_msh'
+-
   Gilles "Sign In" at around 9am.
 -
   !record {model: hr.attendance, id: hr_attendance_1}:
     action: sign_in
-    employee_id: 'hr.employee_qdp'
+    employee_id: 'hr.employee_msh'
     name: !eval datetime.now().strftime('%Y-%m-%d 09:%M:%S')
 -
   I test that Gilles in signed in
 -
-  !assert {model: hr.employee, id: hr.employee_qdp}:
+  !assert {model: hr.employee, id: hr.employee_msh}:
     - state == 'present'
 -
   At the time of logout, I create attendance and perform "Sign Out".
 -
   !record {model: hr.attendance, id: hr_attendance_2}:
     action: sign_out
-    employee_id: 'hr.employee_qdp'
+    employee_id: 'hr.employee_msh'
     name: !eval datetime.now().strftime('%Y-%m-%d 17:30:00')
+-
+  I create Timesheet Entry for time spend on today work.
+-
+  !record {model: hr_timesheet_sheet.sheet, id: hr_timesheet_sheet_sheet_deddk0}:
+    timesheet_ids:
+      - account_id: account.analytic_agrolait
+        date: !eval time.strftime('%Y-%m-%d')
+        name: 'Develop yaml for hr module'
+        user_id: base.user_demo
+        unit_amount: 6.00
+        amount: -90.00
+        product_id: product.product_product_consultant
+        general_account_id: account.a_expense
+        journal_id: hr_timesheet.analytic_journal
 
+-
+  I confirm my Timesheet at end of period by click on "Confirm" button,
+  if the difference between Timesheet hour and attendance hour is more than 1 hour it will give message.
+-
+  !python {model: hr_timesheet_sheet.sheet}: |
+    uid = ref('base.user_root')
+    from openerp import netsvc
+    from openerp.osv import osv
+    try:
+        self.button_confirm(cr, uid, [ref('hr_timesheet_sheet_sheet_deddk0')], {"active_ids":
+          [ref("hr_timesheet.menu_act_hr_timesheet_form")],"active_id": ref("hr_timesheet.menu_act_hr_timesheet_form"),
+          })
+        assert False, "The validation of the timesheet was unexpectedly accepted despite the 2:30 hours of difference"
+    except osv.except_osv:
+        pass
+
+-
+  I try again to confirm the timesheet after modification.
+-
+  !python {model: hr_timesheet_sheet.sheet}: |
+        uid = ref('base.user_root')
+        self.button_confirm(cr, uid, [ref('hr_timesheet_sheet_sheet_deddk0')], {"active_ids":
+          [ref("hr_timesheet.menu_act_hr_timesheet_form")],"active_id": ref("hr_timesheet.menu_act_hr_timesheet_form"),
+          })
+-
+  This time timesheet confirmed successfully.
+  I check that state is "Confirmed".
+-
+  !assert {model: hr_timesheet_sheet.sheet, id: hr_timesheet_sheet_sheet_deddk0}:
+    - state == 'confirm'
+-
+  The manager will accept This request by click on "Accept" button.
+-
+  !python {model: hr_timesheet_sheet.sheet}: |
+    self.write(cr, uid, [ref('hr_timesheet_sheet_sheet_deddk0')], {'state': 'done'})
+-
+  I check that state is "Done".
+-
+  !assert {model: hr_timesheet_sheet.sheet, id: hr_timesheet_sheet_sheet_deddk0}:
+    - state == 'done'
+
+
+-
+  Create a user as 'Timesheet Employee'
+-
+  !record {model: res.users, id: res_hr_timesheet_employee, view: False}:
+    company_id: base.main_company
+    name: Project Timesheet Employee
+    login: empt
+    password: empt
 -
   Give the access rights of Employee to Sign In/Sign Out in  Project.
 -
@@ -36,16 +138,15 @@
 -
   !python {model: hr.sign.in.project}: |
     uid = ref('base.user_demo')
-    state_id = self.check_state(cr, uid, [ref("hr.employee_qdp")], {"active_ids": [ref("hr_timesheet.action_hr_timesheet_sign_in")]})
+    state_id = self.check_state(cr, uid, [ref("hr.employee_msh")], {"active_ids": [ref("hr_timesheet.action_hr_timesheet_sign_in")]})
     assert state_id['name'] == 'Sign in / Sign out', "Check the process of sign-in/sign-out."
-
--TODO: Move to project_timesheet
- I select start date and Perform start work on project.
+-
+  TODO Move to project_timesheet,I select start date and Perform start work on project.
 -
   !python {model: hr.sign.in.project}: |
     import time
     uid = ref('base.user_demo')
-    new_id = self.create(cr, uid, {'emp_id': ref('hr.employee_qdp'), 'name': 'Gilles Gravie',
+    new_id = self.create(cr, uid, {'emp_id': ref('hr.employee_msh'), 'name': 'Gilles Gravie',
     'server_date': time.strftime('%Y-%m-%d %H:%M:%S')})
     self.sign_in_result(cr, uid, [new_id], context)
 -

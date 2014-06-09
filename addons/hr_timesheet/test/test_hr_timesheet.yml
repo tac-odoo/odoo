@@ -9,7 +9,7 @@
 -
   I create employee "Gilles Gravie" as "User".
 -
-  !record {model: hr.employee, id: hr.employee_qdp}:
+  !record {model: hr.employee, id: hr.employee_msh}:
     address_home_id: base.res_partner_address_8
     name: Gilles Gravie
     parent_id: 'hr.employee_al'
@@ -17,21 +17,21 @@
 -
  I assign this product(Service on Timesheet) and journal(Timesheet Journal) to employee "Gilles Gravie"
 -
-  !record {model: hr.employee, id: hr.employee_qdp}:
+  !record {model: hr.employee, id: hr.employee_msh}:
     product_id: product.product_product_consultant
     journal_id: hr_timesheet.analytic_journal
 -
   In order to test hr_timesheet_sheet module in OpenERP,
-  I create Timesheet and check validation process done by manager.
+  I create Timesheet and check confirmation process.
 
-  I create a timesheet for employee "Pieter Parker".
+  I create a timesheet for employee "Gilles Gravie".
 -
   !record {model: hr_timesheet_sheet.sheet, id: hr_timesheet_sheet_sheet_deddk0}:
     date_from: !eval time.strftime('%Y-%m-01')
-    name: Pieter Parker
+    name: Gilles Gravie
     state: new
     user_id: base.user_demo
-    employee_id: 'hr.employee_fp'
+    employee_id: 'hr.employee_msh'
     
 -
   I create Timesheet Entry for time spend on today work.
@@ -57,35 +57,13 @@
     uid = ref('base.user_root')
     from openerp import netsvc
     from openerp.osv import osv
-    try:
-        self.button_confirm(cr, uid, [ref('hr_timesheet_sheet_sheet_deddk0')], {"active_ids":
-          [ref("hr_timesheet.menu_act_hr_timesheet_form")],"active_id": ref("hr_timesheet.menu_act_hr_timesheet_form"),
-          })
-        assert False, "The validation of the timesheet was unexpectedly accepted despite the 2:30 hours of difference"
-    except osv.except_osv:
-        pass
+    self.button_confirm(cr, uid, [ref('hr_timesheet_sheet_sheet_deddk0')], {"active_ids":
+      [ref("hr_timesheet.menu_act_hr_timesheet_form")],"active_id": ref("hr_timesheet.menu_act_hr_timesheet_form"),
+      })
 
--
-  I try again to confirm the timesheet after modification.
--
-  !python {model: hr_timesheet_sheet.sheet}: |
-        uid = ref('base.user_root')
-        self.button_confirm(cr, uid, [ref('hr_timesheet_sheet_sheet_deddk0')], {"active_ids":
-          [ref("hr_timesheet.menu_act_hr_timesheet_form")],"active_id": ref("hr_timesheet.menu_act_hr_timesheet_form"),
-          })
 -
   This time timesheet confirmed successfully.
   I check that state is "Confirmed".
 -
   !assert {model: hr_timesheet_sheet.sheet, id: hr_timesheet_sheet_sheet_deddk0}:
     - state == 'confirm'
--
-  The manager will accept This request by click on "Accept" button.
--
-  !python {model: hr_timesheet_sheet.sheet}: |
-    self.write(cr, uid, [ref('hr_timesheet_sheet_sheet_deddk0')], {'state': 'done'})
--
-  I check that state is "Done".
--
-  !assert {model: hr_timesheet_sheet.sheet, id: hr_timesheet_sheet_sheet_deddk0}:
-    - state == 'done'
