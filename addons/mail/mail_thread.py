@@ -371,7 +371,7 @@ class mail_thread(osv.AbstractModel):
         data_pool = self.pool['ir.model.data']
         for mail_action in self._mail_actions + self._default_mail_actions:
             recipient_list = mail_action['recipients']
-            [recipients.append(recipient.id) for recipient in recipient_list(self, obj, context) if recipient.id not in recipients]
+            recipients.extend([recipient.id for recipient in recipient_list(self, obj, context) if recipient.id not in recipients])
             if mail_action.get('action_xml_id'):
                 dummy, act_id = data_pool.get_object_reference(cr, uid, mail_action['module'], mail_action['action_xml_id'])
                 mail_action['xml_id'] = act_id

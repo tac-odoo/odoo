@@ -44,14 +44,15 @@ class MailController(http.Controller):
                 pass
         return True
 
-    @http.route('/mail_action/<model>/<int:id>', type='http', auth='user')
-    def mail_action(self, model, id, action_name=None, action_type=None, action_id=None):
+    @http.route('/mail/action', type='http', auth='user')
+    def mail_action(self, model, id, method=None, action_type=None, action_id=None):
         if not request.session.uid:
             return login_redirect()
+        id = int(id)
         redirect_url = "/web?db=%s#id=%s&model=%s" %(request.db, id, model)
         object_pool = request.registry.get(model)
         if action_type in ['workflow','object']:
-            action = getattr(object_pool,action_name)
+            action = getattr(object_pool,method)
             action(request.cr, request.uid, [id], context=request.context)
             redirect_url += "&view_type=form"
         if action_type == 'action':
