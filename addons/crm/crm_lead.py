@@ -83,14 +83,14 @@ class crm_lead(format_address, osv.osv):
         'method': 'set_user',
         'type': 'object',
         'string': 'I will manage it',
-        'recipients': lambda self, obj, context: [obj.message_follower_ids],
+        'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': ['crm.mt_lead_create'],
         'button_type': 'success'
     },
     {
         'type': 'action',
         'string': 'Not interested',
-        'recipients': lambda self, obj, context: [obj.message_follower_ids],
+        'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': ['crm.mt_lead_create'],
         'button_type': 'warning',
         'action_xml_id': 'crm_case_category_act_oppor11',

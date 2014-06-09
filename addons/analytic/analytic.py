@@ -42,7 +42,7 @@ class account_analytic_account(osv.osv):
         'method': 'set_pending',
         'type': 'object',
         'string': 'Renew',
-        'recipients': lambda self, obj, context: [obj.message_follower_ids],
+        'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype':['analytic.mt_account_opened','analytic.mt_account_closed'],
         'button_type': 'success'
     },
@@ -50,7 +50,7 @@ class account_analytic_account(osv.osv):
         'method': 'set_close',
         'type': 'object',
         'string': 'Close',
-        'recipients': lambda self, obj, context: [obj.message_follower_ids],
+        'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': ['analytic.mt_account_opened','analytic.mt_account_pending'],
         'button_type': 'warning'
     },
@@ -58,7 +58,7 @@ class account_analytic_account(osv.osv):
         'method': 'set_cancel',
         'type': 'object',
         'string': 'Cancel',
-        'recipients': lambda self, obj, context: [obj.message_follower_ids],
+        'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': ['analytic.mt_account_opened','analytic.mt_account_pending'],
         'button_type': 'warning'
     }]

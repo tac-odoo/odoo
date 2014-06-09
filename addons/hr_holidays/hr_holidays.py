@@ -115,7 +115,7 @@ class hr_holidays(osv.osv):
          'method': 'holidays_validate',
          'type': 'object',
          'string': 'Approve',
-         'recipients': lambda self, obj, context: [obj.message_follower_ids],
+         'recipients': lambda self, obj, context: obj.message_follower_ids,
          'subtype': ['hr_holidays.mt_holidays_confirmed', 'hr_holidays.mt_holidays_refused'],
          'button_type': 'success'
      },
@@ -123,7 +123,7 @@ class hr_holidays(osv.osv):
          'method': 'holidays_refuse',
          'type': 'object',
          'string': 'Refuse',
-         'recipients': lambda self, obj, context: [obj.message_follower_ids],
+         'recipients': lambda self, obj, context: obj.message_follower_ids,
          'subtype': ['hr_holidays.mt_holidays_confirmed', 'hr_holidays.mt_holidays_approved'],
          'button_type': 'warning'
      }]

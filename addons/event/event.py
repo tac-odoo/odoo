@@ -310,7 +310,7 @@ class event_registration(osv.osv):
         'method': 'registration_open',
         'type': 'object',
         'string': 'Confirm',
-        'recipients': lambda self, obj, context: [obj.message_follower_ids],
+        'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': [],
         'button_type': 'success'
     },
@@ -318,7 +318,7 @@ class event_registration(osv.osv):
         'method': 'button_reg_cancel',
         'type': 'object',
         'string': 'Cancel',
-        'recipients': lambda self, obj, context: [obj.message_follower_ids],
+        'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': [],
         'button_type': 'warning'
     }]

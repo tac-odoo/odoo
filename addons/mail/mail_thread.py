@@ -110,7 +110,7 @@ class mail_thread(osv.AbstractModel):
     'method': 'message_unsubscribe_users',
     'type': 'object',
     'string': 'Mute',
-    'recipients': lambda self, obj, context: [obj.message_follower_ids],
+    'recipients': lambda self, obj, context: [],
     'subtype':[],
     'button_type': 'info'
     }]
@@ -370,11 +370,8 @@ class mail_thread(osv.AbstractModel):
         recipients = []
         data_pool = self.pool['ir.model.data']
         for mail_action in self._mail_actions + self._default_mail_actions:
-            x = mail_action['recipients']
-            if x(self, obj, context):
-                for cc in x(self, obj, context)[0]:
-                    if cc.id not in recipients:
-                        recipients.append(cc.id)
+            recipient_list = mail_action['recipients']
+            [recipients.append(recipient.id) for recipient in recipient_list(self, obj, context) if recipient.id not in recipients]
             if mail_action.get('action_xml_id'):
                 dummy, act_id = data_pool.get_object_reference(cr, uid, mail_action['module'], mail_action['action_xml_id'])
                 mail_action['xml_id'] = act_id
@@ -386,7 +383,7 @@ class mail_thread(osv.AbstractModel):
             'res_id': obj.id,
             'base_url': self.pool['ir.config_parameter'].get_param(cr, uid, 'web.base.url', default='http://localhost:8069', context=context)
         })
-        return [mail_actions_body,recipients]
+        return (mail_actions_body,recipients)
 
     #------------------------------------------------------
     # CRUD overrides for automatic subscription and logging

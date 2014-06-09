@@ -64,14 +64,14 @@ class project_issue(osv.Model):
         'method': 'set_user',
         'type': 'object',
         'string': 'I will do it',
-        'recipients': lambda self, obj, context: [obj.message_follower_ids],
+        'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': ['project_issue.mt_issue_new'],
         'button_type': 'success'
     },
     {
         'type': 'action',
         'string': 'Not interested',
-        'recipients': lambda self, obj, context: [obj.message_follower_ids],
+        'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': ['project_issue.mt_issue_new'],
         'button_type': 'warning',
         'action_xml_id': 'action_view_issues',

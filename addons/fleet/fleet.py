@@ -801,7 +801,7 @@ class fleet_vehicle_log_contract(osv.Model):
         'method': 'act_renew_contract',
         'type': 'object',
         'string': 'Renew',
-        'recipients': lambda self, obj, context: [obj.message_follower_ids],
+        'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': [],
         'button_type': 'success'
     },
@@ -809,7 +809,7 @@ class fleet_vehicle_log_contract(osv.Model):
         'method': 'contract_close',
         'type': 'object',
         'string': 'Terminate',
-        'recipients': lambda self, obj, context: [obj.message_follower_ids],
+        'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': [],
         'button_type': 'warning'
     }]
