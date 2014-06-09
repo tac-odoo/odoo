@@ -107,7 +107,7 @@ class mail_thread(osv.AbstractModel):
     #   :param function lambda: returns whether the tracking should record using this subtype
     _track = {}
     _default_mail_actions = [{
-    'name': 'message_unsubscribe_users',
+    'method': 'message_unsubscribe_users',
     'type': 'object',
     'string': 'Mute',
     'recipients': lambda self, obj, context: [obj.message_follower_ids],
