@@ -5,6 +5,7 @@ from datetime import date, datetime
 from collections import defaultdict
 
 from openerp.tests import common
+from openerp.exceptions import except_orm
 
 
 class TestNewFields(common.TransactionCase):
@@ -22,6 +23,32 @@ class TestNewFields(common.TransactionCase):
         # read it with method read()
         values = discussion.read(['name'])[0]
         self.assertEqual(values['name'], discussion.name)
+
+    def test_01_basic_get_assertion(self):
+        """ test item getter """
+        # field access works on single record
+        record = self.env.ref('test_new_api.message_0_0')
+        self.assertEqual(len(record), 1)
+        ok = record.body
+
+        # field access fails on multiple records
+        records = self.env['test_new_api.message'].search([])
+        assert len(records) > 1
+        with self.assertRaises(except_orm):
+            faulty = records.body
+
+    def test_01_basic_set_assertion(self):
+        """ test item setter """
+        # field assignment works on single record
+        record = self.env.ref('test_new_api.message_0_0')
+        self.assertEqual(len(record), 1)
+        record.body = 'OK'
+
+        # field assignment fails on multiple records
+        records = self.env['test_new_api.message'].search([])
+        assert len(records) > 1
+        with self.assertRaises(except_orm):
+            records.body = 'Faulty'
 
     def test_10_computed(self):
         """ check definition of computed fields """

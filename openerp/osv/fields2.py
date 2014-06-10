@@ -229,16 +229,18 @@ class Field(object):
         for record in records:
             # bypass access rights check when traversing the related path
             value = record.sudo() if record.id else record
-            for name in self.related:
-                value = value[name]
-            record[self.name] = value
+            # traverse the intermediate fields, and keep at most one record
+            for name in self.related[:-1]:
+                value = value[name][:1]
+            record[self.name] = value[self.related[-1]]
 
     def _inverse_related(self, records):
         """ Inverse the related field `self` on `records`. """
         for record in records:
             other = record
+            # traverse the intermediate fields, and keep at most one record
             for name in self.related[:-1]:
-                other = other[name]
+                other = other[name][:1]
             if other:
                 other[self.related[-1]] = record[self.name]
 
@@ -431,6 +433,13 @@ class Field(object):
         if record is None:
             return self         # the field is accessed through the owner class
 
+        if not record:
+            # null record -> return the null value for this field
+            return self.null(record.env)
+
+        # only a single record may be accessed
+        record.one()
+
         try:
             return record._cache[self]
         except KeyError:
@@ -439,25 +448,20 @@ class Field(object):
         # cache miss, retrieve value
         if record.id:
             # normal record -> read or compute value for this field
-            self.determine_value(record[0])
-        elif record:
+            self.determine_value(record)
+        else:
             # new record -> compute default value for this field
             record.add_default_value(self)
-        else:
-            # null record -> return the null value for this field
-            return self.null(record.env)
 
         # the result should be in cache now
         return record._cache[self]
 
     def __set__(self, record, value):
         """ set the value of field `self` on `record` """
-        if not record:
-            raise Warning("Null record %s may not be assigned" % record)
-
-        # only one record is updated
         env = record.env
-        record = record[0]
+
+        # only a single record may be updated
+        record.one()
 
         # adapt value to the cache level
         value = self.convert_to_cache(value, env)
@@ -713,7 +717,7 @@ class Date(Field):
             :param datetime timestamp: optional datetime value to use instead of
                 the current date and time (must be a datetime, regular dates
                 can't be converted between timezones.)
-            :rtype: str 
+            :rtype: str
         """
         today = timestamp or datetime.now()
         context_today = None
@@ -1182,12 +1186,14 @@ class Id(Field):
     def to_column(self):
         return fields.integer('ID')
 
-    def __get__(self, instance, owner):
-        if instance is None:
+    def __get__(self, record, owner):
+        if record is None:
             return self         # the field is accessed through the class owner
-        return bool(instance._ids) and instance._ids[0]
+        if not record:
+            return False
+        return record.one()._ids[0]
 
-    def __set__(self, instance, value):
+    def __set__(self, record, value):
         raise NotImplementedError()
 
 
