@@ -5361,31 +5361,36 @@ class BaseModel(object):
         return item in self.ids
 
     def __add__(self, other):
-        """ Return the concatenation of two instances. """
+        """ Return the concatenation of two recordsets. """
         if not isinstance(other, BaseModel) or self._name != other._name:
             raise except_orm("ValueError", "Mixing apples and oranges: %s + %s" % (self, other))
         return self.browse(self._ids + other._ids)
 
     def __sub__(self, other):
-        """ Return the difference between two instances. """
+        """ Return the recordset of all the records in `self` that are not in `other`. """
         if not isinstance(other, BaseModel) or self._name != other._name:
             raise except_orm("ValueError", "Mixing apples and oranges: %s - %s" % (self, other))
-        return self.browse(set(self._ids) - set(other._ids))
+        other_ids = set(other._ids)
+        return self.browse([id for id in self._ids if id not in other_ids])
 
     def __and__(self, other):
-        """ Return the intersection of two instances. """
+        """ Return the intersection of two recordsets.
+            Note that recordset order is not preserved.
+        """
         if not isinstance(other, BaseModel) or self._name != other._name:
             raise except_orm("ValueError", "Mixing apples and oranges: %s & %s" % (self, other))
         return self.browse(set(self._ids) & set(other._ids))
 
     def __or__(self, other):
-        """ Return the union of two instances. """
+        """ Return the union of two recordsets.
+            Note that recordset order is not preserved.
+        """
         if not isinstance(other, BaseModel) or self._name != other._name:
             raise except_orm("ValueError", "Mixing apples and oranges: %s | %s" % (self, other))
         return self.browse(set(self._ids) | set(other._ids))
 
     def __eq__(self, other):
-        """ Test whether two instances are equivalent (as sets). """
+        """ Test whether two recordsets are equivalent (up to reordering). """
         if not isinstance(other, BaseModel):
             if other:
                 _logger.warning("Comparing apples and oranges: %s == %s", self, other)
