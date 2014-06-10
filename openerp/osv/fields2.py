@@ -438,7 +438,7 @@ class Field(object):
             return self.null(record.env)
 
         # only a single record may be accessed
-        record.one()
+        record.ensure_one()
 
         try:
             return record._cache[self]
@@ -461,7 +461,7 @@ class Field(object):
         env = record.env
 
         # only a single record may be updated
-        record.one()
+        record.ensure_one()
 
         # adapt value to the cache level
         value = self.convert_to_cache(value, env)
@@ -602,7 +602,7 @@ class Field(object):
                 target = records - computed
             else:
                 for record in target.browse(env.cache[field]) - computed:
-                    if record.map_cache(path) & records:
+                    if record._mapped_cache(path) & records:
                         target += record
             if target:
                 spec.append((field, target._ids))
@@ -1191,7 +1191,7 @@ class Id(Field):
             return self         # the field is accessed through the class owner
         if not record:
             return False
-        return record.one()._ids[0]
+        return record.ensure_one()._ids[0]
 
     def __set__(self, record, value):
         raise NotImplementedError()

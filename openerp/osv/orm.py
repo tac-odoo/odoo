@@ -5185,7 +5185,7 @@ class BaseModel(object):
     # Conversion methods
     #
 
-    def one(self):
+    def ensure_one(self):
         """ Return `self` if it is a singleton instance, otherwise raise an
             exception.
         """
@@ -5232,7 +5232,7 @@ class BaseModel(object):
     # Record traversal and update
     #
 
-    def _map_func(self, func):
+    def _mapped_func(self, func):
         """ Apply function `func` on all records in `self`, and return the
             result as a list or a recordset (if `func` return recordsets).
         """
@@ -5242,32 +5242,33 @@ class BaseModel(object):
             return reduce(operator.or_, vals, val0)
         return vals
 
-    def map(self, func):
+    def mapped(self, func):
         """ Apply `func` on all records in `self`, and return the result as a
-            list or a recordset (if `func` return recordsets).
+            list or a recordset (if `func` return recordsets). In the latter
+            case, the order of the returned recordset is arbritrary.
 
             :param func: a function or a dot-separated sequence of field names
         """
         if isinstance(func, basestring):
             recs = self
             for name in func.split('.'):
-                recs = recs._map_func(operator.itemgetter(name))
+                recs = recs._mapped_func(operator.itemgetter(name))
             return recs
         else:
-            return self._map_func(func)
+            return self._mapped_func(func)
 
-    def map_cache(self, name_seq):
-        """ Same as `~.map`, but `name_seq` is a dot-separated sequence of field
-            names, and only cached values are used.
+    def _mapped_cache(self, name_seq):
+        """ Same as `~.mapped`, but `name_seq` is a dot-separated sequence of
+            field names, and only cached values are used.
         """
         recs = self
         for name in name_seq.split('.'):
             field = recs._fields[name]
             null = field.null(self.env)
-            recs = recs.map(lambda rec: rec._cache.get(field, null))
+            recs = recs.mapped(lambda rec: rec._cache.get(field, null))
         return recs
 
-    def filter(self, func):
+    def filtered(self, func):
         """ Select the records in `self` such that `func(rec)` is true, and
             return them as a recordset.
 
@@ -5275,7 +5276,7 @@ class BaseModel(object):
         """
         if isinstance(func, basestring):
             name = func
-            func = lambda rec: filter(None, rec.map(name))
+            func = lambda rec: filter(None, rec.mapped(name))
         return self.browse([rec.id for rec in self if func(rec)])
 
     def sorted(self, key=None):
@@ -5626,7 +5627,7 @@ class BaseModel(object):
 
             # compute function fields on secondary records (one2many, many2many)
             for field_seq in (tocheck or ()):
-                record.map(field_seq)
+                record.mapped(field_seq)
 
             # map fields to the corresponding set of subfields to consider
             subfields = defaultdict(set)

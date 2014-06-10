@@ -161,7 +161,7 @@ class account_invoice(Model):
         self.move_lines = self.env['account.move.line']
         if not self.move_id:
             return
-        data_lines = self.move_id.line_id.filter(lambda l: l.account_id == self.account_id)
+        data_lines = self.move_id.line_id.filtered(lambda l: l.account_id == self.account_id)
         partial_lines = self.env['account.move.line']
         for data_line in data_lines:
             if data_line.reconcile_id:

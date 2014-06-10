@@ -231,7 +231,7 @@ class event_event(Model):
     def confirm_event(self):
         if self.email_confirmation_id:
             # send reminder that will confirm the event for all the people that were already confirmed
-            regs = self.registration_ids.filter(lambda reg: reg.state not in ('draft', 'cancel'))
+            regs = self.registration_ids.filtered(lambda reg: reg.state not in ('draft', 'cancel'))
             regs.mail_user_confirm()
         self.state = 'confirm'
 
@@ -245,7 +245,7 @@ class event_event(Model):
         """ Subscribe the current user to a given event """
         user = self.env.user
         num_of_seats = int(self._context.get('ticket', 1))
-        regs = self.registration_ids.filter(lambda reg: reg.user_id == user)
+        regs = self.registration_ids.filtered(lambda reg: reg.user_id == user)
         # the subscription is done as SUPERUSER_ID because in case we share the
         # kanban view, we want anyone to be able to subscribe
         if not regs:
@@ -266,7 +266,7 @@ class event_event(Model):
         # the unsubscription is done as SUPERUSER_ID because in case we share
         # the kanban view, we want anyone to be able to unsubscribe
         user = self.env.user
-        regs = self.sudo().registration_ids.filter(lambda reg: reg.user_id == user)
+        regs = self.sudo().registration_ids.filtered(lambda reg: reg.user_id == user)
         regs.button_reg_cancel()
 
     @api.onchange('type')

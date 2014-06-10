@@ -334,20 +334,22 @@ class TestAPI(common.TransactionCase):
         # check with many records
         ps = self.env['res.partner'].search([('name', 'ilike', 'a')])
         self.assertTrue(len(ps) > 1)
-        with self.assertRaises(except_orm): ps.one()
+        with self.assertRaises(except_orm):
+            ps.ensure_one()
 
         p1 = ps[0]
         self.assertEqual(len(p1), 1)
-        self.assertEqual(p1.one(), p1)
+        self.assertEqual(p1.ensure_one(), p1)
 
         p0 = self.env['res.partner'].browse()
         self.assertEqual(len(p0), 0)
-        with self.assertRaises(except_orm): p0.one()
+        with self.assertRaises(except_orm):
+            p0.ensure_one()
 
     @mute_logger('openerp.osv.orm')
     def test_80_contains(self):
         """ Test membership on recordset. """
-        p1 = self.env['res.partner'].search([('name', 'ilike', 'a')], limit=1).one()
+        p1 = self.env['res.partner'].search([('name', 'ilike', 'a')], limit=1).ensure_one()
         ps = self.env['res.partner'].search([('name', 'ilike', 'a')])
         self.assertTrue(p1 in ps)
 
@@ -411,13 +413,13 @@ class TestAPI(common.TransactionCase):
         customers = ps.browse([p.id for p in ps if p.customer])
 
         # filter on a single field
-        self.assertEqual(ps.filter(lambda p: p.customer), customers)
-        self.assertEqual(ps.filter('customer'), customers)
+        self.assertEqual(ps.filtered(lambda p: p.customer), customers)
+        self.assertEqual(ps.filtered('customer'), customers)
 
         # filter on a sequence of fields
         self.assertEqual(
-            ps.filter(lambda p: p.parent_id.customer),
-            ps.filter('parent_id.customer')
+            ps.filtered(lambda p: p.parent_id.customer),
+            ps.filtered('parent_id.customer')
         )
 
     @mute_logger('openerp.osv.orm')
@@ -428,15 +430,15 @@ class TestAPI(common.TransactionCase):
         for p in ps: parents |= p.parent_id
 
         # map a single field
-        self.assertEqual(ps.map(lambda p: p.parent_id), parents)
-        self.assertEqual(ps.map('parent_id'), parents)
+        self.assertEqual(ps.mapped(lambda p: p.parent_id), parents)
+        self.assertEqual(ps.mapped('parent_id'), parents)
 
         # map a sequence of fields
         self.assertEqual(
-            ps.map(lambda p: p.parent_id.name),
+            ps.mapped(lambda p: p.parent_id.name),
             [p.parent_id.name for p in ps]
         )
         self.assertEqual(
-            ps.map('parent_id.name'),
+            ps.mapped('parent_id.name'),
             [p.name for p in parents]
         )

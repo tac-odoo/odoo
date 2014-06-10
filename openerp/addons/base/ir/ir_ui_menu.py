@@ -74,11 +74,11 @@ class ir_ui_menu(osv.osv):
                 menus = self.with_context(context).search([])
 
                 # first discard all menus with groups the user does not have
-                menus = menus.filter(
+                menus = menus.filtered(
                     lambda menu: not menu.groups_id or menu.groups_id & groups)
 
                 # take apart menus that have an action
-                action_menus = menus.filter('action')
+                action_menus = menus.filtered('action')
                 folder_menus = menus - action_menus
                 visible = self.browse()
 
@@ -103,7 +103,7 @@ class ir_ui_menu(osv.osv):
 
                 self._menu_cache[key] = visible._ids
 
-            return self.filter(lambda menu: menu in visible)
+            return self.filtered(lambda menu: menu in visible)
 
     def search(self, cr, uid, args, offset=0, limit=None, order=None, context=None, count=False):
         if context is None:
