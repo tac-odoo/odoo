@@ -1387,18 +1387,20 @@ class related(function):
         for instance in obj.browse(cr, uid, ids, context=context):
             # traverse all fields except the last one
             for field in self.arg[:-1]:
-                instance = instance[field]
+                instance = instance[field][:1]
             if instance:
-                # write on the last field of the first record
-                instance[0].write({self.arg[-1]: values})
+                # write on the last field of the target record
+                instance.write({self.arg[-1]: values})
 
     def _fnct_read(self, obj, cr, uid, ids, field_name, args, context=None):
         res = {}
         for record in obj.browse(cr, SUPERUSER_ID, ids, context=context):
             value = record
-            for field in self.arg:
-                value = value[field]
-            res[record.id] = value
+            # traverse all fields except the last one
+            for field in self.arg[:-1]:
+                value = value[field][:1]
+            # read the last field on the target record
+            res[record.id] = value[self.arg[-1]]
 
         if self._type == 'many2one':
             # res[id] is a recordset; convert it to (id, name) or False.
