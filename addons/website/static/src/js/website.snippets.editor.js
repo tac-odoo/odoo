@@ -730,7 +730,150 @@
         }
     });
 
+    // used for adding custom css in website
+    // add/remove_css_row: for adding/removing row in/from dialog
+    // get_current_css: return currently applied css on element 
+    website.editor.EditCss = website.editor.Dialog.extend({
+        template: 'website.editor.css.edit',
+        events: _.extend({}, website.editor.Dialog.prototype.events, {
+            'click a.js_add_new_css': 'add_css_row',
+            'click button.js_delete_menu': 'remove_css_row',
+        }),
+        init: function (element) {
+            this.element = element;
+            this.current_css = {" ":""};
+            this._super();
+        },
+        start: function () {
+            var self = this;
+            var r = this._super.apply(this, arguments);
+            self.reinit_class();
+            
+            // For Bootstrap editor
+            this.$el.find(".background_input ul li").click(function(){
+                $('.background_input .result').html($(this).find('a').html());
+                $('.background_input').addClass('bg_dirty');
+                $(this).find('a span').removeClass('label');
+                $('.background_input button').attr("data-class" ,$(this).find('a span').attr('class'));
+                $(this).find('a span').addClass('label');
+            });
+            this.$el.find(".text_color_input ul li").click(function(){
+                $('.text_color_input .result').html($(this).find('a').html());
+                $('.text_color_input').addClass('text_dirty');
+                $('.text_color_input button').attr("data-class" ,$(this).find('a span').attr('class'));
+            });
+            this.$el.find(".border_input ul li").click(function(){
+                $('.border_input .result').html($(this).find('a').html());
+                $('.border_input button').attr("class","btn btn-default").addClass($(this).find('a').attr('class'));  
+                $('.border_input button').attr("data-class" ,$(this).find('a').attr('class'));
+                $('.border_input').addClass('border_dirty');
+            });
+            
+            if($(this.element).attr("style"))
+            {
+                this.current_css = this.get_current_css($(this.element).attr("style"));
+            }
+            this.add_css_row();
+            this.current_css = {" ":""}
+            this.$el.find('.css_property').trigger('blur');
+            return r;
+        },
+        add_css_row: function () {
+            this.$el.find('form.css_editor_form').append(openerp.qweb.render('website.editor.css.inputs', {'current_css':this.current_css}));
+            $('.css_property').typeahead({
+                source: CssPropertyList(),
+                blur: function (e) {
+                    this.focused = false;
+                    var color_picker = this.$element.parent().parent(); 
+                    if(["color","background","background-color","border-color","border-bottom-color","border-top-color","border-left-color","border-right-color","outline-color","column-rule-color"].indexOf(this.$element.val()) != -1){
+                        color_picker.colorpicker({component:'.color_picker',input:'input.css_value'});
+                        color_picker.find('.color_picker').css('display','table-cell');
+                    }
+                    else if(color_picker.colorpicker){
+                        color_picker.find('.color_picker').css('display','none');
+                        try{
+                            color_picker.colorpicker('destroy');
+                        }
+                        catch(err){
+                            console.log(err.message);
+                        }
+                    }
+                    if (!this.mousedover && this.shown) this.hide();
+                  }
+            });
+        },
+        remove_css_row: function (event) {
+            $(event.currentTarget).parent().parent('.input-group').remove();
+        },
+        save:function(){
+            var self = this;
 
+            if(this.$el.find('.border_dirty').length != 0){
+                this.update_class("border");
+            }
+            if(this.$el.find('.text_dirty').length != 0){
+                this.update_class("text");
+                
+            }
+            if(this.$el.find('.bg_dirty').length != 0){
+                this.update_class("bg");
+                
+            }
+            $(this.element).attr("style","");
+            _.each(this.$el.find('.input-group'), function(input) {
+                $(self.element).css($(input).find('.css_property')[0].value,$(input).find('.css_value')[0].value);
+            });
+            this._super();
+        },
+        reinit_class:function(){
+            var self = this;
+            var labels= ["label-info", "label-primary", "label-danger", "label-success", "label-default", "label-warning"];
+            var texts= ["text-default", "text-primary", "text-danger", "text-success", "text-info", "text-warning"];
+            var panels= ["panel-default", "panel-primary", "panel-danger", "panel-success", "panel-info", "panel-warning"];
+            _.each(labels,function(label){
+                if($(self.element).hasClass(label)){
+                    $('.background_input .result').html(self.$el.find('.'+label).parent().html());
+                }
+            });
+            _.each(texts,function(text){
+                if($(self.element).hasClass(text)){
+                    $('.text_color_input .result').html(self.$el.find('.'+text).parent().html());
+                }
+            });
+            _.each(panels,function(panel){
+                if($(self.element).hasClass(panel)){
+                    $('.border_input .result').html(self.$el.find('.'+panel).html());
+                    $('.border_input .result').parent().addClass(panel);
+                }
+            });
+        },
+        update_class:function(type){ 
+            if(type == "border"){
+                $(this.element).removeClass("panel-default panel-primary panel-danger panel-success panel-info panel-warning");
+                $(this.element).addClass($('.border_input button').attr("data-class"));
+                $(this.element).addClass("simple_border");
+            }
+            if(type == "text"){
+                $(this.element).removeClass("text-default text-primary text-danger text-success text-info text-warning");
+                $(this.element).addClass($('.text_color_input button').attr("data-class"));
+            }
+            if(type == "bg"){
+                $(this.element).removeClass("label-default label-primary label-danger label-success label-info label-warning");
+                $(this.element).addClass($('.background_input button').attr("data-class"));
+            }
+            $(this.element).attr('current_css' , JSON.stringify(this.current_json));
+        },
+        get_current_css:function(attr){
+            var current_css=[]
+            var styles = attr.split("; ");
+            for(var i in styles) {
+                var css = styles[i].split(": ");
+                current_css.push({'property':css[0].toLowerCase(),'value':css[1].replace(';','')});
+            }
+            return current_css;
+        }
+        
+    });
     website.snippet.options = {};
     website.snippet.Option = openerp.Class.extend({
         // initialisation (don't overwrite)
@@ -1716,6 +1859,7 @@
             var self = this;
             this.$overlay.on('click', '.oe_snippet_clone', _.bind(this.on_clone, this));
             this.$overlay.on('click', '.oe_snippet_remove', _.bind(this.on_remove, this));
+            this.$overlay.on('click', '.oe_snippet_css', _.bind(this.on_css, this));
             this._drag_and_drop();
         },
 
@@ -1740,6 +1884,26 @@
             return false;
         },
 
+        on_css: function (event) {
+            event.preventDefault();
+            this.$target.find('p,div,span,h1,h2,h3,h4,h5,h6,li,table,tr,td').hover(
+                    function(){
+                        $('.oe_css_highlight').removeClass('oe_css_highlight');
+                        $('*').find('.css_edit').remove();
+                        $(this).addClass('oe_css_highlight');
+                        $(this).prepend('<div class="css_edit"><span class="glyphicon glyphicon glyphicon-edit"></span> CSS<div>');
+                        var self=this;
+                        $('.css_edit').click(function(){
+                            new website.editor.EditCss(self)
+                            .appendTo(document.body);
+                        });
+                    },
+                    function(){
+                        $(this).removeClass('oe_css_highlight')
+                        $(this).find('.css_edit').remove();
+                    });
+            
+        },
         /*
         *  drop_and_build_snippet
         *  This method is called just after that a thumbnail is drag and dropped into a drop zone
@@ -1773,3 +1937,7 @@
     });
 
 })();
+/* returns All css property list, used for displaying hint for custom css*/
+function CssPropertyList(){    
+    return ["color","opacity","background","background-attachment","background-color","background-image","background-position","background-repeat","background-clip","background-origin","background-size","border","border-bottom","border-bottom-color","border-bottom-left-radius","border-bottom-right-radius","border-bottom-style","border-bottom-width","border-color","border-image","border-image-outset","border-image-repeat","border-image-slice","border-image-source","border-image-width","border-left","border-left-color","border-left-style","border-left-width","border-radius","border-right","border-right-color","border-right-style","border-right-width","border-style","border-top","border-top-color","border-top-left-radius","border-top-right-radius","border-top-style","border-top-width","border-width","box-decoration-break","box-shadow","bottom","clear","clip","display","float","height","left","overflow","overflow-x","overflow-y","padding","padding-bottom","padding-left","padding-right","padding-top","position","right","top","visibility","width","vertical-align","z-index","align-content","align-items","align-self","display","flex","flex-basis","flex-direction","flex-flow","flex-grow","flex-shrink","flex-wrap","justify-content","margin","margin-bottom","margin-left","margin-right","margin-top","max-height","max-width","min-height","min-width","order","hanging-punctuation","hyphens","letter-spacing","line-break","line-height","overflow-wrap","tab-size","text-align","text-align-last","text-indent","text-justify","text-transform","white-space","word-break","word-spacing","word-wrap","text-decoration","text-decoration-color","text-decoration-line","text-decoration-style","text-shadow","text-underline-position","font","font-family","font-feature-setting","@font-feature-values","font-kerning","font-language-override","font-synthesis","font-variant-alternates","font-variant-caps","font-variant-east-asian","font-variant-ligatures","font-variant-numeric","font-variant-position","font-size","font-style","font-variant","font-weight","@font-face","font-size-adjust","font-stretch","direction","text-orientation","text-combine-horizontal","unicode-bidi","writing-mode","border-collapse","border-spacing","caption-side","empty-cells","table-layout","counter-increment","counter-reset","list-style","list-style-image","list-style-position","list-style-type","@keyframes","animation","animation-delay","animation-direction","animation-duration   ","animation-fill-mode","animation-iteration-count","animation-name","animation-timing-function","animation-play-state","backface-visibility","perspective","perspective-origin","transform","transform-origin","transform-style","transition","transition-property","transition-duration","transition-timing-function","transition-delay","box-sizing","content","cursor","icon","ime-mode","nav-down","nav-index","nav-left","nav-right","nav-up","outline","outline-color","outline-offset","outline-style","outline-width","resize","text-overflow","break-after","break-before","break-inside","column-count","column-fill","column-gap","column-rule","column-rule-color","column-rule-style","column-rule-width","column-span","column-width","columns","widows","orphans","page-break-after","page-break-before","page-break-inside","marks","quotes","filter","image-orientation","image-rendering","image-resolution","object-fit","object-position","mask","mask-type","mark","mark-after","mark-before","phonemes","rest","rest-after","rest-before","voice-balance","voice-duration","voice-pitch","voice-pitch-range","voice-rate","voice-stress","voice-volume","marquee-direction","marquee-play-count","marquee-speed","marquee-style"];
+}

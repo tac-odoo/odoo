@@ -62,4 +62,98 @@
         </div>
     </t>
 </t>
+
+<t t-name="website.editor.css.edit">
+    <t t-call="website.editor.dialog">
+        <t t-set="title">Edit CSS</t>
+        <ul class="oe_menu_editor list-unstyled">
+            <form class="css_editor_form">
+            </form>
+        </ul>
+        <div class="mt16">
+            <div class="pull-right text-muted">
+                Edit or Add custom CSS
+            </div>
+            <div>
+                <a href="#" class="js_add_new_css">
+                    <i class="fa fa-plus-circle"/> Add New CSS
+                </a>
+            </div>
+            <div>
+                <h3>Bootstrap CSS</h3>
+            </div>
+            <div class="row">
+                <span>
+                    <div class="btn-group background_input">
+                        <div class="text-center"><strong>Background Color</strong></div>
+                        <button type="button" class="btn btn-default" data-toggle="dropdown">
+                            <span class="result"><small>No Background </small></span>
+                            <span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#"><small> No Background </small></a></li>
+                            <li><a href="#"> <span class="label label-default"> </span> Default</a></li>
+                            <li><a href="#"> <span class="label label-primary"> </span> Primary</a></li>
+                            <li><a href="#"> <span class="label label-success"> </span> Success</a></li>
+                            <li><a href="#"> <span class="label label-info"> </span> Info</a></li>
+                            <li><a href="#"> <span class="label label-warning"> </span> Warning</a></li>
+                            <li><a href="#"> <span class="label label-danger"> </span> Danger</a></li>
+                        </ul>
+                    </div>
+                </span>
+                <span>
+                    <div class="btn-group text_color_input">
+                        <div class="text-center"><strong>Text Color</strong></div>
+                        <button type="button" class="btn btn-default" data-toggle="dropdown">
+                            <span class="result"><span > <small> No Color </small> </span></span>
+                            <span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#"> <span >  No Color  </span> </a></li>
+                            <li><a href="#"> <span class="text-default"> <strong> Default </strong> </span> </a></li>
+                            <li><a href="#"> <span class="text-primary"> <strong> Primary </strong> </span> </a></li>
+                            <li><a href="#"> <span class="text-success"> <strong> Success </strong> </span> </a></li>
+                            <li><a href="#"> <span class="text-info"> <strong> Info </strong> </span> </a></li>
+                            <li><a href="#"> <span class="text-warning"><strong> Warning </strong></span> </a></li>
+                            <li><a href="#"> <span class="text-danger"> <strong> Danger</strong></span> </a></li>
+                        </ul>
+                    </div>
+                </span>
+                <span>
+                    <div class="btn-group border_input">
+                        <div class="text-center"><strong>Border</strong></div>
+                        <button type="button" class="btn btn-default" data-toggle="dropdown">
+                            <span class="result"> <small>No Border </small></span> <span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#" style="border:0px;"> <small>No Border </small></a></li>
+                            <li><a href="#" class="panel-default"> Default</a></li>
+                            <li><a href="#" class="panel-primary">  Primary</a></li>
+                            <li><a href="#" class="panel-success">  Success</a></li>
+                            <li><a href="#" class="panel-info">  Info</a></li>
+                            <li><a href="#" class="panel-warning">  Warning</a></li>
+                            <li><a href="#" class="panel-danger">  Danger</a></li>
+                        </ul>
+                    </div>
+                </span>
+            </div>
+        </div>
+    </t>
+</t>
+
+<t t-name="website.editor.css.inputs">
+    <t t-foreach="current_css" t-as="css">
+        <div class="input-group">
+            <span style="display: table-cell;width:45%">
+                <input type="text" class="form-control css_property" placeholder="CSS Property" style="" autocomplete="off" data-provide="typeahead" t-att-value="css['property']"/>
+            </span>
+            <input type="text" class="form-control css_value" placeholder="Value" style="display: table-cell;" t-att-value="css['value']"/>
+            <span class="input-group-addon color_picker" style="display: none;"><i></i></span>
+            <span class="input-group-btn"><button type="button" class="btn btn-danger js_delete_menu fa fa-trash-o"></button></span>
+        </div>
+    </t>
+</t>
 </templates>

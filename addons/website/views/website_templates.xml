@@ -216,6 +216,7 @@
 
     <link rel="stylesheet" href="/web/static/lib/select2/select2.css"/>
     <link rel="stylesheet" href="/website/static/lib/select2-bootstrap-css/select2-bootstrap.css"/>
+    <link rel='stylesheet' href="/website/static/lib/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css"/>
 
     <script type="text/javascript" src="/web/static/lib/select2/select2.js"></script>
 
@@ -232,6 +233,8 @@
     <script type="text/javascript" src="/website/static/lib/MutationObservers/test/sidetable.js"></script>
     <script type="text/javascript" src='/website/static/lib/nearest/jquery.nearest.js'></script>
     <script type="text/javascript" src="/website/static/lib/MutationObservers/MutationObserver.js"></script>
+    <script type="text/javascript" src="/website/static/lib/bootstrap-typehead/bootstrap3-typeahead.min.js"></script>
+    <script type="text/javascript" src="/website/static/lib/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js"></script>
 
     <script type="text/javascript" src="/website/static/src/js/website.editor.js"></script>
     <script type="text/javascript" src="/website/static/src/js/website.editor.newpage.js"></script> <!-- groups="base.group_website_designer" -->
