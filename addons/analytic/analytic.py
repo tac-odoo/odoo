@@ -41,7 +41,7 @@ class account_analytic_account(osv.osv):
     _mail_actions = [{
         'method': 'set_pending',
         'type': 'object',
-        'string': 'Renew',
+        'string': _('Renew'),
         'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype':['analytic.mt_account_opened','analytic.mt_account_closed'],
         'button_type': 'success'
@@ -49,7 +49,7 @@ class account_analytic_account(osv.osv):
     {
         'method': 'set_close',
         'type': 'object',
-        'string': 'Close',
+        'string': _('Close'),
         'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': ['analytic.mt_account_opened','analytic.mt_account_pending'],
         'button_type': 'warning'
@@ -57,7 +57,7 @@ class account_analytic_account(osv.osv):
     {
         'method': 'set_cancel',
         'type': 'object',
-        'string': 'Cancel',
+        'string': _('Cancel'),
         'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': ['analytic.mt_account_opened','analytic.mt_account_pending'],
         'button_type': 'warning'

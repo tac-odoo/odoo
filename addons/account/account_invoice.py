@@ -228,7 +228,7 @@ class account_invoice(osv.osv):
     _mail_actions = [{
         'method': 'invoice_validate',
         'type': 'object',
-        'string': 'Validate',
+        'string': _('Validate'),
         'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': [],
         'button_type': 'success'
@@ -236,7 +236,7 @@ class account_invoice(osv.osv):
     {
         'method': 'action_cancel',
         'type': 'object',
-        'string': 'Cancel',
+        'string': _('Cancel'),
         'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': ['account.mt_invoice_validated'],
         'button_type': 'warning'

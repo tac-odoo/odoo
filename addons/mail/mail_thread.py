@@ -109,7 +109,7 @@ class mail_thread(osv.AbstractModel):
     _default_mail_actions = [{
     'method': 'message_unsubscribe_users',
     'type': 'object',
-    'string': 'Mute',
+    'string': _('Mute'),
     'recipients': lambda self, obj, context: [],
     'subtype':[],
     'button_type': 'info'

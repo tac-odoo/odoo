@@ -82,14 +82,14 @@ class crm_lead(format_address, osv.osv):
     _mail_actions = [{
         'method': 'set_user',
         'type': 'object',
-        'string': 'I will manage it',
+        'string': _('I will manage it'),
         'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': ['crm.mt_lead_create'],
         'button_type': 'success'
     },
     {
         'type': 'action',
-        'string': 'Not interested',
+        'string': _('Not interested'),
         'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': ['crm.mt_lead_create'],
         'button_type': 'warning',

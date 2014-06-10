@@ -800,7 +800,7 @@ class fleet_vehicle_log_contract(osv.Model):
     _mail_actions = [{
         'method': 'act_renew_contract',
         'type': 'object',
-        'string': 'Renew',
+        'string': _('Renew'),
         'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': [],
         'button_type': 'success'
@@ -808,7 +808,7 @@ class fleet_vehicle_log_contract(osv.Model):
     {
         'method': 'contract_close',
         'type': 'object',
-        'string': 'Terminate',
+        'string': _('Terminate'),
         'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': [],
         'button_type': 'warning'

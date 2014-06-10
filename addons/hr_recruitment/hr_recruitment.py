@@ -90,7 +90,7 @@ class hr_applicant(osv.Model):
     _mail_actions = [{
         'method': 'applicant_first_interview',
         'type': 'object',
-        'string': 'Approve',
+        'string': _('Approve'),
         'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': ['hr_recruitment.mt_applicant_new'],
         'button_type': 'success'
@@ -98,7 +98,7 @@ class hr_applicant(osv.Model):
     {
         'method': 'applicant_refused',
         'type': 'object',
-        'string': 'Refuse',
+        'string': _('Refuse'),
         'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': ['hr_recruitment.mt_applicant_new'],
         'button_type': 'warning'

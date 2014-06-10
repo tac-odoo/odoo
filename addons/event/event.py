@@ -309,7 +309,7 @@ class event_registration(osv.osv):
     _mail_actions = [{
         'method': 'registration_open',
         'type': 'object',
-        'string': 'Confirm',
+        'string': _('Confirm'),
         'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': [],
         'button_type': 'success'
@@ -317,7 +317,7 @@ class event_registration(osv.osv):
     {
         'method': 'button_reg_cancel',
         'type': 'object',
-        'string': 'Cancel',
+        'string': _('Cancel'),
         'recipients': lambda self, obj, context: obj.message_follower_ids,
         'subtype': [],
         'button_type': 'warning'
