@@ -164,7 +164,7 @@ class TestMailgateway(TestMail):
         self.assertIn('<div dir="ltr">Should create a multipart/mixed: from gmail, <b>bold</b>, with attachment.<br clear="all"><div><br></div>', res.get('body', ''),
                       'message_parse: html version should be in body after parsing multipart/mixed')
 
-    @mute_logger('openerp.addons.mail.mail_thread', 'openerp.osv.orm')
+    @mute_logger('openerp.addons.mail.mail_thread', 'openerp.models')
     def test_10_message_process(self):
         """ Testing incoming emails processing. """
         cr, uid, user_raoul = self.cr, self.uid, self.user_raoul
@@ -536,7 +536,7 @@ class TestMailgateway(TestMail):
         self.assertIn('<pre>\nPlease call me as soon as possible this afternoon!\n\n--\nSylvie\n</pre>', msg.body,
                       'message_process: plaintext incoming email incorrectly parsed')
 
-    @mute_logger('openerp.addons.mail.mail_thread', 'openerp.osv.orm')
+    @mute_logger('openerp.addons.mail.mail_thread', 'openerp.models')
     def test_20_thread_parent_resolution(self):
         """ Testing parent/child relationships are correctly established when processing incoming mails """
         cr, uid = self.cr, self.uid

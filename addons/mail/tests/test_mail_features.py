@@ -281,7 +281,7 @@ class test_mail(TestMail):
         self.assertNotIn('res_id=%s' % group_pigs.id, url,
                          'notification email: link based on message should not contain res_id')
 
-    @mute_logger('openerp.addons.mail.mail_thread', 'openerp.osv.orm')
+    @mute_logger('openerp.addons.mail.mail_thread', 'openerp.models')
     def test_12_inbox_redirection(self):
         """ Tests designed to test the inbox redirection of emails notification URLs. """
         cr, uid, user_admin, group_pigs = self.cr, self.uid, self.user_admin, self.group_pigs

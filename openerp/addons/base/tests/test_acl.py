@@ -74,7 +74,7 @@ class TestACL(common.TransactionCase):
         #cleanup
         self.tech_group.write({'users': [(3, self.demo_uid)]})
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_field_crud_restriction(self):
         "Read/Write RPC access to restricted field should be forbidden"
         # Verify the test environment first
@@ -101,7 +101,7 @@ class TestACL(common.TransactionCase):
         #cleanup
         self.tech_group.write({'users': [(3, self.demo_uid)]})
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_fields_browse_restriction(self):
         """Test access to records having restricted fields"""
         self._set_field_groups(self.res_partner, 'email', GROUP_TECHNICAL_FEATURES)
@@ -112,7 +112,7 @@ class TestACL(common.TransactionCase):
         part.name
         # ... except if they are restricted
         with self.assertRaises(openerp.osv.orm.except_orm) as cm:
-            with mute_logger('openerp.osv.orm'):
+            with mute_logger('openerp.models'):
                 part.email
 
         self.assertEqual(cm.exception.args[0], 'AccessError')

@@ -29,7 +29,7 @@ from openerp.tools import mute_logger
 
 class TestHolidaysFlow(TestHrHolidaysBase):
 
-    @mute_logger('openerp.addons.base.ir.ir_model', 'openerp.osv.orm')
+    @mute_logger('openerp.addons.base.ir.ir_model', 'openerp.models')
     def test_00_leave_request_flow(self):
         """ Testing leave request flow """
         cr, uid = self.cr, self.uid

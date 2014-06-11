@@ -20,7 +20,7 @@ class TestAPI(common.TransactionCase):
         self.assertIsRecordset(value, model)
         self.assertFalse(value)
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_00_query(self):
         """ Build a recordset, and check its contents. """
         domain = [('name', 'ilike', 'j')]
@@ -41,7 +41,7 @@ class TestAPI(common.TransactionCase):
         self.assertEqual([p.id for p in partners], ids)
         self.assertEqual(self.env['res.partner'].browse(ids), partners)
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_01_query_offset(self):
         """ Build a recordset with offset, and check equivalence. """
         partners1 = self.env['res.partner'].search([], offset=10)
@@ -50,7 +50,7 @@ class TestAPI(common.TransactionCase):
         self.assertIsRecordset(partners2, 'res.partner')
         self.assertEqual(list(partners1), list(partners2))
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_02_query_limit(self):
         """ Build a recordset with offset, and check equivalence. """
         partners1 = self.env['res.partner'].search([], limit=10)
@@ -59,7 +59,7 @@ class TestAPI(common.TransactionCase):
         self.assertIsRecordset(partners2, 'res.partner')
         self.assertEqual(list(partners1), list(partners2))
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_03_query_offset_limit(self):
         """ Build a recordset with offset and limit, and check equivalence. """
         partners1 = self.env['res.partner'].search([], offset=3, limit=7)
@@ -68,7 +68,7 @@ class TestAPI(common.TransactionCase):
         self.assertIsRecordset(partners2, 'res.partner')
         self.assertEqual(list(partners1), list(partners2))
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_05_immutable(self):
         """ Check that a recordset remains the same, even after updates. """
         domain = [('name', 'ilike', 'j')]
@@ -84,7 +84,7 @@ class TestAPI(common.TransactionCase):
         partners2 = self.env['res.partner'].search(domain)
         self.assertFalse(partners2)
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_06_fields(self):
         """ Check that relation fields return records, recordsets or nulls. """
         user = self.registry('res.users').browse(self.cr, self.uid, self.uid)
@@ -105,7 +105,7 @@ class TestAPI(common.TransactionCase):
                 for p in partners:
                     self.assertIsRecordset(p[name], cinfo.column._obj)
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_07_null(self):
         """ Check behavior of null instances. """
         # select a partner without a parent
@@ -128,7 +128,7 @@ class TestAPI(common.TransactionCase):
         self.assertFalse(partner.parent_id.user_id.groups_id)
         self.assertIsRecordset(partner.parent_id.user_id.groups_id, 'res.groups')
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_10_old_old(self):
         """ Call old-style methods in the old-fashioned way. """
         partners = self.env['res.partner'].search([('name', 'ilike', 'j')])
@@ -140,7 +140,7 @@ class TestAPI(common.TransactionCase):
         self.assertEqual(len(res), len(ids))
         self.assertEqual(set(val[0] for val in res), set(ids))
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_20_old_new(self):
         """ Call old-style methods in the new API style. """
         partners = self.env['res.partner'].search([('name', 'ilike', 'j')])
@@ -151,7 +151,7 @@ class TestAPI(common.TransactionCase):
         self.assertEqual(len(res), len(partners))
         self.assertEqual(set(val[0] for val in res), set(map(int, partners)))
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_25_old_new(self):
         """ Call old-style methods on records (new API style). """
         partners = self.env['res.partner'].search([('name', 'ilike', 'j')])
@@ -164,7 +164,7 @@ class TestAPI(common.TransactionCase):
             self.assertTrue(isinstance(res[0], tuple) and len(res[0]) == 2)
             self.assertEqual(res[0][0], p.id)
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_30_new_old(self):
         """ Call new-style methods in the old-fashioned way. """
         partners = self.env['res.partner'].search([('name', 'ilike', 'j')])
@@ -176,7 +176,7 @@ class TestAPI(common.TransactionCase):
         for p in partners:
             self.assertFalse(p.active)
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_40_new_new(self):
         """ Call new-style methods in the new API style. """
         partners = self.env['res.partner'].search([('name', 'ilike', 'j')])
@@ -187,7 +187,7 @@ class TestAPI(common.TransactionCase):
         for p in partners:
             self.assertFalse(p.active)
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_45_new_new(self):
         """ Call new-style methods on records (new API style). """
         partners = self.env['res.partner'].search([('name', 'ilike', 'j')])
@@ -199,7 +199,7 @@ class TestAPI(common.TransactionCase):
         for p in partners:
             self.assertFalse(p.active)
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     @mute_logger('openerp.addons.base.ir.ir_model')
     def test_50_environment(self):
         """ Test environment on records. """
@@ -247,7 +247,7 @@ class TestAPI(common.TransactionCase):
         with self.assertRaises(except_orm):
             demo_partners[0].company_id.name
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_55_draft(self):
         """ Test draft mode nesting. """
         env = self.env
@@ -262,7 +262,7 @@ class TestAPI(common.TransactionCase):
             self.assertTrue(env.draft)
         self.assertFalse(env.draft)
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_60_cache(self):
         """ Check the record cache behavior """
         partners = self.env['res.partner'].search([('child_ids', '!=', False)])
@@ -303,7 +303,7 @@ class TestAPI(common.TransactionCase):
         self.assertEqual(set(partner2.child_ids), set(children2))
         self.env.check_cache()
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_60_cache_prefetching(self):
         """ Check the record cache prefetching """
         self.env.invalidate_all()
@@ -328,7 +328,7 @@ class TestAPI(common.TransactionCase):
             countries |= p.country_id
         self.assertLessEqual(set(countries.ids), set(country_ids))
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_70_one(self):
         """ Check method one(). """
         # check with many records
@@ -346,14 +346,14 @@ class TestAPI(common.TransactionCase):
         with self.assertRaises(except_orm):
             p0.ensure_one()
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_80_contains(self):
         """ Test membership on recordset. """
         p1 = self.env['res.partner'].search([('name', 'ilike', 'a')], limit=1).ensure_one()
         ps = self.env['res.partner'].search([('name', 'ilike', 'a')])
         self.assertTrue(p1 in ps)
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_80_set_operations(self):
         """ Check set operations on recordsets. """
         pa = self.env['res.partner'].search([('name', 'ilike', 'a')])
@@ -406,7 +406,7 @@ class TestAPI(common.TransactionCase):
         with self.assertRaises(except_orm):
             res = ps >= ms
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_80_filter(self):
         """ Check filter on recordsets. """
         ps = self.env['res.partner'].search([])
@@ -422,7 +422,7 @@ class TestAPI(common.TransactionCase):
             ps.filtered('parent_id.customer')
         )
 
-    @mute_logger('openerp.osv.orm')
+    @mute_logger('openerp.models')
     def test_80_map(self):
         """ Check map on recordsets. """
         ps = self.env['res.partner'].search([])

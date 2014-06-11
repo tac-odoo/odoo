@@ -247,7 +247,7 @@ class test_integer_field(ImporterCase):
             -1, -42, -(2**31 - 1), -(2**31), -12345678
         ], values(self.read()))
 
-    @mute_logger('openerp.sql_db', 'openerp.osv.orm')
+    @mute_logger('openerp.sql_db', 'openerp.models')
     def test_out_of_range(self):
         result = self.import_(['value'], [[str(2**31)]])
         self.assertIs(result['ids'], False)
@@ -389,14 +389,14 @@ class test_unbound_string_field(ImporterCase):
 class test_required_string_field(ImporterCase):
     model_name = 'export.string.required'
 
-    @mute_logger('openerp.sql_db', 'openerp.osv.orm')
+    @mute_logger('openerp.sql_db', 'openerp.models')
     def test_empty(self):
         result = self.import_(['value'], [[]])
         self.assertEqual(result['messages'], [message(
             u"Missing required value for the field 'unknown' (value)")])
         self.assertIs(result['ids'], False)
 
-    @mute_logger('openerp.sql_db', 'openerp.osv.orm')
+    @mute_logger('openerp.sql_db', 'openerp.models')
     def test_not_provided(self):
         result = self.import_(['const'], [['12']])
         self.assertEqual(result['messages'], [message(

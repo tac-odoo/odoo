@@ -51,7 +51,7 @@ Integrator at Agrolait"""
 
 class TestProjectFlow(TestProjectBase):
 
-    @mute_logger('openerp.addons.base.ir.ir_model', 'openerp.osv.orm')
+    @mute_logger('openerp.addons.base.ir.ir_model', 'openerp.models')
     def test_00_project_process(self):
         """ Testing project management """
         cr, uid, user_projectuser_id, user_projectmanager_id, project_pigs_id = self.cr, self.uid, self.user_projectuser_id, self.user_projectmanager_id, self.project_pigs_id

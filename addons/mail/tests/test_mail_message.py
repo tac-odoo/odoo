@@ -162,7 +162,7 @@ class TestMailMessage(TestMail):
         self.assertEqual(mail.reply_to, 'someone@example.com',
                          'mail_mail: reply_to should equal the rpely_to given to create')
 
-    @mute_logger('openerp.addons.base.ir.ir_model', 'openerp.osv.orm')
+    @mute_logger('openerp.addons.base.ir.ir_model', 'openerp.models')
     def test_10_mail_message_search_access_rights(self):
         """ Testing mail_message.search() using specific _search implementation """
         cr, uid, group_pigs_id = self.cr, self.uid, self.group_pigs_id
@@ -197,7 +197,7 @@ class TestMailMessage(TestMail):
         msg_ids = self.mail_message.search(cr, uid, [('subject', 'like', '_Test')])
         self.assertEqual(set([msg_id1, msg_id2, msg_id3, msg_id4, msg_id5, msg_id6, msg_id7, msg_id8]), set(msg_ids), 'mail_message search failed')
 
-    @mute_logger('openerp.addons.base.ir.ir_model', 'openerp.osv.orm')
+    @mute_logger('openerp.addons.base.ir.ir_model', 'openerp.models')
     def test_15_mail_message_check_access_rule(self):
         """ Testing mail_message.check_access_rule() """
         cr, uid = self.cr, self.uid
@@ -384,7 +384,7 @@ class TestMailMessage(TestMail):
         self.assertEqual(set(msg.vote_user_ids), set([self.user_raoul]), 'mail_message vote: after unvoting, Bert should be in the voter')
         self.assertEqual(set(msg_raoul.vote_user_ids), set([self.user_raoul]), 'mail_message vote: after unvoting, Bert should be in the voter')
 
-    @mute_logger('openerp.addons.base.ir.ir_model', 'openerp.osv.orm')
+    @mute_logger('openerp.addons.base.ir.ir_model', 'openerp.models')
     def test_50_mail_flow_access_rights(self):
         """ Test a Chatter-looks alike flow to test access rights """
         cr, uid = self.cr, self.uid
