@@ -571,7 +571,7 @@ class BaseModel(object):
     @classmethod
     def _add_field(cls, name, field):
         """ Add the given `field` under the given `name` in the class """
-        field.set_model_name(cls._name, name)
+        field.set_class_name(cls, name)
 
         # add field in _fields (for reflection)
         cls._fields[name] = field

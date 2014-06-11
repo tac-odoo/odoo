@@ -57,6 +57,16 @@ def _check_value(value):
     return value.get() if isinstance(value, SpecialValue) else value
 
 
+def resolve_all_mro(cls, name, reverse=False):
+    """ Return the (successively overridden) values of attribute `name` in `cls`
+        in mro order, or inverse mro order if `reverse` is true.
+    """
+    klasses = reversed(cls.__mro__) if reverse else cls.__mro__
+    for klass in klasses:
+        if name in klass.__dict__:
+            yield klass.__dict__[name]
+
+
 def default_compute(field, value):
     """ Return a compute function for the given default `value`; `value` is
         either a constant, or a unary function returning the default value.
@@ -83,9 +93,11 @@ class Field(object):
     """ Base class of all fields. """
     __metaclass__ = MetaField
 
+    _attrs = None               # dictionary with all field attributes
+    _free_attrs = None          # list of semantic-free attribute names
+
     automatic = False           # whether the field is automatically created ("magic" field)
     _origin = None              # the column or field interfaced by self, if any
-    _free_attrs = None          # collection of semantic-free attribute names
 
     name = None                 # name of the field
     type = None                 # type of the field (string)
@@ -112,12 +124,31 @@ class Field(object):
 
     def __init__(self, string=None, **kwargs):
         kwargs['string'] = string
+        self._attrs = {key: val for key, val in kwargs.iteritems() if val is not None}
         self._free_attrs = []
-        self._init(kwargs)
-        self.reset()
 
-    def _init(self, attrs):
-        """ Initialize `self` with dictionary `attrs`. """
+    def copy(self, **kwargs):
+        """ make a copy of `self`, possibly modified with parameters `kwargs` """
+        field = copy(self)
+        field._attrs = {key: val for key, val in kwargs.iteritems() if val is not None}
+        field._free_attrs = list(self._free_attrs)
+        return field
+
+    def set_class_name(self, cls, name):
+        """ Assign the model class and field name of `self`. """
+        self.model_name = cls._name
+        self.name = name
+
+        # determine all inherited field attributes
+        attrs = {}
+        for field in resolve_all_mro(cls, name, reverse=True):
+            if isinstance(field, type(self)):
+                attrs.update(field._attrs)
+            else:
+                attrs.clear()
+        attrs.update(self._attrs)       # necessary in case self is not in cls
+
+        # initialize `self` with `attrs`
         if 'compute' in attrs:
             # by default, computed fields are not stored and readonly
             attrs['store'] = attrs.get('store', False)
@@ -130,20 +161,10 @@ class Field(object):
                 self._free_attrs.append(attr)
             setattr(self, attr, value)
 
-    def copy(self, **kwargs):
-        """ make a copy of `self`, possibly modified with parameters `kwargs` """
-        field = copy(self)
-        field._free_attrs = list(self._free_attrs)
-        field._init(kwargs)
-        field.reset()
-        return field
-
-    def set_model_name(self, model_name, name):
-        """ assign the model and field names of `self` """
-        self.model_name = model_name
-        self.name = name
         if not self.string:
             self.string = name.replace('_', ' ').capitalize()
+
+        self.reset()
 
     def __str__(self):
         return "%s.%s" % (self.model_name, self.name)
@@ -638,7 +659,8 @@ class Integer(Field):
 class Float(Field):
     """ Float field. """
     type = 'float'
-    digits = None
+    _digits = None              # digits argument passed to class initializer
+    digits = None               # digits as computed by setup()
 
     def __init__(self, string=None, digits=None, **kwargs):
         super(Float, self).__init__(string=string, _digits=digits, **kwargs)
@@ -823,7 +845,7 @@ class Selection(Field):
     type = 'selection'
     selection = None        # [(value, string), ...], model method or method name
 
-    def __init__(self, selection, string=None, **kwargs):
+    def __init__(self, selection=None, string=None, **kwargs):
         """ Selection field.
 
             :param selection: specifies the possible values for this field.
@@ -899,7 +921,7 @@ class Reference(Selection):
     type = 'reference'
     size = 128
 
-    def __init__(self, selection, string=None, **kwargs):
+    def __init__(self, selection=None, string=None, **kwargs):
         """ Reference field.
 
             :param selection: specifies the possible model names for this field.
@@ -939,9 +961,6 @@ class _Relational(Field):
     domain = None                       # domain for searching values
     context = None                      # context for searching values
 
-    def __init__(self, **kwargs):
-        super(_Relational, self).__init__(**kwargs)
-
     _description_relation = property(attrgetter('comodel_name'))
     _description_context = property(attrgetter('context'))
 
@@ -972,7 +991,7 @@ class Many2one(_Relational):
     auto_join = False                   # whether joins are generated upon search
     delegate = False                    # whether self implements delegation
 
-    def __init__(self, comodel_name, string=None, **kwargs):
+    def __init__(self, comodel_name=None, string=None, **kwargs):
         super(Many2one, self).__init__(comodel_name=comodel_name, string=string, **kwargs)
 
     def _setup_regular(self, env):
@@ -1125,9 +1144,13 @@ class One2many(_RelationalMulti):
     auto_join = False                   # whether joins are generated upon search
     limit = None                        # optional limit to use upon read
 
-    def __init__(self, comodel_name, inverse_name=None, string=None, **kwargs):
+    def __init__(self, comodel_name=None, inverse_name=None, string=None, **kwargs):
         super(One2many, self).__init__(
-            comodel_name=comodel_name, inverse_name=inverse_name, string=string, **kwargs)
+            comodel_name=comodel_name,
+            inverse_name=inverse_name,
+            string=string,
+            **kwargs
+        )
 
     def _setup_regular(self, env):
         super(One2many, self)._setup_regular(env)
@@ -1149,10 +1172,16 @@ class Many2many(_RelationalMulti):
     column2 = None                      # column of table referring to comodel
     limit = None                        # optional limit to use upon read
 
-    def __init__(self, comodel_name, relation=None, column1=None, column2=None,
-                string=None, **kwargs):
-        super(Many2many, self).__init__(comodel_name=comodel_name, relation=relation,
-            column1=column1, column2=column2, string=string, **kwargs)
+    def __init__(self, comodel_name=None, relation=None, column1=None, column2=None,
+                 string=None, **kwargs):
+        super(Many2many, self).__init__(
+            comodel_name=comodel_name,
+            relation=relation,
+            column1=column1,
+            column2=column2,
+            string=string,
+            **kwargs
+        )
 
     def _setup_regular(self, env):
         super(Many2many, self)._setup_regular(env)

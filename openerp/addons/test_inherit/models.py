@@ -26,4 +26,7 @@ class mother(openerp.Model):
 
     field_in_mother = openerp.fields.Char()
 
+    # extend the name field by adding a default value
+    name = openerp.fields.Char(default='Unknown')
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
