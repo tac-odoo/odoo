@@ -51,6 +51,7 @@ class Employeework(http.Controller):
             'current_date' : now,
             'data' : read_data(now),
             'date_list' : get_day_and_total(now),
+            'project_list' : {prj['account_id'][0] : prj['account_id'][1] for prj in read_data('', 'project')},
             'get_difference': get_difference})
 
     @http.route('/employeework/dateview', type='http', auth="user", website=True, multilang=True)
@@ -61,6 +62,7 @@ class Employeework(http.Controller):
             'current_date' : datetime.strptime(current_date,"%Y-%m-%d"),
             'data' : read_data(current_date),
             'date_list' : date_list,
+            'project_list' : {prj['account_id'][0] : prj['account_id'][1] for prj in read_data('', 'project')},
             'get_difference': get_difference})
 
     @http.route('/employeework/weekview', type='http', auth="user", website=True, multilang=True)
@@ -122,3 +124,7 @@ class Employeework(http.Controller):
     @http.route('/employeework/removecounter', type='http', auth="user", website=True, multilang=True)
     def employeework_removecounter(self, record_id):
         return get_difference(record_id, "removecounter")
+
+    @http.route('/employeework/project_list', type='json', auth="user", website=True, multilang=True)
+    def employeework_project_list(self):
+        return {prj['account_id'][0] : prj['account_id'][1] for prj in read_data('', 'project')}

@@ -1,6 +1,42 @@
 $(document).ready(function(){
     var employeework = new openerp.website.employeework();
+    var str = '';
+    openerp.jsonRpc("/employeework/project_list", 'call', {}).done(function(result) {
+        list = JSON.stringify(result);
+        // console.log(list)
+        // for (var entry in list) {
+            
+        // //list.foreach(function(entry){
+        //     str += "<li><a href='#' id="+list[entry]+">"+list[entry]+"</a></li>"
+        // //});
+        // };
+        // alert(str);
+    });
+    $("button.addline").click(function(){
+        $(".last_row").before("<tr>\
+            <td>\
+                <div class='btn-group'>\
+                    <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown'> \
+                        Select project \
+                        <span class='caret'></span>\
+                    </button>\
+                    <ul class='dropdown-menu'>\
+                    </ul>\
+                </div>\
+            </td>\
+            <td><input class='form-control' type='text' placeholder='Description'/></td>\
+            <td><input class='form-control' type='text' placeholder='Hour'/></td>\
+            <td>\
+                <button type='button' class='btn btn-primary btn-gt mt4'>\
+                    <span class='fa fa-save'></span>\
+                </button>\
+            </td>\
+        </tr>");
+    });
 });
+
+
+
 openerp.website.employeework = openerp.Class.extend({
     init : function(){
         this.$el_weekview_txt = $(".weekview_txt");

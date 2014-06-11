@@ -91,7 +91,7 @@
     		<t t-if="active=='date'">
 	    		<t t-if="data!=[]">
 	                <div class="table-responsive">
-			            <table class="table table-hover">
+			            <table class="table table-hover dateview">
 			            	<t t-if="active=='date'">
 					        	<tr t-foreach='data' t-as='rec'>
 					        		<td>
@@ -115,9 +115,13 @@
 										</button>
 					        		</td>
 								</tr>
-								<tr>
+								<tr class="last_row">
 					        		<td>
-					        			<h4><strong class="pull-right">Total : </strong></h4></td>
+					        			<button type="button" class="btn btn-primary btn-gt mt4 pull-left addline">
+											<span class="fa fa-plus"></span> Add Line
+										</button>
+					        			<h4><strong class="pull-right">Total : </strong></h4>
+					        		</td>
 					        		<td>
 					        			<t t-foreach="date_list" t-as="date">
 											<t t-if="date['dates']==current_date">
@@ -163,7 +167,7 @@
 						        	</td>
 						        	<td>
 						        		<button type="button" class="btn btn-default btn-sm">
-											<span class="glyphicon glyphicon-remove"></span>
+											<span class="fa fa-remove"></span>
 										</button>
 						        	</td>
 								</tr>
