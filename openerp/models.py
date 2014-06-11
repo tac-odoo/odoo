@@ -3025,6 +3025,7 @@ class BaseModel(object):
         return fields
 
     # new-style implementation of read(); old-style is defined below
+    @api.v8
     def read(self, fields=None, load='_classic_read'):
         """ Read the given fields for the records in `self`.
 
@@ -3070,7 +3071,7 @@ class BaseModel(object):
         return result
 
     # add explicit old-style implementation to read()
-    @api.v7(read)
+    @api.v7
     def read(self, cr, user, ids, fields=None, context=None, load='_classic_read'):
         records = self.browse(cr, user, ids, context)
         result = BaseModel.read(records, fields, load=load)
@@ -5027,6 +5028,7 @@ class BaseModel(object):
         env.prefetch[cls._name].update(ids)
         return records
 
+    @api.v8
     def browse(self, arg=None):
         """ Return an instance corresponding to `arg` and attached to
             `self.env`; `arg` is either a record id, or a collection of record ids.
@@ -5038,7 +5040,7 @@ class BaseModel(object):
         assert all(isinstance(id, IdType) for id in ids), "Browsing invalid ids: %s" % ids
         return self._browse(self.env, ids)
 
-    @api.v7(browse)
+    @api.v7
     def browse(self, cr, uid, arg=None, context=None):
         if isinstance(arg, Iterable) and not isinstance(arg, basestring):
             ids = tuple(arg)

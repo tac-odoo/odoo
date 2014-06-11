@@ -148,6 +148,7 @@ class Report(osv.Model):
     #--------------------------------------------------------------------------
     # Main report methods
     #--------------------------------------------------------------------------
+    @api.v7
     def get_html(self, cr, uid, ids, report_name, data=None, context=None):
         """This method generates and returns html version of a report.
         """
@@ -168,11 +169,12 @@ class Report(osv.Model):
             }
             return self.render(cr, uid, [], report.report_name, docargs, context=context)
 
-    @api.v8(get_html)
+    @api.v8
     def get_html(self, records, report_name, data=None):
         return self._model.get_html(self._cr, self._uid, records.ids, report_name,
                                     data=data, context=self._context)
 
+    @api.v7
     def get_pdf(self, cr, uid, ids, report_name, html=None, data=None, context=None):
         """This method generates and returns pdf version of a report.
         """
@@ -265,11 +267,12 @@ class Report(osv.Model):
         )
         return pdf
 
-    @api.v8(get_pdf)
+    @api.v8
     def get_pdf(self, records, report_name, html=None, data=None):
         return self._model.get_pdf(self._cr, self._uid, records.ids, report_name,
                                    html=html, data=data, context=self._context)
 
+    @api.v7
     def get_action(self, cr, uid, ids, report_name, data=None, context=None):
         """Return an action of type ir.actions.report.xml.
 
@@ -301,7 +304,7 @@ class Report(osv.Model):
             'context': context,
         }
 
-    @api.v8(get_action)
+    @api.v8
     def get_action(self, records, report_name, data=None):
         return self._model.get_action(self._cr, self._uid, records.ids, report_name,
                                       data=data, context=self._context)
@@ -309,6 +312,7 @@ class Report(osv.Model):
     #--------------------------------------------------------------------------
     # Report generation helpers
     #--------------------------------------------------------------------------
+    @api.v7
     def _check_attachment_use(self, cr, uid, ids, report):
         """ Check attachment_use field. If set to true and an existing pdf is already saved, load
         this one now. Else, mark save it.
@@ -341,7 +345,7 @@ class Report(osv.Model):
                         save_in_attachment[record_id] = filename
         return save_in_attachment
 
-    @api.v8(_check_attachment_use)
+    @api.v8
     def _check_attachment_use(self, records, report):
         return self._model._check_attachment_use(
             self._cr, self._uid, records.ids, report, context=self._context)

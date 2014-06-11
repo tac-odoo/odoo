@@ -2087,6 +2087,7 @@ class account_tax(osv.osv):
         tax = self.browse(cr, uid, tax_id, context=context)
         return self.compute_all(cr, uid, [tax], amount, 1) # TOCHECK may use force_exclude parameter
 
+    @api.v7
     def compute_all(self, cr, uid, taxes, price_unit, quantity, product=None, partner=None, force_excluded=False):
         """
         :param force_excluded: boolean used to say that we don't want to consider the value of field price_include of
@@ -2137,7 +2138,7 @@ class account_tax(osv.osv):
             'taxes': tin + tex
         }
 
-    @api.v8(compute_all)
+    @api.v8
     def compute_all(self, price_unit, quantity, product=None, partner=None, force_excluded=False):
         return self._model.compute_all(
             self._cr, self._uid, self, price_unit, quantity,

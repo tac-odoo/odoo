@@ -60,7 +60,7 @@ __all__ = [
 
 import logging
 
-from inspect import getargspec
+from inspect import currentframe, getargspec
 from collections import defaultdict, MutableMapping
 from contextlib import contextmanager
 from pprint import pformat
@@ -520,40 +520,56 @@ def cr_uid_ids_context(method):
     return make_wrapper(method, method, new_api)
 
 
-def v7(new_method):
-    """ Define manually the mapping between api's by decorating the old-style
-        implementation of a new-style method.::
+def v7(method_v7):
+    """ Decorate a method that supports the old-style api only. A new-style api
+        may be provided by redefining a method with the same name and decorated
+        with :func:`~.v8`::
 
-            def stuff(self):
+            @api.v7
+            def foo(self, cr, uid, ids, context=None):
                 ...
 
-            @api.v7(stuff)
-            def stuff(self, cr, uid, context=None):
+            @api.v8
+            def foo(self):
                 ...
 
-        The method name, doc, etc. are copied from `new_method` to the result.
-        This is convenient for keeping backward compatibility with methods that
-        do not follow the predefined mappings.
+        Note that the wrapper method uses the docstring of the first method.
     """
-    return lambda old_method: make_wrapper(new_method, old_method, new_method)
+    # retrieve method_v8 from the caller's frame
+    frame = currentframe().f_back
+    method = frame.f_locals.get(method_v7.__name__)
+    method_v8 = getattr(method, '_v8', method)
+
+    wrapper = make_wrapper(method_v7, method_v7, method_v8)
+    wrapper._v7 = method_v7
+    wrapper._v8 = method_v8
+    return wrapper
 
 
-def v8(old_method):
-    """ Define manually the mapping between api's by decorating the new-style
-        implementation of an old-style method.::
+def v8(method_v8):
+    """ Decorate a method that supports the new-style api only. An old-style api
+        may be provided by redefining a method with the same name and decorated
+        with :func:`~.v7`::
 
-            def stuff(self, cr, uid, context=None):
+            @api.v8
+            def foo(self):
                 ...
 
-            @api.v8(stuff)
-            def stuff(self):
+            @api.v7
+            def foo(self, cr, uid, ids, context=None):
                 ...
 
-        The method name, doc, etc. are copied from `old_method` to the result.
-        This is convenient for keeping backward compatibility with methods that
-        do not follow the predefined mappings.
+        Note that the wrapper method uses the docstring of the first method.
     """
-    return lambda new_method: make_wrapper(old_method, old_method, new_method)
+    # retrieve method_v7 from the caller's frame
+    frame = currentframe().f_back
+    method = frame.f_locals.get(method_v8.__name__)
+    method_v7 = getattr(method, '_v7', method)
+
+    wrapper = make_wrapper(method_v8, method_v7, method_v8)
+    wrapper._v7 = method_v7
+    wrapper._v8 = method_v8
+    return wrapper
 
 
 def noguess(method):

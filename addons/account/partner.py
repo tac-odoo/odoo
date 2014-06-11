@@ -41,6 +41,7 @@ class account_fiscal_position(osv.osv):
         'active': True,
     }
 
+    @api.v7
     def map_tax(self, cr, uid, fposition_id, taxes, context=None):
         if not taxes:
             return []
@@ -58,7 +59,7 @@ class account_fiscal_position(osv.osv):
                 result.add(t.id)
         return list(result)
 
-    @api.v8(map_tax)
+    @api.v8
     def map_tax(self, taxes):
         result = taxes.browse()
         for tax in taxes:
@@ -71,6 +72,7 @@ class account_fiscal_position(osv.osv):
                 result |= tax
         return result
 
+    @api.v7
     def map_account(self, cr, uid, fposition_id, account_id, context=None):
         if not fposition_id:
             return account_id
@@ -80,7 +82,7 @@ class account_fiscal_position(osv.osv):
                 break
         return account_id
 
-    @api.v8(map_account)
+    @api.v8
     def map_account(self, account):
         for pos in self.account_ids:
             if pos.account_src_id == account:
