@@ -137,8 +137,8 @@ import logging
 import traceback
 
 import openerp.modules
-from openerp.osv import fields
-from openerp.osv.orm import MAGIC_COLUMNS, BaseModel
+from . import fields
+from ..models import MAGIC_COLUMNS, BaseModel
 import openerp.tools as tools
 
 

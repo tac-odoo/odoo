@@ -1,7 +1,7 @@
 import simplejson
 import openerp
-import openerp.addons.web.http as http
-from openerp.addons.web.http import request
+import openerp.http as http
+from openerp.http import request
 import openerp.addons.web.controllers.main as webmain
 import json
 

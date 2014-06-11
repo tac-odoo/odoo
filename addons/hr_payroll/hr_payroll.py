@@ -26,8 +26,8 @@ from datetime import datetime
 from datetime import timedelta
 from dateutil import relativedelta
 
-from openerp.osv import fields, osv, api
-from openerp import tools
+from openerp import api, tools
+from openerp.osv import fields, osv
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import openerp
+import openerp.osv.orm
 
 class m(openerp.osv.orm.Model):
     """ A model for which we will define a workflow (see data.xml). """

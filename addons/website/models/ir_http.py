@@ -6,6 +6,7 @@ import re
 import traceback
 import werkzeug
 import werkzeug.routing
+import werkzeug.utils
 
 import openerp
 from openerp.addons.base import ir

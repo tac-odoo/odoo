@@ -20,6 +20,7 @@
 ##############################################################################
 
 import openerp
+import openerp.exceptions
 
 def login(db, login, password):
     res_users = openerp.registry(db)['res.users']

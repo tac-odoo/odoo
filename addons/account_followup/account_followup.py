@@ -19,7 +19,8 @@
 #
 ##############################################################################
 
-from openerp.osv import fields, osv, api
+from openerp import api
+from openerp.osv import fields, osv
 from lxml import etree
 from openerp.tools.translate import _
 

@@ -25,7 +25,7 @@ import time
 import traceback
 
 from openerp.osv import osv, fields
-from openerp.osv.orm import intersect, except_orm
+from openerp.osv.orm import except_orm
 import openerp.tools
 from openerp.tools.translate import _
 

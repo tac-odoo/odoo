@@ -56,12 +56,12 @@ class ir_attachment(osv.osv):
             if model_object and res_id:
                 model_pool = self.pool[model_object]
                 res = model_pool.name_get(cr,uid,[res_id],context)
-                res_name = res and res[0][1] or False
+                res_name = res and res[0][1] or None
                 if res_name:
                     field = self._columns.get('res_name',False)
                     if field and len(res_name) > field.size:
                         res_name = res_name[:field.size-3] + '...' 
-                data[attachment.id] = res_name
+                data[attachment.id] = res_name or False
             else:
                 data[attachment.id] = False
         return data

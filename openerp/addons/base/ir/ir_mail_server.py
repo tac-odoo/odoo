@@ -19,12 +19,12 @@
 #
 ##############################################################################
 
-from email.MIMEText import MIMEText
-from email.MIMEBase import MIMEBase
-from email.MIMEMultipart import MIMEMultipart
-from email.Charset import Charset
-from email.Header import Header
-from email.Utils import formatdate, make_msgid, COMMASPACE
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.charset import Charset
+from email.header import Header
+from email.utils import formatdate, make_msgid, COMMASPACE
 from email import Encoders
 import logging
 import re
