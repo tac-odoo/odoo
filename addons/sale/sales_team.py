@@ -25,6 +25,22 @@ class crm_case_section(osv.osv):
             res[id]['monthly_confirmed'] = self.__get_bar_values(cr, uid, obj, validated_domain, ['amount_total', 'date_order'], 'amount_total', 'date_order', context=context)
         return res
 
+    def _get_amount_forecast(self, cr, uid, ids, field_name, arg, context=None):
+        res = {}
+        for sale_team in self.browse(cr, uid, ids, context):
+            res[sale_team.id] = sale_team.invoiced_target < sale_team.invoiced_forecast
+        return res
+
+    def _forecast_search(self, cr, uid, obj, name, args, context=None):
+        if len(args) == 0: return []
+        if args[0][2] == True:
+            where = "invoiced_target < invoiced_forecast"
+        else:
+            where = "invoiced_target >= invoiced_forecast"
+        cr.execute('select id from crm_case_section where ' + where)
+        ids = [id[0] for id in cr.fetchall()]
+        return [('id','in', ids)]
+    
     def _get_invoices_data(self, cr, uid, ids, field_name, arg, context=None):
         obj = self.pool.get('account.invoice.report')
         res = dict.fromkeys(ids, False)
@@ -54,6 +70,7 @@ class crm_case_section(osv.osv):
         'monthly_invoiced': fields.function(_get_invoices_data,
             type='string', readonly=True,
             string='Rate of sent invoices per duration'),
+        'is_under_performing': fields.function(_get_amount_forecast, type='boolean', string="Under Performing", fnct_search=_forecast_search)
     }
 
     _defaults = {
