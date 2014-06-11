@@ -23,12 +23,12 @@
 import base64
 import re
 import threading
-from openerp.tools.safe_eval import safe_eval as eval
-from openerp import tools
+
 import openerp.modules
 from openerp.osv import fields, osv
+from openerp import api, tools
+from openerp.tools.safe_eval import safe_eval as eval
 from openerp.tools.translate import _
-from openerp import SUPERUSER_ID, multi, returns
 
 MENU_ITEM_SEPARATOR = "/"
 
@@ -52,8 +52,8 @@ class ir_ui_menu(osv.osv):
                 self.pool._any_cache_cleared = True
             self._menu_cache.clear()
 
-    @multi
-    @returns('self')
+    @api.multi
+    @api.returns('self')
     def _filter_visible_menus(self):
         """ Filter `self` to only keep the menu items that should be visible in
             the menu hierarchy of the current user.

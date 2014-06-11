@@ -299,7 +299,7 @@ class RegistryManager(object):
         """
         import openerp.modules
         with cls.lock():
-            with openerp.Environment.manage():
+            with openerp.api.Environment.manage():
                 registry = Registry(db_name)
 
                 # Initializing a registry will call general code which will in

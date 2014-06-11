@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from openerp import Model, fields, api
+from openerp import models, fields, api
 
 # We just create a new model
-class mother(Model):
+class mother(models.Model):
     _name = 'test.inherit.mother'
 
     name = fields.Char('Name', required=True)
@@ -15,7 +15,7 @@ class mother(Model):
 
 # We want to inherits from the parent model and we add some fields
 # in the child object
-class daughter(Model):
+class daughter(models.Model):
     _name = 'test.inherit.daugther'
     _inherits = {'test.inherit.mother': 'template_id'}
 
@@ -27,7 +27,7 @@ class daughter(Model):
 # We add a new field in the parent object. Because of a recent refactoring,
 # this feature was broken.
 # This test and these models try to show the bug and fix it.
-class mother(Model):
+class mother(models.Model):
     _inherit = 'test.inherit.mother'
 
     field_in_mother = fields.Char()

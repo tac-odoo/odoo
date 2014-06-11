@@ -19,7 +19,8 @@
 #
 ##############################################################################
 
-from openerp import depends, model, one, Integer, One2many, Html
+from openerp import api
+from openerp.fields import Integer, One2many, Html
 from openerp.addons.event.event import event_event as Event
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
@@ -135,7 +136,7 @@ class event_event(osv.osv):
     badge_innerleft = Html('Badge Innner Left', translate=True, states={'done': [('readonly', True)]})
     badge_innerright = Html('Badge Inner Right', translate=True, states={'done': [('readonly', True)]})
 
-    @model
+    @api.model
     def _default_tickets(self):
         try:
             product = self.env.ref('event_sale.product_product_event')
@@ -147,8 +148,8 @@ class event_event(osv.osv):
         except ValueError:
             return self.env['event.event.ticket']
 
-    @one
-    @depends('event_ticket_ids.seats_max')
+    @api.one
+    @api.depends('event_ticket_ids.seats_max')
     def _compute_seats_max(self):
         self.seats_max = sum(ticket.seats_max for ticket in self.event_ticket_ids)
 

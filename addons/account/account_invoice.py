@@ -22,9 +22,7 @@
 import itertools
 from lxml import etree
 
-from openerp import Model, Boolean, Integer, Float, Char, Text, Date, \
-                    Selection, Many2one, One2many, Many2many, \
-                    api, model, multi, one, depends, returns, _
+from openerp import models, fields, api, _
 from openerp.exceptions import except_orm, Warning
 import openerp.addons.decimal_precision as dp
 
@@ -47,7 +45,7 @@ TYPE2REFUND = {
 MAGIC_COLUMNS = ('id', 'create_uid', 'create_date', 'write_uid', 'write_date')
 
 
-class account_invoice(Model):
+class account_invoice(models.Model):
     _name = "account.invoice"
     _inherit = ['mail.thread']
     _description = "Invoice"
@@ -61,14 +59,14 @@ class account_invoice(Model):
         },
     }
 
-    @one
-    @depends('invoice_line.price_subtotal', 'tax_line.amount')
+    @api.one
+    @api.depends('invoice_line.price_subtotal', 'tax_line.amount')
     def _compute_amount(self):
         self.amount_untaxed = sum(line.price_subtotal for line in self.invoice_line)
         self.amount_tax = sum(line.amount for line in self.tax_line)
         self.amount_total = self.amount_untaxed + self.amount_tax
 
-    @model
+    @api.model
     def _default_journal(self):
         inv_type = self._context.get('type', 'out_invoice')
         inv_types = inv_type if isinstance(inv_type, list) else [inv_type]
@@ -79,13 +77,13 @@ class account_invoice(Model):
         ]
         return self.env['account.journal'].search(domain, limit=1)
 
-    @model
+    @api.model
     def _default_currency(self):
         journal = self._default_journal()
         return journal.currency or journal.company_id.currency_id
 
-    @model
-    @returns('account.analytic.journal')
+    @api.model
+    @api.returns('account.analytic.journal')
     def _get_journal_analytic(self, inv_type):
         """ Return the analytic journal corresponding to the given invoice type. """
         journal_type = TYPE2JOURNAL.get(inv_type, 'sale')
@@ -95,19 +93,19 @@ class account_invoice(Model):
                 _("You must define an analytic journal of type '%s'!") % (journal_type,))
         return journal
 
-    @one
-    @depends('account_id', 'move_id.line_id.account_id', 'move_id.line_id.reconcile_id')
+    @api.one
+    @api.depends('account_id', 'move_id.line_id.account_id', 'move_id.line_id.reconcile_id')
     def _compute_reconciled(self):
         self.reconciled = self.test_paid()
         if not self.reconciled and self.state == 'paid':
             self.signal_open_test()
 
-    @model
+    @api.model
     def _get_reference_type(self):
         return [('none', _('Free Reference'))]
 
-    @one
-    @depends(
+    @api.one
+    @api.depends(
         'state', 'currency_id', 'invoice_line.price_subtotal',
         'move_id.line_id.account_id.type',
         'move_id.line_id.amount_residual',
@@ -149,8 +147,8 @@ class account_invoice(Model):
         # prevent the residual amount on the invoice to be less than 0
         self.residual = max(self.residual, 0.0)            
 
-    @one
-    @depends(
+    @api.one
+    @api.depends(
         'move_id.line_id.account_id',
         'move_id.line_id.reconcile_id.line_id',
         'move_id.line_id.reconcile_partial_id.line_partial_ids',
@@ -173,8 +171,8 @@ class account_invoice(Model):
             partial_lines += data_line
             self.move_lines = lines - partial_lines
 
-    @one
-    @depends(
+    @api.one
+    @api.depends(
         'move_id.line_id.reconcile_id.line_id',
         'move_id.line_id.reconcile_partial_id.line_partial_ids',
     )
@@ -188,15 +186,15 @@ class account_invoice(Model):
             partial_lines += line
         self.payment_ids = (lines - partial_lines).sorted()
 
-    name = Char(string='Reference/Description', index=True,
+    name = fields.Char(string='Reference/Description', index=True,
         readonly=True, states={'draft': [('readonly', False)]})
-    origin = Char(string='Source Document',
+    origin = fields.Char(string='Source Document',
         help="Reference of the document that produced this invoice.",
         readonly=True, states={'draft': [('readonly', False)]})
-    supplier_invoice_number = Char(string='Supplier Invoice Number',
+    supplier_invoice_number = fields.Char(string='Supplier Invoice Number',
         help="The reference of this invoice as provided by the supplier.",
         readonly=True, states={'draft': [('readonly', False)]})
-    type = Selection([
+    type = fields.Selection([
             ('out_invoice','Customer Invoice'),
             ('in_invoice','Supplier Invoice'),
             ('out_refund','Customer Refund'),
@@ -205,17 +203,17 @@ class account_invoice(Model):
         default=lambda self: self._context.get('type', 'out_invoice'),
         track_visibility='always')
 
-    number = Char(related='move_id.name', store=True, readonly=True)
-    internal_number = Char(string='Invoice Number', readonly=True, default=False,
+    number = fields.Char(related='move_id.name', store=True, readonly=True)
+    internal_number = fields.Char(string='Invoice Number', readonly=True, default=False,
         help="Unique number of the invoice, computed automatically when the invoice is created.")
-    reference = Char(string='Invoice Reference',
+    reference = fields.Char(string='Invoice Reference',
         help="The partner reference of this invoice.")
-    reference_type = Selection('_get_reference_type', string='Payment Reference',
+    reference_type = fields.Selection('_get_reference_type', string='Payment Reference',
         required=True, readonly=True, states={'draft': [('readonly', False)]},
         default='none')
-    comment = Text('Additional Information')
+    comment = fields.Text('Additional Information')
 
-    state = Selection([
+    state = fields.Selection([
             ('draft','Draft'),
             ('proforma','Pro-forma'),
             ('proforma2','Pro-forma'),
@@ -229,83 +227,83 @@ class account_invoice(Model):
              " * The 'Open' status is used when user create invoice,a invoice number is generated.Its in open status till user does not pay invoice.\n"
              " * The 'Paid' status is set automatically when the invoice is paid. Its related journal entries may or may not be reconciled.\n"
              " * The 'Cancelled' status is used when user cancel invoice.")
-    sent = Boolean(readonly=True, default=False,
+    sent = fields.Boolean(readonly=True, default=False,
         help="It indicates that the invoice has been sent.")
-    date_invoice = Date(string='Invoice Date',
+    date_invoice = fields.Date(string='Invoice Date',
         readonly=True, states={'draft': [('readonly', False)]}, index=True,
         help="Keep empty to use the current date")
-    date_due = Date(string='Due Date',
+    date_due = fields.Date(string='Due Date',
         readonly=True, states={'draft': [('readonly', False)]}, index=True,
         help="If you use payment terms, the due date will be computed automatically at the generation "
              "of accounting entries. The payment term may compute several due dates, for example 50% "
              "now and 50% in one month, but if you want to force a due date, make sure that the payment "
              "term is not set on the invoice. If you keep the payment term and the due date empty, it "
              "means direct payment.")
-    partner_id = Many2one('res.partner', string='Partner', change_default=True,
+    partner_id = fields.Many2one('res.partner', string='Partner', change_default=True,
         required=True, readonly=True, states={'draft': [('readonly', False)]},
         track_visibility='always')
-    payment_term = Many2one('account.payment.term', string='Payment Terms',
+    payment_term = fields.Many2one('account.payment.term', string='Payment Terms',
         readonly=True, states={'draft': [('readonly', False)]},
         help="If you use payment terms, the due date will be computed automatically at the generation "
              "of accounting entries. If you keep the payment term and the due date empty, it means direct payment. "
              "The payment term may compute several due dates, for example 50% now, 50% in one month.")
-    period_id = Many2one('account.period', string='Force Period',
+    period_id = fields.Many2one('account.period', string='Force Period',
         domain=[('state', '!=', 'done')],
         help="Keep empty to use the period of the validation(invoice) date.",
         readonly=True, states={'draft': [('readonly', False)]})
 
-    account_id = Many2one('account.account', string='Account',
+    account_id = fields.Many2one('account.account', string='Account',
         required=True, readonly=True, states={'draft': [('readonly', False)]},
         help="The partner account used for this invoice.")
-    invoice_line = One2many('account.invoice.line', 'invoice_id', string='Invoice Lines',
+    invoice_line = fields.One2many('account.invoice.line', 'invoice_id', string='Invoice Lines',
         readonly=True, states={'draft': [('readonly', False)]})
-    tax_line = One2many('account.invoice.tax', 'invoice_id', string='Tax Lines',
+    tax_line = fields.One2many('account.invoice.tax', 'invoice_id', string='Tax Lines',
         readonly=True, states={'draft': [('readonly', False)]})
-    move_id = Many2one('account.move', string='Journal Entry',
+    move_id = fields.Many2one('account.move', string='Journal Entry',
         readonly=True, index=True, ondelete='restrict',
         help="Link to the automatically generated Journal Items.")
 
-    amount_untaxed = Float(string='Subtotal', digits=dp.get_precision('Account'),
+    amount_untaxed = fields.Float(string='Subtotal', digits=dp.get_precision('Account'),
         store=True, readonly=True, compute='_compute_amount', track_visibility='always')
-    amount_tax = Float(string='Tax', digits=dp.get_precision('Account'),
+    amount_tax = fields.Float(string='Tax', digits=dp.get_precision('Account'),
         store=True, readonly=True, compute='_compute_amount')
-    amount_total = Float(string='Total', digits=dp.get_precision('Account'),
+    amount_total = fields.Float(string='Total', digits=dp.get_precision('Account'),
         store=True, readonly=True, compute='_compute_amount')
 
-    currency_id = Many2one('res.currency', string='Currency',
+    currency_id = fields.Many2one('res.currency', string='Currency',
         required=True, readonly=True, states={'draft': [('readonly', False)]},
         default=_default_currency, track_visibility='always')
-    journal_id = Many2one('account.journal', string='Journal',
+    journal_id = fields.Many2one('account.journal', string='Journal',
         required=True, readonly=True, states={'draft': [('readonly', False)]},
         default=_default_journal)
-    company_id = Many2one('res.company', string='Company', change_default=True,
+    company_id = fields.Many2one('res.company', string='Company', change_default=True,
         required=True, readonly=True, states={'draft': [('readonly', False)]},
         default=lambda self: self.env['res.company']._company_default_get('account.invoice'))
-    check_total = Float(string='Verification Total', digits=dp.get_precision('Account'),
+    check_total = fields.Float(string='Verification Total', digits=dp.get_precision('Account'),
         readonly=True, states={'draft': [('readonly', False)]}, default=0.0)
 
-    reconciled = Boolean(string='Paid/Reconciled',
+    reconciled = fields.Boolean(string='Paid/Reconciled',
         store=True, readonly=True, compute='_compute_reconciled',
         help="It indicates that the invoice has been paid and the journal entry of the invoice has been reconciled with one or several journal entries of payment.")
-    partner_bank_id = Many2one('res.partner.bank', string='Bank Account',
+    partner_bank_id = fields.Many2one('res.partner.bank', string='Bank Account',
         help='Bank Account Number to which the invoice will be paid. A Company bank account if this is a Customer Invoice or Supplier Refund, otherwise a Partner bank account number.',
         readonly=True, states={'draft': [('readonly', False)]})
 
-    move_lines = Many2many('account.move.line', string='Entry Lines',
+    move_lines = fields.Many2many('account.move.line', string='Entry Lines',
         compute='_compute_move_lines')
-    residual = Float(string='Balance', digits=dp.get_precision('Account'),
+    residual = fields.Float(string='Balance', digits=dp.get_precision('Account'),
         compute='_compute_residual', store=True,
         help="Remaining amount due.")
-    payment_ids = Many2many('account.move.line', string='Payments',
+    payment_ids = fields.Many2many('account.move.line', string='Payments',
         compute='_compute_payments')
-    move_name = Char(string='Journal Entry',
+    move_name = fields.Char(string='Journal Entry',
         readonly=True, states={'draft': [('readonly', False)]})
-    user_id = Many2one('res.users', string='Salesperson', track_visibility='onchange',
+    user_id = fields.Many2one('res.users', string='Salesperson', track_visibility='onchange',
         readonly=True, states={'draft': [('readonly', False)]},
         default=lambda self: self.env.user)
-    fiscal_position = Many2one('account.fiscal.position', string='Fiscal Position',
+    fiscal_position = fields.Many2one('account.fiscal.position', string='Fiscal Position',
         readonly=True, states={'draft': [('readonly', False)]})
-    commercial_partner_id = Many2one('res.partner', string='Commercial Entity',
+    commercial_partner_id = fields.Many2one('res.partner', string='Commercial Entity',
         related='partner_id.commercial_partner_id', store=True, readonly=True,
         help="The commercial entity that will be used on Journal Entries for this invoice")
 
@@ -314,7 +312,7 @@ class account_invoice(Model):
             'Invoice Number must be unique per Company!'),
     ]
 
-    @model
+    @api.model
     def fields_view_get(self, view_id=None, view_type=False, toolbar=False, submenu=False):
         context = self._context
         if context.get('active_model') == 'res.partner' and context.get('active_ids'):
@@ -362,7 +360,7 @@ class account_invoice(Model):
         res['arch'] = etree.tostring(doc)
         return res
 
-    @multi
+    @api.multi
     def invoice_print(self):
         """ Print the invoice and mark it as sent, so that we can see more
             easily the next step of the workflow
@@ -371,7 +369,7 @@ class account_invoice(Model):
         self.sent = True
         return self.pool['report'].get_action(self, 'account.report_invoice')
 
-    @multi
+    @api.multi
     def action_invoice_sent(self):
         """ Open a window to compose an email, with the edi invoice template
             message loaded by default
@@ -399,11 +397,11 @@ class account_invoice(Model):
             'context': ctx,
         }
 
-    @multi
+    @api.multi
     def confirm_paid(self):
         return self.write({'state': 'paid'})
 
-    @multi
+    @api.multi
     def unlink(self):
         for invoice in self:
             if invoice.state not in ('draft', 'cancel'):
@@ -412,7 +410,7 @@ class account_invoice(Model):
                 raise Warning(_('You cannot delete an invoice after it has been validated (and received a number).  You can set it back to "Draft" state and modify its content, then re-confirm it.'))
         return super(account_invoice, self).unlink()
 
-    @multi
+    @api.multi
     def onchange_partner_id(self, type, partner_id, date_invoice=False,
             payment_term=False, partner_bank_id=False, company_id=False):
         account_id = False
@@ -472,7 +470,7 @@ class account_invoice(Model):
 
         return result
 
-    @multi
+    @api.multi
     def onchange_journal_id(self, journal_id=False):
         if journal_id:
             journal = self.env['account.journal'].browse(journal_id)
@@ -484,10 +482,10 @@ class account_invoice(Model):
             }
         return {}
 
-    @multi
+    @api.multi
     def onchange_payment_term_date_invoice(self, payment_term_id, date_invoice):
         if not date_invoice:
-            date_invoice = Date.today()
+            date_invoice = fields.Date.today()
         if not payment_term_id:
             # To make sure the invoice due date should contain due date which is
             # entered by user when there is no payment term defined
@@ -500,15 +498,15 @@ class account_invoice(Model):
             raise except_orm(_('Insufficient Data!'),
                 _('The payment term of supplier does not have a payment term line.'))
 
-    @multi
+    @api.multi
     def onchange_invoice_line(self, lines):
         return {}
 
-    @multi
+    @api.multi
     def onchange_partner_bank(self, partner_bank_id=False):
         return {'value': {}}
 
-    @multi
+    @api.multi
     def onchange_company_id(self, company_id, part_id, type, invoice_line, currency_id):
         # TODO: add the missing context parameter when forward-porting in trunk
         # so we can remove this hack!
@@ -583,7 +581,7 @@ class account_invoice(Model):
 
         return {'value': values, 'domain': domain}
 
-    @multi
+    @api.multi
     def action_cancel_draft(self):
         # go from canceled state to draft state
         self.write({'state': 'draft'})
@@ -591,8 +589,8 @@ class account_invoice(Model):
         self.create_workflow()
         return True
 
-    @one
-    @returns('ir.ui.view')
+    @api.one
+    @api.returns('ir.ui.view')
     def get_formview_id(self):
         """ Update form view id of action to open the invoice """
         if self.type == 'in_invoice':
@@ -600,7 +598,7 @@ class account_invoice(Model):
         else:
             return self.env.ref('account.invoice_form')
 
-    @one
+    @api.one
     def copy(self, default=None):
         default = dict(default or {},
             state='draft',
@@ -617,7 +615,7 @@ class account_invoice(Model):
             default['date_due'] = False
         return super(account_invoice, self).copy(default)
 
-    @multi
+    @api.multi
     def move_line_id_payment_get(self):
         # return the move line ids with the same account as the invoice self
         if not self.id:
@@ -629,7 +627,7 @@ class account_invoice(Model):
         self._cr.execute(query, (self.id,))
         return [row[0] for row in self._cr.fetchall()]
 
-    @multi
+    @api.multi
     def test_paid(self):
         # check whether all corresponding account move lines are reconciled
         line_ids = self.move_line_id_payment_get()
@@ -639,7 +637,7 @@ class account_invoice(Model):
         self._cr.execute(query, (tuple(line_ids),))
         return all(row[0] for row in self._cr.fetchall())
 
-    @multi
+    @api.multi
     def button_reset_taxes(self):
         account_invoice_tax = self.env['account.invoice.tax']
         ctx = dict(self._context)
@@ -654,7 +652,7 @@ class account_invoice(Model):
         # dummy write on self to trigger recomputations
         return self.with_context(ctx).write({'invoice_line': []})
 
-    @multi
+    @api.multi
     def button_compute(self, set_total=False):
         self.button_reset_taxes()
         for invoice in self:
@@ -666,7 +664,7 @@ class account_invoice(Model):
     def _convert_ref(ref):
         return (ref or '').replace('/','')
 
-    @multi
+    @api.multi
     def _get_analytic_lines(self):
         """ Return a list of dict for creating analytic lines for self[0] """
         company_currency = self.company_id.currency_id
@@ -697,7 +695,7 @@ class account_invoice(Model):
                 })]
         return iml
 
-    @multi
+    @api.multi
     def action_date_assign(self):
         for inv in self:
             res = inv.onchange_payment_term_date_invoice(inv.payment_term.id, inv.date_invoice)
@@ -705,7 +703,7 @@ class account_invoice(Model):
                 inv.write(res['value'])
         return True
 
-    @multi
+    @api.multi
     def finalize_invoice_move_lines(self, move_lines):
         """ finalize_invoice_move_lines(move_lines) -> move_lines
 
@@ -717,7 +715,7 @@ class account_invoice(Model):
         """
         return move_lines
 
-    @multi
+    @api.multi
     def check_tax_lines(self, compute_taxes):
         account_invoice_tax = self.env['account.invoice.tax']
         company_currency = self.company_id.currency_id
@@ -740,13 +738,13 @@ class account_invoice(Model):
                 if key not in tax_key:
                     raise except_orm(_('Warning!'), _('Taxes are missing!\nClick on compute button.'))
 
-    @multi
+    @api.multi
     def compute_invoice_totals(self, company_currency, ref, invoice_move_lines):
         total = 0
         total_currency = 0
         for line in invoice_move_lines:
             if self.currency_id != company_currency:
-                currency = self.currency_id.with_context(date=self.date_invoice or Date.today())
+                currency = self.currency_id.with_context(date=self.date_invoice or fields.Date.today())
                 line['currency_id'] = currency.id
                 line['amount_currency'] = line['price']
                 line['price'] = currency.compute(line['price'], company_currency)
@@ -795,7 +793,7 @@ class account_invoice(Model):
                 line.append((0,0,val))
         return line
 
-    @multi
+    @api.multi
     def action_move_create(self):
         """ Creates invoice related analytics and financial move lines """
         account_invoice_tax = self.env['account.invoice.tax']
@@ -811,7 +809,7 @@ class account_invoice(Model):
 
             ctx = dict(self._context, lang=inv.partner_id.lang)
             if not inv.date_invoice:
-                inv.with_context(ctx).date_invoice = Date.context_today(self)
+                inv.with_context(ctx).date_invoice = fields.Date.context_today(self)
 
             company_currency = inv.company_id.currency_id
             # create the analytical lines, one move line per invoice line
@@ -889,7 +887,7 @@ class account_invoice(Model):
                     'ref': ref
                 })
 
-            date = inv.date_invoice or Date.today()
+            date = inv.date_invoice or fields.Date.today()
 
             part = self.env['res.partner']._find_accounting_partner(inv.partner_id)
 
@@ -934,11 +932,11 @@ class account_invoice(Model):
         self._log_event()
         return True
 
-    @multi
+    @api.multi
     def invoice_validate(self):
         return self.write({'state': 'open'})
 
-    @model
+    @api.model
     def line_get_convert(self, line, part, date):
         return {
             'date_maturity': line.get('date_maturity', False),
@@ -960,7 +958,7 @@ class account_invoice(Model):
             'analytic_account_id': line.get('account_analytic_id', False),
         }
 
-    @multi
+    @api.multi
     def action_number(self):
         #TODO: not correct fix but required a fresh values before reading it.
         self.write({})
@@ -991,7 +989,7 @@ class account_invoice(Model):
 
         return True
 
-    @multi
+    @api.multi
     def action_cancel(self):
         moves = self.env['account.move']
         for inv in self:
@@ -1016,12 +1014,12 @@ class account_invoice(Model):
 
     ###################
 
-    @multi
+    @api.multi
     def _log_event(self, factor=1.0, name='Open Invoice'):
         #TODO: implement messages system
         return True
 
-    @one
+    @api.one
     def _compute_display_name(self):
         TYPES = {
             'out_invoice': _('Invoice'),
@@ -1031,7 +1029,7 @@ class account_invoice(Model):
         }
         self.display_name = "%s %s" % (self.number or TYPES[self.type], self.name or '')
 
-    @model
+    @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
         args = args or []
         recs = self.browse()
@@ -1041,7 +1039,7 @@ class account_invoice(Model):
             recs = self.search([('name', operator, name)] + args, limit=limit)
         return recs.name_get()
 
-    @model
+    @api.model
     def _refund_cleanup_lines(self, lines):
         """ Convert records to dict of values suitable for one2many line creation
 
@@ -1063,7 +1061,7 @@ class account_invoice(Model):
             result.append((0, 0, values))
         return result
 
-    @model
+    @api.model
     def _prepare_refund(self, invoice, date=None, period_id=None, description=None, journal_id=None):
         """ Prepare the dict of values to create the new refund from the invoice.
             This method may be overridden to implement custom
@@ -1099,7 +1097,7 @@ class account_invoice(Model):
         values['journal_id'] = journal.id
 
         values['type'] = TYPE2REFUND[invoice['type']]
-        values['date_invoice'] = date or Date.today()
+        values['date_invoice'] = date or fields.Date.today()
         values['state'] = 'draft'
         values['number'] = False
 
@@ -1109,8 +1107,8 @@ class account_invoice(Model):
             values['name'] = description
         return values
 
-    @multi
-    @returns('self')
+    @api.multi
+    @api.returns('self')
     def refund(self, date=None, period_id=None, description=None, journal_id=None):
         new_invoices = self.browse()
         for invoice in self:
@@ -1128,7 +1126,7 @@ class account_invoice(Model):
         SIGN = {'out_invoice': -1, 'in_invoice': 1, 'out_refund': 1, 'in_refund': -1}
         direction = SIGN[self.type]
         # take the chosen date
-        date = self._context.get('date_p') or Date.today()
+        date = self._context.get('date_p') or fields.Date.today()
 
         # Take the amount in currency and the currency of the payment
         if self._context.get('amount_currency') and self._context.get('currency_id'):
@@ -1210,13 +1208,13 @@ class account_invoice(Model):
         return recs.pay_and_reconcile(pay_amount, pay_account_id, period_id, pay_journal_id,
                     writeoff_acc_id, writeoff_period_id, writeoff_journal_id, name=name)
 
-class account_invoice_line(Model):
+class account_invoice_line(models.Model):
     _name = "account.invoice.line"
     _description = "Invoice Line"
     _order = "invoice_id,sequence,id"
 
-    @one
-    @depends('price_unit', 'discount', 'invoice_line_tax_id', 'quantity',
+    @api.one
+    @api.depends('price_unit', 'discount', 'invoice_line_tax_id', 'quantity',
         'product_id', 'invoice_id.partner_id', 'invoice_id.currency_id')
     def _compute_price(self):
         price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
@@ -1225,7 +1223,7 @@ class account_invoice_line(Model):
         if self.invoice_id:
             self.price_subtotal = self.invoice_id.currency_id.round(self.price_subtotal)
 
-    @model
+    @api.model
     def _default_price_unit(self):
         if not self._context.get('check_total'):
             return 0
@@ -1244,7 +1242,7 @@ class account_invoice_line(Model):
                         total = total - tax['amount']
         return total
 
-    @model
+    @api.model
     def _default_account(self):
         # XXX this gets the default account for the user's company,
         # it should get the default account for the invoice's company
@@ -1254,41 +1252,41 @@ class account_invoice_line(Model):
         else:
             return self.env['ir.property'].get('property_account_expense_categ', 'product.category')
 
-    name = Text(string='Description', required=True)
-    origin = Char(string='Source Document',
+    name = fields.Text(string='Description', required=True)
+    origin = fields.Char(string='Source Document',
         help="Reference of the document that produced this invoice.")
-    sequence = Integer(string='Sequence', default=10,
+    sequence = fields.Integer(string='Sequence', default=10,
         help="Gives the sequence of this line when displaying the invoice.")
-    invoice_id = Many2one('account.invoice', string='Invoice Reference',
+    invoice_id = fields.Many2one('account.invoice', string='Invoice Reference',
         ondelete='cascade', index=True)
-    uos_id = Many2one('product.uom', string='Unit of Measure',
+    uos_id = fields.Many2one('product.uom', string='Unit of Measure',
         ondelete='set null', index=True)
-    product_id = Many2one('product.product', string='Product',
+    product_id = fields.Many2one('product.product', string='Product',
         ondelete='set null', index=True)
-    account_id = Many2one('account.account', string='Account',
+    account_id = fields.Many2one('account.account', string='Account',
         required=True, domain=[('type', 'not in', ['view', 'closed'])],
         default=_default_account,
         help="The income or expense account related to the selected product.")
-    price_unit = Float(string='Unit Price', required=True,
+    price_unit = fields.Float(string='Unit Price', required=True,
         digits= dp.get_precision('Product Price'),
         default=_default_price_unit)
-    price_subtotal = Float(string='Amount', digits= dp.get_precision('Account'),
+    price_subtotal = fields.Float(string='Amount', digits= dp.get_precision('Account'),
         store=True, readonly=True, compute='_compute_price')
-    quantity = Float(string='Quantity', digits= dp.get_precision('Product Unit of Measure'),
+    quantity = fields.Float(string='Quantity', digits= dp.get_precision('Product Unit of Measure'),
         required=True, default=1)
-    discount = Float(string='Discount (%)', digits= dp.get_precision('Discount'),
+    discount = fields.Float(string='Discount (%)', digits= dp.get_precision('Discount'),
         default=0.0)
-    invoice_line_tax_id = Many2many('account.tax',
+    invoice_line_tax_id = fields.Many2many('account.tax',
         'account_invoice_line_tax', 'invoice_line_id', 'tax_id',
         string='Taxes', domain=[('parent_id', '=', False)])
-    account_analytic_id = Many2one('account.analytic.account',
+    account_analytic_id = fields.Many2one('account.analytic.account',
         string='Analytic Account')
-    company_id = Many2one('res.company', string='Company',
+    company_id = fields.Many2one('res.company', string='Company',
         related='invoice_id.company_id', store=True, readonly=True)
-    partner_id = Many2one('res.partner', string='Partner',
+    partner_id = fields.Many2one('res.partner', string='Partner',
         related='invoice_id.partner_id', store=True, readonly=True)
 
-    @model
+    @api.model
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
         res = super(account_invoice_line, self).fields_view_get(
             view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
@@ -1302,7 +1300,7 @@ class account_invoice_line(Model):
             res['arch'] = etree.tostring(doc)
         return res
 
-    @multi
+    @api.multi
     def product_id_change(self, product, uom_id, qty=0, name='', type='out_invoice',
             partner_id=False, fposition_id=False, price_unit=False, currency_id=False,
             context=None, company_id=None):
@@ -1371,7 +1369,7 @@ class account_invoice_line(Model):
 
         return {'value': values, 'domain': domain}
 
-    @multi
+    @api.multi
     def uos_id_change(self, product, uom, qty=0, name='', type='out_invoice', partner_id=False,
             fposition_id=False, price_unit=False, currency_id=False, context=None, company_id=None):
         context = context or {}
@@ -1396,7 +1394,7 @@ class account_invoice_line(Model):
             result['warning'] = warning
         return result
 
-    @model
+    @api.model
     def move_line_get(self, invoice_id):
         inv = self.env['account.invoice'].browse(invoice_id)
         currency = inv.currency_id.with_context(date=inv.date_invoice)
@@ -1435,7 +1433,7 @@ class account_invoice_line(Model):
 
         return res
 
-    @model
+    @api.model
     def move_line_get_item(self, line):
         return {
             'type': 'src',
@@ -1453,7 +1451,7 @@ class account_invoice_line(Model):
     #
     # Set the tax field according to the account and the fiscal position
     #
-    @multi
+    @api.multi
     def onchange_account_id(self, product_id, partner_id, inv_type, fposition_id, account_id):
         if not account_id:
             return {}
@@ -1470,68 +1468,68 @@ class account_invoice_line(Model):
         return {'value': {'invoice_line_tax_id': unique_tax_ids}}
 
 
-class account_invoice_tax(Model):
+class account_invoice_tax(models.Model):
     _name = "account.invoice.tax"
     _description = "Invoice Tax"
     _order = 'sequence'
 
-    @one
-    @depends('base', 'base_amount', 'amount', 'tax_amount')
+    @api.one
+    @api.depends('base', 'base_amount', 'amount', 'tax_amount')
     def _compute_factors(self):
         self.factor_base = self.base_amount / self.base if self.base else 1.0
         self.factor_tax = self.tax_amount / self.amount if self.amount else 1.0
 
-    invoice_id = Many2one('account.invoice', string='Invoice Line',
+    invoice_id = fields.Many2one('account.invoice', string='Invoice Line',
         ondelete='cascade', index=True)
-    name = Char(string='Tax Description',
+    name = fields.Char(string='Tax Description',
         required=True)
-    account_id = Many2one('account.account', string='Tax Account',
+    account_id = fields.Many2one('account.account', string='Tax Account',
         required=True, domain=[('type', 'not in', ['view', 'income', 'closed'])])
-    account_analytic_id = Many2one('account.analytic.account', string='Analytic account')
-    base = Float(string='Base', digits=dp.get_precision('Account'))
-    amount = Float(string='Amount', digits=dp.get_precision('Account'))
-    manual = Boolean(string='Manual', default=True)
-    sequence = Integer(string='Sequence',
+    account_analytic_id = fields.Many2one('account.analytic.account', string='Analytic account')
+    base = fields.Float(string='Base', digits=dp.get_precision('Account'))
+    amount = fields.Float(string='Amount', digits=dp.get_precision('Account'))
+    manual = fields.Boolean(string='Manual', default=True)
+    sequence = fields.Integer(string='Sequence',
         help="Gives the sequence order when displaying a list of invoice tax.")
-    base_code_id = Many2one('account.tax.code', string='Base Code',
+    base_code_id = fields.Many2one('account.tax.code', string='Base Code',
         help="The account basis of the tax declaration.")
-    base_amount = Float(string='Base Code Amount', digits=dp.get_precision('Account'),
+    base_amount = fields.Float(string='Base Code Amount', digits=dp.get_precision('Account'),
         default=0.0)
-    tax_code_id = Many2one('account.tax.code', string='Tax Code',
+    tax_code_id = fields.Many2one('account.tax.code', string='Tax Code',
         help="The tax basis of the tax declaration.")
-    tax_amount = Float(string='Tax Code Amount', digits=dp.get_precision('Account'),
+    tax_amount = fields.Float(string='Tax Code Amount', digits=dp.get_precision('Account'),
         default=0.0)
 
-    company_id = Many2one('res.company', string='Company',
+    company_id = fields.Many2one('res.company', string='Company',
         related='account_id.company_id', store=True, readonly=True)
-    factor_base = Float(string='Multipication factor for Base code',
+    factor_base = fields.Float(string='Multipication factor for Base code',
         compute='_compute_factors')
-    factor_tax = Float(string='Multipication factor Tax code',
+    factor_tax = fields.Float(string='Multipication factor Tax code',
         compute='_compute_factors')
 
-    @multi
+    @api.multi
     def base_change(self, base, currency_id=False, company_id=False, date_invoice=False):
         factor = self.factor_base if self else 1
         company = self.env['res.company'].browse(company_id)
         if currency_id and company.currency_id:
             currency = self.env['res.currency'].browse(currency_id)
-            currency = currency.with_context(date=date_invoice or Date.today())
+            currency = currency.with_context(date=date_invoice or fields.Date.today())
             base = currency.compute(base * factor, company.currency_id, round=False)
         return {'value': {'base_amount': base}}
 
-    @multi
+    @api.multi
     def amount_change(self, amount, currency_id=False, company_id=False, date_invoice=False):
         factor = self.factor_tax if self else 1
         company = self.env['res.company'].browse(company_id)
         if currency_id and company.currency_id:
             currency = self.env['res.currency'].browse(currency_id)
-            currency = currency.with_context(date=date_invoice or Date.today())
+            currency = currency.with_context(date=date_invoice or fields.Date.today())
             amount = currency.compute(amount * factor, company.currency_id, round=False)
         return {'value': {'tax_amount': amount}}
 
     def compute(self, invoice):
         tax_grouped = {}
-        currency = invoice.currency_id.with_context(date=invoice.date_invoice or Date.today())
+        currency = invoice.currency_id.with_context(date=invoice.date_invoice or fields.Date.today())
         company_currency = invoice.company_id.currency_id
         for line in invoice.invoice_line:
             taxes = line.invoice_line_tax_id.compute_all(
@@ -1584,7 +1582,7 @@ class account_invoice_tax(Model):
         invoice = recs.env['account.invoice'].browse(invoice_id)
         return recs.compute(invoice)
 
-    @model
+    @api.model
     def move_line_get(self, invoice_id):
         res = []
         self._cr.execute(
@@ -1608,11 +1606,11 @@ class account_invoice_tax(Model):
         return res
 
 
-class res_partner(Model):
+class res_partner(models.Model):
     # Inherits partner and adds invoice information in the partner form
     _inherit = 'res.partner'
 
-    invoice_ids = One2many('account.invoice', 'partner_id', string='Invoices',
+    invoice_ids = fields.One2many('account.invoice', 'partner_id', string='Invoices',
         readonly=True)
 
     def _find_accounting_partner(self, partner):
@@ -1621,16 +1619,16 @@ class res_partner(Model):
         '''
         return partner.commercial_partner_id
 
-    @one
+    @api.one
     def copy(self, default=None):
         default = dict(default or {}, invoice_ids=[])
         return super(res_partner, self).copy(default)
 
 
-class mail_compose_message(Model):
+class mail_compose_message(models.Model):
     _inherit = 'mail.compose.message'
 
-    @multi
+    @api.multi
     def send_mail(self):
         context = self._context
         if context.get('default_model') == 'account.invoice' and \

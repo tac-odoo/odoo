@@ -40,27 +40,25 @@ class res_partner(osv.Model):
     }
 
 
-from openerp import Model, Integer, Float, Char, Text, Date, Selection, \
-    Reference, Many2one, One2many, Many2many, constrains, onchange, depends, \
-    model, one, _
+from openerp import models, fields, api, _
 
 
-class Category(Model):
+class Category(models.Model):
     _name = 'test_new_api.category'
 
-    name = Char(required=True)
-    parent = Many2one('test_new_api.category')
-    display_name = Char(compute='_compute_display_name', inverse='_inverse_display_name')
+    name = fields.Char(required=True)
+    parent = fields.Many2one('test_new_api.category')
+    display_name = fields.Char(compute='_compute_display_name', inverse='_inverse_display_name')
 
-    @one
-    @depends('name', 'parent.display_name')     # this definition is recursive
+    @api.one
+    @api.depends('name', 'parent.display_name')     # this definition is recursive
     def _compute_display_name(self):
         if self.parent:
             self.display_name = self.parent.display_name + ' / ' + self.name
         else:
             self.display_name = self.name
 
-    @one
+    @api.one
     def _inverse_display_name(self):
         names = self.display_name.split('/')
         # determine sequence of categories
@@ -77,53 +75,53 @@ class Category(Model):
         self.name = names[-1].strip()
 
 
-class Discussion(Model):
+class Discussion(models.Model):
     _name = 'test_new_api.discussion'
 
-    name = Char(string='Title', required=True,
+    name = fields.Char(string='Title', required=True,
         help="General description of what this discussion is about.")
-    moderator = Many2one('res.users')
-    categories = Many2many('test_new_api.category',
+    moderator = fields.Many2one('res.users')
+    categories = fields.Many2many('test_new_api.category',
         'test_new_api_discussion_category', 'discussion', 'category')
-    participants = Many2many('res.users')
-    messages = One2many('test_new_api.message', 'discussion')
+    participants = fields.Many2many('res.users')
+    messages = fields.One2many('test_new_api.message', 'discussion')
 
-    @onchange('moderator')
+    @api.onchange('moderator')
     def _onchange_moderator(self):
         self.participants |= self.moderator
 
 
-class Message(Model):
+class Message(models.Model):
     _name = 'test_new_api.message'
 
-    discussion = Many2one('test_new_api.discussion', ondelete='cascade')
-    body = Text()
-    author = Many2one('res.users', default=lambda self: self.env.user)
-    name = Char(string='Title', compute='_compute_name', store=True)
-    display_name = Char(string='Abstract', compute='_compute_display_name')
-    size = Integer(compute='_compute_size', search='_search_size')
-    double_size = Integer(compute='_compute_double_size')
-    discussion_name = Char(related='discussion.name', readonly=True)
+    discussion = fields.Many2one('test_new_api.discussion', ondelete='cascade')
+    body = fields.Text()
+    author = fields.Many2one('res.users', default=lambda self: self.env.user)
+    name = fields.Char(string='Title', compute='_compute_name', store=True)
+    display_name = fields.Char(string='Abstract', compute='_compute_display_name')
+    size = fields.Integer(compute='_compute_size', search='_search_size')
+    double_size = fields.Integer(compute='_compute_double_size')
+    discussion_name = fields.Char(related='discussion.name', readonly=True)
 
-    @one
-    @constrains('author', 'discussion')
+    @api.one
+    @api.constrains('author', 'discussion')
     def _check_author(self):
         if self.discussion and self.author not in self.discussion.participants:
             raise ValueError(_("Author must be among the discussion participants."))
 
-    @one
-    @depends('author.name', 'discussion.name')
+    @api.one
+    @api.depends('author.name', 'discussion.name')
     def _compute_name(self):
         self.name = "[%s] %s" % (self.discussion.name or '', self.author.name)
 
-    @one
-    @depends('author.name', 'discussion.name', 'body')
+    @api.one
+    @api.depends('author.name', 'discussion.name', 'body')
     def _compute_display_name(self):
         stuff = "[%s] %s: %s" % (self.author.name, self.discussion.name or '', self.body or '')
         self.display_name = stuff[:80]
 
-    @one
-    @depends('body')
+    @api.one
+    @api.depends('body')
     def _compute_size(self):
         self.size = len(self.body or '')
 
@@ -137,8 +135,8 @@ class Message(Model):
         ids = [t[0] for t in self.env.cr.fetchall()]
         return [('id', 'in', ids)]
 
-    @one
-    @depends('size')
+    @api.one
+    @api.depends('size')
     def _compute_double_size(self):
         # This illustrates a subtle situation: self.double_size depends on
         # self.size. When size is computed, self.size is assigned, which should
@@ -150,27 +148,27 @@ class Message(Model):
         self.double_size = self.double_size + size
 
 
-class Talk(Model):
+class Talk(models.Model):
     _name = 'test_new_api.talk'
 
-    parent = Many2one('test_new_api.discussion', delegate=True)
+    parent = fields.Many2one('test_new_api.discussion', delegate=True)
 
 
-class MixedModel(Model):
+class MixedModel(models.Model):
     _name = 'test_new_api.mixed'
 
-    number = Float(digits=(10, 2), default=3.14)
-    date = Date()
-    lang = Selection(string='Language', selection='_get_lang')
-    reference = Reference(string='Related Document',
+    number = fields.Float(digits=(10, 2), default=3.14)
+    date = fields.Date()
+    lang = fields.Selection(string='Language', selection='_get_lang')
+    reference = fields.Reference(string='Related Document',
         selection='_reference_models')
 
-    @model
+    @api.model
     def _get_lang(self):
         langs = self.env['res.lang'].search([])
         return [(lang.code, lang.name) for lang in langs]
 
-    @model
+    @api.model
     def _reference_models(self):
         models = self.env['ir.model'].search([('state', '!=', 'manual')])
         return [(model.model, model.name)

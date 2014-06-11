@@ -25,7 +25,7 @@ from lxml import etree
 from lxml.builder import E
 
 import openerp
-from openerp import SUPERUSER_ID, BaseModel
+from openerp import SUPERUSER_ID, models
 from openerp import tools
 import openerp.exceptions
 from openerp.osv import fields, osv, expression
@@ -372,7 +372,7 @@ class res_users(osv.osv):
                 context_key = False
             if context_key:
                 res = getattr(user, k) or False
-                if isinstance(res, BaseModel):
+                if isinstance(res, models.BaseModel):
                     res = res.id
                 result[context_key] = res or False
         return result

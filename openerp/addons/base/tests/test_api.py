@@ -1,5 +1,5 @@
 
-from openerp import BaseModel
+from openerp import models
 from openerp.tools import mute_logger
 from openerp.osv.orm import except_orm
 from openerp.tests import common
@@ -9,7 +9,7 @@ class TestAPI(common.TransactionCase):
     """ test the new API of the ORM """
 
     def assertIsRecordset(self, value, model):
-        self.assertIsInstance(value, BaseModel)
+        self.assertIsInstance(value, models.BaseModel)
         self.assertEqual(value._name, model)
 
     def assertIsRecord(self, value, model):

@@ -22,10 +22,10 @@ from datetime import timedelta
 
 import pytz
 
-from openerp import Model, fields, api, _
+from openerp import models, fields, api, _
 from openerp.exceptions import Warning
 
-class event_type(Model):
+class event_type(models.Model):
     """ Event Type """
     _name = 'event.type'
 
@@ -42,7 +42,7 @@ class event_type(Model):
         help="It will select this default maximum value when you choose this event")
 
 
-class event_event(Model):
+class event_event(models.Model):
     """Event"""
     _name = 'event.event'
     _inherit = ['mail.thread', 'ir.needaction_mixin']
@@ -285,7 +285,7 @@ class event_event(Model):
             self.date_end = fields.Datetime.to_string(date_begin + timedelta(hours=1))
 
 
-class event_registration(Model):
+class event_registration(models.Model):
     """Event Registration"""
     _name= 'event.registration'
     _inherit = ['mail.thread', 'ir.needaction_mixin']

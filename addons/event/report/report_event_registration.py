@@ -19,29 +19,29 @@
 #
 ##############################################################################
 
-from openerp import Model, Integer, Char, Datetime, Selection, Many2one
+from openerp import models, fields
 from openerp import tools
 
 
-class report_event_registration(Model):
+class report_event_registration(models.Model):
     """Events Analysis"""
     _name = "report.event.registration"
     _order = 'event_date desc'
     _auto = False
 
-    event_date = Datetime('Event Date', readonly=True)
-    event_id = Many2one('event.event', 'Event', required=True)
-    draft_state = Integer(' # No of Draft Registrations')
-    confirm_state = Integer(' # No of Confirmed Registrations')
-    seats_max = Integer('Max Seats')
-    nbevent = Integer('Number Of Events')
-    event_type = Many2one('event.type', 'Event Type')
-    registration_state = Selection([('draft', 'Draft'), ('confirm', 'Confirmed'), ('done', 'Attended'), ('cancel', 'Cancelled')], 'Registration State', readonly=True, required=True)
-    event_state = Selection([('draft', 'Draft'), ('confirm', 'Confirmed'), ('done', 'Done'), ('cancel', 'Cancelled')], 'Event State', readonly=True, required=True)
-    user_id = Many2one('res.users', 'Event Responsible', readonly=True)
-    user_id_registration = Many2one('res.users', 'Register', readonly=True)
-    name_registration = Char('Participant / Contact Name', readonly=True)
-    company_id = Many2one('res.company', 'Company', readonly=True)
+    event_date = fields.Datetime('Event Date', readonly=True)
+    event_id = fields.Many2one('event.event', 'Event', required=True)
+    draft_state = fields.Integer(' # No of Draft Registrations')
+    confirm_state = fields.Integer(' # No of Confirmed Registrations')
+    seats_max = fields.Integer('Max Seats')
+    nbevent = fields.Integer('Number Of Events')
+    event_type = fields.Many2one('event.type', 'Event Type')
+    registration_state = fields.Selection([('draft', 'Draft'), ('confirm', 'Confirmed'), ('done', 'Attended'), ('cancel', 'Cancelled')], 'Registration State', readonly=True, required=True)
+    event_state = fields.Selection([('draft', 'Draft'), ('confirm', 'Confirmed'), ('done', 'Done'), ('cancel', 'Cancelled')], 'Event State', readonly=True, required=True)
+    user_id = fields.Many2one('res.users', 'Event Responsible', readonly=True)
+    user_id_registration = fields.Many2one('res.users', 'Register', readonly=True)
+    name_registration = fields.Char('Participant / Contact Name', readonly=True)
+    company_id = fields.Many2one('res.company', 'Company', readonly=True)
 
     def init(self, cr):
         """Initialize the sql view for the event registration """

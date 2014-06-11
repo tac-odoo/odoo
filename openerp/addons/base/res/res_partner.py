@@ -26,8 +26,7 @@ import pytz
 import urlparse
 
 import openerp
-from openerp import SUPERUSER_ID
-from openerp import tools, model, multi, one, returns
+from openerp import tools, api
 from openerp.osv import osv, fields
 from openerp.osv.expression import get_unaccent_wrapper
 from openerp.tools.translate import _
@@ -60,7 +59,7 @@ ADDRESS_FORMAT_LAYOUTS = {
 
 
 class format_address(object):
-    @model
+    @api.model
     def fields_view_get_address(self, arch):
         fmt = self.env.user.company_id.country_id.address_format or ''
         for k, v in ADDRESS_FORMAT_LAYOUTS.items():
@@ -74,7 +73,7 @@ class format_address(object):
         return arch
 
 
-@model
+@api.model
 def _tz_get(self):
     # put POSIX 'Etc/*' entries at the end to avoid confusing users - see bug 1086728
     return [(tz,tz) for tz in sorted(pytz.all_timezones, key=lambda tz: tz if not tz.startswith('Etc/') else '_')]
@@ -108,7 +107,7 @@ class res_partner_category(osv.Model):
             res.append((category.id, ' / '.join(reversed(names))))
         return res
 
-    @model
+    @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
         args = args or []
         if name:
@@ -118,7 +117,7 @@ class res_partner_category(osv.Model):
         categories = self.search(args, limit=limit)
         return categories.name_get()
 
-    @multi
+    @api.multi
     def _name_get_fnc(self, field_name, arg):
         return dict(self.name_get())
 
@@ -158,7 +157,7 @@ class res_partner_title(osv.osv):
     }
 
 
-@model
+@api.model
 def _lang_get(self):
     languages = self.env['res.lang'].search([])
     return [(language.code, language.name) for language in languages]
@@ -177,21 +176,21 @@ class res_partner(osv.Model, format_address):
             res[partner.id] = self._display_address(cr, uid, partner, context=context)
         return res
 
-    @multi
+    @api.multi
     def _get_tz_offset(self, name, args):
         return dict(
             (p.id, datetime.datetime.now(pytz.timezone(p.tz or 'GMT')).strftime('%z'))
             for p in self)
 
-    @multi
+    @api.multi
     def _get_image(self, name, args):
         return dict((p.id, tools.image_get_resized_images(p.image)) for p in self)
 
-    @one
+    @api.one
     def _set_image(self, name, value, args):
         return self.write({'image': tools.image_resize_image_big(value)})
 
-    @multi
+    @api.multi
     def _has_image(self, name, args):
         return dict((p.id, bool(p.image)) for p in self)
 
@@ -304,12 +303,12 @@ class res_partner(osv.Model, format_address):
         'commercial_partner_id': fields.function(_commercial_partner_id, type='many2one', relation='res.partner', string='Commercial Entity', store=_commercial_partner_store_triggers)
     }
 
-    @model
+    @api.model
     def _default_category(self):
         category_id = self.env.context.get('category_id', False)
         return [category_id] if category_id else False
 
-    @model
+    @api.model
     def _get_default_image(self, is_company, colorize=False):
         img_path = openerp.modules.get_module_resource(
             'base', 'static/src/img', 'company_image.png' if is_company else 'avatar.png')
@@ -330,14 +329,14 @@ class res_partner(osv.Model, format_address):
             res['arch'] = self.fields_view_get_address(cr, user, res['arch'], context=context)
         return res
 
-    @model
+    @api.model
     def _default_company(self):
         return self.env['res.company']._company_default_get('res.partner')
 
     _defaults = {
         'active': True,
-        'lang': model(lambda self: self.env.lang),
-        'tz': model(lambda self: self.env.context.get('tz', False)),
+        'lang': api.model(lambda self: self.env.lang),
+        'tz': api.model(lambda self: self.env.context.get('tz', False)),
         'customer': True,
         'category_id': _default_category,
         'company_id': _default_company,
@@ -352,14 +351,14 @@ class res_partner(osv.Model, format_address):
         (osv.osv._check_recursion, 'You cannot create recursive Partner hierarchies.', ['parent_id']),
     ]
 
-    @one
+    @api.one
     def copy(self, default=None):
         default = dict(default or {})
         default['user_ids'] = False
         default['name'] = _('%s (copy)') % self.name
         return super(res_partner, self).copy(default)
 
-    @multi
+    @api.multi
     def onchange_type(self, is_company):
         value = {}
         value['title'] = False
@@ -392,7 +391,7 @@ class res_partner(osv.Model, format_address):
             result['value'] = {'use_parent_address': False}
         return result
 
-    @multi
+    @api.multi
     def onchange_state(self, state_id):
         if state_id:
             state = self.env['res.country.state'].browse(state_id)
@@ -522,7 +521,7 @@ class res_partner(osv.Model, format_address):
             website = urlparse.urlunparse(('http', netloc, path, params, query, fragment))
         return website
 
-    @multi
+    @api.multi
     def write(self, vals):
         # res.partner must only allow to set the company_id of a partner if it
         # is the same as the company of all users that inherit from this partner
@@ -544,7 +543,7 @@ class res_partner(osv.Model, format_address):
             self._fields_sync(partner, vals)
         return result
 
-    @model
+    @api.model
     def create(self, vals):
         if vals.get('website'):
             vals['website'] = self._clean_website(vals['website'])
@@ -755,8 +754,8 @@ class res_partner(osv.Model, format_address):
             return False
         return _('Partners: ')+self.pool['res.partner.category'].browse(cr, uid, context['category_id'], context).name
 
-    @model
-    @returns('self')
+    @api.model
+    @api.returns('self')
     def main_partner(self):
         ''' Return the main partner '''
         return self.env.ref('base.main_partner')

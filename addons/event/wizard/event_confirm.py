@@ -19,14 +19,14 @@
 #
 ##############################################################################
 
-from openerp import TransientModel, multi
+from openerp import models, api
 
 
-class event_confirm(TransientModel):
+class event_confirm(models.TransientModel):
     """Event Confirmation"""
     _name = "event.confirm"
 
-    @multi
+    @api.multi
     def confirm(self):
         events = self.env['event.event'].browse(self._context.get('event_ids', []))
         events.do_confirm()

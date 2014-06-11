@@ -121,7 +121,7 @@ class YamlInterpreter(object):
                              'time': time,
                              'datetime': datetime,
                              'timedelta': timedelta}
-        self.env = openerp.Environment(self.cr, self.uid, self.context)
+        self.env = openerp.api.Environment(self.cr, self.uid, self.context)
 
     def _log(self, *args, **kwargs):
         _logger.log(self.loglevel, *args, **kwargs)
@@ -557,7 +557,7 @@ class YamlInterpreter(object):
             self.uid = self.get_id(node.uid)
         if node.noupdate:
             self.noupdate = node.noupdate
-        self.env = openerp.Environment(self.cr, self.uid, self.context)
+        self.env = openerp.api.Environment(self.cr, self.uid, self.context)
 
     def process_python(self, node):
         python, statements = node.items()[0]
