@@ -1557,6 +1557,7 @@
                                 <field name="location_id" groups="stock.group_locations"/>
                                 <field name="group_id" groups="stock.group_adv_location"/>
                                 <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+                                <field name="calendar_id"/>
                             </group>
                         </group>
                         <group>

@@ -52,7 +52,7 @@ Dashboard / Reports for Warehouse Management will include:
     """,
     'website': 'http://www.openerp.com',
     'images': ['images/stock_forecast_report.png', 'images/delivery_orders.jpeg', 'images/inventory_analysis.jpeg','images/location.jpeg','images/moves_analysis.jpeg','images/physical_inventories.jpeg'],
-    'depends': ['product', 'procurement', 'board', 'web_kanban_gauge', 'web_kanban_sparkline'],
+    'depends': ['product', 'procurement', 'board', 'web_kanban_gauge', 'web_kanban_sparkline', 'resource'],
     'category': 'Warehouse Management',
     'sequence': 16,
     'demo': [

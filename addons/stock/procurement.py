@@ -307,6 +307,9 @@ class procurement_order(osv.osv):
 
     def _get_orderpoint_date_planned(self, cr, uid, orderpoint, start_date, context=None):
         date_planned = start_date
+        if orderpoint.calendar_id:
+            calendar_obj = self.pool.get("resource.calendar")
+            date_planned = calendar_obj.get_next_day(cr, uid, orderpoint.calendar_id.id, start_date, context=context)
         return date_planned.strftime(DEFAULT_SERVER_DATE_FORMAT)
 
     def _prepare_orderpoint_procurement(self, cr, uid, orderpoint, product_qty, context=None):
@@ -326,9 +329,15 @@ class procurement_order(osv.osv):
 
     def _product_virtual_get(self, cr, uid, order_point):
         product_obj = self.pool.get('product.product')
+        calendar_obj = self.pool.get('resource.calendar')
+        ctx={'location': order_point.location_id.id}
+        if order_point.calendar_id:
+            date1 = calendar_obj.get_next_day(cr, uid, order_point.calendar_id.id, datetime.utcnow())
+            date2 = calendar_obj.get_next_day(cr, uid, order_point.calendar_id.id, date1)
+            ctx.update({'to_date': date2.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
         return product_obj._product_available(cr, uid,
                 [order_point.product_id.id],
-                context={'location': order_point.location_id.id})[order_point.product_id.id]['virtual_available']
+                context=ctx)[order_point.product_id.id]['virtual_available']
 
     def _procure_orderpoint_confirm(self, cr, uid, use_new_cursor=False, company_id = False, context=None):
         '''
