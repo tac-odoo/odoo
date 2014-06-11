@@ -482,7 +482,6 @@
                     });
                 });
         },
-
         fetch_editables: function (root) {
             return $(root).find('[data-oe-model]')
                 .not('link, script')
@@ -502,14 +501,11 @@
                 airPopover: [
                     ['style', ['style']],
                     ['font', ['bold', 'italic', 'underline', 'clear']],
-                    ['fontname', ['fontname']],
                     ['fontsize', ['fontsize']],
                     ['color', ['color']],
                     ['para', ['ul', 'ol', 'paragraph']],
-                    ['height', ['height']],
                     ['table', ['table']],
-                    ['insert', ['link', 'picture', 'video']],
-                    ['help', ['help']]
+                    ['insert', ['link', 'picture']],
                 ],
                 oninit: function() {
                     self.setup_editables(root);
