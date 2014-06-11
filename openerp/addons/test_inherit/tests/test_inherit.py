@@ -24,4 +24,13 @@ class test_inherits(common.TransactionCase):
         self.assertTrue(field.required)
         self.assertEqual(field.default, 'Unknown')
 
+    def test_depends_extension(self):
+        """ check that @depends on overridden compute methods extends dependencies """
+        mother = self.registry('test.inherit.mother')
+        field = mother._fields['surname']
+
+        # the field dependencies are added
+        self.assertItemsEqual(field.depends, ['name', 'field_in_mother'])
+
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

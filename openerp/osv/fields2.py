@@ -114,6 +114,7 @@ class Field(object):
     inverse = None              # inverse(recs) inverses field on recs
     search = None               # search(recs, operator, value) searches on self
     related = None              # sequence of field names, for related fields
+    default = None              # default value
 
     string = None               # field label
     help = None                 # field tooltip
@@ -279,21 +280,28 @@ class Field(object):
         """ Setup the attributes of a non-related field. """
         recs = env[self.model_name]
 
-        # remap compute, inverse an search to their expected type
-        if isinstance(self.compute, basestring):
-            self.compute = getattr(type(recs), self.compute)
-        elif hasattr(self, 'default'):
+        def make_depends(deps):
+            return tuple(deps(recs) if callable(deps) else deps)
+
+        # transform self.default into self.compute
+        if self.default is not None and self.compute is None:
             self.compute = default_compute(self, self.default)
 
+        # convert compute into a callable and determine depends
+        if isinstance(self.compute, basestring):
+            # if the compute method has been overridden, concatenate all their _depends
+            self.depends = ()
+            for method in resolve_all_mro(type(recs), self.compute, reverse=True):
+                self.depends += make_depends(getattr(method, '_depends', ()))
+            self.compute = getattr(type(recs), self.compute)
+        else:
+            self.depends = make_depends(getattr(self.compute, '_depends', ()))
+
+        # convert inverse and search into callables
         if isinstance(self.inverse, basestring):
             self.inverse = getattr(type(recs), self.inverse)
         if isinstance(self.search, basestring):
             self.search = getattr(type(recs), self.search)
-
-        # retrieve dependencies from compute method
-        self.depends = getattr(self.compute, '_depends', ())
-        if callable(self.depends):
-            self.depends = self.depends(recs)
 
     def _setup_dependency(self, path0, model, path1):
         """ Make `self` depend on `model`; `path0 + path1` is a dependency of
