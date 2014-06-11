@@ -25,8 +25,8 @@ import re
 from openerp import tools
 
 from email.header import decode_header
-from openerp import SUPERUSER_ID
-from openerp.osv import osv, orm, fields, api
+from openerp import SUPERUSER_ID, api
+from openerp.osv import osv, orm, fields
 from openerp.tools import html_email_clean
 from openerp.tools.translate import _
 from HTMLParser import HTMLParser

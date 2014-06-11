@@ -48,7 +48,8 @@ from openerp.modules.db import create_categories
 from openerp.modules import get_module_resource
 from openerp.tools.parse_version import parse_version
 from openerp.tools.translate import _
-from openerp.osv import osv, orm, fields, fields2, api
+from openerp.osv import osv, orm, fields
+from openerp import api, fields as fields2
 
 _logger = logging.getLogger(__name__)
 

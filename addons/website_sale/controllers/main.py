@@ -2,8 +2,8 @@
 import werkzeug
 
 from openerp import SUPERUSER_ID
-from openerp.addons.web import http
-from openerp.addons.web.http import request
+from openerp import http
+from openerp.http import request
 from openerp.tools.translate import _
 from openerp.addons.website.models.website import slug
 

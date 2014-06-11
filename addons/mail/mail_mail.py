@@ -25,10 +25,10 @@ import re
 from urllib import urlencode
 from urlparse import urljoin
 
-from openerp import tools
+from openerp import api, tools
 from openerp import SUPERUSER_ID
 from openerp.addons.base.ir.ir_mail_server import MailDeliveryException
-from openerp.osv import fields, osv, api
+from openerp.osv import fields, osv
 from openerp.tools.translate import _
 
 _logger = logging.getLogger(__name__)

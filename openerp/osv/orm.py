@@ -59,11 +59,9 @@ import dateutil.relativedelta
 import psycopg2
 from lxml import etree
 
-from .env import Environment
-from . import api
 from . import fields
 import openerp
-import openerp.tools as tools
+from openerp import tools, api
 from openerp.exceptions import except_orm, AccessError, MissingError
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.tools.config import config
@@ -72,6 +70,8 @@ from openerp.tools.safe_eval import safe_eval as eval
 from openerp.tools.translate import _
 from openerp import SUPERUSER_ID
 from query import Query
+
+from openerp.api import Environment
 
 _logger = logging.getLogger(__name__)
 _schema = logging.getLogger(__name__ + '.schema')
@@ -5826,7 +5826,7 @@ PGERROR_TO_OE = defaultdict(
 
 # keep those imports here to avoid dependency cycle errors
 from . import expression
-from . import fields2
-from .fields2 import Field, SpecialValue, FailedValue
+from .. import fields as fields2
+from ..fields import Field, SpecialValue, FailedValue
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

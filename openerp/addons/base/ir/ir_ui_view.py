@@ -35,9 +35,9 @@ import HTMLParser
 from lxml import etree
 
 import openerp
-from openerp import tools
+from openerp import tools, api
 from openerp.http import request
-from openerp.osv import fields, osv, orm, api
+from openerp.osv import fields, osv, orm
 from openerp.tools import graph, SKIPPED_ELEMENT_TYPES
 from openerp.tools.safe_eval import safe_eval as eval
 from openerp.tools.view_validation import valid_view

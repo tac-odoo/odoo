@@ -37,10 +37,10 @@ import xmlrpclib
 from email.message import Message
 from urllib import urlencode
 
-from openerp import tools
+from openerp import api, tools
 from openerp import SUPERUSER_ID
 from openerp.addons.mail.mail_message import decode
-from openerp.osv import fields, osv, orm, api
+from openerp.osv import fields, osv, orm
 from openerp.osv.orm import BaseModel
 from openerp.tools.safe_eval import safe_eval as eval
 from openerp.tools.translate import _

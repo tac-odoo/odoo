@@ -2,7 +2,7 @@
 
 import urlparse
 
-from openerp.addons.web.http import request
+from openerp.http import request
 from openerp.osv import fields, osv
 
 

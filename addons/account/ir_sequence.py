@@ -18,8 +18,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
-from openerp.osv import fields, osv, api
+from openerp import api
+from openerp.osv import fields, osv
 
 class ir_sequence_fiscalyear(osv.osv):
     _name = 'account.sequence.fiscalyear'
