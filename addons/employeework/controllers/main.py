@@ -7,25 +7,27 @@ def read_data(date, desc = ""):
     model = request.registry['hr.analytic.timesheet']
     if desc == "project":
         return model.search_read(request.cr, request.uid, [], ['account_id'])
-    else:
-        return model.search_read(request.cr, request.uid, [('date','=', date)])
+    return model.search_read(request.cr, request.uid, [('date','=', date)])
 
 def get_data(project_id, date):
     model = request.registry['hr.analytic.timesheet']
     return model.search_read(request.cr, request.uid, [('account_id','=',project_id),('date','=',date)], ['id','unit_amount'])
 
-def get_diff(record_id):
+def get_difference(record_id, desc = ""):
     model = request.registry['hr.analytic.timesheet']
-    date = model.search_read(request.cr, request.uid, [('id','=',int(record_id))], ['date_counter','unit_amount'])[0]
-    diff = datetime.now() - datetime.strptime(date['date_counter'],"%Y-%m-%d %H:%M:%S.%f")
-    mints = diff.seconds / 60
-    hours = mints / 60
-    final_diff = '<span class="hour">%dH</span> <span class="minute">%dM</span>' % (hours,mints)
-    return str(final_diff)
+    stored_date = model.search_read(request.cr, request.uid, [('id','=',int(record_id))], ['date_counter','unit_amount'])[0]
+    difference = datetime.now() - datetime.strptime(stored_date['date_counter'],"%Y-%m-%d %H:%M:%S.%f")
+    minute = difference.seconds / 60
+    hour = minute / 60
+    final_difference = '<span class="hour">%d</span>H <span class="minute">%d</span>M' % (hour,minute)
+    if desc == "removecounter":
+        final_difference = float("%d.%d" % (hour,minute))
+        model.write(request.cr, request.uid, [int(record_id)], {'unit_amount' : final_difference + float(stored_date['unit_amount']), 'date_counter' : None})
+    return str(final_difference)
 
 def get_day_and_total(date):
     dictonary, grand_total = [], 0
-    for date in list(get_week(date)):
+    for date in list(get_week_list(date)):
         count = sum([float(_date['unit_amount']) for _date in read_data(date)])
         grand_total += count
         dictonary.append({'dates' : date,'count' : count})
@@ -33,7 +35,7 @@ def get_day_and_total(date):
     return dictonary
 
 #Get list of 7 days in week
-def get_week(date):
+def get_week_list(date):
     date -= timedelta(days = (date.weekday() + 1) % 7)
     for n in xrange(7):
         yield date
@@ -49,7 +51,7 @@ class Employeework(http.Controller):
             'current_date' : now,
             'data' : read_data(now),
             'date_list' : get_day_and_total(now),
-            'get_diff': get_diff})
+            'get_difference': get_difference})
 
     @http.route('/employeework/dateview', type='http', auth="user", website=True, multilang=True)
     def employeework_dateview(self, active, current_date):
@@ -59,15 +61,14 @@ class Employeework(http.Controller):
             'current_date' : datetime.strptime(current_date,"%Y-%m-%d"),
             'data' : read_data(current_date),
             'date_list' : date_list,
-            'get_diff': get_diff})
+            'get_difference': get_difference})
 
     @http.route('/employeework/weekview', type='http', auth="user", website=True, multilang=True)
     def employeework_weekview(self, active, current_date):
         current_date = datetime.strptime(current_date,"%Y-%m-%d")
-        date_list = list(get_week(current_date))
+        date_list = list(get_week_list(current_date))
 
         project_list = {prj['account_id'][0] : prj['account_id'][1] for prj in read_data('', 'project')}
-
         row_total = {i.strftime("%Y-%m-%d") : 0 for i in date_list}
 
         week_data = []
@@ -101,16 +102,16 @@ class Employeework(http.Controller):
         if len(data) == 0:
             model.create(request.cr, request.uid, {'name' : '/','journal_id' : request.uid, 'unit_amount' : hour, 'date' : date, 'account_id' : project_id})
         else:
-            diff = float(hour) - float(sum([l['unit_amount'] for l in data]))
-            slash = model.search_read(request.cr, request.uid, [('account_id','=',int(project_id)),('date','=',date),('name','=','/')],['id','unit_amount'])
-            id_list = [l['id'] for l in slash]
-            hour_list = sum([l['unit_amount'] for l in slash])
-            if len(id_list) == 1:
-                if(float(hour_list)+diff<0):
+            difference = float(hour) - float(sum([l['unit_amount'] for l in data]))
+            slash_record = model.search_read(request.cr, request.uid, [('account_id','=',int(project_id)),('date','=',date),('name','=','/')],['id','unit_amount'])
+            slash_record_id_list = [l['id'] for l in slash_record]
+            slash_record_hour_list = sum([l['unit_amount'] for l in slash_record])
+            if len(slash_record_id_list) == 1:
+                if(float(slash_record_hour_list) + difference < 0):
                     return now
-                model.write(request.cr, request.uid, id_list, {'unit_amount' : float(hour_list)+diff})
+                model.write(request.cr, request.uid, slash_record_id_list, {'unit_amount' : float(slash_record_hour_list) + difference})
             else:
-                model.create(request.cr, request.uid, {'name' : '/','journal_id' : request.uid, 'unit_amount' : diff, 'date' : date, 'account_id' : project_id})
+                model.create(request.cr, request.uid, {'name' : '/','journal_id' : request.uid, 'unit_amount' : difference, 'date' : date, 'account_id' : project_id})
         return now
 
     @http.route('/employeework/addcounter', type='http', auth="user", website=True, multilang=True)
@@ -120,11 +121,4 @@ class Employeework(http.Controller):
 
     @http.route('/employeework/removecounter', type='http', auth="user", website=True, multilang=True)
     def employeework_removecounter(self, record_id):
-        model = request.registry['hr.analytic.timesheet']
-        date = model.search_read(request.cr, request.uid, [('id','=',int(record_id))], ['date_counter','unit_amount'])[0]
-        diff = datetime.now() - datetime.strptime(date['date_counter'],"%Y-%m-%d %H:%M:%S.%f")
-        mints = diff.seconds / 60
-        hours = mints / 60
-        final_diff = float("%d.%d" % (hours,mints))
-        model.write(request.cr, request.uid, [int(record_id)], {'unit_amount' : final_diff + float(date['unit_amount']), 'date_counter' : None})
-        return str(final_diff)
+        return get_difference(record_id, "removecounter")

@@ -1,2 +1,2 @@
 import controllers
-import models
+import hr_analytic_timesheet

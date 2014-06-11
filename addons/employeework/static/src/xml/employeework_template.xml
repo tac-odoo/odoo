@@ -106,7 +106,7 @@
 									        	<i t-att-id="rec['id']" t-att-class="rec['date_counter'] and 'fa fa-clock-o fa-stack-2x text-success' or 'fa fa-clock-o fa-stack-2x'"></i>
 									        	<i t-att-id="rec['id']" t-att-class="rec['date_counter'] and 'fa fa-cog fa-stack-1x fa-spin' or 'fa fa-cog fa-stack-1x fa-spin hidden'" style="bottom: 0;right: 0px;left: initial;line-height: initial;width: initial;"></i>
 									    	</span>
-								    		<strong t-att-id="rec['id']" t-raw="rec['date_counter'] and get_diff(rec['id']) or '0H 0M'" />
+								    		<strong t-att-id="rec['id']" t-raw="rec['date_counter'] and get_difference(rec['id']) or ''" />
 									    </button>
 					        		</td>
 					        		<td>
@@ -159,7 +159,7 @@
 						        		<td><input t-att-id="rec['project_id']" t-att-date="r['date']" class="weekview_txt form-control" type="text" t-att-value="r['total']" /></td>
 						        	</t>
 						        	<td>
-						        		<h5><a style="text-decoration:none;"><t t-esc="rec['total']" /></a></h5>
+						        		<h5><a style="text-decoration:none;" t-esc="rec['total']"/></h5>
 						        	</td>
 						        	<td>
 						        		<button type="button" class="btn btn-default btn-sm">
@@ -180,7 +180,7 @@
 							</t>
 			        	</table>
 			        </div>
-		        <h3 t-if="data==[]" style="text-align:center;"><span class="label label-primary">No Data Available.</span></h3>
+		        	<h3 t-if="data==[]" style="text-align:center;" class="label label-primary">No Data Available.</h3>
 		    	</div>
 	    	</t>
     	</template>
