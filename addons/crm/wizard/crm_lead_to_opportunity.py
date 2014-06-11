@@ -130,6 +130,8 @@ class crm_lead2opportunity_partner(osv.osv_memory):
         data = self.browse(cr, uid, ids, context=context)[0]
         leads = lead.browse(cr, uid, lead_ids, context=context)
         for lead_id in leads:
+            lead_id.partner_name = vals['partner_name']
+            lead.write(cr, uid, [lead_id.id], {"partner_name": vals['partner_name'],"partner_id": vals['partner_id'].id})
             partner_id = self._create_partner(cr, uid, lead_id.id, data.action, lead_id.partner_id.id, context=context)
             res = lead.convert_opportunity(cr, uid, [lead_id.id], partner_id, [], False, context=context)
         user_ids = vals.get('user_ids', False)
@@ -152,6 +154,7 @@ class crm_lead2opportunity_partner(osv.osv_memory):
         lead_obj = self.pool['crm.lead']
 
         w = self.browse(cr, uid, ids, context=context)[0]
+        print ">>>>>>>>>>>>>>>>>>>", w.partner_id
         opp_ids = [o.id for o in w.opportunity_ids]
         if w.name == 'merge':
             lead_id = lead_obj.merge_opportunity(cr, uid, opp_ids, context=context)
@@ -164,7 +167,7 @@ class crm_lead2opportunity_partner(osv.osv_memory):
                 lead_obj.write(cr, uid, lead_id, {'user_id': w.user_id.id, 'section_id': w.section_id.id}, context=context)
         else:
             lead_ids = context.get('active_ids', [])
-            self._convert_opportunity(cr, uid, ids, {'lead_ids': lead_ids, 'user_ids': [w.user_id.id], 'section_id': w.section_id.id}, context=context)
+            self._convert_opportunity(cr, uid, ids, {'lead_ids': lead_ids, 'partner_id': w.partner_id, 'partner_name': w.partner_name, 'user_ids': [w.user_id.id], 'section_id': w.section_id.id}, context=context)
 
         return self.pool.get('crm.lead').redirect_opportunity_view(cr, uid, lead_ids[0], context=context)
 
