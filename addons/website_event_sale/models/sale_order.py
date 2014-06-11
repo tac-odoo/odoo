@@ -62,7 +62,7 @@ class sale_order_line(osv.Model):
         attendee_obj = request.registry.get('event.registration_attendee')
         if request.session.get('attendees_list', False) and request.session.get('attendees_list') != []:
             sale_order_obj = request.registry.get('sale.order').browse(cr, uid, request.session.get('sale_order_id', False), context=context)
-            attendee_ids = request.registry.get('event.registration_attendee').search(cr, uid, [('origin', '=', sale_order_obj.name)])
+            attendee_ids = attendee_obj.search(cr, uid, [('origin', '=', sale_order_obj.name)])
             attendee_ids.reverse()
             for attendee, attendees_list in zip(attendee_obj.browse(cr, uid, attendee_ids, context=context), request.session.get('attendees_list', False)):
                 attendee_obj.write(cr, uid, [attendee.id], {

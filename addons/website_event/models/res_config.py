@@ -8,7 +8,7 @@ class event_config_settings(osv.osv_memory):
         'group_publish_events': fields.boolean('Publish your event',
             implied_group='website_event.group_publish_events',
             help='Publish your event in the web.'),
-        'group_advanced_event_features': fields.boolean('Manage advanced event features',
-            implied_group='website_event.group_advanced_event_features',
-            help='Manage advanced event features like etracking, agenda, sponsors.'),
+        'module_website_event_track': fields.boolean('Manage advanced event features',
+            help='Manage advanced event features like etracking, agenda, sponsors.\n'
+                '-This installs the module website_event_track.'),
     }

@@ -2,7 +2,7 @@
 <openerp>
 <data>
 
-<template name="Sponsors" id="event_sponsor" inherit_option_id="website_event.layout" inherit_id="website_event.layout" groups="website_event.group_advanced_event_features">
+<template name="Sponsors" id="event_sponsor" inherit_option_id="website_event.layout" inherit_id="website_event.layout">
     <xpath expr="//t[@t-call='website.layout']" position="inside">
         <t t-set="head">
             <link rel='stylesheet' href='/website_event_track/static/src/css/website_event_track.css'/>

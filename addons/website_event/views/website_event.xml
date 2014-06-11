@@ -207,12 +207,7 @@
                     </ol>
                     <ol class="breadcrumb mb0" id="event_menu" t-if="event.menu_id">
                         <t t-foreach="event.menu_id.child_id" t-as="submenu">
-                            <t t-if="submenu.name not in ['Agenda', 'Location']">
-                                <t t-call="website.submenu"/>
-                            </t>
-                            <t t-if="submenu.name in ['Agenda', 'Location']" groups="website_event.group_advanced_event_features">
-                                <t t-call="website.submenu"/>
-                            </t>
+                            <t t-call="website.submenu"/>
                         </t>
                     </ol>
                 </div>

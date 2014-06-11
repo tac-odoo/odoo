@@ -94,7 +94,7 @@
                             <span>Free</span>
                         </td>
                         <td>
-                            <select class="form-control" name='ticket-1-FREE'>
+                            <select class="form-control" name='ticket-0-FREE'>
                                 <t t-foreach="range(0, 11)" t-as="nb"><option t-esc="nb"/></t>
                             </select>
                         </td>
@@ -126,6 +126,7 @@
                 <table class="table">
                     <t t-foreach="post" t-as="ticket">
                         <t t-set="split_ticket" t-value="ticket.split('-')"></t>
+                        <t t-set="quantity" t-value="post[ticket]"/>
                         <t t-if="int(post[ticket]) > 0">
                             <thead>
                                 <tr>
@@ -142,10 +143,10 @@
                                 <t t-foreach="range(1, int(post[ticket])+1)" t-as="attendee">
                                     <tr class='form-group'>
                                         <td>Attendee<t t-raw="attendee"/></td>
-                                        <td><input class='form-control input-sm' type='text' t-attf-name="attendee-name-#{split_ticket[1]}-#{attendee}" required="required"/></td>
-                                        <td><input class='form-control input-sm' type='tel' t-attf-name="attendee-phone-#{split_ticket[1]}-#{attendee}"/></td>
-                                        <td><input class='form-control input-sm' type='email' t-attf-name="attendee-email-#{split_ticket[1]}-#{attendee}" required="required"/></td>
-                                        <td><input t-if="split_ticket[2] != 'FREE'" class='hidden' type='text' t-attf-name="attendee-event_ticket_id-#{split_ticket[1]}-#{attendee}" t-attf-value="#{ split_ticket[1] }"/></td>
+                                        <td><input class='form-control input-sm' type='text' t-attf-name="attendee-name-#{split_ticket[1]}-#{attendee}-#{quantity}" required="required"/></td>
+                                        <td><input class='form-control input-sm' type='tel' t-attf-name="attendee-phone-#{split_ticket[1]}-#{attendee}-#{quantity}"/></td>
+                                        <td><input class='form-control input-sm' type='email' t-attf-name="attendee-email-#{split_ticket[1]}-#{attendee}-#{quantity}" required="required"/></td>
+                                        <td><input t-if="split_ticket[2] != 'FREE'" class='hidden' type='text' t-attf-name="attendee-event_ticket_id-#{split_ticket[1]}-#{attendee}-#{quantity}" t-attf-value="#{ split_ticket[1] }"/></td>
                                     </tr>
                                 </t>
                             </tbody>

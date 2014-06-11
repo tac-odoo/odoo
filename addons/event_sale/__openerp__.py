@@ -43,6 +43,7 @@ this event.
         'event_sale_view.xml',
         'event_sale_data.xml',
         'security/event_sale_security.xml',
+        'security/ir.model.access.csv',
         'res_config_view.xml',
     ],
     'demo': ['event_demo.xml'],

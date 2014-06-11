@@ -180,7 +180,7 @@ class event_event(osv.osv):
                                               'event.registration_attendee': (_events_from_registrations, ['state'], 10),
                                               'event.event': (lambda self, cr, uid, ids, c = {}: ids,
                                                               ['seats_max', 'registration_ids'], 20),
-                                              'event.event.ticket': (_get_ticket_events, ['seats_max'], 10),
+                                              'event.event.ticket': (_get_ticket_events, ['seats_max'], 30),
                                            }),
     }
     _defaults = {

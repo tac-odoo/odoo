@@ -15,8 +15,8 @@
                         <label for="group_publish_events"/>
                     </div>
                     <div>
-                        <field name="group_advanced_event_features" class="oe_inline"/>
-                        <label for="group_advanced_event_features"/>
+                        <field name="module_website_event_track" class="oe_inline"/>
+                        <label for="module_website_event_track"/>
                     </div>
                 </div>
             </field>

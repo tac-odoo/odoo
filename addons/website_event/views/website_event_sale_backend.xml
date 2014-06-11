@@ -16,10 +16,10 @@
         <field name="model">event.event</field>
         <field name="inherit_id" ref="event.view_event_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//notebook/page[@string='Event Management']" position="attributes">
+            <xpath expr="//notebook/page[@name='event_management']" position="attributes">
                 <attribute name="invisible">0</attribute>
             </xpath>
-            <xpath expr="//notebook/page[@string='Event Management']/div[@name='promotion']" position="replace">
+            <xpath expr="//notebook/page[@name='event_management']/div[@name='promotion']" position="replace">
                 <group string="Event Promotion and Visibility">
                     <field name="website_published" class="pull-left" widget="website_button" string=" " groups="website_event.group_publish_events"/>
                     <field name="website_url" string="Publish" widget="url"/>

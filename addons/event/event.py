@@ -241,7 +241,6 @@ class event_event(osv.osv):
         'seats_registered': fields.function(_get_registered_seats, string='Number of Seats Registered', type='string'),
         'sold_ticket': fields.function(_get_sold_tickets, string='Sold Tickets on Unconfirmed Tickets', type='string'),
         'registration_ids': fields.one2many('event.registration_attendee', 'event_id', 'Registrations', readonly=False, states={'done': [('readonly', True)]}),
-        'track_ids': fields.one2many('event.track', 'event_id', 'Tracks', readonly=False),
         'date_begin': fields.datetime('Start Date', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'date_end': fields.datetime('End Date', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'state': fields.selection([
@@ -528,7 +527,7 @@ class event_reminder(osv.osv):
                     for subs in event.attendee_ids:
                         time_to_send = datetime.max
                         if not subs.reminder_sended:
-                            time_to_send = datetime.strptime(subs.create_date, '%Y-%m-%d') + timedelta(days=self._get_number_days(reminder))
+                            time_to_send = datetime.strptime(subs.create_date, "%Y-%m-%d %H:%M:%S") + timedelta(days=self._get_number_days(reminder))
                             if time_to_send < datetime.now():
                                 self.pool.get('event.event').send_reminder_mail(cr, uid, event.id, reminder.email_template.id, context=context)
                                 self.pool.get('event.registration_attendee').write(cr, uid, [subs.id], {'reminder_sended': True}, context=context)

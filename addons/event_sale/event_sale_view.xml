@@ -90,14 +90,14 @@
             <field name="inherit_id" ref="event.view_event_form"/>
             <field name="arch" type="xml">
                 <data>
-                    <xpath expr="//notebook/page[@string='Event Management']" position="attributes">
+                    <xpath expr="//notebook/page[@name='event_management']" position="attributes">
                         <attribute name="invisible">0</attribute>
                     </xpath>
-                    <xpath expr="//notebook/page[@string='Event Management']/div[@name='ticket_management']" position="replace">
+                    <xpath expr="//notebook/page[@name='event_management']/div[@name='ticket_management']" position="replace">
                             <group string="Ticket and Seats Management" groups="event_sale.group_event_manage_tickets">
-                                <field name="seats_max" string="Maximum Registration" class="oe_inline" attrs="{'invisible':[('seats_max', '==', 0)]}" />
-                                <label for="seats_max" string="Maximum Registration" class="oe_inline" attrs="{'invisible':[('seats_max', '!=', 0)]}"/>
-                                <span class="oe_inline oe_grey" attrs="{'invisible':[('seats_max', '!=', 0)]}"> Unlimited</span>
+                                <field name="seats_max" string="Maximum Registration" class="oe_inline" attrs="{'invisible':[('event_ticket_ids', '==', [])]}"/>
+                                <label for="seats_max" string="Maximum Registration" class="oe_inline" attrs="{'invisible':[('event_ticket_ids', '!=', [])]}"/>
+                                <span class="oe_inline oe_grey" attrs="{'invisible':[('event_ticket_ids', '!=', [])]}"> Unlimited</span>
                             </group>
                             <group name="Event Tickets" groups="event_sale.group_event_manage_tickets">
                                 <field name="event_ticket_ids" string="Manage tickets">
@@ -111,9 +111,9 @@
                                 </field>
                             </group>
                     </xpath>
-                    <xpath expr="//notebook/page[@string='Advanced']/div[@class='manageSales']" position="replace">
+                    <xpath expr="//notebook/page[@name='advanced']/div[@class='manageSales']" position="replace">
                         <group attrs="{'invisible':[('event_ticket_ids', '=', [])]}">
-                            <label for="action_get_sale_order_for_event" class="oe_edit_only" string="Manage Sales" />
+                            <label for="action_get_sale_order_for_event" string="Manage Sales" states="confirm,done"/>
                             <button string="History of Orders" type="object" name="action_get_sale_order_for_event" states="confirm,done" />
                         </group>
                     </xpath>

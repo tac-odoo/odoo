@@ -32,21 +32,21 @@
             },
             {
                 title:     "Fill attendees details",
-                waitFor:   '#top_menu .my_cart_quantity:contains(2)',
                 element:   'form[action="/event/cart/update?event_id=3"] .btn:contains("Order Now")',
                 autoComplete: function (tour) {
-                    if ($("input[name='attendee-name-4-1']").val() === "")
-                        $("input[name='attendee-name-4-1']").val("StandardAttendee1");
-                    if ($("input[name='attendee-email-4-1']").val() === "")
-                        $("input[name='attendee-email-4-1']").val("standardattende1@eventoptenerp.com");
-                    if ($("input[name='attendee-name-5-1']").val() === "")
-                        $("input[name='attendee-name-5-1']").val("VIPAttendee1");
-                    if ($("input[name='attendee-email-5-1']").val() === "")
-                        $("input[name='attendee-email-5-1']").val("vipattende1@eventoptenerp.com");
+                    if ($("input[name='attendee-name-4-1-1']").val() === "")
+                        $("input[name='attendee-name-4-1-1']").val("StandardAttendee1");
+                    if ($("input[name='attendee-email-4-1-1']").val() === "")
+                        $("input[name='attendee-email-4-1-1']").val("standardattende1@eventoptenerp.com");
+                    if ($("input[name='attendee-name-5-1-1']").val() === "")
+                        $("input[name='attendee-name-5-1-1']").val("VIPAttendee1");
+                    if ($("input[name='attendee-email-5-1-1']").val() === "")
+                        $("input[name='attendee-email-5-1-1']").val("vipattende1@eventoptenerp.com");
                 },
             },
             {
                 title:     "Complete checkout",
+                waitFor:   '#top_menu .my_cart_quantity:contains(2)',
                 element:   'form[action="/shop/confirm_order"] .btn:contains("Confirm")',
                 autoComplete: function (tour) {
                     if ($("input[name='name']").val() === "")
