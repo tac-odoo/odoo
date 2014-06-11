@@ -1199,6 +1199,6 @@ class Id(Field):
 
 # imported here to avoid dependency cycle issues
 from openerp import SUPERUSER_ID
-from openerp.exceptions import Warning, MissingError
-from openerp.osv import fields
-from openerp.osv.orm import BaseModel, MAGIC_COLUMNS
+from .exceptions import Warning, MissingError
+from .models import BaseModel, MAGIC_COLUMNS
+from .osv import fields

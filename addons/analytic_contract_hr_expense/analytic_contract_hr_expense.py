@@ -19,7 +19,6 @@
 #
 ##############################################################################
 from openerp.osv import fields, osv
-from openerp.osv.orm import intersect
 from openerp.tools.translate import _
 
 from openerp.addons.decimal_precision import decimal_precision as dp

@@ -28,7 +28,7 @@ import logging
 import threading
 
 import openerp
-from openerp import SUPERUSER_ID
+from .. import SUPERUSER_ID
 from openerp.tools import assertion_report, lazy_property
 
 _logger = logging.getLogger(__name__)
@@ -135,6 +135,8 @@ class Registry(Mapping):
         and registers them in the registry.
 
         """
+        from .. import models
+
         models_to_load = [] # need to preserve loading order
         lazy_property.reset_all(self)
 
@@ -144,7 +146,7 @@ class Registry(Mapping):
 
         # Instantiate registered classes (via the MetaModel automatic discovery
         # or via explicit constructor call), and add them to the pool.
-        for cls in openerp.osv.orm.MetaModel.module_to_models.get(module.name, []):
+        for cls in models.MetaModel.module_to_models.get(module.name, []):
             # models register themselves in self.models
             model = cls._build_model(self, cr)
             if model._name not in models_to_load:
