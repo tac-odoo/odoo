@@ -39,6 +39,7 @@ from openerp.service import security, model as service_model
 from openerp.osv.orm import except_orm
 from openerp.tools.func import lazy_property
 from odoo.modules.registry import RegistryManager
+from openerp.service import wsgi_server
 
 _logger = logging.getLogger(__name__)
 
@@ -1322,6 +1323,6 @@ class CommonController(Controller):
 
 # register main wsgi handler
 root = Root()
-openerp.service.wsgi_server.register_wsgi_handler(root)
+wsgi_server.register_wsgi_handler(root)
 
 # vim:et:ts=4:sw=4:

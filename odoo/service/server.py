@@ -38,6 +38,7 @@ from odoo.modules.registry import RegistryManager
 from openerp.release import nt_service_name
 import openerp.tools.config as config
 from openerp.tools.misc import stripped_sys_argv, dumpstacks
+from openerp.addons.base.ir.ir_cron import ir_cron 
 
 _logger = logging.getLogger(__name__)
 
@@ -244,7 +245,7 @@ class ThreadedServer(CommonServer):
             _logger.debug('cron%d polling for jobs', number)
             for db_name, registry in registries.items():
                 while True and registry.ready:
-                    acquired = openerp.addons.base.ir.ir_cron.ir_cron._acquire_job(db_name)
+                    acquired = ir_cron._acquire_job(db_name)
                     if not acquired:
                         break
 
