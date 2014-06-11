@@ -149,11 +149,11 @@ class Field(object):
         attrs.update(self._attrs)       # necessary in case self is not in cls
 
         # initialize `self` with `attrs`
-        if 'compute' in attrs:
+        if attrs.get('compute'):
             # by default, computed fields are not stored and readonly
             attrs['store'] = attrs.get('store', False)
-            attrs['readonly'] = attrs.get('readonly', 'inverse' not in attrs)
-        if 'related' in attrs:
+            attrs['readonly'] = attrs.get('readonly', not attrs.get('inverse'))
+        if attrs.get('related'):
             # by default, related fields are not stored
             attrs['store'] = attrs.get('store', False)
         for attr, value in attrs.iteritems():
