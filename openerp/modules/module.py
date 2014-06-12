@@ -49,7 +49,7 @@ hooked = False
 # Modules already loaded
 loaded = []
 
-class AddonsImportHook(object):
+class OdooImportHook(object):
     """
     Import hook to load OpenERP addons from multiple paths.
 
@@ -63,19 +63,41 @@ class AddonsImportHook(object):
 
     def find_module(self, module_name, package_path):
         module_parts = module_name.split('.')
-        if len(module_parts) == 3 and module_name.startswith('openerp.addons.'):
+        if len(module_parts) == 3 and module_name.startswith(('openerp.addons.', 'odoo.addons.')):
             return self # We act as a loader too.
+        if module_name.startswith('odoo') and not module_name.startswith('odoo.addons.'):
+            return OdooLoader()
 
     def load_module(self, module_name):
+        canonical = re.sub(
+            r'^odoo\.addons\.(\w+)$',
+            r'openerp.addons.\1',
+            module_name)
+        new = re.sub(
+            r'^openerp\.addons\.(\w+)$',
+            r'odoo.addons.\1',
+            canonical)
+
         if module_name in sys.modules:
             return sys.modules[module_name]
 
         _1, _2, module_part = module_name.split('.')
         # Note: we don't support circular import.
         f, path, descr = imp.find_module(module_part, ad_paths)
-        mod = imp.load_module('openerp.addons.' + module_part, f, path, descr)
-        sys.modules['openerp.addons.' + module_part] = mod
+        mod = imp.load_module(canonical, f, path, descr)
+        sys.modules[canonical] = mod
+        sys.modules[new] = mod
+        setattr(openerp.addons, module_part, mod)
         return mod
+
+class OdooLoader(object):
+    def load_module(self, module_name):
+        old_name = re.sub(
+            r'^odoo(\..*|)$',
+            r'openerp\1',
+            module_name
+        )
+        return sys.modules.setdefault(module_name, sys.modules[old_name])
 
 def initialize_sys_path():
     """
@@ -104,7 +126,7 @@ def initialize_sys_path():
         ad_paths.append(base_path)
 
     if not hooked:
-        sys.meta_path.append(AddonsImportHook())
+        sys.meta_path.append(OdooImportHook())
         hooked = True
 
 def get_module_path(module, downloaded=False, display_warning=True):
