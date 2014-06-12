@@ -1,47 +1,6 @@
 $(document).ready(function(){
     var employeework = new openerp.website.employeework();
-    var project_list = '';
-    openerp.jsonRpc("/employeework/project_list", 'call', {}).done(function(result) {
-        $.each(result, function(key,value){
-             project_list += "<option id='" + key + "'>" + value + "</option>"
-        });
-    });
-    $("button.addline").click(function(){
-        $("table.dateview tr:last").before("<tr>\
-            <td>\
-                <select class='form-control project_list' data-style='btn-danger'>\
-                " + project_list + "\
-                </select>\
-            </td>\
-            <td class='has-error'><input class='form-control input-normal new_desc' type='text' placeholder='Description'/></td>\
-            <td class='has-error'><input class='form-control new_hour' type='text' placeholder='Hour'/></td>\
-            <td>\
-                <button type='button' class='btn btn-primary btn-gt save mt4'>\
-                    <span class='fa fa-save'></span> Save\
-                </button>\
-            </td>\
-        </tr>");
-        $("button.save").click(function(){
-            var desc = $(".new_desc").val();
-            var hour = $(".new_hour").val();
-            var project_id = $(".project_list :selected").attr("id");
-            var date = $("input#hidden").val();
-            if(desc.trim() == '' || hour == '') {
-                alert("Enter Value in Fields");
-                return false;
-            }
-            openerp.jsonRpc("/employeework/addline", 'call', {'description' : desc + ' ', 'date' : date, 'hour' : hour, 'project_id' : project_id}).done(function(result) {
-                if(!JSON.stringify(result)){
-                    alert("Record not create");
-                } else {
-                    window.location.reload();
-                }
-            });
-        });
-    });
 });
-
-
 
 openerp.website.employeework = openerp.Class.extend({
     init : function(){
@@ -49,8 +8,10 @@ openerp.website.employeework = openerp.Class.extend({
         this.$el_save_button = $("a#save");
         this.$el_last_time = $("span#result");
         this.$el_timer = $('button.timer');
+        this.project_list = '';
         this.start();
         this.start_interval();
+        this.add_line();
         this.timer_action();
         this.stop_invalid_input(this.$el_weekview_txt);
         this.active_save_button(this.$el_weekview_txt);
@@ -63,6 +24,7 @@ openerp.website.employeework = openerp.Class.extend({
             self.edit_weekview_data();
         });
     },
+    // Update timer on 1 minute
     start_interval : function(){
         var self = this;
         setInterval(function(){
@@ -73,16 +35,77 @@ openerp.website.employeework = openerp.Class.extend({
                 var minute = el_minute.text();
                 minute = parseInt(minute) + 1;
                 if(minute > 60) {
-                    hour = parseInt(hour) + 1;
+                    el_hour.text(parseInt(hour) + 1);
                     minute = 0;
                 }
-                el_hour.text(hour);
                 el_minute.text(minute);
             });
         }, 60000);
     },
-    timer_action : function(){
+    // Get project list
+    get_project_list : function(){
         var self = this;
+        openerp.jsonRpc("/employeework/project_list", 'call', {}).done(function(result) {
+            $.each(result, function(key,value){
+                 self.project_list += "<option id=" + key + ">" + value + "</option>"
+            });
+        });
+    },
+    // Add Line in dateview
+    add_line : function(){
+        var self = this;
+        self.get_project_list();
+        this.$el_addline_button = $("button.addline");
+        this.$el_addline_button.click(function(){
+            $(this).hide();
+            if($("tr").hasClass('new_record'))
+                return false;
+            $("table.dateview tr:last").before("<tr class='new_record'>\
+                <td>\
+                    <select class='form-control project_list' data-style='btn-danger'>\
+                    " + self.project_list + "\
+                    </select>\
+                </td>\
+                <td class='new_record'><input class='form-control input-normal new_desc' type='text' placeholder='Description'/></td>\
+                <td class='new_record'><input class='form-control new_hour' type='text' placeholder='Hour'/></td>\
+                <td>\
+                    <button type='button' class='btn btn-primary btn-gt save mt4'>\
+                        <span class='fa fa-save'></span> Save\
+                    </button>\
+                    <button type='button' class='btn btn-primary btn-gt cancel mt4'>\
+                        <span class='fa fa-trash-o'></span> Cancel\
+                    </button>\
+                </td>\
+            </tr>");
+            self.stop_invalid_input($('.new_hour'));
+            $("button.cancel").click(function(){
+                $("tr.new_record").remove();
+                $(self.$el_addline_button).show();
+            });
+            $("button.save").click(function(){
+                var desc = $(".new_desc").val().trim();
+                var hour = $(".new_hour").val().trim();
+                $("td.new_record").removeClass('has-error');
+                if(desc == '') {
+                    $(".new_desc").parent("td").addClass("has-error");
+                    return false;
+                }
+                if(hour == '') {
+                    $(".new_hour").parent("td").addClass("has-error");
+                    return false;
+                }
+                openerp.jsonRpc("/employeework/addline", 'call', {'description' : desc + ' ', 'date' : $("input#hidden").val(), 'hour' : hour, 'project_id' : $(".project_list :selected").attr("id")}).done(function(result) {
+                    if(!JSON.stringify(result)){
+                        alert("Record not create");
+                    } else {
+                        window.location.reload();
+                    }
+                });
+            });
+        });
+    },
+    // Start and Stop timer
+    timer_action : function(){
         this.$el_timer.click(function(){
             var id = this.id;
             var $el_cog = $(this).find('.fa-cog');
@@ -91,7 +114,7 @@ openerp.website.employeework = openerp.Class.extend({
             if(!element.length) {
                 $el_cog.removeClass("hidden");
                 $el_clock.addClass('text-success');
-                $(this).find("strong#" + id).append("<span class='hour'>0</span>H <span class='minute'>0</span>M");
+                $(this).find("strong#" + id).html("<span class='hour'>0</span>H <span class='minute'>0</span>M");
                 $.ajax({url:"/employeework/addcounter",data:'record_id=' + id,success:function(result){
                    
                 }
@@ -110,6 +133,7 @@ openerp.website.employeework = openerp.Class.extend({
             }
         });
     },
+    // Prevent to enter invalid input of textbox in weekview
     stop_invalid_input : function($el){
         $el.keypress(function(event) {
             if(event.which == 8 || event.which == 0)
@@ -120,6 +144,7 @@ openerp.website.employeework = openerp.Class.extend({
                 return false;
         });
     },
+    // Add or Edit value of textbox in weekview
     edit_weekview_data : function(){
         var self = this;
         this.$el_find_dirty = $('table tbody').find(".dirty");
@@ -136,6 +161,7 @@ openerp.website.employeework = openerp.Class.extend({
         self.$el_find_dirty.removeClass("dirty");
         self.$el_save_button.hide(500);
     },
+    // Active save button on textbox value change in weekview
     active_save_button : function($el){
         var self = this;
         $el.change(function(){

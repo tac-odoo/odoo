@@ -3,16 +3,19 @@ from openerp.addons.web.http import request
 from datetime import datetime, timedelta, date
 from math import ceil
 
+# Read project data date wise & Get project list
 def read_data(date, desc = ""):
     model = request.registry['hr.analytic.timesheet']
     if desc == "project":
         return model.search_read(request.cr, request.uid, [], ['account_id'])
     return model.search_read(request.cr, request.uid, [('date','=', date)])
 
+# Get project data via project id and date wise
 def get_data(project_id, date):
     model = request.registry['hr.analytic.timesheet']
     return model.search_read(request.cr, request.uid, [('account_id','=',project_id),('date','=',date)], ['id','unit_amount'])
 
+# Get difference on page load for timer & Stop timer and store difference
 def get_difference(record_id, desc = ""):
     model = request.registry['hr.analytic.timesheet']
     stored_date = model.search_read(request.cr, request.uid, [('id','=',int(record_id))], ['date_counter','unit_amount'])[0]
@@ -25,6 +28,7 @@ def get_difference(record_id, desc = ""):
         model.write(request.cr, request.uid, [int(record_id)], {'unit_amount' : final_difference + float(stored_date['unit_amount']), 'date_counter' : None})
     return str(final_difference)
 
+# Get day, total and grand total
 def get_day_and_total(date):
     dictonary, grand_total = [], 0
     for date in list(get_week_list(date)):
@@ -43,6 +47,7 @@ def get_week_list(date):
 
 class Employeework(http.Controller):
 
+    # Load home page, By default dateview
     @http.route('/employeework', type='http', auth="user", website=True, multilang=True)
     def employeework_home(self):
         now = datetime.now().date()
@@ -53,6 +58,7 @@ class Employeework(http.Controller):
             'date_list' : get_day_and_total(now),
             'get_difference': get_difference})
 
+    # Load dateview
     @http.route('/employeework/dateview', type='http', auth="user", website=True, multilang=True)
     def employeework_dateview(self, active, current_date):
         date_list = get_day_and_total(datetime.strptime(current_date,"%Y-%m-%d"))
@@ -63,6 +69,7 @@ class Employeework(http.Controller):
             'date_list' : date_list,
             'get_difference': get_difference})
 
+    # Load weekview
     @http.route('/employeework/weekview', type='http', auth="user", website=True, multilang=True)
     def employeework_weekview(self, active, current_date):
         current_date = datetime.strptime(current_date,"%Y-%m-%d")
@@ -93,6 +100,7 @@ class Employeework(http.Controller):
             'date_list' : date_list,
             'row_total' : sort_list})
 
+    # Add or Edit value of textbox in weekview
     @http.route('/employeework/editdata', type='http', auth="user", website=True, multilang=True)
     def employeework_editdata(self, hour, date, project_id):
         now = datetime.now().strftime("%H:%M:%S")
@@ -114,6 +122,7 @@ class Employeework(http.Controller):
                 model.create(request.cr, request.uid, {'name' : '/','journal_id' : request.uid, 'unit_amount' : difference, 'date' : date, 'account_id' : project_id})
         return now
 
+    # Start timer
     @http.route('/employeework/addcounter', type='http', auth="user", website=True, multilang=True)
     def employeework_addcounter(self, record_id):
         model = request.registry['hr.analytic.timesheet']
@@ -123,10 +132,12 @@ class Employeework(http.Controller):
     def employeework_removecounter(self, record_id):
         return get_difference(record_id, "removecounter")
 
+    # Get unique project list
     @http.route('/employeework/project_list', type='json', auth="user", website=True, multilang=True)
     def employeework_project_list(self):
         return {prj['account_id'][0] : prj['account_id'][1] for prj in read_data('', 'project')}
 
+    # Add line
     @http.route('/employeework/addline', type='json', auth="user", website=True, multilang=True)
     def employeework_addline(self, date, project_id, description, hour):
         model = request.registry['hr.analytic.timesheet']

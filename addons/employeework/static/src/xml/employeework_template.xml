@@ -7,8 +7,8 @@
 			  	<div class="container">
 					<div class="row">
 						<div class="col-xs-5 col-md-4">
+							<input id="hidden" type="hidden" t-attf-value="{{current_date}}" />
 		    				<h2 t-if="active=='date'">
-		    					<input id="hidden" type="hidden" t-attf-value="{{current_date}}" />
 				    			<t t-esc="current_date.strftime('%A')" /> 
 				    			<small t-esc="str(current_date.day)" />
 				    			<small t-esc="current_date.strftime('%B')" />
@@ -166,7 +166,7 @@
 						        	</td>
 						        	<td>
 						        		<button type="button" class="btn btn-default btn-sm">
-											<span class="fa fa-remove"></span>
+											<span class="fa fa-trash-o"></span>
 										</button>
 						        	</td>
 								</tr>
@@ -176,7 +176,7 @@
 										<t t-foreach="row_total" t-as='r'>
 							        		<td style="text-align:center;"><h5><a style="text-decoration:none;"><t t-esc="r" /></a></h5></td>
 							        	</t>
-							        	<td><h5><span class="label label-primary" t-esc="sum(row_total)" /></h5></td>
+							        	<td><h4><span class="label label-primary" t-esc="sum(row_total)" /></h4></td>
 							        	<td></td>
 						        	</tr>
 								</thead>
