@@ -1566,6 +1566,11 @@ class serialized(_column):
 # TODO: review completly this class for speed improvement
 class property(function):
 
+    def to_field_args(self):
+        args = super(reference, self).to_field_args()
+        args['company_dependent'] = True
+        return args
+
     def _fnct_search(self, tobj, cr, uid, obj, name, domain, context=None):
         ir_property = obj.pool['ir.property']
         result = []
