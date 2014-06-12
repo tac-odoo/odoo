@@ -308,8 +308,7 @@ class procurement_order(osv.osv):
     def _get_orderpoint_date_planned(self, cr, uid, orderpoint, start_date, context=None):
         date_planned = start_date
         if orderpoint.calendar_id:
-            calendar_obj = self.pool.get("resource.calendar")
-            date_planned = calendar_obj.get_next_day(cr, uid, orderpoint.calendar_id.id, start_date, context=context)
+            date_planned, date2 = self._get_next_dates(cr, uid, orderpoint)
         return date_planned.strftime(DEFAULT_SERVER_DATE_FORMAT)
 
     def _prepare_orderpoint_procurement(self, cr, uid, orderpoint, product_qty, context=None):
@@ -327,13 +326,18 @@ class procurement_order(osv.osv):
             'group_id': orderpoint.group_id.id,
         }
 
+
+    def _get_next_dates(self, cr, uid, orderpoint):
+        calendar_obj = self.pool.get('resource.calendar')
+        date1 = calendar_obj.get_next_day(cr, uid, orderpoint.calendar_id.id, datetime.utcnow() + relativedelta(days = 1))
+        date2 = calendar_obj.get_next_day(cr, uid, orderpoint.calendar_id.id, date1 + relativedelta(days = 1))
+        return (date1, date2)
+
     def _product_virtual_get(self, cr, uid, order_point):
         product_obj = self.pool.get('product.product')
-        calendar_obj = self.pool.get('resource.calendar')
         ctx={'location': order_point.location_id.id}
         if order_point.calendar_id:
-            date1 = calendar_obj.get_next_day(cr, uid, order_point.calendar_id.id, datetime.utcnow())
-            date2 = calendar_obj.get_next_day(cr, uid, order_point.calendar_id.id, date1)
+            date1, date2 = self._get_next_dates(cr, uid, order_point)
             ctx.update({'to_date': date2.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
         return product_obj._product_available(cr, uid,
                 [order_point.product_id.id],

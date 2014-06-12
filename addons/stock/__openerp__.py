@@ -100,6 +100,7 @@ Dashboard / Reports for Warehouse Management will include:
         'test/packing.yml',
         'test/packingneg.yml',
         'test/wiseoperator.yml',
+        'test/orderpoint_calendar.yml',
     ],
     'installable': True,
     'application': True,
