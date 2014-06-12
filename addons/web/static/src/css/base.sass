@@ -1971,6 +1971,11 @@ $sheet-padding: 16px
             padding-left: 2em
         li:not(.oe_m2o_dropdown_option) + li.oe_m2o_dropdown_option
             margin-top: 10px
+        .oe_widgetImage_avatar
+            width: 25px
+            height: 25px
+            margin-right: 5px
+            float: left
     // }}}
     // FormView.fieldstatus {{{
     ul.oe_form_status, ul.oe_form_status_clickable
@@ -2511,6 +2516,9 @@ div.ui-widget-overlay
         padding: 0
         a
             padding: 1px 16px
+            float: left
+            width: inherit
+            
         a.ui-corner-all
             @include radius(0)
         a.ui-state-active

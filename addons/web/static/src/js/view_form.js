@@ -3851,6 +3851,74 @@ instance.web.form.FieldMany2One = instance.web.form.AbstractField.extend(instanc
     }
 });
 
+//extended widget for Many2one Field
+instance.web.form.FieldMany2OneImage=instance.web.form.FieldMany2One.extend(instance.web.form.CompletionFieldMixin,{
+    template: "FieldMany2OneImage",
+    init: function(field_manager, node) {
+        this._super(field_manager, node);
+    },
+    get_search_result: function(search_val) {
+        var self = this;
+        var dataset = new instance.web.DataSet(this, this.field.relation, self.build_context());
+        var blacklist = this.get_search_blacklist();
+        this.last_query = search_val;
+        return this.orderer.add(dataset.name_search(
+                search_val, new instance.web.CompoundDomain(self.build_domain(), [["id", "not in", blacklist]]),
+                'ilike', this.limit + 1, self.build_context())).then(function(data) {
+            self.last_search = data;
+            // possible selections for the m2o
+            
+            var values = _.map(data, function(x) {
+                x[1] = x[1].split("\n")[0];
+                return {
+                    label: QWeb.render('widgetImage', {'widgetImage_src':dataset.model,'widgetImage_id':x[0]})+" "+_.str.escapeHTML(x[1]),
+                    value: x[1],
+                    name: x[1],
+                    id: x[0],
+                };
+            });
+
+            // search more... if more results that max
+            if (values.length > self.limit) {
+                values = values.slice(0, self.limit);
+                values.push({
+                    label: _t("Search More..."),
+                    action: function() {
+                        dataset.name_search(search_val, self.build_domain(), 'ilike', 160).done(function(data) {
+                            self._search_create_popup("search", data);
+                        });
+                    },
+                    classname: 'oe_m2o_dropdown_option'
+                });
+            }
+            // quick create
+            var raw_result = _(data.result).map(function(x) {return x[1];});
+            if (search_val.length > 0 && !_.include(raw_result, search_val) &&
+                ! (self.options && (self.options.no_create || self.options.no_quick_create))) {
+                values.push({
+                    label: _.str.sprintf(_t('Create "<strong>%s</strong>"'),
+                        $('<span />').text(search_val).html()),
+                    action: function() {
+                        self._quick_create(search_val);
+                    },
+                    classname: 'oe_m2o_dropdown_option'
+                });
+            }
+            // create...
+            if (!(self.options && self.options.no_create)){
+                values.push({
+                    label: _t("Create and Edit..."),
+                    action: function() {
+                        self._search_create_popup("form", undefined, self._create_context(search_val));
+                    },
+                    classname: 'oe_m2o_dropdown_option'
+                });
+            }
+            return values;
+        });
+    },
+});
+
 instance.web.form.Many2OneButton = instance.web.form.AbstractField.extend({
     template: 'Many2OneButton',
     init: function(field_manager, node) {
@@ -6205,6 +6273,7 @@ instance.web.form.widgets = new instance.web.Registry({
     'selection' : 'instance.web.form.FieldSelection',
     'radio' : 'instance.web.form.FieldRadio',
     'many2one' : 'instance.web.form.FieldMany2One',
+    'many2oneimage' : 'instance.web.form.FieldMany2OneImage',
     'many2onebutton' : 'instance.web.form.Many2OneButton',
     'many2many' : 'instance.web.form.FieldMany2Many',
     'many2many_tags' : 'instance.web.form.FieldMany2ManyTags',
