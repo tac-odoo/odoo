@@ -5100,6 +5100,7 @@ class BaseModel(object):
         return dict(
             (name, self._fields[name].convert_to_cache(value, self.env))
             for name, value in values.iteritems()
+            if name in self._fields
         )
 
     def _convert_to_write(self, values):
@@ -5108,6 +5109,7 @@ class BaseModel(object):
         return dict(
             (name, fields[name].convert_to_write(value))
             for name, value in values.iteritems()
+            if name in self._fields
         )
 
     #
@@ -5192,8 +5194,8 @@ class BaseModel(object):
             # This is useful for computing a function field on secondary
             # records, if that field depends on the main record.
             for name in values:
-                field = self._fields[name]
-                if field.inverse_field:
+                field = self._fields.get(name)
+                if field and field.inverse_field:
                     field.inverse_field._update(record[name], record)
 
         return record
@@ -5479,6 +5481,9 @@ class BaseModel(object):
                 this for secondary fields that are not keys of `values`
         """
         env = self.env
+
+        if field_name not in self._fields:
+            return {}
 
         with env.do_in_draft():
             # create a new record with the values, except field_name
