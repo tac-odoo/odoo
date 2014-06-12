@@ -511,7 +511,8 @@
                     self.setup_editables(root);
                     self.trigger('rte:ready');
                     def.resolve();
-                }
+                },
+                styleWithSpan: false,
              }
         }
     });
