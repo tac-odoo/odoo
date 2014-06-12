@@ -114,6 +114,7 @@ class Field(object):
     inverse = None              # inverse(recs) inverses field on recs
     search = None               # search(recs, operator, value) searches on self
     related = None              # sequence of field names, for related fields
+    company_dependent = False   # whether `self` is company-dependent (property field)
     default = None              # default value
 
     string = None               # field label
@@ -399,6 +400,13 @@ class Field(object):
                 args[attr[8:]] = getattr(self, attr)
             elif attr in self._free_attrs:
                 args[attr] = getattr(self, attr)
+
+        if self.company_dependent:
+            args['type'] = self.type
+            if self.type == 'many2one':
+                args['relation'] = self.comodel_name
+            return fields.property(**args)
+
         return getattr(fields, self.type)(**args)
 
     # properties used by to_column() to create a column instance
