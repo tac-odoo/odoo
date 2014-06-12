@@ -8,6 +8,7 @@
 					<div class="row">
 						<div class="col-xs-5 col-md-4">
 		    				<h2 t-if="active=='date'">
+		    					<input id="hidden" type="hidden" t-attf-value="{{current_date}}" />
 				    			<t t-esc="current_date.strftime('%A')" /> 
 				    			<small t-esc="str(current_date.day)" />
 				    			<small t-esc="current_date.strftime('%B')" />
@@ -89,55 +90,53 @@
 		</template>
     	<template id="display" name="Display Data">
     		<t t-if="active=='date'">
-	    		<t t-if="data!=[]">
-	                <div class="table-responsive">
-			            <table class="table table-hover dateview">
-			            	<t t-if="active=='date'">
-					        	<tr t-foreach='data' t-as='rec'>
-					        		<td>
-					        			<b t-esc="rec['account_id'][1]" /><br /><small t-esc="rec['name']" />
-					        		</td>
-					        		<td>
-					        			<h4><strong t-att-id="rec['id']" t-esc="rec['unit_amount']" /></h4>
-					        		</td>
-					        		<td>
-					        			<button t-att-id="rec['id']" type="button" class="btn btn-default btn-md mt4 timer">
-						        			<span class="fa-stack fa-lg">
-									        	<i t-att-id="rec['id']" t-att-class="rec['date_counter'] and 'fa fa-clock-o fa-stack-2x text-success' or 'fa fa-clock-o fa-stack-2x'"></i>
-									        	<i t-att-id="rec['id']" t-att-class="rec['date_counter'] and 'fa fa-cog fa-stack-1x fa-spin' or 'fa fa-cog fa-stack-1x fa-spin hidden'" style="bottom: 0;right: 0px;left: initial;line-height: initial;width: initial;"></i>
-									    	</span>
-								    		<strong t-att-id="rec['id']" t-raw="rec['date_counter'] and get_difference(rec['id']) or ''" />
-									    </button>
-					        		</td>
-					        		<td>
-					        			<button type="button" class="btn btn-default btn-gt mt4">
-											<span class="fa fa-pencil"></span>
-										</button>
-					        		</td>
-								</tr>
-								<tr class="last_row">
-					        		<td>
-					        			<button type="button" class="btn btn-primary btn-gt mt4 pull-left addline">
-											<span class="fa fa-plus"></span> Add Line
-										</button>
-					        			<h4><strong class="pull-right">Total : </strong></h4>
-					        		</td>
-					        		<td>
-					        			<t t-foreach="date_list" t-as="date">
-											<t t-if="date['dates']==current_date">
-												<h4 id="dateview_total"><t t-esc="date['count']" /></h4>
-											</t>
+                <div class="table-responsive">
+		            <table class="table table-hover dateview">
+		            	<t t-if="data==[]">
+				        	<h3 style="text-align:center;"><span class="label label-primary">No Data Available.</span></h3>
+				        </t>
+		            	<t t-if="active=='date'">
+				        	<tr t-foreach='data' t-as='rec'>
+				        		<td>
+				        			<b t-esc="rec['account_id'][1]" /><br /><small t-esc="rec['name']" />
+				        		</td>
+				        		<td>
+				        			<h4><strong t-att-id="rec['id']" t-esc="rec['unit_amount']" /></h4>
+				        		</td>
+				        		<td>
+				        			<button t-att-id="rec['id']" type="button" class="btn btn-default btn-md mt4 timer">
+					        			<span class="fa-stack fa-lg">
+								        	<i t-att-id="rec['id']" t-att-class="rec['date_counter'] and 'fa fa-clock-o fa-stack-2x text-success' or 'fa fa-clock-o fa-stack-2x'"></i>
+								        	<i t-att-id="rec['id']" t-att-class="rec['date_counter'] and 'fa fa-cog fa-stack-1x fa-spin' or 'fa fa-cog fa-stack-1x fa-spin hidden'" style="bottom: 0;right: 0px;left: initial;line-height: initial;width: initial;"></i>
+								    	</span>
+							    		<strong t-att-id="rec['id']" t-raw="rec['date_counter'] and get_difference(rec['id']) or ''" />
+								    </button>
+				        		</td>
+				        		<td>
+				        			<button type="button" class="btn btn-default btn-gt mt4">
+										<span class="fa fa-pencil"></span>
+									</button>
+				        		</td>
+							</tr>
+							<tr>
+				        		<td>
+				        			<button type="button" class="btn btn-primary btn-gt mt4 pull-left addline">
+										<span class="fa fa-plus"></span> Add Line
+									</button>
+				        			<h4><strong class="pull-right">Total : </strong></h4>
+				        		</td>
+				        		<td>
+				        			<t t-foreach="date_list" t-as="date">
+										<t t-if="date['dates']==current_date">
+											<h4 id="dateview_total"><t t-esc="date['count']" /></h4>
 										</t>
-					        		</td>
-					        		<td></td><td></td>
-								</tr>
-							</t>
-			        	</table>
-			        </div>
-		        </t>
-		        <t t-if="data==[]">
-		        	<h3 style="text-align:center;"><span class="label label-primary">No Data Available.</span></h3>
-		        </t>
+									</t>
+				        		</td>
+				        		<td></td><td></td>
+							</tr>
+						</t>
+		        	</table>
+		        </div>
 	    	</t>
 	    	<t t-if="active=='week'">
 	    		<div class="panel panel-default">

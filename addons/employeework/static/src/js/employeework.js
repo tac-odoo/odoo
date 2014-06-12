@@ -1,37 +1,43 @@
 $(document).ready(function(){
     var employeework = new openerp.website.employeework();
-    var str = '';
+    var project_list = '';
     openerp.jsonRpc("/employeework/project_list", 'call', {}).done(function(result) {
-        list = JSON.stringify(result);
-        // console.log(list)
-        // for (var entry in list) {
-            
-        // //list.foreach(function(entry){
-        //     str += "<li><a href='#' id="+list[entry]+">"+list[entry]+"</a></li>"
-        // //});
-        // };
-        // alert(str);
+        $.each(result, function(key,value){
+             project_list += "<option id='" + key + "'>" + value + "</option>"
+        });
     });
     $("button.addline").click(function(){
-        $(".last_row").before("<tr>\
+        $("table.dateview tr:last").before("<tr>\
             <td>\
-                <div class='btn-group'>\
-                    <button type='button' class='btn btn-default dropdown-toggle' data-toggle='dropdown'> \
-                        Select project \
-                        <span class='caret'></span>\
-                    </button>\
-                    <ul class='dropdown-menu'>\
-                    </ul>\
-                </div>\
+                <select class='form-control project_list' data-style='btn-danger'>\
+                " + project_list + "\
+                </select>\
             </td>\
-            <td><input class='form-control' type='text' placeholder='Description'/></td>\
-            <td><input class='form-control' type='text' placeholder='Hour'/></td>\
+            <td class='has-error'><input class='form-control input-normal new_desc' type='text' placeholder='Description'/></td>\
+            <td class='has-error'><input class='form-control new_hour' type='text' placeholder='Hour'/></td>\
             <td>\
-                <button type='button' class='btn btn-primary btn-gt mt4'>\
-                    <span class='fa fa-save'></span>\
+                <button type='button' class='btn btn-primary btn-gt save mt4'>\
+                    <span class='fa fa-save'></span> Save\
                 </button>\
             </td>\
         </tr>");
+        $("button.save").click(function(){
+            var desc = $(".new_desc").val();
+            var hour = $(".new_hour").val();
+            var project_id = $(".project_list :selected").attr("id");
+            var date = $("input#hidden").val();
+            if(desc.trim() == '' || hour == '') {
+                alert("Enter Value in Fields");
+                return false;
+            }
+            openerp.jsonRpc("/employeework/addline", 'call', {'description' : desc + ' ', 'date' : date, 'hour' : hour, 'project_id' : project_id}).done(function(result) {
+                if(!JSON.stringify(result)){
+                    alert("Record not create");
+                } else {
+                    window.location.reload();
+                }
+            });
+        });
     });
 });
 
