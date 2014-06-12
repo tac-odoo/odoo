@@ -222,15 +222,8 @@ class MetaModel(api.Meta):
             return
 
         if not hasattr(self, '_module'):
-            # The (OpenERP) module name can be in the `openerp.addons` namespace
-            # or not.  For instance, module `sale` can be imported as
-            # `openerp.addons.sale` (the right way) or `sale` (for backward
-            # compatibility).
-            module_parts = self.__module__.split('.')
-            if len(module_parts) > 2 and module_parts[:2] == ['openerp', 'addons']:
-                module_name = self.__module__.split('.')[2]
-            else:
-                module_name = self.__module__.split('.')[0]
+            assert self.__module__.startswith(('odoo.addons.', 'openerp.addons.'))
+            module_name = self.__module__.split('.')[2]
             self._module = module_name
 
         # Remember which models to instanciate for this module.
