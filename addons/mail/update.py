@@ -10,7 +10,7 @@ from openerp import release, SUPERUSER_ID
 from openerp.osv import osv
 from openerp.tools.translate import _
 from openerp.tools.safe_eval import safe_eval
-from openerp.tools.config import config
+from openerp.tools import config
 from openerp.tools import misc
 
 _logger = logging.getLogger(__name__)
