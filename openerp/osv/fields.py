@@ -1567,7 +1567,7 @@ class serialized(_column):
 class property(function):
 
     def to_field_args(self):
-        args = super(reference, self).to_field_args()
+        args = super(property, self).to_field_args()
         args['company_dependent'] = True
         return args
 
