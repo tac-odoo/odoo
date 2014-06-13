@@ -18,7 +18,9 @@
     factory(window.jQuery, window.CodeMirror);
   }
 }(function ($, CodeMirror) {
-  
+  var website = openerp.website;
+  var _t = openerp._t;
+  website.add_template_file('/website/static/src/xml/website.editor.xml');
 
 
   if ('function' !== typeof Array.prototype.reduce) {
@@ -1783,7 +1785,6 @@
       var rng = range.create();
       var bNewWindow = true;
       var sUrl = '';
-
       // If range on anchor expand range on anchor(for edit link).
       if (rng.isOnAnchor()) {
         var elAnchor = dom.ancestor(rng.sc, dom.isAnchor);
@@ -2101,7 +2102,7 @@
      */
     var showPopover = function ($popover, elPlaceholder) {
       var $placeholder = $(elPlaceholder);
-      var pos = $placeholder.position();
+      var pos = $placeholder.offset();
 
       // include margin
       var height = $placeholder.outerHeight(true);
@@ -2314,13 +2315,43 @@
       return $.Deferred(function (deferred) {
         var $linkDialog = $dialog.find('.note-link-dialog');
 
-        var $linkText = $linkDialog.find('.note-link-text'),
-        $linkUrl = $linkDialog.find('.note-link-url'),
+        var $linkText = $linkDialog.find('#link-text'),
+        $linkUrl = $linkDialog.find('#link-external'),
         $linkBtn = $linkDialog.find('.note-link-btn'),
         $openInNewWindow = $linkDialog.find('input[type=checkbox]');
 
         $linkDialog.one('shown.bs.modal', function () {
           $linkText.val(linkInfo.text);
+          var last;
+          $('#link-page').select2({
+            minimumInputLength: 1,
+            placeholder: _t("New or existing page"),
+            query: function (q) {
+            if (q.term == last) return;
+            last = q.term;
+            $.when(
+              self.page_exists(q.term),
+                self.fetch_pages(q.term)
+              ).then(function (exists, results) {
+                var rs = _.map(results, function (r) {
+                  return { id: r.url, text: r.name, };
+                });
+                if (!exists) {
+                  rs.push({
+                    create: true,
+                    id: q.term,
+                    text: _.str.sprintf(_t("Create page '%s'"), q.term),
+                  });
+                }
+                q.callback({
+                  more: false,
+                  results: rs
+                });
+              }, function () {
+                q.callback({more: false, results: []});
+                    });
+                },
+            });
 
           $linkText.keyup(function () {
             // if linktext was modified by keyup,
@@ -2357,6 +2388,7 @@
         }).modal('show');
       }).promise();
     };
+
 
     /**
      * show help dialog
@@ -2870,8 +2902,6 @@
      * @param {Function} options.enter - enter key handler
      */
     this.attach = function (oLayoutInfo, options) {
-      console.log('oLayoutInfo', oLayoutInfo);
-      console.log('options', options);
       // handlers for editable
       this.bindKeyMap(oLayoutInfo, options.keyMap[agent.bMac ? 'mac' : 'pc']);
       oLayoutInfo.editable.on('mousedown', hMousedown);
@@ -3549,7 +3579,7 @@
                      '</div>' : ''
                    );
         var footer = '<button href="#" class="btn btn-primary note-link-btn disabled" disabled>' + lang.link.insert + '</button>';
-        return tplDialog('note-link-dialog', lang.link.insert, body, footer);
+        return tplDialog('note-link-dialog', lang.link.insert, openerp.qweb.render('website.editor.dialog.link',{}), footer);
       };
 
       var tplVideoDialog = function () {

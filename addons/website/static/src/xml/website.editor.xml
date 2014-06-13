@@ -36,8 +36,6 @@
         <button type="button" class="btn pull-left remove btn-danger">Remove Link</button>
     </t>
     <t t-name="website.editor.dialog.link">
-        <t t-call="website.editor.dialog">
-            <t t-set="title">Link to</t>
             <form>
                 <ul class="list-group">
                     <li class="list-group-item form-group active">
@@ -86,7 +84,6 @@
                     </div>
                 </div>
             </form>
-        </t>
     </t>
     <t t-name="website.editor.dialog.media">
         <div class="modal" tabindex="-1" role="dialog" aria-hidden="true">

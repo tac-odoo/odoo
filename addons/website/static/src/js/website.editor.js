@@ -4,7 +4,7 @@
     var website = openerp.website;
     var _t = openerp._t;
 
-    website.add_template_file('/website/static/src/xml/website.editor.xml');
+//    website.add_template_file('/website/static/src/xml/website.editor.xml');
     website.dom_ready.done(function () {
         var is_smartphone = $(document.body)[0].clientWidth < 767;
 
