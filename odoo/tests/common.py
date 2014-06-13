@@ -173,7 +173,7 @@ class HttpCase(TransactionCase):
         self.session = odoo.http.root.session_store.new()
         self.session_id = self.session.sid
         self.session.db = DB
-        openerp.http.root.session_store.save(self.session)
+        odoo.http.root.session_store.save(self.session)
         # setup an url opener helper
         self.opener = urllib2.OpenerDirector()
         self.opener.add_handler(urllib2.UnknownHandler())

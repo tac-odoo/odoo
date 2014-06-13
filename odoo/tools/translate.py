@@ -848,7 +848,7 @@ def trans_generate(lang, modules, cr):
             # QWeb template files
             if fnmatch.fnmatch(root, '*/static/src/xml*'):
                 for fname in fnmatch.filter(files, '*.xml'):
-                    babel_extract_terms(fname, path, root, 'openerp.tools.translate:babel_extract_qweb',
+                    babel_extract_terms(fname, path, root, 'odoo.tools.translate:babel_extract_qweb',
                                         extra_comments=[WEB_TRANSLATION_COMMENT])
 
     out = []

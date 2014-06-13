@@ -139,7 +139,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True, skip_modules=
 
     # register, instantiate and initialize models for each modules
     t0 = time.time()
-    t0_sql = openerp.sql_db.sql_counter
+    t0_sql = odoo.sql_db.sql_counter
 
     for index, package in enumerate(graph):
         module_name = package.name
@@ -153,7 +153,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True, skip_modules=
 
         new_install = package.installed_version is None
         if new_install:
-            py_module = sys.modules['openerp.addons.%s' % (module_name,)]
+            py_module = sys.modules['odoo.addons.%s' % (module_name,)]
             pre_init = package.info.get('pre_init_hook')
             if pre_init:
                 getattr(py_module, pre_init)(cr)
@@ -220,7 +220,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True, skip_modules=
             # Set new modules and dependencies
             modobj.write(cr, SUPERUSER_ID, [module_id], {'state': 'installed', 'latest_version': ver})
             # Update translations for all installed languages
-            modobj.update_translations(cr, SUPERUSER_ID, [module_id], None, {'overwrite': openerp.tools.config["overwrite_existing_translations"]})
+            modobj.update_translations(cr, SUPERUSER_ID, [module_id], None, {'overwrite': odoo.tools.config["overwrite_existing_translations"]})
 
             package.state = 'installed'
             for kind in ('init', 'demo', 'update'):
@@ -232,7 +232,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True, skip_modules=
 
     registry.setup_models(cr)
 
-    _logger.log(25, "%s modules loaded in %.2fs, %s queries", len(graph), time.time() - t0, openerp.sql_db.sql_counter - t0_sql)
+    _logger.log(25, "%s modules loaded in %.2fs, %s queries", len(graph), time.time() - t0, odoo.sql_db.sql_counter - t0_sql)
 
     # The query won't be valid for models created later (i.e. custom model
     # created after the registry has been loaded), so empty its result.
@@ -430,7 +430,7 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
                 for pkg in pkgs:
                     uninstall_hook = pkg.info.get('uninstall_hook')
                     if uninstall_hook:
-                        py_module = sys.modules['openerp.addons.%s' % (pkg.name,)]
+                        py_module = sys.modules['odoo.addons.%s' % (pkg.name,)]
                         getattr(py_module, uninstall_hook)(cr, registry)
 
                 registry['ir.module.module'].module_uninstall(cr, SUPERUSER_ID, modules_to_remove.values())
@@ -463,12 +463,12 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         cr.commit()
 
         t0 = time.time()
-        t0_sql = openerp.sql_db.sql_counter
-        if openerp.tools.config['test_enable']:
+        t0_sql = odoo.sql_db.sql_counter
+        if odoo.tools.config['test_enable']:
             cr.execute("SELECT name FROM ir_module_module WHERE state='installed'")
             for module_name in cr.fetchall():
                 report.record_result(odoo.modules.module.run_unit_tests(module_name[0], cr.dbname, position=runs_post_install))
-            _logger.log(25, "All post-tested in %.2fs, %s queries", time.time() - t0, openerp.sql_db.sql_counter - t0_sql)
+            _logger.log(25, "All post-tested in %.2fs, %s queries", time.time() - t0, odoo.sql_db.sql_counter - t0_sql)
     finally:
         cr.close()
 

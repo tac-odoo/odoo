@@ -1,3 +1,4 @@
+import importlib
 import logging
 import sys
 import os
@@ -56,8 +57,7 @@ def main():
     if len(args) and not args[0].startswith("-"):
         logging.disable(logging.CRITICAL)
         for m in module.get_modules():
-            m = 'openerp.addons.' + m
-            __import__(m)
+            importlib.import_module('odoo.addons.' + m)
             #try:
             #except Exception, e:
             #    raise

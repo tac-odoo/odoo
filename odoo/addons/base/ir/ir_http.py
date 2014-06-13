@@ -150,7 +150,7 @@ class ir_http(osv.AbstractModel):
         if not hasattr(self, '_routing_map'):
             _logger.info("Generating routing map")
             cr = request.cr
-            m = request.registry.get('ir.module.module')
+            m = request.registry['ir.module.module']
             ids = m.search(cr, openerp.SUPERUSER_ID, [('state', '=', 'installed'), ('name', '!=', 'web')], context=request.context)
             installed = set(x['name'] for x in m.read(cr, 1, ids, ['name'], context=request.context))
             if openerp.tools.config['test_enable']:
