@@ -46,7 +46,56 @@
 <template id="header" name="Forum Index">
     <t t-call="website.layout">
         <t t-set="head">
+<<<<<<< HEAD
             <t t-call-assets="website_forum.assets_forum"/>
+=======
+            <link rel='stylesheet' href="/web/static/lib/jquery.textext/jquery.textext.css"/>
+            <link rel='stylesheet' href='/website_forum/static/src/css/website_forum.css'/>
+            <script type="text/javascript" src="/website_forum/static/src/js/website_forum.js"/>
+            <script type="text/javascript" src="/web/static/lib/jquery.textext/jquery.textext.js"/>
+            <script type="text/javascript" src="/web/static/lib/ckeditor/ckeditor.js"/>
+            <script type="text/javascript">
+                CKEDITOR.config.toolbar = [['Bold','Italic','Underline','Strike'],['NumberedList','BulletedList', 'Blockquote']
+                ,['Outdent','Indent','Link','Unlink','Image'],] ;
+            </script>
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+            <meta property="og:type" content="website" />
+<<<<<<< HEAD
+>>>>>>> d885757... [ADD] open graph meta description tag for facebook.
+=======
+            <meta property="og:title" content="Odoo Forum"/>
+            <meta property="og:description" context="Odoo Forum which provides common platform for all the users"/>
+>>>>>>> 273af04... [ADD] open graph tags for facebook sharing
+=======
+>>>>>>> 98860ab... [IMP] Sharing description of Facebook]
+=======
+            <meta property="og:type" content="website" />
+=======
+            <meta content="summary" name="twitter:card" />
+            <t t-if="host_url">
+                <meta name="twitter:domain" t-attf-content="#{host_url}" />
+                <meta property="og:image" t-attf-content="#{host_url}forum/high_logo.png" />
+            </t>
+>>>>>>> a928050... [IMP] Twitter-Card tags and corrected the indentation
+            <t t-if="question">
+                <meta property="og:title" t-attf-content="#{question.name}" />
+                <meta property="og:description" t-attf-content="#{plaintxt_content}" />
+            </t>
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 6b8d06c... [IMP] Added OpenGraph tags for Facebook and Schema tag for Google Plus
+=======
+            <meta name="og:type" content="website" />
+>>>>>>> a928050... [IMP] Twitter-Card tags and corrected the indentation
+=======
+=======
+            <meta property="og:url" t-attf-content="#{url}" />
+>>>>>>> f1d7c3f... [IMP] website_forum: Added og:title meta tag for helping facebook, twitter srappers.
+            <meta property="og:type" content="website" />
+>>>>>>> 519e113... [IMP] website_forum: Converted Question content to plain text for sharing feature. /
         </t>
         <div class="container mt16">
             <div class="navbar navbar-default">
@@ -443,7 +492,15 @@
 <template id="post_description_full" name="Question Navigation">
     <t t-call="website_forum.header">
         <div t-attf-class="question #{not question.active and 'alert alert-danger' or ''}">
+<<<<<<< HEAD
+<<<<<<< HEAD
             <div class="col-md-2 hidden-xs text-center">
+=======
+            <div class="text-center pull-left"> 
+>>>>>>> 9fcf9e3... [IMP] Sharing functionality with schema description
+=======
+            <div class="text-center pull-left">
+>>>>>>> 6997cb4... [IMP] Improving sharing code
                 <t t-call="website_forum.vote">
                     <t t-set="post" t-value="question"/>
                 </t>
@@ -455,7 +512,20 @@
                         t-attf-class="favourite_question no-decoration fa fa-2x fa-star #{question.user_favourite and 'forum_favourite_question' or ''}"/>
                 </div>
             </div>
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
             <div class="col-md-10">
+=======
+            <div style="margin-left: 95px;" itemscope="" itemtype="http://schema.org/Question">
+>>>>>>> 9fcf9e3... [IMP] Sharing functionality with schema description
+=======
+            <div style="margin-left: 95px;" itemscope="" itemtype="http://schema.org/Article">
+                <link rel="image_src" t-attf-href="#{host_url}logo.png" itemprop="image" /><!-- For Google Pluse -->
+>>>>>>> d727e85... [IMP] Trying to improve fetching method for sharing.
+=======
+            <div style="margin-left: 95px;">
+>>>>>>> 6997cb4... [IMP] Improving sharing code
                 <h1 class="mt0">
                     <a t-attf-href="/forum/#{ slug(forum) }/question/#{ slug(question) }" t-field="question.name"/>
                     <span t-if="not question.active"><b> [Deleted]</b></span>
@@ -481,7 +551,34 @@
                         </t>
                     </div>
                 </div>
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
                 <t t-raw="question.content"/>
+=======
+                <div itemprop="description">
+=======
+                <div itemprop="text">
+<<<<<<< HEAD
+>>>>>>> 6b8d06c... [IMP] Added OpenGraph tags for Facebook and Schema tag for Google Plus
+                  <t t-raw="question.content" />
+=======
+=======
+                <div itemprop="description">
+>>>>>>> d727e85... [IMP] Trying to improve fetching method for sharing.
+                    <t t-raw="question.content" />
+>>>>>>> a928050... [IMP] Twitter-Card tags and corrected the indentation
+                </div>
+=======
+                <t t-raw="question.content" />
+>>>>>>> 6997cb4... [IMP] Improving sharing code
+=======
+                <t t-raw="question.content"/>
+>>>>>>> 7b48feb... [IMP] Improving the code
+
+>>>>>>> 9fcf9e3... [IMP] Sharing functionality with schema description
                 <div class="mt16 clearfix">
                     <div class="pull-right">
                         <div class="text-right">
@@ -498,7 +595,14 @@
                                     Comment
                                 </a>
                             </li>
+<<<<<<< HEAD
                             <li t-if="question.state != 'close'">
+=======
+                            <li>
+                                <a style="cursor: pointer" data-toggle="popover" class="share_link text-muted fa fa-share" t-attf-data-target="#share#{question._name.replace('.','') + '-' + str(question.id) }" data-container="body" data-placement="bottom"> Share</a>
+                            </li>
+                            <li t-if="question.state != 'close' and ((user.id == question.create_uid.id and can_close_own) or can_close_all)">
+>>>>>>> 047ac52... [ADD] Sharing functionality for question and answer in website_forum
                                 <t t-call="website_forum.link_button">
                                     <t t-set="url" t-value="'/forum/' + slug(forum) +'/question/' + slug(question) + '/ask_for_close'"/>
                                     <t t-set="label" t-value="'Close'"/>
@@ -567,14 +671,31 @@
                 <t t-call="website_forum.post_comment">
                     <t t-set="object" t-value="question"/>
                 </t>
+                <t t-call="website_forum.share">
+                    <t t-set="object" t-value="question"/>
+                </t>
             </div>
         </div>
         <hr/>
 
-        <div t-foreach="question.child_ids" t-as="answer" class="mt16 mb32">
+<<<<<<< HEAD
+        <div t-foreach="question.child_ids" t-as="answer" class="mt16 mb32" >
+<<<<<<< HEAD
             <a t-attf-id="answer-#{str(answer.id)}"/>
             <div t-attf-class="forum_answer" t-attf-id="answer_#{answer.id}" >
                 <div class="col-md-2 hidden-xs text-center">
+=======
+            <div t-attf-class="forum_answer" t-attf-id="answer-#{answer.id}" >
+=======
+        <div t-foreach="question.child_ids" t-as="answer" class="mt16 mb32">
+<<<<<<< HEAD
+            <div t-attf-class="forum_answer" t-attf-id="answer-#{answer.id}">
+>>>>>>> 9547343... [IMP] website_forum: Improving code of social network sharing feature
+=======
+            <div t-attf-class="forum_answer" t-attf-id="answer-#{answer.id}" >
+>>>>>>> 1694afa... [IMP] website_forum: Improving code for social network sharing
+                <div class="text-center pull-left">
+>>>>>>> 25b6112... [FIX,ADD] website_forum: Fixed the issue of URL when user shares post which is alredy shared. Added flash feature when the URL is open with hash(#) in URL
                     <t t-call="website_forum.vote">
                         <t t-set="post" t-value="answer"/>
                     </t>
@@ -584,8 +705,37 @@
                             t-attf-data-href="/forum/#{slug(question.forum_id)}/post/#{slug(answer)}/toggle_correct"/>
                     </div>
                 </div>
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
                 <div class="col-md-10 clearfix">
                     <t t-raw="answer.content"/>
+=======
+                <div style="margin-left: 95px;" class="clearfix">
+=======
+                <div style="margin-left: 95px;" class="clearfix" itemprop="suggestedAnswer" itemscope="" itemtype="http://schema.org/Answer">
+<<<<<<< HEAD
+>>>>>>> 6b8d06c... [IMP] Added OpenGraph tags for Facebook and Schema tag for Google Plus
+                  <div itemprop="text">
+                    <t t-raw="answer.content" />
+                  </div>
+>>>>>>> 9fcf9e3... [IMP] Sharing functionality with schema description
+=======
+=======
+                <div style="margin-left: 95px;" class="clearfix">
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 6997cb4... [IMP] Improving sharing code
+                    <div itemprop="text">
+                        <t t-raw="answer.content" />
+                    </div>
+>>>>>>> a928050... [IMP] Twitter-Card tags and corrected the indentation
+=======
+                    <t t-raw="answer.content" />
+>>>>>>> 7b48feb... [IMP] Improving the code
+=======
+                    <t t-raw="answer.content"/>
+>>>>>>> 7fb0249... [IMP] website_forum: Improving code of social network sharing
                     <div class="mt16">
                         <ul class="list-inline pull-right">
                             <li>
@@ -596,12 +746,27 @@
                                 </a>
                             </li>
                             <li>
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
                                 <t t-call="website_forum.link_button">
                                     <t t-set="url" t-value="'/forum/' + slug(forum) + '/post/' + slug(answer) + '/edit'"/>
                                     <t t-set="label" t-value="'Edit'"/>
                                     <t t-set="classes" t-value="'fa fa-edit'"/>
                                     <t t-set="karma" t-value="not answer.can_edit and answer.karma_edit or 0"/>
                                 </t>
+=======
+                                <a style="cursor: pointer" data-toggle="collapse" class="text-muted fa fa-share" t-attf-data-target="#share#{ answer._name.replace('.','') + '-' + str(answer.id) }">Share</a>
+=======
+                                <a style="cursor: pointer" data-toggle="popover" class="share_link text-muted fa fa-share" t-attf-data-target="#share#{answer._name.replace('.','') + '-' + str(answer.id)}" data-container="body" data-placement="bottom">Share</a>
+>>>>>>> 801606e... [IMP] View: Converted the sharing buttons in bootstrap popover.
+=======
+                                <a style="cursor: pointer" data-toggle="popover" class="share_link text-muted fa fa-share" t-attf-data-target="#share#{answer._name.replace('.','') + '-' + str(answer.id)}" data-container="body" data-placement="bottom"> Share</a>
+>>>>>>> 25b6112... [FIX,ADD] website_forum: Fixed the issue of URL when user shares post which is alredy shared. Added flash feature when the URL is open with hash(#) in URL
+                            </li>
+                            <li t-if="(user.id == answer.create_uid.id and can_edit_own) or can_edit_all">
+                                <a class="text-muted fa fa-edit" t-attf-href="/forum/#{slug(forum)}/post/#{slug(answer)}/edit"> Edit</a>
+>>>>>>> 047ac52... [ADD] Sharing functionality for question and answer in website_forum
                             </li>
                             <li>
                                 <t t-call="website_forum.link_button">
@@ -643,6 +808,9 @@
                     <t t-call="website_forum.post_comment">
                         <t t-set="object" t-value="answer"/>
                     </t>
+                    <t t-call="website_forum.share">
+                        <t t-set="object" t-value="answer"/>
+                    </t>
                 </div>
             </div>
         </div>
@@ -654,6 +822,48 @@
             <span class="text-muted">(only one answer per question is allowed)</span>
         </div>
     </t>
+</template>
+
+<!-- Utility template: Share question and answer -->
+<template id="share">
+    <div class="row clearfix">
+        <div class="col-xs-4 col-xs-offset-8">
+            <div class="css_editable_mode_hidden">
+                <t t-if="object.parent_id">
+                    <t t-set="url" t-value="'\'' + url + '#answer-' + str(object.id) + '\''" />
+                    <t t-set="question_name" t-value="'\'' + object.parent_id.name + '\''" />
+                </t>
+                <t t-if="not object.parent_id">
+                    <t t-set="url" t-value="'\'' + url + '\''" />
+                    <t t-set="question_name" t-value="'\'' + object.name + '\''" />
+                </t>
+                <t t-if="object.content">
+                    <t t-set="content_description" t-value="'\'' + object.content[0:100].rstrip() + '...\'.replace(/&lt;\/?[^&gt;]+(&gt;|$)/g,\'\')'" />
+                </t>
+                <t t-if="not object.content">
+                    <t t-set="content_description" t-value="'\'No description found. \''" />
+                </t>
+                <div t-attf-id="share#{ object._name.replace('.','') + '-' + str(object.id) }" class="collapse share_buttons oe_comment_grey">
+                    <a style="cursor: pointer" t-attf-onclick="javascript: window.open('https://twitter.com/share?url=' + encodeURIComponent( #{url}), '', 'menubar=no, toolbar=no, resizable=yes, scrollbar=yes, height=600,width=600'); return false;" class="fa-stack fa-lg">
+                        <span class="fa fa-circle fa-stack-2x"></span>
+                        <span class="fa fa-twitter fa-stack-1x fa-inverse"></span>
+                    </a>
+                    <a style="cursor: pointer" t-attf-onclick="javascript: window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(#{url}),'','menubar=no, toolbar=no, resizable=yes, scrollbars=yes, height=600,width=600'); return false;" class="fa-stack fa-lg">
+                        <span class="fa fa-circle fa-stack-2x"></span>
+                        <span class="fa fa-facebook fa-stack-1x fa-inverse"></span>
+                    </a>
+                    <a style="cursor: pointer" t-attf-onclick="javascript: window.open('https://www.linkedin.com/shareArticle?mini=true&amp;url=' + encodeURIComponent(#{url}) + '&amp;title=' + encodeURIComponent(#{question_name}) + '&amp;summary=' + encodeURIComponent(#{content_description} ) + '&amp;source=' + encodeURIComponent('Source'),'','menubar=no, toolbar=no, resizable=yes, srollbars=yes, height=600,width=600'); return false;" class="fa-stack fa-lg">
+                        <span class="fa fa-circle fa-stack-2x"></span>
+                        <span class="fa fa-linkedin fa-stack-1x fa-inverse"></span>
+                    </a>
+                    <a style="cursor: pointer" t-attf-onclick="javascript: window.open('https://plus.google.com/share?url=' + encodeURIComponent(#{url}), '', 'menubar=no, toolbar=no, resizable=yes, scrollbars=yes, height=600,width=600'); return false;" class="fa-stack fa-lg">
+                        <span class="fa fa-circle fa-stack-2x"></span>
+                        <span class="fa fa-google-plus fa-stack-1x fa-inverse"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <!-- Utility template: Post a Comment -->

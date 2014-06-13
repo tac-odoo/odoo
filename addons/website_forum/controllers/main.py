@@ -46,6 +46,35 @@ class WebsiteForum(http.Controller):
         values.update(kwargs)
         return values
 
+<<<<<<< HEAD
+=======
+    def _has_enough_karma(self, karma_name, uid=None):
+        Forum = request.registry['forum.forum']
+        karma = hasattr(Forum, karma_name) and getattr(Forum, karma_name) or 0
+        user = request.registry['res.users'].browse(request.cr, SUPERUSER_ID, uid or request.uid, context=request.context)
+        if user.karma < karma:
+            return False, {'error': 'not_enough_karma', 'karma': karma}
+        return True, {}
+
+    # High Resolution Logo
+    # -------------------------------------------------
+
+    @http.route(['/forum/high_logo.png'], type="http", auth="public", website=True)
+    def image(self, **kwargs):
+        cr, uid, context= request.cr, request.uid, request.context
+        Company = request.registry['res.company']
+        image = Company.browse(cr, uid, 1, context=context).logo
+        image = image.decode('base64')
+        headers = [
+                ('Content-type', 'image/png'),
+                ('Content-Length', len(image)),
+        ]
+        return request.make_response(image, headers)
+<<<<<<< HEAD
+>>>>>>> d727e85... [IMP] Trying to improve fetching method for sharing.
+=======
+
+>>>>>>> 0ae8a1b... [IMP] website_forum : Improving the code for social network sharing
     # Forum
     # --------------------------------------------------
 
@@ -202,6 +231,10 @@ class WebsiteForum(http.Controller):
             return werkzeug.utils.redirect(redirect_url, 301)
 
         filters = 'question'
+        if question.content:
+            plaintxt_content = html2plaintext(question.content[0:100] + "...")
+        else:
+            plaintxt_content = "No description found."
         values = self._prepare_forum_values(forum=forum, searches=post)
         values.update({
             'main_object': question,
@@ -209,6 +242,9 @@ class WebsiteForum(http.Controller):
             'header': {'question_data': True},
             'filters': filters,
             'reversed': reversed,
+            'host_url': request.httprequest.host_url,
+            'url' : request.httprequest.url,
+            'plaintxt_content' : plaintxt_content,
         })
         return request.website.render("website_forum.post_description_full", values)
 
