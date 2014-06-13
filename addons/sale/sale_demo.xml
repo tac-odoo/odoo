@@ -383,7 +383,7 @@ Thanks!</field>
             <field name="quantity">2</field>
             <field name="account_id" ref="account.a_sale"/>
         </record>
-        <record id="test_crm_sale_invoice_1_line_2" model="account.invoice.line">
+        <record id="test_crm_sale_invoice_1_line_3" model="account.invoice.line">
             <field name="name">Server with raid 10 and 2048ECC ram</field>
             <field name="invoice_id" ref="test_crm_sale_invoice_1"/>
             <field name="price_unit">4800</field>
