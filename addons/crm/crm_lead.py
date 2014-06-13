@@ -720,6 +720,8 @@ class crm_lead(format_address, osv.osv):
             partner_id = self._lead_create_contact(cr, uid, lead, lead.partner_name, True, context=context)
         elif not lead.partner_name and lead.contact_name:
             partner_id = self._lead_create_contact(cr, uid, lead, lead.contact_name, False, context=context)
+        elif not lead.partner_name and not lead.contact_name and context.get('contact_name'):
+            partner_id = self._lead_create_contact(cr, uid, lead, context.get('contact_name'), False, context=context)
         elif lead.email_from and self.pool.get('res.partner')._parse_partner_name(lead.email_from, context=context)[0]:
             contact_name = self.pool.get('res.partner')._parse_partner_name(lead.email_from, context=context)[0]
             partner_id = self._lead_create_contact(cr, uid, lead, contact_name, False, context=context)
@@ -749,7 +751,7 @@ class crm_lead(format_address, osv.osv):
                 partner_ids[lead.id] = lead.partner_id.id
                 continue
             if not partner_id and action == 'create':
-                partner_id = self._create_lead_partner(cr, uid, lead, context)
+                partner_id = self._create_lead_partner(cr, uid, lead, context=context)
                 self.pool['res.partner'].write(cr, uid, partner_id, {'section_id': lead.section_id and lead.section_id.id or False})
             if partner_id:
                 lead.write({'partner_id': partner_id}, context=context)
