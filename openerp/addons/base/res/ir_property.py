@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+from operator import itemgetter
 import time
 
 from openerp import models, api
@@ -254,17 +255,19 @@ class ir_property(osv.osv):
         """ Return a domain for the records that match the given condition. """
         field = self.env[model]._fields[name]
         if field.type == 'many2one':
-            def makeref(id):
-                return id and '%s,%s' % (model, id)
+            comodel = field.comodel_name
+            def makeref(value):
+                return value and '%s,%s' % (comodel, value)
             if operator in ('=', '!=', '<=', '<', '>', '>='):
                 value = makeref(value)
             elif operator in ('in', 'not in'):
                 value = map(makeref, value)
             elif operator in ('=like', '=ilike', 'like', 'not like', 'ilike', 'not ilike'):
                 # most probably inefficient... but correct
-                target = self.env[field.comodel_name]
-                target = target.search([('display_name', operator, value)])
-                operator, value = 'in', map(makeref, target.ids)
+                target = self.env[comodel]
+                target_names = target.name_search(value, operator=operator, limit=None)
+                target_ids = map(itemgetter(0), target_names)
+                operator, value = 'in', map(makeref, target_ids)
 
         # retrieve the properties that match the condition
         domain = self._get_domain(name, model)
