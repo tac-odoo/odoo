@@ -513,6 +513,11 @@
                     def.resolve();
                 },
                 styleWithSpan: false,
+                onpaste: function(e) {
+                    e.preventDefault();
+                    var text = (e.originalEvent || e).clipboardData.getData('text/plain') || prompt('Paste something..');
+                    document.execCommand('insertText', false, text);
+                },
              }
         }
     });
