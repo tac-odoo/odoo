@@ -466,8 +466,6 @@ class account_move_line(osv.osv):
     _inherit = 'account.move.line'
     _columns = {
         'asset_id': fields.many2one('account.asset.asset', 'Asset', ondelete="restrict"),
-        'entry_ids': fields.one2many('account.move.line', 'asset_id', 'Entries', readonly=True, states={'draft':[('readonly',False)]}),
-
     }
 
 class account_asset_history(osv.osv):
