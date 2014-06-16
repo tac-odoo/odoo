@@ -177,6 +177,9 @@ class ir_property(osv.osv):
             the given `ids`, and return a dictionary mapping `ids` to their
             corresponding value.
         """
+        if not ids:
+            return {}
+
         domain = self._get_domain(name, model)
         if domain is None:
             return dict.fromkeys(ids, False)
@@ -209,6 +212,9 @@ class ir_property(osv.osv):
         """
         def clean(value):
             return value.id if isinstance(value, models.BaseModel) else value
+
+        if not values:
+            return
 
         domain = self._get_domain(name, model)
         if domain is None:
