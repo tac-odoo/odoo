@@ -117,7 +117,6 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
         });
         this.is_initialized = $.Deferred();
         this.mutating_mutex = new $.Mutex();
-        this.on_change_list = [];
         this.save_list = [];
         this.reload_mutex = new $.Mutex();
         this.__clicked_inside = false;
@@ -203,6 +202,7 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
             ]));
         }
 
+        this._build_onchange_specs();
         this.has_been_loaded.resolve();
 
         // Add bounce effect on button 'Edit' when click on readonly page view.
@@ -334,31 +334,27 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
             set_values.push(result);
         });
         return $.when.apply(null, set_values).then(function() {
+            var def = $.when({});
             if (!record.id) {
-                // New record: Second pass in order to trigger the onchanges
-                // respecting the fields order defined in the view
-                _.each(self.fields_order, function(field_name) {
-                    if (record[field_name] !== undefined) {
-                        var field = self.fields[field_name];
-                        field._dirty_flag = true;
-                        self.do_onchange(field);
-                    }
-                });
+                // trigger onchanges
+                def = self.do_onchange(null);
             }
-            self.on_form_changed();
-            self.rendering_engine.init_fields();
-            self.is_initialized.resolve();
-            self.do_update_pager(record.id === null || record.id === undefined);
-            if (self.sidebar) {
-               self.sidebar.do_attachement_update(self.dataset, self.datarecord.id);
-            }
-            if (record.id) {
-                self.do_push_state({id:record.id});
-            } else {
-                self.do_push_state({});
-            }
-            self.$el.add(self.$buttons).removeClass('oe_form_dirty');
-            self.autofocus();
+            return def.then(function() {
+                self.on_form_changed();
+                self.rendering_engine.init_fields();
+                self.is_initialized.resolve();
+                self.do_update_pager(record.id === null || record.id === undefined);
+                if (self.sidebar) {
+                   self.sidebar.do_attachement_update(self.dataset, self.datarecord.id);
+                }
+                if (record.id) {
+                    self.do_push_state({id:record.id});
+                } else {
+                    self.do_push_state({});
+                }
+                self.$el.add(self.$buttons).removeClass('oe_form_dirty');
+                self.autofocus();
+            });
         });
     },
     /**
@@ -438,8 +434,21 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
             $(".oe_form_pager_state", this.$pager).html(_.str.sprintf(_t("%d / %d"), this.dataset.index + 1, this.dataset.ids.length));
         }
     },
-    parse_on_change_v8: function (onchange, widget) {
-        // onchange V8: call onchange(field_values, field_name, tocheck)
+
+    _build_onchange_specs: function() {
+        var self = this;
+        self._onchange_specs = {};
+        _.each(this.fields, function(field, name) {
+            self._onchange_specs[name] = field.node.attrs.on_change || "";
+            _.each(field.view.fields, function(subfield, subname) {
+            // _.each(field.field.views, function(view) {
+            //     _.each(view.fields, function(subfield, subname) {
+                    self._onchange_specs[name + "." + subname] = subfield.node.attrs.on_change || "";
+                // });
+            });
+        });
+    },
+    _get_onchange_values: function() {
         var field_values = this.get_fields_values();
         if (field_values.id.toString().match(instance.web.BufferedDataSet.virtual_id_regex)) {
             delete field_values.id;
@@ -456,121 +465,33 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
                 field_values[parent_name] = parent_values;
             }
         }
-        // add all known subfields in views into tocheck
-        var tocheck = [];
-        _.each(this.fields, function(field, name) {
-            _.each(field.field.views, function(view) {
-                _.each(view.fields, function(subfield, subname) {
-                    tocheck.push(name + "." + subname);
-                });
-            });
-        });
-        return {
-            method: "onchange",
-            args: [field_values, widget.name, tocheck]
-        };
+        return field_values;
     },
-    parse_on_change: function (on_change, widget) {
+
+    do_onchange: function(widget) {
         var self = this;
-        var onchange = _.str.trim(on_change);
-        var call = onchange.match(/^(\w+)\((.*?)\)$/);
-        if (!call) {
-            if (onchange === "1" || onchange === "true") {
-                return this.parse_on_change_v8(onchange, widget);
-            }
-            if (onchange === "0" || onchange === "false") {
-                return {};
-            }
-            throw new Error(_.str.sprintf(_t("Wrong on change format: %s"), onchange));
-        }
-
-        var method = call[1];
-        if (!_.str.trim(call[2])) {
-            return {method: method, args: []};
-        }
-
-        var argument_replacement = {
-            'False': function () {return false;},
-            'True': function () {return true;},
-            'None': function () {return null;},
-            'context': function () {
-                return new instance.web.CompoundContext(
-                        self.dataset.get_context(),
-                        widget.build_context() ? widget.build_context() : {});
-            }
-        };
-        var parent_fields = null;
-        var args = _.map(call[2].split(','), function (a, i) {
-            var field = _.str.trim(a);
-
-            // literal constant or context
-            if (field in argument_replacement) {
-                return argument_replacement[field]();
-            }
-            // literal number
-            if (/^-?\d+(\.\d+)?$/.test(field)) {
-                return Number(field);
-            }
-            // form field
-            if (self.fields[field]) {
-                var value_ = self.fields[field].get_value();
-                return value_ === null || value_ === undefined ? false : value_;
-            }
-            // parent field
-            var splitted = field.split('.');
-            if (splitted.length > 1 && _.str.trim(splitted[0]) === "parent" && self.dataset.parent_view) {
-                if (parent_fields === null) {
-                    parent_fields = self.dataset.parent_view.get_fields_values();
-                }
-                var p_val = parent_fields[_.str.trim(splitted[1])];
-                if (p_val !== undefined) {
-                    return p_val === null || p_val === undefined ? false : p_val;
-                }
-            }
-            // string literal
-            var first_char = field[0], last_char = field[field.length-1];
-            if ((first_char === '"' && last_char === '"')
-                || (first_char === "'" && last_char === "'")) {
-                return field.slice(1, -1);
-            }
-
-            throw new Error("Could not get field with name '" + field +
-                            "' for onchange '" + onchange + "'");
-        });
-
-        return {
-            method: method,
-            args: args
-        };
-    },
-    do_onchange: function(widget, processed) {
-        var self = this;
-        this.on_change_list = [{widget: widget, processed: processed}].concat(this.on_change_list);
-        return this._process_operations();
-    },
-    _process_onchange: function(on_change_obj) {
-        var self = this;
-        var widget = on_change_obj.widget;
-        var processed = on_change_obj.processed;
         try {
             var def = $.when({});
-            processed = processed || [];
-            processed.push(widget.name);
-            var on_change = widget.node.attrs.on_change;
-            if (on_change) {
-                var change_spec = self.parse_on_change(on_change, widget);
-                if (change_spec.method) {
-                    var ids = [];
-                    if (self.datarecord.id && !instance.web.BufferedDataSet.virtual_id_regex.test(self.datarecord.id)) {
-                        // In case of a o2m virtual id, we should pass an empty ids list
-                        ids.push(self.datarecord.id);
-                    }
-                    def = self.alive(new instance.web.Model(self.dataset.model).call(
-                        change_spec.method, [ids].concat(change_spec.args)));
+            var change_spec = widget ? self._onchange_specs[widget.name] : null;
+            if (!widget || (!_.isEmpty(change_spec) && change_spec !== "0")) {
+                var ids = [],
+                    trigger_field_name = widget ? widget.name : false,
+                    values = self._get_onchange_values(),
+                    context = new instance.web.CompoundContext(self.dataset.get_context());
+
+                if (widget && widget.build_context()) {
+                    context.add(widget.build_context());
                 }
+
+                if (self.datarecord.id && !instance.web.BufferedDataSet.virtual_id_regex.test(self.datarecord.id)) {
+                    // In case of a o2m virtual id, we should pass an empty ids list
+                    ids.push(self.datarecord.id);
+                }
+                def = self.alive(new instance.web.Model(self.dataset.model).call(
+                    "onchange", [ids, values, trigger_field_name, self._onchange_specs, context]));
             }
             return def.then(function(response) {
-                if (widget.field['change_default']) {
+                if (widget && widget.field['change_default']) {
                     var fieldname = widget.name;
                     var value_;
                     if (response.value && (fieldname in response.value)) {
@@ -603,7 +524,7 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
                 }
                 return response;
             }).then(function(response) {
-                return self.on_processed_onchange(response, processed);
+                return self.on_processed_onchange(response);
             });
         } catch(e) {
             console.error(e);
@@ -611,7 +532,7 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
             return $.Deferred().reject();
         }
     },
-    on_processed_onchange: function(result, processed) {
+    on_processed_onchange: function(result) {
         try {
         var fields = this.fields;
         _(result.domain).each(function (domain, fieldname) {
@@ -621,8 +542,9 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
         });
 
         if (!_.isEmpty(result.value)) {
-            this._internal_set_values(result.value, processed);
+            this._internal_set_values(result.value);
         }
+        // FIXME XXX a list of warnings?
         if (!_.isEmpty(result.warning)) {
             new instance.web.Dialog(this, {
                 size: 'medium',
@@ -644,21 +566,12 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
         var self = this;
         return this.mutating_mutex.exec(function() {
             function iterate() {
-                var on_change_obj = self.on_change_list.shift();
-                if (on_change_obj) {
-                    return self._process_onchange(on_change_obj).then(function() {
-                        return iterate();
-                    });
-                }
                 var defs = [];
                 _.each(self.fields, function(field) {
                     defs.push(field.commit_value());
                 });
                 var args = _.toArray(arguments);
                 return $.when.apply($, defs).then(function() {
-                    if (self.on_change_list.length !== 0) {
-                        return iterate();
-                    }
                     var save_obj = self.save_list.pop();
                     if (save_obj) {
                         return self._process_save(save_obj).then(function() {
@@ -677,8 +590,7 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
             return iterate();
         });
     },
-    _internal_set_values: function(values, exclude) {
-        exclude = exclude || [];
+    _internal_set_values: function(values) {
         for (var f in values) {
             if (!values.hasOwnProperty(f)) { continue; }
             var field = this.fields[f];
@@ -690,9 +602,6 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
                     field.set_value(value_);
                     field._inhibit_on_change_flag = false;
                     field._dirty_flag = true;
-                    if (!_.contains(exclude, field.name)) {
-                        this.do_onchange(field, exclude);
-                    }
                 }
             }
         }
