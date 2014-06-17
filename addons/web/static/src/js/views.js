@@ -1194,9 +1194,12 @@ instance.web.Sidebar = instance.web.Widget.extend({
             var c = instance.web.pyeval.eval('context',
                 new instance.web.CompoundContext(
                     sidebar_eval_context, active_ids_context));
+            var ds_context = instance.web.pyeval.eval('context', 
+                    new instance.web.CompoundContext(
+                        self.getParent().dataset.get_context(), active_ids_context));
             self.rpc("/web/action/load", {
                 action_id: item.action.id,
-                context: c
+                context: ds_context
             }).done(function(result) {
                 result.context = new instance.web.CompoundContext(
                     result.context || {}, active_ids_context)
