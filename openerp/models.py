@@ -77,6 +77,7 @@ _schema = logging.getLogger(__name__ + '.schema')
 
 regex_order = re.compile('^( *([a-z0-9:_]+|"[a-z0-9:_]+")( *desc| *asc)?( *, *|))+$', re.I)
 regex_object_name = re.compile(r'^[a-z0-9_.]+$')
+onchange_v7 = re.compile(r"^(\w+)(\(.*\))$")
 
 AUTOINIT_RECALCULATE_STORED_FIELDS = 1000
 
@@ -5470,68 +5471,110 @@ class BaseModel(object):
         return field.name in self._onchange_methods or \
             any(dep in other_fields for dep in field.dependents)
 
-    @api.multi
-    def onchange(self, values, field_name, tocheck=None):
-        """ Perform an onchange on the given field.
-
-            :param values: dictionary mapping field names to values, giving the
-                current state of modification
-            :param field_name: name of the modified field_name
-            :param tocheck: list of (dot-separated) field names to check; use
-                this for secondary fields that are not keys of `values`
+    def _onchange_eval(self, field_name, onchange, result):
+        """ Apply onchange method(s) for field `field_name` with spec `onchange`
+            on record `self`. Value assignments are applied on `self`, while
+            domain and warning messages are put in dictionary `result`.
         """
-        env = self.env
+        onchange = onchange.strip()
 
-        if field_name not in self._fields:
-            return {}
-
-        with env.do_in_draft():
-            # create a new record with the values, except field_name
-            record = self.new(values)
-            record_values = dict(record._cache)
-            field_value = record._cache.pop(field_name, False)
-
-            # attach `self` with a different context (for cache consistency)
-            record._origin = self.with_context(__onchange=True)
-
-        # at this point, the cache should be clean
-        assert not env.dirty
-
-        with env.do_in_draft():
-            # apply the change on the record
-            record[field_name] = field_value
-
-            # invoke field-specific onchange methods
-            result = {}
+        # onchange V8
+        if onchange in ("1", "true"):
             for method in self._onchange_methods.get(field_name, ()):
-                method_res = method(record)
+                method_res = method(self)
                 if not method_res:
                     continue
                 if 'domain' in method_res:
                     result.setdefault('domain', {}).update(method_res['domain'])
                 if 'warning' in method_res:
                     result['warning'] = method_res['warning']
+            return
 
-            # compute function fields on secondary records (one2many, many2many)
-            for field_seq in (tocheck or ()):
-                record.mapped(field_seq)
+        # onchange V7
+        match = onchange_v7.match(onchange)
+        if match:
+            method, params = match.groups()
+            # evaluate params -> tuple
+            # TODO: add 'parent' field when it makes sense
+            global_vars = {'context': self._context}
+            field_vars = self._convert_to_write(self._cache)
+            params = eval(params, global_vars, field_vars)
+            # call onchange method
+            args = (self._cr, self._uid, self._origin.ids) + params
+            method_res = getattr(self._model, method)(*args)
+            if 'value' in method_res:
+                self.update(self._convert_to_cache(method_res['value']))
+            if 'domain' in method_res:
+                result.setdefault('domain', {}).update(method_res['domain'])
+            if 'warning' in method_res:
+                result['warning'] = method_res['warning']
 
-            # map fields to the corresponding set of subfields to consider
-            subfields = defaultdict(set)
-            for dotname in (tocheck or ()):
-                if '.' in dotname:
-                    name, subname = dotname.split('.')
-                    subfields[name].add(subname)
+    @api.multi
+    def onchange(self, values, field_name, field_onchange):
+        """ Perform an onchange on the given field.
 
-            # add changed values to result, and return it
-            changed = result.setdefault('value', {})
-            for name, oldval in record_values.iteritems():
-                newval = record[name]
-                if newval != oldval or getattr(newval, '_dirty', False):
-                    field = self._fields[name]
-                    changed[name] = field.convert_to_write(newval, self, subfields[name])
+            :param values: dictionary mapping field names to values, giving the
+                current state of modification
+            :param field_name: name of the modified field_name
+            :param field_onchange: dictionary mapping field names to their
+                on_change attribute
+        """
+        env = self.env
 
-            return result
+        if field_name and field_name not in self._fields:
+            return {}
+
+        # create a new record with values, and attach `self` to it
+        with env.do_in_draft():
+            record = self.new(values)
+            values = dict(record._cache)
+            # attach `self` with a different context (for cache consistency)
+            record._origin = self.with_context(__onchange=True)
+
+        # determine which field should be triggered an onchange
+        todo = set([field_name]) if field_name else set(values)
+        done = set()
+
+        # dummy assignment: trigger invalidations on the record
+        for name in todo:
+            record[name] = record[name]
+
+        result = {}
+
+        while todo:
+            name = todo.pop()
+            if name in done:
+                continue
+            done.add(name)
+
+            with env.do_in_draft():
+                # apply field-specific onchange methods
+                if field_onchange.get(name):
+                    record._onchange_eval(name, field_onchange[name], result)
+
+                # force re-evaluation of function fields on secondary records
+                for field_seq in field_onchange:
+                    record.mapped(field_seq)
+
+                # determine which fields have been modified
+                for name, oldval in values.iteritems():
+                    newval = record[name]
+                    if newval != oldval or getattr(newval, '_dirty', False):
+                        todo.add(name)
+
+        # complete result with values, and return it
+        subfields = defaultdict(set)
+        for dotname in field_onchange:
+            if '.' in dotname:
+                name, subname = dotname.split('.')
+                subfields[name].add(subname)
+
+        result['value'] = {
+            name: self._fields[name].convert_to_write(record[name], self, subfields[name])
+            for name in done
+        }
+
+        return result
 
 
 class RecordCache(MutableMapping):
