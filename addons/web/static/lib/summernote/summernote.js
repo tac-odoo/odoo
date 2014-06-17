@@ -1768,6 +1768,7 @@
       $.each(rng.nodes(dom.isAnchor), function (idx, elAnchor) {
         // update link text
         $(elAnchor).html(sLinkText);
+        $(elAnchor).attr('href', sLinkUrlWithProtocol)
         if (bNewWindow) {
           $(elAnchor).attr('target', '_blank');
         } else {
@@ -1785,18 +1786,24 @@
       var rng = range.create();
       var bNewWindow = true;
       var sUrl = '';
+      var email = '';
       // If range on anchor expand range on anchor(for edit link).
       if (rng.isOnAnchor()) {
         var elAnchor = dom.ancestor(rng.sc, dom.isAnchor);
         rng = range.createFromNode(elAnchor);
         bNewWindow = $(elAnchor).attr('target') === '_blank';
-        sUrl = elAnchor.href;
+        if ((match = /mailto:(.+)/.exec(elAnchor.href))) {
+            email =  match[1];
+        } else {
+            sUrl = elAnchor.href;
+        }
       }
 
       return {
         text: rng.toString(),
         url: sUrl,
-        newWindow: bNewWindow
+        newWindow: bNewWindow,
+        email: email
       };
     };
 
@@ -2304,6 +2311,41 @@
       });
     };
 
+    var changed = function ($e) {
+      this.$('.url-source').filter(':input').not($e).val('')
+        .filter(function () { return !!$(this).data('select2'); })
+        .select2('data', null);
+      $e.closest('.list-group-item')
+        .addClass('active')
+        .siblings().removeClass('active')
+         .addBack().removeClass('has-error');
+    };
+    var call = function (method, args, kwargs) {
+        var self = this;
+        var req = method + '_req';
+
+        if (this[req]) { this[req].abort(); }
+
+        return this[req] = openerp.jsonRpc('/web/dataset/call_kw', 'call', {
+            model: 'website',
+            method: method,
+            args: args,
+            kwargs: kwargs,
+        }).always(function () {
+            self[req] = null;
+        });
+    };
+    var page_exists = function (term) {
+        return call('page_exists', [null, term], {
+            context: website.get_context(),
+        });
+    };
+    var fetch_pages = function (term) {
+        return call('search_pages', [null, term], {
+            limit: 9,
+            context: website.get_context(),
+        });
+    };
     /**
      * Show link dialog and set event handlers on dialog controls.
      *
@@ -2318,10 +2360,31 @@
         var $linkText = $linkDialog.find('#link-text'),
         $linkUrl = $linkDialog.find('#link-external'),
         $linkBtn = $linkDialog.find('.note-link-btn'),
+        $email =  $linkDialog.find('#link-email'),
         $openInNewWindow = $linkDialog.find('input[type=checkbox]');
+
+        $('input.url-source').on('change', function (e) { changed($(e.target)); }),
+        $('input.url-source').on('mousedown', function (e) {
+          var $target = $(e.target).closest('.list-group-item');
+          if (!$target.length || $target.hasClass('active')) {
+            // clicked outside groups, or clicked in active groups
+            return;
+          }
+          changed($target.find('.url-source').filter(':input'));
+        }),
 
         $linkDialog.one('shown.bs.modal', function () {
           $linkText.val(linkInfo.text);
+
+          var match, $control;
+          if (linkInfo.email) {
+            $control =  $email.val(linkInfo.email);
+          }
+          if (!$control) {
+            $control =  $linkUrl.val(linkInfo.url);
+          }
+          changed($control)
+
           var last;
           $('#link-page').select2({
             minimumInputLength: 1,
@@ -2330,8 +2393,8 @@
             if (q.term == last) return;
             last = q.term;
             $.when(
-              self.page_exists(q.term),
-                self.fetch_pages(q.term)
+              page_exists(q.term),
+              fetch_pages(q.term)
               ).then(function (exists, results) {
                 var rs = _.map(results, function (r) {
                   return { id: r.url, text: r.name, };
@@ -2359,14 +2422,7 @@
             linkInfo.text = $linkText.val();
           });
 
-          // if no url was given, copy text to url
-          if (!linkInfo.url) {
-            linkInfo.url = linkInfo.text;
-            toggleBtn($linkBtn, linkInfo.text);
-          }
-
           $linkUrl.keyup(function () {
-            toggleBtn($linkBtn, $linkUrl.val());
             // display same link on `Text to display` input
             // when create a new link
             if (!linkInfo.text) {
@@ -2379,6 +2435,33 @@
           $linkBtn.one('click', function (event) {
             event.preventDefault();
 
+            var $e = $linkDialog.find('.list-group-item.active .url-source').filter(':input');
+            var val = $e.val();
+            if (!val || !$e[0].checkValidity()) {
+                // FIXME: error message
+                $e.closest('.form-group').addClass('has-error');
+                $e.focus();
+                return;
+            }
+
+            var done = $.when();
+            if ($e.hasClass('email-address')) {
+                $linkUrl.val($email.val());
+            } else if ($e.hasClass('page')) {
+                var data = $e.select2('data');
+                if (!data.create) {
+                    self.make_link(data.id, false, data.text);
+                } else {
+                    // Create the page, get the URL back
+                    done = $.get(_.str.sprintf(
+                            '/website/add/%s?noredirect=1', encodeURI(data.id)))
+                        .then(function (response) {
+                            self.make_link(response, false, data.id);
+                        });
+                }
+            } else {
+                $linkUrl.val($linkUrl.val())
+            }
             $linkDialog.modal('hide');
             deferred.resolve($linkText.val(), $linkUrl.val(), $openInNewWindow.is(':checked'));
           });
@@ -3578,7 +3661,7 @@
                        '</label>' +
                      '</div>' : ''
                    );
-        var footer = '<button href="#" class="btn btn-primary note-link-btn disabled" disabled>' + lang.link.insert + '</button>';
+        var footer = '';
         return tplDialog('note-link-dialog', lang.link.insert, openerp.qweb.render('website.editor.dialog.link',{}), footer);
       };
 
