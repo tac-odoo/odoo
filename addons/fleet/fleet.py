@@ -808,7 +808,7 @@ class fleet_vehicle_log_contract(osv.Model):
         'notes': fields.text('Terms and Conditions', help='Write here all supplementary informations relative to this contract'),
         'cost_generated': fields.float('Recurring Cost Amount', help="Costs paid at regular intervals, depending on the cost frequency. If the cost frequency is set to unique, the cost will be logged at the start date"),
         'cost_frequency': fields.selection([('no','No'), ('daily', 'Daily'), ('weekly','Weekly'), ('monthly','Monthly'), ('yearly','Yearly')], 'Recurring Cost Frequency', help='Frequency of the recuring cost', required=True),
-        'generated_cost_ids': fields.one2many('fleet.vehicle.cost', 'contract_id', 'Generated Costs', ondelete='cascade'),
+        'generated_cost_ids': fields.one2many('fleet.vehicle.cost', 'contract_id', 'Generated Costs'),
         'sum_cost': fields.function(_get_sum_cost, type='float', string='Indicative Costs Total'),
         'cost_id': fields.many2one('fleet.vehicle.cost', 'Cost', required=True, ondelete='cascade'),
         'cost_amount': fields.related('cost_id', 'amount', string='Amount', type='float', store=True), #we need to keep this field as a related with store=True because the graph view doesn't support (1) to address fields from inherited table and (2) fields that aren't stored in database
