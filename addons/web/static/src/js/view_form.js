@@ -3852,7 +3852,7 @@ instance.web.form.FieldMany2One = instance.web.form.AbstractField.extend(instanc
 });
 
 //extended widget for Many2one Field
-instance.web.form.FieldMany2OneImage=instance.web.form.FieldMany2One.extend(instance.web.form.CompletionFieldMixin,{
+instance.web.form.FieldMany2OneImage=instance.web.form.FieldMany2One.extend({
     template: "FieldMany2OneImage",
     init: function(field_manager, node) {
         this._super(field_manager, node);
@@ -3917,6 +3917,11 @@ instance.web.form.FieldMany2OneImage=instance.web.form.FieldMany2One.extend(inst
             return values;
         });
     },
+    add_id: function(id) {
+    this.display_value = {};
+    this.display_value_backup = {};
+    this.reinit_value(id);
+    }
 });
 
 instance.web.form.Many2OneButton = instance.web.form.AbstractField.extend({
