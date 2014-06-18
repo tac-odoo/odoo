@@ -19,14 +19,9 @@
 #
 ##############################################################################
 
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-from decimal import Decimal
 import logging
-import pdb
 import time
 
-import openerp
 from openerp import tools
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
@@ -1287,8 +1282,6 @@ class pos_order_line(osv.osv):
             'name': self.pool.get('ir.sequence').get(cr, uid, 'pos.order.line')
         })
         return super(pos_order_line, self).copy_data(cr, uid, id, default, context=context)
-
-import io, StringIO
 
 class ean_wizard(osv.osv_memory):
     _name = 'pos.ean_wizard'
