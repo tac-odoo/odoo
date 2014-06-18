@@ -5486,7 +5486,7 @@ class BaseModel(object):
                 if not result.get(names):
                     result[names] = node.attrib.get('on_change')
                 # traverse the subviews included in relational fields
-                for subinfo in info['fields'][name]['views'].itervalues():
+                for subinfo in info['fields'][name].get('views', {}).itervalues():
                     process(etree.fromstring(subinfo['arch']), subinfo, names)
             else:
                 for child in node:
@@ -5520,12 +5520,14 @@ class BaseModel(object):
         match = onchange_v7.match(onchange)
         if match:
             method, params = match.groups()
+
             # evaluate params -> tuple
             global_vars = {'context': self._context, 'uid': self._uid}
             if self._context.get('field_parent'):
                 global_vars['parent'] = self[self._context['field_parent']]
             field_vars = self._convert_to_write(self._cache)
             params = eval("[%s]" % params, global_vars, field_vars)
+
             # call onchange method
             args = (self._cr, self._uid, self._origin.ids) + tuple(params)
             method_res = getattr(self._model, method)(*args)
