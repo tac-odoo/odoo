@@ -482,6 +482,9 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
                 if (widget && widget.build_context()) {
                     context.add(widget.build_context());
                 }
+                if (self.dataset.parent_view) {
+                    context.add({field_parent: self.dataset.child_name});
+                }
 
                 if (self.datarecord.id && !instance.web.BufferedDataSet.virtual_id_regex.test(self.datarecord.id)) {
                     // In case of a o2m virtual id, we should pass an empty ids list
