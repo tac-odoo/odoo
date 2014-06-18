@@ -26,33 +26,37 @@ class TestOnChange(common.TransactionCase):
         BODY = "What a beautiful day!"
         USER = self.env.user
 
-        self.env.invalidate_all()
-        result = self.Message.onchange({
+        field_onchange = self.Message._onchange_spec()
+        self.assertEqual(field_onchange.get('author'), '1')
+        self.assertEqual(field_onchange.get('body'), '1')
+        self.assertEqual(field_onchange.get('discussion'), '1')
+
+        values = {
             'discussion': discussion.id,
             'name': "[%s] %s" % ('', USER.name),
             'body': False,
             'author': USER.id,
             'size': 0,
-        }, 'discussion')
-        self.assertEqual(result['value'], {
-            'name': "[%s] %s" % (discussion.name, USER.name),
-        })
-
+        }
         self.env.invalidate_all()
-        result = self.Message.onchange({
+        result = self.Message.onchange(values, 'discussion', field_onchange)
+        self.assertLessEqual(set(['name']), set(result['value']))
+        self.assertEqual(result['value']['name'], "[%s] %s" % (discussion.name, USER.name))
+
+        values = {
             'discussion': discussion.id,
             'name': "[%s] %s" % (discussion.name, USER.name),
             'body': BODY,
             'author': USER.id,
             'size': 0,
-        }, 'body')
-        self.assertEqual(result['value'], {
-            'size': len(BODY),
-        })
+        }
+        self.env.invalidate_all()
+        result = self.Message.onchange(values, 'body', field_onchange)
+        self.assertLessEqual(set(['size']), set(result['value']))
+        self.assertEqual(result['value']['size'], len(BODY))
 
     def test_new_onchange_one2many(self):
         """ test the effect of onchange() on one2many fields """
-        tocheck = ['messages.name', 'messages.body', 'messages.author', 'messages.size']
         BODY = "What a beautiful day!"
         USER = self.env.user
 
@@ -60,9 +64,12 @@ class TestOnChange(common.TransactionCase):
         message = self.Message.create({'body': BODY})
         self.assertEqual(message.name, "[%s] %s" % ('', USER.name))
 
+        field_onchange = self.Discussion._onchange_spec()
+        self.assertEqual(field_onchange.get('name'), '1')
+        self.assertEqual(field_onchange.get('messages'), '1')
+
         # modify messages
-        self.env.invalidate_all()
-        result = self.Discussion.onchange({
+        values = {
             'name': "Foo",
             'categories': [],
             'moderator': False,
@@ -74,15 +81,12 @@ class TestOnChange(common.TransactionCase):
                     'author': USER.id,
                     'size': len(BODY),
                 }),
-                (1, message.id, {
-                    'name': "[%s] %s" % ('', USER.name),
-                    'body': BODY,
-                    'author': USER.id,
-                    'size': len(BODY),
-                }),
+                (4, message.id),
             ],
-        }, 'messages', tocheck)
-        self.assertItemsEqual(list(result['value']), ['messages'])
+        }
+        self.env.invalidate_all()
+        result = self.Discussion.onchange(values, 'messages', field_onchange)
+        self.assertLessEqual(set(['messages']), set(result['value']))
         self.assertItemsEqual(result['value']['messages'], [
             (0, 0, {
                 'name': "[%s] %s" % ("Foo", USER.name),
@@ -99,8 +103,7 @@ class TestOnChange(common.TransactionCase):
         ])
 
         # modify discussion name
-        self.env.invalidate_all()
-        result = self.Discussion.onchange({
+        values = {
             'name': "Foo",
             'categories': [],
             'moderator': False,
@@ -114,8 +117,10 @@ class TestOnChange(common.TransactionCase):
                 }),
                 (4, message.id),
             ],
-        }, 'name', tocheck)
-        self.assertItemsEqual(list(result['value']), ['messages'])
+        }
+        self.env.invalidate_all()
+        result = self.Discussion.onchange(values, 'name', field_onchange)
+        self.assertLessEqual(set(['messages']), set(result['value']))
         self.assertItemsEqual(result['value']['messages'], [
             (0, 0, {
                 'name': "[%s] %s" % ("Foo", USER.name),
@@ -136,24 +141,24 @@ class TestOnChange(common.TransactionCase):
         discussion = self.env.ref('test_new_api.discussion_0')
         demo = self.env.ref('base.user_demo')
 
+        field_onchange = self.Discussion._onchange_spec()
+        self.assertEqual(field_onchange.get('moderator'), '1')
+
         # first remove demo user from participants
         discussion.participants -= demo
         self.assertNotIn(demo, discussion.participants)
 
         # check that demo_user is added to participants when set as moderator
-        name = discussion.name
-        categories = [(4, cat.id) for cat in discussion.categories]
         participants = [(4, usr.id) for usr in discussion.participants]
-        messages = [(4, msg.id) for msg in discussion.messages]
-
-        self.env.invalidate_all()
-        result = discussion.onchange({
-            'name': name,
-            'categories': categories,
+        values = {
+            'name': discussion.name,
             'moderator': demo.id,
+            'categories': [(4, cat.id) for cat in discussion.categories],
+            'messages': [(4, msg.id) for msg in discussion.messages],
             'participants': participants,
-            'messages': messages,
-        }, 'moderator')
+        }
+        self.env.invalidate_all()
+        result = discussion.onchange(values, 'moderator', field_onchange)
 
-        self.assertItemsEqual(list(result['value']), ['participants'])
+        self.assertLessEqual(set(['participants']), set(result['value']))
         self.assertItemsEqual(result['value']['participants'], participants + [(4, demo.id)])

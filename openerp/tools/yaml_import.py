@@ -394,6 +394,7 @@ class YamlInterpreter(object):
         fields = fields or {}
         if view is not False:
             fg = view_info['fields']
+            onchange_spec = model._onchange_spec(self.cr, SUPERUSER_ID, view_info, context=self.context)
             # gather the default values on the object. (Can't use `fields´ as parameter instead of {} because we may
             # have references like `base.main_company´ in the yaml file and it's not compatible with the function)
             defaults = default and model._add_missing_default_values(self.cr, SUPERUSER_ID, {}, context=self.context) or {}
@@ -433,10 +434,8 @@ class YamlInterpreter(object):
 
                     if el.attrib['on_change'] in ('1', 'true'):
                         # New-style on_change
-                        # TODO: this call does not take into account subrecords
-                        # (one2many and many2many fields)
                         recs = model.browse(self.cr, SUPERUSER_ID, [], self.context)
-                        result = recs.onchange(record_dict, field_name, [])
+                        result = recs.onchange(record_dict, field_name, onchange_spec)
 
                     else:
                         match = re.match("([a-z_1-9A-Z]+)\((.*)\)", el.attrib['on_change'])
