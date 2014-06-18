@@ -33,7 +33,6 @@ class contactus(http.Controller):
             'contact_name': contact_name,
             'email_from': email_from,
             'name': name or contact_name,
-            'user_id': False,
         }
 
         # fields validation
@@ -50,6 +49,7 @@ class contactus(http.Controller):
         except ValueError:
             pass
 
+        post['user_id'] = False
         environ = request.httprequest.headers.environ
         post['description'] = "%s\n-----------------------------\nIP: %s\nUSER_AGENT: %s\nACCEPT_LANGUAGE: %s\nREFERER: %s" % (
             post['description'],

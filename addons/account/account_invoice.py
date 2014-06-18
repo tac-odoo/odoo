@@ -1377,8 +1377,10 @@ class account_invoice_line(models.Model):
         company_id = company_id if company_id != None else context.get('company_id', False)
         self = self.with_context(company_id=company_id)
 
-        result = self.product_id_change(product, uom, qty, name, type, partner_id,
-            fposition_id, price_unit, currency_id, context=context)
+        result = self.product_id_change(
+            product, uom, qty, name, type, partner_id, fposition_id, price_unit,
+            currency_id, context=context, company_id=company_id,
+        )
         warning = {}
         if not uom:
             result['value']['price_unit'] = 0.0

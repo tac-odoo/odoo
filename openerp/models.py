@@ -1354,8 +1354,8 @@ class BaseModel(object):
            :return: True if the current user is a member of one of the
                     given groups
         """
-        return any([self.pool.get('res.users').has_group(cr, uid, group_ext_id)
-                        for group_ext_id in groups.split(',')])
+        return any(self.pool['res.users'].has_group(cr, uid, group_ext_id)
+                   for group_ext_id in groups.split(','))
 
     def _get_default_form_view(self, cr, user, context=None):
         """ Generates a default single-line form view using all fields
@@ -1368,13 +1368,14 @@ class BaseModel(object):
         :rtype: etree._Element
         """
         view = etree.Element('form', string=self._description)
+        group = etree.SubElement(view, 'group', col="4")
         for fname, field in self._fields.iteritems():
             if field.automatic or field.type in ('one2many', 'many2many'):
                 continue
 
-            etree.SubElement(view, 'field', name=fname)
+            etree.SubElement(group, 'field', name=fname)
             if field.type == 'text':
-                etree.SubElement(view, 'newline')
+                etree.SubElement(group, 'newline')
         return view
 
     def _get_default_search_view(self, cr, user, context=None):
@@ -2519,7 +2520,7 @@ class BaseModel(object):
                                 ('numeric', 'float', get_pg_type(f)[1], '::'+get_pg_type(f)[1]),
                                 ('float8', 'float', get_pg_type(f)[1], '::'+get_pg_type(f)[1]),
                             ]
-                            if f_pg_type == 'varchar' and f._type == 'char' and ((f.size is None and f_pg_size) or f_pg_size < f.size):
+                            if f_pg_type == 'varchar' and f._type == 'char' and f_pg_size and (f.size is None or f_pg_size < f.size):
                                 try:
                                     with cr.savepoint():
                                         cr.execute('ALTER TABLE "%s" ALTER COLUMN "%s" TYPE %s' % (self._table, k, pg_varchar(f.size)))
