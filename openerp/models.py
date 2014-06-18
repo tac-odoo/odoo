@@ -77,7 +77,7 @@ _schema = logging.getLogger(__name__ + '.schema')
 
 regex_order = re.compile('^( *([a-z0-9:_]+|"[a-z0-9:_]+")( *desc| *asc)?( *, *|))+$', re.I)
 regex_object_name = re.compile(r'^[a-z0-9_.]+$')
-onchange_v7 = re.compile(r"^(\w+)(\(.*\))$")
+onchange_v7 = re.compile(r"^(\w+)\((.*)\)$")
 
 AUTOINIT_RECALCULATE_STORED_FIELDS = 1000
 
@@ -5499,9 +5499,9 @@ class BaseModel(object):
             if self._context.get('field_parent'):
                 global_vars['parent'] = self[self._context['field_parent']]
             field_vars = self._convert_to_write(self._cache)
-            params = eval(params, global_vars, field_vars)
+            params = eval("[%s]" % params, global_vars, field_vars)
             # call onchange method
-            args = (self._cr, self._uid, self._origin.ids) + params
+            args = (self._cr, self._uid, self._origin.ids) + tuple(params)
             method_res = getattr(self._model, method)(*args)
             if 'value' in method_res:
                 self.update(self._convert_to_cache(method_res['value']))
