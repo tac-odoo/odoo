@@ -511,6 +511,20 @@
                     self.setup_editables(root);
                     self.trigger('rte:ready');
                     def.resolve();
+                    var i =0;
+                    var insertBlock = '<div class="mediumInsert" contenteditable="false">'+
+                    '<div class="mediumInsert-buttons">'+
+                    '<a class="mediumInsert-buttonsShow">+</a>'+
+                    '</div>'+
+                    '<div class="mediumInsert-placeholder"></div>'+
+                    '</div>';
+                  $('p').each(function () {
+                    if (!$(this).next().hasClass('mediumInsert')) {
+                        $(this).after(insertBlock);
+                        $(this).next('.mediumInsert').attr('id', 'mediumInsert-'+ i);
+                      }
+                      i++;
+                  });
                 },
                 styleWithSpan: false,
                 onpaste: function(e) {

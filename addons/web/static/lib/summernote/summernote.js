@@ -21,6 +21,7 @@
   var website = openerp.website;
   var _t = openerp._t;
   website.add_template_file('/website/static/src/xml/website.editor.xml');
+  var records;
 
 
   if ('function' !== typeof Array.prototype.reduce) {
@@ -60,7 +61,6 @@
     bMSIE: navigator.userAgent.indexOf('MSIE') > -1 || navigator.userAgent.indexOf('Trident') > -1,
     bFF: navigator.userAgent.indexOf('Firefox') > -1,
     jqueryVersion: parseFloat($.fn.jquery),
-    bCodeMirror: !!CodeMirror
   };
 
   /**
@@ -1497,6 +1497,10 @@
      */
     this.currentStyle = function (elTarget) {
       var rng = range.create();
+      var $el =$(elTarget).parent().parent();
+      if($el.hasClass('mediumInsert')) {
+        $el.prev().append('<p class="insert-image"/>')
+      }
       return rng.isOnEditable() && style.current(rng, elTarget);
     };
 
@@ -1595,7 +1599,13 @@
           display: '',
           width: Math.min($editable.width(), $image.width())
         });
-        range.create().insertNode($image[0]);
+        var rng = range.create()
+        if($('.insert-image')){
+            rng = document.createRange();
+            rng.selectNodeContents(document.getElementsByClassName('insert-image')[0])
+            $('p').removeClass('insert-image');
+        }
+        rng.insertNode($image[0])
       }).fail(function () {
         var callbacks = $editable.data('callbacks');
         if (callbacks.onImageUploadError) {
@@ -2133,9 +2143,14 @@
     this.update = function ($popover, oStyle, isAirMode) {
       button.update($popover, oStyle);
 
-      var $linkPopover = $popover.find('.note-link-popover');
-
-      if (oStyle.anchor) {
+      var $linkPopover = $popover.find('.note-link-image-popover');
+      if(oStyle.anchor.className == 'mediumInsert-buttonsShow'){
+        var $anchor = $linkPopover.find('a');
+        $anchor.attr('href', oStyle.anchor.href).html(oStyle.anchor.href);
+        showPopover($linkPopover, oStyle.anchor);
+      }
+      else if (oStyle.anchor) {
+        $linkPopover = $popover.find('.note-link-popover');
         var $anchor = $linkPopover.find('a');
         $anchor.attr('href', oStyle.anchor.href).html(oStyle.anchor.href);
         showPopover($linkPopover, oStyle.anchor);
@@ -2217,6 +2232,57 @@
       $handle.children().hide();
     };
   };
+    var try_remove = function (e) {
+        var $help_block = this.$('.help-block').empty();
+        var self = this;
+        var $a = $(e.target);
+        var id = parseInt($a.data('id'), 10);
+        var attachment = _.findWhere(records, {id: id});
+        var $both = $a.parent().children();
+
+        $both.css({borderWidth: "5px", borderColor: "#f00"});
+
+        return openerp.jsonRpc('/web/dataset/call_kw', 'call', {
+            model: 'ir.attachment',
+            method: 'try_remove',
+            args: [],
+            kwargs: {
+                ids: [id],
+                context: website.get_context()
+            }
+        }).then(function (prevented) {
+            if (_.isEmpty(prevented)) {
+                records = _.without(records, attachment);
+                display_attachments();
+                return;
+            }
+            $both.css({borderWidth: "", borderColor: ""});
+            $help_block.replaceWith(openerp.qweb.render(
+                'website.editor.dialog.image.existing.error', {
+                    views: prevented[id]
+                }
+            ));
+        });
+    };
+    var display_attachments = function (records) {
+        this.$('.help-block').empty();
+        var per_screen = 12;
+
+        var from = 0 * per_screen;
+        // Create rows of 3 records
+        var rows = _(records).chain()
+            .slice(from, from + per_screen)
+            .groupBy(function (_, index) { return Math.floor(index / 6); })
+            .values()
+            .value();
+
+        this.$('.existing-attachments').replaceWith(
+            openerp.qweb.render(
+                'website.editor.dialog.image.existing.content', {rows: rows}));
+        this.$('.pager')
+            .find('li.previous').toggleClass('disabled', (from === 0)).end()
+            .find('li.next').toggleClass('disabled', (from + per_screen >= records.length));
+    };
 
   /**
    * Dialog 
@@ -2243,37 +2309,94 @@
      * @param {jQuery} $dialog
      * @return {Promise}
      */
+    var select_existing =  function (e) {
+        var link = $(e.currentTarget).attr('src');
+        this.link = link;
+        selected_existing(link);
+    };
+    var selected_existing = function (link) {
+        this.$('.existing-attachment-cell.media_selected').removeClass("media_selected");
+        var $select = this.$('.existing-attachment-cell img').filter(function () {
+            return $(this).attr("src") == link;
+        }).first();
+        $select.parent().addClass("media_selected");
+        return $select;
+    };
+    var form_submit = function (event) {
+        var self = this;
+        var $form = $('form[action="/website/attach"]');
+        if (!$form.find('input[name="upload"]').val().length) {
+            var url = $form.find('input[name="url"]').val();
+            if (selected_existing(url).size()) {
+                event.preventDefault();
+                return false;
+            }
+        }
+        var callback = _.uniqueId('func_');
+        $('input[name=func]').val(callback);
+        window[callback] = function (url, error) {
+            delete window[callback];
+            file_selected(url, error);
+        };
+    };
+    var file_selection = function () {
+//        $el.addClass('nosave');
+        $('form').removeClass('has-error').find('.help-block').empty();
+        $('button.filepicker').removeClass('btn-danger btn-success');
+        form_submit();
+//        $('form').submit();
+    };
+    var file_selected = function(url, error) {
+        var $button = this.$('button.filepicker');
+        if (!error) {
+            $button.addClass('btn-success');
+        } else {
+            url = null;
+            this.$('form').addClass('has-error')
+                .find('.help-block').text(error);
+            $button.addClass('btn-danger');
+        }
+        this.set_image(url, error);
+        // auto save and close popup
+        this.parent.save();
+    };
     this.showImageDialog = function ($editable, $dialog) {
       return $.Deferred(function (deferred) {
         var $imageDialog = $dialog.find('.note-image-dialog');
-
+        var dialUrl;
         var $imageInput = $dialog.find('.note-image-input'),
-            $imageUrl = $dialog.find('.note-image-url'),
             $imageBtn = $dialog.find('.note-image-btn');
 
         $imageDialog.one('shown.bs.modal', function () {
+            $('.existing-attachments img').on('click', function(e){
+                select_existing(e)
+                dialUrl = $(e.currentTarget).attr('src')
+            })
+            $('.existing-attachment-remove').on('click', function(e){
+                try_remove(e);
+            })
+            $('button.filepicker').on('click',function () {
+                $('input[type=file]').click ();
+            }).on('change' , file_selection());
+//            $('form').on('submit', form_submit());
           // Cloning imageInput to clear element.
           $imageInput.replaceWith($imageInput.clone()
             .on('change', function () {
               $imageDialog.modal('hide');
-              deferred.resolve(this.files);
+              deferred.resolve(dialUrl);
             })
           );
 
           $imageBtn.click(function (event) {
             event.preventDefault();
-
             $imageDialog.modal('hide');
-            deferred.resolve($imageUrl.val());
+            deferred.resolve(dialUrl);
           });
 
-          $imageUrl.keyup(function () {
-            toggleBtn($imageBtn, $imageUrl.val());
-          }).val('').focus();
         }).one('hidden.bs.modal', function () {
           $editable.focus();
           $imageInput.off('change');
-          $imageUrl.off('keyup');
+//          $imageUrl.off('keyup');
           $imageBtn.off('click');
         }).modal('show');
       });
@@ -2373,7 +2496,7 @@
           changed($target.find('.url-source').filter(':input'));
         }),
 
-        $linkDialog.one('shown.bs.modal', function () {
+        $linkDialog.on('shown.bs.modal', function () {
           $linkText.val(linkInfo.text);
 
           var match, $control;
@@ -2768,7 +2891,6 @@
           var $selection = oLayoutInfo.handle().find('.note-control-selection');
           $target = $($selection.data('target'));
         }
-
         if (editor[sEvent]) { // on command
           $editable.trigger('focus');
           editor[sEvent]($editable, sValue, $target);
@@ -3471,6 +3593,16 @@
         return tplPopover('note-link-popover', content);
       };
 
+      var tplLinkImagePopover = function () {
+        var linkImageButton = tplIconButton('fa fa-picture-o icon-picture', {
+          event: 'showImageDialog',
+          title: lang.image.image
+        });
+        var content = '<div class="note-insert btn-group">' +
+                        linkImageButton +
+                      '</div>';
+        return tplPopover('note-link-image-popover', content);
+      };
       var tplImagePopover = function () {
         var fullButton = tplButton('<span class="note-fontsize-10">100%</span>', {
           title: lang.image.resizeFull,
@@ -3533,6 +3665,7 @@
       return '<div class="note-popover">' +
                tplLinkPopover() +
                tplImagePopover() +
+               tplLinkImagePopover() +
                (options.airMode ?  tplAirPopover() : '') +
              '</div>';
     };
@@ -3634,14 +3767,29 @@
     var replaceMacKeys = function (sHtml) {
       return sHtml.replace(/⌘/g, 'Ctrl').replace(/⇧/g, 'Shift');
     };
-
+    var fetch_existing = function () {
+        var domain = [['res_model', '=', 'ir.ui.view'], '|',
+                    ['mimetype', '=', false], ['mimetype', '=like', 'image/%']];
+        return openerp.jsonRpc('/web/dataset/call_kw', 'call', {
+            model: 'ir.attachment',
+            method: 'search_read',
+            args: [],
+            kwargs: {
+                fields: ['name', 'website_url'],
+                domain: domain,
+                order: 'id desc',
+                context: website.get_context(),
+            }
+        }).then(function (records) {
+            records = records
+            display_attachments(records);
+        });
+    };
     var tplDialogs = function (lang, options) {
       var tplImageDialog = function () {
-        var body = '<h5>' + lang.image.selectFromFiles + '</h5>' +
-                   '<input class="note-image-input" type="file" name="files" accept="image/*" />' +
-                   '<h5>' + lang.image.url + '</h5>' +
-                   '<input class="note-image-url form-control span12" type="text" />';
-        var footer = '<button href="#" class="btn btn-primary note-image-btn disabled" disabled>' + lang.image.insert + '</button>';
+        var body = openerp.qweb.render('website.editor.dialog.media',{})
+        fetch_existing()
+        var footer = '<button href="#" class="btn btn-primary note-image-btn">' + lang.image.insert + '</button>';
         return tplDialog('note-image-dialog', lang.image.insert, body, footer);
       };
 
@@ -3874,6 +4022,7 @@
 
       //07. create Dialog
       var $dialog = $(tplDialogs(langInfo, options)).prependTo($editor);
+
       $dialog.find('button.close, a.modal-close').click(function () {
         $(this).closest('.modal').modal('hide');
       });
