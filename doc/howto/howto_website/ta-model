@@ -1,10 +1,10 @@
 # HG changeset patch
-# Parent b97beadb72d4270e2a060d5331ac1e5290f94d11
+# Parent 3fbc9c92bcee395900c441aeb80e68036004a7a0
 
 diff --git a/controllers/academy.py b/controllers/academy.py
 --- a/controllers/academy.py
 +++ b/controllers/academy.py
-@@ -3,19 +3,13 @@
+@@ -3,19 +3,12 @@
  from openerp import http
  from openerp.addons.web.controllers import main
  
@@ -19,8 +19,7 @@ diff --git a/controllers/academy.py b/controllers/academy.py
  class academy(main.Home):
      @http.route('/', auth='public', website=True)
      def index(self):
-+        tas = http.request.registry['academy.tas'].search_read(
-+            http.request.cr, http.request.uid, context=http.request.context)
++        tas = http.request.env['academy.tas'].search([])
          return http.request.render('academy.index', {
 -            'tas': teaching_assistants,
 +            'tas': tas,
@@ -31,8 +30,8 @@ diff --git a/models/academy.py b/models/academy.py
 --- a/models/academy.py
 +++ b/models/academy.py
 @@ -2,7 +2,7 @@
- from openerp import Model
- from openerp import Char
+ from openerp.models import Model
+ from openerp.fields import Char
  
 -class academy(Model):
 -    _name = "academy.academy"

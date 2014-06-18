@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 2465ec0266508489a92e23cc20d208f72edd5ffd
+# Parent 13c65b2eed8f84b951ff5a98051f64fe35ddcf0a
 
 diff --git a/__openerp__.py b/__openerp__.py
 --- a/__openerp__.py
@@ -15,22 +15,17 @@ diff --git a/__openerp__.py b/__openerp__.py
 diff --git a/controllers/academy.py b/controllers/academy.py
 --- a/controllers/academy.py
 +++ b/controllers/academy.py
-@@ -6,10 +6,15 @@ from openerp.addons.web.controllers impo
+@@ -6,8 +6,10 @@ from openerp.addons.web.controllers impo
  class academy(main.Home):
      @http.route('/', auth='public', website=True)
      def index(self):
-+        cr, uid, context = http.request.cr, http.request.uid, http.request.context
-+        Lectures = http.request.registry['academy.lectures']
-         tas = http.request.registry['academy.tas'].search_read(
-             http.request.cr, http.request.uid, context=http.request.context)
-+        lectures = Lectures.browse(
-+            cr, uid, Lectures.search(cr, uid, [], context=context), context=context)
++        lectures = http.request.env['academy.lectures'].search([])
+         tas = http.request.env['academy.tas'].search([])
          return http.request.render('academy.index', {
-             'tas': tas,
 +            'lectures': lectures,
+             'tas': tas,
          })
  
-     @http.route('/tas/<model("academy.tas"):ta>/', auth='public', website=True)
 diff --git a/data/lectures.xml b/data/lectures.xml
 new file mode 100644
 --- /dev/null
@@ -65,9 +60,9 @@ diff --git a/models/academy.py b/models/academy.py
 +++ b/models/academy.py
 @@ -1,9 +1,16 @@
  # -*- coding: utf-8 -*-
- from openerp import Model
--from openerp import Char, Html
-+from openerp import Char, Html, Date
+ from openerp.models import Model
+-from openerp.fields import Char, Html
++from openerp.fields import Char, Html, Date
  
  class TeachingAssistants(Model):
      _name = "academy.tas"

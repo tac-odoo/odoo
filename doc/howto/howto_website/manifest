@@ -73,8 +73,8 @@ new file mode 100644
 +++ b/models/academy.py
 @@ -0,0 +1,8 @@
 +# -*- coding: utf-8 -*-
-+from openerp import Model
-+from openerp import Char
++from openerp.models import Model
++from openerp.fields import Char
 +
 +class academy(Model):
 +    _name = "academy.academy"

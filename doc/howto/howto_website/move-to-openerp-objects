@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 31635a11b750982a00ae4afc9952b5e23f39c985
+# Parent bc8914ae6b552520bdc3856e81d3624dc5a77a99
 
 diff --git a/__init__.py b/__init__.py
 --- a/__init__.py
@@ -26,34 +26,25 @@ diff --git a/__openerp__.py b/__openerp__.py
 diff --git a/controllers/academy.py b/controllers/academy.py
 --- a/controllers/academy.py
 +++ b/controllers/academy.py
-@@ -6,18 +6,29 @@ from openerp.addons.web.controllers impo
+@@ -6,14 +6,22 @@ from openerp.addons.web.controllers impo
  class academy(main.Home):
      @http.route('/', auth='public', website=True)
      def index(self):
-+        registry = http.request.registry
-         cr, uid, context = http.request.cr, http.request.uid, http.request.context
--        Lectures = http.request.registry['academy.lectures']
--        tas = http.request.registry['academy.tas'].search_read(
--            http.request.cr, http.request.uid, context=http.request.context)
+-        lectures = http.request.env['academy.lectures'].search([])
+-        tas = http.request.env['academy.tas'].search([])
++        ta_group = http.request.env.ref('academy.tas')
++        tas = http.request.env['res.users'].search(
++            [('groups_id', '=', [ta_group.id])]
++        )
 +
-+        Data = registry['ir.model.data']
-+        _, ta_group_id = Data.get_object_reference(cr, uid, 'academy', 'tas')
-+        tas = registry['res.users'].search_read(
-+            http.request.cr, http.request.uid,
-+            [('groups_id', '=', [ta_group_id])],
-+            context=http.request.context)
-+
-+        Lectures = registry['event.event']
-+        _, lecture_type_id = Data.get_object_reference(cr, uid, 'academy', 'lecture_type')
-         lectures = Lectures.browse(
--            cr, uid, Lectures.search(cr, uid, [], context=context), context=context)
-+            cr, uid,
-+            Lectures.search(cr, uid, [('type', '=', lecture_type_id),], context=context),
-+            context=context)
++        lecture_type = http.request.env.ref('academy.lecture_type')
++        lectures = http.request.env['event.event'].search(
++            [('type', '=', lecture_type.id)]
++        )
 +
          return http.request.render('academy.index', {
-             'tas': tas,
              'lectures': lectures,
+             'tas': tas,
          })
  
 -    @http.route('/tas/<model("academy.tas"):ta>/', auth='public', website=True)
@@ -229,8 +220,8 @@ deleted file mode 100644
 +++ /dev/null
 @@ -1,16 +0,0 @@
 -# -*- coding: utf-8 -*-
--from openerp import Model
--from openerp import Char, Html, Date
+-from openerp.models import Model
+-from openerp.fields import Char, Html, Date
 -
 -class TeachingAssistants(Model):
 -    _name = "academy.tas"
@@ -249,8 +240,8 @@ new file mode 100644
 --- /dev/null
 +++ b/models/res_partner.py
 @@ -0,0 +1,8 @@
-+from openerp import Model
-+from openerp import Html
++from openerp.models import Model
++from openerp.fields import Html
 +
 +class Partner(Model):
 +    _inherit = 'res.partner'

@@ -1,14 +1,14 @@
 # HG changeset patch
-# Parent 261a40812f17ea8b1a2d8cf47bab41d02e541f9a
+# Parent d57af6d92026e45b336308b143a5c227d44de9f7
 
 diff --git a/models/academy.py b/models/academy.py
 --- a/models/academy.py
 +++ b/models/academy.py
 @@ -1,8 +1,9 @@
  # -*- coding: utf-8 -*-
- from openerp import Model
--from openerp import Char
-+from openerp import Char, Html
+ from openerp.models import Model
+-from openerp.fields import Char
++from openerp.fields import Char, Html
  
  class TeachingAssistants(Model):
      _name = "academy.tas"
