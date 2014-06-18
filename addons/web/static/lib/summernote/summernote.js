@@ -2496,7 +2496,7 @@
           changed($target.find('.url-source').filter(':input'));
         }),
 
-        $linkDialog.on('shown.bs.modal', function () {
+        $linkDialog.one('shown.bs.modal', function () {
           $linkText.val(linkInfo.text);
 
           var match, $control;
@@ -2555,7 +2555,7 @@
 
           $openInNewWindow.prop('checked', linkInfo.newWindow);
 
-          $linkBtn.one('click', function (event) {
+          $linkBtn.on('click', function (event) {
             event.preventDefault();
 
             var $e = $linkDialog.find('.list-group-item.active .url-source').filter(':input');
