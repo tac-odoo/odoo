@@ -334,6 +334,7 @@
     website.RTE = openerp.Widget.extend({
         init: function (EditorBar) {
             this.EditorBar = EditorBar;
+            $('.mediumInsert').remove();
             this._super.apply(this, arguments);
         },
 
@@ -509,8 +510,6 @@
                 ],
                 oninit: function() {
                     self.setup_editables(root);
-                    self.trigger('rte:ready');
-                    def.resolve();
                     var i =0;
                     var insertBlock = '<div class="mediumInsert" contenteditable="false">'+
                     '<div class="mediumInsert-buttons">'+
@@ -525,6 +524,8 @@
                       }
                       i++;
                   });
+                  self.trigger('rte:ready');
+                  def.resolve();
                 },
                 styleWithSpan: false,
                 onpaste: function(e) {

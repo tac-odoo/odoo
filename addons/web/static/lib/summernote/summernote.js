@@ -1605,7 +1605,8 @@
             rng.selectNodeContents(document.getElementsByClassName('insert-image')[0])
             $('p').removeClass('insert-image');
         }
-        rng.insertNode($image[0])
+        rng.insertNode($image[0]);
+        $('.popover').hide();
       }).fail(function () {
         var callbacks = $editable.data('callbacks');
         if (callbacks.onImageUploadError) {
@@ -2360,14 +2361,70 @@
         // auto save and close popup
         this.parent.save();
     };
+    var get_url = function () {
+        var video_id = $("#video_id").val();
+        var video_type = $("#video_type").val();
+        switch (video_type) {
+            case "youtube":
+                return "//www.youtube.com/embed/" + video_id + "?autoplay=" + (this.$("#autoplay").is(":checked") ? 1 : 0);
+            case "vimeo":
+                return "//player.vimeo.com/video/" + video_id + "?autoplay=" + (this.$("#autoplay").is(":checked") ? 1 : 0);
+            case "dailymotion":
+                return "//www.dailymotion.com/embed/video/" + video_id + "?autoplay=" + (this.$("#autoplay").is(":checked") ? 1 : 0);
+            default:
+                return video_id;
+        }
+    };
+    var get_video = function (event) {
+            if (event) event.preventDefault();
+            var needle = $("input#urlvideo").val();
+            var video_id;
+            var video_type;
+
+            if (needle.indexOf(".youtube.") != -1) {
+                video_type = "youtube";
+                video_id = needle.match(/\.youtube\.[a-z]+\/(embed\/|watch\?v=)?([^\/?&]+)/i)[2];
+            } else if (needle.indexOf("//youtu.") != -1) {
+                video_type = "youtube";
+                video_id = needle.match(/youtube\.[a-z]+\/([^\/?&]+)/i)[1];
+            } else if (needle.indexOf("player.vimeo.") != -1 || needle.indexOf("//vimeo.") != -1) {
+                video_type = "vimeo";
+                video_id = needle.match(/vimeo\.[a-z]+\/(video\/)?([^?&]+)/i)[2];
+            } else if (needle.indexOf(".dailymotion.") != -1) {
+                video_type = "dailymotion";
+                video_id = needle.match(/dailymotion\.[a-z]+\/(embed\/)?(video\/)?([^\/?&]+)/i)[3];
+            } else {
+                video_type = "";
+                video_id = needle;
+            }
+
+            $("#video_id").val(video_id);
+            $("#video_type").val(video_type);
+            console.log('url',get_url());
+            $("iframe").attr("src", get_url());
+            return false;
+    };
     this.showImageDialog = function ($editable, $dialog) {
       return $.Deferred(function (deferred) {
         var $imageDialog = $dialog.find('.note-image-dialog');
         var dialUrl;
+        var active = 'imageDialog'
         var $imageInput = $dialog.find('.note-image-input'),
             $imageBtn = $dialog.find('.note-image-btn');
-
-        $imageDialog.one('shown.bs.modal', function () {
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (event) {
+                if ($(event.target).is('[href="#editor-media-image"]')) {
+                    active = 'imageDialog';
+                    $('li.search, li.previous, li.next').removeClass("hidden");
+                } else if ($(event.target).is('[href="#editor-media-icon"]')) {
+                    active = 'iconDialog';
+                    $('li.search, li.previous, li.next').removeClass("hidden");
+                    $('.nav-tabs li.previous, .nav-tabs li.next').addClass("hidden");
+                } else if ($(event.target).is('[href="#editor-media-video"]')) {
+                    active = 'videoDialog'
+                    $('.nav-tabs li.search').addClass("hidden");
+                }
+            });
+            $imageDialog.one('shown.bs.modal', function () {
             $('.existing-attachments img').on('click', function(e){
                 select_existing(e)
                 dialUrl = $(e.currentTarget).attr('src')
@@ -2378,6 +2435,9 @@
             $('button.filepicker').on('click',function () {
                 $('input[type=file]').click ();
             }).on('change' , file_selection());
+            $('input#urlvideo ~ button').on('click', function(e) {
+                get_video(e);
+            });
 //            $('form').on('submit', form_submit());
           // Cloning imageInput to clear element.
           $imageInput.replaceWith($imageInput.clone()
