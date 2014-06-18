@@ -31,7 +31,7 @@
                     <filter string="My Tasks" domain="[('user_id','=',uid)]"/>
                     <filter string="Unassigned Tasks" domain="[('user_id','=',False)]"/>
                     <separator/>
-                    <filter string="My Projects" domain="[('project_id.user_id','=',uid)]"/>
+                    <filter string="My Projects" domain="[('message_is_follower', '=', True)]"/>
                 </search>
             </field>
         </record>
