@@ -1499,7 +1499,7 @@
       var rng = range.create();
       var $el =$(elTarget).parent().parent();
       if($el.hasClass('mediumInsert')) {
-        $el.prev().append('<p class="insert-image"/>')
+        $el.prev().append('<p class="insert-media"/>')
       }
       return rng.isOnEditable() && style.current(rng, elTarget);
     };
@@ -1600,10 +1600,10 @@
           width: Math.min($editable.width(), $image.width())
         });
         var rng = range.create()
-        if($('.insert-image')){
+        if($('.insert-media')){
             rng = document.createRange();
-            rng.selectNodeContents(document.getElementsByClassName('insert-image')[0])
-            $('p').removeClass('insert-image');
+            rng.selectNodeContents(document.getElementsByClassName('insert-media')[0])
+            $('p').removeClass('insert-media');
         }
         rng.insertNode($image[0]);
         $('.popover').hide();
@@ -1669,8 +1669,14 @@
       }
 
       if ($video) {
+        rng = range.create()
+        if($('.insert-media')){
+            rng = document.createRange();
+            rng.selectNodeContents(document.getElementsByClassName('insert-media')[0]);
+            $('p').removeClass('insert-media');
+        }
         $video.attr('frameborder', 0);
-        range.create().insertNode($video[0]);
+        rng.insertNode($video[0]);
       }
     };
 
@@ -2361,6 +2367,15 @@
         // auto save and close popup
         this.parent.save();
     };
+    var change_input = function (e) {
+        var $input = $(e.target);
+        var $button = $input.parent().find("button");
+        if ($input.val() === "") {
+            $button.addClass("btn-default").removeClass("btn-primary");
+        } else {
+            $button.removeClass("btn-default").addClass("btn-primary");
+        }
+    }
     var get_url = function () {
         var video_id = $("#video_id").val();
         var video_type = $("#video_type").val();
@@ -2400,9 +2415,17 @@
 
             $("#video_id").val(video_id);
             $("#video_type").val(video_type);
-            console.log('url',get_url());
             $("iframe").attr("src", get_url());
-            return false;
+            return get_url();
+    };
+    var get_embed_video = function (event) {
+        event.preventDefault();
+        var embedvideo = $("input#embedvideo").val().match(/src=["']?([^"']+)["' ]?/);
+        if (embedvideo) {
+            $("input#urlvideo").val(embedvideo[1]);
+            return get_video(event);
+        }
+        return false;
     };
     this.showImageDialog = function ($editable, $dialog) {
       return $.Deferred(function (deferred) {
@@ -2436,7 +2459,16 @@
                 $('input[type=file]').click ();
             }).on('change' , file_selection());
             $('input#urlvideo ~ button').on('click', function(e) {
-                get_video(e);
+                dialUrl = get_video(e);
+            });
+            $('input#embedvideo ~ button').on('click', function(e) {
+                dialUrl = get_embed_video(e);
+            });
+            $('input#urlvideo').on('change keyup', function(e){
+                change_input(e);
+            });
+            $('input#embedvideo').on('change keyup', function(e){
+                change_input(e);
             });
 //            $('form').on('submit', form_submit());
           // Cloning imageInput to clear element.
@@ -2450,7 +2482,7 @@
           $imageBtn.click(function (event) {
             event.preventDefault();
             $imageDialog.modal('hide');
-            deferred.resolve(dialUrl);
+            deferred.resolve(dialUrl, active);
           });
 
         }).one('hidden.bs.modal', function () {
@@ -2975,13 +3007,17 @@
         } else if (sEvent === 'showImageDialog') {
           $editable.focus();
 
-          dialog.showImageDialog($editable, $dialog).then(function (data) {
-            if (typeof data === 'string') {
+          dialog.showImageDialog($editable, $dialog).then(function (data, active) {
+            if (typeof data === 'string' && active == 'imageDialog') {
               editor.restoreRange($editable);
               editor.insertImage($editable, data);
-            } else {
+            } else if (active == 'imageDialog') {
               insertImages($editable, data);
+            } else {
+                editor.restoreRange($editable);
+                editor.insertVideo($editable, data);
             }
+
           });
         } else if (sEvent === 'showVideoDialog') {
           $editable.focus();
