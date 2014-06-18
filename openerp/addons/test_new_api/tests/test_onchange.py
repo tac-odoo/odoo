@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from lxml import etree
 from openerp.tests import common
 
 class TestOnChange(common.TransactionCase):
