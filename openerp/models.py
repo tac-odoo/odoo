@@ -5495,8 +5495,9 @@ class BaseModel(object):
         if match:
             method, params = match.groups()
             # evaluate params -> tuple
-            # TODO: add 'parent' field when it makes sense
-            global_vars = {'context': self._context}
+            global_vars = {'context': self._context, 'uid': self._uid}
+            if self._context.get('field_parent'):
+                global_vars['parent'] = self[self._context['field_parent']]
             field_vars = self._convert_to_write(self._cache)
             params = eval(params, global_vars, field_vars)
             # call onchange method
