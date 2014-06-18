@@ -5524,6 +5524,15 @@ class BaseModel(object):
         if field_name and field_name not in self._fields:
             return {}
 
+        # determine subfields for field.convert_to_write() below
+        secondary = []
+        subfields = defaultdict(set)
+        for dotname in field_onchange:
+            if '.' in dotname:
+                secondary.append(dotname)
+                name, subname = dotname.split('.')
+                subfields[name].add(subname)
+
         # create a new record with values, and attach `self` to it
         with env.do_in_draft():
             record = self.new(values)
@@ -5539,7 +5548,7 @@ class BaseModel(object):
         for name in todo:
             record[name] = record[name]
 
-        result = {}
+        result = {'value': {}}
 
         while todo:
             name = todo.pop()
@@ -5553,26 +5562,18 @@ class BaseModel(object):
                     record._onchange_eval(name, field_onchange[name], result)
 
                 # force re-evaluation of function fields on secondary records
-                for field_seq in field_onchange:
+                for field_seq in secondary:
                     record.mapped(field_seq)
 
                 # determine which fields have been modified
                 for name, oldval in values.iteritems():
                     newval = record[name]
                     if newval != oldval or getattr(newval, '_dirty', False):
+                        field = self._fields[name]
+                        result['value'][name] = field.convert_to_write(
+                            newval, record._origin, subfields[name],
+                        )
                         todo.add(name)
-
-        # complete result with values, and return it
-        subfields = defaultdict(set)
-        for dotname in field_onchange:
-            if '.' in dotname:
-                name, subname = dotname.split('.')
-                subfields[name].add(subname)
-
-        result['value'] = {
-            name: self._fields[name].convert_to_write(record[name], self, subfields[name])
-            for name in done
-        }
 
         return result
 
