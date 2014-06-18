@@ -21,35 +21,13 @@ class TestOnChange(common.TransactionCase):
         with self.assertRaises(AttributeError):
             self.Discussion.not_really_a_method()
 
-    def _get_field_onchange(self, records):
-        """ Return the onchange spec from the form view of the given model. """
-        result = {}
-
-        def process_view(view, prefix=''):
-            def process_node(node, prefix):
-                if node.tag == 'field':
-                    name = node.attrib['name']
-                    names = "%s.%s" % (prefix, name) if prefix else name
-                    if not result.get(names):
-                        result[names] = node.attrib.get('on_change')
-                    for subview in view['fields'][name]['views'].itervalues():
-                        process_view(subview, names)
-                else:
-                    for child in node:
-                        process_node(child, prefix)
-
-            process_node(etree.fromstring(view['arch']), prefix)
-
-        process_view(records.fields_view_get(view_type='form'))
-        return result
-
     def test_new_onchange(self):
         """ test the effect of onchange() """
         discussion = self.env.ref('test_new_api.discussion_0')
         BODY = "What a beautiful day!"
         USER = self.env.user
 
-        field_onchange = self._get_field_onchange(self.Message)
+        field_onchange = self.Message._onchange_spec()
         self.assertEqual(field_onchange.get('author'), '1')
         self.assertEqual(field_onchange.get('body'), '1')
         self.assertEqual(field_onchange.get('discussion'), '1')
@@ -87,7 +65,7 @@ class TestOnChange(common.TransactionCase):
         message = self.Message.create({'body': BODY})
         self.assertEqual(message.name, "[%s] %s" % ('', USER.name))
 
-        field_onchange = self._get_field_onchange(self.Discussion)
+        field_onchange = self.Discussion._onchange_spec()
         self.assertEqual(field_onchange.get('name'), '1')
         self.assertEqual(field_onchange.get('messages'), '1')
 
@@ -164,7 +142,7 @@ class TestOnChange(common.TransactionCase):
         discussion = self.env.ref('test_new_api.discussion_0')
         demo = self.env.ref('base.user_demo')
 
-        field_onchange = self._get_field_onchange(self.Discussion)
+        field_onchange = self.Discussion._onchange_spec()
         self.assertEqual(field_onchange.get('moderator'), '1')
 
         # first remove demo user from participants

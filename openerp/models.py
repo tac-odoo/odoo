@@ -5471,6 +5471,32 @@ class BaseModel(object):
         return field.name in self._onchange_methods or \
             any(dep in other_fields for dep in field.dependents)
 
+    @api.model
+    def _onchange_spec(self, view_info=None):
+        """ Return the onchange spec from a view description; if not given, the
+            result of ``self.fields_view_get()`` is used.
+        """
+        result = {}
+
+        # for traversing the XML arch and populating result
+        def process(node, info, prefix):
+            if node.tag == 'field':
+                name = node.attrib['name']
+                names = "%s.%s" % (prefix, name) if prefix else name
+                if not result.get(names):
+                    result[names] = node.attrib.get('on_change')
+                # traverse the subviews included in relational fields
+                for subinfo in info['fields'][name]['views'].itervalues():
+                    process(etree.fromstring(subinfo['arch']), subinfo, names)
+            else:
+                for child in node:
+                    process(child, info, prefix)
+
+        if view_info is None:
+            view_info = self.fields_view_get()
+        process(etree.fromstring(view_info['arch']), view_info, '')
+        return result
+
     def _onchange_eval(self, field_name, onchange, result):
         """ Apply onchange method(s) for field `field_name` with spec `onchange`
             on record `self`. Value assignments are applied on `self`, while
