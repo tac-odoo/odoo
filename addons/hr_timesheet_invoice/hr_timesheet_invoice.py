@@ -299,7 +299,7 @@ class account_analytic_line(osv.osv):
 
 class hr_analytic_timesheet(osv.osv):
     _inherit = "hr.analytic.timesheet"
-    def on_change_account_id(self, cr, uid, ids, account_id, user_id=False):
+    def on_change_account_id(self, cr, uid, ids, account_id, user_id=False, context=None):
         res = {}
         if not account_id:
             return res
