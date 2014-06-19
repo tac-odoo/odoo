@@ -228,8 +228,6 @@ class project(osv.osv):
         'active': fields.boolean('Active', help="If the active field is set to False, it will allow you to hide the project without removing it."),
         'sequence': fields.integer('Sequence', help="Gives the sequence order when displaying a list of Projects."),
         'analytic_account_id': fields.many2one('account.analytic.account', 'Contract/Analytic', help="Link this project to an analytic account if you need financial management on projects. It enables you to connect projects with budgets, planning, cost and revenue analysis, timesheets on projects, etc.", ondelete="cascade", required=True),
-        'members': fields.many2many('res.users', 'project_user_rel', 'project_id', 'uid', 'Project Members',
-            help="Project's members are users who can have an access to the tasks related to this project.", states={'close':[('readonly',True)], 'cancelled':[('readonly',True)]}),
         'tasks': fields.one2many('project.task', 'project_id', "Task Activities"),
         'planned_hours': fields.function(_progress_rate, multi="progress", string='Planned Time', help="Sum of planned hours of all tasks related to this project and its child projects.",
             store = {
@@ -429,15 +427,17 @@ class project(osv.osv):
         projects = self.browse(cr, uid, ids, context=context)
 
         for project in projects:
-            if (not project.members) and force_members:
-                raise osv.except_osv(_('Warning!'),_("You must assign members on the project '%s'!") % (project.name,))
+            domain = [partner.id for partner in project.message_follower_ids]
+            user_id = self.pool.get('res.users').search(cr, uid, [('partner_id','in', domain)], context=context)
+            if (not user_id) and force_members:
+                raise osv.except_osv(_('Warning!'),_("You must assign followers on the project '%s'!") % (project.name,))
 
         resource_pool = self.pool.get('resource.resource')
 
         result = "from openerp.addons.resource.faces import *\n"
         result += "import datetime\n"
         for project in self.browse(cr, uid, ids, context=context):
-            u_ids = [i.id for i in project.members]
+            u_ids = [partner.id for partner in project.message_follower_ids]
             if project.user_id and (project.user_id.id not in u_ids):
                 u_ids.append(project.user_id.id)
             for task in project.tasks:
@@ -461,7 +461,7 @@ def Project():
         calendar_id = project.resource_calendar_id and project.resource_calendar_id.id or False
         working_days = resource_pool.compute_working_calendar(cr, uid, calendar_id, context=context)
         # TODO: check if we need working_..., default values are ok.
-        puids = [x.id for x in project.members]
+        puids = [partner.id for partner in project.message_follower_ids]
         if project.user_id:
             puids.append(project.user_id.id)
         result = """
@@ -625,7 +625,7 @@ class task(osv.osv):
         project_id = self._resolve_project_id_from_context(cr, uid, context=context)
         access_rights_uid = access_rights_uid or uid
         if project_id:
-            ids += self.pool.get('project.project').read(cr, access_rights_uid, project_id, ['members'], context=context)['members']
+            ids += self.pool.get('project.project').read(cr, access_rights_uid, project_id, ['message_follower_ids'], context=context)['message_follower_ids']
             order = res_users._order
             # lame way to allow reverting search, should just work in the trivial case
             if read_group_order == 'user_id desc':
