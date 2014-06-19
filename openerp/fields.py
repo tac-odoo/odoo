@@ -698,14 +698,14 @@ class Field(object):
     def determine_value(self, record):
         """ Determine the value of `self` for `record`. """
         env = record.env
-        if self.depends:
-            # this is a computed field
-            if self.store and not env.draft:
-                # recompute field on record if required
+
+        if self.store and not (self.depends and env.draft):
+            # this is a stored field
+            if self.depends:
+                # this is a stored computed field, check for recomputation
                 recs = record._recompute_check(self)
                 if recs:
-                    # execute the compute method in DRAFT mode; the result is
-                    # saved to database by method BaseModel.recompute()
+                    # recompute the value (only in cache)
                     with env.do_in_draft():
                         self.compute_value(recs.exists())
                     # HACK: if result is in the wrong cache, copy values
@@ -718,20 +718,21 @@ class Field(object):
                             except MissingError as e:
                                 values = FailedValue(e)
                             target._cache.update(values)
-                else:
-                    record._prefetch_field(self)
-            else:
-                # execute the compute method in DRAFT mode
-                with env.do_in_draft():
-                    if self.recursive:
-                        self.compute_value(record)
-                    else:
-                        recs = record._in_cache_without(self)
-                        self.compute_value(recs.exists())
+                    # the result is saved to database by BaseModel.recompute()
+                    return
 
-        elif self.store:
-            # this is a simple stored field
+            # read the field from database
             record._prefetch_field(self)
+
+        elif self.compute:
+            # this is either a non-stored computed field, or a stored computed
+            # field in draft mode
+            with env.do_in_draft():
+                if self.recursive:
+                    self.compute_value(record)
+                else:
+                    recs = record._in_cache_without(self)
+                    self.compute_value(recs.exists())
 
         else:
             # this is a non-stored non-computed field

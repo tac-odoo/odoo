@@ -73,6 +73,10 @@ class TestNewFields(common.TransactionCase):
             message.write({'body': (message.body or '') + "!!!"})
             self.assertEqual(message.size, size + 3)
 
+        # special case: computed field without dependency must be computed
+        record = self.env['test_new_api.mixed'].create({})
+        self.assertTrue(record.now)
+
     def test_11_stored(self):
         """ test stored fields """
         # find the demo discussion

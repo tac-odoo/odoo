@@ -159,9 +159,15 @@ class MixedModel(models.Model):
 
     number = fields.Float(digits=(10, 2), default=3.14)
     date = fields.Date()
+    now = fields.Datetime(compute='_compute_now')
     lang = fields.Selection(string='Language', selection='_get_lang')
     reference = fields.Reference(string='Related Document',
         selection='_reference_models')
+
+    @api.one
+    def _compute_now(self):
+        # this is a non-stored computed field without dependencies
+        self.now = fields.Datetime.now()
 
     @api.model
     def _get_lang(self):
