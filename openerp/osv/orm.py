@@ -1343,7 +1343,7 @@ class BaseModel(object):
             self._parent_store_compute(cr)
         return position, 0, 0, 0
 
-    def load(self, cr, uid, fields, data, context=None):
+    def load(self, cr, uid, fields, data, csv=False, context=None):
         """
         Attempts to load the data matrix, and returns a list of ids (or
         ``False`` if there was an error and no id could be generated) and a
@@ -1387,6 +1387,22 @@ class BaseModel(object):
                         u"Unknown database error: '%s'" % e))
                 break
             try:
+                if csv:
+                    cur_obj = self.pool.get(self._name)
+                    view_info = self.fields_view_get(cr, uid, False, 'form', context)
+                    interpreter =  tools.YamlInterpreter(cr, current_module, xid, mode, filename=None)
+                    rec_data = {}
+                    data_list = []
+                    for key,data in record.items():
+                        if isinstance(data, (list,dict)):
+                            for add_data in data:
+                                if add_data[2]:
+                                    data_list.append(add_data[2])
+                            rec_data[key] = data_list
+                        else:
+                            rec_data[key] = data
+                    record_dict = interpreter._create_record(cur_obj, rec_data, view_info)
+                    record.update(record_dict)
                 ids.append(ModelData._update(cr, uid, self._name,
                      current_module, record, mode=mode, xml_id=xid,
                      noupdate=noupdate, res_id=id, context=context))

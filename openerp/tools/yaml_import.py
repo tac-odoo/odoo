@@ -152,6 +152,8 @@ class YamlInterpreter(object):
         #    raise YamlImportException("The xml_id should be a non empty string.")
         elif isinstance(xml_id, types.IntType):
             id = xml_id
+        elif isinstance(xml_id, (list,tuple)):
+            id = xml_id[-1]
         elif xml_id in self.id_map:
             id = self.id_map[xml_id]
         else:
@@ -515,10 +517,19 @@ class YamlInterpreter(object):
             value = self.get_id(expression)
         elif column._type == "one2many":
             other_model = self.get_model(column._obj)
-            value = [(0, 0, self._create_record(other_model, fields, view_info, parent, default=default)) for fields in expression]
+            if expression is not False:
+                value = [(0, 0, self._create_record(other_model, fields, view_info, parent, default=default)) for fields in expression]
+            else:
+                value = expression
         elif column._type == "many2many":
-            ids = [self.get_id(xml_id) for xml_id in expression]
-            value = [(6, 0, ids)]
+            if expression is not False:
+                ids = [self.get_id(xml_id) for xml_id in expression]
+                if ids and type(ids[0]) is list:
+                    value = [(6, 0, ids[0])]
+                else:
+                    value = [(6, 0, ids)]
+            else:
+                value = expression
         elif column._type == "date" and is_string(expression):
             # enforce ISO format for string date values, to be locale-agnostic during tests
             time.strptime(expression, misc.DEFAULT_SERVER_DATE_FORMAT)
