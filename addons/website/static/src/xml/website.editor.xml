@@ -92,35 +92,52 @@
             </form>
     </t>
     <t t-name="website.editor.dialog.media">
-        <ul class="nav nav-tabs">
-            <li class="active"><a href="#editor-media-image" data-toggle="tab">Image</a></li>
-            <li><a href="#editor-media-icon" data-toggle="tab">Pictogram</a></li>
-            <li><a href="#editor-media-video" data-toggle="tab">Video</a></li>
-            <li class="search" style="float: right;">
-                <ul class="pager mb0 mt0">
-                    <li class="previous disabled"><a href="#">← Previous</a></li>
-                    <li class="next disabled"><a href="#">Next →</a></li>
-                </ul>
-            </li>
-            <li class="search" style="float: right;">
-                <form action="#">
-                    <div class="form-group font-icons fa fa-search mb0">
-                        <input type="search" class="form-control" id="icon-search"/>
+        <div class="modal note-image-dialog" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog select-media">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h3 class="modal-title">Select a Media</h3>
                     </div>
-                </form>
-            </li>
-        </ul>
-
-        <!-- Tab panes -->
-        <div class="tab-content">
-            <div class="tab-pane fade in active" id="editor-media-image">
-                <t t-call="website.editor.dialog.image"/>
-            </div>
-            <div class="tab-pane fade" id="editor-media-icon">
-                <t t-call="website.editor.dialog.font-icons"/>
-            </div>
-            <div class="tab-pane fade" id="editor-media-video">
-                <t t-call="website.editor.dialog.video"/>
+                    <div class="modal-body">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#editor-media-image" data-toggle="tab">Image</a></li>
+                            <li><a href="#editor-media-icon" data-toggle="tab">Pictogram</a></li>
+                            <li><a href="#editor-media-video" data-toggle="tab">Video</a></li>
+                            <li class="search" style="float: right;">
+                                <ul class="pager mb0 mt0">
+                                    <li class="previous disabled"><a href="#">← Previous</a></li>
+                                    <li class="next disabled"><a href="#">Next →</a></li>
+                                </ul>
+                            </li>
+                            <li class="search" style="float: right;">
+                                <form action="#">
+                                    <div class="form-group font-icons fa fa-search mb0">
+                                        <input type="search" class="form-control" id="icon-search"/>
+                                    </div>
+                                </form>
+                            </li>
+                        </ul>
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                            <div class="tab-pane fade in active" id="editor-media-image">
+                                <t t-call="website.editor.dialog.image"/>
+                            </div>
+                            <div class="tab-pane fade" id="editor-media-icon">
+                                <t t-call="website.editor.dialog.font-icons"/>
+                            </div>
+                            <div class="tab-pane fade" id="editor-media-video">
+                                <t t-call="website.editor.dialog.video"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary note-image-btn save">Save</button>
+                        <button type="button" class="btn hidden wait" disabled="disabled"/>
+                        or
+                        <a href="#" data-dismiss="modal" aria-hidden="true">Discard</a>
+                    </div>
+                </div>
             </div>
         </div>
     </t>

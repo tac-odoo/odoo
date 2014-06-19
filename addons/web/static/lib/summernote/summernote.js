@@ -3073,11 +3073,12 @@
               editor.insertImage($editable, data);
             } else if (active == 'imageDialog') {
               insertImages($editable, data);
-            } else if (active == 'iconDialog') {
-                editor.insertIcon($editable, $dialog);
-            } else {
+            } else if(active == 'videoDialog') {
                 editor.restoreRange($editable);
                 editor.insertVideo($editable, data);
+            }
+            else if(active == 'iconDialog') {
+                editor.insertIcon($editable, $dialog);
             }
 
           });
@@ -3947,8 +3948,7 @@
       var tplImageDialog = function () {
         var body = openerp.qweb.render('website.editor.dialog.media',{'icons':options.icons})
         fetch_existing()
-        var footer = '<button href="#" class="btn btn-primary note-image-btn">' + lang.image.insert + '</button>';
-        return tplDialog('note-image-dialog', lang.image.insert, body, footer);
+        return body;
       };
 
       var tplLinkDialog = function () {
