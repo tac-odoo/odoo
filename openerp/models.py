@@ -5448,12 +5448,12 @@ class BaseModel(object):
             while env.todo:
                 field, recs = next(env.todo.iteritems())
                 # evaluate the fields to recompute, and save them to database
-                for rec in recs:
+                for rec, rec1 in zip(recs, recs.with_context(recompute=False)):
                     try:
                         values = rec._convert_to_write({
                             f.name: rec[f.name] for f in field.computed_fields
                         })
-                        rec.with_context(recompute=False)._write(values)
+                        rec1._write(values)
                     except MissingError:
                         pass
                 # mark the computed fields as done
