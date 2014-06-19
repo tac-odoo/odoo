@@ -117,7 +117,7 @@
                 <t t-call="website.editor.dialog.image"/>
             </div>
             <div class="tab-pane fade" id="editor-media-icon">
-<!--                <t t-call="website.editor.dialog.font-icons">-->
+                <t t-call="website.editor.dialog.font-icons"/>
             </div>
             <div class="tab-pane fade" id="editor-media-video">
                 <t t-call="website.editor.dialog.video"/>
@@ -265,7 +265,7 @@
             <input type="hidden" id="fa-size"/>
             <div class="font-icons-icons">
                 <t t-call="website.editor.dialog.font-icons.icons">
-                    <t t-set="icons" t-value="widget.icons"/>
+                    <t t-set="icons" t-value="icons"/>
                 </t>
             </div>
             <div class="form-group mt32" id="fa-preview">

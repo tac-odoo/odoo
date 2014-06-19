@@ -1615,6 +1615,24 @@
       });
     };
 
+/**
+     * insert icon
+     *
+     * @param {jQuery} $editable
+     * @param {String} sUrl
+     */
+    this.insertIcon = function ($editable, $dialog) {
+        $image = $dialog.find('.font-icons-selected')
+        var rng = range.create()
+        if($('.insert-media')){
+            rng = document.createRange();
+            rng.selectNodeContents(document.getElementsByClassName('insert-media')[0])
+            $('p').removeClass('insert-media');
+        }
+        rng.insertNode($image[0]);
+        $('.popover').hide();
+    };
+
     /**
      * insert video
      * @param {jQuery} $editable
@@ -2427,6 +2445,43 @@
         }
         return false;
     };
+    var update_preview = function ($imageDialog) {
+        var $preview = $imageDialog.find('#fa-preview').empty();
+
+        var sizes = ['', 'fa-2x', 'fa-3x', 'fa-4x', 'fa-5x'];
+        var classes = get_fa_classes($imageDialog);
+        var no_sizes = _.difference(classes, sizes).join(' ');
+        var selected = false;
+        for (var i = sizes.length - 1; i >= 0; i--) {
+            var size = sizes[i];
+
+            var $p = $('<span>')
+                    .attr('data-size', size)
+                    .addClass(size)
+                    .addClass(no_sizes);
+            if ((size && _.contains(classes, size)) || (classes[2] === "" && !selected)) {
+                $preview.append($p.clone());
+                $imageDialog.find('#fa-size').val(size);
+                $p.addClass('font-icons-selected');
+                selected = true;
+            }
+            $preview.prepend($p);
+            $('#fa-preview span').on('click', function(e){
+                e.preventDefault();
+                $imageDialog.find('#fa-size').val(e.target.getAttribute('data-size'));
+                update_preview($imageDialog);
+            })
+        }
+    };
+    var get_fa_classes = function ($imageDialog) {
+        return [
+            'fa',
+            $imageDialog.find('#fa-icon').val(),
+            $imageDialog.find('#fa-size').val(),
+            $imageDialog.find('#fa-rotation').val(),
+            $imageDialog.find('#fa-border').prop('checked') ? 'fa-border' : ''
+        ];
+    };
     this.showImageDialog = function ($editable, $dialog) {
       return $.Deferred(function (deferred) {
         var $imageDialog = $dialog.find('.note-image-dialog');
@@ -2454,6 +2509,11 @@
             })
             $('.existing-attachment-remove').on('click', function(e){
                 try_remove(e);
+            })
+            $('.font-icons-icon').on('click', function(e){
+                e.preventDefault();
+                $imageDialog.find('#fa-icon').val(e.target.getAttribute('data-id'));
+                update_preview($imageDialog);
             })
             $('button.filepicker').on('click',function () {
                 $('input[type=file]').click ();
@@ -3013,6 +3073,8 @@
               editor.insertImage($editable, data);
             } else if (active == 'imageDialog') {
               insertImages($editable, data);
+            } else if (active == 'iconDialog') {
+                editor.insertIcon($editable, $dialog);
             } else {
                 editor.restoreRange($editable);
                 editor.insertVideo($editable, data);
@@ -3883,7 +3945,7 @@
     };
     var tplDialogs = function (lang, options) {
       var tplImageDialog = function () {
-        var body = openerp.qweb.render('website.editor.dialog.media',{})
+        var body = openerp.qweb.render('website.editor.dialog.media',{'icons':options.icons})
         fetch_existing()
         var footer = '<button href="#" class="btn btn-primary note-image-btn">' + lang.image.insert + '</button>';
         return tplDialog('note-image-dialog', lang.image.insert, body, footer);
