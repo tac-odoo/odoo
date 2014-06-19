@@ -144,3 +144,6 @@ def modifiers_tests():
     test_modifiers({}, '{}')
     test_modifiers({"invisible": True}, '{"invisible": true}')
     test_modifiers({"invisible": False}, '{}')
+
+        else:
+            fields_to_read = list(set(fields_to_read))
