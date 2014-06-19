@@ -2289,11 +2289,12 @@
             ));
         });
     };
+    var page = 0;
     var display_attachments = function (records) {
         this.$('.help-block').empty();
         var per_screen = 12;
 
-        var from = 0 * per_screen;
+        var from = page * per_screen;
         // Create rows of 3 records
         var rows = _(records).chain()
             .slice(from, from + per_screen)
@@ -3942,6 +3943,14 @@
         }).then(function (records) {
             records = records
             display_attachments(records);
+            $(".pager > li").click(function (e) {
+                e.preventDefault();
+
+                var $target = $(e.currentTarget);
+                if ($target.hasClass('disabled')) { return; }
+                page += $target.hasClass('previous') ? -1 : 1;
+                display_attachments(records);
+            });
         });
     };
     var tplDialogs = function (lang, options) {
