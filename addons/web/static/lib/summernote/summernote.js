@@ -3946,38 +3946,13 @@
     };
     var tplDialogs = function (lang, options) {
       var tplImageDialog = function () {
-        var body = openerp.qweb.render('website.editor.dialog.media',{'icons':options.icons})
+        var dialogMedia = openerp.qweb.render('website.editor.dialog.media',{'icons':options.icons})
         fetch_existing()
-        return body;
+        return dialogMedia;
       };
 
       var tplLinkDialog = function () {
-        var body = '<div class="form-group">' +
-                     '<label>' + lang.link.textToDisplay + '</label>' +
-                     '<input class="note-link-text form-control span12" type="text" />' +
-                   '</div>' +
-                   '<div class="form-group">' +
-                     '<label>' + lang.link.url + '</label>' +
-                     '<input class="note-link-url form-control span12" type="text" />' +
-                   '</div>' +
-                   (!options.disableLinkTarget ?
-                     '<div class="checkbox">' +
-                       '<label>' + '<input type="checkbox" checked> ' +
-                         lang.link.openInNewWindow +
-                       '</label>' +
-                     '</div>' : ''
-                   );
-        var footer = '';
-        return tplDialog('note-link-dialog', lang.link.insert, openerp.qweb.render('website.editor.dialog.link',{}), footer);
-      };
-
-      var tplVideoDialog = function () {
-        var body = '<div class="form-group">' +
-                     '<label>' + lang.video.url + '</label>&nbsp;<small class="text-muted">' + lang.video.providers + '</small>' +
-                     '<input class="note-video-url form-control span12" type="text" />' +
-                   '</div>';
-        var footer = '<button href="#" class="btn btn-primary note-video-btn disabled" disabled>' + lang.video.insert + '</button>';
-        return tplDialog('note-video-dialog', lang.video.insert, body, footer);
+        return openerp.qweb.render('website.editor.dialog.link',{});
       };
 
       var tplHelpDialog = function () {
