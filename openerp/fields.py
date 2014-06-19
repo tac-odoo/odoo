@@ -1229,10 +1229,11 @@ class Many2one(_Relational):
 
         # determine self.inverse_field
         for field in env[self.comodel_name]._fields.itervalues():
-            field.setup(env)
-            if isinstance(field, One2many) and field.inverse_field == self:
-                self.inverse_field = field
-                break
+            if field.type == 'one2many':
+                field.setup(env)
+                if field.inverse_field == self:
+                    self.inverse_field = field
+                    break
 
         # determine self.delegate
         self.delegate = self.name in env[self.model_name]._inherits.values()
@@ -1475,11 +1476,11 @@ class Many2many(_RelationalMulti):
         if self.relation:
             expected = (self.relation, self.column2, self.column1)
             for field in env[self.comodel_name]._fields.itervalues():
-                field.setup(env)
-                if isinstance(field, Many2many) and \
-                        (field.relation, field.column1, field.column2) == expected:
-                    self.inverse_field = field
-                    break
+                if field.type == 'many2many':
+                    field.setup(env)
+                    if (field.relation, field.column1, field.column2) == expected:
+                        self.inverse_field = field
+                        break
 
     _column_rel = property(attrgetter('relation'))
     _column_id1 = property(attrgetter('column1'))
