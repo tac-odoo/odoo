@@ -561,6 +561,7 @@ class hr_payslip(osv.osv):
         rules = {}
         categories_dict = {}
         blacklist = []
+        worked_days_obj = False
         payslip_obj = self.pool.get('hr.payslip')
         inputs_obj = self.pool.get('hr.payslip.worked_days')
         obj_rule = self.pool.get('hr.salary.rule')
@@ -574,7 +575,8 @@ class hr_payslip(osv.osv):
 
         categories_obj = BrowsableObject(self.pool, cr, uid, payslip.employee_id.id, categories_dict)
         input_obj = InputLine(self.pool, cr, uid, payslip.employee_id.id, inputs)
-        worked_days_obj = WorkedDays(self.pool, cr, uid, payslip.employee_id.id, worked_days)
+        if worked_days:
+            worked_days_obj = WorkedDays(self.pool, cr, uid, payslip.employee_id.id, worked_days)
         payslip_obj = Payslips(self.pool, cr, uid, payslip.employee_id.id, payslip)
         rules_obj = BrowsableObject(self.pool, cr, uid, payslip.employee_id.id, rules)
 
