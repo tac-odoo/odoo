@@ -3970,7 +3970,6 @@
       return '<div class="note-dialog">' +
                tplImageDialog() +
                tplLinkDialog() +
-               tplVideoDialog() +
                tplHelpDialog() +
              '</div>';
     };
