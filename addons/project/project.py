@@ -427,9 +427,7 @@ class project(osv.osv):
         projects = self.browse(cr, uid, ids, context=context)
 
         for project in projects:
-            domain = [partner.id for partner in project.message_follower_ids]
-            user_id = self.pool.get('res.users').search(cr, uid, [('partner_id','in', domain)], context=context)
-            if (not user_id) and force_members:
+            if (not project.message_follower_ids) and force_members:
                 raise osv.except_osv(_('Warning!'),_("You must assign followers on the project '%s'!") % (project.name,))
 
         resource_pool = self.pool.get('resource.resource')
@@ -437,7 +435,13 @@ class project(osv.osv):
         result = "from openerp.addons.resource.faces import *\n"
         result += "import datetime\n"
         for project in self.browse(cr, uid, ids, context=context):
-            u_ids = [partner.id for partner in project.message_follower_ids]
+            for follower in  project.message_follower_ids:
+                u_ids = []
+                if follower.user_ids:
+                    domain = follower.user_ids[0].partner_id.id
+                    res_user_id = self.pool.get('res.users').search(cr, uid, [('partner_id','=', domain)], context=context)
+                    u_ids.append(res_user_id[0])
+                    
             if project.user_id and (project.user_id.id not in u_ids):
                 u_ids.append(project.user_id.id)
             for task in project.tasks:
@@ -461,7 +465,14 @@ def Project():
         calendar_id = project.resource_calendar_id and project.resource_calendar_id.id or False
         working_days = resource_pool.compute_working_calendar(cr, uid, calendar_id, context=context)
         # TODO: check if we need working_..., default values are ok.
-        puids = [partner.id for partner in project.message_follower_ids]
+
+        for follower in  project.message_follower_ids:
+            puids = []
+            if follower.user_ids:
+                domain = follower.user_ids[0].partner_id.id
+                res_user_id = self.pool.get('res.users').search(cr, uid, [('partner_id','=', domain)], context=context)
+                puids.append(res_user_id[0])
+
         if project.user_id:
             puids.append(project.user_id.id)
         result = """
