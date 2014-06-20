@@ -440,12 +440,11 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
         self._onchange_specs = {};
         _.each(this.fields, function(field, name) {
             self._onchange_specs[name] = field.node.attrs.on_change || "";
-            _.each(field.view.fields, function(subfield, subname) {
-            // _.each(field.field.views, function(view) {
-            //     _.each(view.fields, function(subfield, subname) {
+            if (!_.isEmpty(field.field.views)) {
+                _.each(field.view.fields, function(subfield, subname) {
                     self._onchange_specs[name + "." + subname] = subfield.node.attrs.on_change || "";
-                // });
-            });
+                });
+            }
         });
     },
     _get_onchange_values: function() {
