@@ -3015,7 +3015,7 @@ class BaseModel(object):
         if not fields:
             fields = filter(valid, self._fields)
         else:
-            invalid_fields = filter(lambda name: not valid(name), fields)
+            invalid_fields = list(set(filter(lambda name: not valid(name), fields)))
             if invalid_fields:
                 _logger.warning('Access Denied by ACLs for operation: %s, uid: %s, model: %s, fields: %s',
                     operation, user, self._name, ', '.join(invalid_fields))
