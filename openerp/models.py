@@ -4232,12 +4232,6 @@ class BaseModel(object):
 
         return True
 
-    #
-    # TODO: Validate
-    #
-    def perm_write(self, cr, user, ids, fields, context=None):
-        raise NotImplementedError(_('This method does not exist anymore'))
-
     # TODO: ameliorer avec NULL
     def _where_calc(self, cr, user, domain, active_test=True, context=None):
         """Computes the WHERE clause needed to implement an OpenERP domain.
