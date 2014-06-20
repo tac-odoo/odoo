@@ -336,7 +336,7 @@ class TestMailMessage(TestMail):
         self.assertEqual(len(notif_ids), 1, 'mail_message set_message_read: more than one notification created')
         # Test: notification read
         notif = self.mail_notification.browse(cr, uid, notif_ids[0])
-        self.assertTrue(notif['read'], 'mail_notification read failed')
+        self.assertTrue(notif['is_read'], 'mail_notification read failed')
         self.assertFalse(msg.to_read, 'mail_message read failed')
 
         # Do: Raoul reads msg
@@ -347,7 +347,7 @@ class TestMailMessage(TestMail):
         self.assertEqual(len(notif_ids), 1, 'mail_message set_message_read: more than one notification created')
         # Test: notification read
         notif = self.mail_notification.browse(cr, uid, notif_ids[0])
-        self.assertTrue(notif['read'], 'mail_notification starred failed')
+        self.assertTrue(notif['is_read'], 'mail_notification starred failed')
         self.assertFalse(msg_raoul.to_read, 'mail_message starred failed')
 
         # Do: Admin unreads msg
