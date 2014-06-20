@@ -340,5 +340,12 @@
             </div>
         </form>
     </t>
-
+    <t t-name="website.editor.insert.inline.media">
+        <div class="mediumInsert" contenteditable="false">
+            <div class="mediumInsert-buttons">
+                <a class="mediumInsert-buttonsShow">+</a>
+            </div>
+            <div class="mediumInsert-placeholder"/>
+        </div>
+    </t>
 </templates>

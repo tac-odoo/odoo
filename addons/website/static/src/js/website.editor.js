@@ -517,26 +517,13 @@
                     ['insert', ['link', 'picture']],
                 ],
                 oninit: function() {
-                    self.setup_editables(root);
-                    var i =0;
-                    var insertBlock = '<div class="mediumInsert" contenteditable="false">'+
-                    '<div class="mediumInsert-buttons">'+
-                    '<a class="mediumInsert-buttonsShow">+</a>'+
-                    '</div>'+
-                    '<div class="mediumInsert-placeholder"></div>'+
-                    '</div>';
-                  $('p').each(function () {
-                    if (!$(this).next().hasClass('mediumInsert')) {
-                        $(this).after(insertBlock);
-                        $(this).next('.mediumInsert').attr('id', 'mediumInsert-'+ i);
-                      }
-                      i++;
-                  });
+                  self.setup_editables(root);
                   self.trigger('rte:ready');
                   def.resolve();
                 },
                 styleWithSpan: false,
                 icons: icons,
+                inlinemedia : ['p'],
                 onpaste: function(e) {
                     e.preventDefault();
                     var text = (e.originalEvent || e).clipboardData.getData('text/plain') || prompt('Paste something..');

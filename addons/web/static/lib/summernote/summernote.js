@@ -702,6 +702,8 @@
       disableDragAndDrop: false,    // disable drag and drop event
       disableResizeEditor: false,   // disable resizing editor
 
+      incons : [], // list of icons
+      inlinemedia : [] , //insert inline media eg. image , video etc 
       codemirror: {                 // codemirror options
         mode: 'text/html',
         lineNumbers: true
@@ -2257,6 +2259,7 @@
       $handle.children().hide();
     };
   };
+
     var try_remove = function (e) {
         var $help_block = this.$('.help-block').empty();
         var self = this;
@@ -2301,11 +2304,10 @@
             .groupBy(function (_, index) { return Math.floor(index / 6); })
             .values()
             .value();
-
         this.$('.existing-attachments').replaceWith(
             openerp.qweb.render(
                 'website.editor.dialog.image.existing.content', {rows: rows}));
-        this.$('.pager')
+        this.parent.$('.pager')
             .find('li.previous').toggleClass('disabled', (from === 0)).end()
             .find('li.next').toggleClass('disabled', (from + per_screen >= records.length));
     };
@@ -2483,6 +2485,65 @@
             $imageDialog.find('#fa-border').prop('checked') ? 'fa-border' : ''
         ];
     };
+    var fetch_existing = function (needle) {
+        var domain = [['res_model', '=', 'ir.ui.view'], '|',
+                    ['mimetype', '=', false], ['mimetype', '=like', 'image/%']];
+        if (needle && needle.length) {
+            domain.push('|', ['datas_fname', 'ilike', needle], ['name', 'ilike', needle]);
+        }
+        return openerp.jsonRpc('/web/dataset/call_kw', 'call', {
+            model: 'ir.attachment',
+            method: 'search_read',
+            args: [],
+            kwargs: {
+                fields: ['name', 'website_url'],
+                domain: domain,
+                order: 'id desc',
+                context: website.get_context(),
+            }
+        }).then(function (records) {
+            records = records;
+            display_attachments(records);
+        });
+    };
+    var search = function () {
+        var needle = this.$("input#icon-search").val();
+        fetch_existing(needle).then(function (records) {
+            selected_existing($('input.url').val());
+        });
+    };
+    var try_remove = function (e) {
+        var $help_block = this.$('.help-block').empty();
+        var self = this;
+        var $a = $(e.target);
+        var id = parseInt($a.data('id'), 10);
+        var attachment = _.findWhere(records, {id: id});
+        var $both = $a.parent().children();
+
+        $both.css({borderWidth: "5px", borderColor: "#f00"});
+
+        return openerp.jsonRpc('/web/dataset/call_kw', 'call', {
+            model: 'ir.attachment',
+            method: 'try_remove',
+            args: [],
+            kwargs: {
+                ids: [id],
+                context: website.get_context()
+            }
+        }).then(function (prevented) {
+            if (_.isEmpty(prevented)) {
+                records = _.without(records, attachment);
+                display_attachments(records);
+                return;
+            }
+            $both.css({borderWidth: "", borderColor: ""});
+            $help_block.replaceWith(openerp.qweb.render(
+                'website.editor.dialog.image.existing.error', {
+                    views: prevented[id]
+                }
+            ));
+        });
+    };
     this.showImageDialog = function ($editable, $dialog) {
       return $.Deferred(function (deferred) {
         var $imageDialog = $dialog.find('.note-image-dialog');
@@ -2530,6 +2591,9 @@
             });
             $('input#embedvideo').on('change keyup', function(e){
                 change_input(e);
+            });
+            $('input#icon-search').on('change keyup', function(){
+                search();
             });
 //            $('form').on('submit', form_submit());
           // Cloning imageInput to clear element.
@@ -3956,7 +4020,7 @@
     var tplDialogs = function (lang, options) {
       var tplImageDialog = function () {
         var dialogMedia = openerp.qweb.render('website.editor.dialog.media',{'icons':options.icons})
-        fetch_existing()
+        fetch_existing('');
         return dialogMedia;
       };
 
@@ -4278,6 +4342,15 @@
             $holder.html($holder.code());
           });
         }
+      });
+
+      $.each(options.inlinemedia , function (index,value) {
+          $(value).each(function(i, v){
+              if (!$(this).next().hasClass('mediumInsert')) {
+                  $(this).after(openerp.qweb.render('website.editor.insert.inline.media', {}));
+                  $(this).next('.mediumInsert').attr('id', 'mediumInsert-'+ i);
+              }
+          });
       });
 
       // focus on first editable element
