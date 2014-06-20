@@ -20,55 +20,6 @@
   !record {model: hr.employee, id: hr.employee_msh}:
     product_id: product.product_product_consultant
     journal_id: hr_timesheet.analytic_journal
-
--
-  Give the access rights of Employee to Sign In/Sign Out in  Project.
--
-  !context
-    uid: 'res_hr_timesheet_employee'
--
-  On "Sign In/Sign Out by Project" wizard i click on "Sign In/Sign Out" button of this wizard.
--
-  !python {model: hr.sign.in.project}: |
-    uid = ref('base.user_demo')
-    state_id = self.check_state(cr, uid, [ref("hr.employee_msh")], {"active_ids": [ref("hr_timesheet.action_hr_timesheet_sign_in")]})
-    assert state_id['name'] == 'Sign in / Sign out', "Check the process of sign-in/sign-out."
--
-  I select start date and Perform start work on project.
--
-  !python {model: hr.sign.in.project}: |
-    import time
-    uid = ref('base.user_demo')
-    new_id = self.create(cr, uid, {'emp_id': ref('hr.employee_msh'), 'name': 'Gilles Gravie',
-    'server_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-    self.sign_in_result(cr, uid, [new_id], context)
--
-  I change my project "Thymbra" and I click on the "Change Work" button of this wizard
--
-  !python {model: hr.sign.out.project}: |
-    import time
-    from datetime import datetime, date, timedelta
-    uid = ref('base.user_demo')
-    new_id = self.create(cr, uid, {'account_id': ref('account.analytic_nebula'),'analytic_amount': 7.0,
-    'date': (datetime.now()+timedelta(1)).strftime('%Y-%m-%d %H:%M:%S') ,
-    'date_start': time.strftime('%Y-%m-%d %H:%M:%S'), 'info': 'Create Yaml for hr module',
-    'name': 'Gilles Gravie', 'server_date': time.strftime('%Y-%m-%d %H:%M:%S'), 'state': 'present'})
-
-    self.sign_out_result(cr, uid, [new_id], context)
--
-  My work for this project "Sednacom" is over and I stop working by clicking on "Stop Work" button of this wizard.
--
-  !python {model: hr.sign.out.project}: |
-    import time
-    from datetime import datetime, date, timedelta
-    uid = ref('base.user_demo')
-    new_id = self.create(cr, uid, {'account_id': ref('account.analytic_spark'), 'analytic_amount': 7.0,
-    'date': (datetime.now()+timedelta(2)).strftime('%Y-%m-%d %H:%M:%S'),
-    'date_start': time.strftime('%Y-%m-%d %H:%M:%S'), 'info': 'Create Yaml for hr module',
-    'name': 'Gilles Gravie', 'server_date': time.strftime('%Y-%m-%d %H:%M:%S'), 'state': 'absent'})
-    self.sign_out_result_end(cr, uid, [new_id], context)
-
-
 -
   In order to test hr_timesheet_sheet module in OpenERP,
   I create Timesheet and check confirmation process.
@@ -81,7 +32,6 @@
     state: new
     user_id: base.user_demo
     employee_id: 'hr.employee_msh'
-    
 -
   I create Timesheet Entry for time spend on today work.
 -
@@ -96,7 +46,6 @@
         product_id: product.product_product_consultant
         general_account_id: account.a_expense
         journal_id: hr_timesheet.analytic_journal
-
 -
   I confirm my Timesheet at end of period by click on "Confirm" button,
   if the difference between Timesheet hour and attendance hour is more than 1 hour it will give message.
@@ -108,7 +57,6 @@
     self.button_confirm(cr, uid, [ref('hr_timesheet_sheet_sheet_deddk0')], {"active_ids":
       [ref("hr_timesheet.menu_act_hr_timesheet_form")],"active_id": ref("hr_timesheet.menu_act_hr_timesheet_form"),
       })
-
 -
   This time timesheet confirmed successfully.
   I check that state is "Confirmed".

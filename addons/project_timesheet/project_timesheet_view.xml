@@ -93,7 +93,7 @@
               </p>
             </field>
         </record>
-        <menuitem action="hr_timesheet.action_hr_timesheet_sign_in"
+        <menuitem action="hr_timesheet_sheet.action_hr_timesheet_sign_in"
             id="menu_hr_timesheet_sign_in"
             parent="hr_attendance.menu_hr_attendance"
             sequence="5" groups="base.group_hr_attendance" />
@@ -107,7 +107,7 @@
         <!--
             Time Tracking menu in project Management
         -->
-<!--        <menuitem id="menu_project_working_hours" parent="base.menu_project_management_time_tracking" action="hr_timesheet.act_hr_timesheet_line_evry1_all_form"/> -->
+<!--        <menuitem id="menu_project_working_hours" parent="base.menu_project_management_time_tracking" action="hr_timesheet_sheet.act_hr_timesheet_line_evry1_all_form"/> -->
 
         <record id="action_account_analytic_overdue" model="ir.actions.act_window">
             <field name="name">Customer Projects</field>

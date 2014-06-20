@@ -51,6 +51,7 @@ The validation can be configured in the company:
         'security/ir.model.access.csv',
         'hr_timesheet_sheet_view.xml',
         'report/timesheet_report_view.xml',
+        'wizard/hr_timesheet_sign_in_out_view.xml',
         'hr_timesheet_sheet_data.xml',
         'res_config_view.xml',
     ],
