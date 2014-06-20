@@ -3246,12 +3246,11 @@ class BaseModel(object):
             )
             (missing - forbidden)._cache.update(FailedValue(exc))
 
-    # TODO check READ access
-    def perm_read(self, cr, user, ids, context=None, details=True):
+    @api.multi
+    def get_metadata(self):
         """
         Returns some metadata about the given records.
 
-        :param details: if True, \*_uid fields are replaced with the name of the user
         :return: list of ownership dictionaries for each requested record
         :rtype: list of dictionaries with the following keys:
 
@@ -3262,37 +3261,31 @@ class BaseModel(object):
                     * write_date: date of the last change to the record
                     * xmlid: XML ID to use to refer to this record (if there is one), in format ``module.name``
         """
-        if not context:
-            context = {}
-        if not ids:
-            return []
-        fields = ''
-        uniq = isinstance(ids, (int, long))
-        if uniq:
-            ids = [ids]
+        ids = self._ids
+        cr = self.env.cr
+
         fields = ['id']
         if self._log_access:
             fields += ['create_uid', 'create_date', 'write_uid', 'write_date']
         quoted_table = '"%s"' % self._table
-        fields_str = ",".join('%s.%s'%(quoted_table, field) for field in fields)
+        fields_str = ",".join('%s.%s' % (quoted_table, field) for field in fields)
         query = '''SELECT %s, __imd.module, __imd.name
                    FROM %s LEFT JOIN ir_model_data __imd
                        ON (__imd.model = %%s and __imd.res_id = %s.id)
                    WHERE %s.id IN %%s''' % (fields_str, quoted_table, quoted_table, quoted_table)
         cr.execute(query, (self._name, tuple(ids)))
         res = cr.dictfetchall()
+
+        uids = list(set(r[k] for r in res for k in ['write_uid', 'create_uid'] if r.get(k)))
+        names = dict(self.env['res.users'].browse(uids).name_get())
+
         for r in res:
             for key in r:
-                r[key] = r[key] or False
-                if details and key in ('write_uid', 'create_uid') and r[key]:
-                    try:
-                        r[key] = self.pool.get('res.users').name_get(cr, user, [r[key]])[0]
-                    except Exception:
-                        pass # Leave the numeric uid there
+                value = r[key] = r[key] or False
+                if key in ('write_uid', 'create_uid') and value in names:
+                    r[key] = (value, names[value])
             r['xmlid'] = ("%(module)s.%(name)s" % r) if r['name'] else False
             del r['name'], r['module']
-        if uniq:
-            return res[ids[0]]
         return res
 
     def _check_concurrency(self, cr, ids, context):

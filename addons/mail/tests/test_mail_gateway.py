@@ -203,8 +203,8 @@ class TestMailgateway(TestMail):
         # Test: one group created by mailgateway administrator
         self.assertEqual(len(frog_groups), 1, 'message_process: a new mail.group should have been created')
         frog_group = self.mail_group.browse(cr, uid, frog_groups[0])
-        res = self.mail_group.perm_read(cr, uid, [frog_group.id], details=False)
-        self.assertEqual(res[0].get('create_uid'), uid,
+        res = self.mail_group.get_metadata(cr, uid, [frog_group.id])[0].get('create_uid') or [None]
+        self.assertEqual(res[0], uid,
                          'message_process: group should have been created by uid as alias_user__id is False on the alias')
         # Test: one message that is the incoming email
         self.assertEqual(len(frog_group.message_ids), 1,
@@ -271,8 +271,8 @@ class TestMailgateway(TestMail):
         # Test: one group created by Raoul
         self.assertEqual(len(frog_groups), 1, 'message_process: a new mail.group should have been created')
         frog_group = self.mail_group.browse(cr, uid, frog_groups[0])
-        res = self.mail_group.perm_read(cr, uid, [frog_group.id], details=False)
-        self.assertEqual(res[0].get('create_uid'), self.user_raoul_id,
+        res = self.mail_group.get_metadata(cr, uid, [frog_group.id])[0].get('create_uid') or [None]
+        self.assertEqual(res[0], self.user_raoul_id,
                          'message_process: group should have been created by alias_user_id')
         # Test: one message that is the incoming email
         self.assertEqual(len(frog_group.message_ids), 1,
