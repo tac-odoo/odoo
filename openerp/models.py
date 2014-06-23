@@ -3142,8 +3142,10 @@ class BaseModel(object):
 
         # we need fully-qualified column names in case len(tables) > 1
         def qualify(f):
-            if isinstance(self._columns.get(f), fields.binary) and context.get('bin_size'):
-                return 'length(%s."%s") as "%s"' % (self._table, f, f)
+            if isinstance(self._columns.get(f), fields.binary) and \
+                    context.get('bin_size_%s' % f, context.get('bin_size')):
+                # PG 9.2 introduces conflicting pg_size_pretty(numeric) -> need ::cast 
+                return 'pg_size_pretty(length(%s."%s")::bigint) as "%s"' % (self._table, f, f)
             else:
                 return '%s."%s"' % (self._table, f)
         qual_names = map(qualify, set(fields_pre + ['id']))
