@@ -154,6 +154,7 @@ class Registry(Mapping):
                 models_to_load.append(model._name)
 
         # call hook after models have been instantiated
+        self._m2m = {}
         for model in self.models.itervalues():
             model._after_registry_update(cr, SUPERUSER_ID)
 

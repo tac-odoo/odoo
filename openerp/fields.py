@@ -322,12 +322,13 @@ class Field(object):
 
     def reset(self):
         """ Prepare `self` for a new setup. """
+        self._setup_done = False
         # self._triggers is a set of pairs (field, path) that represents the
         # computed fields that depend on `self`. When `self` is modified, it
         # invalidates the cache of each `field`, and registers the records to
         # recompute based on `path`. See method `modified` below for details.
         self._triggers = set()
-        self._setup_done = False
+        self.inverse_field = None
 
     def setup(self, env):
         """ Complete the setup of `self` (dependencies, recomputation triggers,
@@ -1227,13 +1228,7 @@ class Many2one(_Relational):
     def _setup_regular(self, env):
         super(Many2one, self)._setup_regular(env)
 
-        # determine self.inverse_field
-        for field in env[self.comodel_name]._fields.itervalues():
-            if field.type == 'one2many':
-                field.setup(env)
-                if field.inverse_field == self:
-                    self.inverse_field = field
-                    break
+        # self.inverse_field is determined by the corresponding One2many field
 
         # determine self.delegate
         self.delegate = self.name in env[self.model_name]._inherits.values()
@@ -1407,8 +1402,12 @@ class One2many(_RelationalMulti):
 
     def _setup_regular(self, env):
         super(One2many, self)._setup_regular(env)
+
         if self.inverse_name:
-            self.inverse_field = env[self.comodel_name]._fields[self.inverse_name]
+            # link self to its inverse field and vice-versa
+            invf = env[self.comodel_name]._fields[self.inverse_name]
+            self.inverse_field = invf
+            invf.inverse_field = self
 
     _description_relation_field = property(attrgetter('inverse_name'))
 
@@ -1474,13 +1473,15 @@ class Many2many(_RelationalMulti):
                 self.relation, self.column1, self.column2 = column._sql_names(model)
 
         if self.relation:
-            expected = (self.relation, self.column2, self.column1)
-            for field in env[self.comodel_name]._fields.itervalues():
-                if field.type == 'many2many':
-                    field.setup(env)
-                    if (field.relation, field.column1, field.column2) == expected:
-                        self.inverse_field = field
-                        break
+            m2m = env.registry._m2m
+            # if inverse field has already been setup, it is present in m2m
+            invf = m2m.get((self.relation, self.column2, self.column1))
+            if invf:
+                self.inverse_field = invf
+                invf.inverse_field = self
+            else:
+                # add self in m2m, so that its inverse field can find it
+                m2m[(self.relation, self.column1, self.column2)] = self
 
     _column_rel = property(attrgetter('relation'))
     _column_id1 = property(attrgetter('column1'))
