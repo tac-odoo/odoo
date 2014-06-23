@@ -102,6 +102,7 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
         this.fields = {};
         this.fields_order = [];
         this.datarecord = {};
+        this._onchange_specs = {};
         this.default_focus_field = null;
         this.default_focus_button = null;
         this.fields_registry = instance.web.form.widgets;
@@ -124,6 +125,7 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
         this.rendering_engine = new instance.web.form.FormRenderingEngine(this);
         self.set({actual_mode: self.options.initial_mode});
         this.has_been_loaded.done(function() {
+            self._build_onchange_specs();
             self.on("change:actual_mode", self, self.check_actual_mode);
             self.check_actual_mode();
             self.on("change:actual_mode", self, self.init_pager);
@@ -202,7 +204,6 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
             ]));
         }
 
-        this._build_onchange_specs();
         this.has_been_loaded.resolve();
 
         // Add bounce effect on button 'Edit' when click on readonly page view.
@@ -437,14 +438,26 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
 
     _build_onchange_specs: function() {
         var self = this;
+        var find = function(field_name, root) {
+            var fields = [root];
+            while (fields.length) {
+                var node = fields.pop();
+                if (node.tag === 'field' && node.attrs.name === field_name) {
+                    return node.attrs.on_change || "";
+                }
+                fields = _.union(fields, node.children);
+            }
+            return "";
+        };
+
         self._onchange_specs = {};
         _.each(this.fields, function(field, name) {
-            self._onchange_specs[name] = field.node.attrs.on_change || "";
-            if (!_.isEmpty(field.field.views)) {
-                _.each(field.view.fields, function(subfield, subname) {
-                    self._onchange_specs[name + "." + subname] = subfield.node.attrs.on_change || "";
+            self._onchange_specs[name] = find(name, field.node);
+            _.each(field.field.views, function(view) {
+                _.each(view.fields, function(_, subname) {
+                    self._onchange_specs[name + '.' + subname] = find(subname, view.arch);
                 });
-            }
+            });
         });
     },
     _get_onchange_values: function() {
@@ -469,9 +482,10 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
 
     do_onchange: function(widget) {
         var self = this;
+        var onchange_specs = self._onchange_specs;
         try {
             var def = $.when({});
-            var change_spec = widget ? self._onchange_specs[widget.name] : null;
+            var change_spec = widget ? onchange_specs[widget.name] : null;
             if (!widget || (!_.isEmpty(change_spec) && change_spec !== "0")) {
                 var ids = [],
                     trigger_field_name = widget ? widget.name : false,
@@ -482,7 +496,8 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
                     context.add(widget.build_context());
                 }
                 if (self.dataset.parent_view) {
-                    context.add({field_parent: self.dataset.child_name});
+                    var parent_name = self.dataset.parent_view.get_field_desc(self.dataset.child_name).relation_field;
+                    context.add({field_parent: parent_name});
                 }
 
                 if (self.datarecord.id && !instance.web.BufferedDataSet.virtual_id_regex.test(self.datarecord.id)) {
@@ -490,7 +505,7 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
                     ids.push(self.datarecord.id);
                 }
                 def = self.alive(new instance.web.Model(self.dataset.model).call(
-                    "onchange", [ids, values, trigger_field_name, self._onchange_specs, context]));
+                    "onchange", [ids, values, trigger_field_name, onchange_specs, context]));
             }
             return def.then(function(response) {
                 if (widget && widget.field['change_default']) {
