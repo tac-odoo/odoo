@@ -350,13 +350,6 @@ class Field(object):
         for path in self.depends:
             self._setup_dependency([], env[self.model_name], path.split('.'))
 
-        # determine all the fields computed by self.compute
-        self.computed_fields = self.compute and [
-            field
-            for field in env[self.model_name]._fields.itervalues()
-            if field.compute in (self.compute, self.compute.__name__)
-        ] or []
-
     #
     # Setup of related fields
     #

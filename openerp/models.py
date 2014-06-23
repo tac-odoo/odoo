@@ -2952,6 +2952,13 @@ class BaseModel(object):
         for field in self._fields.itervalues():
             field.setup(self.env)
 
+        # group fields by compute to determine field.computed_fields
+        computed_fields = defaultdict(list)
+        for field in self._fields.itervalues():
+            field.computed_fields = fields = computed_fields[field.compute]
+            if field.compute:
+                fields.append(self)
+
     def fields_get(self, cr, user, allfields=None, context=None, write_access=True):
         """ Return the definition of each field.
 
