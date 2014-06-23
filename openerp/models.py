@@ -52,6 +52,7 @@ import re
 import time
 import traceback
 from collections import defaultdict, Iterable, MutableMapping
+from inspect import getmembers
 
 import babel.dates
 import dateutil.relativedelta
@@ -662,9 +663,8 @@ class BaseModel(object):
         # retrieve new-style fields and duplicate them (to avoid clashes with
         # inheritance between different models)
         cls._fields = {}
-        for attr in dir(cls):
-            field = getattr(cls, attr)
-            if isinstance(field, Field) and not field._origin:
+        for attr, field in getmembers(cls, Field.__instancecheck__):
+            if not field._origin:
                 cls._add_field(attr, field.copy())
 
         # introduce magic fields
@@ -679,8 +679,7 @@ class BaseModel(object):
         cls._inherits_reload()
 
         # register constraints and onchange methods
-        cls._init_constraints()
-        cls._init_onchange_methods()
+        cls._init_constraints_onchanges()
 
         # check defaults
         for k in cls._defaults:
@@ -793,31 +792,24 @@ class BaseModel(object):
                 cls._columns[field['name']] = getattr(fields, field['ttype'])(**attrs)
 
     @classmethod
-    def _init_constraints(cls):
+    def _init_constraints_onchanges(cls):
         # store sql constraint error messages
         for (key, _, msg) in cls._sql_constraints:
             cls.pool._sql_error[cls._table + '_' + key] = msg
 
-        # collect constraint methods
+        # collect constraint and onchange methods
         cls._constraint_methods = []
-        for attr in dir(cls):
-            value = getattr(cls, attr)
-            if callable(value) and hasattr(value, '_constrains'):
-                if not all(name in cls._fields for name in value._constrains):
-                    _logger.warning("@constrains parameters must be field names: %r", value._constrains)
-                cls._constraint_methods.append(value)
-
-    @classmethod
-    def _init_onchange_methods(cls):
-        # collect onchange methods
         cls._onchange_methods = defaultdict(list)
-        for attr in dir(cls):
-            value = getattr(cls, attr)
-            if callable(value) and hasattr(value, '_onchange'):
-                if not all(name in cls._fields for name in value._onchange):
-                    _logger.warning("@onchange parameters must be field names: %r", value._onchange)
-                for name in value._onchange:
-                    cls._onchange_methods[name].append(value)
+        for attr, func in getmembers(cls, callable):
+            if hasattr(func, '_constrains'):
+                if not all(name in cls._fields for name in func._constrains):
+                    _logger.warning("@constrains%r parameters must be field names", func._constrains)
+                cls._constraint_methods.append(func)
+            if hasattr(func, '_onchange'):
+                if not all(name in cls._fields for name in func._onchange):
+                    _logger.warning("@onchange%r parameters must be field names", func._onchange)
+                for name in func._onchange:
+                    cls._onchange_methods[name].append(func)
 
     def __new__(cls):
         # In the past, this method was registering the model class in the server.
