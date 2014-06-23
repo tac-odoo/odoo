@@ -1221,6 +1221,7 @@ instance.web.ListView.List = instance.web.Class.extend( /** @lends instance.web.
         return QWeb.render('ListView.row', {
             columns: this.columns,
             options: this.options,
+            dataset: this.dataset,
             record: record,
             row_parity: (index % 2 === 0) ? 'even' : 'odd',
             view: this.view,
