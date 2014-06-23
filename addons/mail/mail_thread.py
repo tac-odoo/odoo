@@ -158,7 +158,7 @@ class mail_thread(osv.AbstractModel):
         # search for unread messages, directly in SQL to improve performances
         cr.execute("""  SELECT m.res_id FROM mail_message m
                         RIGHT JOIN mail_notification n
-                        ON (n.message_id = m.id AND n.partner_id = %s AND (n.read = False or n.read IS NULL))
+                        ON (n.message_id = m.id AND n.partner_id = %s AND (n.is_read = False or n.is_read IS NULL))
                         WHERE m.model = %s AND m.res_id in %s""",
                     (user_pid, self._name, tuple(ids),))
         for result in cr.fetchall():
@@ -1836,12 +1836,12 @@ class mail_thread(osv.AbstractModel):
         partner_id = self.pool.get('res.users').browse(cr, uid, uid, context=context).partner_id.id
         cr.execute('''
             UPDATE mail_notification SET
-                read=false
+                is_read=false
             WHERE
                 message_id IN (SELECT id from mail_message where res_id=any(%s) and model=%s limit 1) and
                 partner_id = %s
         ''', (ids, self._name, partner_id))
-        self.pool.get('mail.notification').invalidate_cache(cr, uid, ['read'], context=context)
+        self.pool.get('mail.notification').invalidate_cache(cr, uid, ['is_read'], context=context)
         return True
 
     def message_mark_as_read(self, cr, uid, ids, context=None):
@@ -1849,12 +1849,12 @@ class mail_thread(osv.AbstractModel):
         partner_id = self.pool.get('res.users').browse(cr, uid, uid, context=context).partner_id.id
         cr.execute('''
             UPDATE mail_notification SET
-                read=true
+                is_read=true
             WHERE
                 message_id IN (SELECT id FROM mail_message WHERE res_id=ANY(%s) AND model=%s) AND
                 partner_id = %s
         ''', (ids, self._name, partner_id))
-        self.pool.get('mail.notification').invalidate_cache(cr, uid, ['read'], context=context)
+        self.pool.get('mail.notification').invalidate_cache(cr, uid, ['is_read'], context=context)
         return True
 
     #------------------------------------------------------

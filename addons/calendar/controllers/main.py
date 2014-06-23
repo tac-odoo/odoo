@@ -67,5 +67,5 @@ class meeting_invitation(http.Controller):
         uid = request.session.uid
         context = request.session.context
         with registry.cursor() as cr:
-            res = registry.get("res.partner").calendar_last_notif_ack(cr, uid, context=context)
+            res = registry.get("res.partner")._set_calendar_last_notif_ack(cr, uid, context=context)
             return res

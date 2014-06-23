@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2013 OpenERP (<http://www.openerp.com>).
+#    Copyright (C) 2013-2014 OpenERP (<http://www.openerp.com>).
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -151,7 +151,7 @@ class Message(models.Model):
 class Talk(models.Model):
     _name = 'test_new_api.talk'
 
-    parent = fields.Many2one('test_new_api.discussion', delegate=True)
+    parent = fields.Many2one('test_new_api.discussion', delegate=True, required=True)
 
 
 class MixedModel(models.Model):

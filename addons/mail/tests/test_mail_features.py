@@ -779,7 +779,7 @@ class test_mail(TestMail):
         # Test: number of unread notification = needaction on mail.message
         notif_ids = self.mail_notification.search(cr, uid, [
             ('partner_id', '=', user_admin.partner_id.id),
-            ('read', '=', False)
+            ('is_read', '=', False)
             ])
         na_count = self.mail_message._needaction_count(cr, uid, domain=[])
         self.assertEqual(len(notif_ids), na_count, 'unread notifications count does not match needaction count')
@@ -794,7 +794,7 @@ class test_mail(TestMail):
         # Test: admin has 3 new notifications (from demo), and 3 new needaction
         notif_ids = self.mail_notification.search(cr, uid, [
             ('partner_id', '=', user_admin.partner_id.id),
-            ('read', '=', False)
+            ('is_read', '=', False)
             ])
         self.assertEqual(len(notif_ids), na_admin_base + 3, 'Admin should have 3 new unread notifications')
         na_admin = self.mail_message._needaction_count(cr, uid, domain=[])
@@ -804,7 +804,7 @@ class test_mail(TestMail):
         # Test: demo has 0 new notifications (not a follower, not receiving its own messages), and 0 new needaction
         notif_ids = self.mail_notification.search(cr, uid, [
             ('partner_id', '=', user_raoul.partner_id.id),
-            ('read', '=', False)
+            ('is_read', '=', False)
             ])
         self.assertEqual(len(notif_ids), na_demo_base + 0, 'Demo should have 0 new unread notifications')
         na_demo = self.mail_message._needaction_count(cr, user_raoul.id, domain=[])

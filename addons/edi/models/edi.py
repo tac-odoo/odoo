@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Business Applications
-#    Copyright (c) 2011-2012 OpenERP S.A. <http://openerp.com>
+#    Copyright (c) 2011-2014 OpenERP S.A. <http://openerp.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -66,7 +66,7 @@ def last_update_for(record):
        if available, otherwise False
     """
     if record._log_access:
-        record_log = record.perm_read()[0]
+        record_log = record.get_metadata()[0]
         return record_log.get('write_date') or record_log.get('create_date') or False
     return False
 

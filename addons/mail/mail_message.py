@@ -89,7 +89,7 @@ class mail_message(osv.Model):
         notif_ids = notif_obj.search(cr, uid, [
             ('partner_id', 'in', [partner_id]),
             ('message_id', 'in', ids),
-            ('read', '=', False),
+            ('is_read', '=', False),
         ], context=context)
         for notif in notif_obj.browse(cr, uid, notif_ids, context=context):
             res[notif.message_id.id] = True
@@ -97,8 +97,8 @@ class mail_message(osv.Model):
 
     def _search_to_read(self, cr, uid, obj, name, domain, context=None):
         """ Search for messages to read by the current user. Condition is
-            inversed because we search unread message on a read column. """
-        return ['&', ('notification_ids.partner_id.user_ids', 'in', [uid]), ('notification_ids.read', '=', not domain[0][2])]
+            inversed because we search unread message on a is_read column. """
+        return ['&', ('notification_ids.partner_id.user_ids', 'in', [uid]), ('notification_ids.is_read', '=', not domain[0][2])]
 
     def _get_starred(self, cr, uid, ids, name, arg, context=None):
         """ Compute if the message is unread by the current user. """
@@ -115,8 +115,7 @@ class mail_message(osv.Model):
         return res
 
     def _search_starred(self, cr, uid, obj, name, domain, context=None):
-        """ Search for messages to read by the current user. Condition is
-            inversed because we search unread message on a read column. """
+        """ Search for starred messages by the current user."""
         return ['&', ('notification_ids.partner_id.user_ids', 'in', [uid]), ('notification_ids.starred', '=', domain[0][2])]
 
     _columns = {
@@ -243,20 +242,20 @@ class mail_message(osv.Model):
         user_pid = self.pool['res.users'].browse(cr, SUPERUSER_ID, uid, context=context).partner_id.id
         domain = [('partner_id', '=', user_pid), ('message_id', 'in', msg_ids)]
         if not create_missing:
-            domain += [('read', '=', not read)]
+            domain += [('is_read', '=', not read)]
         notif_ids = notification_obj.search(cr, uid, domain, context=context)
 
         # all message have notifications: already set them as (un)read
         if len(notif_ids) == len(msg_ids) or not create_missing:
-            notification_obj.write(cr, uid, notif_ids, {'read': read}, context=context)
+            notification_obj.write(cr, uid, notif_ids, {'is_read': read}, context=context)
             return len(notif_ids)
 
         # some messages do not have notifications: find which one, create notification, update read status
         notified_msg_ids = [notification.message_id.id for notification in notification_obj.browse(cr, uid, notif_ids, context=context)]
         to_create_msg_ids = list(set(msg_ids) - set(notified_msg_ids))
         for msg_id in to_create_msg_ids:
-            notification_obj.create(cr, uid, {'partner_id': user_pid, 'read': read, 'message_id': msg_id}, context=context)
-        notification_obj.write(cr, uid, notif_ids, {'read': read}, context=context)
+            notification_obj.create(cr, uid, {'partner_id': user_pid, 'is_read': read, 'message_id': msg_id}, context=context)
+        notification_obj.write(cr, uid, notif_ids, {'is_read': read}, context=context)
         return len(notif_ids)
 
     @api.cr_uid_ids_context
@@ -277,7 +276,7 @@ class mail_message(osv.Model):
             'starred': starred
         }
         if starred:
-            values['read'] = False
+            values['is_read'] = False
 
         notif_ids = notification_obj.search(cr, uid, domain, context=context)
 
@@ -919,5 +918,5 @@ class mail_message(osv.Model):
                 notification_obj.create(cr, uid, {
                         'message_id': message.parent_id.id,
                         'partner_id': partner.id,
-                        'read': True,
+                        'is_read': True,
                     }, context=context)

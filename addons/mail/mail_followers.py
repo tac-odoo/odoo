@@ -79,7 +79,7 @@ class mail_notification(osv.Model):
     _columns = {
         'partner_id': fields.many2one('res.partner', string='Contact',
                         ondelete='cascade', required=True, select=1),
-        'read': fields.boolean('Read', select=1),
+        'is_read': fields.boolean('Read', select=1),
         'starred': fields.boolean('Starred', select=1,
             help='Starred message that goes into the todo mailbox'),
         'message_id': fields.many2one('mail.message', string='Message',
@@ -87,14 +87,14 @@ class mail_notification(osv.Model):
     }
 
     _defaults = {
-        'read': False,
+        'is_read': False,
         'starred': False,
     }
 
     def init(self, cr):
         cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = %s', ('mail_notification_partner_id_read_starred_message_id',))
         if not cr.fetchone():
-            cr.execute('CREATE INDEX mail_notification_partner_id_read_starred_message_id ON mail_notification (partner_id, read, starred, message_id)')
+            cr.execute('CREATE INDEX mail_notification_partner_id_read_starred_message_id ON mail_notification (partner_id, is_read, starred, message_id)')
 
     def get_partners_to_email(self, cr, uid, ids, message, context=None):
         """ Return the list of partners to notify, based on their preferences.
@@ -105,7 +105,7 @@ class mail_notification(osv.Model):
         """
         notify_pids = []
         for notification in self.browse(cr, uid, ids, context=context):
-            if notification['read']:
+            if notification.is_read:
                 continue
             partner = notification.partner_id
             # Do not send to partners without email address defined
@@ -168,12 +168,12 @@ class mail_notification(osv.Model):
             existing_pids.add(notification.partner_id.id)
 
         # update existing notifications
-        self.write(cr, uid, ids, {'read': False}, context=context)
+        self.write(cr, uid, ids, {'is_read': False}, context=context)
 
         # create new notifications
         new_pids = set(partner_ids) - existing_pids
         for new_pid in new_pids:
-            new_notif_ids.append(self.create(cr, uid, {'message_id': message_id, 'partner_id': new_pid, 'read': False}, context=context))
+            new_notif_ids.append(self.create(cr, uid, {'message_id': message_id, 'partner_id': new_pid, 'is_read': False}, context=context))
         return new_notif_ids
 
     def _notify_email(self, cr, uid, ids, message_id, force_send=False, user_signature=True, context=None):

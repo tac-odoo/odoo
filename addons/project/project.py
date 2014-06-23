@@ -1053,7 +1053,7 @@ class task(osv.osv):
             new_stage = vals.get('stage_id')
             vals_reset_kstate = dict(vals, kanban_state='normal')
             for t in self.browse(cr, uid, ids, context=context):
-                write_vals = vals_reset_kstate if t.stage_id != new_stage else vals
+                write_vals = vals_reset_kstate if t.stage_id.id != new_stage else vals
                 super(task, self).write(cr, uid, [t.id], write_vals, context=context)
             result = True
         else:
