@@ -3261,9 +3261,6 @@ class BaseModel(object):
                     * write_date: date of the last change to the record
                     * xmlid: XML ID to use to refer to this record (if there is one), in format ``module.name``
         """
-        ids = self._ids
-        cr = self.env.cr
-
         fields = ['id']
         if self._log_access:
             fields += ['create_uid', 'create_date', 'write_uid', 'write_date']
@@ -3273,8 +3270,8 @@ class BaseModel(object):
                    FROM %s LEFT JOIN ir_model_data __imd
                        ON (__imd.model = %%s and __imd.res_id = %s.id)
                    WHERE %s.id IN %%s''' % (fields_str, quoted_table, quoted_table, quoted_table)
-        cr.execute(query, (self._name, tuple(ids)))
-        res = cr.dictfetchall()
+        self._cr.execute(query, (self._name, tuple(self.ids)))
+        res = self._cr.dictfetchall()
 
         uids = list(set(r[k] for r in res for k in ['write_uid', 'create_uid'] if r.get(k)))
         names = dict(self.env['res.users'].browse(uids).name_get())
