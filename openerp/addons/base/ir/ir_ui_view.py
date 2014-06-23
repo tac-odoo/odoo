@@ -302,15 +302,6 @@ class view(osv.osv):
                     view.application,
                 ))
 
-
-    def copy(self, cr, uid, id, default=None, context=None):
-        if not default:
-            default = {}
-        default.update({
-            'model_ids': [],
-        })
-        return super(view, self).copy(cr, uid, id, default, context=context)
-
     # default view selection
     def default_view(self, cr, uid, model, view_type, context=None):
         """ Fetches the default view for the provided (model, view_type) pair:

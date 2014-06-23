@@ -152,7 +152,7 @@ class mail_message(osv.Model):
             help='Technical field holding the message notifications. Use notified_partner_ids to access notified partners.'),
         'subject': fields.char('Subject'),
         'date': fields.datetime('Date'),
-        'message_id': fields.char('Message-Id', help='Message unique identifier', select=1, readonly=1),
+        'message_id': fields.char('Message-Id', help='Message unique identifier', select=1, readonly=1, copy=False),
         'body': fields.html('Contents', help='Automatically sanitized HTML contents'),
         'to_read': fields.function(_get_to_read, fnct_search=_search_to_read,
             type='boolean', string='To read',
@@ -831,13 +831,6 @@ class mail_message(osv.Model):
         if attachments_to_delete:
             self.pool.get('ir.attachment').unlink(cr, uid, attachments_to_delete, context=context)
         return super(mail_message, self).unlink(cr, uid, ids, context=context)
-
-    def copy(self, cr, uid, id, default=None, context=None):
-        """ Overridden to avoid duplicating fields that are unique to each email """
-        if default is None:
-            default = {}
-        default.update(message_id=False, headers=False)
-        return super(mail_message, self).copy(cr, uid, id, default=default, context=context)
 
     #------------------------------------------------------
     # Messaging API

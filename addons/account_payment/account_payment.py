@@ -87,13 +87,13 @@ class payment_order(osv.osv):
 
     _columns = {
         'date_scheduled': fields.date('Scheduled Date', states={'done':[('readonly', True)]}, help='Select a date if you have chosen Preferred Date to be fixed.'),
-        'reference': fields.char('Reference', required=1, states={'done': [('readonly', True)]}),
+        'reference': fields.char('Reference', required=1, states={'done': [('readonly', True)]}, copy=False),
         'mode': fields.many2one('payment.mode', 'Payment Mode', select=True, required=1, states={'done': [('readonly', True)]}, help='Select the Payment Mode to be applied.'),
         'state': fields.selection([
             ('draft', 'Draft'),
             ('cancel', 'Cancelled'),
             ('open', 'Confirmed'),
-            ('done', 'Done')], 'Status', select=True,
+            ('done', 'Done')], 'Status', select=True, copy=False,
             help='When an order is placed the status is \'Draft\'.\n Once the bank is confirmed the status is set to \'Confirmed\'.\n Then the order is paid the status is \'Done\'.'),
         'line_ids': fields.one2many('payment.line', 'order_id', 'Payment lines', states={'done': [('readonly', True)]}),
         'total': fields.function(_total, string="Total", type='float'),
@@ -134,16 +134,6 @@ class payment_order(osv.osv):
         self.write(cr, uid, ids, {'date_done': time.strftime('%Y-%m-%d')})
         self.signal_workflow(cr, uid, ids, 'done')
         return True
-
-    def copy(self, cr, uid, id, default=None, context=None):
-        if default is None:
-            default = {}
-        default.update({
-            'state': 'draft',
-            'line_ids': [],
-            'reference': self.pool.get('ir.sequence').get(cr, uid, 'payment.order')
-        })
-        return super(payment_order, self).copy(cr, uid, id, default, context=context)
 
     def write(self, cr, uid, ids, vals, context=None):
         if context is None:

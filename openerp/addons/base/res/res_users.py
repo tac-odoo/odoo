@@ -164,7 +164,7 @@ class res_users(osv.osv):
             help='Partner-related data of the user'),
         'login': fields.char('Login', size=64, required=True,
             help="Used to log into the system"),
-        'password': fields.char('Password', size=64, invisible=True,
+        'password': fields.char('Password', size=64, invisible=True, copy=False,
             help="Keep empty if you don't want the user to be able to connect on the system."),
         'new_password': fields.function(_get_password, type='char', size=64,
             fnct_inv=_set_new_password, string='Set Password',

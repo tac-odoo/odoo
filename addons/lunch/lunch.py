@@ -299,7 +299,9 @@ class lunch_order(osv.Model):
     _columns = {
         'user_id': fields.many2one('res.users', 'User Name', required=True, readonly=True, states={'new':[('readonly', False)]}),
         'date': fields.date('Date', required=True, readonly=True, states={'new':[('readonly', False)]}),
-        'order_line_ids': fields.one2many('lunch.order.line', 'order_id', 'Products', ondelete="cascade", readonly=True, states={'new':[('readonly', False)]}),
+        'order_line_ids': fields.one2many('lunch.order.line', 'order_id', 'Products',
+                                          ondelete="cascade", readonly=True, states={'new':[('readonly', False)]},
+                                          copy=True),
         'total': fields.function(_price_get, string="Total", store={
                  'lunch.order.line': (_fetch_orders_from_lines, ['product_id','order_id'], 20),
             }),
@@ -307,7 +309,7 @@ class lunch_order(osv.Model):
                                     ('confirmed','Confirmed'), \
                                     ('cancelled','Cancelled'), \
                                     ('partially','Partially Confirmed')] \
-                                ,'Status', readonly=True, select=True),
+                                ,'Status', readonly=True, select=True, copy=False),
         'alerts': fields.function(_alerts_get, string="Alerts", type='text'),
     }
 

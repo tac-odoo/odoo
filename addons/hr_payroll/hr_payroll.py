@@ -46,10 +46,10 @@ class hr_payroll_structure(osv.osv):
     _columns = {
         'name':fields.char('Name', required=True),
         'code':fields.char('Reference', size=64, required=True),
-        'company_id':fields.many2one('res.company', 'Company', required=True),
+        'company_id':fields.many2one('res.company', 'Company', required=True, copy=False),
         'note': fields.text('Description'),
         'parent_id':fields.many2one('hr.payroll.structure', 'Parent'),
-        'children_ids':fields.one2many('hr.payroll.structure', 'parent_id', 'Children'),
+        'children_ids':fields.one2many('hr.payroll.structure', 'parent_id', 'Children', copy=True),
         'rule_ids':fields.many2many('hr.salary.rule', 'hr_structure_salary_rule_rel', 'struct_id', 'rule_id', 'Salary Rules'),
     }
 
@@ -73,21 +73,8 @@ class hr_payroll_structure(osv.osv):
     ]
         
     def copy(self, cr, uid, id, default=None, context=None):
-        """
-        Create a new record in hr_payroll_structure model from existing one
-        @param cr: cursor to database
-        @param user: id of current user
-        @param id: list of record ids on which copy method executes
-        @param default: dict type contains the values to be override during copy of object
-        @param context: context arguments, like lang, time zone
-
-        @return: returns a id of newly created record
-        """
-        if not default:
-            default = {}
-        default.update(
-            code=_("%s (copy)") % (self.browse(cr, uid, id, context=context).code),
-            company_id=self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.id)
+        default = dict(default or {},
+                       code=_("%s (copy)") % (self.browse(cr, uid, id, context=context).code))
         return super(hr_payroll_structure, self).copy(cr, uid, id, default, context=context)
 
     @api.cr_uid_ids_context
@@ -228,7 +215,7 @@ class hr_payslip_run(osv.osv):
         'state': fields.selection([
             ('draft', 'Draft'),
             ('close', 'Close'),
-        ], 'Status', select=True, readonly=True),
+        ], 'Status', select=True, readonly=True, copy=False),
         'date_start': fields.date('Date From', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'date_end': fields.date('Date To', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'credit_note': fields.boolean('Credit Note', readonly=True, states={'draft': [('readonly', False)]}, help="If its checked, indicates that all payslips generated from here are refund payslips."),
@@ -277,7 +264,7 @@ class hr_payslip(osv.osv):
     _columns = {
         'struct_id': fields.many2one('hr.payroll.structure', 'Structure', readonly=True, states={'draft': [('readonly', False)]}, help='Defines the rules that have to be applied to this payslip, accordingly to the contract chosen. If you let empty the field contract, this field isn\'t mandatory anymore and thus the rules applied will be all the rules set on the structure of all contracts of the employee valid for the chosen period'),
         'name': fields.char('Payslip Name', required=False, readonly=True, states={'draft': [('readonly', False)]}),
-        'number': fields.char('Reference', required=False, readonly=True, states={'draft': [('readonly', False)]}),
+        'number': fields.char('Reference', required=False, readonly=True, states={'draft': [('readonly', False)]}, copy=False),
         'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'date_from': fields.date('Date From', readonly=True, states={'draft': [('readonly', False)]}, required=True),
         'date_to': fields.date('Date To', readonly=True, states={'draft': [('readonly', False)]}, required=True),
@@ -286,21 +273,21 @@ class hr_payslip(osv.osv):
             ('verify', 'Waiting'),
             ('done', 'Done'),
             ('cancel', 'Rejected'),
-        ], 'Status', select=True, readonly=True,
+        ], 'Status', select=True, readonly=True, copy=False,
             help='* When the payslip is created the status is \'Draft\'.\
             \n* If the payslip is under verification, the status is \'Waiting\'. \
             \n* If the payslip is confirmed then status is set to \'Done\'.\
             \n* When user cancel payslip the status is \'Rejected\'.'),
         'line_ids': one2many_mod2('hr.payslip.line', 'slip_id', 'Payslip Lines', readonly=True, states={'draft':[('readonly',False)]}),
-        'company_id': fields.many2one('res.company', 'Company', required=False, readonly=True, states={'draft': [('readonly', False)]}),
+        'company_id': fields.many2one('res.company', 'Company', required=False, readonly=True, states={'draft': [('readonly', False)]}, copy=False),
         'worked_days_line_ids': fields.one2many('hr.payslip.worked_days', 'payslip_id', 'Payslip Worked Days', required=False, readonly=True, states={'draft': [('readonly', False)]}),
         'input_line_ids': fields.one2many('hr.payslip.input', 'payslip_id', 'Payslip Inputs', required=False, readonly=True, states={'draft': [('readonly', False)]}),
-        'paid': fields.boolean('Made Payment Order ? ', required=False, readonly=True, states={'draft': [('readonly', False)]}),
+        'paid': fields.boolean('Made Payment Order ? ', required=False, readonly=True, states={'draft': [('readonly', False)]}, copy=False),
         'note': fields.text('Internal Note', readonly=True, states={'draft':[('readonly',False)]}),
         'contract_id': fields.many2one('hr.contract', 'Contract', required=False, readonly=True, states={'draft': [('readonly', False)]}),
         'details_by_salary_rule_category': fields.function(_get_lines_salary_rule_category, method=True, type='one2many', relation='hr.payslip.line', string='Details by Salary Rule Category'),
         'credit_note': fields.boolean('Credit Note', help="Indicates this payslip has a refund of another", readonly=True, states={'draft': [('readonly', False)]}),
-        'payslip_run_id': fields.many2one('hr.payslip.run', 'Payslip Batches', readonly=True, states={'draft': [('readonly', False)]}),
+        'payslip_run_id': fields.many2one('hr.payslip.run', 'Payslip Batches', readonly=True, states={'draft': [('readonly', False)]}, copy=False),
         'payslip_count': fields.function(_count_detail_payslip, type='integer', string="Payslip Computation Details"),
     }
     _defaults = {
@@ -320,19 +307,6 @@ class hr_payslip(osv.osv):
         return True
 
     _constraints = [(_check_dates, "Payslip 'Date From' must be before 'Date To'.", ['date_from', 'date_to'])]
-
-    def copy(self, cr, uid, id, default=None, context=None):
-        if not default:
-            default = {}
-        company_id = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.id
-        default.update({
-            'line_ids': [],
-            'company_id': company_id,
-            'number': '',
-            'payslip_run_id': False,
-            'paid': False,
-        })
-        return super(hr_payslip, self).copy(cr, uid, id, default, context=context)
 
     def cancel_sheet(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'cancel'}, context=context)
@@ -801,10 +775,10 @@ class hr_salary_rule(osv.osv):
         'amount_fix': fields.float('Fixed Amount', digits_compute=dp.get_precision('Payroll'),),
         'amount_percentage': fields.float('Percentage (%)', digits_compute=dp.get_precision('Payroll Rate'), help='For example, enter 50.0 to apply a percentage of 50%'),
         'amount_python_compute':fields.text('Python Code'),
-        'amount_percentage_base':fields.char('Percentage based on', required=False, readonly=False, help='result will be affected to a variable'),
-        'child_ids':fields.one2many('hr.salary.rule', 'parent_rule_id', 'Child Salary Rule'),
+        'amount_percentage_base': fields.char('Percentage based on', required=False, readonly=False, help='result will be affected to a variable'),
+        'child_ids':fields.one2many('hr.salary.rule', 'parent_rule_id', 'Child Salary Rule', copy=True),
         'register_id':fields.many2one('hr.contribution.register', 'Contribution Register', help="Eventual third party involved in the salary payment of the employees."),
-        'input_ids': fields.one2many('hr.rule.input', 'input_id', 'Inputs'),
+        'input_ids': fields.one2many('hr.rule.input', 'input_id', 'Inputs', copy=True),
         'note':fields.text('Description'),
      }
     _defaults = {

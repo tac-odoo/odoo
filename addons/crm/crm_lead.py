@@ -28,7 +28,6 @@ from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.addons.base.res.res_partner import format_address
 from openerp.osv import fields, osv, orm
-from openerp.tools import html2plaintext
 from openerp.tools.translate import _
 
 CRM_LEAD_FIELDS_TO_MERGE = ['name',
@@ -224,7 +223,7 @@ class crm_lead(format_address, osv.osv):
                     "Filter 'Available for Mass Mailing' allows users to filter the leads when performing mass mailing."),
         'type': fields.selection([ ('lead','Lead'), ('opportunity','Opportunity'), ],'Type', select=True, help="Type is used to separate Leads and Opportunities"),
         'priority': fields.selection(crm.AVAILABLE_PRIORITIES, 'Priority', select=True),
-        'date_closed': fields.datetime('Closed', readonly=True),
+        'date_closed': fields.datetime('Closed', readonly=True, copy=False),
         'stage_id': fields.many2one('crm.case.stage', 'Stage', track_visibility='onchange', select=True,
                         domain="['&', ('section_ids', '=', section_id), '|', ('type', '=', type), ('type', '=', 'both')]"),
         'user_id': fields.many2one('res.users', 'Salesperson', select=True, track_visibility='onchange'),
@@ -917,9 +916,7 @@ class crm_lead(format_address, osv.osv):
             default['date_open'] = fields.datetime.now()
         else:
             default['date_open'] = False
-        default['date_closed'] = False
-        default['stage_id'] = self._get_default_stage_id(cr, uid, local_context)
-        return super(crm_lead, self).copy(cr, uid, id, default, context=context)
+        return super(crm_lead, self).copy(cr, uid, id, default, context=local_context)
 
     def get_empty_list_help(self, cr, uid, help, context=None):
         context['empty_list_help_model'] = 'crm.case.section'

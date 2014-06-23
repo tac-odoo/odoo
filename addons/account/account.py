@@ -62,7 +62,7 @@ class account_payment_term(osv.osv):
         'name': fields.char('Payment Term', translate=True, required=True),
         'active': fields.boolean('Active', help="If the active field is set to False, it will allow you to hide the payment term without removing it."),
         'note': fields.text('Description', translate=True),
-        'line_ids': fields.one2many('account.payment.term.line', 'payment_id', 'Terms'),
+        'line_ids': fields.one2many('account.payment.term.line', 'payment_id', 'Terms', copy=True),
     }
     _defaults = {
         'active': 1,
@@ -212,9 +212,6 @@ def _code_get(self, cr, uid, context=None):
 #----------------------------------------------------------
 # Accounts
 #----------------------------------------------------------
-
-class account_tax(osv.osv):
-    _name = 'account.tax'
 
 class account_account(osv.osv):
     _order = "parent_left"
@@ -730,7 +727,7 @@ class account_journal(osv.osv):
         'centralisation': fields.boolean('Centralized Counterpart', help="Check this box to determine that each entry of this journal won't create a new counterpart but will share the same counterpart. This is used in fiscal year closing."),
         'update_posted': fields.boolean('Allow Cancelling Entries', help="Check this box if you want to allow the cancellation the entries related to this journal or of the invoice related to this journal"),
         'group_invoice_lines': fields.boolean('Group Invoice Lines', help="If this box is checked, the system will try to group the accounting lines when generating them from invoices."),
-        'sequence_id': fields.many2one('ir.sequence', 'Entry Sequence', help="This field contains the information related to the numbering of the journal entries of this journal.", required=True),
+        'sequence_id': fields.many2one('ir.sequence', 'Entry Sequence', help="This field contains the information related to the numbering of the journal entries of this journal.", required=True, copy=False),
         'user_id': fields.many2one('res.users', 'User', help="The user responsible for this journal"),
         'groups_id': fields.many2many('res.groups', 'account_journal_group_rel', 'journal_id', 'group_id', 'Groups'),
         'currency': fields.many2one('res.currency', 'Currency', help='The currency used to enter statement'),
@@ -769,15 +766,12 @@ class account_journal(osv.osv):
         (_check_currency, 'Configuration error!\nThe currency chosen should be shared by the default accounts too.', ['currency','default_debit_account_id','default_credit_account_id']),
     ]
 
-    def copy(self, cr, uid, id, default=None, context=None, done_list=None, local=False):
-        default = {} if default is None else default.copy()
-        if done_list is None:
-            done_list = []
+    def copy(self, cr, uid, id, default=None, context=None):
+        default = dict(context or {})
         journal = self.browse(cr, uid, id, context=context)
         default.update(
             code=_("%s (copy)") % (journal['code'] or ''),
-            name=_("%s (copy)") % (journal['name'] or ''),
-            sequence_id=False)
+            name=_("%s (copy)") % (journal['name'] or ''))
         return super(account_journal, self).copy(cr, uid, id, default, context=context)
 
     def write(self, cr, uid, ids, vals, context=None):
@@ -865,7 +859,10 @@ class account_fiscalyear(osv.osv):
         'date_start': fields.date('Start Date', required=True),
         'date_stop': fields.date('End Date', required=True),
         'period_ids': fields.one2many('account.period', 'fiscalyear_id', 'Periods'),
-        'state': fields.selection([('draft','Open'), ('done','Closed')], 'Status', readonly=True),
+        'state': fields.selection([('draft','Open'), ('done','Closed')], 'Status', readonly=True, copy=False),
+        'end_journal_period_id': fields.many2one(
+             'account.journal.period', 'End of Year Entries Journal',
+             readonly=True, copy=False),
     }
     _defaults = {
         'state': 'draft',
@@ -958,7 +955,7 @@ class account_period(osv.osv):
         'date_start': fields.date('Start of Period', required=True, states={'done':[('readonly',True)]}),
         'date_stop': fields.date('End of Period', required=True, states={'done':[('readonly',True)]}),
         'fiscalyear_id': fields.many2one('account.fiscalyear', 'Fiscal Year', required=True, states={'done':[('readonly',True)]}, select=True),
-        'state': fields.selection([('draft','Open'), ('done','Closed')], 'Status', readonly=True,
+        'state': fields.selection([('draft','Open'), ('done','Closed')], 'Status', readonly=True, copy=False,
                                   help='When monthly periods are created. The status is \'Draft\'. At the end of monthly period it is in \'Done\' status.'),
         'company_id': fields.related('fiscalyear_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True)
     }
@@ -1134,22 +1131,6 @@ class account_journal_period(osv.osv):
     }
     _order = "period_id"
 
-
-class account_fiscalyear(osv.osv):
-    _inherit = "account.fiscalyear"
-    _description = "Fiscal Year"
-    _columns = {
-        'end_journal_period_id':fields.many2one('account.journal.period','End of Year Entries Journal', readonly=True),
-    }
-
-    def copy(self, cr, uid, id, default=None, context=None):
-        default = {} if default is None else default.copy()
-        default.update({
-            'period_ids': [],
-            'end_journal_period_id': False
-        })
-        return super(account_fiscalyear, self).copy(cr, uid, id, default=default, context=context)
-
 #----------------------------------------------------------
 # Entries
 #----------------------------------------------------------
@@ -1237,13 +1218,21 @@ class account_move(osv.osv):
         return [line.move_id.id for line in line_obj.browse(cr, uid, ids, context=context)]
 
     _columns = {
-        'name': fields.char('Number', required=True),
-        'ref': fields.char('Reference'),
+        'name': fields.char('Number', required=True, copy=False),
+        'ref': fields.char('Reference', copy=False),
         'period_id': fields.many2one('account.period', 'Period', required=True, states={'posted':[('readonly',True)]}),
         'journal_id': fields.many2one('account.journal', 'Journal', required=True, states={'posted':[('readonly',True)]}),
-        'state': fields.selection([('draft','Unposted'), ('posted','Posted')], 'Status', required=True, readonly=True,
-            help='All manually created new journal entries are usually in the status \'Unposted\', but you can set the option to skip that status on the related journal. In that case, they will behave as journal entries automatically created by the system on document validation (invoices, bank statements...) and will be created in \'Posted\' status.'),
-        'line_id': fields.one2many('account.move.line', 'move_id', 'Entries', states={'posted':[('readonly',True)]}),
+        'state': fields.selection(
+              [('draft','Unposted'), ('posted','Posted')], 'Status',
+              required=True, readonly=True, copy=False,
+              help='All manually created new journal entries are usually in the status \'Unposted\', '
+                   'but you can set the option to skip that status on the related journal. '
+                   'In that case, they will behave as journal entries automatically created by the '
+                   'system on document validation (invoices, bank statements...) and will be created '
+                   'in \'Posted\' status.'),
+        'line_id': fields.one2many('account.move.line', 'move_id', 'Entries',
+                                   states={'posted':[('readonly',True)]},
+                                   copy=True),
         'to_check': fields.boolean('To Review', help='Check this box if you are unsure of that journal entry and if you want to note it as \'to be reviewed\' by an accounting expert.'),
         'partner_id': fields.related('line_id', 'partner_id', type="many2one", relation="res.partner", string="Partner", store={
             _name: (lambda self, cr,uid,ids,c: ids, ['line_id'], 10),
@@ -1354,23 +1343,9 @@ class account_move(osv.osv):
     # TODO: Check if period is closed !
     #
     def create(self, cr, uid, vals, context=None):
-        if context is None:
-            context = {}
-        if 'line_id' in vals and context.get('copy'):
-            for l in vals['line_id']:
-                if not l[0]:
-                    l[2].update({
-                        'reconcile_id':False,
-                        'reconcile_partial_id':False,
-                        'analytic_lines':False,
-                        'invoice':False,
-                        'ref':False,
-                        'balance':False,
-                        'account_tax_id':False,
-                        'statement_id': False,
-                    })
-
-            if 'journal_id' in vals and vals.get('journal_id', False):
+        context = dict(context or {})
+        if vals.get('line_id'):
+            if vals.get('journal_id'):
                 for l in vals['line_id']:
                     if not l[0]:
                         l[2]['journal_id'] = vals['journal_id']
@@ -1387,7 +1362,6 @@ class account_move(osv.osv):
                         l[2]['period_id'] = default_period
                 context['period_id'] = default_period
 
-        if vals.get('line_id', False):
             c = context.copy()
             c['novalidate'] = True
             c['period_id'] = vals['period_id'] if 'period_id' in vals else self._get_period(cr, uid, context)
@@ -1401,19 +1375,6 @@ class account_move(osv.osv):
         else:
             result = super(account_move, self).create(cr, uid, vals, context)
         return result
-
-    def copy(self, cr, uid, id, default=None, context=None):
-        default = {} if default is None else default.copy()
-        context = {} if context is None else context.copy()
-        default.update({
-            'state':'draft',
-            'ref': False,
-            'name':'/',
-        })
-        context.update({
-            'copy':True
-        })
-        return super(account_move, self).copy(cr, uid, id, default, context)
 
     def unlink(self, cr, uid, ids, context=None, check=True):
         if context is None:
@@ -1834,18 +1795,12 @@ class account_tax_code(osv.osv):
         if user.company_id:
             return user.company_id.id
         return self.pool.get('res.company').search(cr, uid, [('parent_id', '=', False)])[0]
+
     _defaults = {
         'company_id': _default_company,
         'sign': 1.0,
         'notprintable': False,
     }
-
-    def copy(self, cr, uid, id, default=None, context=None):
-        if default is None:
-            default = {}
-        default = default.copy()
-        default.update({'line_ids': []})
-        return super(account_tax_code, self).copy(cr, uid, id, default, context)
 
     _check_recursion = check_cycle
     _constraints = [
@@ -2283,7 +2238,7 @@ class account_model(osv.osv):
         'name': fields.char('Model Name', required=True, help="This is a model for recurring accounting entries"),
         'journal_id': fields.many2one('account.journal', 'Journal', required=True),
         'company_id': fields.related('journal_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True),
-        'lines_id': fields.one2many('account.model.line', 'model_id', 'Model Entries'),
+        'lines_id': fields.one2many('account.model.line', 'model_id', 'Model Entries', copy=True),
         'legend': fields.text('Legend', readonly=True, size=100),
     }
 
@@ -2422,8 +2377,8 @@ class account_subscription(osv.osv):
         'period_total': fields.integer('Number of Periods', required=True),
         'period_nbr': fields.integer('Period', required=True),
         'period_type': fields.selection([('day','days'),('month','month'),('year','year')], 'Period Type', required=True),
-        'state': fields.selection([('draft','Draft'),('running','Running'),('done','Done')], 'Status', required=True, readonly=True),
-        'lines_id': fields.one2many('account.subscription.line', 'subscription_id', 'Subscription Lines')
+        'state': fields.selection([('draft','Draft'),('running','Running'),('done','Done')], 'Status', required=True, readonly=True, copy=False),
+        'lines_id': fields.one2many('account.subscription.line', 'subscription_id', 'Subscription Lines', copy=True)
     }
     _defaults = {
         'date_start': fields.date.context_today,

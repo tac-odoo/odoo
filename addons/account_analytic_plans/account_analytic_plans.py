@@ -78,7 +78,7 @@ class account_analytic_plan(osv.osv):
     _description = "Analytic Plan"
     _columns = {
         'name': fields.char('Analytic Plan', required=True, select=True),
-        'plan_ids': fields.one2many('account.analytic.plan.line', 'plan_id', 'Analytic Plans'),
+        'plan_ids': fields.one2many('account.analytic.plan.line', 'plan_id', 'Analytic Plans', copy=True),
     }
 
 
@@ -107,7 +107,7 @@ class account_analytic_plan_instance(osv.osv):
         'name': fields.char('Analytic Distribution'),
         'code': fields.char('Distribution Code', size=16),
         'journal_id': fields.many2one('account.analytic.journal', 'Analytic Journal' ),
-        'account_ids': fields.one2many('account.analytic.plan.instance.line', 'plan_id', 'Account Id'),
+        'account_ids': fields.one2many('account.analytic.plan.instance.line', 'plan_id', 'Account Id', copy=True),
         'account1_ids': one2many_mod2('account.analytic.plan.instance.line', 'plan_id', 'Account1 Id'),
         'account2_ids': one2many_mod2('account.analytic.plan.instance.line', 'plan_id', 'Account2 Id'),
         'account3_ids': one2many_mod2('account.analytic.plan.instance.line', 'plan_id', 'Account3 Id'),
@@ -130,13 +130,6 @@ class account_analytic_plan_instance(osv.osv):
         res = super(account_analytic_plan_instance, self).search(cr, user, args, offset=offset, limit=limit, order=order,
                                                                  context=context, count=count)
         return res
-
-    def copy(self, cr, uid, id, default=None, context=None):
-        if not default:
-            default = {}
-        default.update({'account1_ids':False, 'account2_ids':False, 'account3_ids':False,
-                'account4_ids':False, 'account5_ids':False, 'account6_ids':False})
-        return super(account_analytic_plan_instance, self).copy(cr, uid, id, default, context=context)
 
     def _default_journal(self, cr, uid, context=None):
         if context is None:

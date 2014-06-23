@@ -51,7 +51,7 @@ class mail_mail(osv.Model):
             ('received', 'Received'),
             ('exception', 'Delivery Failed'),
             ('cancel', 'Cancelled'),
-        ], 'Status', readonly=True),
+        ], 'Status', readonly=True, copy=False),
         'auto_delete': fields.boolean('Auto Delete',
             help="Permanently delete this email after sending it, to save space"),
         'references': fields.text('References', help='Message references, such as identifiers of previous messages', readonly=1),
@@ -59,7 +59,7 @@ class mail_mail(osv.Model):
         'recipient_ids': fields.many2many('res.partner', string='To (Partners)'),
         'email_cc': fields.char('Cc', help='Carbon copy message recipients'),
         'body_html': fields.text('Rich-text Contents', help="Rich-text/HTML message"),
-        'headers': fields.text('Headers'),
+        'headers': fields.text('Headers', copy=False),
         # Auto-detected based on create() - if 'mail_message_id' was passed then this mail is a notification
         # and during unlink() we will not cascade delete the parent and its attachments
         'notification': fields.boolean('Is Notification',

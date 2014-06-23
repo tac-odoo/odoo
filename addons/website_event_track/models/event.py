@@ -86,7 +86,7 @@ class event_track(osv.osv):
         'event_id': fields.many2one('event.event', 'Event', required=True),
         'color': fields.integer('Color Index'),
         'priority': fields.selection([('3','Low'),('2','Medium (*)'),('1','High (**)'),('0','Highest (***)')], 'Priority', required=True),
-        'website_published': fields.boolean('Available in the website'),
+        'website_published': fields.boolean('Available in the website', copy=False),
         'website_url': fields.function(_website_url, string="Website url", type="char"),
         'image': fields.related('speaker_ids', 'image', type='binary', readonly=True)
     }
@@ -141,8 +141,8 @@ class event_event(osv.osv):
 
     _columns = {
         'tag_ids': fields.many2many('event.tag', string='Tags'),
-        'track_ids': fields.one2many('event.track', 'event_id', 'Tracks'),
-        'sponsor_ids': fields.one2many('event.sponsor', 'event_id', 'Sponsorships'),
+        'track_ids': fields.one2many('event.track', 'event_id', 'Tracks', copy=True),
+        'sponsor_ids': fields.one2many('event.sponsor', 'event_id', 'Sponsorships', copy=True),
         'blog_id': fields.many2one('blog.blog', 'Event Blog'),
         'show_track_proposal': fields.boolean('Talks Proposals'),
         'show_tracks': fields.boolean('Multiple Tracks'),

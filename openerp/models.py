@@ -4517,9 +4517,9 @@ class BaseModel(object):
 
 
         fields_to_copy = dict((f,fi) for f, fi in self._all_columns.iteritems()
+                                     if fi.column.copy
                                      if f not in default
-                                     if f not in blacklist
-                                     if not isinstance(fi.column, fields.function))
+                                     if f not in blacklist)
 
         data = self.read(cr, uid, [id], fields_to_copy.keys(), context=context)
         if data:

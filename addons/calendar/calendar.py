@@ -899,7 +899,7 @@ class calendar_event(osv.Model):
         'categ_ids': fields.many2many('calendar.event.type', 'meeting_category_rel', 'event_id', 'type_id', 'Tags'),
         'attendee_ids': fields.one2many('calendar.attendee', 'event_id', 'Attendees', ondelete='cascade'),
         'partner_ids': fields.many2many('res.partner', 'calendar_event_res_partner_rel', string='Attendees', states={'done': [('readonly', True)]}),
-        'alarm_ids': fields.many2many('calendar.alarm', 'calendar_alarm_calendar_event_rel', string='Reminders', ondelete="restrict"),
+        'alarm_ids': fields.many2many('calendar.alarm', 'calendar_alarm_calendar_event_rel', string='Reminders', ondelete="restrict", copy=False),
     }
     _defaults = {
         'end_type': 'count',
@@ -1403,16 +1403,9 @@ class calendar_event(osv.Model):
         return res
 
     def copy(self, cr, uid, id, default=None, context=None):
-        if context is None:
-            context = {}
-
         default = default or {}
-
         self._set_date(cr, uid, default, id=default.get('id'), context=context)
-        default['attendee_ids'] = False
-
-        res = super(calendar_event, self).copy(cr, uid, calendar_id2real_id(id), default, context)
-        return res
+        return super(calendar_event, self).copy(cr, uid, calendar_id2real_id(id), default, context)
 
     def _detach_one_event(self, cr, uid, id, values=dict(), context=None):
         real_event_id = calendar_id2real_id(id)

@@ -30,11 +30,11 @@ class res_users(osv.osv):
     # TODO create helper fields for autofill openid_url and openid_email -> http://pad.openerp.com/web-openid
 
     _columns = {
-        'openid_url': fields.char('OpenID URL', size=1024),
-        'openid_email': fields.char('OpenID Email', size=256,
+        'openid_url': fields.char('OpenID URL', size=1024, copy=False),
+        'openid_email': fields.char('OpenID Email', size=256, copy=False,
                                     help="Used for disambiguation in case of a shared OpenID URL"),
         'openid_key': fields.char('OpenID Key', size=utils.KEY_LENGTH,
-                                  readonly=True),
+                                  readonly=True, copy=False),
     }
 
     def _check_openid_url_email(self, cr, uid, ids, context=None):
@@ -47,17 +47,6 @@ class res_users(osv.osv):
     _constraints = [
         (_check_openid_url_email, lambda self, *a, **kw: self._check_openid_url_email_msg(*a, **kw), ['active', 'openid_url', 'openid_email']),
     ]
-
-    def copy(self, cr, uid, rid, defaults=None, context=None):
-        reset_fields = 'openid_url openid_email'.split()
-        reset_values = dict.fromkeys(reset_fields, False)
-        if defaults is None:
-            defaults = reset_values
-        else:
-            defaults = dict(reset_values, **defaults)
-
-        defaults['openid_key'] = False
-        return super(res_users, self).copy(cr, uid, rid, defaults, context)
 
     def _login(self, db, login, password):
         result = super(res_users, self)._login(db, login, password)

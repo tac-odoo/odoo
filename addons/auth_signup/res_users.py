@@ -104,9 +104,9 @@ class res_partner(osv.Model):
         return self._get_signup_url_for_action(cr, uid, ids, context=context)
 
     _columns = {
-        'signup_token': fields.char('Signup Token'),
-        'signup_type': fields.char('Signup Token Type'),
-        'signup_expiration': fields.datetime('Signup Expiration'),
+        'signup_token': fields.char('Signup Token', copy=False),
+        'signup_type': fields.char('Signup Token Type', copy=False),
+        'signup_expiration': fields.datetime('Signup Expiration', copy=False),
         'signup_valid': fields.function(_get_signup_valid, type='boolean', string='Signup Token is Valid'),
         'signup_url': fields.function(_get_signup_url, type='char', string='Signup URL'),
     }

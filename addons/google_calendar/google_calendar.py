@@ -937,7 +937,6 @@ class calendar_event(osv.Model):
 
     def copy(self, cr, uid, id, default=None, context=None):
         default = default or {}
-        default['attendee_ids'] = False
         if default.get('write_type', False):
             del default['write_type']
         elif default.get('recurrent_id', False):

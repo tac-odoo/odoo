@@ -99,7 +99,7 @@ class account_analytic_account(osv.osv):
 class account_analytic_line(osv.osv):
     _inherit = 'account.analytic.line'
     _columns = {
-        'invoice_id': fields.many2one('account.invoice', 'Invoice', ondelete="set null"),
+        'invoice_id': fields.many2one('account.invoice', 'Invoice', ondelete="set null", copy=False),
         'to_invoice': fields.many2one('hr_timesheet_invoice.factor', 'Invoiceable', help="It allows to set the discount while making invoice, keep empty if the activities should not be invoiced."),
     }
 
@@ -140,14 +140,6 @@ class account_analytic_line(osv.osv):
                     raise osv.except_osv(_('Error!'),
                         _('You cannot modify an invoiced analytic line!'))
         return True
-
-    def copy(self, cursor, user, obj_id, default=None, context=None):
-        if default is None:
-            default = {}
-        default = default.copy()
-        default.update({'invoice_id': False})
-        return super(account_analytic_line, self).copy(cursor, user, obj_id,
-                default, context=context)
 
     def _get_invoice_price(self, cr, uid, account, product_id, user_id, qty, context = {}):
         pro_price_obj = self.pool.get('product.pricelist')
@@ -314,16 +306,6 @@ class hr_analytic_timesheet(osv.osv):
                 'message': 'The analytic account is in pending state.\nYou should not work on this account !'
             }
         return res
-
-    def copy(self, cursor, user, obj_id, default=None, context=None):
-        if default is None:
-            default = {}
-        default = default.copy()
-        default.update({'invoice_id': False})
-        return super(hr_analytic_timesheet, self).copy(cursor, user, obj_id,
-                default, context=context)
-
-
 
 class account_invoice(osv.osv):
     _inherit = "account.invoice"

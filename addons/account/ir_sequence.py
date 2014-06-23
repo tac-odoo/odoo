@@ -43,7 +43,7 @@ class ir_sequence(osv.osv):
     _inherit = 'ir.sequence'
     _columns = {
         'fiscal_ids': fields.one2many('account.sequence.fiscalyear',
-            'sequence_main_id', 'Sequences')
+            'sequence_main_id', 'Sequences', copy=True)
     }
 
     @api.cr_uid_ids_context

@@ -97,7 +97,7 @@ class product_pricelist(osv.osv):
         'name': fields.char('Pricelist Name', required=True, translate=True),
         'active': fields.boolean('Active', help="If unchecked, it will allow you to hide the pricelist without removing it."),
         'type': fields.selection(_pricelist_type_get, 'Pricelist Type', required=True),
-        'version_id': fields.one2many('product.pricelist.version', 'pricelist_id', 'Pricelist Versions'),
+        'version_id': fields.one2many('product.pricelist.version', 'pricelist_id', 'Pricelist Versions', copy=True),
         'currency_id': fields.many2one('res.currency', 'Currency', required=True),
         'company_id': fields.many2one('res.company', 'Company'),
     }
@@ -336,9 +336,9 @@ class product_pricelist_version(osv.osv):
         'active': fields.boolean('Active',
             help="When a version is duplicated it is set to non active, so that the " \
             "dates do not overlaps with original version. You should change the dates " \
-            "and reactivate the pricelist"),
+            "and reactivate the pricelist", copy=False),
         'items_id': fields.one2many('product.pricelist.item',
-            'price_version_id', 'Price List Items', required=True),
+            'price_version_id', 'Price List Items', required=True, copy=True),
         'date_start': fields.date('Start Date', help="First valid date for the version."),
         'date_end': fields.date('End Date', help="Last valid date for the version."),
         'company_id': fields.related('pricelist_id','company_id',type='many2one',
@@ -347,12 +347,6 @@ class product_pricelist_version(osv.osv):
     _defaults = {
         'active': lambda *a: 1,
     }
-
-    # We desactivate duplicated pricelists, so that dates do not overlap
-    def copy(self, cr, uid, id, default=None, context=None):
-        if not default: default= {}
-        default['active'] = False
-        return super(product_pricelist_version, self).copy(cr, uid, id, default, context)
 
     def _check_date(self, cursor, user, ids, context=None):
         for pricelist_version in self.browse(cursor, user, ids, context=context):

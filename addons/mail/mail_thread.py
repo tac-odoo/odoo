@@ -448,10 +448,6 @@ class mail_thread(osv.AbstractModel):
     def copy_data(self, cr, uid, id, default=None, context=None):
         # avoid tracking multiple temporary changes during copy
         context = dict(context or {}, mail_notrack=True)
-
-        default = default or {}
-        default['message_ids'] = []
-        default['message_follower_ids'] = []
         return super(mail_thread, self).copy_data(cr, uid, id, default=default, context=context)
 
     #------------------------------------------------------

@@ -21,7 +21,6 @@
 
 from openerp import api
 from openerp.fields import Integer, One2many, Html
-from openerp.addons.event.event import event_event as Event
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
 

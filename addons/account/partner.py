@@ -34,8 +34,8 @@ class account_fiscal_position(osv.osv):
         'name': fields.char('Fiscal Position', required=True),
         'active': fields.boolean('Active', help="By unchecking the active field, you may hide a fiscal position without deleting it."),
         'company_id': fields.many2one('res.company', 'Company'),
-        'account_ids': fields.one2many('account.fiscal.position.account', 'position_id', 'Account Mapping'),
-        'tax_ids': fields.one2many('account.fiscal.position.tax', 'position_id', 'Tax Mapping'),
+        'account_ids': fields.one2many('account.fiscal.position.account', 'position_id', 'Account Mapping', copy=True),
+        'tax_ids': fields.one2many('account.fiscal.position.tax', 'position_id', 'Tax Mapping', copy=True),
         'note': fields.text('Notes'),
         'auto_apply': fields.boolean('Automatic', help="Apply automatically this fiscal position."),
         'vat_required': fields.boolean('VAT required', help="Apply only if partner has a VAT number."),
@@ -302,7 +302,14 @@ class res_partner(osv.osv):
              help="This payment term will be used instead of the default one for purchase orders and supplier invoices"),
         'ref_companies': fields.one2many('res.company', 'partner_id',
             'Companies that refers to partner'),
-        'last_reconciliation_date': fields.datetime('Latest Full Reconciliation Date', help='Date on which the partner accounting entries were fully reconciled last time. It differs from the last date where a reconciliation has been made for this partner, as here we depict the fact that nothing more was to be reconciled at this date. This can be achieved in 2 different ways: either the last unreconciled debit/credit entry of this partner was reconciled, either the user pressed the button "Nothing more to reconcile" during the manual reconciliation process.')
+        'last_reconciliation_date': fields.datetime(
+            'Latest Full Reconciliation Date', copy=False,
+            help='Date on which the partner accounting entries were fully reconciled last time. '
+                 'It differs from the last date where a reconciliation has been made for this partner, '
+                 'as here we depict the fact that nothing more was to be reconciled at this date. '
+                 'This can be achieved in 2 different ways: either the last unreconciled debit/credit '
+                 'entry of this partner was reconciled, either the user pressed the button '
+                 '"Nothing more to reconcile" during the manual reconciliation process.')
     }
 
     def _commercial_fields(self, cr, uid, context=None):

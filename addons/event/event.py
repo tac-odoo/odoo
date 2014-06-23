@@ -145,7 +145,7 @@ class event_event(models.Model):
             ('cancel', 'Cancelled'),
             ('confirm', 'Confirmed'),
             ('done', 'Done')
-        ], string='Status', default='draft', readonly=True, required=True,
+        ], string='Status', default='draft', readonly=True, required=True, copy=False,
         help="If event is created, the status is 'Draft'. If event is confirmed for the particular dates the status is set to 'Confirmed'. If the event is over, the status is set to 'Done'. If event is cancelled the status is set to 'Cancelled'.")
     email_registration_id = fields.Many2one('email.template', string='Registration Confirmation Email',
         help='This field contains the template of the mail that will be automatically sent each time a registration for this event is confirmed.')
@@ -203,13 +203,6 @@ class event_event(models.Model):
     def _check_closing_date(self):
         if self.date_end < self.date_begin:
             raise Warning(_('Closing Date cannot be set before Beginning Date.'))
-
-    @api.one
-    def copy(self, default):
-        """ Reset the state and the registrations while copying an event """
-        default['state'] = 'draft'
-        default['registration_ids'] = []
-        return super(event_event, self).copy(default)
 
     @api.one
     def button_draft(self):
@@ -317,7 +310,7 @@ class event_registration(models.Model):
             ('cancel', 'Cancelled'),
             ('open', 'Confirmed'),
             ('done', 'Attended'),
-        ], string='Status', default='draft', readonly=True)
+        ], string='Status', default='draft', readonly=True, copy=False)
     email = fields.Char(string='Email')
     phone = fields.Char(string='Phone')
     name = fields.Char(string='Name', select=True)

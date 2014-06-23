@@ -29,7 +29,7 @@ class followup(osv.osv):
     _description = 'Account Follow-up'
     _rec_name = 'name'
     _columns = {
-        'followup_line': fields.one2many('account_followup.followup.line', 'followup_id', 'Follow-up'),
+        'followup_line': fields.one2many('account_followup.followup.line', 'followup_id', 'Follow-up', copy=True),
         'company_id': fields.many2one('res.company', 'Company', required=True),
         'name': fields.related('company_id', 'name', string = "Name", readonly=True, type="char"),
     }
@@ -437,15 +437,17 @@ class res_partner(osv.osv):
     _columns = {
         'payment_responsible_id':fields.many2one('res.users', ondelete='set null', string='Follow-up Responsible', 
                                                  help="Optionally you can assign a user to this field, which will make him responsible for the action.", 
-                                                 track_visibility="onchange"), 
-        'payment_note':fields.text('Customer Payment Promise', help="Payment Note", track_visibility="onchange"),
-        'payment_next_action':fields.text('Next Action', 
+                                                 track_visibility="onchange", copy=False), 
+        'payment_note':fields.text('Customer Payment Promise', help="Payment Note", track_visibility="onchange", copy=False),
+        'payment_next_action':fields.text('Next Action', copy=False,
                                     help="This is the next action to be taken.  It will automatically be set when the partner gets a follow-up level that requires a manual action. ", 
                                     track_visibility="onchange"), 
-        'payment_next_action_date':fields.date('Next Action Date',
-                                    help="This is when the manual follow-up is needed. " \
-                                    "The date will be set to the current date when the partner gets a follow-up level that requires a manual action. "\
-                                    "Can be practical to set manually e.g. to see if he keeps his promises."),
+        'payment_next_action_date': fields.date('Next Action Date', copy=False,
+                                    help="This is when the manual follow-up is needed. "
+                                         "The date will be set to the current date when the partner "
+                                         "gets a follow-up level that requires a manual action. "
+                                         "Can be practical to set manually e.g. to see if he keeps "
+                                         "his promises."),
         'unreconciled_aml_ids':fields.one2many('account.move.line', 'partner_id', domain=['&', ('reconcile_id', '=', False), '&', 
                             ('account_id.active','=', True), '&', ('account_id.type', '=', 'receivable'), ('state', '!=', 'draft')]), 
         'latest_followup_date':fields.function(_get_latest, method=True, type='date', string="Latest Follow-up Date", 

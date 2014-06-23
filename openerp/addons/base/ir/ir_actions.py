@@ -550,7 +550,7 @@ class ir_actions_server(osv.osv):
                                         help="Provide an expression that, applied on the current record, gives the field to update."),
         'fields_lines': fields.one2many('ir.server.object.lines', 'server_id',
                                         string='Value Mapping',
-                                        help=""),
+                                        copy=True),
 
         # Fake fields used to implement the placeholder assistant
         'model_object_field': fields.many2one('ir.model.fields', string="Field",

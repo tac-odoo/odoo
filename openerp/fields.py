@@ -261,6 +261,7 @@ class Field(object):
 
     store = True                # whether the field is stored in database
     index = False               # whether the field is indexed in database
+    copyable = True             # whether the field is copied over by BaseModel.copy()
     depends = ()                # collection of field dependencies
     recursive = False           # whether self depends on itself
     compute = None              # compute(recs) computes field on recs
@@ -305,12 +306,16 @@ class Field(object):
 
         # initialize `self` with `attrs`
         if attrs.get('compute'):
-            # by default, computed fields are not stored and readonly
+            # by default, computed fields are not stored, not copied and readonly
             attrs['store'] = attrs.get('store', False)
+            attrs['copy'] = attrs.get('copy', False)
             attrs['readonly'] = attrs.get('readonly', not attrs.get('inverse'))
         if attrs.get('related'):
             # by default, related fields are not stored
             attrs['store'] = attrs.get('store', False)
+        if 'copy' in attrs:
+            # attribute is copyable because there is also a copy() method
+            attrs['copyable'] = attrs.pop('copy')
 
         for attr, value in attrs.iteritems():
             if not hasattr(self, attr):
@@ -566,6 +571,7 @@ class Field(object):
         return getattr(fields, self.type)(**args)
 
     # properties used by to_column() to create a column instance
+    _column_copy = property(attrgetter('copyable'))
     _column_select = property(attrgetter('index'))
     _column_string = property(attrgetter('string'))
     _column_help = property(attrgetter('help'))
@@ -1113,7 +1119,7 @@ class Selection(Field):
             selection = getattr(env[self.model_name], selection)()
         elif callable(selection):
             selection = selection(env[self.model_name])
-        return [value for value, label in selection]
+        return [value for value, _ in selection]
 
     def convert_to_cache(self, value, env):
         if value in self.get_values(env):
@@ -1401,6 +1407,7 @@ class One2many(_RelationalMulti):
     inverse_name = None                 # name of the inverse field
     auto_join = False                   # whether joins are generated upon search
     limit = None                        # optional limit to use upon read
+    copyable = False                    # o2m are not copied by default
 
     def __init__(self, comodel_name=None, inverse_name=None, string=None, **kwargs):
         super(One2many, self).__init__(

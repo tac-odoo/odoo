@@ -96,7 +96,7 @@ class base_action_rule(osv.osv):
             ondelete='restrict',
             domain="[('model_id', '=', model_id.model)]",
             help="If present, this condition must be satisfied before executing the action rule."),
-        'last_run': fields.datetime('Last Run', readonly=1),
+        'last_run': fields.datetime('Last Run', readonly=1, copy=False),
     }
 
     _defaults = {

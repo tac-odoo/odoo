@@ -381,13 +381,6 @@ class Partner(osv.osv):
         (_check_recursion, 'Error ! You cannot create recursive associated members.', ['associate_member'])
     ]
 
-    def copy(self, cr, uid, id, default=None, context=None):
-        if default is None:
-            default = {}
-        default = default.copy()
-        default['member_lines'] = []
-        return super(Partner, self).copy(cr, uid, id, default, context=context)
-
     def create_membership_invoice(self, cr, uid, ids, product_id=None, datas=None, context=None):
         """ Create Customer Invoice of Membership for partners.
         @param datas: datas has dictionary value which consist Id of Membership product and Cost Amount of Membership.

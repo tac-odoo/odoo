@@ -254,9 +254,9 @@ class account_asset_asset(osv.osv):
         'note': fields.text('Note'),
         'category_id': fields.many2one('account.asset.category', 'Asset Category', required=True, change_default=True, readonly=True, states={'draft':[('readonly',False)]}),
         'parent_id': fields.many2one('account.asset.asset', 'Parent Asset', readonly=True, states={'draft':[('readonly',False)]}),
-        'child_ids': fields.one2many('account.asset.asset', 'parent_id', 'Children Assets'),
+        'child_ids': fields.one2many('account.asset.asset', 'parent_id', 'Children Assets', copy=True),
         'purchase_date': fields.date('Purchase Date', required=True, readonly=True, states={'draft':[('readonly',False)]}),
-        'state': fields.selection([('draft','Draft'),('open','Running'),('close','Close')], 'Status', required=True,
+        'state': fields.selection([('draft','Draft'),('open','Running'),('close','Close')], 'Status', required=True, copy=False,
                                   help="When an asset is created, the status is 'Draft'.\n" \
                                        "If the asset is confirmed, the status goes in 'Running' and the depreciation lines can be posted in the accounting.\n" \
                                        "You can manually close an asset when the depreciation is over. If the last line of depreciation is posted, the asset automatically goes in that status."),
@@ -328,14 +328,6 @@ class account_asset_asset(osv.osv):
         if method_time != 'number':
             res['value'] = {'prorata': False}
         return res
-
-    def copy(self, cr, uid, id, default=None, context=None):
-        if default is None:
-            default = {}
-        if context is None:
-            context = {}
-        default.update({'depreciation_line_ids': [], 'account_move_line_ids': [], 'history_ids': [], 'state': 'draft'})
-        return super(account_asset_asset, self).copy(cr, uid, id, default, context=context)
 
     def _compute_entries(self, cr, uid, ids, period_id, context=None):
         result = []

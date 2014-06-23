@@ -41,7 +41,7 @@ added to partners that match the segmentation criterions after computation.'),
                     ('running','Running')], 'Execution Status', readonly=True),
         'partner_id': fields.integer('Max Partner ID processed'),
         'segmentation_line': fields.one2many('crm.segmentation.line', \
-                            'segmentation_id', 'Criteria', required=True),
+                            'segmentation_id', 'Criteria', required=True, copy=True),
         'sales_purchase_active': fields.boolean('Use The Sales Purchase Rules', help='Check if you want to use this tab as part of the segmentation rule. If not checked, the criteria beneath will be ignored')
     }
     _defaults = {

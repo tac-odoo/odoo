@@ -24,7 +24,6 @@ import logging
 import time
 
 from openerp.osv import osv, fields
-from openerp.osv.orm import except_orm
 import openerp.tools
 from openerp.tools.translate import _
 
@@ -518,7 +517,7 @@ class account_analytic_account(osv.osv):
         'invoiced_total' : fields.function(_sum_of_fields, type="float",multi="sum_of_all", string="Total Invoiced"),
         'remaining_total' : fields.function(_sum_of_fields, type="float",multi="sum_of_all", string="Total Remaining", help="Expectation of remaining income for this contract. Computed as the sum of remaining subtotals which, in turn, are computed as the maximum between '(Estimation - Invoiced)' and 'To Invoice' amounts"),
         'toinvoice_total' : fields.function(_sum_of_fields, type="float",multi="sum_of_all", string="Total to Invoice", help=" Sum of everything that could be invoiced for this contract."),
-        'recurring_invoice_line_ids': fields.one2many('account.analytic.invoice.line', 'analytic_account_id', 'Invoice Lines'),
+        'recurring_invoice_line_ids': fields.one2many('account.analytic.invoice.line', 'analytic_account_id', 'Invoice Lines', copy=True),
         'recurring_invoices' : fields.boolean('Generate recurring invoices automatically'),
         'recurring_rule_type': fields.selection([
             ('daily', 'Day(s)'),

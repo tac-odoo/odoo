@@ -167,19 +167,20 @@ class hr_holidays(osv.osv):
     _columns = {
         'name': fields.char('Description', size=64),
         'state': fields.selection([('draft', 'To Submit'), ('cancel', 'Cancelled'),('confirm', 'To Approve'), ('refuse', 'Refused'), ('validate1', 'Second Approval'), ('validate', 'Approved')],
-            'Status', readonly=True, track_visibility='onchange',
+            'Status', readonly=True, track_visibility='onchange', copy=False,
             help='The status is set to \'To Submit\', when a holiday request is created.\
             \nThe status is \'To Approve\', when holiday request is confirmed by user.\
             \nThe status is \'Refused\', when holiday request is refused by manager.\
             \nThe status is \'Approved\', when holiday request is approved by manager.'),
         'user_id':fields.related('employee_id', 'user_id', type='many2one', relation='res.users', string='User', store=True),
-        'date_from': fields.datetime('Start Date', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}, select=True),
-        'date_to': fields.datetime('End Date', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}),
+        'date_from': fields.datetime('Start Date', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}, select=True, copy=False),
+        'date_to': fields.datetime('End Date', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}, copy=False),
         'holiday_status_id': fields.many2one("hr.holidays.status", "Leave Type", required=True,readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}),
         'employee_id': fields.many2one('hr.employee', "Employee", select=True, invisible=False, readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}),
-        'manager_id': fields.many2one('hr.employee', 'First Approval', invisible=False, readonly=True, help='This area is automatically filled by the user who validate the leave'),
+        'manager_id': fields.many2one('hr.employee', 'First Approval', invisible=False, readonly=True, copy=False,
+                                      help='This area is automatically filled by the user who validate the leave'),
         'notes': fields.text('Reasons',readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}),
-        'number_of_days_temp': fields.float('Allocation', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}),
+        'number_of_days_temp': fields.float('Allocation', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}, copy=False),
         'number_of_days': fields.function(_compute_number_of_days, string='Number of Days', store=True),
         'meeting_id': fields.many2one('calendar.event', 'Meeting'),
         'type': fields.selection([('remove','Leave Request'),('add','Allocation Request')], 'Request Type', required=True, readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}, help="Choose 'Leave Request' if someone wants to take an off-day. \nChoose 'Allocation Request' if you want to increase the number of leaves available for someone", select=True),
@@ -188,7 +189,8 @@ class hr_holidays(osv.osv):
         'department_id':fields.related('employee_id', 'department_id', string='Department', type='many2one', relation='hr.department', readonly=True, store=True),
         'category_id': fields.many2one('hr.employee.category', "Employee Tag", help='Category of Employee', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}),
         'holiday_type': fields.selection([('employee','By Employee'),('category','By Employee Tag')], 'Allocation Mode', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}, help='By Employee: Allocation/Request for individual Employee, By Employee Tag: Allocation/Request for group of employees in category', required=True),
-        'manager_id2': fields.many2one('hr.employee', 'Second Approval', readonly=True, help='This area is automaticly filled by the user who validate the leave with second level (If Leave type need second validation)'),
+        'manager_id2': fields.many2one('hr.employee', 'Second Approval', readonly=True, copy=False,
+                                       help='This area is automaticly filled by the user who validate the leave with second level (If Leave type need second validation)'),
         'double_validation': fields.related('holiday_status_id', 'double_validation', type='boolean', relation='hr.holidays.status', string='Apply Double Validation'),
         'can_reset': fields.function(
             _get_can_reset,
@@ -212,16 +214,6 @@ class hr_holidays(osv.osv):
         ('date_check2', "CHECK ( (type='add') OR (date_from <= date_to))", "The start date must be anterior to the end date."),
         ('date_check', "CHECK ( number_of_days_temp >= 0 )", "The number of days must be greater than 0."),
     ]
-    
-    def copy(self, cr, uid, id, default=None, context=None):
-        if default is None:
-            default = {}
-        if context is None:
-            context = {}
-        default = default.copy()
-        default['date_from'] = False
-        default['date_to'] = False
-        return super(hr_holidays, self).copy(cr, uid, id, default, context=context)
 
     def _create_resource_leave(self, cr, uid, leaves, context=None):
         '''This method will create entry in resource calendar leave object at the time of holidays validated '''

@@ -327,7 +327,7 @@ class product_attribute(osv.osv):
     _description = "Product Attribute"
     _columns = {
         'name': fields.char('Name', translate=True, required=True),
-        'value_ids': fields.one2many('product.attribute.value', 'attribute_id', 'Values'),
+        'value_ids': fields.one2many('product.attribute.value', 'attribute_id', 'Values', copy=True),
     }
 
 class product_attribute_value(osv.osv):
@@ -1157,7 +1157,7 @@ class product_supplierinfo(osv.osv):
         'qty': fields.function(_calc_qty, store=True, type='float', string='Quantity', multi="qty", help="This is a quantity which is converted into Default Unit of Measure."),
         'product_tmpl_id' : fields.many2one('product.template', 'Product Template', required=True, ondelete='cascade', select=True, oldname='product_id'),
         'delay' : fields.integer('Delivery Lead Time', required=True, help="Lead time in days between the confirmation of the purchase order and the reception of the products in your warehouse. Used by the scheduler for automatic computation of the purchase order planning."),
-        'pricelist_ids': fields.one2many('pricelist.partnerinfo', 'suppinfo_id', 'Supplier Pricelist'),
+        'pricelist_ids': fields.one2many('pricelist.partnerinfo', 'suppinfo_id', 'Supplier Pricelist', copy=True),
         'company_id':fields.many2one('res.company','Company',select=1),
     }
     _defaults = {

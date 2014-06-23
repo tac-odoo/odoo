@@ -81,9 +81,8 @@ class _column(object):
     _symbol_f = _symbol_set
     _symbol_set = (_symbol_c, _symbol_f)
     _symbol_get = None
-
-    # used to hide a certain field type in the list of field types
     _deprecated = False
+    copy = True # whether the field is copied by BaseModel.copy()
 
     def __init__(self, string='unknown', required=False, readonly=False, domain=None, context=None, states=None, priority=0, change_default=False, size=None, ondelete=None, translate=False, select=False, manual=False, **args):
         """
@@ -133,6 +132,7 @@ class _column(object):
         """ return a dictionary with all the arguments to pass to the field """
         items = [
             ('_origin', self),                  # field interfaces self
+            ('copy', self.copy),
             ('index', self.select),
             ('string', self.string),
             ('help', self.help),
@@ -638,6 +638,9 @@ class one2many(_column):
     _classic_write = False
     _prefetch = False
     _type = 'one2many'
+
+    # one2many columns are not copied by default
+    copy = False
 
     def __init__(self, obj, fields_id, string='unknown', limit=None, auto_join=False, **args):
         _column.__init__(self, string=string, **args)
@@ -1179,6 +1182,9 @@ class function(_column):
     _prefetch = False
     _type = 'function'
     _properties = True
+
+    # function fields are not copied by default
+    copy = False
 
 #
 # multi: compute several fields in one call

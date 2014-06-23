@@ -19,15 +19,12 @@
 #
 ##############################################################################
 
-import sys
 import time
 from datetime import datetime
-from operator import itemgetter
 
-from lxml import etree
 
 from openerp import workflow
-from openerp.osv import fields, osv, orm
+from openerp.osv import fields, osv
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 from openerp import tools
@@ -455,9 +452,9 @@ class account_move_line(osv.osv):
         'move_id': fields.many2one('account.move', 'Journal Entry', ondelete="cascade", help="The move of this entry line.", select=2, required=True),
         'narration': fields.related('move_id','narration', type='text', relation='account.move', string='Internal Note'),
         'ref': fields.related('move_id', 'ref', string='Reference', type='char', store=True),
-        'statement_id': fields.many2one('account.bank.statement', 'Statement', help="The bank statement used for bank reconciliation", select=1),
-        'reconcile_id': fields.many2one('account.move.reconcile', 'Reconcile', readonly=True, ondelete='set null', select=2),
-        'reconcile_partial_id': fields.many2one('account.move.reconcile', 'Partial Reconcile', readonly=True, ondelete='set null', select=2),
+        'statement_id': fields.many2one('account.bank.statement', 'Statement', help="The bank statement used for bank reconciliation", select=1, copy=False),
+        'reconcile_id': fields.many2one('account.move.reconcile', 'Reconcile', readonly=True, ondelete='set null', select=2, copy=False),
+        'reconcile_partial_id': fields.many2one('account.move.reconcile', 'Partial Reconcile', readonly=True, ondelete='set null', select=2, copy=False),
         'reconcile_ref': fields.function(_get_reconcile, type='char', string='Reconcile Ref', oldname='reconcile', store={
                     'account.move.line': (lambda self, cr, uid, ids, c={}: ids, ['reconcile_id','reconcile_partial_id'], 50),'account.move.reconcile': (_get_move_from_reconcile, None, 50)}),
         'amount_currency': fields.float('Amount Currency', help="The amount expressed in an optional other currency if it is a multi-currency entry.", digits_compute=dp.get_precision('Account')),
@@ -483,13 +480,13 @@ class account_move_line(osv.osv):
         'analytic_lines': fields.one2many('account.analytic.line', 'move_id', 'Analytic lines'),
         'centralisation': fields.selection([('normal','Normal'),('credit','Credit Centralisation'),('debit','Debit Centralisation'),('currency','Currency Adjustment')], 'Centralisation', size=8),
         'balance': fields.function(_balance, fnct_search=_balance_search, string='Balance'),
-        'state': fields.selection([('draft','Unbalanced'), ('valid','Balanced')], 'Status', readonly=True),
+        'state': fields.selection([('draft','Unbalanced'), ('valid','Balanced')], 'Status', readonly=True, copy=False),
         'tax_code_id': fields.many2one('account.tax.code', 'Tax Account', help="The Account can either be a base tax code or a tax code account."),
         'tax_amount': fields.float('Tax/Base Amount', digits_compute=dp.get_precision('Account'), select=True, help="If the Tax account is a tax code account, this field will contain the taxed amount.If the tax account is base tax code, "\
                     "this field will contain the basic amount(without tax)."),
         'invoice': fields.function(_invoice, string='Invoice',
             type='many2one', relation='account.invoice', fnct_search=_invoice_search),
-        'account_tax_id':fields.many2one('account.tax', 'Tax'),
+        'account_tax_id':fields.many2one('account.tax', 'Tax', copy=False),
         'analytic_account_id': fields.many2one('account.analytic.account', 'Analytic Account'),
         'company_id': fields.related('account_id', 'company_id', type='many2one', relation='res.company',
                             string='Company', store=True, readonly=True)

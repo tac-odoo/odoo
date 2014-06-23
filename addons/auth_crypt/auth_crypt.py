@@ -40,7 +40,7 @@ class res_users(osv.osv):
 
     _columns = {
         'password': fields.function(get_pw, fnct_inv=set_pw, type='char', string='Password', invisible=True, store=True),
-        'password_crypt': fields.char(string='Encrypted Password', invisible=True),
+        'password_crypt': fields.char(string='Encrypted Password', invisible=True, copy=False),
     }
 
     def check_credentials(self, cr, uid, password):

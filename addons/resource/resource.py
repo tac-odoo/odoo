@@ -46,7 +46,7 @@ class resource_calendar(osv.osv):
     _columns = {
         'name': fields.char("Name", required=True),
         'company_id': fields.many2one('res.company', 'Company', required=False),
-        'attendance_ids': fields.one2many('resource.calendar.attendance', 'calendar_id', 'Working Time'),
+        'attendance_ids': fields.one2many('resource.calendar.attendance', 'calendar_id', 'Working Time', copy=True),
         'manager': fields.many2one('res.users', 'Workgroup Manager'),
         'leave_ids': fields.one2many(
             'resource.calendar.leaves', 'calendar_id', 'Leaves',
@@ -654,8 +654,8 @@ class resource_resource(osv.osv):
     _name = "resource.resource"
     _description = "Resource Detail"
     _columns = {
-        'name' : fields.char("Name", required=True),
-        'code': fields.char('Code', size=16),
+        'name': fields.char("Name", required=True),
+        'code': fields.char('Code', size=16, copy=False),
         'active' : fields.boolean('Active', help="If the active field is set to False, it will allow you to hide the resource record without removing it."),
         'company_id' : fields.many2one('res.company', 'Company'),
         'resource_type': fields.selection([('user','Human'),('material','Material')], 'Resource Type', required=True),

@@ -38,20 +38,6 @@ class sale_order(osv.osv):
         },
     }
 
-    def copy(self, cr, uid, id, default=None, context=None):
-        if not default:
-            default = {}
-        default.update({
-            'date_order': fields.datetime.now(),
-            'state': 'draft',
-            'invoice_ids': [],
-            'date_confirm': False,
-            'client_order_ref': '',
-            'name': self.pool.get('ir.sequence').get(cr, uid, 'sale.order'),
-            'procurement_group_id': False,
-        })
-        return super(sale_order, self).copy(cr, uid, id, default, context=context)
-
     def _amount_line_tax(self, cr, uid, line, context=None):
         val = 0.0
         for c in self.pool.get('account.tax').compute_all(cr, uid, line.tax_id, line.price_unit * (1-(line.discount or 0.0)/100.0), line.product_uom_qty, line.product_id, line.order_id.partner_id)['taxes']:
@@ -185,10 +171,10 @@ class sale_order(osv.osv):
         return None
 
     _columns = {
-        'name': fields.char('Order Reference', required=True,
+        'name': fields.char('Order Reference', required=True, copy=False,
             readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, select=True),
         'origin': fields.char('Source Document', help="Reference of the document that generated this sales order request."),
-        'client_order_ref': fields.char('Reference/Description'),
+        'client_order_ref': fields.char('Reference/Description', copy=False),
         'state': fields.selection([
             ('draft', 'Draft Quotation'),
             ('sent', 'Quotation Sent'),
@@ -199,13 +185,13 @@ class sale_order(osv.osv):
             ('shipping_except', 'Shipping Exception'),
             ('invoice_except', 'Invoice Exception'),
             ('done', 'Done'),
-            ], 'Status', readonly=True, help="Gives the status of the quotation or sales order.\
+            ], 'Status', readonly=True, copy=False, help="Gives the status of the quotation or sales order.\
               \nThe exception status is automatically set when a cancel operation occurs \
               in the invoice validation (Invoice Exception) or in the picking list process (Shipping Exception).\nThe 'Waiting Schedule' status is set when the invoice is confirmed\
                but waiting for the scheduler to run on the order date.", select=True),
-        'date_order': fields.datetime('Date', required=True, readonly=True, select=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}),
+        'date_order': fields.datetime('Date', required=True, readonly=True, select=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=False),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True, help="Date on which sales order is created."),
-        'date_confirm': fields.date('Confirmation Date', readonly=True, select=True, help="Date on which sales order is confirmed."),
+        'date_confirm': fields.date('Confirmation Date', readonly=True, select=True, help="Date on which sales order is confirmed.", copy=False),
         'user_id': fields.many2one('res.users', 'Salesperson', states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, select=True, track_visibility='onchange'),
         'partner_id': fields.many2one('res.partner', 'Customer', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, required=True, change_default=True, select=True, track_visibility='always'),
         'partner_invoice_id': fields.many2one('res.partner', 'Invoice Address', readonly=True, required=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Invoice address for current sales order."),
@@ -218,8 +204,8 @@ class sale_order(osv.osv):
         'currency_id': fields.related('pricelist_id', 'currency_id', type="many2one", relation="res.currency", string="Currency", readonly=True, required=True),
         'project_id': fields.many2one('account.analytic.account', 'Contract / Analytic', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="The analytic account related to a sales order."),
 
-        'order_line': fields.one2many('sale.order.line', 'order_id', 'Order Lines', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}),
-        'invoice_ids': fields.many2many('account.invoice', 'sale_order_invoice_rel', 'order_id', 'invoice_id', 'Invoices', readonly=True, help="This is the list of invoices that have been generated for this sales order. The same sales order may have been invoiced in several times (by line for example)."),
+        'order_line': fields.one2many('sale.order.line', 'order_id', 'Order Lines', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=True),
+        'invoice_ids': fields.many2many('account.invoice', 'sale_order_invoice_rel', 'order_id', 'invoice_id', 'Invoices', readonly=True, copy=False, help="This is the list of invoices that have been generated for this sales order. The same sales order may have been invoiced in several times (by line for example)."),
         'invoiced_rate': fields.function(_invoiced_rate, string='Invoiced Ratio', type='float'),
         'invoiced': fields.function(_invoiced, string='Paid',
             fnct_search=_invoiced_search, type='boolean', help="It indicates that an invoice has been paid."),
@@ -250,7 +236,7 @@ class sale_order(osv.osv):
         'fiscal_position': fields.many2one('account.fiscal.position', 'Fiscal Position'),
         'company_id': fields.many2one('res.company', 'Company'),
         'section_id': fields.many2one('crm.case.section', 'Sales Team'),
-        'procurement_group_id': fields.many2one('procurement.group', 'Procurement group'),
+        'procurement_group_id': fields.many2one('procurement.group', 'Procurement group', copy=False),
 
     }
     _defaults = {
@@ -898,7 +884,7 @@ class sale_order_line(osv.osv):
         'name': fields.text('Description', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'sequence': fields.integer('Sequence', help="Gives the sequence order when displaying a list of sales order lines."),
         'product_id': fields.many2one('product.product', 'Product', domain=[('sale_ok', '=', True)], change_default=True, readonly=True, states={'draft': [('readonly', False)]}, ondelete='restrict'),
-        'invoice_lines': fields.many2many('account.invoice.line', 'sale_order_line_invoice_rel', 'order_line_id', 'invoice_id', 'Invoice Lines', readonly=True),
+        'invoice_lines': fields.many2many('account.invoice.line', 'sale_order_line_invoice_rel', 'order_line_id', 'invoice_id', 'Invoice Lines', readonly=True, copy=False),
         'invoiced': fields.function(_fnct_line_invoiced, string='Invoiced', type='boolean',
             store={
                 'account.invoice': (_order_lines_from_invoice, ['state'], 10),
@@ -914,7 +900,9 @@ class sale_order_line(osv.osv):
         'product_uos': fields.many2one('product.uom', 'Product UoS'),
         'discount': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount'), readonly=True, states={'draft': [('readonly', False)]}),
         'th_weight': fields.float('Weight', readonly=True, states={'draft': [('readonly', False)]}),
-        'state': fields.selection([('cancel', 'Cancelled'),('draft', 'Draft'),('confirmed', 'Confirmed'),('exception', 'Exception'),('done', 'Done')], 'Status', required=True, readonly=True,
+        'state': fields.selection(
+                [('cancel', 'Cancelled'),('draft', 'Draft'),('confirmed', 'Confirmed'),('exception', 'Exception'),('done', 'Done')],
+                'Status', required=True, readonly=True, copy=False,
                 help='* The \'Draft\' status is set when the related sales order in draft status. \
                     \n* The \'Confirmed\' status is set when the related sales order is confirmed. \
                     \n* The \'Exception\' status is set when the related sales order is set as exception. \
@@ -1072,12 +1060,6 @@ class sale_order_line(osv.osv):
             )['value']
             values = dict(defaults, **values)
         return super(sale_order_line, self).create(cr, uid, values, context=context)
-
-    def copy_data(self, cr, uid, id, default=None, context=None):
-        if not default:
-            default = {}
-        default.update({'state': 'draft', 'invoice_lines': [], 'procurement_ids': []})
-        return super(sale_order_line, self).copy_data(cr, uid, id, default, context=context)
 
     def product_id_change(self, cr, uid, ids, pricelist, product, qty=0,
             uom=False, qty_uos=0, uos=False, name='', partner_id=False,

@@ -264,7 +264,7 @@ class project_issue(osv.Model):
         'version_id': fields.many2one('project.issue.version', 'Version'),
         'stage_id': fields.many2one ('project.task.type', 'Stage',
                         track_visibility='onchange', select=True,
-                        domain="[('project_ids', '=', project_id)]"),
+                        domain="[('project_ids', '=', project_id)]", copy=False),
         'project_id': fields.many2one('project.project', 'Project', track_visibility='onchange', select=True),
         'duration': fields.float('Duration'),
         'task_id': fields.many2one('project.task', 'Task', domain="[('project_id','=',project_id)]"),

@@ -114,8 +114,16 @@ class account_bank_statement(osv.osv):
     _description = "Bank Statement"
     _inherit = ['mail.thread']
     _columns = {
-        'name': fields.char('Reference', states={'draft': [('readonly', False)]}, readonly=True, help='if you give the Name other then /, its created Accounting Entries Move will be with same name as statement name. This allows the statement entries to have the same references than the statement itself'), # readonly for account_cash_statement
-        'date': fields.date('Date', required=True, states={'confirm': [('readonly', True)]}, select=True),
+        'name': fields.char(
+            'Reference', states={'draft': [('readonly', False)]},
+            readonly=True, # readonly for account_cash_statement
+            copy=False,
+            help='if you give the Name other then /, its created Accounting Entries Move '
+                 'will be with same name as statement name. '
+                 'This allows the statement entries to have the same references than the '
+                 'statement itself'),
+        'date': fields.date('Date', required=True, states={'confirm': [('readonly', True)]},
+                            select=True, copy=False),
         'journal_id': fields.many2one('account.journal', 'Journal', required=True,
             readonly=True, states={'draft':[('readonly',False)]}),
         'period_id': fields.many2one('account.period', 'Period', required=True,
@@ -132,14 +140,15 @@ class account_bank_statement(osv.osv):
             string="Computed Balance", help='Balance as calculated based on Opening Balance and transaction lines'),
         'company_id': fields.related('journal_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True),
         'line_ids': fields.one2many('account.bank.statement.line',
-            'statement_id', 'Statement lines',
-            states={'confirm':[('readonly', True)]}),
+                                    'statement_id', 'Statement lines',
+                                    states={'confirm':[('readonly', True)]}, copy=True),
         'move_line_ids': fields.one2many('account.move.line', 'statement_id',
-            'Entry lines', states={'confirm':[('readonly',True)]}),
+                                         'Entry lines', states={'confirm':[('readonly',True)]}),
         'state': fields.selection([('draft', 'New'),
                                    ('open','Open'), # used by cash statements
                                    ('confirm', 'Closed')],
                                    'Status', required=True, readonly="1",
+                                   copy=False,
                                    help='When new statement is created the status will be \'Draft\'.\n'
                                         'And after getting confirmation from the bank it will be in \'Confirmed\' status.'),
         'currency': fields.function(_currency, string='Currency',
@@ -384,10 +393,6 @@ class account_bank_statement(osv.osv):
                     _('In order to delete a bank statement, you must first cancel it to delete related journal items.')
                 )
         return super(account_bank_statement, self).unlink(cr, uid, ids, context=context)
-
-    def copy(self, cr, uid, id, default=None, context=None):
-        default_values = dict(default or {}, move_line_ids=[])
-        return super(account_bank_statement, self).copy(cr, uid, id, default_values, context=context)
 
     def button_journal_entries(self, cr, uid, ids, context=None):
         ctx = (context or {}).copy()
@@ -796,8 +801,8 @@ class account_bank_statement_line(osv.osv):
     _description = "Bank Statement Line"
     _inherit = ['ir.needaction_mixin']
     _columns = {
-        'name': fields.char('Description', required=True),
-        'date': fields.date('Date', required=True),
+        'name': fields.char('Description', required=True, copy=False),
+        'date': fields.date('Date', required=True, copy=False),
         'amount': fields.float('Amount', digits_compute=dp.get_precision('Account')),
         'partner_id': fields.many2one('res.partner', 'Partner'),
         'bank_account_id': fields.many2one('res.partner.bank','Bank Account'),

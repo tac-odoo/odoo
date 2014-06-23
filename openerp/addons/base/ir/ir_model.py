@@ -98,7 +98,7 @@ class ir_model(osv.osv):
         'name': fields.char('Model Description', translate=True, required=True),
         'model': fields.char('Model', required=True, select=1),
         'info': fields.text('Information'),
-        'field_id': fields.one2many('ir.model.fields', 'model_id', 'Fields', required=True),
+        'field_id': fields.one2many('ir.model.fields', 'model_id', 'Fields', required=True, copy=True),
         'state': fields.selection([('manual','Custom Object'),('base','Base Object')],'Type', readonly=True),
         'access_ids': fields.one2many('ir.model.access', 'model_id', 'Access'),
         'osv_memory': fields.function(_is_osv_memory, string='Transient Model', type='boolean',

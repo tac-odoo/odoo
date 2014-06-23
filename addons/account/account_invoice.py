@@ -203,8 +203,9 @@ class account_invoice(models.Model):
         default=lambda self: self._context.get('type', 'out_invoice'),
         track_visibility='always')
 
-    number = fields.Char(related='move_id.name', store=True, readonly=True)
-    internal_number = fields.Char(string='Invoice Number', readonly=True, default=False,
+    number = fields.Char(related='move_id.name', store=True, readonly=True, copy=False)
+    internal_number = fields.Char(string='Invoice Number', readonly=True,
+        default=False, copy=False,
         help="Unique number of the invoice, computed automatically when the invoice is created.")
     reference = fields.Char(string='Invoice Reference',
         help="The partner reference of this invoice.")
@@ -221,19 +222,19 @@ class account_invoice(models.Model):
             ('paid','Paid'),
             ('cancel','Cancelled'),
         ], string='Status', index=True, readonly=True, default='draft',
-        track_visibility='onchange',
+        track_visibility='onchange', copy=False,
         help=" * The 'Draft' status is used when a user is encoding a new and unconfirmed Invoice.\n"
              " * The 'Pro-forma' when invoice is in Pro-forma status,invoice does not have an invoice number.\n"
              " * The 'Open' status is used when user create invoice,a invoice number is generated.Its in open status till user does not pay invoice.\n"
              " * The 'Paid' status is set automatically when the invoice is paid. Its related journal entries may or may not be reconciled.\n"
              " * The 'Cancelled' status is used when user cancel invoice.")
-    sent = fields.Boolean(readonly=True, default=False,
+    sent = fields.Boolean(readonly=True, default=False, copy=False,
         help="It indicates that the invoice has been sent.")
     date_invoice = fields.Date(string='Invoice Date',
         readonly=True, states={'draft': [('readonly', False)]}, index=True,
-        help="Keep empty to use the current date")
+        help="Keep empty to use the current date", copy=False)
     date_due = fields.Date(string='Due Date',
-        readonly=True, states={'draft': [('readonly', False)]}, index=True,
+        readonly=True, states={'draft': [('readonly', False)]}, index=True, copy=False,
         help="If you use payment terms, the due date will be computed automatically at the generation "
              "of accounting entries. The payment term may compute several due dates, for example 50% "
              "now and 50% in one month, but if you want to force a due date, make sure that the payment "
@@ -248,7 +249,7 @@ class account_invoice(models.Model):
              "of accounting entries. If you keep the payment term and the due date empty, it means direct payment. "
              "The payment term may compute several due dates, for example 50% now, 50% in one month.")
     period_id = fields.Many2one('account.period', string='Force Period',
-        domain=[('state', '!=', 'done')],
+        domain=[('state', '!=', 'done')], copy=False,
         help="Keep empty to use the period of the validation(invoice) date.",
         readonly=True, states={'draft': [('readonly', False)]})
 
@@ -256,11 +257,11 @@ class account_invoice(models.Model):
         required=True, readonly=True, states={'draft': [('readonly', False)]},
         help="The partner account used for this invoice.")
     invoice_line = fields.One2many('account.invoice.line', 'invoice_id', string='Invoice Lines',
-        readonly=True, states={'draft': [('readonly', False)]})
+        readonly=True, states={'draft': [('readonly', False)]}, copy=True)
     tax_line = fields.One2many('account.invoice.tax', 'invoice_id', string='Tax Lines',
-        readonly=True, states={'draft': [('readonly', False)]})
+        readonly=True, states={'draft': [('readonly', False)]}, copy=True)
     move_id = fields.Many2one('account.move', string='Journal Entry',
-        readonly=True, index=True, ondelete='restrict',
+        readonly=True, index=True, ondelete='restrict', copy=False,
         help="Link to the automatically generated Journal Items.")
 
     amount_untaxed = fields.Float(string='Subtotal', digits=dp.get_precision('Account'),
@@ -297,8 +298,8 @@ class account_invoice(models.Model):
         help="Remaining amount due.")
     payment_ids = fields.Many2many('account.move.line', string='Payments',
         compute='_compute_payments')
-    move_name = fields.Char(string='Journal Entry',
-        readonly=True, states={'draft': [('readonly', False)]})
+    move_name = fields.Char(string='Journal Entry', readonly=True,
+        states={'draft': [('readonly', False)]}, copy=False)
     user_id = fields.Many2one('res.users', string='Salesperson', track_visibility='onchange',
         readonly=True, states={'draft': [('readonly', False)]},
         default=lambda self: self.env.user)
@@ -598,23 +599,6 @@ class account_invoice(models.Model):
             return self.env.ref('account.invoice_supplier_form')
         else:
             return self.env.ref('account.invoice_form')
-
-    @api.one
-    def copy(self, default=None):
-        default = dict(default or {},
-            state='draft',
-            number=False,
-            move_id=False,
-            move_name=False,
-            internal_number=False,
-            period_id=False,
-            sent=False,
-        )
-        if 'date_invoice' not in default:
-            default['date_invoice'] = False
-        if 'date_due' not in default:
-            default['date_due'] = False
-        return super(account_invoice, self).copy(default)
 
     @api.multi
     def move_line_id_payment_get(self):
@@ -1624,12 +1608,6 @@ class res_partner(models.Model):
         Find the partner for which the accounting entries will be created
         '''
         return partner.commercial_partner_id
-
-    @api.one
-    def copy(self, default=None):
-        default = dict(default or {}, invoice_ids=[])
-        return super(res_partner, self).copy(default)
-
 
 class mail_compose_message(models.Model):
     _inherit = 'mail.compose.message'

@@ -185,7 +185,7 @@ class ir_ui_menu(osv.osv):
 
     def copy(self, cr, uid, id, default=None, context=None):
         ir_values_obj = self.pool.get('ir.values')
-        res = super(ir_ui_menu, self).copy(cr, uid, id, context=context)
+        res = super(ir_ui_menu, self).copy(cr, uid, id, default=default, context=context)
         datas=self.read(cr,uid,[res],['name'])[0]
         rex=re.compile('\([0-9]+\)')
         concat=rex.findall(datas['name'])
