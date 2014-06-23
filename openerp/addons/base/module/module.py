@@ -605,7 +605,7 @@ class module(osv.osv):
                 for key in values:
                     old = getattr(mod, key)
                     updated = isinstance(values[key], basestring) and tools.ustr(values[key]) or values[key]
-                    if not old == updated:
+                    if (old or updated) and updated != old:
                         updated_values[key] = values[key]
                 if terp.get('installable', True) and mod.state == 'uninstallable':
                     updated_values['state'] = 'uninstalled'
