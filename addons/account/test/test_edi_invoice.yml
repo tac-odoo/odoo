@@ -4,7 +4,7 @@
   First I create a draft customer invoice
 -
   !record {model: account.invoice, id: invoice_edi_1}:
-    journal_id: 1
+    journal_id: account.bank_journal
     partner_id: base.res_partner_2
     currency_id: base.EUR
     company_id: 1
@@ -31,6 +31,11 @@
         account_id: account.a_pay
         manual: True
         amount: 1000.00
+-
+  I compute a customer Invoice
+-
+  !python {model: account.invoice}: |
+    self.button_compute(cr, uid, [ref('invoice_edi_1')])
 -
   I confirm and open the invoice
 -

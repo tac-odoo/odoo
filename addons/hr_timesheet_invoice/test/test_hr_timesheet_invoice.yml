@@ -48,7 +48,12 @@
     sequence: 1
     company_id: base.main_company
     type_tax_use: all
-    tax_code_id: tax_case
+    tax_invoice_line_ids:
+      - code_type: base
+        amount: 100
+      - code_type: tax
+        amount: 10
+        code_id: tax_case
 -
   I create an Account with the tax
 -
