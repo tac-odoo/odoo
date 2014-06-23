@@ -88,6 +88,18 @@ class MetaField(type):
         if cls.type:
             cls.by_type[cls.type] = cls
 
+        # compute class attributes to avoid calling dir() on fields
+        cls.column_attrs = []
+        cls.related_attrs = []
+        cls.description_attrs = []
+        for attr in dir(cls):
+            if attr.startswith('_column_'):
+                cls.column_attrs.append((attr[8:], attr))
+            elif attr.startswith('_related_'):
+                cls.related_attrs.append((attr[9:], attr))
+            elif attr.startswith('_description_'):
+                cls.description_attrs.append((attr[13:], attr))
+
 
 class Field(object):
     """ The field descriptor contains the field definition, and manages accesses
@@ -378,10 +390,9 @@ class Field(object):
         self.search = self._search_related
 
         # copy attributes from field to self (string, help, etc.)
-        for attr in dir(self):
-            if attr.startswith('_related_'):
-                if not getattr(self, attr[9:]):
-                    setattr(self, attr[9:], getattr(field, attr))
+        for attr, prop in self.related_attrs:
+            if not getattr(self, attr):
+                setattr(self, attr, getattr(field, prop))
 
         # special case: related fields never have an inverse field!
         self.inverse_field = None
@@ -495,13 +506,12 @@ class Field(object):
     def get_description(self, env):
         """ Return a dictionary that describes the field `self`. """
         desc = {'type': self.type, 'store': self.store}
-        for attr in dir(self):
-            if attr.startswith('_description_'):
-                value = getattr(self, attr)
-                if callable(value):
-                    value = value(env)
-                if value:
-                    desc[attr[13:]] = value
+        for attr, prop in self.description_attrs:
+            value = getattr(self, prop)
+            if callable(value):
+                value = value(env)
+            if value:
+                desc[attr] = value
         return desc
 
     # properties used by get_description()
@@ -541,11 +551,10 @@ class Field(object):
 
         _logger.debug("Create fields._column for Field %s", self)
         args = {}
-        for attr in dir(self):
-            if attr.startswith('_column_'):
-                args[attr[8:]] = getattr(self, attr)
-            elif attr in self._free_attrs:
-                args[attr] = getattr(self, attr)
+        for attr, prop in self.column_attrs:
+            args[attr] = getattr(self, prop)
+        for attr in self._free_attrs:
+            args[attr] = getattr(self, attr)
 
         if self.company_dependent:
             # company-dependent fields are mapped to former property fields
