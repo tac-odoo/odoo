@@ -5023,7 +5023,7 @@ class BaseModel(object):
             ids = tuple(arg)
         else:
             ids = (arg,) if arg else ()
-        assert all(isinstance(id, IdType) for id in ids), "Browsing invalid ids: %s" % ids
+        #assert all(isinstance(id, IdType) for id in ids), "Browsing invalid ids: %s" % ids
         return self._browse(self.env, ids)
 
     @api.v7
@@ -5032,7 +5032,7 @@ class BaseModel(object):
             ids = tuple(arg)
         else:
             ids = (arg,) if arg else ()
-        assert all(isinstance(id, IdType) for id in ids), "Browsing invalid ids: %s" % ids
+        #assert all(isinstance(id, IdType) for id in ids), "Browsing invalid ids: %s" % ids
         return self._browse(Environment(cr, uid, context or {}), ids)
 
     #
