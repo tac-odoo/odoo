@@ -47,7 +47,12 @@
     sequence: 1
     company_id: base.main_company
     type_tax_use: all
-    tax_code_id: tax_case
+    tax_invoice_line_ids: 
+      - code_type: base
+        amount: 100
+      - code_type: tax
+        amount: 8
+        code_id: tax_case
 -
   I create an Account with the tax
 -
@@ -107,7 +112,6 @@
       product = invoice.product_id.id
 
     product_exp = data['product'][0]
-
     assert product == product_exp
     assert aline.invoice_id, "Invoice created, but analytic line wasn't updated."
     assert aline.invoice_id == invoice_id, "Invoice doesn't match the one at analytic line"

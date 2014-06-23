@@ -33,6 +33,11 @@
       - product_id: product.product_product_5
         quantity: 10.0
 -
+  compute
+-
+  !python {model: account.invoice}: |
+    self.button_compute(cr, uid, [ref('account_invoice_customer0')])
+-
   I manually assign tax on invoice
 -
   !python {model: account.invoice.tax}: |

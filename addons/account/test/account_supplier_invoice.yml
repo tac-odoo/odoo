@@ -22,7 +22,13 @@
     sequence: 1
     company_id: base.main_company
     type_tax_use: all
-    tax_code_id: tax_case
+    tax_invoice_line_ids: 
+      - code_type: base
+        amount: 100
+      - code_type: tax
+        amount: 10
+        code_id: tax_case
+        account_id: account.ova
 -
   I create a supplier invoice
 -
@@ -44,6 +50,11 @@
     partner_id: base.res_partner_12
     reference_type: none
     type: in_invoice
+-
+  I compute a supplier Invoice
+-
+  !python {model: account.invoice}: |
+    self.button_compute(cr, uid, [ref('account_invoice_supplier0')])
 -
   I check that Initially supplier invoice state is "Draft"
 -

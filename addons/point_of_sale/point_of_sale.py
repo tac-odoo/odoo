@@ -986,16 +986,6 @@ class pos_order(osv.osv):
         grouped_data = {}
         have_to_group_by = session and session.config_id.group_by or False
 
-        def compute_tax(amount, tax, line):
-            if amount > 0:
-                tax_code_id = tax['base_code_id']
-                tax_amount = line.price_subtotal * tax['base_sign']
-            else:
-                tax_code_id = tax['ref_base_code_id']
-                tax_amount = line.price_subtotal * tax['ref_base_sign']
-
-            return (tax_code_id, tax_amount,)
-
         for order in self.browse(cr, uid, ids, context=context):
             if order.account_move:
                 continue
@@ -1081,8 +1071,10 @@ class pos_order(osv.osv):
                 computed_taxes = account_tax_obj.compute_all(cr, uid, taxes, line.price_unit * (100.0-line.discount) / 100.0, line.qty)['taxes']
 
                 for tax in computed_taxes:
+                    if tax['code_type'] == 'base':
+                        continue
                     tax_amount += cur_obj.round(cr, uid, cur, tax['amount'])
-                    group_key = (tax['tax_code_id'], tax['base_code_id'], tax['account_collected_id'], tax['id'])
+                    group_key = (tax['code_id'], tax['account_id'], tax['tax_id'])
 
                     group_tax.setdefault(group_key, 0)
                     group_tax[group_key] += cur_obj.round(cr, uid, cur, tax['amount'])
@@ -1104,7 +1096,8 @@ class pos_order(osv.osv):
                 tax_amount = 0
                 while computed_taxes:
                     tax = computed_taxes.pop(0)
-                    tax_code_id, tax_amount = compute_tax(amount, tax, line)
+                    tax_code_id = tax['code_id']
+                    tax_amount = tax['tax_amount'] >= 0 and abs(line.price_subtotal) or -abs(line.price_subtotal)
 
                     # If there is one we stop
                     if tax_code_id:
@@ -1125,7 +1118,8 @@ class pos_order(osv.osv):
 
                 # For each remaining tax with a code, whe create a move line
                 for tax in computed_taxes:
-                    tax_code_id, tax_amount = compute_tax(amount, tax, line)
+                    tax_code_id = tax['code_id']
+                    tax_amount = tax['tax_amount'] >= 0 and abs(line.price_subtotal) or -abs(line.price_subtotal)
                     if not tax_code_id:
                         continue
 
@@ -1142,7 +1136,7 @@ class pos_order(osv.osv):
                     })
 
             # Create a move for each tax group
-            (tax_code_pos, base_code_pos, account_pos, tax_id)= (0, 1, 2, 3)
+            (code_pos, account_pos, tax_id)= (0, 1, 2)
 
             for key, tax_amount in group_tax.items():
                 tax = self.pool.get('account.tax').browse(cr, uid, key[tax_id], context=context)
@@ -1153,7 +1147,7 @@ class pos_order(osv.osv):
                     'account_id': key[account_pos] or income_account,
                     'credit': ((tax_amount>0) and tax_amount) or 0.0,
                     'debit': ((tax_amount<0) and -tax_amount) or 0.0,
-                    'tax_code_id': key[tax_code_pos],
+                    'tax_code_id': key[code_pos],
                     'tax_amount': tax_amount,
                     'partner_id': order.partner_id and self.pool.get("res.partner")._find_accounting_partner(order.partner_id).id or False
                 })

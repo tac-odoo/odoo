@@ -443,7 +443,8 @@ class account_voucher(osv.osv):
             if not tax[0].price_include:
                 for line in voucher.line_ids:
                     for tax_line in tax_pool.compute_all(cr, uid, tax, line.amount, 1).get('taxes', []):
-                        total_tax += tax_line.get('amount', 0.0)
+                        if tax_line['code_type'] == 'tax':
+                            total_tax += tax_line.get('amount', 0.0)
                 total += total_tax
             else:
                 for line in voucher.line_ids:
@@ -451,8 +452,9 @@ class account_voucher(osv.osv):
                     line_tax = 0.0
 
                     for tax_line in tax_pool.compute_all(cr, uid, tax, line.untax_amount or line.amount, 1).get('taxes', []):
-                        line_tax += tax_line.get('amount', 0.0)
-                        line_total += tax_line.get('price_unit')
+                        if tax_line['code_type'] == 'tax':
+                            line_tax += tax_line.get('amount', 0.0)
+                            line_total += tax_line.get('price_unit')
                     total_tax += line_tax
                     untax_amount = line.untax_amount or line.amount
                     voucher_line_pool.write(cr, uid, [line.id], {'amount':line_total, 'untax_amount':untax_amount})
@@ -490,7 +492,8 @@ class account_voucher(osv.osv):
 
                 if not tax[0].price_include:
                     for tax_line in tax_pool.compute_all(cr, uid, tax, line_amount, 1).get('taxes', []):
-                        total_tax += tax_line.get('amount')
+                        if tax_line['code_type'] == 'tax':
+                            total_tax += tax_line.get('amount')
 
             voucher_total += line_amount
         total = voucher_total + total_tax
@@ -1249,8 +1252,9 @@ class account_voucher(osv.osv):
 
             if move_line.get('account_tax_id', False):
                 tax_data = tax_obj.browse(cr, uid, [move_line['account_tax_id']], context=context)[0]
-                if not (tax_data.base_code_id and tax_data.tax_code_id):
-                    raise osv.except_osv(_('No Account Base Code and Account Tax Code!'),_("You have to configure account base code and account tax code on the '%s' tax!") % (tax_data.name))
+                for tax_invoice_line_id in tax_data.tax_invoice_line_ids:
+                    if not tax_invoice_line_id.code_id:
+                        raise osv.except_osv(_('No Tax Grid!'),_("You have to configure Tax Grid on the '%s' tax!") % (tax_data.name))
 
             # compute the amount in foreign currency
             foreign_currency_diff = 0.0

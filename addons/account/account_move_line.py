@@ -1232,28 +1232,19 @@ class account_move_line(osv.osv):
         if vals.get('account_tax_id', False):
             tax_id = tax_obj.browse(cr, uid, vals['account_tax_id'])
             total = vals['debit'] - vals['credit']
-            base_code = 'base_code_id'
-            tax_code = 'tax_code_id'
-            account_id = 'account_collected_id'
-            base_sign = 'base_sign'
-            tax_sign = 'tax_sign'
-            if journal.type in ('purchase_refund', 'sale_refund') or (journal.type in ('cash', 'bank') and total < 0):
-                base_code = 'ref_base_code_id'
-                tax_code = 'ref_tax_code_id'
-                account_id = 'account_paid_id'
-                base_sign = 'ref_base_sign'
-                tax_sign = 'ref_tax_sign'
             tmp_cnt = 0
             for tax in tax_obj.compute_all(cr, uid, [tax_id], total, 1.00, force_excluded=False).get('taxes'):
+                if tax['code_type'] == 'base':
+                    continue
                 #create the base movement
                 if tmp_cnt == 0:
-                    if tax[base_code]:
+                    if tax['account_id']:
                         tmp_cnt += 1
                         if tax_id.price_include:
                             total = tax['price_unit']
                         newvals = {
-                            'tax_code_id': tax[base_code],
-                            'tax_amount': tax[base_sign] * abs(total),
+                            'tax_code_id': tax['code_id'],
+                            'tax_amount': tax['tax_amount'] >= 0 and abs(total) or -abs(total),
                         }
                         if tax_id.price_include:
                             if tax['price_unit'] < 0:
@@ -1270,8 +1261,8 @@ class account_move_line(osv.osv):
                         'ref': vals.get('ref', False),
                         'statement_id': vals.get('statement_id', False),
                         'account_tax_id': False,
-                        'tax_code_id': tax[base_code],
-                        'tax_amount': tax[base_sign] * abs(total),
+                        'tax_code_id': tax['code_id'],
+                        'tax_amount':  tax['tax_amount'] >= 0 and abs(total) or -abs(total),
                         'account_id': vals['account_id'],
                         'credit': 0.0,
                         'debit': 0.0,
@@ -1287,9 +1278,9 @@ class account_move_line(osv.osv):
                     'ref': vals.get('ref',False),
                     'statement_id': vals.get('statement_id', False),
                     'account_tax_id': False,
-                    'tax_code_id': tax[tax_code],
-                    'tax_amount': tax[tax_sign] * abs(tax['amount']),
-                    'account_id': tax[account_id] or vals['account_id'],
+                    'tax_code_id': tax['code_id'],
+                    'tax_amount':  tax['tax_amount'] >= 0 and abs(total) or -abs(total),
+                    'account_id': tax['account_id'] or vals['account_id'],
                     'credit': tax['amount']<0 and -tax['amount'] or 0.0,
                     'debit': tax['amount']>0 and tax['amount'] or 0.0,
                 }

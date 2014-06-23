@@ -101,24 +101,23 @@
                                     <field name="account_analytic_id" groups="analytic.group_analytic_accounting"/>
                                 </tree>
                             </field>
-			                <group>
+                            <group>
                                 <field name="narration" placeholder="Internal Notes" nolabel="1"/>
                                 <group class="oe_subtotal_footer oe_right">
                                     <field name="tax_id" 
-                                        on_change="onchange_price(line_cr_ids, tax_id, partner_id)"
-                                        widget="selection" nolabel="1"
-					placeholder="Tax"
-                                        domain="[('type_tax_use','in',('sale','all')), ('parent_id', '=', False)]"/>
+                                        on_change="onchange_price(line_cr_ids, tax_id, partner_id)" 
+                                        widget="selection" nolabel="1" 
+                                        placeholder="Tax" domain="[('type_tax_use','in',('sale','all')), ('parent_id', '=', False)]"/>
                                     <field name="tax_amount" nolabel="1"/>
                                     <div class="oe_subtotal_footer_separator">
                                         <label for="amount"/>
                                         <button type="object" class="oe_link oe_edit_only"
                                             name="compute_tax" string="(update)"
                                             attrs="{'invisible': [('state','!=','draft')]}"/>
-			                        </div>
+                                    </div>
                                     <field name="amount" class="oe_subtotal_footer_separator" nolabel="1"/>
                                 </group>                                    
-			                </group>
+			    </group>
                         </page>
                         <page string="Journal Items" attrs="{'invisible': [('state','!=','posted')]}">
                             <group col="4">
@@ -269,17 +268,14 @@
                                     <field name="tax_id" 
                                         on_change="onchange_price(line_dr_ids, tax_id, partner_id)"
                                         widget="selection" nolabel="1"
-					placeholder="Tax"
-
-                                        domain="[('type_tax_use','in',('purchase','all')), ('parent_id', '=', False)]"
-                                        />
+                                        placeholder="Tax" domain="[('type_tax_use','in',('purchase','all')), ('parent_id', '=', False)]"/>
                                     <field name="tax_amount" nolabel="1"/>
                                     <div class="oe_subtotal_footer_separator">
                                         <label for="amount"/>
                                         <button type="object" class="oe_link oe_edit_only"
                                             name="compute_tax" string="(update)"
                                             attrs="{'invisible': [('state','!=','draft')]}"/>
-			            </div>
+                                    </div>
                                     <field name="amount" class="oe_subtotal_footer_separator" nolabel="1"/>
                                 </group>
                             </group>

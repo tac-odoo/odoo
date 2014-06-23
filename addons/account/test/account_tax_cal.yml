@@ -1,0 +1,247 @@
+-
+  In order to test account tax I create a new base line and tax lines
+-
+  I create a Tax
+-
+  !record {model: account.tax, id: vat_12}:
+    name: VAT-12%
+    amount: 12
+    type: percent
+    tax_invoice_line_ids:
+      - code_type: base
+        amount: 100
+      - code_type: tax #vat
+        amount: 12
+        account_id: account.ova
+      - code_type: tax #cess2
+        amount: 0.24
+        account_id: account.ova
+      - code_type: tax #high education cess1
+        amount: 0.12
+        account_id: account.ova
+-
+  I compute a tax
+-
+  !python {model: account.tax}: |
+    taxes = self.browse(cr, uid, [ref('vat_12')])
+    res = self.compute_all(cr, uid, taxes, 1000, 3)
+    taxes = res['taxes']
+
+    assert res['total'] == 3000, 'Incorrect amount on which tax applied.'
+    assert res['total_included'] == 3370.7999999999997, 'Incorrect total amount(with Tax amount).'
+
+    assert taxes[0]['price_unit'] == 1000, 'Incorrect unit Price.'
+    assert taxes[0]['amount'] == 3000, 'Incorrect base amount.'
+    assert taxes[0]['code_type'] == 'base', 'Incorrect code type.'
+
+    assert taxes[1]['price_unit'] == 1000.0, 'Incorrect unit Price.'
+    assert taxes[1]['amount'] == 360.0, 'Incorrect calculated tax amount.'
+    assert taxes[1]['code_type'] == 'tax', 'Incorrect code type.'
+
+    assert taxes[2]['price_unit'] == 1000.0, 'Incorrect unit Price.'
+    assert taxes[2]['amount'] == 7.2, 'Incorrect calculated amount for cess2 tax.'
+    assert taxes[2]['code_type'] == 'tax', 'Incorrect code type.'
+
+    assert taxes[3]['price_unit'] == 1000.0, 'Incorrect unit Price.'
+    assert taxes[3]['amount'] == 3.6, 'Incorrect calculated amount for high education cess1 tax.'
+    assert taxes[3]['code_type'] == 'tax', 'Incorrect code type.'
+-
+  In order to test account tax with Price Include I create a new base line and tax line
+-
+  I create a Tax with price include
+-
+  !record {model: account.tax, id: priceinclude}:
+    name: Price Include
+    amount: 10
+    type: percent
+    price_include: 1
+-
+  I compute a tax.
+-
+  !python {model: account.tax}: |
+    taxes = self.browse(cr, uid, [ref('priceinclude')])
+    res = self.compute_all(cr, uid, taxes, 1000, 1)
+    taxes = res['taxes']
+
+    assert res['total'] == 910, 'Incorrect amount on which tax applied.'
+    assert res['total_included'] == 1000, 'Incorrect total amount(with Tax amount).'
+
+    assert taxes[0]['price_unit'] == 910, 'Incorrect unit Price.'
+    assert taxes[0]['amount'] == 1000, 'Incorrect base amount.'
+    assert taxes[0]['code_type'] == 'base', 'Incorrect code type.'
+
+    assert taxes[1]['price_unit'] == 910, 'Incorrect unit Price.'
+    assert taxes[1]['amount'] == 90, 'Incorrect tax amount.'
+    assert taxes[1]['code_type'] == 'tax', 'Incorrect code type.'
+-
+  In order to test account tax with Include Base I create a new base line and tax lines
+-
+  I create a Tax with include base
+-
+   !record {model: account.tax, id: vat_4_group}:
+     name: vat 4 group
+     type: group
+-
+  !record {model: account.tax, id: vat12}:
+    name: vat 12
+    amount: 12
+    type: percent
+    parent_id: vat_4_group
+-
+  !record {model: account.tax, id: vat_4_cess_2}:
+    name: Education cess
+    amount: 2
+    type: percent
+    include_base_amount: 1
+    parent_id: vat_4_group
+-
+  !record {model: account.tax, id: vat_4_cess_1}:
+    name: Higher Education cess
+    amount: 1
+    type: percent
+    include_base_amount: 1
+    parent_id: vat_4_group
+-
+  I compute a tax
+-
+  !python {model: account.tax}: |
+    taxes = self.browse(cr, uid, [ref('vat_4_group')])
+    res = self.compute_all(cr, uid, taxes, 1000, 3)
+    taxes = res['taxes']
+
+    assert res['total'] == 3000, 'Incorrect amount on which tax applied.'
+    assert res['total_included'] == 3450.6, 'Incorrect total amount(with Tax amount).'
+
+    assert taxes[0]['price_unit'] == 1000, 'Incorrect unit Price for vat 12.'
+    assert taxes[0]['amount'] == 3000, 'Incorrect base amount for vat 12.'
+    assert taxes[0]['code_type'] == 'base', 'Incorrect code type for vat 12.'
+    
+    assert taxes[1]['price_unit'] == 1000, 'Incorrect unit Price for vat 12.'
+    assert taxes[1]['amount'] == 360, 'Incorrect tax amount for vat 12.'
+    assert taxes[1]['code_type'] == 'tax', 'Incorrect code type for vat 12.'
+
+    assert taxes[2]['price_unit'] == 1000, 'Incorrect unit Price for Education cess tax.'
+    assert taxes[2]['amount'] == 3000, 'Incorrect base amount for Education cess tax.'
+    assert taxes[2]['code_type'] == 'base', 'Incorrect code type for Education cess tax.'
+
+    assert taxes[3]['price_unit'] == 1000, 'Incorrect unit Price for Education cess tax.'
+    assert taxes[3]['amount'] == 60, 'Incorrect tax amount for Education cess tax.'
+    assert taxes[3]['code_type'] == 'tax', 'Incorrect code type for Education cess tax.'
+
+    assert taxes[4]['price_unit'] == 1020, 'Incorrect unit Price for Higher Education cess tax.'
+    assert taxes[4]['amount'] == 3060, 'Incorrect base amount for Higher Education cess tax.'
+    assert taxes[4]['code_type'] == 'base', 'Incorrect code type for Higher Education cess tax.'
+
+    assert taxes[5]['price_unit'] == 1020, 'Incorrect unit Price for Higher Education cess tax.'
+    assert taxes[5]['amount'] == 30.6, 'Incorrect tax amount for Higher Education cess tax.'
+    assert taxes[5]['code_type'] == 'tax', 'Incorrect code type for Higher Education cess tax.'
+
+-
+  In order to test account tax with Python Code I create a new base line and tax line
+-
+  I create a Tax
+-
+  !record {model: account.tax, id: code_tax}:
+    name: Code Tax
+    type: code
+    python_compute: '100 * 0.10'
+    tax_invoice_line_ids:
+      - code_type: base
+        amount: 100
+      - code_type: tax 
+        amount: 10
+-
+  I compute a tax
+-
+  !python {model: account.tax}: |
+    taxes = self.browse(cr, uid, [ref('code_tax')])
+    res = self.compute_all(cr, uid, taxes, 1000, 1)
+    taxes = res['taxes']
+
+    assert res['total'] == 1000, 'Incorrect amount on which tax applied.'
+    assert res['total_included'] == 1100, 'Incorrect total amount(with Tax amount).'
+
+    assert taxes[0]['price_unit'] == 1000, 'Incorrect unit Price.'
+    assert taxes[0]['amount'] == 1000, 'Incorrect base amount.'
+    assert taxes[0]['code_type'] == 'base', 'Incorrect code type.'
+
+    assert taxes[1]['price_unit'] == 1000, 'Incorrect unit Price.'
+    assert taxes[1]['amount'] == 100, 'Incorrect tax amount.'
+    assert taxes[1]['code_type'] == 'tax', 'Incorrect code type.'
+
+-
+  In order to test account invoice I create a new supplier invoice
+-
+  I create a Tax with Base code and Tax code
+-
+  !record {model: account.tax.code, id: tax_10_base_code}:
+    name: Tax 10 Base Code
+-
+  !record {model: account.tax.code, id: tax_10_tax_code}:
+    name: TAX 10 Tax Code
+-
+  !record {model: account.tax, id: invtax}:
+    name: Tax10.0
+    amount: 10.0
+    type: percent
+    type_tax_use: all
+    tax_invoice_line_ids:
+      - code_type: base
+        amount: 100.0
+        code_id: tax_10_base_code
+      - code_type: tax
+        amount: 10.0
+        code_id: tax_10_tax_code
+-
+  I create a supplier invoice
+-
+  !record {model: account.invoice, id: account_invoice_supplier1, view: invoice_supplier_form}:
+    account_id: account.a_pay
+    check_total: 3300.0
+    currency_id: base.EUR
+    invoice_line:
+      - account_id: account.a_expense
+        name: '[PCSC234] PC Assemble SC234'
+        price_unit: 300.0
+        product_id: product.product_product_3
+        quantity: 10.0
+        uos_id: product.product_uom_unit
+        invoice_line_tax_id:
+                  - invtax
+    journal_id: account.expenses_journal
+    partner_id: base.res_partner_12
+    reference_type: none
+    type: in_invoice
+-
+  I compute a supplier Invoice
+-
+  !python {model: account.invoice}: |
+    self.button_compute(cr, uid, [ref('account_invoice_supplier1')])
+-
+  I check that account invoice tax line
+- 
+  !python {model: account.invoice}: |
+    inv = self.browse(cr, uid, ref('account_invoice_supplier1'))
+    taxline = inv.tax_line
+    assert taxline[0].amount == 300, "Tax amount is wrong"
+    assert taxline[0].base == 3000, "Base amount is wrong"
+- 
+  I Validate the invoice and make state of invoice to open
+-
+  !workflow {model: account.invoice, action: invoice_open, ref: account_invoice_supplier1}
+-
+  I check that the invoice state is now "Open"
+-
+  !assert {model: account.invoice, id: account_invoice_supplier1}:
+    - state == 'open'
+-
+  I check that account move lines
+-
+  !python {model: account.invoice}: |
+    inv = self.browse(cr, uid, ref('account_invoice_supplier1'))
+    move_line = inv.move_id.line_id
+    assert (move_line[0].debit == 3300.0 and move_line[0].credit == 0.0 and move_line[0].tax_amount == 0.0), "Incorrect Debit, Credit or Amount"
+    assert (move_line[1].debit == 0.0 and move_line[1].credit == 300.0 and move_line[1].tax_amount == 300.0), "Incorrect Debit, Credit or Amount"
+    assert (move_line[1].tax_code_id.id == ref('tax_10_tax_code')), "Incorrect Tax Account"
+    assert (move_line[2].debit == 0.0 and move_line[2].credit == 3000.0 and move_line[2].tax_amount == 3000.0), "Incorrect Debit, Credit or Amount"
+    assert (move_line[2].tax_code_id.id == ref('tax_10_base_code')), "Incorrect Tax Account"
