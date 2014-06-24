@@ -2925,6 +2925,7 @@ class account_tax_template(osv.osv):
                 'sequence': tax.sequence,
                 'amount': tax.amount,
                 'type': tax.type,
+                'company_id': company_id,
                 'applicable_type': tax.applicable_type,
                 'parent_id': tax.parent_id and ((tax.parent_id.id in tax_template_to_tax) and tax_template_to_tax[tax.parent_id.id]) or False,
                 'python_compute': tax.python_compute,
@@ -3394,8 +3395,16 @@ class wizard_multi_charts_accounts(osv.osv_memory):
         :param company_id: id of the company for wich the wizard is running
         :return: True
         '''
+        def _set_tax_line_value(tax_ids, value):
+            """Set tax line value same as changed tax value"""
+            for tax in obj_tax_temp.browse(cr, uid, tax_ids, context=context):
+                for tax_line in tax.tax_invoice_line_ids + tax.tax_refund_line_ids:
+                    if tax_line.code_type == 'tax':
+                        obj_tax_line_temp.write(cr, uid, tax_line.id, {'amount': value, 'tax_amount': value}, context=context)
+            return True
         obj_tax_code_template = self.pool.get('account.tax.code.template')
         obj_tax_temp = self.pool.get('account.tax.template')
+        obj_tax_line_temp = self.pool.get('account.tax.line.template')
         chart_template = obj_wizard.chart_template_id
         vals = {}
         all_parents = self._get_chart_parent_ids(cr, uid, chart_template, context=context)
@@ -3403,10 +3412,12 @@ class wizard_multi_charts_accounts(osv.osv_memory):
         if not chart_template.complete_tax_set:
             value = obj_wizard.sale_tax_rate
             ref_tax_ids = obj_tax_temp.search(cr, uid, [('type_tax_use','in', ('sale','all')), ('chart_template_id', 'in', all_parents)], context=context, order="sequence, id desc", limit=1)
-            obj_tax_temp.write(cr, uid, ref_tax_ids, {'amount': value/100.0, 'name': _('Tax %.2f%%') % value})
+            obj_tax_temp.write(cr, uid, ref_tax_ids, {'amount': value, 'name': _('Tax %.2f%%') % value})
+            _set_tax_line_value(ref_tax_ids, value)
             value = obj_wizard.purchase_tax_rate
             ref_tax_ids = obj_tax_temp.search(cr, uid, [('type_tax_use','in', ('purchase','all')), ('chart_template_id', 'in', all_parents)], context=context, order="sequence, id desc", limit=1)
-            obj_tax_temp.write(cr, uid, ref_tax_ids, {'amount': value/100.0, 'name': _('Purchase Tax %.2f%%') % value})
+            obj_tax_temp.write(cr, uid, ref_tax_ids, {'amount': value, 'name': _('Purchase Tax %.2f%%') % value})
+            _set_tax_line_value(ref_tax_ids, value)
         return True
 
     def execute(self, cr, uid, ids, context=None):
