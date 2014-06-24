@@ -736,11 +736,13 @@ class Environment(object):
         if not spec:
             return
         for env in list(self.all):
+            c = env.cache
             for field, ids in spec:
                 if ids is None:
-                    env.cache.pop(field, None)
+                    if field in c:
+                        del c[field]
                 else:
-                    field_cache = env.cache[field]
+                    field_cache = c[field]
                     for id in ids:
                         field_cache.pop(id, None)
 
