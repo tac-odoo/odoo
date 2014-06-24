@@ -35,7 +35,7 @@
         <record model="ir.rule" id="project.task_visibility_rule">
             <field name="name">Project/Task: employees: public, portal, employee or (followers and following)</field>
             <field name="domain_force">['|',
-                                            ('project_id.privacy_visibility', 'in', ['public', 'portal', 'employees']),
+                                            ('project_id.privacy_visibility', 'in', ['public', 'portal', 'employees','followers']),
                                             '&amp;',
                                                 ('project_id.privacy_visibility', '=', 'followers'),
                                                 ('message_follower_ids', 'in', [user.partner_id.id]),
