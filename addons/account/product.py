@@ -45,7 +45,7 @@ class product_template(osv.osv):
     _columns = {
         'taxes_id': fields.many2many('account.tax', 'product_taxes_rel',
             'prod_id', 'tax_id', 'Customer Taxes',
-            domain=[('parent_id','=',False),('type_tax_use','in',['sale','all'])]),
+             domain=[('parent_id','=',False),('type_tax_use','in',['sale','all'])]),
         'supplier_taxes_id': fields.many2many('account.tax',
             'product_supplier_taxes_rel', 'prod_id', 'tax_id',
             'Supplier Taxes', domain=[('parent_id', '=', False),('type_tax_use','in',['purchase','all'])]),
