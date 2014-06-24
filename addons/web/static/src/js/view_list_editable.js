@@ -682,7 +682,6 @@
             this.delegate = this.options.delegate;
 
             this.record = null;
-            this._shelve = [];
 
             this.form = new (this.options.formView)(
                 this, this.delegate.dataset, false, {
@@ -785,18 +784,6 @@
             this.form.do_hide();
             return $.when(record);
         },
-        shelve: function () {
-            var self = this;
-            return this.cancel(true).then(function (record) {
-                self._shelve.push(record);
-                return record;
-            });
-        },
-        unshelve: function () {
-            this.record = this._shelve.pop();
-            this.form.do_show();
-            return $.when(this.record);
-        }
     });
 
     instance.web.ListView.Groups.include(/** @lends instance.web.ListView.Groups# */{

@@ -335,27 +335,24 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
             set_values.push(result);
         });
         return $.when.apply(null, set_values).then(function() {
-            var def = $.when({});
             if (!record.id) {
                 // trigger onchanges
-                def = self.do_onchange(null);
+                self.do_onchange(null);
             }
-            return def.then(function() {
-                self.on_form_changed();
-                self.rendering_engine.init_fields();
-                self.is_initialized.resolve();
-                self.do_update_pager(record.id === null || record.id === undefined);
-                if (self.sidebar) {
-                   self.sidebar.do_attachement_update(self.dataset, self.datarecord.id);
-                }
-                if (record.id) {
-                    self.do_push_state({id:record.id});
-                } else {
-                    self.do_push_state({});
-                }
-                self.$el.add(self.$buttons).removeClass('oe_form_dirty');
-                self.autofocus();
-            });
+            self.on_form_changed();
+            self.rendering_engine.init_fields();
+            self.is_initialized.resolve();
+            self.do_update_pager(record.id === null || record.id === undefined);
+            if (self.sidebar) {
+               self.sidebar.do_attachement_update(self.dataset, self.datarecord.id);
+            }
+            if (record.id) {
+                self.do_push_state({id:record.id});
+            } else {
+                self.do_push_state({});
+            }
+            self.$el.add(self.$buttons).removeClass('oe_form_dirty');
+            self.autofocus();
         });
     },
     /**
@@ -442,6 +439,9 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
             var fields = [root];
             while (fields.length) {
                 var node = fields.pop();
+                if (!node) {
+                    continue;
+                }
                 if (node.tag === 'field' && node.attrs.name === field_name) {
                     return node.attrs.on_change || "";
                 }
@@ -4165,17 +4165,6 @@ instance.web.form.FieldOne2Many = instance.web.form.AbstractField.extend({
         value_ = value_ || [];
         var self = this;
         var view = this.get_active_view();
-        var was_editing = false;
-        if (view && view.type == 'list' && view.controller.editor.is_editing()) {
-            // TODO: make shelve, unshelve work
-            // was_editing = true;
-            // view.controller.editor.shelve();
-
-            // Meanwhile ...
-            view.controller.cancel_edition(true);
-            view.controller.start_edition();
-            return;
-        }
         this.dataset.reset_ids([]);
         var ids;
         if(value_.length >= 1 && value_[0] instanceof Array) {
@@ -4228,10 +4217,6 @@ instance.web.form.FieldOne2Many = instance.web.form.AbstractField.extend({
         }
         if (this.dataset.index === null && this.dataset.ids.length > 0) {
             this.dataset.index = 0;
-        }
-        if (was_editing) {
-            // TODO: make shelve, unshelve work
-            // view.controller.editor.unshelve();
         }
         this.trigger_on_change();
         if (this.is_started) {
