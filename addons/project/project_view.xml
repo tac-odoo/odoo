@@ -132,7 +132,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Other Info">
+                        <page string="Project Details">
                             <group string="Administration">
                                 <field name="privacy_visibility" widget="radio"/>
                                 <field name="planned_hours" widget="float_time"
