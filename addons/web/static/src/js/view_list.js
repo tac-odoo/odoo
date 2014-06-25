@@ -90,6 +90,8 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
 
         this.no_leaf = false;
         this.grouped = false;
+
+        this.opened_groups = {};
     },
     view_loading: function(r) {
         return this.load_list(r);
@@ -513,7 +515,16 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
                 } else if (self.dataset.index >= self.records.length) {
                     self.dataset.index = 0;
                 }
-
+                console.log(self.opened_groups);
+                _(self.opened_groups).each(function (level_groups) {
+                    console.log(level_groups);
+                    _(level_groups).each(function (group) {
+                        console.log(group);
+                        var $row = self.$('tr:contains(' + group.datagroup.value[1] + ')');
+                        $row.click();
+                        // group.open(group.point_insertion(group.$row[0]));
+                    });
+                });
                 self.compute_aggregates();
                 reloaded.resolve();
             }));
@@ -601,11 +612,11 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
                 self.records.remove(self.records.get(id));
             });
             if (self.records.length === 0 && self.dataset.size() > 0) {
-                //Trigger previous manually to navigate to previous page, 
+                //Trigger previous manually to navigate to previous page,
                 //If all records are deleted on current page.
                 self.$pager.find('ul li:first a').trigger('click');
             } else if (self.dataset.size() == self.limit()) {
-                //Reload listview to update current page with next page records 
+                //Reload listview to update current page with next page records
                 //because pager going to be hidden if dataset.size == limit
                 self.reload();
             } else {
@@ -894,7 +905,7 @@ instance.web.ListView.List = instance.web.Class.extend( /** @lends instance.web.
      *
      * @constructs instance.web.ListView.List
      * @extends instance.web.Class
-     * 
+     *
      * @param {Object} opts display options, identical to those of :js:class:`instance.web.ListView`
      */
     init: function (group, opts) {
@@ -982,7 +993,7 @@ instance.web.ListView.List = instance.web.Class.extend( /** @lends instance.web.
                       field = $target.closest('td').data('field'),
                        $row = $target.closest('tr'),
                   record_id = self.row_id($row);
-                
+
                 if ($target.attr('disabled')) {
                     return;
                 }
@@ -1340,12 +1351,21 @@ instance.web.ListView.Groups = instance.web.Class.extend( /** @lends instance.we
                                 .removeClass('ui-icon-triangle-1-e')
                                 .addClass('ui-icon-triangle-1-s');
                         child.open(self.point_insertion(e.currentTarget));
+
+                        if (!child.view.opened_groups[child.datagroup.level - 1]) {
+                            child.view.opened_groups[child.datagroup.level - 1] = [child];
+                        } else {
+                            child.view.opened_groups[child.datagroup.level - 1].push(child);
+                        }
                     } else {
                         $row.removeData('open')
                             .find('span.ui-icon')
                                 .removeClass('ui-icon-triangle-1-s')
                                 .addClass('ui-icon-triangle-1-e');
                         child.close();
+
+                        child.view.opened_groups[child.datagroup.level - 1] = _(child.view.opened_groups[child.datagroup.level - 1]).without(child);
+
                         // force recompute the selection as closing group reset properties
                         var selection = self.get_selection();
                         $(self).trigger('selected', [selection.ids, this.records]);
@@ -1381,7 +1401,7 @@ instance.web.ListView.Groups = instance.web.Class.extend( /** @lends instance.we
                     }
                     group_label = _.str.escapeHTML(group_label);
                 }
-                    
+
                 // group_label is html-clean (through format or explicit
                 // escaping if format failed), can inject straight into HTML
                 $group_column.html(_.str.sprintf(_t("%s (%d)"),
@@ -1756,7 +1776,7 @@ var Record = instance.web.Class.extend(/** @lends Record# */{
     /**
      * @constructs Record
      * @extends instance.web.Class
-     * 
+     *
      * @mixes Events
      * @param {Object} [data]
      */
@@ -1838,11 +1858,11 @@ var Collection = instance.web.Class.extend(/** @lends Collection# */{
      * Smarter collections, with events, very strongly inspired by Backbone's.
      *
      * Using a "dumb" array of records makes synchronization between the
-     * various serious 
+     * various serious
      *
      * @constructs Collection
      * @extends instance.web.Class
-     * 
+     *
      * @mixes Events
      * @param {Array} [records] records to initialize the collection with
      * @param {Object} [options]
