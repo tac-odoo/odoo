@@ -1,5 +1,13 @@
 $(document).ready(function () {
 
+    $('.tag_follow').mouseenter(function(event) {
+        $(event.currentTarget).children('div').css('display','block');
+        $(event.currentTarget).children('div').fadeIn();
+    });
+    $('.tag_follow').mouseleave(function(event) {
+        $(event.currentTarget).children('div').fadeOut();
+    });
+
     $('.karma_required').on('click', function (ev) {
         var karma = $(ev.currentTarget).data('karma');
         if (karma) {
@@ -128,15 +136,18 @@ $(document).ready(function () {
                 cacheResults: true
             }
         });
-        // Adds: create tags on space + blur
-        $("input.load_tags").on('whitespaceKeyDown blur', function () {
+        // Adds: create tags on space + enter
+        $("input.load_tags").on('whitespaceKeyDown', function () {
             $(this).textext()[0].tags().addTags([ $(this).val() ]);
             $(this).val("");
         });
         $("input.load_tags").on('isTagAllowed', function(e, data) {
-            if (_.indexOf($(this).textext()[0].tags()._formData, data.tag) != -1) {
-                data.result = false;
-            }
+            _.each($(this).textext()[0].tags()._formData, function( value ) {
+                if (value.toLowerCase() == data.tag.toLowerCase()) {
+                    alert("\"" + data.tag + "\" is already in the list");
+                    data.result = false;
+                }
+            });
         });
     }
 

@@ -309,6 +309,12 @@ class Post(osv.Model):
         'child_ids': list(),
     }
 
+    def tag_follow_question(self, cr, uid, tag_list, context=None):
+        tag_obj_list = self.pool['forum.tag'].browse(cr, uid, tag_list, context=context)
+        follower_list = [partner.id for tag in tag_obj_list if tag.message_follower_ids for partner in tag.message_follower_ids]
+        follower_list = list(set(follower_list))
+        return follower_list
+
     def create(self, cr, uid, vals, context=None):
         if context is None:
             context = {}
@@ -320,6 +326,12 @@ class Post(osv.Model):
             raise KarmaError('Not enough karma to create a new question')
         elif not post.parent_id and not post.can_answer:
             raise KarmaError('Not enough karma to answer to a question')
+        #get tag follower + add tag follower to question follower
+        tag_list = [tag_id.id for tag_id in post.tag_ids]
+        follower_list = self.tag_follow_question(cr, uid, tag_list, context=context)
+        if follower_list:
+            self.write(cr, uid, [post_id], {'message_follower_ids':follower_list}, context=context)
+
         # messaging and chatter
         base_url = self.pool['ir.config_parameter'].get_param(cr, uid, 'web.base.url')
         if post.parent_id:
@@ -357,6 +369,11 @@ class Post(osv.Model):
         if any(key not in ['state', 'active', 'is_correct', 'closed_uid', 'closed_date', 'closed_reason_id'] for key in vals.keys()) and any(not post.can_edit for post in posts):
             raise KarmaError('Not enough karma to edit a post.')
 
+        if 'tag_ids' in vals:
+            tag_list = [tag_id for tag_ids_list in vals.get('tag_ids') for tag_id in tag_ids_list[2]]
+            follower_list = self.tag_follow_question(cr, uid, tag_list, context=context)
+            if follower_list:
+                vals['message_follower_ids'] = follower_list
         res = super(Post, self).write(cr, uid, ids, vals, context=context)
         # if post content modify, notify followers
         if 'content' in vals or 'name' in vals:
@@ -564,7 +581,7 @@ class Vote(osv.Model):
 class Tags(osv.Model):
     _name = "forum.tag"
     _description = "Tag"
-    _inherit = ['website.seo.metadata']
+    _inherit = ['mail.thread', 'website.seo.metadata']
 
     def _get_posts_count(self, cr, uid, ids, field_name, arg, context=None):
         return dict((tag_id, self.pool['forum.post'].search_count(cr, uid, [('tag_ids', 'in', tag_id)], context=context)) for tag_id in ids)
@@ -586,3 +603,15 @@ class Tags(osv.Model):
         ),
         'create_uid': fields.many2one('res.users', 'Created by', readonly=True),
     }
+
+    def create(self, cr, uid, vals, context=None):
+        tag_id = super(Tags, self).create(cr, uid, vals, context=context)
+        user = self.pool['res.users'].browse(cr, uid, uid, context=context)
+        if user.karma < 30 and not user.id == SUPERUSER_ID:
+            raise KarmaError('Not enough karma to create a new Tag')
+        return tag_id
+
+    def message_subscribe(self, cr, uid, ids, partner_ids, subtype_ids=None, context=None):
+        super(Tags, self).message_subscribe(cr, uid, ids, partner_ids, subtype_ids=subtype_ids, context=context)
+        question_ids = self.pool['forum.post'].search(cr, uid, [('tag_ids','in',ids)], context=context)
+        self.pool['forum.post'].message_subscribe(cr, SUPERUSER_ID, question_ids, partner_ids, context=context)

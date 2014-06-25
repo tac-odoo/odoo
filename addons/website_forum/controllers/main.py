@@ -15,7 +15,6 @@ from openerp.addons.website.models.website import slug
 
 controllers = controllers()
 
-
 class WebsiteForum(http.Controller):
     _post_per_page = 10
     _user_per_page = 30
