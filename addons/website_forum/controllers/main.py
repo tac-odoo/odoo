@@ -15,7 +15,6 @@ from openerp.addons.website.models.website import slug
 
 controllers = controllers()
 
-
 class WebsiteForum(http.Controller):
     _post_per_page = 10
     _user_per_page = 30
@@ -133,6 +132,13 @@ class WebsiteForum(http.Controller):
             'search': search,
         })
         return request.website.render("website_forum.forum_index", values)
+
+    @http.route('/forum/check_tag', type='json', auth="public", methods=['POST'], website=True)
+    def allow_tag_creation(self, **post):
+        cr, uid, context = request.cr, request.uid, request.context
+        if request.registry['forum.tag'].search(cr, uid, [('name','=',post['tags'])], context=context):
+            return True
+        return False
 
     @http.route(['/forum/<model("forum.forum"):forum>/faq'], type='http', auth="public", website=True)
     def forum_faq(self, forum, **post):
