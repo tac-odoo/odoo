@@ -601,32 +601,6 @@ class many2one(_column):
         args['auto_join'] = self._auto_join
         return args
 
-    def get(self, cr, obj, ids, name, user=None, context=None, values=None):
-        if context is None:
-            context = {}
-        if values is None:
-            values = {}
-
-        res = {}
-        for r in values:
-            res[r['id']] = r[name]
-        for id in ids:
-            res.setdefault(id, '')
-        obj = obj.pool[self._obj]
-
-        # build a dictionary of the form {'id_of_distant_resource': name_of_distant_resource}
-        # we use uid=1 because the visibility of a many2one field value (just id and name)
-        # must be the access right of the parent form and not the linked object itself.
-        records = dict(obj.name_get(cr, SUPERUSER_ID,
-                                    list(set([x for x in res.values() if x and isinstance(x, (int,long))])),
-                                    context=context))
-        for id in res:
-            if res[id] in records:
-                res[id] = (res[id], records[res[id]])
-            else:
-                res[id] = False
-        return res
-
     def set(self, cr, obj_src, id, field, values, user=None, context=None):
         if not context:
             context = {}
@@ -1295,17 +1269,7 @@ class function(_column):
         field_type = obj._columns[field]._type
         new_values = dict(values)
 
-        if field_type == "integer":
-            # integer/long values greater than 2^31-1 are not supported
-            # in pure XMLRPC, so we have to pass them as floats :-(
-            # This is not needed for stored fields and non-functional integer
-            # fields, as their values are constrained by the database backend
-            # to the same 32bits signed int limit.
-            for rid, value in values.iteritems():
-                if value and value > xmlrpclib.MAXINT:
-                    new_values[rid] = __builtin__.float(value)
-
-        elif field_type == 'binary':
+        if field_type == 'binary':
             if context.get('bin_size'):
                 # client requests only the size of binary fields
                 for rid, value in values.iteritems():
@@ -1315,16 +1279,6 @@ class function(_column):
                 for rid, value in values.iteritems():
                     if value:
                         new_values[rid] = sanitize_binary_value(value)
-
-        elif field_type == "many2one" and hasattr(obj._columns[field], 'relation'):
-            # make the result a tuple if it is not already one
-            if all(isinstance(value, (int, long)) for value in values.values() if value):
-                obj_model = obj.pool[obj._columns[field].relation]
-                ids = [i for i in values.values() if i]
-                dict_names = dict(obj_model.name_get(cr, SUPERUSER_ID, ids, context))
-                for rid, value in values.iteritems():
-                    if value:
-                        new_values[rid] = (value, dict_names[value])
 
         return new_values
 

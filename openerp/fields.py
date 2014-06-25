@@ -27,6 +27,7 @@ from functools import partial
 from operator import attrgetter
 import logging
 import pytz
+import xmlrpclib
 
 from openerp.tools import float_round, ustr, html_sanitize
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
@@ -826,6 +827,13 @@ class Integer(Field):
 
     def convert_to_cache(self, value, env):
         return int(value or 0)
+
+    def convert_to_read(self, value, use_name_get=True):
+        # Integer values greater than 2^31-1 are not supported in pure XMLRPC,
+        # so we have to pass them as floats :-(
+        if value and value > xmlrpclib.MAXINT:
+            return float(value)
+        return value
 
     def _update(self, records, value):
         # special case, when an integer field is used as inverse for a one2many
