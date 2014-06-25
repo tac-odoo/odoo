@@ -4100,14 +4100,16 @@ class BaseModel(object):
 
         # only keep store triggers that should be triggered for the ``fields``
         # being written to.
-        triggers_to_compute = [f for f in stored_functions \
-                if ((not f[trigger_fields_]) or set(fields).intersection(f[trigger_fields_]))]
+        triggers_to_compute = (
+            f for f in stored_functions
+            if not f[trigger_fields_] or set(fields).intersection(f[trigger_fields_])
+        )
 
         to_compute_map = {}
         target_id_results = {}
         for store_trigger in triggers_to_compute:
             target_func_id_ = id(store_trigger[target_ids_func_])
-            if not target_func_id_ in target_id_results:
+            if target_func_id_ not in target_id_results:
                 # use admin user for accessing objects having rules defined on store fields
                 target_id_results[target_func_id_] = [i for i in store_trigger[target_ids_func_](self, cr, SUPERUSER_ID, ids, context) if i]
             target_ids = target_id_results[target_func_id_]
@@ -4136,11 +4138,9 @@ class BaseModel(object):
             for triggers, target_ids in trigger_ids_maps.iteritems():
                 call_map.setdefault((priority,model),[]).append((priority, model, target_ids,
                                                                  [t[func_field_to_compute_] for t in triggers]))
-        ordered_keys = call_map.keys()
-        ordered_keys.sort()
         result = []
-        if ordered_keys:
-            result = reduce(operator.add, (call_map[k] for k in ordered_keys))
+        if call_map:
+            result = reduce(operator.add, (call_map[k] for k in sorted(call_map)))
         return result
 
     def _store_set_values(self, cr, uid, ids, fields, context):
@@ -5024,7 +5024,7 @@ class BaseModel(object):
             ids = tuple(arg)
         else:
             ids = (arg,) if arg else ()
-        assert all(isinstance(id, IdType) for id in ids), "Browsing invalid ids: %s" % ids
+        #assert all(isinstance(id, IdType) for id in ids), "Browsing invalid ids: %s" % ids
         return self._browse(self.env, ids)
 
     @api.v7
@@ -5033,7 +5033,7 @@ class BaseModel(object):
             ids = tuple(arg)
         else:
             ids = (arg,) if arg else ()
-        assert all(isinstance(id, IdType) for id in ids), "Browsing invalid ids: %s" % ids
+        #assert all(isinstance(id, IdType) for id in ids), "Browsing invalid ids: %s" % ids
         return self._browse(Environment(cr, uid, context or {}), ids)
 
     #
@@ -5398,8 +5398,14 @@ class BaseModel(object):
         for fname in fnames:
             spec += self._fields[fname].modified(self)
 
-        # HACK: invalidate all non-stored fields.function
-        spec += [(f, None) for f in self.pool.pure_function_fields]
+        cached_fields = {
+            field
+            for env in self.env.all
+            for field in env.cache
+        }
+        # invalidate non-stored fields.function which are currently cached
+        spec += [(f, None) for f in self.pool.pure_function_fields
+                 if f in cached_fields]
 
         self.env.invalidate(spec)
 

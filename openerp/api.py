@@ -736,11 +736,13 @@ class Environment(object):
         if not spec:
             return
         for env in list(self.all):
+            c = env.cache
             for field, ids in spec:
                 if ids is None:
-                    env.cache.pop(field, None)
+                    if field in c:
+                        del c[field]
                 else:
-                    field_cache = env.cache[field]
+                    field_cache = c[field]
                     for id in ids:
                         field_cache.pop(id, None)
 
@@ -764,7 +766,7 @@ class Environment(object):
         # re-fetch the records, and compare with their former cache
         invalids = []
         for field, field_dump in cache_dump.iteritems():
-            ids = filter(None, list(field_dump))
+            ids = filter(None, field_dump)
             records = self[field.model_name].browse(ids)
             for record in records:
                 try:

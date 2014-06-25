@@ -770,12 +770,12 @@ class Field(object):
             fields/records to recompute, and return a spec indicating what to
             invalidate.
         """
-        env = records.env(user=SUPERUSER_ID, context={'active_test': False})
-
         # invalidate the fields that depend on self, and prepare recomputation
         spec = [(self, records._ids)]
         for field, path in self._triggers:
             if field.store:
+                # don't move this line to function top, see log
+                env = records.env(user=SUPERUSER_ID, context={'active_test': False})
                 target = env[field.model_name].search([(path, 'in', records.ids)])
                 if target:
                     spec.append((field, target._ids))
