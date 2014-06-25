@@ -396,8 +396,7 @@
                 <search string="Jobs">
                     <field name="name" string="Job"/>
                     <filter domain="[('state','=','open')]" string="In Position"/>
-                    <filter domain="[('state','=','recruit')]" string="In Recruitment" name="in_recruitment"/>
-                    <filter domain="[('message_is_follower','=',True)]" string="Followers" name="followers"/>
+                    <filter domain="['&amp;',('message_is_follower','=',True),('state','=','recruit')]" string="Followers" name="followers"/>
                     <field name="department_id"/>
                     <group expand="0" string="Group By">
                         <filter string="Department" domain="[]" context="{'group_by':'department_id'}"/>
