@@ -91,7 +91,7 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
         this.no_leaf = false;
         this.grouped = false;
 
-        this.opened_groups = {};
+        this.expanded_groups = new ExpandedGroups();
     },
     view_loading: function(r) {
         return this.load_list(r);
@@ -515,16 +515,35 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
                 } else if (self.dataset.index >= self.records.length) {
                     self.dataset.index = 0;
                 }
-                console.log(self.opened_groups);
-                _(self.opened_groups).each(function (level_groups) {
-                    console.log(level_groups);
-                    _(level_groups).each(function (group) {
-                        console.log(group);
-                        var $row = self.$('tr:contains(' + group.datagroup.value[1] + ')');
-                        $row.click();
-                        // group.open(group.point_insertion(group.$row[0]));
+
+                var continue_def = $.Deferred().resolve();
+                _.each(self.opened_groups, function (level) {
+                    console.log('level: ', level);
+                    console.log('continue state: ', continue_def.state());
+                    continue_def.then(function () {
+                        var defs = _.map(level, function (group) {
+                            var def = new $.Deferred();
+
+                            console.log('looking for: ', group);
+                            var $row = self.$('tr:contains(' + group + ')').click();
+                            console.log('$row: ', $row);
+
+                            function resolve (d) {
+                                console.log('resolve def')
+                                d.resolve();
+                            }
+
+                            setTimeout(resolve(def), 2000);
+                            return def.promise();
+                        });
+                        $.when.apply($, defs).then(function () {
+                            console.log('resolve continue')
+                            continue_def.resolve();
+                        });
                     });
+                    continue_def = $.Deferred().promise();
                 });
+
                 self.compute_aggregates();
                 reloaded.resolve();
             }));
@@ -590,6 +609,7 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
 
         if (_.isEmpty(group_by) && !context['group_by_no_leaf']) {
             group_by = null;
+            this.expanded_groups = new ExpandedGroups();
         }
         this.no_leaf = !!context['group_by_no_leaf'];
         this.grouped = !!group_by;
@@ -1352,11 +1372,17 @@ instance.web.ListView.Groups = instance.web.Class.extend( /** @lends instance.we
                                 .addClass('ui-icon-triangle-1-s');
                         child.open(self.point_insertion(e.currentTarget));
 
-                        if (!child.view.opened_groups[child.datagroup.level - 1]) {
-                            child.view.opened_groups[child.datagroup.level - 1] = [child];
-                        } else {
-                            child.view.opened_groups[child.datagroup.level - 1].push(child);
+                        // Add group to be expanded
+                        var parent = null;
+                        var has_parent = child.datagroup.level > 1;
+                        if (has_parent) {
+                            parent = self.view.expanded_groups.find({
+                                'value': child.datagroup.parent.value[1],
+                            });
                         }
+                        var node = new ExpandedGroups(parent, child.datagroup.value[1]);
+                        self.view.expanded_groups.add(node);
+
                     } else {
                         $row.removeData('open')
                             .find('span.ui-icon')
@@ -1364,13 +1390,22 @@ instance.web.ListView.Groups = instance.web.Class.extend( /** @lends instance.we
                                 .addClass('ui-icon-triangle-1-e');
                         child.close();
 
-                        child.view.opened_groups[child.datagroup.level - 1] = _(child.view.opened_groups[child.datagroup.level - 1]).without(child);
+                        // Remove group to be expanded
+                        self.view.expanded_groups.remove({
+                            'value': child.datagroup.value[1],
+                        });
 
                         // force recompute the selection as closing group reset properties
                         var selection = self.get_selection();
                         $(self).trigger('selected', [selection.ids, this.records]);
                     }
                 });
+
+                // if (!_(self.view.expanded_groups.find({
+                //     'value': child.datagroup.value[1],
+                // })).isEmpty()) {
+                //     console.log('child to expand: ', child);
+                // }
             }
             placeholder.appendChild($row[0]);
 
@@ -1666,6 +1701,9 @@ function synchronized(fn) {
 }
 var DataGroup =  instance.web.Class.extend({
    init: function(parent, model, domain, context, group_by, level) {
+
+        this.parent = parent;
+
        this.model = new instance.web.Model(model, context, domain);
        this.group_by = group_by;
        this.context = context;
@@ -1719,6 +1757,37 @@ var StaticDataGroup = DataGroup.extend({
    list: function (fields, ifGroups, ifRecords) {
        ifRecords(this.dataset);
    }
+});
+
+var ExpandedGroups = instance.web.Class.extend({
+    init: function (parent, value) {
+        this.parent = parent;
+        this.value = value;
+        this.children = [];
+    },
+    expand: function () {},
+    find: function (node) {
+        debugger;
+        if (this.value === node.value) {
+            return this;
+        } else if (!_(this.children).isEmpty()) {
+            var l = this.children.length;
+            for (var i = 0; i < l; i++) {
+                return this.children[i].find(node);
+            }
+        }
+        return null;
+    },
+    add: function (node) {
+        if (!this.find(node)) {
+            this.children.push(node);
+        }
+    },
+    remove: function (node) {
+        if (this.find(node)) {
+            this.children = _(this.children).without(node);
+        }
+    },
 });
 
 /**
