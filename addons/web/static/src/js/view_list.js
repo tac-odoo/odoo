@@ -1365,6 +1365,9 @@ instance.web.ListView.Groups = instance.web.Class.extend( /** @lends instance.we
             var $row = child.$row = $('<tr class="oe_group_header">');
             if (group.openable && group.length) {
                 $row.click(function (e) {
+                    var parent = null;
+                    var has_parent = false;
+                    var node;
                     if (!$row.data('open')) {
                         $row.data('open', true)
                             .find('span.ui-icon')
@@ -1373,14 +1376,13 @@ instance.web.ListView.Groups = instance.web.Class.extend( /** @lends instance.we
                         child.open(self.point_insertion(e.currentTarget));
 
                         // Add group to be expanded
-                        var parent = null;
-                        var has_parent = child.datagroup.level > 1;
+                        has_parent = child.datagroup.level > 1;
                         if (has_parent) {
                             parent = self.view.expanded_groups.find({
                                 'value': child.datagroup.parent.value[1],
                             });
                         }
-                        var node = new ExpandedGroups(parent, child.datagroup.value[1]);
+                        node = new ExpandedGroups(parent, child.datagroup.value[1]);
                         self.view.expanded_groups.add(node);
 
                     } else {
@@ -1391,9 +1393,14 @@ instance.web.ListView.Groups = instance.web.Class.extend( /** @lends instance.we
                         child.close();
 
                         // Remove group to be expanded
-                        self.view.expanded_groups.remove({
-                            'value': child.datagroup.value[1],
-                        });
+                        has_parent = child.datagroup.level > 1;
+                        if (has_parent) {
+                            parent = self.view.expanded_groups.find({
+                                'value': child.datagroup.parent.value[1],
+                            });
+                        }
+                        node = new ExpandedGroups(parent, child.datagroup.value[1]);
+                        self.view.expanded_groups.remove(node);
 
                         // force recompute the selection as closing group reset properties
                         var selection = self.get_selection();
@@ -1767,25 +1774,36 @@ var ExpandedGroups = instance.web.Class.extend({
     },
     expand: function () {},
     find: function (node) {
-        debugger;
         if (this.value === node.value) {
             return this;
         } else if (!_(this.children).isEmpty()) {
             var l = this.children.length;
+            var result = null;
             for (var i = 0; i < l; i++) {
-                return this.children[i].find(node);
+                var found = this.children[i].find(node);
+                if (!!found) {
+                    result = found;
+                    break;
+                }
             }
+            return result;
         }
         return null;
     },
     add: function (node) {
-        if (!this.find(node)) {
+        var found = this.find(node);
+        if (!found && !!node.parent) {
+            node.parent.children.push(node);
+        } else if (!node.parent) {
             this.children.push(node);
         }
     },
     remove: function (node) {
-        if (this.find(node)) {
-            this.children = _(this.children).without(node);
+        var found = this.find(node);
+        if (!!found && !!found.parent) {
+            found.parent.children = _(found.parent.children).without(found);
+        } else if (!!found) {
+            this.children = _(this.children).without(found);
         }
     },
 });
