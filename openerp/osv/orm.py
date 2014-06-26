@@ -8,6 +8,7 @@ from ..models import (
     Model, TransientModel, AbstractModel,
 
     MAGIC_COLUMNS,
+    LOG_ACCESS_COLUMNS,
 )
 
 # extra definitions for backward compatibility
