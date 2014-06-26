@@ -1407,12 +1407,6 @@ instance.web.ListView.Groups = instance.web.Class.extend( /** @lends instance.we
                         $(self).trigger('selected', [selection.ids, this.records]);
                     }
                 });
-
-                // if (!_(self.view.expanded_groups.find({
-                //     'value': child.datagroup.value[1],
-                // })).isEmpty()) {
-                //     console.log('child to expand: ', child);
-                // }
             }
             placeholder.appendChild($row[0]);
 
