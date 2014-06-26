@@ -1599,15 +1599,14 @@ $sheet-padding: 16px
     // FormView.header {{{
     .oe_form > :not(.oe_form_nosheet) header
         padding-left: 2px
-        ul:not(.oe_tooltip_technical):not(.oe_dropdown_menu)
-            display: inline-block
-            float: right
         .oe_button
             margin: 3px 2px 1px
             &:first-child
                 margin-left: 6px
-
     .oe_form  header
+        ul:not(.oe_tooltip_technical):not(.oe_dropdown_menu)
+            display: inline-block
+            float: right
         border-bottom: 1px solid #cacaca
         padding-left: 2px
         @include vertical-gradient(#fcfcfc, #dedede)
