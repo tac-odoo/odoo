@@ -516,6 +516,7 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
                     self.dataset.index = 0;
                 }
 
+                // Expand already expanded groups
                 var continue_def = $.Deferred().resolve();
                 _.each(self.opened_groups, function (level) {
                     console.log('level: ', level);
@@ -540,9 +541,14 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
                             console.log('resolve continue')
                             continue_def.resolve();
                         });
+                        continue_def = $.Deferred().promise();
                     });
-                    continue_def = $.Deferred().promise();
                 });
+
+                if (!_(self.expanded_groups.children).isEmpty()) {
+                    self.expanded_groups.expand(self.groups.children);
+                }
+
 
                 self.compute_aggregates();
                 reloaded.resolve();
@@ -1766,7 +1772,30 @@ var ExpandedGroups = instance.web.Class.extend({
         this.value = value;
         this.children = [];
     },
-    expand: function () {},
+    expand: function (groups, expand) {
+        debugger;
+        var to_expand = expand || [];
+        var values = _(this.children).pluck('value');
+        to_expand.push(_(groups).filter(function (group) {
+            return _(values).contains(group.datagroup.value[1]);
+        }));
+
+        to_expand = _(to_expand).flatten();
+
+        console.log(to_expand);
+
+        var next = to_expand.shift();
+        var notify_change = function (e) {
+            console.log(e);
+        };
+        while (!!next) {
+            console.log(next);
+            console.log(to_expand);
+            next.$row.on('DOMNodeInsertedIntoDocument', notify_change);
+            next.$row.click();
+            next = to_expand.shift();
+        }
+    },
     find: function (node) {
         if (this.value === node.value) {
             return this;
