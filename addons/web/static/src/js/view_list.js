@@ -1781,28 +1781,24 @@ var ExpandedGroups = instance.web.Class.extend({
 
         to_expand = _(to_expand).flatten();
 
-        console.log(to_expand);
-
         var next = to_expand.shift();
         var found = !!next ? this.find({
             'value': next.datagroup.value[1]
         }) : null;
-        while (!!next) {
-            console.log(next);
-            console.log(to_expand);
 
+        var wait_for_children = function (n, f, l) {
+            if (!_(n.children).isEmpty()) {
+                f.expand.apply(f, [n.children]);
+            } else {
+                _.delay(wait_for_children, 50, n, f, l);
+            }
+        };
+
+        while (!!next) {
             next.$row.click();
             if (!!found && !_(found.children).isEmpty()) {
-                var wait_for_children = function (n, f, l) {
-                    if (!_(n.children).isEmpty()) {
-                        f.expand.apply(f, [n.children]);
-                    } else {
-                        _.delay(wait_for_children, 50, n, f, l);
-                    }
-                };
                 wait_for_children(next, found, to_expand);
             }
-
             next = to_expand.shift();
             found = !!next ? this.find(next.datagroup.value[1]) : null;
         }
