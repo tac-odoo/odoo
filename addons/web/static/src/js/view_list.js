@@ -545,10 +545,7 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
                     });
                 });
 
-                if (!_(self.expanded_groups.children).isEmpty()) {
-                    self.expanded_groups.expand(self.groups.children);
-                }
-
+                self.expanded_groups.expand(self.groups.children);
 
                 self.compute_aggregates();
                 reloaded.resolve();
@@ -1773,10 +1770,12 @@ var ExpandedGroups = instance.web.Class.extend({
         this.children = [];
     },
     expand: function (groups, expand) {
-        debugger;
         var to_expand = expand || [];
         var values = _(this.children).pluck('value');
         to_expand.push(_(groups).filter(function (group) {
+            if (!group.datagroup) {
+                return false;
+            }
             return _(values).contains(group.datagroup.value[1]);
         }));
 
@@ -1785,15 +1784,27 @@ var ExpandedGroups = instance.web.Class.extend({
         console.log(to_expand);
 
         var next = to_expand.shift();
-        var notify_change = function (e) {
-            console.log(e);
-        };
+        var found = !!next ? this.find({
+            'value': next.datagroup.value[1]
+        }) : null;
         while (!!next) {
             console.log(next);
             console.log(to_expand);
-            next.$row.on('DOMNodeInsertedIntoDocument', notify_change);
+
             next.$row.click();
+            if (!!found && !_(found.children).isEmpty()) {
+                var wait_for_children = function (n, f, l) {
+                    if (!_(n.children).isEmpty()) {
+                        f.expand.apply(f, [n.children]);
+                    } else {
+                        _.delay(wait_for_children, 50, n, f, l);
+                    }
+                };
+                wait_for_children(next, found, to_expand);
+            }
+
             next = to_expand.shift();
+            found = !!next ? this.find(next.datagroup.value[1]) : null;
         }
     },
     find: function (node) {
@@ -1817,7 +1828,7 @@ var ExpandedGroups = instance.web.Class.extend({
         var found = this.find(node);
         if (!found && !!node.parent) {
             node.parent.children.push(node);
-        } else if (!node.parent) {
+        } else if (!found) {
             this.children.push(node);
         }
     },
