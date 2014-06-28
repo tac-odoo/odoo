@@ -243,6 +243,9 @@ class website(osv.osv):
         is_website_publisher = Access.check(cr, uid, 'ir.ui.view', 'write', False, context)
         return is_website_publisher
 
+    def is_user(self, cr, uid, ids, context=None):
+        return self.pool['res.users'].has_group(cr, request.uid, 'base.group_user')
+
     def get_template(self, cr, uid, ids, template, context=None):
         if isinstance(template, (int, long)):
             view_id = template
@@ -591,7 +594,7 @@ class website_menu(osv.osv):
     _name = "website.menu"
     _description = "Website Menu"
     _columns = {
-        'name': fields.char('Menu', size=64, required=True, translate=True),
+        'name': fields.char('Menu', required=True, translate=True),
         'url': fields.char('Url', translate=True),
         'new_window': fields.boolean('New Window'),
         'sequence': fields.integer('Sequence'),

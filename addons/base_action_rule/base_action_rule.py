@@ -54,10 +54,10 @@ class base_action_rule(osv.osv):
     _order = 'sequence'
 
     _columns = {
-        'name':  fields.char('Rule Name', size=64, required=True),
+        'name':  fields.char('Rule Name', required=True),
         'model_id': fields.many2one('ir.model', 'Related Document Model',
             required=True, domain=[('osv_memory', '=', False)]),
-        'model': fields.related('model_id', 'model', type="char", size=256, string='Model'),
+        'model': fields.related('model_id', 'model', type="char", string='Model'),
         'create_date': fields.datetime('Create Date', readonly=1),
         'active': fields.boolean('Active',
             help="When unchecked, the rule is hidden and will not be executed."),
@@ -165,14 +165,14 @@ class base_action_rule(osv.osv):
             if not hasattr(model_obj, 'base_action_ruled'):
                 # monkey-patch methods create and write
 
-                def create(self, cr, uid, vals, context=None):
+                def create(self, cr, uid, vals, context=None, **kwargs):
                     # avoid loops or cascading actions
                     if context and context.get('action'):
                         return create.origin(self, cr, uid, vals, context=context)
 
                     # call original method with a modified context
                     context = dict(context or {}, action=True)
-                    new_id = create.origin(self, cr, uid, vals, context=context)
+                    new_id = create.origin(self, cr, uid, vals, context=context, **kwargs)
 
                     # as it is a new record, we do not consider the actions that have a prefilter
                     action_model = self.pool.get('base.action.rule')
@@ -186,7 +186,7 @@ class base_action_rule(osv.osv):
                             action_model._process(cr, uid, action, [new_id], context=context)
                     return new_id
 
-                def write(self, cr, uid, ids, vals, context=None):
+                def write(self, cr, uid, ids, vals, context=None, **kwargs):
                     # avoid loops or cascading actions
                     if context and context.get('action'):
                         return write.origin(self, cr, uid, ids, vals, context=context)
@@ -208,7 +208,7 @@ class base_action_rule(osv.osv):
                         pre_ids[action] = action_model._filter(cr, uid, action, action.filter_pre_id, ids, context=context)
 
                     # call original method
-                    write.origin(self, cr, uid, ids, vals, context=context)
+                    write.origin(self, cr, uid, ids, vals, context=context, **kwargs)
 
                     # check postconditions, and execute actions on the records that satisfy them
                     for action in actions:

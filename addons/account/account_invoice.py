@@ -809,8 +809,7 @@ class account_invoice(models.Model):
                 continue
 
             ctx = dict(self._context, lang=inv.partner_id.lang)
-            if not inv.date_invoice:
-                inv.with_context(ctx).date_invoice = fields.Date.context_today(self)
+            date_invoice = inv.date_invoice or fields.Date.context_today(self)
 
             company_currency = inv.company_id.currency_id
             # create the analytical lines, one move line per invoice line
@@ -851,10 +850,10 @@ class account_invoice(models.Model):
             name = inv.name or inv.supplier_invoice_number or '/'
             totlines = []
             if inv.payment_term:
-                totlines = inv.with_context(ctx).payment_term.compute(total, inv.date_invoice)[0]
+                totlines = inv.with_context(ctx).payment_term.compute(total, date_invoice)[0]
             if totlines:
                 res_amount_currency = total_currency
-                ctx['date'] = inv.date_invoice
+                ctx['date'] = date_invoice
                 for i, t in enumerate(totlines):
                     if inv.currency_id != company_currency:
                         amount_currency = company_currency.with_context(ctx).compute(t[1], inv.currency_id)
@@ -888,7 +887,7 @@ class account_invoice(models.Model):
                     'ref': ref
                 })
 
-            date = inv.date_invoice or fields.Date.today()
+            date = date_invoice
 
             part = self.env['res.partner']._find_accounting_partner(inv.partner_id)
 
@@ -913,7 +912,7 @@ class account_invoice(models.Model):
             ctx['company_id'] = inv.company_id.id
             period = inv.period_id
             if not period:
-                period = period.with_context(ctx).find(inv.date_invoice)[:1]
+                period = period.with_context(ctx).find(date_invoice)[:1]
             if period:
                 move_vals['period_id'] = period.id
                 for i in line:
@@ -922,11 +921,13 @@ class account_invoice(models.Model):
             ctx['invoice'] = inv
             move = account_move.with_context(ctx).create(move_vals)
             # make the invoice point to that move
-            inv.with_context(ctx).write({
+            vals = {
+                'date_invoice': date_invoice,
                 'move_id': move.id,
                 'period_id': period.id,
                 'move_name': move.name,
-            })
+            }
+            inv.with_context(ctx).write(vals)
             # Pass invoice in context in method post: used if you want to get the same
             # account move reference when creating the same invoice after a cancelled one:
             move.post()
