@@ -481,12 +481,12 @@ class Field(object):
 
             field.setup(env)
 
-            _logger.debug("Add trigger on %s to recompute %s", field, self)
+            #_logger.debug("Add trigger on %s to recompute %s", field, self)
             field._triggers.add((self, '.'.join(path0 or ['id'])))
 
             # add trigger on inverse field, too
             if field.inverse_field:
-                _logger.debug("Add trigger on %s to recompute %s", field.inverse_field, self)
+                #_logger.debug("Add trigger on %s to recompute %s", field.inverse_field, self)
                 field.inverse_field._triggers.add((self, '.'.join(path0 + [head])))
 
             # recursively traverse the dependency
