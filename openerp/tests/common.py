@@ -5,6 +5,7 @@ helpers and classes to write tests.
 
 """
 import errno
+import glob
 import json
 import logging
 import os
@@ -173,7 +174,6 @@ class HttpCase(TransactionCase):
         self.session_id = self.session.sid
         self.session.db = DB
         openerp.http.root.session_store.save(self.session)
-        self.localstorage_path = mkdtemp()
         # setup an url opener helper
         self.opener = urllib2.OpenerDirector()
         self.opener.add_handler(urllib2.UnknownHandler())
@@ -184,7 +184,6 @@ class HttpCase(TransactionCase):
         self.opener.addheaders.append(('Cookie', 'session_id=%s' % self.session_id))
 
     def tearDown(self):
-        rmtree(self.localstorage_path)
         self.registry.leave_test_mode()
         super(HttpCase, self).tearDown()
 
@@ -257,6 +256,11 @@ class HttpCase(TransactionCase):
 
     def phantom_run(self, cmd, timeout):
         _logger.info('phantom_run executing %s', ' '.join(cmd))
+
+        ls_glob = os.path.expanduser('~/.qws/share/data/Ofi Labs/PhantomJS/http_localhost_%s.*'%PORT)
+        for i in glob.glob(ls_glob):
+            _logger.info('phantomjs unlink localstorage %s', i)
+            os.unlink(i)
         try:
             phantom = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         except OSError:
@@ -299,7 +303,6 @@ class HttpCase(TransactionCase):
         # phantom.args[1] == options
         cmd = [
             'phantomjs',
-            '--local-storage-path', self.localstorage_path,
             jsfile, phantomtest, json.dumps(options)
         ]
         self.phantom_run(cmd, timeout)
