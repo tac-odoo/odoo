@@ -516,35 +516,6 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
                     self.dataset.index = 0;
                 }
 
-                // Expand already expanded groups
-                var continue_def = $.Deferred().resolve();
-                _.each(self.opened_groups, function (level) {
-                    console.log('level: ', level);
-                    console.log('continue state: ', continue_def.state());
-                    continue_def.then(function () {
-                        var defs = _.map(level, function (group) {
-                            var def = new $.Deferred();
-
-                            console.log('looking for: ', group);
-                            var $row = self.$('tr:contains(' + group + ')').click();
-                            console.log('$row: ', $row);
-
-                            function resolve (d) {
-                                console.log('resolve def')
-                                d.resolve();
-                            }
-
-                            setTimeout(resolve(def), 2000);
-                            return def.promise();
-                        });
-                        $.when.apply($, defs).then(function () {
-                            console.log('resolve continue')
-                            continue_def.resolve();
-                        });
-                        continue_def = $.Deferred().promise();
-                    });
-                });
-
                 self.expanded_groups.expand(self.groups.children);
 
                 self.compute_aggregates();
