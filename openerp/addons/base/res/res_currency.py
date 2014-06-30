@@ -111,7 +111,7 @@ class res_currency(osv.osv):
                           ON res_currency
                           (name, (COALESCE(company_id,-1)))""")
 
-    date = fields2.Date(compute='compute_date', store=True)
+    date = fields2.Date(compute='compute_date')
 
     @api.one
     @api.depends('rate_ids.name')
