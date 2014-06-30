@@ -1786,21 +1786,23 @@ var ExpandedGroups = instance.web.Class.extend({
             'value': next.datagroup.value[1]
         }) : null;
 
-        var wait_for_children = function (n, f, l) {
+        var wait_for_children = function (n, f) {
             if (!_(n.children).isEmpty()) {
                 f.expand.apply(f, [n.children]);
             } else {
-                _.delay(wait_for_children, 50, n, f, l);
+                _.delay(wait_for_children, 50, n, f);
             }
         };
 
         while (!!next) {
             next.$row.click();
             if (!!found && !_(found.children).isEmpty()) {
-                wait_for_children(next, found, to_expand);
+                wait_for_children(next, found);
             }
             next = to_expand.shift();
-            found = !!next ? this.find(next.datagroup.value[1]) : null;
+            found = !!next ? this.find({
+                'value': next.datagroup.value[1]
+            }) : null;
         }
     },
     find: function (node) {
