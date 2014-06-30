@@ -87,12 +87,18 @@ class sale_order(osv.Model):
             # Create line if no line with product_id can be located
             if not line_id:
                 values = self._website_product_id_change(cr, uid, ids, so.id, product_id, context=context)
-                line_id = sol.create(cr, SUPERUSER_ID, values, context=context)
+                if context.get('event', False):
+                    for i in range(add_qty):
+                        line_id = sol.create(cr, SUPERUSER_ID, values, context=context)
+                else:
+                    line_id = sol.create(cr, SUPERUSER_ID, values, context=context)
                 if add_qty:
                     add_qty -= 1
 
             # compute new quantity
-            if set_qty:
+            if context.get('event', False):
+                quantity = 1
+            elif set_qty:
                 quantity = set_qty
             elif add_qty != None:
                 quantity = sol.browse(cr, SUPERUSER_ID, line_id, context=context).product_uom_qty + (add_qty or 0)

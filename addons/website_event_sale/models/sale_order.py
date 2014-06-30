@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from openerp.addons.web.http import request
 from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
@@ -44,3 +45,33 @@ class sale_order(osv.Model):
             values['name'] = "%s: %s" % (ticket.event_id.name, ticket.name)
 
         return values
+
+class sale_order_line(osv.Model):
+    _inherit = 'sale.order.line'
+
+    def button_confirm(self, cr, uid, ids, context=None):
+        '''
+        Updated attendees details in attendee form and sales order lines.
+        '''
+        if context is None:
+            context = {}
+        result = super(sale_order_line, self).button_confirm(cr, uid, ids, context=context)
+        attendee_obj = request.registry.get('event.registration')
+        attendees_list = request.session.get('attendees_list', False)
+        if attendees_list and attendees_list != []:
+            sale_order_obj = request.registry.get('sale.order').browse(cr, uid, request.session.get('sale_order_id', False), context=context)
+            attendee_ids = attendee_obj.search(cr, uid, [('origin', '=', sale_order_obj.name)])
+            attendee_ids.reverse()
+            for attendee, attendees_data in zip(attendee_obj.browse(cr, uid, attendee_ids, context=context), attendees_list):
+                attendee_obj.write(cr, uid, [attendee.id], {
+                    'name': attendees_data['name'],
+                    'email': attendees_data['email'],
+                    'phone': attendees_data['phone']
+                }, context=context)
+
+            ids.reverse()
+            for attendee, saleorder_line in zip(attendee_obj.browse(cr, uid, attendee_ids, context= context), self.browse(cr, uid, ids, context=context)):
+                name = saleorder_line.name + ' ( ' + attendee.name + ' )'
+                self.write(cr, uid, saleorder_line.id, {'name': name}, context=context)
+            request.session['attendees_list'] = []
+        return result

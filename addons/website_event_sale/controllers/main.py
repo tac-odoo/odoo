@@ -24,28 +24,68 @@ from openerp.addons.web import http
 from openerp.addons.web.http import request
 from openerp.addons.website_event.controllers.main import website_event
 from openerp.tools.translate import _
+from collections import OrderedDict, defaultdict
 
 
 class website_event(website_event):
 
-    @http.route(['/event/cart/update'], type='http', auth="public", methods=['POST'], website=True)
-    def cart_update(self, event_id, **post):
+    @http.route(['/event/register/attendee'], type='http', auth="public", methods=['POST'], website=True)
+    def register_attendee(self, event_id, **post):
         cr, uid, context = request.cr, request.uid, request.context
-        ticket_obj = request.registry.get('event.event.ticket')
-
+        event_obj = request.registry.get('event.event').browse(cr, uid, int(event_id), context=context)
         sale = False
         for key, value in post.items():
             quantity = int(value or "0")
             if not quantity:
                 continue
             sale = True
-            ticket_id = key.split("-")[0] == 'ticket' and int(key.split("-")[1]) or None
-            ticket = ticket_obj.browse(cr, SUPERUSER_ID, ticket_id, context=context)
-            request.website.sale_get_order(force_create=1)._cart_update(
-                product_id=ticket.product_id.id, add_qty=quantity, context=dict(context, event_ticket_id=ticket.id))
 
         if not sale:
             return request.redirect("/event/%s" % event_id)
+
+        values = {
+            'post': OrderedDict(sorted(post.items())),
+            'event_id': event_id,
+            'event': event_obj,
+        }
+        return request.website.render("website_event_sale.event_attendee_registration", values)
+
+    @http.route(['/event/cart/update'], type='http', auth="public", methods=['POST'], website=True)
+    def cart_update(self, event_id, **post):
+        cr, uid, context = request.cr, request.uid, request.context
+        attendees_list = []
+        dict_attendee = {}
+        ticket_obj = request.registry.get('event.event.ticket')
+        attendee_obj = request.registry.get('event.registration_attendee')
+
+        for key, value in post.items():
+            if key.partition('-')[0] == "attendee":
+                dict_attendee[key] = value
+
+        ticket_id = False
+        attendees = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+        for key, value in dict_attendee.items():
+            splitted_key = key.rsplit('-')
+            ticket_id = int(splitted_key[2])
+            context.update({'event': True})
+            attendees[splitted_key[2]][splitted_key[3]][splitted_key[1]] = value
+            if ticket_id != 0:
+                ticket = ticket_obj.browse(cr, SUPERUSER_ID, ticket_id, context=context)
+                request.website.sale_get_order(force_create=1)._cart_update(
+                    product_id=ticket.product_id.id, add_qty=int(splitted_key[4]), context=dict(context, event_ticket_id=ticket.id))
+
+        for key1, value1 in attendees.items():
+            for key2, value2 in value1.items():
+                value2['event_id'] = event_id
+                attendees_list.append(dict(value2))
+                if ticket_id == 0:
+                    attendee_obj.create(request.cr, SUPERUSER_ID, value2, context=request.context)
+
+        if ticket_id == 0:
+            return request.redirect("/event")
+
+        request.session['attendees_list'] = attendees_list
+
         return request.redirect("/shop/checkout")
 
     def _add_event(self, event_name="New Event", context={}, **kwargs):
@@ -61,6 +101,3 @@ class website_event(website_event):
         except ValueError:
             pass
         return super(website_event, self)._add_event(event_name, context, **kwargs)
-
-
-
