@@ -265,8 +265,6 @@ class res_partner(osv.Model, format_address):
         'city': fields.char('City'),
         'state_id': fields.many2one("res.country.state", 'State', ondelete='restrict'),
         'country_id': fields.many2one('res.country', 'Country', ondelete='restrict'),
-        'country': fields.related('country_id', type='many2one', relation='res.country', string='Country',
-                                  deprecated="This field will be removed as of OpenERP 7.1, use country_id instead"),
         'email': fields.char('Email'),
         'phone': fields.char('Phone'),
         'fax': fields.char('Fax'),
