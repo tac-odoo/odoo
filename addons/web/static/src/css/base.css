@@ -3490,6 +3490,13 @@ div.tour-backdrop {
   opacity: 0.8;
 }
 
+.oe_ActiveWidgetButton .btn-danger .oe_activated, .oe_ActiveWidgetButton .deactive .oe_activated {
+  display: none;
+}
+.oe_ActiveWidgetButton .btn-success .oe_deactivated, .oe_ActiveWidgetButton .active .oe_deactivated {
+  display: none;
+}
+
 body {
   overflow: auto;
 }
