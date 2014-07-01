@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+
+        <template id="layout" inherit_id="website.layout" name="Google Search Layout">
+            <xpath expr="//head" position="inside">
+                <t t-if="website.google_search_published">
+                    <script type="text/javascript">
+                        (function () {
+                            var gcse = document.createElement('script');
+                            gcse.type = 'text/javascript';
+                            gcse.async = true;
+                            gcse.src = (document.location.protocol === 'https' ? 'https:' : 'http:') + '//www.google.com/cse/cse.js';
+                            var s = document.getElementsByTagName('script')[0];
+                            s.parentNode.insertBefore(gcse, s);
+                        })();
+                    </script>
+                </t>
+            </xpath>
+            <xpath expr="//main" position="before">
+                <div t-if="website.google_search_published" class="container google_custom_search">
+                    <div class="gcse-search"></div>
+                </div>
+            </xpath>
+        </template>
+
+    </data>
+</openerp>
