@@ -2095,12 +2095,10 @@
                                 <tree string="Tax Invoice Line" editable="bottom">
                                     <field name="sequence" widget="handle"/>
                                     <field name="code_type"/>
-                                    <field name="description"/>
                                     <field name="account_id" domain="[('type', '!=', 'view')]"/>
                                     <field name="analytic_account_id" groups="analytic.group_analytic_accounting" domain="[('type','in',('normal','contract'))]"/>
                                     <field name="apply_on" invisible="1"/>
-                                    <field name="base_amount" attrs="{'invisible': [('code_type', '=', 'base')]}"/>
-                                    <field name="amount" on_change="onchange_amount(amount, context)"/>
+                                    <field name="debit_credit_amount"/>
                                     <field name="tax_amount"/>
                                     <field name="code_id"/>
                                 </tree>
@@ -2113,12 +2111,10 @@
                                 <tree string="Tax Refund Line" editable="bottom">
                                     <field name="sequence" widget="handle"/>
                                     <field name="code_type"/>
-                                    <field name="description"/>
                                     <field name="account_id" domain="[('type', '!=', 'view')]"/>
                                     <field name="analytic_account_id" groups="analytic.group_analytic_accounting" domain="[('type','in',('normal','contract'))]"/>
                                     <field name="apply_on" invisible="1"/>
-                                    <field name="base_amount" attrs="{'invisible': [('code_type', '=', 'base')]}"/>
-                                    <field name="amount" on_change="onchange_amount(amount, context)"/>
+                                    <field name="debit_credit_amount"/>
                                     <field name="tax_amount"/>
                                     <field name="code_id"/>
                                 </tree>

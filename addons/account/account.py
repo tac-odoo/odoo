@@ -2182,7 +2182,7 @@ class account_tax_line(osv.Model):
         return taxes
 
     _columns = {
-        'tax_id': fields.many2one('account.tax','Tax', required=True, ondelete="cascade"),
+        'tax_id': fields.many2one('account.tax','Tax', ondelete="cascade"),
         'apply_on': fields.selection([('invoice','Invoice'),('refund','Refund')], "Apply On", required=True),
         'sequence': fields.integer('Sequence', required=True, help="The sequence field is used to order the tax lines from the lowest sequences to the higher ones, in order to know which one to compute first (lower sequence first)."),
         'code_type': fields.selection([('base','Base'),('tax','Tax')], "Code Type"),
@@ -2750,20 +2750,16 @@ class account_tax_line_template(osv.Model):
         'code_id': fields.many2one('account.tax.code.template', 'Section in the Tax Statement', help="Use this code for the tax declaration."),
         'account_id': fields.many2one('account.account.template', 'Tax Account', help="Set the account that will be set by default on invoice tax lines for invoices or refund. Leave empty to use the expense account."),
         'analytic_account_id': fields.many2one('account.analytic.account', 'Tax Analytic Account', help="Set the analytic account that will be used by default on the invoice tax lines for invoices or Refunds. Leave empty if you don't want to use an analytic account on the invoice tax lines by default."),
-        'amount': fields.float('Tax/Base Amount', required=True, digits_compute=dp.get_precision('Account')),
+        'debit_credit_amount': fields.float('Tax/Base Amount', required=True, digits_compute=dp.get_precision('Account')),
         'sequence': fields.integer('Sequence', required=True, help="The sequence field is used to order the tax lines from the lowest sequences to the higher ones. The order is important if you have a tax with several tax children. In this case, the evaluation order is important."),
         'tax_id': fields.many2one('account.tax.template','Tax', ondelete="cascade"),
-        'description': fields.char('Display'),
-        'base_amount': fields.float('Base for Computation', help="Use this to define different base amount for current tax line"),
-        #will remove after confirmation.
-        'code_sign': fields.float('Amount to report in the Tax Statement', help="Amount to report in the Tax Statement."),
     }
     _defaults = {
         'sequence': 1,
-        'code_type': 'base',
-        'tax_amount': 1,
+        'code_type': 'tax',
+        'tax_amount': 1000,
         'apply_on': 'invoice',
-        'base_amount': 100.0,
+        'debit_credit_amount': 1000.0,
     }
 
     def onchange_amount(self, cr, uid, ids, amount=False, context=None):
@@ -2781,13 +2777,11 @@ class account_tax_line_template(osv.Model):
             vals = {
                 'code_type': tax_line.code_type,
                 'tax_amount': tax_line.tax_amount,
-                'amount': tax_line.amount,
+                'debit_credit_amount': tax_line.debit_credit_amount,
                 'apply_on': tax_line.apply_on,
                 'code_id': tax_line.code_id and ((tax_line.code_id.id in tax_code_template_ref) and tax_code_template_ref[tax_line.code_id.id]) or False,
                 'analytic_account_id': tax_line.analytic_account_id.id,
                 'sequence': tax_line.sequence,
-                'description': tax_line.description,
-                'base_amount': tax_line.base_amount,
             }
             new_line = obj_tax_line.create(cr, uid, vals, context=context)
             line_accounts[new_line] = tax_line.account_id and tax_line.account_id.id or False
