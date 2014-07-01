@@ -21,6 +21,7 @@
 ##############################################################################
 
 import base64
+import logging
 import operator
 import re
 import threading
@@ -33,6 +34,8 @@ from openerp.tools.translate import _
 
 MENU_ITEM_SEPARATOR = "/"
 
+
+_logger = logging.getLogger(__name__)
 
 class ir_ui_menu(osv.osv):
     _name = 'ir.ui.menu'
@@ -167,6 +170,8 @@ class ir_ui_menu(osv.osv):
         return super(ir_ui_menu, self).write(cr, uid, ids, values, context=context)
 
     def unlink(self, cr, uid, ids, context=None):
+        import traceback
+        _logger.warning('Deleting ir.ui.menu %s: %s', ids, ''.join(traceback.format_stack()))
         # Detach children and promote them to top-level, because it would be unwise to
         # cascade-delete submenus blindly. We also can't use ondelete=set null because
         # that is not supported when _parent_store is used (would silently corrupt it).
