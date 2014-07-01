@@ -1587,7 +1587,7 @@ class account_invoice_line(osv.osv):
             tax_code_found= False
             for tax in tax_obj.compute_all(cr, uid, line.invoice_line_tax_id,
                     (line.price_unit * (1.0 - (line['discount'] or 0.0) / 100.0)),
-                    line.quantity, 
+                    line.quantity,
                     line.product_id,
                     inv.partner_id, date=inv.date_invoice, apply_on=apply_on)['taxes']:
                 if tax['code_type'] == 'base':
@@ -1599,10 +1599,9 @@ class account_invoice_line(osv.osv):
                         res[-1]['price'] = 0.0
                         res[-1]['account_analytic_id'] = False
                         res[-1]['tax_code_id'] = tax['code_id']
-                        res[-1]['tax_amount'] = tax['tax_amount'] >= 0 and tax['price_unit'] * line.quantity or -tax['price_unit'] * line.quantity
+                        res[-1]['tax_amount'] = tax['tax_amount']
                     tax_code_found = True
         return res
-
 
     def move_line_get_item(self, cr, uid, line, context=None):
         return {
@@ -1649,11 +1648,11 @@ class account_invoice_tax(osv.osv):
                 'factor_base': 1.0,
                 'factor_tax': 1.0,
             }
-            if invoice_tax.amount <> 0.0:
+            if invoice_tax.amount != 0.0:
                 factor_tax = invoice_tax.tax_amount / invoice_tax.amount
                 res[invoice_tax.id]['factor_tax'] = factor_tax
 
-            if invoice_tax.base <> 0.0:
+            if invoice_tax.base != 0.0:
                 factor_base = invoice_tax.base_amount / invoice_tax.base
                 res[invoice_tax.id]['factor_base'] = factor_base
 
@@ -1716,27 +1715,25 @@ class account_invoice_tax(osv.osv):
         cur_obj = self.pool.get('res.currency')
         inv = self.pool.get('account.invoice').browse(cr, uid, invoice_id, context=context)
         cur = inv.currency_id
-        company_currency = inv.company_id.currency_id.id
         apply_on = 'refund'
-        if inv.type in ['out_invoice','in_invoice']:
+        if inv.type in ['out_invoice', 'in_invoice']:
             apply_on = 'invoice'
         for line in inv.invoice_line:
             for tax in tax_obj.compute_all(cr, uid, line.invoice_line_tax_id, (line.price_unit * (1-(line.discount or 0.0)/100.0)), \
                                            line.quantity, line.product_id, inv.partner_id, date=inv.date_invoice, apply_on=apply_on)['taxes']:
-                val={'invoice_id': inv.id,
+                val = {'invoice_id': inv.id,
                     'name': tax['name'],
                     'sequence': tax['sequence'],
                     'amount': tax['amount'],
+                    'tax_amount': tax['tax_amount'],
                     'manual': False,
                     'base': tax['price_unit'] * line['quantity'],
+                    'base_amount': tax['price_unit'] * line['quantity'],
                     'base_code_id': tax['code_type'] and tax['code_type'] == 'base' and tax['code_id'] or False,
                     'tax_code_id': tax['code_type'] and tax['code_type'] == 'tax' and tax['code_id'] or False,
-                    'base_amount': 0,
-                    'tax_amount': 0,
                     'account_id': tax['account_id'] or line.account_id.id,
-                    'account_analytic_id': tax['analytic_account_id']}
-                val['base_amount'] = tax['tax_amount'] >= 0 and val['base'] or -val['base']
-                val['tax_amount'] = tax['tax_amount'] >= 0 and val['amount'] or -val['amount']
+                    'account_analytic_id': tax['analytic_account_id'],
+                }
                 if tax['code_type'] == 'base':
                     continue
                 key = (val['tax_code_id'], val['base_code_id'], val['account_id'], val['account_analytic_id'])
@@ -1763,8 +1760,8 @@ class account_invoice_tax(osv.osv):
                     and not t['tax_amount']:
                 continue
             res.append({
-                'type':'tax',
-                'name':t['name'],
+                'type': 'tax',
+                'name': t['name'],
                 'price_unit': t['amount'],
                 'quantity': 1,
                 'price': t['amount'] or 0.0,
