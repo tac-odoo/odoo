@@ -397,8 +397,8 @@
 
         <record id="otaxs_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_purch_S"/>
             <field name="tax_id" ref="otaxs"/>
@@ -406,8 +406,8 @@
 
         <record id="otaxs_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">15</field>
-            <field name="amount">15</field>
+            <field name="tax_amount">150</field>
+            <field name="debit_credit_amount">150</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_output_S"/>
             <field name="account_id" ref="conf_ova"/>
@@ -416,8 +416,8 @@
 
         <record id="otaxs_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_purch_S"/>
             <field name="tax_id" ref="otaxs"/>
@@ -425,8 +425,8 @@
 
         <record id="otaxs_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">15</field>
-            <field name="amount">15</field>
+            <field name="tax_amount">150</field>
+            <field name="debit_credit_amount">150</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_output_S"/>
             <field name="account_id" ref="conf_ova"/>
@@ -443,8 +443,8 @@
 
         <record id="otaxr_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_purch_R"/>
             <field name="tax_id" ref="otaxr"/>
@@ -452,8 +452,8 @@
 
         <record id="otaxr_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">5</field>
-            <field name="amount">5</field>
+            <field name="tax_amount">50</field>
+            <field name="debit_credit_amount">50</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_output_R"/>
             <field name="account_id" ref="conf_ova"/>
@@ -462,8 +462,8 @@
 
         <record id="otaxr_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_purch_R"/>
             <field name="tax_id" ref="otaxr"/>
@@ -471,8 +471,8 @@
 
         <record id="otaxr_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">5</field>
-            <field name="amount">5</field>
+            <field name="tax_amount">50</field>
+            <field name="debit_credit_amount">50</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_output_R"/>
             <field name="account_id" ref="conf_ova"/>
@@ -489,8 +489,8 @@
 
         <record id="otaxx_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_purch_X"/>
             <field name="tax_id" ref="otaxx"/>
@@ -499,7 +499,7 @@
         <record id="otaxx_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_output_X"/>
             <field name="account_id" ref="conf_ova"/>
@@ -508,8 +508,8 @@
 
         <record id="otaxx_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_purch_X"/>
             <field name="tax_id" ref="otaxx"/>
@@ -518,7 +518,7 @@
         <record id="otaxx_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_output_X"/>
             <field name="account_id" ref="conf_ova"/>
@@ -535,8 +535,8 @@
 
         <record id="otaxo_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_purch_O"/>
             <field name="tax_id" ref="otaxo"/>
@@ -545,7 +545,7 @@
         <record id="otaxo_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_output_O"/>
             <field name="account_id" ref="conf_ova"/>
@@ -554,8 +554,8 @@
 
         <record id="otaxo_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_purch_O"/>
             <field name="tax_id" ref="otaxo"/>
@@ -564,7 +564,7 @@
         <record id="otaxo_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_output_O"/>
             <field name="account_id" ref="conf_ova"/>
@@ -583,8 +583,8 @@
 
         <record id="itaxs_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_sales_S"/>
             <field name="tax_id" ref="itaxs"/>
@@ -592,8 +592,8 @@
 
         <record id="itaxs_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">15</field>
-            <field name="amount">15</field>
+            <field name="tax_amount">150</field>
+            <field name="debit_credit_amount">150</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_input_S"/>
             <field name="account_id" ref="conf_iva"/>
@@ -602,8 +602,8 @@
 
         <record id="itaxs_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_sales_S"/>
             <field name="tax_id" ref="itaxs"/>
@@ -611,8 +611,8 @@
 
         <record id="itaxs_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">15</field>
-            <field name="amount">15</field>
+            <field name="tax_amount">150</field>
+            <field name="debit_credit_amount">150</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_input_S"/>
             <field name="account_id" ref="conf_iva"/>
@@ -629,8 +629,8 @@
 
         <record id="itaxr_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_sales_R"/>
             <field name="tax_id" ref="itaxr"/>
@@ -638,8 +638,8 @@
 
         <record id="itaxr_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">5</field>
-            <field name="amount">5</field>
+            <field name="tax_amount">50</field>
+            <field name="debit_credit_amount">50</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_input_R"/>
             <field name="account_id" ref="conf_iva"/>
@@ -648,8 +648,8 @@
 
         <record id="itaxr_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_sales_R"/>
             <field name="tax_id" ref="itaxr"/>
@@ -657,8 +657,8 @@
 
         <record id="itaxr_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">5</field>
-            <field name="amount">5</field>
+            <field name="tax_amount">50</field>
+            <field name="debit_credit_amount">50</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_input_R"/>
             <field name="account_id" ref="conf_iva"/>
@@ -675,8 +675,8 @@
 
         <record id="itaxx_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_sales_X"/>
             <field name="tax_id" ref="itaxx"/>
@@ -685,7 +685,7 @@
         <record id="itaxx_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_input_X"/>
             <field name="account_id" ref="conf_iva"/>
@@ -694,8 +694,8 @@
 
         <record id="itaxx_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_sales_X"/>
             <field name="tax_id" ref="itaxx"/>
@@ -704,7 +704,7 @@
         <record id="itaxx_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_input_X"/>
             <field name="account_id" ref="conf_iva"/>
@@ -721,8 +721,8 @@
 
         <record id="itaxo_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_sales_O"/>
             <field name="tax_id" ref="itaxo"/>
@@ -731,7 +731,7 @@
         <record id="itaxo_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_input_O"/>
             <field name="account_id" ref="conf_iva"/>
@@ -740,8 +740,8 @@
 
         <record id="itaxo_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_sales_O"/>
             <field name="tax_id" ref="itaxo"/>
@@ -750,7 +750,7 @@
         <record id="itaxo_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
-            <field name="amount">0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="tax_code_input_O"/>
             <field name="account_id" ref="conf_iva"/>
