@@ -9,6 +9,9 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='google_analytics_key']" position="after">
                     <field name="google_search_published"/>
+                    <field name="google_search_cx" attrs="{
+                        'invisible': [('google_search_published', '=', False)],
+                    }"/>
                 </xpath>
             </field>
         </record>

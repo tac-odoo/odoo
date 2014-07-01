@@ -16,6 +16,18 @@
                             </div>
                         </div>
                     </div>
+                    <label for="google_search_published" attrs="{
+                        'invisible': [('google_search_published', '=', False)],
+                    }"/>
+                    <div name="google_search_cx"  attrs="{
+                        'invisible': [('google_search_published', '=', False)],
+                    }">
+                        <div>
+                            <div name="google_search_cx" class="oe_inline">
+                                <field name="google_search_cx" placeholder="XXXXXXXXXXXXXXXXXXXXX:YYYYYYYYYYY"/>
+                            </div>
+                        </div>
+                    </div>
                 </xpath>
             </field>
         </record>

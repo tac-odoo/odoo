@@ -8,7 +8,7 @@
                 <t t-if="website.google_search_published">
                     <script type="text/javascript">
                         (function () {
-                            var cx = '010359173656136596246:lbhapdn1yba';
+                            var cx = _.str.trim('<t t-esc="website.google_search_cx"/>');
                             var gcse = document.createElement('script');
                             gcse.type = 'text/javascript';
                             gcse.async = true;
