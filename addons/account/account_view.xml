@@ -984,18 +984,18 @@
                         <group>
                             <field name="name"/>
                             <field name="description" attrs="{'invisible': [('type','in',('group'))]}"/>
-                            <field name="type" on_change="onchange_tax_id(type, amount, type_tax_use, python_compute, price_include, context)"/>
-                            <field name="price_include" attrs="{'invisible':[('type','in',('group','code'))], 'readonly':[('type','in',('percentage_price_include'))]}" on_change="onchange_tax_id(type, amount, type_tax_use, python_compute, price_include, context)"/>
+                            <field name="type" on_change="onchange_tax_id(type, amount, price_include, context)"/>
+                            <field name="price_include" attrs="{'invisible':[('type','in',('group','code'))], 'readonly':[('type','in',('percentage_price_include'))]}" on_change="onchange_tax_id(type, amount, price_include, context)"/>
                             <field name="active" groups="base.group_no_one"/>
                         </group>
                         <group>
-                            <field name="type_tax_use" string="Domain" on_change="onchange_tax_id(type, amount, type_tax_use, python_compute, price_include, context)"/>
+                            <field name="type_tax_use" string="Domain"/>
                             <field name="company_id" widget="selection" groups="base.group_multi_company"/>
                             <label for="amount" attrs="{'invisible': [('type','in',('group','code'))]}"/>
                             <div attrs="{'invisible': [('type','in',('group','code'))]}">
                                 <field name="amount" string="Tax Rate" class="oe_inline" nolabel="1"
-                                on_change="onchange_tax_id(type, amount, type_tax_use, python_compute, price_include, context)"/>
-                                    <span attrs="{'invisible': [('type','not in',('percent','percentage_price_include'))]}">%%</span>
+                                on_change="onchange_tax_id(type, amount, price_include, context)"/>
+                                <span attrs="{'invisible': [('type','not in',('percent','percentage_price_include'))]}">%%</span>
                             </div>
                             <label for="include_base_amount"/>
                             <div>
@@ -1010,7 +1010,7 @@
                             <field colspan="4" name="python_applicable" nolabel="1" attrs="{'invisible': [('applicable_type','!=','code')], 'required':[('applicable_type','=','code')]}" groups="base.group_no_one"/>
                         </group>
                         <group string="Tax Computation By Python Code" attrs="{'invisible': [('type','!=','code')]}">
-                            <field name="python_compute" attrs="{'required':[('type','=','code')]}" on_change="onchange_tax_id(type, amount, type_tax_use, python_compute, price_include, context)"/>
+                            <field name="python_compute" attrs="{'required':[('type','=','code')]}"/>
                         </group>
                     </group>
                     <group name="child" attrs="{'invisible': [('type','!=','group')]}" string="Child Tax Account">
@@ -1026,10 +1026,11 @@
                                 <tree string="Tax Invoice Line" editable="bottom">
                                     <field name="sequence" widget="handle"/>
                                     <field name="code_type"/>
+                                    <field name="debit_credit_amount"/>
                                     <field name="account_id" domain="[('type', '!=', 'view')]"/>
                                     <field name="analytic_account_id" groups="analytic.group_analytic_accounting" domain="[('type','in',('normal','contract'))]"/>
                                     <field name="apply_on" invisible="1"/>
-                                    <field name="amount" on_change="onchange_amount(amount, context)"/>
+                                    <field name="tax_amount"/>
                                     <field name="code_id"/>
                                 </tree>
                             </field>
@@ -1041,10 +1042,11 @@
                                 <tree string="Tax Refund Line" editable="bottom">
                                     <field name="sequence" widget="handle"/>
                                     <field name="code_type"/>
+                                    <field name="debit_credit_amount"/>
                                     <field name="account_id" domain="[('type', '!=', 'view')]"/>
                                     <field name="analytic_account_id" groups="analytic.group_analytic_accounting" domain="[('type','in',('normal','contract'))]"/>
                                     <field name="apply_on" invisible="1"/>
-                                    <field name="amount" on_change="onchange_amount(amount, context)"/>
+                                    <field name="tax_amount"/>
                                     <field name="code_id"/>
                                 </tree>
                             </field>
@@ -2052,16 +2054,16 @@
                             <field name="name"/>
                             <field name="chart_template_id"/>
                             <field name="description" attrs="{'invisible': [('type','in',('group'))]}"/>
-                            <field name="type" on_change="onchange_tax_id(type, amount, type_tax_use, python_compute, price_include, context)"/>
-                            <field name="price_include" attrs="{'invisible':[('type','in',('group','code'))], 'readonly':[('type','in',('percentage_price_include'))]}" on_change="onchange_tax_id(type, amount, type_tax_use, python_compute, price_include, context)"/>
+                            <field name="type" on_change="onchange_tax_id(type, amount, price_include, context)"/>
+                            <field name="price_include" attrs="{'invisible':[('type','in',('group','code'))], 'readonly':[('type','in',('percentage_price_include'))]}" on_change="onchange_tax_id(type, amount, price_include, context)"/>
                             <field name="active" groups="base.group_no_one"/>
                         </group>
                         <group>
-                            <field name="type_tax_use" string="Domain" on_change="onchange_tax_id(type, amount, type_tax_use, python_compute, price_include, context)"/>
+                            <field name="type_tax_use" string="Domain"/>
                             <label for="amount" attrs="{'invisible': [('type','in',('group','code'))]}"/>
                             <div attrs="{'invisible': [('type','in',('group','code'))]}">
                                 <field name="amount" string="Tax Rate" class="oe_inline" nolabel="1"
-                                on_change="onchange_tax_id(type, amount, type_tax_use, python_compute, price_include, context)"/>
+                                on_change="onchange_tax_id(type, amount, price_include, context)"/>
                                     <span attrs="{'invisible': [('type','not in',('percent','percentage_price_include'))]}">%%</span>
                             </div>
                             <label for="include_base_amount"/>
@@ -2077,7 +2079,7 @@
                             <field colspan="4" name="python_applicable" nolabel="1" attrs="{'invisible': [('applicable_type','!=','code')], 'required':[('applicable_type','=','code')]}" groups="base.group_no_one"/>
                         </group>
                         <group string="Tax Computation By Python Code" attrs="{'invisible': [('type','!=','code')]}">
-                            <field name="python_compute" attrs="{'required':[('type','=','code')]}" on_change="onchange_tax_id(type, amount, type_tax_use, python_compute, price_include, context)"/>
+                            <field name="python_compute" attrs="{'required':[('type','=','code')]}"/>
                         </group>
                     </group>
                     <group name="child" attrs="{'invisible': [('type','!=','group')]}" string="Child Tax Account">

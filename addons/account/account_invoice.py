@@ -1416,7 +1416,7 @@ class account_invoice_line(models.Model):
                         res[-1]['price'] = 0.0
                         res[-1]['account_analytic_id'] = False
                         res[-1]['tax_code_id'] = tax['code_id']
-                        res[-1]['tax_amount'] = tax['tax_amount'] >= 0 and tax['price_unit'] * line.quantity or -tax['price_unit'] * line.quantity
+                        res[-1]['tax_amount'] = tax['tax_amount']
                     tax_code_found = True
         return res
 
@@ -1531,12 +1531,12 @@ class account_invoice_tax(models.Model):
                     'name': tax['name'],
                     'sequence': tax['sequence'],
                     'amount': tax['amount'],
+                    'tax_amount': tax['tax_amount'],
                     'manual': False,
                     'base': tax['price_unit'] * line['quantity'],
+                    'base_amount': tax['price_unit'] * line['quantity'],
                     'base_code_id': tax['code_type'] and tax['code_type'] == 'base' and tax['code_id'] or False,
                     'tax_code_id': tax['code_type'] and tax['code_type'] == 'tax' and tax['code_id'] or False,
-                    'base_amount': 0,
-                    'tax_amount': 0,
                     'account_id': tax['account_id'] or line.account_id.id,
                     'account_analytic_id': tax['analytic_account_id']}
 
