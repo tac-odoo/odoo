@@ -244,6 +244,28 @@ class Website(openerp.addons.web.controllers.main.Home):
                 })
         return result
 
+    @http.route('/website/assets_css_get', type='json', auth='user', website=True)
+    def assets_css_get(self, xml_id):
+        return request.registry["ir.ui.view"]._get_assets_urls(request.cr, request.uid, xml_id, context=request.context)['css']
+
+    @http.route('/website/save_css', type='json', auth='user', website=True)
+    def save_css(self, css):
+        ir_att = request.registry['ir.attachment']
+        file_name = css['id'].split('/')[-1]
+        css_file = ir_att.search(request.cr, request.uid,[('url',"=",css['id'])])
+        if css_file:
+            ir_att.write(request.cr, request.uid,css_file,{'datas':css['text'].encode('base64')}, context=request.context) 
+        else:
+            ir_att.create(request.cr, request.uid, dict(   
+                datas=css['text'].encode('base64'),
+                mimetype='text/css',
+                type='binary',
+                name=file_name,
+                datas_fname=file_name,
+                url=css['id'],
+            ), context=request.context)
+        return True
+
     @http.route('/website/get_view_translations', type='json', auth='public', website=True)
     def get_view_translations(self, xml_id, lang=None):
         lang = lang or request.context.get('lang')

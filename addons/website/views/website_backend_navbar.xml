@@ -63,6 +63,7 @@
                 </a>
                 <ul class="dropdown-menu" role="menu">
                     <li><a href="#advanced-view-editor" data-action='ace'>HTML Editor</a></li>
+                    <li><a data-action="ace_css" href="#">CSS Editor</a></li>
                     <li><a href="/page/website.themes">Change Theme</a></li>
                     <li><a href="/web#return_label=Website&amp;action=website.action_module_website">Install Apps</a></li>
                     <li class="divider"></li>

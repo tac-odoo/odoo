@@ -4,12 +4,26 @@ import re
 import simplejson
 import werkzeug
 
+from HTMLParser import HTMLParser
 from lxml import etree, html
 
 from openerp import SUPERUSER_ID
 from openerp.addons.website.models import website
 from openerp.http import request
 from openerp.osv import osv, fields
+
+class AssetsExtractor(HTMLParser):
+    js=[]
+    css=[]
+    def handle_starttag(self, tag, attrs):
+        if tag == 'link':
+            for attr in attrs:
+                if ('rel', 'stylesheet') in attrs and attr[0] == "href":
+                    self.css.append(attr[1])
+        if tag == 'script':
+            for attr in attrs:
+                if attr[0] == "src":
+                    self.js.append(attr[1])
 
 class view(osv.osv):
     _inherit = "ir.ui.view"
@@ -81,6 +95,31 @@ class view(osv.osv):
                 if r not in result:
                     result.append(r)
         return result
+
+    def _get_assets_urls(self, cr, uid, view_id, options=True, context=None):
+        """ For a given view ``view_id``, should return:
+
+        * Path of JS files used in view 
+        * Path of CSS files used in view
+        """
+        imd = request.registry['ir.model.data']
+        view_model, view_theme_id = imd.get_object_reference(cr, uid, 'website', 'theme')
+        current_theme = self.search(request.cr, request.uid, [('inherit_id', '=', view_theme_id),('application', '=', 'enabled'),], context=context)
+        if current_theme:
+            view_theme_id = current_theme[0]
+        assets = [self.browse(cr, uid, view_theme_id, context),]
+        views = self._views_get(cr, uid, view_id, options, context)
+        parser = AssetsExtractor()
+        for view in views:
+            node = etree.fromstring(view.arch)
+            for child in node.xpath("//t[@t-call-assets]"):
+                called_asset = self._view_obj(cr, uid, child.get('t-call-assets'), context=context)
+                if called_asset not in assets:
+                    assets.append(self._view_obj(cr, uid, child.get('t-call-assets'), context=context))
+        views.extend(assets)
+        for v in views:
+            parser.feed(v.arch)
+        return {'css': list(set(parser.css)),'js': list(set(parser.js)),}
 
     def extract_embedded_fields(self, cr, uid, arch, context=None):
         return arch.xpath('//*[@data-oe-model != "ir.ui.view"]')

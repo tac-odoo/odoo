@@ -3,6 +3,9 @@
 
     var _t = openerp._t;
     var hash = "#advanced-view-editor";
+    
+    var path = "website/static/lib/ace/";
+    ace.config.set("workerPath", path);
 
     var website = openerp.website;
     website.add_template_file('/website/static/src/xml/website.ace.xml');
@@ -17,6 +20,17 @@
             } else {
                 this.globalEditor = new website.ace.ViewEditor(this);
                 this.globalEditor.appendTo($(document.body));
+            }
+        }, 
+        launchAceCss: function (e) {
+            if (e) {
+                e.preventDefault();
+            }
+            if (this.globaCssEditor) {
+                this.globalCssEditor.open();
+            } else {
+                this.globalCssEditor = new website.ace.ViewEditor(this, true);
+                this.globalCssEditor.appendTo($(document.body));
             }
         },
     });
@@ -70,39 +84,50 @@
         template: 'website.ace_view_editor',
         events: {
             'change #ace-view-list': 'displaySelectedView',
+            'change #ace-css-view-list': 'displaySelectedCssView',
             'click button[data-action=save]': 'saveViews',
             'click button[data-action=format]': 'formatXml',
             'click button[data-action=close]': 'close',
         },
-        init: function (parent) {
+        init: function (parent, is_css) {
             this.buffers = {};
             this.views = {};
             this._super(parent);
+            this.is_css = typeof is_css !== 'undefined' ? is_css : false;
         },
         start: function () {
             var self = this;
             self.aceEditor = ace.edit(self.$('#ace-view-editor')[0]);
             self.aceEditor.setTheme("ace/theme/monokai");
             var viewId = $(document.documentElement).data('view-xmlid');
-            openerp.jsonRpc('/website/customize_template_get', 'call', {
-                'xml_id': viewId,
-                'full': true,
-            }).then(function (views) {
-                self.loadViews.call(self, views);
-                self.open.call(self);
-                var curentHash = window.location.hash;
-                var indexOfView = curentHash.indexOf("?view=");
-                if (indexOfView >= 0) {
-                    var viewId = parseInt(curentHash.substring(indexOfView + 6, curentHash.length), 10);
-                    self.$('#ace-view-list').val(viewId).change();
-                } else {
-                    if (views.length >= 2) {
-                        var mainTemplate = views[1];
-                        self.$('#ace-view-list').val(mainTemplate.id).trigger('change');
+            if (self.is_css) {
+                openerp.jsonRpc('/website/assets_css_get', 'call', {
+                    'xml_id' : viewId,
+                }).then(function(views) {
+                    self.loadCssViews.call(self, views);
+                    self.open.call(self);
+                });
+            }else{
+                openerp.jsonRpc('/website/customize_template_get', 'call', {
+                    'xml_id': viewId,
+                    'full': true,
+                }).then(function (views) {
+                    self.loadViews.call(self, views);
+                    self.open.call(self);
+                    var curentHash = window.location.hash;
+                    var indexOfView = curentHash.indexOf("?view=");
+                    if (indexOfView >= 0) {
+                        var viewId = parseInt(curentHash.substring(indexOfView + 6, curentHash.length), 10);
+                        self.$('#ace-view-list').val(viewId).change();
+                    } else {
+                        if (views.length >= 2) {
+                            var mainTemplate = views[1];
+                            self.$('#ace-view-list').val(mainTemplate.id).trigger('change');
+                        }
+                        window.location.hash = hash;
                     }
-                    window.location.hash = hash;
-                }
-            });
+                });
+            }
 
             var $editor = self.$('.ace_editor');
             function resizeEditor (target) {
@@ -152,6 +177,7 @@
         },
         loadViews: function (views) {
             var $viewList = this.$('#ace-view-list');
+            this.$el.find('#ace-css-view-list').hide();
             _(this.buildViewGraph(views)).each(function (view) {
                 if (!view.id) { return; }
 
@@ -159,6 +185,36 @@
                 new website.ace.ViewOption(this, view).appendTo($viewList);
                 this.loadView(view.id);
             }.bind(this));
+        },
+        loadCssViews: function (views) {
+            var self = this;
+            self.$el.find('#ace-view-list').hide();
+            var $viewList = self.$('#ace-css-view-list');
+            _.each(views, function (view) {
+                var css_file = view.split("/");
+                new website.ace.ViewOption(self, {'id':view,'name':css_file[css_file.length -1],'lavel':0}).appendTo($viewList);
+                $.get(view, function(cssContent){
+                    var editingSession = self.buffers[view] = new ace.EditSession(vkbeautify.css(cssContent));
+                    editingSession.setMode("ace/mode/css");
+                    editingSession.setUndoManager(new ace.UndoManager());
+                    editingSession.on("change", function () {
+                        setTimeout(function () {
+                            var $option = self.$('#ace-css-view-list').find('[value="'+view+'"]');
+                            var bufferName = $option.text();
+                            var dirtyMarker = " (unsaved changes)";
+                            var isDirty = editingSession.getUndoManager().hasUndo();
+                            if (isDirty && bufferName.indexOf(dirtyMarker) < 0) {
+                                $option.text(bufferName + dirtyMarker);
+                            } else if (!isDirty && bufferName.indexOf(dirtyMarker) > 0) {
+                                $option.text(bufferName.substring(0, bufferName.indexOf(dirtyMarker)));
+                            }
+                        }, 1);
+                    });
+                    if (view === self.selectedCssViewId()) {
+                        self.aceEditor.setSession(editingSession);
+                    }
+                });
+            });
         },
         buildViewGraph: function (views) {
             var activeViews = _.uniq(_.filter(views, function (view) {
@@ -225,6 +281,9 @@
         selectedViewId: function () {
             return parseInt(this.$('#ace-view-list').val(), 10);
         },
+        selectedCssViewId : function() {
+            return this.$('#ace-css-view-list').val();
+        },
         displayView: function (id) {
             var viewId = parseInt(id, 10);
             var editingSession = this.buffers[viewId];
@@ -239,24 +298,55 @@
             this.displayView(this.selectedViewId());
             this.updateHash();
         },
+        displaySelectedCssView: function () {
+            var self = this;
+            var viewId = self.selectedCssViewId();
+            var editingSession = this.buffers[viewId];
+            if (editingSession) {
+                self.aceEditor.setSession(editingSession);
+            }
+        },
         formatXml: function () {
             var xml = new website.ace.XmlDocument(this.aceEditor.getValue());
             this.aceEditor.setValue(xml.format());
         },
         saveViews: function () {
             var self = this;
+            var not_valid_css = false;
             var toSave = _.filter(_.map(self.buffers, function (editingSession, viewId) {
+                var content = "";
+                if (!self.is_css){
+                    viewId = parseInt(viewId, 10);
+                    content = editingSession.getValue();
+                }else{
+                    _.filter(editingSession.getAnnotations(),function(anno){
+                        if(anno.type == 'error' & editingSession.getUndoManager().hasUndo()){
+                            not_valid_css =true;
+                        } 
+                    });
+                    viewId = '/custom'+viewId;
+                    content = vkbeautify.cssmin( editingSession.getValue());
+                }
                 return {
-                    id: parseInt(viewId, 10),
+                    id: viewId,
                     isDirty: editingSession.getUndoManager().hasUndo(),
-                    text: editingSession.getValue(),
+                    text: content,
                 };
             }), function (session) {
                 return session.isDirty;
             });
+            if (not_valid_css){
+                alert("Not Valid CSS");
+                return false
+            }
             this.clearError();
             var requests = _.map(toSave, function (session) {
-                return self.saveView(session);
+                if(self.is_css){
+                    
+                    return self.saveCssView(session);
+                }else{
+                    return self.saveView(session);
+                }
             });
             $.when.apply($, requests).then(function () {
                 self.reloadPage.call(self);
@@ -282,6 +372,18 @@
             } else {
                 def.reject(null, session, isWellFormed);
             }
+            return def;
+        },
+        saveCssView: function (session) {
+            var self = this;
+            var def = $.Deferred();
+            openerp.jsonRpc('/website/save_css', 'call', {
+                'css': session,
+            }).then(function (views) {
+                def.resolve();
+            }).fail(function (source, error) {
+                def.reject("server", session, error);
+            });
             return def;
         },
         updateHash: function () {
@@ -360,6 +462,9 @@
         var ace = new website.Ace();
         $(document.body).on('click', 'a[data-action=ace]', function() {
             ace.launchAce();
+        });
+        $(document.body).on('click', 'a[data-action=ace_css]', function() {
+            ace.launchAceCss();
         });
     });
 
