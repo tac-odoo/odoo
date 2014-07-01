@@ -668,7 +668,7 @@ class account_invoice(models.Model):
                 currency = self.currency_id.with_context(date=self.date_invoice)
                 il['analytic_lines'] = [(0,0, {
                     'name': il['name'],
-                    'date': self.date_invoice,
+                    'date': self.date_invoice or fields.Date.context_today(self),
                     'account_id': il['account_analytic_id'],
                     'unit_amount': il['quantity'],
                     'amount': currency.compute(il['price'], company_currency) * sign,

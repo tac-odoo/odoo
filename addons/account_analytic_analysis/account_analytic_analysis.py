@@ -270,7 +270,7 @@ class account_analytic_account(osv.osv):
         if child_ids:
             #Search all invoice lines not in cancelled state that refer to this analytic account
             inv_line_obj = self.pool.get("account.invoice.line")
-            inv_lines = inv_line_obj.search(cr, uid, ['&', ('account_analytic_id', 'in', child_ids), ('invoice_id.state', '!=', 'cancel')], context=context)
+            inv_lines = inv_line_obj.search(cr, uid, ['&', ('account_analytic_id', 'in', child_ids), ('invoice_id.state', '!=', 'cancel'), ('invoice_id.type','=','out_invoice')], context=context)
             for line in inv_line_obj.browse(cr, uid, inv_lines, context=context):
                 res[line.account_analytic_id.id] += line.price_subtotal
         for acc in self.browse(cr, uid, res.keys(), context=context):
