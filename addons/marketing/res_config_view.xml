@@ -12,6 +12,7 @@
                         or
                         <button string="Cancel" type="object" name="cancel" class="oe_link"/>
                     </header>
+                <div name="config_setting">        
                     <separator string="Mass Mailing"/>
                     <group>
                         <label for="id" string="Settings"/>
@@ -32,6 +33,7 @@
                             </div>
                         </div>
                     </group>
+                </div>
                 </form>
             </field>
         </record>

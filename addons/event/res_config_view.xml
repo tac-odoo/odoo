@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+    
+         <record id="view_event_configuration" model="ir.ui.view">
+            <field name="name">marketing.config.settings</field>
+            <field name="model">marketing.config.settings</field>
+            <field name="inherit_id" ref="marketing.view_marketing_configuration"/>
+            <field name="arch" type="xml">
+            <xpath expr="//div[@name='config_setting']" position="inside">                   
+                  <form string="event.config.settings" class="oe_form_configuration">                
+                        <separator string="Event Features"/>
+                            <group>
+                                <label for="id" string="Settings"/>     
+                                    <div>
+                                        <div name="module_event_sale">    
+                                            <field name="module_event_sale" class="oe_inline"/>
+                                            <label for="module_event_sale"/>
+                                        </div>
+                                        <div name="module_website_event_track">
+                                            <field name="module_website_event_track"/>
+                                            <label for="module_website_event_track"/>
+                                        </div>
+                                    </div>
+                               </group>
+                   </form>
+             </xpath>                  
+            </field>
+        </record>
+    </data>
+</openerp>
+                    
+                 
+       
