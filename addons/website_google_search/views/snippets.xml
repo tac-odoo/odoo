@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <template id="snippets" inherit_id="website.snippets">
+            <xpath expr="//div[@id='snippet_feature']" position="inside">
+                <div>
+                    <div class="oe_snippet_thumbnail">
+                        <img class="oe_snippet_thumbnail_img" src="/website/static/src/img/blocks/block_well.png"/>
+                        <span class="oe_snippet_thumbnail_title">Google Search</span>
+                    </div>
+                    <section class="oe_snippet_body">
+                        <div class="container">
+                            <div class="row">
+                                Hello
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="snippet_options" inherit_id="website.snippet_options">
+            <xpath expr="." position="inside">
+                <div data-snippet-option-id='google-search' data-selector="section">
+                    <li class="dropdown-submenu">
+                        <a tabindex="-1" href="#">Style</a>
+                        <ul class="dropdown-menu">
+                            <li data-value="para_large"><a>Bigger Text</a></li>
+                            <li data-value="readable"><a>Narrow</a></li>
+                        </ul>
+                    </li>
+                </div>
+            </xpath>
+        </template>
+
+    </data>
+</openerp>
