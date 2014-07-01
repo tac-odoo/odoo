@@ -20,9 +20,16 @@
                 </t>
             </xpath>
             <xpath expr="//main" position="before">
-                <div t-if="website.google_search_published" class="container google_custom_search">
-                    <div class="gcse-search"></div>
+                <div class="container">
+                    <div class="row">
+                        <div t-if="website.google_search_published" class="col-md-4 col-md-offset-8" name="google_custom_search">
+                            <div class="gcse-search"></div>
+                        </div>
+                    </div>
                 </div>
+            </xpath>
+            <xpath expr="//t[@t-if='website.google_analytics_key']" position="after">
+                <link rel="stylesheet" href="/website_google_search/static/src/css/base.css"/>
             </xpath>
         </template>
 
