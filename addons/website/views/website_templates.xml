@@ -195,6 +195,7 @@
     <script type="text/javascript" src="/website/static/lib/ace/theme-monokai.js"></script>
     <script type="text/javascript" src="/website/static/lib/ace/mode-xml.js"></script>
     <script type="text/javascript" src="/website/static/lib/ace/mode-css.js"></script>
+    <script type="text/javascript" src="/website/static/lib/ace/mode-sass.js"></script>
     <script type="text/javascript" src="/website/static/lib/vkbeautify/vkbeautify.0.99.00.beta.js"></script>
     <script type="text/javascript" src="/website/static/lib/jQuery.transfo.js"></script>
     <t t-call="web.jqueryui_conflict">

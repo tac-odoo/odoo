@@ -246,7 +246,13 @@ class Website(openerp.addons.web.controllers.main.Home):
 
     @http.route('/website/assets_css_get', type='json', auth='user', website=True)
     def assets_css_get(self, xml_id):
-        return request.registry["ir.ui.view"]._get_assets_urls(request.cr, request.uid, xml_id, context=request.context)['css']
+        ir_att = request.registry['ir.attachment']
+        css_list = request.registry["ir.ui.view"]._get_assets_urls(request.cr, request.uid, xml_id, context=request.context)['css']
+        edited_css = [c.get('url') for c in ir_att.search_read(request.cr, request.uid, [('url','=ilike', "/custom/css/%")],['url'], context=request.context)]
+        for index,css in enumerate(css_list):
+            if '/custom/css'+css in edited_css:
+                css_list[index] = '/custom/css'+css
+        return css_list
 
     @http.route('/website/save_css', type='json', auth='user', website=True)
     def save_css(self, css):

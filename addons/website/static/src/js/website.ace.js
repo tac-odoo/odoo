@@ -324,7 +324,7 @@
                             not_valid_css =true;
                         } 
                     });
-                    viewId = '/custom'+viewId;
+                    viewId = '/custom/css'+viewId;
                     content = vkbeautify.cssmin( editingSession.getValue());
                 }
                 return {
