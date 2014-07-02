@@ -1,0 +1,54 @@
+table.gsc-search-box td {
+    vertical-align: middle;
+}
+
+td.gsc-search-button {
+    width: 1%;
+}
+
+input.gsc-search-button, input.gsc-search-button:hover, input.gsc-search-button:focus {
+    background-color: #3276b1;
+    border-color: #357ebd;
+    filter: none;
+}
+
+.cse .gsc-search-button input.gsc-search-button-v2, input.gsc-search-button-v2 {
+    height: 13px;
+    margin-top: 2px;
+    min-width: 13px;
+    padding: 6px 27px;
+    width: 13px;
+}
+
+.cse input.gsc-search-button, input.gsc-search-button {
+    background-color: #428bca;
+    background-image: url(http://www.google.com/uds/css/v2/search_box_icon.png) !important;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    border: 1px solid #357ebd;
+    border-radius: 2px 2px 2px 2px;
+    color: #FFFFFF;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: bold;
+    height: auto;
+    min-width: auto;
+    padding: 10px 28px;
+}
+
+input.gsc-search-button {
+    margin-left: 2px;
+}
+
+input.gsc-input {
+    background-image: none !important;
+    font-size: 13px;
+}
+
+/** BOOTSTRAP BOX-SIZING **/
+
+*, *:before, *:after {
+  -webkit-box-sizing: inherit;
+  -moz-box-sizing: inherit;
+  box-sizing: inherit;
+}

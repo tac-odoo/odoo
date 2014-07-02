@@ -8,5 +8,26 @@
             </xpath>
         </template>
 
+        <template id="layout" inherit_id="website.layout" name="Google Search Layout">
+            <xpath expr="//head" position="inside">
+                <t t-if="website and website.google_search_published">
+                    <script type="text/javascript">
+                        (function () {
+                            var cx = _.str.trim('<t t-esc="website.google_search_cx"/>');
+                            var gcse = document.createElement('script');
+                            gcse.type = 'text/javascript';
+                            gcse.async = true;
+                            gcse.src = (document.location.protocol === 'https' ? 'https:' : 'http:') + '//www.google.com/cse/cse.js' + (!!cx ? '?cx=' + cx : '');
+                            var s = document.getElementsByTagName('script')[0];
+                            s.parentNode.insertBefore(gcse, s);
+                        })();
+                    </script>
+                </t>
+            </xpath>
+            <xpath expr="//t[@t-if='website and website.google_analytics_key']" position="after">
+                <link rel="stylesheet" href="/website_google_search/static/src/css/website_google_search.css"/>
+            </xpath>
+        </template>
+
     </data>
 </openerp>
