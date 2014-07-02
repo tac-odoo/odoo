@@ -13,33 +13,33 @@
 
     <record id="schedule6_input_tax_15_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="15bases_vat_code_sales_tax_sale"/>
         <field name="tax_id" ref="schedule6_input_tax_15"/>
     </record>
     <record id="schedule6_input_tax_15_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">15</field>
+        <field name="tax_amount">150</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">15</field>
+        <field name="debit_credit_amount">150</field>
         <field name="code_id" ref="15vat_code_sales_tax_sale"/>
         <field name="account_id" ref="c114214"/>
         <field name="tax_id" ref="schedule6_input_tax_15"/>
     </record>
     <record id="schedule6_input_tax_15_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_input_tax_15"/>
     </record>
     <record id="schedule6_input_tax_15_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">15</field>
+        <field name="tax_amount">150</field>
         <field name="apply_on">refund</field>
-        <field name="amount">15</field>
+        <field name="debit_credit_amount">150</field>
         <field name="tax_id" ref="schedule6_input_tax_15"/>
     </record>
 
@@ -54,33 +54,33 @@
 
     <record id="schedule6_input_tax_12_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="12bases_vat_code_sales_tax_sale"/>
         <field name="tax_id" ref="schedule6_input_tax_12"/>
     </record>
     <record id="schedule6_input_tax_12_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">12</field>
+        <field name="tax_amount">120</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="code_id" ref="12vat_code_sales_tax_sale"/>
         <field name="account_id" ref="c114214"/>
         <field name="tax_id" ref="schedule6_input_tax_12"/>
     </record>
     <record id="schedule6_input_tax_12_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_input_tax_12"/>
     </record>
     <record id="schedule6_input_tax_12_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">12</field>
+        <field name="tax_amount">120</field>
         <field name="apply_on">refund</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="tax_id" ref="schedule6_input_tax_12"/>
     </record>
 
@@ -95,33 +95,33 @@
 
     <record id="schedule6_input_tax_4_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="4bases_vat_code_sales_tax_sale"/>
         <field name="tax_id" ref="schedule6_input_tax_4"/>
     </record>
     <record id="schedule6_input_tax_4_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">4</field>
+        <field name="tax_amount">40</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">4</field>
+        <field name="debit_credit_amount">40</field>
         <field name="code_id" ref="4vat_code_sales_tax_sale"/>
         <field name="account_id" ref="c114214"/>
         <field name="tax_id" ref="schedule6_input_tax_4"/>
     </record>
     <record id="schedule6_input_tax_4_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_input_tax_4"/>
     </record>
     <record id="schedule6_input_tax_4_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">4</field>
+        <field name="tax_amount">40</field>
         <field name="apply_on">refund</field>
-        <field name="amount">4</field>
+        <field name="debit_credit_amount">40</field>
         <field name="tax_id" ref="schedule6_input_tax_4"/>
     </record>
 
@@ -136,33 +136,33 @@
 
     <record id="schedule6_add_input_vat_1_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="1bases_add_vat_on_sale"/>
         <field name="tax_id" ref="schedule6_add_input_vat_1"/>
     </record>
     <record id="schedule6_add_input_vat_1_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">1</field>
+        <field name="tax_amount">10</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">1</field>
+        <field name="debit_credit_amount">10</field>
         <field name="code_id" ref="1add_vat_on_sale"/>
         <field name="account_id" ref="c114215"/>
         <field name="tax_id" ref="schedule6_add_input_vat_1"/>
     </record>
     <record id="schedule6_add_input_vat_1_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_add_input_vat_1"/>
     </record>
     <record id="schedule6_add_input_vat_1_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">1</field>
+        <field name="tax_amount">10</field>
         <field name="apply_on">refund</field>
-        <field name="amount">1</field>
+        <field name="debit_credit_amount">10</field>
         <field name="tax_id" ref="schedule6_add_input_vat_1"/>
     </record>
 
@@ -177,33 +177,33 @@
 
     <record id="schedule6_input_vat_12_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="12bases_vat_on_sale"/>
         <field name="tax_id" ref="schedule6_input_vat_12"/>
     </record>
     <record id="schedule6_input_vat_12_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">12.5</field>
+        <field name="tax_amount">125</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">12.5</field>
+        <field name="debit_credit_amount">125</field>
         <field name="code_id" ref="12vat_on_sale"/>
         <field name="account_id" ref="c114215"/>
         <field name="tax_id" ref="schedule6_input_vat_12"/>
     </record>
     <record id="schedule6_input_vat_12_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_input_vat_12"/>
     </record>
     <record id="schedule6_input_vat_12_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">12.5</field>
+        <field name="tax_amount">125</field>
         <field name="apply_on">refund</field>
-        <field name="amount">12.5</field>
+        <field name="debit_credit_amount">125</field>
         <field name="tax_id" ref="schedule6_input_vat_12"/>
     </record>
 
@@ -218,33 +218,33 @@
 
     <record id="schedule6_add_input_vat_2_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="2bases_add_vat_on_sale"/>
         <field name="tax_id" ref="schedule6_add_input_vat_2"/>
     </record>
     <record id="schedule6_add_input_vat_2_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">2.5</field>
+        <field name="tax_amount">25</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">2.5</field>
+        <field name="debit_credit_amount">25</field>
         <field name="code_id" ref="2add_vat_on_sale"/>
         <field name="account_id" ref="c114215"/>
         <field name="tax_id" ref="schedule6_add_input_vat_2"/>
     </record>
     <record id="schedule6_add_input_vat_2_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_add_input_vat_2"/>
     </record>
     <record id="schedule6_add_input_vat_2_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">2.5</field>
+        <field name="tax_amount">25</field>
         <field name="apply_on">refund</field>
-        <field name="amount">2.5</field>
+        <field name="debit_credit_amount">25</field>
         <field name="tax_id" ref="schedule6_add_input_vat_2"/>
     </record>
 
@@ -259,33 +259,33 @@
 
     <record id="schedule6_sale_vat_8_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="8bases_vat_on_sale"/>
         <field name="tax_id" ref="schedule6_sale_vat_8"/>
     </record>
     <record id="schedule6_sale_vat_8_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">8</field>
+        <field name="tax_amount">80</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">8</field>
+        <field name="debit_credit_amount">80</field>
         <field name="code_id" ref="8vat_on_sale"/>
         <field name="account_id" ref="c114215"/>
         <field name="tax_id" ref="schedule6_sale_vat_8"/>
     </record>
     <record id="schedule6_sale_vat_8_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_sale_vat_8"/>
     </record>
     <record id="schedule6_sale_vat_8_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">8</field>
+        <field name="tax_amount">80</field>
         <field name="apply_on">refund</field>
-        <field name="amount">8</field>
+        <field name="debit_credit_amount">80</field>
         <field name="tax_id" ref="schedule6_sale_vat_8"/>
     </record>
 
@@ -300,33 +300,33 @@
 
     <record id="schedule6_sale_vat_10_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="10bases_vat_on_sale"/>
         <field name="tax_id" ref="schedule6_sale_vat_10"/>
     </record>
     <record id="schedule6_sale_vat_10_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">10</field>
+        <field name="tax_amount">100</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">10</field>
+        <field name="debit_credit_amount">100</field>
         <field name="code_id" ref="10vat_on_sale"/>
         <field name="account_id" ref="c114215"/>
         <field name="tax_id" ref="schedule6_sale_vat_10"/>
     </record>
     <record id="schedule6_sale_vat_10_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_sale_vat_10"/>
     </record>
     <record id="schedule6_sale_vat_10_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">10</field>
+        <field name="tax_amount">100</field>
         <field name="apply_on">refund</field>
-        <field name="amount">10</field>
+        <field name="debit_credit_amount">100</field>
         <field name="tax_id" ref="schedule6_sale_vat_10"/>
     </record>
 
@@ -343,18 +343,18 @@
     <record id="schedule6_sale_Excise_Duty_12_invoice_base_line" model="account.tax.line.template">
         <field name="sequence">1</field>
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="bases_vat_code_tax_exice_sale"/>
         <field name="tax_id" ref="schedule6_sale_Excise_Duty_12"/>
     </record>
     <record id="schedule6_sale_Excise_Duty_12_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">1</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">12</field>
+        <field name="tax_amount">120</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="code_id" ref="10vat_on_sale"/>
         <field name="account_id" ref="c1142111"/>
         <field name="tax_id" ref="schedule6_sale_Excise_Duty_12"/>
@@ -362,10 +362,9 @@
     <record id="schedule6_sale_Excise_Duty_12_child1_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">2</field>
+        <field name="tax_amount">20</field>
         <field name="apply_on">invoice</field>
-        <field name="base_amount">12</field>
-        <field name="amount">2</field>
+        <field name="debit_credit_amount">20</field>
         <field name="code_id" ref="edu_vat_code_tax_exice_sale"/>
         <field name="account_id" ref="c1142112"/>
         <field name="tax_id" ref="schedule6_sale_Excise_Duty_12"/>
@@ -373,10 +372,9 @@
     <record id="schedule6_sale_Excise_Duty_12_child2_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">3</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">1</field>
+        <field name="tax_amount">10</field>
         <field name="apply_on">invoice</field>
-        <field name="base_amount">12</field>
-        <field name="amount">1</field>
+        <field name="debit_credit_amount">10</field>
         <field name="code_id" ref="hedu_vat_code_tax_exice_sale"/>
         <field name="account_id" ref="c1142113"/>
         <field name="tax_id" ref="schedule6_sale_Excise_Duty_12"/>
@@ -384,35 +382,33 @@
     <record id="schedule6_sale_Excise_Duty_12_refund_base_line" model="account.tax.line.template">
         <field name="sequence">1</field>
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_sale_Excise_Duty_12"/>
     </record>
     <record id="schedule6_sale_Excise_Duty_12_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">1</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">12</field>
+        <field name="tax_amount">120</field>
         <field name="apply_on">refund</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="tax_id" ref="schedule6_sale_Excise_Duty_12"/>
     </record>
     <record id="schedule6_sale_Excise_Duty_12_child1_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">2</field>
+        <field name="tax_amount">20</field>
         <field name="apply_on">refund</field>
-        <field name="base_amount">12</field>
-        <field name="amount">2</field>
+        <field name="debit_credit_amount">20</field>
         <field name="tax_id" ref="schedule6_sale_Excise_Duty_12"/>
     </record>
     <record id="schedule6_sale_Excise_Duty_12_child2_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">3</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">1</field>
+        <field name="tax_amount">10</field>
         <field name="apply_on">refund</field>
-        <field name="base_amount">12</field>
-        <field name="amount">1</field>
+        <field name="debit_credit_amount">10</field>
         <field name="tax_id" ref="schedule6_sale_Excise_Duty_12"/>
     </record>
 
@@ -429,18 +425,18 @@
     <record id="schedule6_sale_service_tax_12_invoice_base_line" model="account.tax.line.template">
         <field name="sequence">8</field>
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="bases_vat_code_service_tax_sale"/>
         <field name="tax_id" ref="schedule6_sale_service_tax_12"/>
     </record>
     <record id="schedule6_sale_service_tax_12_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">8</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">12</field>
+        <field name="tax_amount">120</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="code_id" ref="vat_code_service_tax_sale"/>
         <field name="account_id" ref="c1142121"/>
         <field name="tax_id" ref="schedule6_sale_service_tax_12"/>
@@ -448,10 +444,9 @@
     <record id="schedule6_sale_service_tax_12_child1_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">2</field>
+        <field name="tax_amount">20</field>
         <field name="apply_on">invoice</field>
-        <field name="base_amount">12</field>
-        <field name="amount">2</field>
+        <field name="debit_credit_amount">20</field>
         <field name="code_id" ref="edu_vat_code_service_tax_sale"/>
         <field name="account_id" ref="c1142122"/>
         <field name="tax_id" ref="schedule6_sale_service_tax_12"/>
@@ -459,10 +454,9 @@
     <record id="schedule6_sale_service_tax_12_child2_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">1</field>
+        <field name="tax_amount">10</field>
         <field name="apply_on">invoice</field>
-        <field name="base_amount">12</field>
-        <field name="amount">1</field>
+        <field name="debit_credit_amount">10</field>
         <field name="code_id" ref="hedu_vat_code_service_tax_sale"/>
         <field name="account_id" ref="c1142123"/>
         <field name="tax_id" ref="schedule6_sale_service_tax_12"/>
@@ -470,35 +464,33 @@
     <record id="schedule6_sale_service_tax_12_refund_base_line" model="account.tax.line.template">
         <field name="sequence">8</field>
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_sale_service_tax_12"/>
     </record>
     <record id="schedule6_sale_service_tax_12_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">8</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">12</field>
+        <field name="tax_amount">120</field>
         <field name="apply_on">refund</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="tax_id" ref="schedule6_sale_service_tax_12"/>
     </record>
     <record id="schedule6_sale_service_tax_12_child1_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">2</field>
+        <field name="tax_amount">20</field>
         <field name="apply_on">refund</field>
-        <field name="base_amount">12</field>
-        <field name="amount">2</field>
+        <field name="debit_credit_amount">20</field>
         <field name="tax_id" ref="schedule6_sale_service_tax_12"/>
     </record>
     <record id="schedule6_sale_service_tax_12_child2_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">1</field>
+        <field name="tax_amount">10</field>
         <field name="apply_on">refund</field>
-        <field name="base_amount">12</field>
-        <field name="amount">1</field>
+        <field name="debit_credit_amount">10</field>
         <field name="tax_id" ref="schedule6_sale_service_tax_12"/>
     </record>
 
@@ -513,33 +505,33 @@
 
     <record id="schedule6_input_vat_4_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="4bases_vat_on_sale"/>
         <field name="tax_id" ref="schedule6_input_vat_4"/>
     </record>
     <record id="schedule6_input_vat_4_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">4</field>
+        <field name="tax_amount">40</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">4</field>
+        <field name="debit_credit_amount">40</field>
         <field name="code_id" ref="4vat_on_sale"/>
         <field name="account_id" ref="c114215"/>
         <field name="tax_id" ref="schedule6_input_vat_4"/>
     </record>
     <record id="schedule6_input_vat_4_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_input_vat_4"/>
     </record>
     <record id="schedule6_input_vat_4_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">4</field>
+        <field name="tax_amount">40</field>
         <field name="apply_on">refund</field>
-        <field name="amount">4</field>
+        <field name="debit_credit_amount">40</field>
         <field name="tax_id" ref="schedule6_input_vat_4"/>
     </record>
 
@@ -555,33 +547,33 @@
 
     <record id="schedule6_output_tax_15_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">-100</field>
+        <field name="tax_amount">-1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="15bases_vat_code_sales_tax_purchase"/>
         <field name="tax_id" ref="schedule6_output_tax_15"/>
     </record>
     <record id="schedule6_output_tax_15_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">-15</field>
+        <field name="tax_amount">-150</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">15</field>
+        <field name="debit_credit_amount">150</field>
         <field name="code_id" ref="15vat_code_sales_tax_purchase"/>
         <field name="account_id" ref="c121610"/>
         <field name="tax_id" ref="schedule6_output_tax_15"/>
     </record>
     <record id="schedule6_output_tax_15_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_output_tax_15"/>
     </record>
     <record id="schedule6_output_tax_15_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">15</field>
+        <field name="tax_amount">150</field>
         <field name="apply_on">refund</field>
-        <field name="amount">15</field>
+        <field name="debit_credit_amount">150</field>
         <field name="tax_id" ref="schedule6_output_tax_15"/>
     </record>
 
@@ -596,33 +588,33 @@
 
     <record id="schedule6_output_tax_12_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">-100</field>
+        <field name="tax_amount">-1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="12bases_vat_code_sales_tax_purchase"/>
         <field name="tax_id" ref="schedule6_output_tax_12"/>
     </record>
     <record id="schedule6_output_tax_12_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">-12</field>
+        <field name="tax_amount">-120</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="code_id" ref="12vat_code_sales_tax_purchase"/>
         <field name="account_id" ref="c121610"/>
         <field name="tax_id" ref="schedule6_output_tax_12"/>
     </record>
     <record id="schedule6_output_tax_12_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_output_tax_12"/>
     </record>
     <record id="schedule6_output_tax_12_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">12</field>
+        <field name="tax_amount">120</field>
         <field name="apply_on">refund</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="tax_id" ref="schedule6_output_tax_12"/>
     </record>
 
@@ -637,33 +629,33 @@
 
     <record id="schedule6_output_tax_4_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">-100</field>
+        <field name="tax_amount">-1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="4bases_vat_code_sales_tax_purchase"/>
         <field name="tax_id" ref="schedule6_output_tax_4"/>
     </record>
     <record id="schedule6_output_tax_4_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">-4</field>
+        <field name="tax_amount">-40</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">4</field>
+        <field name="debit_credit_amount">40</field>
         <field name="code_id" ref="4vat_code_sales_tax_purchase"/>
         <field name="account_id" ref="c121610"/>
         <field name="tax_id" ref="schedule6_output_tax_4"/>
     </record>
     <record id="schedule6_output_tax_4_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_output_tax_4"/>
     </record>
     <record id="schedule6_output_tax_4_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">4</field>
+        <field name="tax_amount">40</field>
         <field name="apply_on">refund</field>
-        <field name="amount">4</field>
+        <field name="debit_credit_amount">40</field>
         <field name="tax_id" ref="schedule6_output_tax_4"/>
     </record>
 
@@ -678,33 +670,33 @@
 
     <record id="schedule6_add_output_vat_1_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">-100</field>
+        <field name="tax_amount">-1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="1bases_add_vat_on_purchase"/>
         <field name="tax_id" ref="schedule6_add_output_vat_1"/>
     </record>
     <record id="schedule6_add_output_vat_1_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">-1</field>
+        <field name="tax_amount">-10</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">1</field>
+        <field name="debit_credit_amount">10</field>
         <field name="code_id" ref="1add_vat_on_purchase"/>
         <field name="account_id" ref="c121611"/>
         <field name="tax_id" ref="schedule6_add_output_vat_1"/>
     </record>
     <record id="schedule6_add_output_vat_1_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_add_output_vat_1"/>
     </record>
     <record id="schedule6_add_output_vat_1_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">1</field>
+        <field name="tax_amount">10</field>
         <field name="apply_on">refund</field>
-        <field name="amount">1</field>
+        <field name="debit_credit_amount">10</field>
         <field name="tax_id" ref="schedule6_add_output_vat_1"/>
     </record>
 
@@ -719,33 +711,33 @@
 
     <record id="schedule6_output_vat_12_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">-100</field>
+        <field name="tax_amount">-1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="12bases_vat_on_purchase"/>
         <field name="tax_id" ref="schedule6_output_vat_12"/>
     </record>
     <record id="schedule6_output_vat_12_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">-12.5</field>
+        <field name="tax_amount">-125</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">12.5</field>
+        <field name="debit_credit_amount">125</field>
         <field name="code_id" ref="12vat_on_purchase"/>
         <field name="account_id" ref="c121611"/>
         <field name="tax_id" ref="schedule6_output_vat_12"/>
     </record>
     <record id="schedule6_output_vat_12_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_output_vat_12"/>
     </record>
     <record id="schedule6_output_vat_12_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">12.5</field>
+        <field name="tax_amount">125</field>
         <field name="apply_on">refund</field>
-        <field name="amount">12.5</field>
+        <field name="debit_credit_amount">125</field>
         <field name="tax_id" ref="schedule6_output_vat_12"/>
     </record>
 
@@ -760,33 +752,33 @@
 
     <record id="schedule6_add_output_vat_2_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">-100</field>
+        <field name="tax_amount">-1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="2bases_add_vat_on_purchase"/>
         <field name="tax_id" ref="schedule6_add_output_vat_2"/>
     </record>
     <record id="schedule6_add_output_vat_2_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">-2.5</field>
+        <field name="tax_amount">-25</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">2.5</field>
+        <field name="debit_credit_amount">25</field>
         <field name="code_id" ref="2add_vat_on_purchase"/>
         <field name="account_id" ref="c121611"/>
         <field name="tax_id" ref="schedule6_add_output_vat_2"/>
     </record>
     <record id="schedule6_add_output_vat_2_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_add_output_vat_2"/>
     </record>
     <record id="schedule6_add_output_vat_2_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">2.5</field>
+        <field name="tax_amount">25</field>
         <field name="apply_on">refund</field>
-        <field name="amount">2.5</field>
+        <field name="debit_credit_amount">25</field>
         <field name="tax_id" ref="schedule6_add_output_vat_2"/>
     </record>
 
@@ -801,33 +793,33 @@
 
     <record id="schedule6_purchase_vat_8_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">-100</field>
+        <field name="tax_amount">-1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="8bases_vat_on_purchase"/>
         <field name="tax_id" ref="schedule6_purchase_vat_8"/>
     </record>
     <record id="schedule6_purchase_vat_8_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">-8</field>
+        <field name="tax_amount">-80</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">8</field>
+        <field name="debit_credit_amount">80</field>
         <field name="code_id" ref="8vat_on_purchase"/>
         <field name="account_id" ref="c121611"/>
         <field name="tax_id" ref="schedule6_purchase_vat_8"/>
     </record>
     <record id="schedule6_purchase_vat_8_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_purchase_vat_8"/>
     </record>
     <record id="schedule6_purchase_vat_8_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">8</field>
+        <field name="tax_amount">80</field>
         <field name="apply_on">refund</field>
-        <field name="amount">8</field>
+        <field name="debit_credit_amount">80</field>
         <field name="tax_id" ref="schedule6_purchase_vat_8"/>
     </record>
 
@@ -842,33 +834,33 @@
 
     <record id="schedule6_purchase_vat_10_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">-100</field>
+        <field name="tax_amount">-1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="10bases_vat_on_purchase"/>
         <field name="tax_id" ref="schedule6_purchase_vat_10"/>
     </record>
     <record id="schedule6_purchase_vat_10_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">-10</field>
+        <field name="tax_amount">-100</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">10</field>
+        <field name="debit_credit_amount">100</field>
         <field name="code_id" ref="10vat_on_purchase"/>
         <field name="account_id" ref="c121611"/>
         <field name="tax_id" ref="schedule6_purchase_vat_10"/>
     </record>
     <record id="schedule6_purchase_vat_10_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_purchase_vat_10"/>
     </record>
     <record id="schedule6_purchase_vat_10_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">10</field>
+        <field name="tax_amount">100</field>
         <field name="apply_on">refund</field>
-        <field name="amount">10</field>
+        <field name="debit_credit_amount">100</field>
         <field name="tax_id" ref="schedule6_purchase_vat_10"/>
     </record>
 
@@ -885,18 +877,18 @@
     <record id="schedule6_purchase_Excise_Duty_12_invoice_base_line" model="account.tax.line.template">
         <field name="sequence">1</field>
         <field name="code_type">base</field>
-        <field name="tax_amount">-100</field>
+        <field name="tax_amount">-1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="bases_vat_code_tax_exice_purchase"/>
         <field name="tax_id" ref="schedule6_purchase_Excise_Duty_12"/>
     </record>
     <record id="schedule6_purchase_Excise_Duty_12_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">1</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">-12</field>
+        <field name="tax_amount">-120</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="code_id" ref="vat_code_tax_exice_purchase"/>
         <field name="account_id" ref="c1216121"/>
         <field name="tax_id" ref="schedule6_purchase_Excise_Duty_12"/>
@@ -904,10 +896,9 @@
     <record id="schedule6_purchase_Excise_Duty_12_child1_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">-2</field>
+        <field name="tax_amount">-20</field>
         <field name="apply_on">invoice</field>
-        <field name="base_amount">12</field>
-        <field name="amount">2</field>
+        <field name="debit_credit_amount">20</field>
         <field name="code_id" ref="edu_vat_code_tax_exice_purchase"/>
         <field name="account_id" ref="c1216122"/>
         <field name="tax_id" ref="schedule6_purchase_Excise_Duty_12"/>
@@ -915,10 +906,9 @@
     <record id="schedule6_purchase_Excise_Duty_12_child2_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">3</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">-1</field>
+        <field name="tax_amount">-10</field>
         <field name="apply_on">invoice</field>
-        <field name="base_amount">12</field>
-        <field name="amount">1</field>
+        <field name="debit_credit_amount">10</field>
         <field name="code_id" ref="hedu_vat_code_tax_exice_purchase"/>
         <field name="account_id" ref="c1216123"/>
         <field name="tax_id" ref="schedule6_purchase_Excise_Duty_12"/>
@@ -926,35 +916,33 @@
     <record id="schedule6_purchase_Excise_Duty_12_refund_base_line" model="account.tax.line.template">
         <field name="sequence">1</field>
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_purchase_Excise_Duty_12"/>
     </record>
     <record id="schedule6_purchase_Excise_Duty_12_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">1</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">12</field>
+        <field name="tax_amount">120</field>
         <field name="apply_on">refund</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="tax_id" ref="schedule6_purchase_Excise_Duty_12"/>
     </record>
     <record id="schedule6_purchase_Excise_Duty_12_child1_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">2</field>
+        <field name="tax_amount">20</field>
         <field name="apply_on">refund</field>
-        <field name="base_amount">12</field>
-        <field name="amount">2</field>
+        <field name="debit_credit_amount">20</field>
         <field name="tax_id" ref="schedule6_purchase_Excise_Duty_12"/>
     </record>
     <record id="schedule6_purchase_Excise_Duty_12_child2_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">3</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">1</field>
+        <field name="tax_amount">10</field>
         <field name="apply_on">refund</field>
-        <field name="base_amount">12</field>
-        <field name="amount">1</field>
+        <field name="debit_credit_amount">10</field>
         <field name="tax_id" ref="schedule6_purchase_Excise_Duty_12"/>
     </record>
 
@@ -971,18 +959,18 @@
     <record id="schedule6_purchase_service_tax_12_invoice_base_line" model="account.tax.line.template">
         <field name="sequence">8</field>
         <field name="code_type">base</field>
-        <field name="tax_amount">-100</field>
+        <field name="tax_amount">-1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="bases_vat_code_service_tax_pur"/>
         <field name="tax_id" ref="schedule6_purchase_service_tax_12"/>
     </record>
     <record id="schedule6_purchase_service_tax_12_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">8</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">-12</field>
+        <field name="tax_amount">-120</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="code_id" ref="vat_code_service_tax_pur"/>
         <field name="account_id" ref="c1216131"/>
         <field name="tax_id" ref="schedule6_purchase_service_tax_12"/>
@@ -990,10 +978,9 @@
     <record id="schedule6_purchase_service_tax_12_child1_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">-2</field>
+        <field name="tax_amount">-20</field>
         <field name="apply_on">invoice</field>
-        <field name="base_amount">12</field>
-        <field name="amount">2</field>
+        <field name="debit_credit_amount">20</field>
         <field name="code_id" ref="edu_vat_code_service_tax_pur"/>
         <field name="account_id" ref="c1216132"/>
         <field name="tax_id" ref="schedule6_purchase_service_tax_12"/>
@@ -1001,10 +988,9 @@
     <record id="schedule6_purchase_service_tax_12_child2_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">-1</field>
+        <field name="tax_amount">-10</field>
         <field name="apply_on">invoice</field>
-        <field name="base_amount">12</field>
-        <field name="amount">1</field>
+        <field name="debit_credit_amount">10</field>
         <field name="code_id" ref="hedu_vat_code_service_tax_pur"/>
         <field name="account_id" ref="c1216133"/>
         <field name="tax_id" ref="schedule6_purchase_service_tax_12"/>
@@ -1012,35 +998,33 @@
     <record id="schedule6_purchase_service_tax_12_refund_base_line" model="account.tax.line.template">
         <field name="sequence">8</field>
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_purchase_service_tax_12"/>
     </record>
     <record id="schedule6_purchase_service_tax_12_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">8</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">12</field>
+        <field name="tax_amount">120</field>
         <field name="apply_on">refund</field>
-        <field name="amount">12</field>
+        <field name="debit_credit_amount">120</field>
         <field name="tax_id" ref="schedule6_purchase_service_tax_12"/>
     </record>
     <record id="schedule6_purchase_service_tax_12_child1_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">2</field>
+        <field name="tax_amount">20</field>
         <field name="apply_on">refund</field>
-        <field name="base_amount">12</field>
-        <field name="amount">2</field>
+        <field name="debit_credit_amount">20</field>
         <field name="tax_id" ref="schedule6_purchase_service_tax_12"/>
     </record>
     <record id="schedule6_purchase_service_tax_12_child2_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">1</field>
+        <field name="tax_amount">10</field>
         <field name="apply_on">refund</field>
-        <field name="base_amount">12</field>
-        <field name="amount">1</field>
+        <field name="debit_credit_amount">10</field>
         <field name="tax_id" ref="schedule6_purchase_service_tax_12"/>
     </record>
 
@@ -1055,33 +1039,33 @@
 
     <record id="schedule6_output_vat_4_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">-100</field>
+        <field name="tax_amount">-1000</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="code_id" ref="4bases_vat_on_purchase"/>
         <field name="tax_id" ref="schedule6_output_vat_4"/>
     </record>
     <record id="schedule6_output_vat_4_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">-4</field>
+        <field name="tax_amount">-40</field>
         <field name="apply_on">invoice</field>
-        <field name="amount">4</field>
+        <field name="debit_credit_amount">40</field>
         <field name="code_id" ref="4vat_on_purchase"/>
         <field name="account_id" ref="c121611"/>
         <field name="tax_id" ref="schedule6_output_vat_4"/>
     </record>
     <record id="schedule6_output_vat_4_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">100</field>
+        <field name="tax_amount">1000</field>
         <field name="apply_on">refund</field>
-        <field name="amount">100</field>
+        <field name="debit_credit_amount">1000</field>
         <field name="tax_id" ref="schedule6_output_vat_4"/>
     </record>
     <record id="schedule6_output_vat_4_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">4</field>
+        <field name="tax_amount">40</field>
         <field name="apply_on">refund</field>
-        <field name="amount">4</field>
+        <field name="debit_credit_amount">40</field>
         <field name="tax_id" ref="schedule6_output_vat_4"/>
     </record>
 
