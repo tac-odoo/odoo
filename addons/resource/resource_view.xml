@@ -24,7 +24,7 @@
             </field>
         </record>
 
-           <record id="view_resource_calendar_search" model="ir.ui.view">
+        <record id="view_resource_calendar_search" model="ir.ui.view">
             <field name="name">resource.calendar.search</field>
             <field name="model">resource.calendar</field>
             <field name="arch" type="xml">
@@ -67,6 +67,7 @@
                         </group>
                             <field name="attendance_ids"/>
                             <field name="leave_ids"/>
+                            <field name="next_day"/>
                     </sheet>
                 </form>
             </field>
@@ -80,6 +81,7 @@
                     <field name="name"/>
                     <field name="manager"/>
                     <field name="company_id" groups="base.group_multi_company"/>
+                    
                 </tree>
             </field>
         </record>
@@ -108,6 +110,7 @@
                     <field name="hour_from" widget="float_time"/>
                     <field name="hour_to" widget="float_time"/>
                     <field name="date_from"/>
+                    <field name="date_to"/>
                 </tree>
             </field>
         </record>
@@ -240,9 +243,9 @@
                     <field name="name" string="Reason"/>
                     <field name="resource_id" />
                     <field name="company_id" groups="base.group_multi_company"/>
-                    <field name="calendar_id" />
-                    <field name="date_from" />
-                    <field name="date_to" />
+                    <field name="calendar_id"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
                 </tree>
             </field>
         </record>

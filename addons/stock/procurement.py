@@ -363,6 +363,9 @@ class procurement_order(osv.osv):
         while ids:
             ids = orderpoint_obj.search(cr, uid, dom, offset=offset, limit=100)
             for op in orderpoint_obj.browse(cr, uid, ids, context=context):
+                if op.purchase_calendar_id:
+                    #If next date 
+                    pass
                 prods = self._product_virtual_get(cr, uid, op)
                 if prods is None:
                     continue
