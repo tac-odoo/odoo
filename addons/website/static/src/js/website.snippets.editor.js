@@ -747,15 +747,16 @@
             this.$el = $option.find(">li").clone();
             this.data = $option.data();
 
-            this.required = this.$el.data("required");
-
             this.set_active();
-            this.$el.find('li[data-value] a').on('mouseenter mouseleave click', _.bind(this._mouse, this));
-            this.$el.not(':not([data-value])').find("a").on('mouseenter mouseleave click', _.bind(this._mouse, this));
+            this.$el.find('li:not(.dropdown-submenu) a').on('mouseenter mouseleave click', _.bind(this._mouse, this));
             this.$target.on('snippet-style-reset', _.bind(this.set_active, this));
 
             this.start();
         },
+        
+        /**
+         * this method handles mouse:over and mouse:leave on the snippet editor menu
+         */
         _mouse: function (event) {
             var self = this;
 
@@ -767,27 +768,32 @@
             }else {
                 this.over = true;
             }
+            
+            // create the object {'$next' : $DOM, '$prev' : $DOM }
 
-            var $prev, $next;
+            var $prev, $next, $parent;
             if (event.type === 'mouseleave') {
                 $prev = $(event.currentTarget).parent();
-                $next = this.$el.find("li[data-value].active");
+                $parent = $prev.parents('ul.dropdown-menu:not(:last)').parent();
+                $next = $parent.find("li[data-value].active");
             } else {
-                $prev = this.$el.find("li[data-value].active");
                 $next = $(event.currentTarget).parent();
+                $parent = $next.parents('ul.dropdown-menu:not(:last)').parent();
+                $prev = $parent.find("li[data-value].active");
             }
             if (!$prev.length) {
                 $prev = false;
             }
             if ($prev && $prev[0] === $next[0]) {
                 $next = false;
-                if (this.required) {
+                if ($parent && $parent.$el && $parent.$el.data("required")) {
                     return;
                 }
             }
 
             var np = {'$next': $next, '$prev': $prev};
 
+            // triggers preview or apply methods if a menu item has been clicked 
             if (event.type === 'click') {
                 setTimeout(function () {
                     self.set_active();
@@ -813,9 +819,7 @@
                     var $li = $(this);
                     return  ($li.data('value') && self.$target.hasClass($li.data('value')));
                 })
-                .first()
                 .addClass("active");
-            this.$el.find('li:has(li[data-value].active)').addClass("active");
         },
 
         start: function () {
@@ -849,7 +853,6 @@
 
         preview: function (np) {
             var self = this;
-
             // add or remove html class
             if (np.$prev) {
                 this.$target.removeClass(np.$prev.data('value') || "");

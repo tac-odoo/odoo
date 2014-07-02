@@ -20,7 +20,7 @@
 
     <script type="text/javascript" src="/website/static/src/js/website.snippets.animation.js"></script>
     <script type="text/javascript" src="/web/static/lib/bootstrap/js/bootstrap.js"></script>
-
+    
 </template>
 
 <template id="assets_backend" name="website assets for backend" inherit_id="web.assets_backend">
@@ -246,6 +246,11 @@
     <script type="text/javascript" src="/website/static/src/js/website.translator.js"></script>
 
     <script type="text/javascript" src="/website/static/src/js/jQuery.transfo.js"></script>
+    
+    <!-- GALLERY START HERE : Added for gallery support -->
+    <link type="text/css" rel="stylesheet" href='/website/static/src/css/gallery.css'/>
+    <script type="text/javascript" src="/website/static/src/js/website.gallery.js" />
+    <!-- GALLERY END HERE -->
 </template>
 
 <template id="debugger" inherit_id="website.layout" optional="disabled" name="Debugger &amp; Tests">
