@@ -2182,7 +2182,7 @@ class account_tax_line(osv.Model):
         return taxes
 
     _columns = {
-        'tax_id': fields.many2one('account.tax','Tax', ondelete="cascade"),
+        'tax_id': fields.many2one('account.tax','Tax', required=True, ondelete="cascade"),
         'apply_on': fields.selection([('invoice','Invoice'),('refund','Refund')], "Apply On", required=True),
         'sequence': fields.integer('Sequence', required=True, help="The sequence field is used to order the tax lines from the lowest sequences to the higher ones, in order to know which one to compute first (lower sequence first)."),
         'code_type': fields.selection([('base','Base'),('tax','Tax')], "Code Type"),
@@ -2765,14 +2765,12 @@ class account_tax_line_template(osv.Model):
     def onchange_amount(self, cr, uid, ids, amount=False, context=None):
         return {'value': {'tax_amount': context and 'default_apply_on' in context and context['default_apply_on'] == 'refund' and -amount or amount}}
 
-    def generate_tax_line(self, cr, uid, line_ids, tax_code_template_ref, context=None):
+    def generate_tax_line(self, cr, uid, tax_id, line_ids, tax_code_template_ref, context=None):
         """
         This method for generating lines from templates.
         """
-        if context is None:
-            context = {}
-        tax_lines, line_accounts = [], {}
         obj_tax_line = self.pool.get('account.tax.line')
+        line_accounts = {}
         for tax_line in line_ids:
             vals = {
                 'code_type': tax_line.code_type,
@@ -2782,11 +2780,11 @@ class account_tax_line_template(osv.Model):
                 'code_id': tax_line.code_id and ((tax_line.code_id.id in tax_code_template_ref) and tax_code_template_ref[tax_line.code_id.id]) or False,
                 'analytic_account_id': tax_line.analytic_account_id.id,
                 'sequence': tax_line.sequence,
+                'tax_id': tax_id,
             }
             new_line = obj_tax_line.create(cr, uid, vals, context=context)
             line_accounts[new_line] = tax_line.account_id and tax_line.account_id.id or False
-            tax_lines.append(new_line)
-        return { 'tax_lines' : tax_lines, 'line_accounts': line_accounts}
+        return {'line_accounts': line_accounts}
 
 class account_tax_template(osv.osv):
     _name = 'account.tax.template'
@@ -2861,19 +2859,12 @@ class account_tax_template(osv.osv):
             'account_dict': dictionary containing a to-do list with all the accounts to assign on new taxes
             }
         """
-        if context is None:
-            context = {}
         res = {}
         todo_dict = {}
         tax_template_to_tax = {}
         tax_obj = self.pool.get('account.tax')
         obj_tax_line_temp = self.pool.get('account.tax.line.template')
         for tax in tax_templates:
-            #Generate tax lines
-            tax_invoice_lines = obj_tax_line_temp.generate_tax_line(cr, uid, tax.tax_invoice_line_ids, tax_code_template_ref, context=context)
-            todo_dict.update(tax_invoice_lines['line_accounts'])
-            tax_refund_lines = obj_tax_line_temp.generate_tax_line(cr, uid, tax.tax_refund_line_ids, tax_code_template_ref, context=context)
-            todo_dict.update(tax_refund_lines['line_accounts'])
             vals_tax = {
                 'name': tax.name,
                 'sequence': tax.sequence,
@@ -2888,11 +2879,13 @@ class account_tax_template(osv.osv):
                 'description': tax.description,
                 'type_tax_use': tax.type_tax_use,
                 'price_include': tax.price_include,
-                'tax_invoice_line_ids': [(4, line) for line in tax_invoice_lines['tax_lines']],
-                'tax_refund_line_ids': [(4, line) for line in tax_refund_lines['tax_lines']],
             }
-            new_tax = tax_obj.create(cr, uid, vals_tax)
+            new_tax = tax_obj.create(cr, uid, vals_tax, context=context)
             tax_template_to_tax[tax.id] = new_tax
+            #Generate tax lines
+            line_ids = tax.tax_invoice_line_ids + tax.tax_refund_line_ids
+            tax_lines = obj_tax_line_temp.generate_tax_line(cr, uid, new_tax, line_ids, tax_code_template_ref, context=context)
+            todo_dict.update(tax_lines['line_accounts'])
         res.update({'tax_template_to_tax': tax_template_to_tax, 'account_dict': todo_dict})
         return res
 
