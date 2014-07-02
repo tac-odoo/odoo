@@ -15,7 +15,6 @@ from PIL import Image
 import openerp
 from openerp.addons.web import http
 from openerp.http import request, Response
-import pudb
 
 logger = logging.getLogger(__name__)
 
