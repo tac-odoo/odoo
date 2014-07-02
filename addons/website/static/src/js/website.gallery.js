@@ -19,7 +19,6 @@
         start  : function() {
             var self = this;
             this._super();
-            //this.add_mutation_observer();
         },
         select : function (next_previous) {
             var self = this;
@@ -55,23 +54,19 @@
             var ms = next_previous.$next.data("value").split("-")[1];
             this.$target.attr("data-"+next_previous.$next.data("key"), ms);
         }, 
-        reapply : function(key, value) {
-            if (this.$target.hasClass("nomode")) {
-                this.nomode();
-            }
-            if (this.$target.hasClass("masonry")) {
-                this.masonry();
-            }
-            if (this.$target.hasClass("grid")) {
-                this.grid();
-            }
-            if (this.$target.hasClass("slideshow")) {
-                this.slideshow();
-            }
+        reapply : function() {
+            var self    = this,
+                modes   = [ 'nomode', 'grid', 'masonry', 'slideshow' ], 
+                classes = this.$target.attr("class").split(/\s+/);
+            modes.forEach(function(mode) {
+                if (classes.indexOf(mode) != -1) {
+                    self[mode]();
+                    return;
+                }
+            });
         },
         nomode : function() {
-        	//this.suspend_mutation_observer();
-        	var self = this;
+            var self = this;
             var $imgs = this.$target.find("img"),
                 classes="",
                 cls = ['1', '2', '3', '4', '6', '12'];
@@ -83,10 +78,8 @@
             });
             this.$target.children().remove();
             this.$target.append($imgs);
-            //this.resume_mutation_observer();
         },
         masonry : function() {
-            //this.suspend_mutation_observer();
             var self     = this,
                 $imgs    = this.$target.find("img"),
                 columns  = this.get_columns(),
@@ -126,11 +119,8 @@
                     $cur.addClass(classes);
                  });
             });
-            //this.resume_mutation_observer();
-
         },
         grid : function() {
-            //this.suspend_mutation_observer();
             var self     = this,
                 $imgs    = this.$target.find("img"),
                 $img     = undefined,
@@ -150,12 +140,8 @@
                     $row.appendTo(self.$target);
                 }                
             });
-            //this.resume_mutation_observer();
-
         },
         slideshow :function () {
-            //this.suspend_mutation_observer();
-            
             var self = this;
             var $imgs = this.$target.find("img"),
                 urls = [],
@@ -173,16 +159,14 @@
             this.$target.children().remove();
             this.$target.append($slideshow);
             $slideshow.css("height", Math.round(window.innerHeight*0.7));
-            
-            //this.resume_mutation_observer();
         },
         
         columns : function(key, value) {
-            this.reapply(key, value); // nothing to do, just recompute with new values
+            this.reapply(); // nothing to do, just recompute with new values
         },
         
         images_add : function() {
-        	/* will be moved in ImageDialog from MediaManager */
+            /* will be moved in ImageDialog from MediaManager */
             var self = this,
             $upload_form = $(openerp.qweb.render('website.gallery.dialog.upload')),
             $progressbar = $upload_form.find(".progress-bar");
@@ -258,15 +242,6 @@
         },
         sizing : function() { // done via css, keep it to avoid undefined error
         },
-        onBlur : function() {
-            //this.remove_mutation_observer();
-        },
-        onFocus : function() {
-            //this.add_mutation_observer();
-        },
-        on_remove : function() {
-            //this.remove_mutation_observer();
-        },
         /*
          *  helpers
          */
@@ -322,43 +297,7 @@
             if (this.$target.hasClass("slideshow")) {
                 this.$target.removeAttr("style");
             }
-            //this.remove_mutation_observer();
-        },
-        mutation_callback : function(mutations) {
-            var require_reapply = false;
-            for (var i = 0; i < mutations.length; i++) {
-            	if (mutations[i].removedNodes.length > 0) {
-            		require_reapply = true;
-            	}
-            }
-            window.galleryObserver.takeRecords();
-            if (require_reapply) {
-            	this.reapply();
-            }
-        },
-        add_mutation_observer: function() {
-            if (!window.galleryObserver) {
-                window.galleryObserver = new MutationObserver(this.mutation_callback);
-                //this.resume_mutation_observer();
-            }
-        },
-        suspend_mutation_observer : function() {
-            window.galleryObserver.disconnect();
-        },
-        resume_mutation_observer : function() {
-            var galleryTarget = (this.$target.is(".gallery")) ? this.$target[0] : this.$target.closest(".gallery")[0];
-            window.galleryObserver.observe(galleryTarget, { 
-                subtree: true, 
-                childList: true 
-            }); 
-        },
-        remove_mutation_observer: function() {
-            if (window.galleryObserver) {
-                //this.suspend_mutation_observer();
-                delete window.galleryObserver;
-            }
         }
-        
     }); // website.snippet.Option.extend
 
 })(); // anonymous function
