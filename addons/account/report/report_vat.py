@@ -19,10 +19,16 @@
 #
 ##############################################################################
 
-import time
+from openerp import http
+from openerp.http import request
 from openerp.osv import osv
 from openerp.report import report_sxw
 from common_report_header import common_report_header
+
+import simplejson
+import time
+import xlwt
+import StringIO
 
 
 class tax_report(report_sxw.rml_parse, common_report_header):
@@ -239,5 +245,30 @@ class report_vat(osv.AbstractModel):
     _inherit = 'report.abstract_report'
     _template = 'account.report_vat'
     _wrapped_report_class = tax_report
+
+
+class report_vat_xls(http.Controller):
+    @http.route(['/report/account.report_vat_xls'], type='http', auth='user', website=True, multilang=True)
+    def report_account_tax_xls(self, **data):
+        data = simplejson.loads(data['options'])
+
+        vat = tax_report(request.cr, request.uid, '', context=request.context)
+        vat.set_context(None, data, None)
+        lines = vat._get_lines(vat._get_basedon(data), company_id=data['form']['company_id'])
+
+        if lines:
+            xls = StringIO.StringIO()
+            xls_workbook = xlwt.Workbook()
+            vat_sheet = xls_workbook.add_sheet('report_vat')
+            for x in range(0, len(lines)):
+                for y in range(0, len(lines[0])):
+                    vat_sheet.write(x, y, lines[x].values()[y])
+            xls_workbook.save(xls)
+            xls.seek(0)
+            content = xls.read()
+        return request.make_response(content, headers=[
+            ('Content-Type', 'application/vnd.ms-excel'),
+            ('Content-Disposition', 'attachment; filename=report_vat.xls;')
+        ])
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
