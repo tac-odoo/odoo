@@ -4146,8 +4146,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_0_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">10</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_1e"/>
             <field name="tax_id" ref="btw_0"/>
@@ -4157,7 +4157,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">10</field>
             <field name="code_type">tax</field>
             <field eval="0" name="tax_amount"/>
-            <field eval="0" name="amount"/>
+            <field eval="0" name="debit_credit_amount"/>
             <field name="account_id" ref="vat_payable0"/>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="btw_0"/>
@@ -4166,8 +4166,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_0_refund_base_line" model="account.tax.line.template">
             <field name="sequence">10</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_1e"/>
             <field name="tax_id" ref="btw_0"/>
@@ -4178,7 +4178,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable0"/>
             <field eval="0" name="tax_amount"/>
-            <field eval="0" name="amount"/>
+            <field eval="0" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="btw_0"/>
         </record>
@@ -4196,8 +4196,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_6_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">10</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_1b"/>
             <field name="tax_id" ref="btw_6"/>
@@ -4207,8 +4207,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">10</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_low"/>
-            <field eval="6" name="tax_amount"/>
-            <field eval="6" name="amount"/>
+            <field eval="60" name="tax_amount"/>
+            <field eval="60" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_1b"/>
             <field name="tax_id" ref="btw_6"/>
@@ -4217,8 +4217,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_6_refund_base_line" model="account.tax.line.template">
             <field name="sequence">10</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_1b"/>
             <field name="tax_id" ref="btw_6"/>
@@ -4228,8 +4228,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">10</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_low"/>
-            <field eval="-6" name="tax_amount"/>
-            <field eval="6" name="amount"/>
+            <field eval="-60" name="tax_amount"/>
+            <field eval="60" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_1b"/>
             <field name="tax_id" ref="btw_6"/>
@@ -4248,8 +4248,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_21_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">5</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_1a"/>
             <field name="tax_id" ref="btw_21"/>
@@ -4259,8 +4259,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">5</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_high"/>
-            <field eval="21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_1a"/>
             <field name="tax_id" ref="btw_21"/>
@@ -4269,8 +4269,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_21_mwst_20_refund_base_line" model="account.tax.line.template">
             <field name="sequence">5</field>
             <field name="code_type">base</field>
-            <field name="amount">100</field>
-            <field name="tax_amount">-100</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_1a"/>
             <field name="tax_id" ref="btw_21"/>
@@ -4280,8 +4280,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">5</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_high"/>
-            <field eval="-21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="-210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_1a"/>
             <field name="tax_id" ref="btw_21"/>
@@ -4301,8 +4301,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_overig_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">15</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_1a"/>
             <field name="tax_id" ref="btw_overig"/>
@@ -4312,8 +4312,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">15</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_high"/>
-            <field eval="21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_1a"/>
             <field name="tax_id" ref="btw_overig"/>
@@ -4322,8 +4322,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_overig_refund_base_line" model="account.tax.line.template">
             <field name="sequence">15</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_1c"/>
             <field name="tax_id" ref="btw_overig"/>
@@ -4333,8 +4333,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">15</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_high"/>
-            <field eval="-21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="-210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_1c"/>
             <field name="tax_id" ref="btw_overig"/>
@@ -4354,8 +4354,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_6_buy_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">10</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
            <field name="tax_id" ref="btw_6_buy"/>
         </record>
@@ -4364,8 +4364,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">10</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_low"/>
-            <field eval="6" name="tax_amount"/>
-            <field eval="6" name="amount"/>
+            <field eval="60" name="tax_amount"/>
+            <field eval="60" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_6_buy"/>
@@ -4374,8 +4374,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_6_buy_refund_base_line" model="account.tax.line.template">
             <field name="sequence">10</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
         <field name="tax_id" ref="btw_6_buy"/>
         </record>
@@ -4384,8 +4384,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">10</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_low"/>
-            <field eval="-6" name="tax_amount"/>
-            <field eval="6" name="amount"/>
+            <field eval="-60" name="tax_amount"/>
+            <field eval="60" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_6_buy"/>
@@ -4404,8 +4404,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_21_buy_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">5</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="btw_21_buy"/>
         </record>
@@ -4414,8 +4414,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">5</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_high"/>
-            <field eval="21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_21_buy"/>
@@ -4424,8 +4424,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_21_buy_refund_base_line" model="account.tax.line.template">
             <field name="sequence">5</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="btw_21_buy"/>
         </record>
@@ -4434,8 +4434,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">5</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_high"/>
-            <field eval="-21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="-210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_21_buy"/>
@@ -4454,8 +4454,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_overig_buy_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">15</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="btw_overig_buy"/>
         </record>
@@ -4464,8 +4464,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">15</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_high"/>
-            <field eval="21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_overig_buy"/>
@@ -4474,8 +4474,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_overig_buy_refund_base_line" model="account.tax.line.template">
             <field name="sequence">15</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="btw_overig_buy"/>
         </record>
@@ -4484,8 +4484,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">15</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_high"/>
-            <field eval="-21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="-210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_overig_buy"/>
@@ -4505,8 +4505,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_verk_0_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">15</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>            
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>            
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_1e"/>
             <field name="tax_id" ref="btw_verk_0"/>
@@ -4517,7 +4517,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_verlegd"/>
             <field eval="0.00" name="tax_amount"/>
-            <field eval="0.00" name="amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="btw_verk_0"/>
         </record>
@@ -4525,8 +4525,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_verk_0_refund_base_line" model="account.tax.line.template">
             <field name="sequence">15</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_1e"/>
             <field name="tax_id" ref="btw_verk_0"/>
@@ -4537,7 +4537,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_verlegd"/>
             <field eval="0.00" name="tax_amount"/>
-            <field eval="0.00" name="amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="btw_verk_0"/>
         </record>
@@ -4555,8 +4555,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_ink_0_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">15</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_2a"/>
             <field name="tax_id" ref="btw_ink_0"/>
@@ -4566,8 +4566,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">15</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_verlegd"/>
-            <field eval="21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="btw_ink_0"/>
         </record> -->
@@ -4575,8 +4575,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_ink_0_refund_base_line" model="account.tax.line.template">
             <field name="sequence">15</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_2a"/>
             <field name="tax_id" ref="btw_ink_0"/>
@@ -4586,8 +4586,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">15</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_verlegd"/>
-            <field eval="-21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="-210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="btw_ink_0"/>
         </record> -->
@@ -4595,10 +4595,9 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_ink_0_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">98</field>
             <field name="code_type">tax</field>
-            <field name="base_amount">21</field>
             <field name="account_id" ref="vat_payable_verlegd"/>
-            <field eval="100" name="tax_amount"/>
-            <field eval="100" name="amount"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_2a"/>
             <field name="tax_id" ref="btw_ink_0"/>
@@ -4607,10 +4606,9 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_ink_0_refund_tax_line_2" model="account.tax.line.template">
             <field name="sequence">98</field>
             <field name="code_type">tax</field>
-            <field name="base_amount">21</field>
             <field name="account_id" ref="vat_payable_verlegd"/>
-            <field eval="-100" name="tax_amount"/>
-            <field eval="100" name="amount"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_2a"/>
             <field name="tax_id" ref="btw_ink_0"/>
@@ -4619,10 +4617,9 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_ink_0_invoice_tax_line_3" model="account.tax.line.template">
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
-            <field name="base_amount">21</field>
             <field name="account_id" ref="vat_payable_verlegd"/>
-            <field eval="-100" name="tax_amount"/>
-            <field eval="-100" name="amount"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_ink_0"/>
@@ -4631,10 +4628,9 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_ink_0_refund_tax_line_4" model="account.tax.line.template">
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
-            <field name="base_amount">21</field>
             <field name="account_id" ref="vat_payable_verlegd"/>
-            <field eval="100" name="tax_amount"/>
-            <field eval="-100" name="amount"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_ink_0"/>
@@ -4654,8 +4650,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_I_6_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_4b"/>
             <field name="tax_id" ref="btw_I_6"/>
@@ -4664,8 +4660,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <!-- <record id="btw_I_6_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">tax</field>
-            <field eval="6" name="tax_amount"/>
-            <field eval="6" name="amount"/>
+            <field eval="60" name="tax_amount"/>
+            <field eval="60" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="btw_I_6"/>
         </record> -->
@@ -4673,8 +4669,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_I_6_refund_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_4b"/>
             <field name="tax_id" ref="btw_I_6"/>
@@ -4683,8 +4679,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <!-- <record id="btw_I_6_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">tax</field>
-            <field eval="-6" name="tax_amount"/>
-            <field eval="6" name="amount"/>
+            <field eval="-60" name="tax_amount"/>
+            <field eval="60" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="btw_I_6"/>
         </record> -->
@@ -4693,9 +4689,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_low"/>
-            <field name="base_amount">6</field>
-            <field eval="100" name="tax_amount"/>
-            <field eval="-100" name="amount"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_4b"/>
             <field name="tax_id" ref="btw_I_6"/>
@@ -4705,9 +4700,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_low"/>
-            <field name="base_amount">6</field>
-            <field eval="-100" name="tax_amount"/>
-            <field eval="-100" name="amount"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_4b"/>
             <field name="tax_id" ref="btw_I_6"/>
@@ -4717,9 +4711,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
              <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_low"/>
-            <field name="base_amount">6</field>
-            <field eval="100" name="tax_amount"/>
-            <field eval="100" name="amount"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_I_6"/>
@@ -4729,9 +4722,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_low"/>
-            <field name="base_amount">6</field>
-            <field eval="-100" name="tax_amount"/>
-            <field eval="100" name="amount"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_I_6"/>
@@ -4750,8 +4742,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_I_21_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_4b"/>
             <field name="tax_id" ref="btw_I_21"/>
@@ -4760,8 +4752,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <!-- <record id="btw_I_21_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">tax</field>
-            <field eval="21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="btw_I_21"/>
         </record> -->
@@ -4769,8 +4761,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_I_21_refund_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_4b"/>
             <field name="tax_id" ref="btw_I_21"/>
@@ -4779,8 +4771,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <!-- <record id="btw_I_21_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">tax</field>
-            <field eval="-21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="-210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="btw_I_21"/>
         </record> -->
@@ -4789,9 +4781,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_high"/>
-            <field eval="21" name="base_amount"/>
-            <field eval="100" name="tax_amount"/>
-            <field eval="-100" name="amount"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_4b"/>
             <field name="tax_id" ref="btw_I_21"/>
@@ -4801,9 +4792,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_high"/>
-            <field eval="21" name="base_amount"/>
-            <field eval="-100" name="tax_amount"/>
-            <field eval="-100" name="amount"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_4b"/>
             <field name="tax_id" ref="btw_I_21"/>
@@ -4813,9 +4803,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_high"/>
-            <field eval="21" name="base_amount"/>
-            <field eval="100" name="tax_amount"/>
-            <field eval="100" name="amount"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_I_21"/>
@@ -4825,9 +4814,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_high"/>
-            <field eval="21" name="base_amount"/>
-            <field eval="-100" name="tax_amount"/>
-            <field eval="100" name="amount"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_I_21"/>
@@ -4846,8 +4834,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_I_overig_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="amount">100</field>
-            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="tax_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_4b"/>
             <field name="tax_id" ref="btw_I_overig"/>
@@ -4857,7 +4845,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">20</field>
             <field name="code_type">tax</field>
             <field eval="0.00" name="tax_amount"/>
-            <field eval="0.00" name="amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="btw_I_overig"/>
         </record> -->
@@ -4865,8 +4853,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_I_overig_refund_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_4b"/>
             <field name="tax_id" ref="btw_I_overig"/>
@@ -4876,7 +4864,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">20</field>
             <field name="code_type">tax</field>
             <field eval="0.00" name="tax_amount"/>
-            <field eval="0.00" name="amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="btw_I_overig"/>
         </record> -->
@@ -4885,9 +4873,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_high"/>
-            <field name="base_amount">0.00</field>
-            <field eval="100" name="tax_amount"/>
-            <field eval="-100" name="amount"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_4b"/>
             <field name="tax_id" ref="btw_I_overig"/>
@@ -4896,10 +4883,9 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_I_overig_refund_tax_line_2" model="account.tax.line.template">
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
-            <field name="base_amount">0.00</field>
             <field name="account_id" ref="vat_payable_high"/>
-            <field eval="-100" name="tax_amount"/>
-            <field eval="-100" name="amount"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_4b"/>
             <field name="tax_id" ref="btw_I_overig"/>
@@ -4908,10 +4894,9 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_I_overig_invoice_tax_line_3" model="account.tax.line.template">
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
-            <field name="base_amount">0.00</field>
             <field name="account_id" ref="vat_refund_high"/>
-            <field eval="100" name="tax_amount"/>
-            <field eval="100" name="amount"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_I_overig"/>
@@ -4921,9 +4906,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_high"/>
-            <field name="base_amount">0.00</field>
-            <field eval="-100" name="tax_amount"/>
-            <field eval="100" name="amount"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_I_overig"/>
@@ -4942,8 +4926,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_X0_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_3b"/>
            <field name="tax_id" ref="btw_X0"/>
@@ -4954,7 +4938,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable0"/>
             <field eval="0.00" name="tax_amount"/>
-            <field eval="0.00" name="amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="btw_X0"/>
         </record>
@@ -4962,8 +4946,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_X0_refund_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_3b"/>
             <field name="tax_id" ref="btw_X0"/>
@@ -4973,7 +4957,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">20</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable0"/>
-            <field eval="0.00" name="amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
             <field eval="0.00" name="tax_amount"/>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="btw_X0"/>
@@ -4992,8 +4976,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_X2_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_3c"/>
             <field name="tax_id" ref="btw_X2"/>
@@ -5004,7 +4988,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable0"/>
             <field eval="0.00" name="tax_amount"/>
-            <field eval="0.00" name="amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="btw_X2"/>
         </record>
@@ -5012,8 +4996,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_X2_refund_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_3c"/>
             <field name="tax_id" ref="btw_X2"/>
@@ -5024,7 +5008,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable0"/>
             <field eval="0.00" name="tax_amount"/>
-            <field eval="0.00" name="amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="btw_X2"/>
         </record>
@@ -5044,8 +5028,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_E1_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_4a"/>
             <field name="tax_id" ref="btw_E1"/>
@@ -5054,8 +5038,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <!-- <record id="btw_E1_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">tax</field>
-            <field eval="6" name="tax_amount"/>
-            <field eval="6" name="amount"/>
+            <field eval="60" name="tax_amount"/>
+            <field eval="60" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="btw_E1"/>
         </record> -->
@@ -5063,8 +5047,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_E1_refund_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_4a"/>
             <field name="tax_id" ref="btw_E1"/>
@@ -5073,8 +5057,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <!-- <record id="btw_E1_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">tax</field>
-            <field eval="6" name="tax_amount"/>
-            <field eval="6" name="amount"/>
+            <field eval="60" name="tax_amount"/>
+            <field eval="60" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="btw_E1"/>
         </record> -->
@@ -5083,9 +5067,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_low"/>
-            <field name="base_amount">6</field>
-            <field eval="100" name="tax_amount"/>
-            <field eval="-100" name="amount"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_4a"/>
             <field name="tax_id" ref="btw_E1"/>
@@ -5095,9 +5078,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_low"/>
-            <field name="base_amount">6</field>
-            <field eval="-100" name="tax_amount"/>
-            <field eval="-100" name="amount"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_4a"/>
             <field name="tax_id" ref="btw_E1"/>
@@ -5107,9 +5089,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_low"/>
-            <field name="base_amount">6</field>
-            <field eval="100" name="tax_amount"/>
-            <field eval="100" name="amount"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_E1"/>
@@ -5119,9 +5100,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_low"/>
-            <field name="base_amount">6</field>
-            <field eval="-100" name="tax_amount"/>
-            <field eval="100" name="amount"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_E1"/>
@@ -5140,8 +5120,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_E2_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_4a"/>
             <field name="tax_id" ref="btw_E2"/>
@@ -5150,8 +5130,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <!-- <record id="btw_E2_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">tax</field>
-            <field eval="21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="btw_E2"/>
         </record> -->
@@ -5159,8 +5139,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_E2_refund_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_4a"/>
             <field name="tax_id" ref="btw_E2"/>
@@ -5169,8 +5149,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <!-- <record id="btw_E2_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">tax</field>
-            <field eval="-21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="-210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="btw_E2"/>
         </record> -->
@@ -5179,9 +5159,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_high"/>
-            <field name="base_amount">21</field>
-            <field eval="100" name="tax_amount"/>
-            <field eval="-100" name="amount"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_4a"/>
             <field name="tax_id" ref="btw_E2"/>
@@ -5191,9 +5170,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_high"/>
-            <field name="base_amount">21</field>
-            <field eval="-100" name="tax_amount"/>
-            <field eval="-100" name="amount"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_4a"/>
             <field name="tax_id" ref="btw_E2"/>
@@ -5203,9 +5181,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_high"/>
-            <field name="base_amount">21</field>
-            <field eval="100" name="tax_amount"/>
-            <field eval="100" name="amount"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_E2"/>
@@ -5215,9 +5192,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_refund_high"/>
-            <field name="base_amount">21</field>
-            <field eval="-100" name="tax_amount"/>
-            <field eval="100" name="amount"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_E2"/>
@@ -5236,8 +5212,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_E_overig_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_4a"/>
             <field name="tax_id" ref="btw_E_overig"/>
@@ -5246,8 +5222,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <!-- <record id="btw_E_overig_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">tax</field>
-            <field eval="21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="btw_E_overig"/>
         </record> -->
@@ -5255,8 +5231,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_E_overig_refund_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">-100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_4a"/>
             <field name="tax_id" ref="btw_E_overig"/>
@@ -5265,8 +5241,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <!-- <record id="btw_E_overig_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">tax</field>
-            <field eval="-21" name="tax_amount"/>
-            <field eval="21" name="amount"/>
+            <field eval="-210" name="tax_amount"/>
+            <field eval="210" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="btw_E_overig"/>
         </record> -->
@@ -5275,9 +5251,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_high"/>
-            <field eval="21" name="base_amount"/>
-            <field eval="100" name="tax_amount"/>
-            <field eval="-100" name="amount"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_4a"/>
             <field name="tax_id" ref="btw_E_overig"/>
@@ -5287,9 +5262,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable_high"/>
-            <field eval="21" name="base_amount"/>
-            <field eval="-100" name="tax_amount"/>
-            <field eval="-100" name="amount"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="-1000" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_4a"/>
             <field name="tax_id" ref="btw_E_overig"/>
@@ -5298,10 +5272,9 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_E_overig_invoice_tax_line_3" model="account.tax.line.template">
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
-            <field eval="21" name="base_amount"/>
             <field name="account_id" ref="vat_refund_high"/>
-            <field eval="100" name="tax_amount"/>
-            <field eval="100" name="amount"/>
+            <field eval="1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_E_overig"/>
@@ -5310,10 +5283,9 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_E_overig_refund_tax_line_4" model="account.tax.line.template">
             <field name="sequence">99</field>
             <field name="code_type">tax</field>
-            <field eval="21" name="base_amount"/>
             <field name="account_id" ref="vat_refund_high"/>
-            <field eval="-100" name="tax_amount"/>
-            <field eval="100" name="amount"/>
+            <field eval="-1000" name="tax_amount"/>
+            <field eval="1000" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="btw_code_5b"/>
             <field name="tax_id" ref="btw_E_overig"/>
@@ -5333,8 +5305,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_X1_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="omz_code_3a"/>
             <field name="tax_id" ref="btw_X1"/>
@@ -5345,7 +5317,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable0"/>
             <field eval="0.00" name="tax_amount"/>
-            <field eval="0.00" name="amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="btw_X1"/>
         </record>
@@ -5353,8 +5325,8 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         <record id="btw_X1_refund_base_line" model="account.tax.line.template">
             <field name="sequence">20</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">100</field>
-            <field name="amount">100</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="omz_code_3a"/>
             <field name="tax_id" ref="btw_X1"/>
@@ -5365,7 +5337,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="code_type">tax</field>
             <field name="account_id" ref="vat_payable0"/>
             <field eval="0.00" name="tax_amount"/>
-            <field eval="0.00" name="amount"/>
+            <field eval="0.00" name="debit_credit_amount"/>
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="btw_X1"/>
         </record>
