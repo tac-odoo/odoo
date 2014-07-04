@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="website.google_search.results">
+        <t t-log="widget"/>
+        <ul class="google_search_results">
+            <li class="google_search_results_header">
+                <span class="btn google_search_results_header_counter">
+                    <t t-set="req" t-value="widget.queries.request[0]"/>
+                    <t t-esc="req.startIndex"/> - <t t-esc="req.count"/> of <t t-esc="req.totalResults"/>
+                </span>
+                <span class="google_search_results_header_pager">
+                    <a class="btn a-submit" name="previous">
+                        <i class="fa fa-caret-square-o-left"></i>
+                    </a>
+                    <a class="btn a-submit" name="next">
+                        <i class="fa fa-caret-square-o-right"></i>
+                    </a>
+                </span>
+            </li>
+            <t t-foreach="widget.items" t-as="item">
+                <li class="google_search_results_item">
+                    <div class="google_search_results_item_link">
+                        <a t-att-href="item.link">
+                            <t t-esc="item.title"/>
+                        </a>
+                    </div>
+                    <div class="google_search_results_item_text">
+                        <t t-raw="item.snippet"/>
+                    </div>
+                </li>
+            </t>
+        </ul>
+    </t>
+    <t t-name="website.google_search.error">
+        <t t-log="widget"/>
+        <ul class="google_search_results">
+            <li class="google_search_results_header">
+                <t t-esc="widget.error.message"/>
+            </li>
+        </ul>
+    </t>
+</templates>

@@ -1,0 +1,26 @@
+@charset "utf-8"
+
+.google_search_box
+    padding-right: 20px
+    padding-top: 12px
+    form
+        input[name=q]
+            min-width: 250px
+    .google_search_results
+        position: absolute
+        background: #fff
+        list-style: none
+        padding-left: 0px
+        max-height: 600px
+        overflow-x: auto
+        border: 1px solid #ccc
+        .google_search_results_header
+            .google_search_results_header_counter
+                padding: 6px 12px 6px 12px
+            .google_search_results_header_pager
+                float: right
+        .google_search_results_item
+            padding: 5px
+            border-bottom: 1px solid #ccc
+            &:last-child
+                border-bottom: none
