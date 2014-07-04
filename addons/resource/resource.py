@@ -143,7 +143,10 @@ class resource_calendar(osv.osv):
             if current_interval[0] <= leave[1]:
                 current_interval[0] = leave[1]
         if current_interval and current_interval[0] < interval[1]:  # remove intervals moved outside base interval due to leaves
-            intervals.append((current_interval[0], current_interval[1], interval[2]))
+            if len(interval) > 2:
+                intervals.append((current_interval[0], current_interval[1], interval[2]))
+            else:
+                intervals.append((current_interval[0], current_interval[1],))
         return intervals
 
     def interval_schedule_hours(self, intervals, hour, remove_at_end=True):

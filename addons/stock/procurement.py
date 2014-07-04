@@ -311,7 +311,7 @@ class procurement_order(osv.osv):
             date_planned, date2 = self._get_next_dates(cr, uid, orderpoint)
         return date_planned.strftime(DEFAULT_SERVER_DATE_FORMAT)
 
-    def _prepare_orderpoint_procurement(self, cr, uid, orderpoint, product_qty, context=None):
+    def _prepare_orderpoint_procurement(self, cr, uid, orderpoint, product_qty, group=False, context=None):
         return {
             'name': orderpoint.name,
             'date_planned': self._get_orderpoint_date_planned(cr, uid, orderpoint, datetime.today(), context=context),
@@ -323,16 +323,8 @@ class procurement_order(osv.osv):
             'origin': orderpoint.name,
             'warehouse_id': orderpoint.warehouse_id.id,
             'orderpoint_id': orderpoint.id,
-            'group_id': orderpoint.group_id.id,
+            'group_id': group or orderpoint.group_id.id,
         }
-
-    def _get_attendance_from_date(self, cr, uid, calendar, date_from):
-        #groups = self.search(cr, uid, )
-        #Sure it can be optimized...
-        for att in calendar.attendence_ids:
-            if att.dayofweek == date_from.weekday() and (not (att.date_from and att.date_from > date_from or att.date_to and att.date_to < date_from)):
-                return att
-        return False
 
 
 
@@ -360,8 +352,10 @@ class procurement_order(osv.osv):
                 print (date1, res[0][1])
                 return (date1, res[0][1])
             else:
+                print "esc1"
                 return (False, False)
         else: 
+            print "esc2"
             return (False, False)
         
 
@@ -388,14 +382,23 @@ class procurement_order(osv.osv):
         att_obj = self.pool.get("resource.calendar.attendance")
         execute = False
         group = False
+        #TODO: Two cases are more or less similar
         if orderpoint.last_execution_date and orderpoint.purchase_calendar_id:
             new_date = datetime.strptime(orderpoint.last_execution_date, DEFAULT_SERVER_DATETIME_FORMAT)
             intervals = calendar_obj._schedule_days(cr, uid, orderpoint.purchase_calendar_id.id, 1, new_date, compute_leaves=True)
             if intervals:
                 interval = intervals[0]
-                if interval[0] > new_date and interval[0] < datetime.datetime.utcnow():
+                if interval[0] > new_date and interval[0] < datetime.utcnow():
                     execute = True
-                    group = att_obj.browse(cr, uid, intervals[2], context=context).group_id.id
+                    group = att_obj.browse(cr, uid, interval[2], context=context).group_id.id
+        elif orderpoint.purchase_calendar_id:
+            new_date = datetime.utcnow()
+            intervals = calendar_obj._schedule_days(cr, uid, orderpoint.purchase_calendar_id.id, 1, new_date, compute_leaves=True)
+            if intervals: 
+                interval = intervals[0]
+                if interval[0] < new_date and interval[1] > new_date:
+                    execute = True
+                    group = att_obj.browse(cr, uid, interval[2], context=context).group_id.id
         else:
             execute = True
         return execute, group
@@ -423,7 +426,9 @@ class procurement_order(osv.osv):
             ids = orderpoint_obj.search(cr, uid, dom, offset=offset, limit=100)
             for op in orderpoint_obj.browse(cr, uid, ids, context=context):
                 execute, group = self._get_group(cr, uid, op, context=context)
+                print op.product_id.name, execute, group
                 if not execute:
+                    print "esc0"
                     continue
                 prods = self._product_virtual_get(cr, uid, op)
                 if prods is None:
@@ -442,7 +447,7 @@ class procurement_order(osv.osv):
 
                     if qty > 0:
                         proc_id = procurement_obj.create(cr, uid,
-                                                         self._prepare_orderpoint_procurement(cr, uid, op, qty, context=context),
+                                                         self._prepare_orderpoint_procurement(cr, uid, op, qty, group = group, context=context),
                                                          context=context)
                         self.check(cr, uid, [proc_id])
                         self.run(cr, uid, [proc_id])
