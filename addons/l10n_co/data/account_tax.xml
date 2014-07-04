@@ -285,8 +285,8 @@
 
     <record id="tax7_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">10.67</field>
-        <field name="amount">-10.67</field>
+        <field name="tax_amount">106.7</field>
+        <field name="debit_credit_amount">-106.7</field>
         <field name="apply_on">invoice</field>
         <field name="code_id" ref="vat_code_due_tva"/>
         <field name="tax_id" ref="tax7"/>

@@ -115,7 +115,7 @@
         
         <record id="impuestos_plantilla_iva_por_pagar_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="text_amount">1000</field>
+            <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="impuestos_base_iva_ventas"/>
@@ -125,7 +125,7 @@
         <record id="impuestos_plantilla_iva_por_pagar_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="account_id" ref="cta210201"/>
-            <field name="text_amount" eval="120"/>
+            <field name="tax_amount" eval="120"/>
             <field name="debit_credit_amount" eval="120"/>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="impuestos_iva_por_pagar"/>
