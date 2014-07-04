@@ -330,23 +330,35 @@ class procurement_order(osv.osv):
 
     def _get_next_dates(self, cr, uid, orderpoint, context=None):
         calendar_obj = self.pool.get('resource.calendar')
+        att_obj = self.pool.get('resource.calendar.attendance')
         execute, group = self._get_group(cr, uid, orderpoint, context=context)
         
         res = calendar_obj._schedule_days(cr, uid, orderpoint.calendar_id.id, 1, datetime.utcnow(), compute_leaves=True)
         if res and res[0][0] < datetime.utcnow():
-            new_date = res[0][1] + relativedelta(hours=1)
+            new_date = res[0][1] + relativedelta(days=1)
             res = calendar_obj._schedule_days(cr, uid, orderpoint.calendar_id.id, 1, new_date, compute_leaves=True) #need + 1 h -> maybe change to 1 minute
-        # 
-        if group and res and res[0][2] != group:
-            new_date = res[0][1] + relativedelta(hours=1)
+        # res[0][2]
+        att_group = False
+        if res:
+            att_group = att_obj.browse(cr, uid, res[0][2], context=context).group_id.id
+        if res and group and att_group != group:
+            import pdb; pdb.set_trace()
+            new_date = res[0][1] + relativedelta(days=1)
             res = calendar_obj._schedule_days(cr, uid, orderpoint.calendar_id.id, 1, new_date, compute_leaves=True) #need + 1 h -> maybe change to 1 minute
-            while res != False or res[0][2] != group:
-                new_date = res[0][1] + relativedelta(hours=1)
+            att_group = False
+            if res:
+                att_group = att_obj.browse(cr, uid, res[0][2], context=context).group_id.id
+            #TODO: Safety pall for endless loops!#
+            while res != False and att_group != group:
+                new_date = res[0][1] + relativedelta(days=1)
                 res = calendar_obj._schedule_days(cr, uid, orderpoint.calendar_id.id, 1, new_date, compute_leaves=True)
+                att_group = False
+                if res:
+                    att_group = att_obj.browse(cr, uid, res[0][2], context=context).group_id.id
         
         if res:
             date1 = res[0][1]
-            new_date = res[0][1] + relativedelta(hours=1)
+            new_date = res[0][1] + relativedelta(days=1)
             res = calendar_obj._schedule_days(cr, uid, orderpoint.calendar_id.id, 1, new_date, compute_leaves=True) #need + 1 h -> maybe change to 1 minute
             if res: 
                 print (date1, res[0][1])
