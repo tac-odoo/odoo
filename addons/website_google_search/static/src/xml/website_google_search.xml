@@ -1,0 +1,29 @@
+<templates id="template" xml:space="preserve">
+
+    <t t-name="website.google_search.dialog.configuration">
+        <t t-call="website.editor.dialog">
+            <t t-set="title">Google Search Configuration</t>
+            <form>
+                <ul class="list-group">
+                    <li class="list-group-item form-group active">
+                        <h4 class="list-group-item-heading">
+                            <label for="google-search-cx" class="control-label">
+                                Google Search cx
+                            </label>
+                        </h4>
+                        <input class="form-control" id="google-search-cx" type="text"/>
+                    </li>
+                    <li class="list-group-item form-group active">
+                        <h4 class="list-group-item-heading">
+                            <label for="google-search-verification" class="control-label">
+                                Google Search verification
+                            </label>
+                        </h4>
+                        <input class="form-control" id="google-search-verification" type="text"/>
+                    </li>
+                </ul>
+            </form>
+        </t>
+    </t>
+
+</templates>

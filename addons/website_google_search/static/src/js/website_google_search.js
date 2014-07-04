@@ -28,9 +28,12 @@
         drop_and_build_snippet: function () {
             var self = this;
             var context = website.get_context();
+            var dialog = new website.google_search.ConfigDialog(this.editor);
+            dialog.appendTo(document.body);
+            /**
             website.prompt({
                 'id': "google_search_cx",
-                'window_title': _t("Google Search Information"),
+                'window_title': _t("Google Search Configuration"),
                 'input': _t("Google Search cx"),
             }).then(function (val, field, $dialog) {
                 openerp.jsonRpc('/web/dataset/call_kw', 'call', {
@@ -56,6 +59,21 @@
                     },
                 });
             });
+            */
+        },
+    });
+
+    website.add_template_file('/website_google_search/static/src/xml/website_google_search.xml');
+
+    website.google_search = {};
+
+    website.google_search.ConfigDialog = website.editor.Dialog.extend({
+        template: 'website.google_search.dialog.configuration',
+        save: function () {
+            debugger;
+        },
+        cancel: function () {
+            debugger;
         },
     });
 
