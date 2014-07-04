@@ -326,22 +326,81 @@ class procurement_order(osv.osv):
             'group_id': orderpoint.group_id.id,
         }
 
+    def _get_attendance_from_date(self, cr, uid, calendar, date_from):
+        #groups = self.search(cr, uid, )
+        #Sure it can be optimized...
+        for att in calendar.attendence_ids:
+            if att.dayofweek == date_from.weekday() and (not (att.date_from and att.date_from > date_from or att.date_to and att.date_to < date_from)):
+                return att
+        return False
 
-    def _get_next_dates(self, cr, uid, orderpoint):
+
+
+    def _get_next_dates(self, cr, uid, orderpoint, context=None):
         calendar_obj = self.pool.get('resource.calendar')
-        date1 = calendar_obj.get_next_day(cr, uid, orderpoint.calendar_id.id, datetime.utcnow() + relativedelta(days = 1))
-        date2 = calendar_obj.get_next_day(cr, uid, orderpoint.calendar_id.id, date1 + relativedelta(days = 1))
-        return (date1, date2)
+        execute, group = self._get_group(cr, uid, orderpoint, context=context)
+        
+        res = calendar_obj._schedule_days(cr, uid, orderpoint.calendar_id.id, 1, datetime.utcnow(), compute_leaves=True)
+        if res and res[0][0] < datetime.utcnow():
+            new_date = res[0][1] + relativedelta(hours=1)
+            res = calendar_obj._schedule_days(cr, uid, orderpoint.calendar_id.id, 1, new_date, compute_leaves=True) #need + 1 h -> maybe change to 1 minute
+        # 
+        if group and res and res[0][2] != group:
+            new_date = res[0][1] + relativedelta(hours=1)
+            res = calendar_obj._schedule_days(cr, uid, orderpoint.calendar_id.id, 1, new_date, compute_leaves=True) #need + 1 h -> maybe change to 1 minute
+            while res != False or res[0][2] != group:
+                new_date = res[0][1] + relativedelta(hours=1)
+                res = calendar_obj._schedule_days(cr, uid, orderpoint.calendar_id.id, 1, new_date, compute_leaves=True)
+        
+        if res:
+            date1 = res[0][1]
+            new_date = res[0][1] + relativedelta(hours=1)
+            res = calendar_obj._schedule_days(cr, uid, orderpoint.calendar_id.id, 1, new_date, compute_leaves=True) #need + 1 h -> maybe change to 1 minute
+            if res: 
+                print (date1, res[0][1])
+                return (date1, res[0][1])
+            else:
+                return (False, False)
+        else: 
+            return (False, False)
+        
 
     def _product_virtual_get(self, cr, uid, order_point):
         product_obj = self.pool.get('product.product')
         ctx={'location': order_point.location_id.id}
         if order_point.calendar_id:
             date1, date2 = self._get_next_dates(cr, uid, order_point)
+            if not date1 or not date2:
+                return 0.0
             ctx.update({'to_date': date2.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
         return product_obj._product_available(cr, uid,
                 [order_point.product_id.id],
                 context=ctx)[order_point.product_id.id]['virtual_available']
+
+
+    def _get_group(self, cr, uid, orderpoint, context=None):
+        """
+            Will check if the orderpoint needs to be executed and if yes, will also return group
+            :return execute, group
+        """
+        #Check if orderpoint has last execution date and calculate if we need to calculate again already
+        calendar_obj = self.pool.get("resource.calendar")
+        att_obj = self.pool.get("resource.calendar.attendance")
+        execute = False
+        group = False
+        if orderpoint.last_execution_date and orderpoint.purchase_calendar_id:
+            new_date = datetime.strptime(orderpoint.last_execution_date, DEFAULT_SERVER_DATETIME_FORMAT)
+            intervals = calendar_obj._schedule_days(cr, uid, orderpoint.purchase_calendar_id.id, 1, new_date, compute_leaves=True)
+            if intervals:
+                interval = intervals[0]
+                if interval[0] > new_date and interval[0] < datetime.datetime.utcnow():
+                    execute = True
+                    group = att_obj.browse(cr, uid, intervals[2], context=context).group_id.id
+        else:
+            execute = True
+        return execute, group
+        
+
 
     def _procure_orderpoint_confirm(self, cr, uid, use_new_cursor=False, company_id = False, context=None):
         '''
@@ -363,9 +422,9 @@ class procurement_order(osv.osv):
         while ids:
             ids = orderpoint_obj.search(cr, uid, dom, offset=offset, limit=100)
             for op in orderpoint_obj.browse(cr, uid, ids, context=context):
-                if op.purchase_calendar_id:
-                    #If next date 
-                    pass
+                execute, group = self._get_group(cr, uid, op, context=context)
+                if not execute:
+                    continue
                 prods = self._product_virtual_get(cr, uid, op)
                 if prods is None:
                     continue
@@ -387,6 +446,7 @@ class procurement_order(osv.osv):
                                                          context=context)
                         self.check(cr, uid, [proc_id])
                         self.run(cr, uid, [proc_id])
+                        orderpoint_obj.write(cr, uid, [op.id], {'last_execution_date': datetime.utcnow().strftime(DEFAULT_SERVER_DATETIME_FORMAT)}, context=context)
             offset += len(ids)
             if use_new_cursor:
                 cr.commit()

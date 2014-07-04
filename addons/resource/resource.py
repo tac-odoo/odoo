@@ -50,8 +50,9 @@ class resource_calendar(osv.osv):
         for calend in self.browse(cr, uid, ids, context=context):
             #date1 = self.get_next_day(cr, uid, calend.id, datetime.utcnow() + relativedelta(days = 1))
             _format = '%Y-%m-%d %H:%M:%S'
-            res[calend.id] = self.schedule_days_get_date(
-            cr, uid, calend.id, 1, day_date=datetime.datetime.utcnow(), compute_leaves=True).strftime(_format)
+            sched_date = self.schedule_days_get_date(
+            cr, uid, calend.id, 1, day_date=datetime.datetime.utcnow(), compute_leaves=True)
+            res[calend.id] = sched_date and sched_date.strftime(_format) or False
         return res
         
         
@@ -64,7 +65,7 @@ class resource_calendar(osv.osv):
             'resource.calendar.leaves', 'calendar_id', 'Leaves',
             help=''
         ),
-        'next_day': fields.function(_calculate_next_day, string='Next day it should trigger', type='datetime')
+        'next_day': fields.function(_calculate_next_day, string='Next day it should trigger', type='datetime'),
     }
     _defaults = {
         'company_id': lambda self, cr, uid, context: self.pool.get('res.company')._company_default_get(cr, uid, 'resource.calendar', context=context)
@@ -142,7 +143,7 @@ class resource_calendar(osv.osv):
             if current_interval[0] <= leave[1]:
                 current_interval[0] = leave[1]
         if current_interval and current_interval[0] < interval[1]:  # remove intervals moved outside base interval due to leaves
-            intervals.append((current_interval[0], current_interval[1]))
+            intervals.append((current_interval[0], current_interval[1], interval[2]))
         return intervals
 
     def interval_schedule_hours(self, intervals, hour, remove_at_end=True):
@@ -360,7 +361,8 @@ class resource_calendar(osv.osv):
         for calendar_working_day in self.get_attendances_for_weekday_date(cr, uid, id, [start_dt.weekday()], start_dt, context):
             working_interval = (
                 work_dt.replace(hour=int(calendar_working_day.hour_from)),
-                work_dt.replace(hour=int(calendar_working_day.hour_to))
+                work_dt.replace(hour=int(calendar_working_day.hour_to)), 
+                calendar_working_day.id,
             )
             working_intervals += self.interval_remove_leaves(working_interval, work_limits)
 
@@ -549,6 +551,7 @@ class resource_calendar(osv.osv):
         intervals = []
         planned_days = 0
         iterations = 0
+#         import pdb; pdb.set_trace()
         if backwards:
             current_datetime = day_date.replace(hour=23, minute=59, second=59)
         else:
@@ -570,7 +573,6 @@ class resource_calendar(osv.osv):
                 current_datetime = self.get_next_day(cr, uid, id, current_datetime, context)
             # avoid infinite loops
             iterations += 1
-
         return intervals
 
     def schedule_days_get_date(self, cr, uid, id, days, day_date=None, compute_leaves=False,
