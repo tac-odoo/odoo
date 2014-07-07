@@ -362,11 +362,21 @@ class resource_calendar(osv.osv):
 
         working_intervals = []
         for calendar_working_day in self.get_attendances_for_weekday_date(cr, uid, id, [start_dt.weekday()], start_dt, context):
-            working_interval = (
-                work_dt.replace(hour=int(calendar_working_day.hour_from)),
-                work_dt.replace(hour=int(calendar_working_day.hour_to)), 
-                calendar_working_day.id,
-            )
+            if context and context.get('no_round_hours'):
+                min_from = int((calendar_working_day.hour_from - int(calendar_working_day.hour_from)) * 60)
+                min_to = int((calendar_working_day.hour_to - int(calendar_working_day.hour_to)) * 60)
+                working_interval = (
+                    work_dt.replace(hour=int(calendar_working_day.hour_from), minute=min_from),
+                    work_dt.replace(hour=int(calendar_working_day.hour_to), minute=min_to), 
+                    calendar_working_day.id,
+                ) 
+            else:
+                working_interval = (
+                    work_dt.replace(hour=int(calendar_working_day.hour_from)),
+                    work_dt.replace(hour=int(calendar_working_day.hour_to)), 
+                    calendar_working_day.id,
+                )
+            
             working_intervals += self.interval_remove_leaves(working_interval, work_limits)
 
         # find leave intervals
