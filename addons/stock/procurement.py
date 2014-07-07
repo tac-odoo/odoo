@@ -342,7 +342,6 @@ class procurement_order(osv.osv):
         if res:
             att_group = att_obj.browse(cr, uid, res[0][2], context=context).group_id.id
         if res and group and att_group != group:
-            import pdb; pdb.set_trace()
             new_date = res[0][1] + relativedelta(days=1)
             res = calendar_obj._schedule_days(cr, uid, orderpoint.calendar_id.id, 1, new_date, compute_leaves=True) #need + 1 h -> maybe change to 1 minute
             att_group = False
@@ -379,6 +378,7 @@ class procurement_order(osv.osv):
             if not date1 or not date2:
                 return 0.0
             ctx.update({'to_date': date2.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
+        print ctx
         return product_obj._product_available(cr, uid,
                 [order_point.product_id.id],
                 context=ctx)[order_point.product_id.id]['virtual_available']
@@ -398,16 +398,14 @@ class procurement_order(osv.osv):
         if orderpoint.last_execution_date and orderpoint.purchase_calendar_id:
             new_date = datetime.strptime(orderpoint.last_execution_date, DEFAULT_SERVER_DATETIME_FORMAT)
             intervals = calendar_obj._schedule_days(cr, uid, orderpoint.purchase_calendar_id.id, 1, new_date, compute_leaves=True)
-            if intervals:
-                interval = intervals[0]
+            for interval in intervals:
                 if interval[0] > new_date and interval[0] < datetime.utcnow():
                     execute = True
                     group = att_obj.browse(cr, uid, interval[2], context=context).group_id.id
         elif orderpoint.purchase_calendar_id:
             new_date = datetime.utcnow()
             intervals = calendar_obj._schedule_days(cr, uid, orderpoint.purchase_calendar_id.id, 1, new_date, compute_leaves=True)
-            if intervals: 
-                interval = intervals[0]
+            for interval in intervals: 
                 if interval[0] < new_date and interval[1] > new_date:
                     execute = True
                     group = att_obj.browse(cr, uid, interval[2], context=context).group_id.id
@@ -443,6 +441,7 @@ class procurement_order(osv.osv):
                     print "esc0"
                     continue
                 prods = self._product_virtual_get(cr, uid, op)
+                print "prods:", prods
                 if prods is None:
                     continue
                 if prods < op.product_min_qty:
