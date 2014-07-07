@@ -134,9 +134,9 @@ class WebsiteForum(http.Controller):
         return request.website.render("website_forum.forum_index", values)
 
     @http.route('/forum/check_tag', type='json', auth="public", methods=['POST'], website=True)
-    def allow_tag_creation(self, **post):
+    def check_tag_existence(self, **post):
         cr, uid, context = request.cr, request.uid, request.context
-        if request.registry['forum.tag'].search(cr, uid, [('name','=',post['tags'])], context=context):
+        if request.registry['forum.tag'].search(cr, uid, [('name','=',post['tags'])], context=context) or request.uid == SUPERUSER_ID or request.registry['res.users'].browse(cr, uid, uid, context=context).karma > 30:
             return True
         return False
 

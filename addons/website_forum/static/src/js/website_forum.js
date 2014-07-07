@@ -138,21 +138,24 @@ $(document).ready(function () {
         });
         // Adds: create tags on space + blur
         $("input.load_tags").on('whitespaceKeyDown blur', function () {
-            if($("#karma").val() < 30 && $(this).val()){
-              openerp.jsonRpc('/forum/check_tag', 'call', {'tags':$(this).val()}).then(function(result){
+            var self = $(this);
+            var tag = $(this).val();
+            if(tag){
+              openerp.jsonRpc('/forum/check_tag', 'call', {'tags':tag}).then(function(result){
                   if (!result) {
-                        alert("Sorry you need more than 30 Karma.");
+                      alert("Sorry you need more than 30 Karma.");
                   }
-                  });
-            }
-            else {
-                $(this).textext()[0].tags().addTags([ $(this).val() ]);
+                  else {
+                      self.textext()[0].tags().addTags([ tag ]);
+                  }
+              });
             }
             $(this).val("");
         });
         $("input.load_tags").on('isTagAllowed', function(e, data) {
             _.each($(this).textext()[0].tags()._formData, function( value ) {
-                if (value.toLowerCase() == data.tag.toLowerCase()) { 
+                if (value.toLowerCase() == data.tag.toLowerCase()) {
+                    alert("Tag \"" + value + "\" is already in the list");
                     data.result = false;
                 }
             });

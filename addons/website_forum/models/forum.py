@@ -326,7 +326,7 @@ class Post(osv.Model):
             raise KarmaError('Not enough karma to create a new question')
         elif not post.parent_id and not post.can_answer:
             raise KarmaError('Not enough karma to answer to a question')
-        #get tag follower + add tag follower to queestion follower
+        #get tag follower + add tag follower to question follower
         tag_list = [tag_id.id for tag_id in post.tag_ids]
         follower_list = self.tag_follow_question(cr, uid, tag_list, context=context)
         if follower_list:
@@ -605,8 +605,8 @@ class Tags(osv.Model):
 
     def create(self, cr, uid, vals, context=None):
         tag_id = super(Tags, self).create(cr, uid, vals, context=context)
-        users = self.pool['res.users'].browse(cr, uid, uid, context=context)
-        if users.karma < 30:
+        user = self.pool['res.users'].browse(cr, uid, uid, context=context)
+        if user.karma < 30 and not user.id == SUPERUSER_ID:
             raise KarmaError('Not enough karma to create a new Tag')
         return tag_id
 

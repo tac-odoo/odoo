@@ -26,11 +26,6 @@
             <field name="state">open</field>
         </record>
 
-        <!-- Users -->
-        <record id="base.user_root" model="res.users">
-            <field name="karma">30</field>
-        </record>
-
         <!-- Answers subtypes -->
         <record id="mt_answer_new" model="mail.message.subtype">
             <field name="name">New Answer</field>
