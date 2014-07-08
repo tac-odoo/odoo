@@ -1348,7 +1348,7 @@ instance.web.WebClient = instance.web.Client.extend({
     do_reload: function() {
         var self = this;
         return this.session.session_reload().then(function () {
-            instance.session.load_modules(true).then(
+            return instance.session.load_locales().then(
                 self.menu.proxy('do_reload')); });
     },
     do_notify: function() {

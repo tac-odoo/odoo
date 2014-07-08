@@ -218,10 +218,6 @@ instance.web.Session.include( /** @lends instance.web.Session# */{
         this.user_context= {};
         this.db = null;
         this.module_list = instance._modules.slice();
-        this.module_loaded = {};
-        _(this.module_list).each(function (mod) {
-            self.module_loaded[mod] = true;
-        });
         this.active_id = null;
         return this.session_init();
     },
@@ -234,7 +230,7 @@ instance.web.Session.include( /** @lends instance.web.Session# */{
             var modules = instance._modules.join(',');
             var deferred = self.load_qweb(modules);
             if(self.session_is_valid()) {
-                return deferred.then(function() { return self.load_modules(); });
+                return deferred.then(function() { return self.load_locales(); });
             }
             return $.when(
                     deferred,
@@ -257,7 +253,7 @@ instance.web.Session.include( /** @lends instance.web.Session# */{
     session_authenticate: function() {
         var self = this;
         return $.when(this._super.apply(this, arguments)).then(function() {
-            return self.load_modules();
+            return self.load_locales();
         });
     },
     session_logout: function() {
@@ -300,43 +296,27 @@ instance.web.Session.include( /** @lends instance.web.Session# */{
         ].join(';');
     },
     /**
-     * Load additional web addons of that instance and init them
+     * Load localisation
      *
      */
-    load_modules: function() {
+    load_locales: function() {
         var self = this;
-        return this.rpc('/web/session/modules', {}).then(function(result) {
-            var all_modules = _.uniq(self.module_list.concat(result));
-            var to_load = _.difference(result, self.module_list).join(',');
-            self.module_list = all_modules;
+        var datejs_locale = "/web/static/lib/datejs/globalization/" + self.user_context.lang.replace("_", "-") + ".js";
+        return self.load_translations().then(function () {
+            return self.load_js([ datejs_locale ]);
+        }).done(function() {
+            // provide timeago.js with our own translator method
+            $.timeago.settings.translator = instance.web._t;
 
-            var loaded = self.load_translations();
-            var datejs_locale = "/web/static/lib/datejs/globalization/" + self.user_context.lang.replace("_", "-") + ".js";
-
-            var file_list = [ datejs_locale ];
-            if(to_load.length) {
-                loaded = $.when(
-                    loaded,
-                    self.rpc('/web/webclient/csslist', {mods: to_load}).done(self.load_css.bind(self)),
-                    self.load_qweb(to_load),
-                    self.rpc('/web/webclient/jslist', {mods: to_load}).done(function(files) {
-                        file_list = file_list.concat(files);
-                    })
-                );
+            if (!Date.CultureInfo.pmDesignator) {
+                // If no am/pm designator is specified but the openerp
+                // datetime format uses %i, date.js won't be able to
+                // correctly format a date. See bug#938497.
+                Date.CultureInfo.amDesignator = 'AM';
+                Date.CultureInfo.pmDesignator = 'PM';
             }
-            return loaded.then(function () {
-                return self.load_js(file_list);
-            }).done(function() {
-                self.on_modules_loaded();
-                self.trigger('module_loaded');
-                if (!Date.CultureInfo.pmDesignator) {
-                    // If no am/pm designator is specified but the openerp
-                    // datetime format uses %i, date.js won't be able to
-                    // correctly format a date. See bug#938497.
-                    Date.CultureInfo.amDesignator = 'AM';
-                    Date.CultureInfo.pmDesignator = 'PM';
-                }
-            });
+
+            self.trigger('locales_loaded');
         });
     },
     load_translations: function() {
@@ -369,24 +349,6 @@ instance.web.Session.include( /** @lends instance.web.Session# */{
             });
         });
         return self.qweb_mutex.def;
-    },
-    on_modules_loaded: function() {
-        for(var j=0; j<this.module_list.length; j++) {
-            var mod = this.module_list[j];
-            if(this.module_loaded[mod])
-                continue;
-            instance[mod] = {};
-            // init module mod
-            var fct = instance._openerp[mod];
-            if(typeof(fct) === "function") {
-                instance._openerp[mod] = {};
-                for (var k in fct) {
-                    instance._openerp[mod][k] = fct[k];
-                }
-                fct(instance, instance._openerp[mod]);
-            }
-            this.module_loaded[mod] = true;
-        }
     },
     /**
      * Cooperative file download implementation, for ajaxy APIs.
@@ -682,11 +644,6 @@ var _t = instance.web._t;
     _t('about a year ago');
     _t('%d years ago');
 }
-
-instance.session.on('module_loaded', this, function () {
-    // provide timeago.js with our own translator method
-    $.timeago.settings.translator = instance.web._t;
-});
 
 /** Setup blockui */
 if ($.blockUI) {

@@ -582,14 +582,6 @@ class Home(http.Controller):
 
 class WebClient(http.Controller):
 
-    @http.route('/web/webclient/csslist', type='json', auth="none")
-    def csslist(self, mods=None):
-        return manifest_list('css', mods=mods)
-
-    @http.route('/web/webclient/jslist', type='json', auth="none")
-    def jslist(self, mods=None):
-        return manifest_list('js', mods=mods)
-
     @http.route('/web/webclient/qweb', type='http', auth="none")
     def qweb(self, mods=None, db=None):
         files = [f[0] for f in manifest_glob('qweb', addons=mods, db=db)]

@@ -15,11 +15,6 @@ openerp.test_support = {
             username: false,
             user_context: {},
             db: false,
-//            this.module_list = openerp._modules.slice();
-//            this.module_loaded = {};
-//            _(this.module_list).each(function (mod) {
-//                self.module_loaded[mod] = true;
-//            });
             context: {},
             shortcuts: [],
             active_id: null
