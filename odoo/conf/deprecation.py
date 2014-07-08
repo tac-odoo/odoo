@@ -31,29 +31,29 @@ code removed, and thus these variables made unnecessary.
 """
 
 # If True, the Python modules inside the openerp namespace are made available
-# without the 'openerp.' prefix. E.g. openerp.osv.osv and osv.osv refer to the
+# without the 'odoo.' prefix. E.g. odoo.osv.osv and osv.osv refer to the
 # same module.
 # Introduced around 2011.02.
 # Change to False around 2013.02.
 open_openerp_namespace = False
 
-# If True, openerp.netsvc.LocalService() can be used to lookup reports or to
-# access openerp.workflow.
+# If True, odoo.netsvc.LocalService() can be used to lookup reports or to
+# access odoo.workflow.
 # Introduced around 2013.03.
 # Among the related code:
-# - The openerp.netsvc.LocalService() function.
-# - The openerp.report.interface.report_int._reports dictionary.
-# - The register attribute in openerp.report.interface.report_int (and in its
+# - The odoo.netsvc.LocalService() function.
+# - The odoo.report.interface.report_int._reports dictionary.
+# - The register attribute in odoo.report.interface.report_int (and in its
 # - auto column in ir.actions.report.xml.
 # inheriting classes).
 allow_local_service = True
 
-# Applies for the register attribute in openerp.report.interface.report_int.
+# Applies for the register attribute in odoo.report.interface.report_int.
 # See comments for allow_local_service above.
 # Introduced around 2013.03.
 allow_report_int_registration = True
 
-# If True, the functions in openerp.pooler can be used.
+# If True, the functions in odoo.pooler can be used.
 # Introduced around 2013.03 (actually they are deprecated since much longer
 # but no warning was dispayed in the logs).
 openerp_pooler = True

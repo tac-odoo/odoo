@@ -317,8 +317,8 @@ class rml_parse(object):
 class report_sxw(report_rml, preprocess.report):
     """
     The register=True kwarg has been added to help remove the
-    openerp.netsvc.LocalService() indirection and the related
-    openerp.report.interface.report_int._reports dictionary:
+    odoo.netsvc.LocalService() indirection and the related
+    odoo.report.interface.report_int._reports dictionary:
     report_sxw registered in XML with auto=False are also registered in Python.
     In that case, they are registered in the above dictionary. Since
     registration is automatically done upon instanciation, and that

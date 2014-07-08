@@ -35,7 +35,7 @@ import os
 import tempfile
 
 _logger = logging.getLogger(__name__)
-_test_logger = logging.getLogger('openerp.tests')
+_test_logger = logging.getLogger('odoo.tests')
 
 
 def try_report(cr, uid, rname, ids, data=None, context=None, our_module=None, report_type=None):

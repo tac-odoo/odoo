@@ -21,7 +21,6 @@
 
 from odoo.workflow.service import WorkflowService
 
-# The new API is in openerp.workflow.workflow_service
 # OLD API of the Workflow
 
 def clear_cache(cr, uid):

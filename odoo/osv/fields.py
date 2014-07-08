@@ -167,7 +167,7 @@ class _column(object):
            e.g. when this field is used as ``rec_name``.
 
            :param obj: the ``BaseModel`` instance this column belongs to 
-           :param value: a proper value as returned by :py:meth:`~openerp.orm.osv.BaseModel.read`
+           :param value: a proper value as returned by :py:meth:`~odoo.orm.osv.BaseModel.read`
                          for this column
         """
         # delegated to class method, so a column type A can delegate

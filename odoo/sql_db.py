@@ -608,7 +608,7 @@ def db_connect(db_name):
     return Connection(_Pool, db_name)
 
 def close_db(db_name):
-    """ You might want to call openerp.modules.registry.RegistryManager.delete(db_name) along this function."""
+    """ You might want to call odoo.modules.registry.RegistryManager.delete(db_name) along this function."""
     global _Pool
     if _Pool:
         _Pool.close_all(dsn(db_name))

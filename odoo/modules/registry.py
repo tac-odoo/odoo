@@ -64,7 +64,7 @@ class Registry(Mapping):
         # Indicates that the registry is 
         self.ready = False
 
-        # Inter-process signaling (used only when openerp.multi_process is True):
+        # Inter-process signaling (used only when odoo.multi_process is True):
         # The `base_registry_signaling` sequence indicates the whole registry
         # must be reloaded.
         # The `base_cache_signaling sequence` indicates all caches must be
@@ -171,7 +171,7 @@ class Registry(Mapping):
         """
         for model in self.models.itervalues():
             model.clear_caches()
-        # Special case for ir_ui_menu which does not use openerp.tools.ormcache.
+        # Special case for ir_ui_menu which does not use odoo.tools.ormcache.
         ir_ui_menu = self.models.get('ir.ui.menu')
         if ir_ui_menu is not None:
             ir_ui_menu.clear_cache()
@@ -291,7 +291,7 @@ class RegistryManager(object):
                                update_module)
             finally:
                 # set db tracker - cleaned up at the WSGI
-                # dispatching phase in openerp.service.wsgi_server.application
+                # dispatching phase in odoo.service.wsgi_server.application
                 threading.current_thread().dbname = db_name
 
     @classmethod

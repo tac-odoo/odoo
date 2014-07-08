@@ -135,12 +135,7 @@ class OdooHook(object):
 
 def initialize_sys_path():
     """
-    Setup an import-hook to be able to import OpenERP addons from the different
-    addons paths.
-
-    This ensures something like ``import crm`` (or even
-    ``import openerp.addons.crm``) works even if the addons are not in the
-    PYTHONPATH.
+    Setup an import-hook to be able to import Odoo addons as openerp.
     """
     global ad_paths
     global hooked
@@ -437,7 +432,7 @@ def get_test_modules(module):
 
 # Use a custom stream object to log the test executions.
 class TestStream(object):
-    def __init__(self, logger_name='openerp.tests'):
+    def __init__(self, logger_name='odoo.tests'):
         self.logger = logging.getLogger(logger_name)
         self.r = re.compile(r'^-*$|^ *... *$|^ok$')
     def flush(self):

@@ -46,7 +46,7 @@ from odoo.modules.module import initialize_sys_path, \
 from module import runs_post_install
 
 _logger = logging.getLogger(__name__)
-_test_logger = logging.getLogger('openerp.tests')
+_test_logger = logging.getLogger('odoo.tests')
 
 
 def load_module_graph(cr, graph, status=None, perform_checks=True, skip_modules=None, report=None):
@@ -292,7 +292,7 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
                 tools.config["demo"]['all'] = 1
 
         # This is a brand new registry, just created in
-        # openerp.modules.registry.RegistryManager.new().
+        # odoo.modules.registry.RegistryManager.new().
         registry = odoo.registry(cr.dbname)
 
         if 'base' in tools.config['update'] or 'all' in tools.config['update']:

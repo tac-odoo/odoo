@@ -75,7 +75,7 @@ class RequestHandler(werkzeug.serving.WSGIRequestHandler):
         # flag the current thread as handling a http request
         super(RequestHandler, self).setup()
         me = threading.currentThread()
-        me.name = 'openerp.service.http.request.%s' % (me.ident,)
+        me.name = 'odoo.service.http.request.%s' % (me.ident,)
 
 # _reexec() should set LISTEN_* to avoid connection refused during reload time. It
 # should also work with systemd socket activation. This is currently untested
@@ -270,7 +270,7 @@ class ThreadedServer(CommonServer):
         for i in range(odoo.tools.config['max_cron_threads']):
             def target():
                 self.cron_thread(i)
-            t = threading.Thread(target=target, name="openerp.service.cron.cron%d" % i)
+            t = threading.Thread(target=target, name="odoo.service.cron.cron%d" % i)
             t.setDaemon(True)
             t.start()
             _logger.debug("cron%d started!" % i)
@@ -282,7 +282,7 @@ class ThreadedServer(CommonServer):
         self.httpd.serve_forever()
 
     def http_spawn(self):
-        t = threading.Thread(target=self.http_thread, name="openerp.service.httpd")
+        t = threading.Thread(target=self.http_thread, name="odoo.service.httpd")
         t.setDaemon(True)
         t.start()
         _logger.info('HTTP service (werkzeug) running on %s:%s', self.interface, self.port)
@@ -790,7 +790,7 @@ class WorkerCron(Worker):
         return db_names
 
     def process_work(self):
-        rpc_request = logging.getLogger('openerp.netsvc.rpc.request')
+        rpc_request = logging.getLogger('odoo.netsvc.rpc.request')
         rpc_request_flag = rpc_request.isEnabledFor(logging.DEBUG)
         _logger.debug("WorkerCron (%s) polling for jobs", self.pid)
         db_names = self._db_list()

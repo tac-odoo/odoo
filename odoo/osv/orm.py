@@ -127,7 +127,7 @@ def test_modifiers(what, expected):
 
 # To use this test:
 # import openerp
-# openerp.osv.orm.modifiers_tests()
+# odoo.osv.orm.modifiers_tests()
 def modifiers_tests():
     test_modifiers('<field name="a"/>', '{}')
     test_modifiers('<field name="a" invisible="1"/>', '{"invisible": true}')

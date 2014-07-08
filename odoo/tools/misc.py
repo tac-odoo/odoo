@@ -28,6 +28,7 @@ Miscellaneous tools used by OpenERP.
 from functools import wraps
 import cProfile
 from contextlib import contextmanager
+import re
 import subprocess
 import logging
 import os
@@ -1065,16 +1066,18 @@ class mute_logger(object):
     """Temporary suppress the logging.
     Can be used as context manager or decorator.
 
-        @mute_logger('openerp.plic.ploc')
+        @mute_logger('odoo.plic.ploc')
         def do_stuff():
             blahblah()
 
-        with mute_logger('openerp.foo.bar'):
+        with mute_logger('odoo.foo.bar'):
             do_suff()
 
     """
     def __init__(self, *loggers):
-        self.loggers = loggers
+        self.loggers = map(
+            lambda name: re.sub(r'^openerp\.(.+)$', r'odoo.\g<1>', name),
+            loggers)
 
     def filter(self, record):
         return 0

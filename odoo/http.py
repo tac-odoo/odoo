@@ -192,7 +192,7 @@ class WebRequest(object):
 
     .. attribute:: env
 
-        an :class:`openerp.api.Environment` bound to the current
+        an :class:`odoo.api.Environment` bound to the current
         request's ``cr``, ``uid`` and ``context``
     """
     def __init__(self, httprequest):
@@ -212,7 +212,7 @@ class WebRequest(object):
         self._failed = None
 
         # set db/uid trackers - they're cleaned up at the WSGI
-        # dispatching phase in openerp.service.wsgi_server.application
+        # dispatching phase in odoo.service.wsgi_server.application
         if self.db:
             threading.current_thread().dbname = self.db
         if self.session.uid:
@@ -531,7 +531,7 @@ def to_jsonable(o):
 def jsonrequest(f):
     """ 
         .. deprecated:: 8.0
-            Use the :func:`~openerp.http.route` decorator instead.
+            Use the :func:`~odoo.http.route` decorator instead.
     """
     base = f.__name__.lstrip('/')
     if f.__name__ == "index":
@@ -618,7 +618,7 @@ def httprequest(f):
     """ 
         .. deprecated:: 8.0
 
-        Use the :func:`~openerp.http.route` decorator instead.
+        Use the :func:`~odoo.http.route` decorator instead.
     """
     base = f.__name__.lstrip('/')
     if f.__name__ == "index":
@@ -1297,7 +1297,7 @@ class Root(object):
                 if db:
                     odoo.modules.registry.RegistryManager.check_registry_signaling(db)
                     try:
-                        with odoo.tools.mute_logger('openerp.sql_db'):
+                        with odoo.tools.mute_logger('odoo.sql_db'):
                             ir_http = request.registry['ir.http']
                     except (AttributeError, psycopg2.OperationalError):
                         # psycopg2 error or attribute error while constructing

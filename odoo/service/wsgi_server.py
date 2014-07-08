@@ -49,7 +49,7 @@ _logger = logging.getLogger(__name__)
 
 # XML-RPC fault codes. Some care must be taken when changing these: the
 # constants are also defined client-side and must remain in sync.
-# User code must use the exceptions defined in ``openerp.exceptions`` (not
+# User code must use the exceptions defined in ``odoo.exceptions`` (not
 # create directly ``xmlrpclib.Fault`` objects).
 RPC_FAULT_CODE_CLIENT_ERROR = 1 # indistinguishable from app. error.
 RPC_FAULT_CODE_APPLICATION_ERROR = 1
@@ -66,7 +66,7 @@ def xmlrpc_return(start_response, service, method, params, string_faultcode=Fals
     and XML-RPC fault codes.
     """
     # Map OpenERP core exceptions to XML-RPC fault codes. Specific exceptions
-    # defined in ``openerp.exceptions`` are mapped to specific fault codes;
+    # defined in ``odoo.exceptions`` are mapped to specific fault codes;
     # all the other exceptions are mapped to the generic
     # RPC_FAULT_CODE_APPLICATION_ERROR value.
     # This also mimics SimpleXMLRPCDispatcher._marshaled_dispatch() for
@@ -99,7 +99,7 @@ def xmlrpc_handle_exception_int(e):
         info = e.traceback
         # Which one is the best ?
         formatted_info = "".join(traceback.format_exception(*info))
-        #formatted_info = openerp.tools.exception_to_unicode(e) + '\n' + info
+        #formatted_info = odoo.tools.exception_to_unicode(e) + '\n' + info
         fault = xmlrpclib.Fault(RPC_FAULT_CODE_APPLICATION_ERROR, formatted_info)
         response = xmlrpclib.dumps(fault, allow_none=False, encoding=None)
     else:
@@ -110,7 +110,7 @@ def xmlrpc_handle_exception_int(e):
             info = sys.exc_info()
             # Which one is the best ?
             formatted_info = "".join(traceback.format_exception(*info))
-            #formatted_info = openerp.tools.exception_to_unicode(e) + '\n' + info
+            #formatted_info = odoo.tools.exception_to_unicode(e) + '\n' + info
             fault = xmlrpclib.Fault(RPC_FAULT_CODE_APPLICATION_ERROR, formatted_info)
             response = xmlrpclib.dumps(fault, allow_none=None, encoding=None)
     return response
@@ -186,7 +186,7 @@ def application_unproxied(environ, start_response):
     """ WSGI entry point."""
     # cleanup db/uid trackers - they're set at HTTP dispatch in
     # web.session.OpenERPSession.send() and at RPC dispatch in
-    # openerp.service.web_services.objects_proxy.dispatch().
+    # odoo.service.web_services.objects_proxy.dispatch().
     # /!\ The cleanup cannot be done at the end of this `application`
     # method because werkzeug still produces relevant logging afterwards 
     if hasattr(threading.current_thread(), 'uid'):

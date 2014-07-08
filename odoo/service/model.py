@@ -23,7 +23,7 @@ def dispatch(method, params):
     (db, uid, passwd ) = params[0:3]
 
     # set uid tracker - cleaned up at the WSGI
-    # dispatching phase in openerp.service.wsgi_server.application
+    # dispatching phase in odoo.service.wsgi_server.application
     threading.current_thread().uid = uid
 
     params = params[3:]

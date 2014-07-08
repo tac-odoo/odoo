@@ -171,7 +171,7 @@ class Field(object):
                 return [('name', operator, value)]
 
         The compute method has to assign the field on all records of the invoked
-        recordset. The decorator :meth:`openerp.api.depends` must be applied on
+        recordset. The decorator :meth:`odoo.api.depends` must be applied on
         the compute method to specify the field dependencies; those dependencies
         are used to determine when to recompute the field; recomputation is
         automatic and guarantees cache/database consistency. Note that the same

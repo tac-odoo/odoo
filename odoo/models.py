@@ -222,8 +222,9 @@ class MetaModel(api.Meta):
             return
 
         if not hasattr(self, '_module'):
-            assert self.__module__.startswith(('odoo.addons.', 'openerp.addons.'))
-            module_name = self.__module__.split('.')[2]
+            fullmod = self.__module__
+            assert fullmod.startswith(('odoo.addons.', 'openerp.addons.'))
+            module_name = fullmod.split('.')[2]
             self._module = module_name
 
         # Remember which models to instanciate for this module.

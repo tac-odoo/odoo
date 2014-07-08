@@ -44,11 +44,11 @@ def log(logger, level, prefix, msg, depth=None):
 
 def LocalService(name):
     """
-    The openerp.netsvc.LocalService() function is deprecated. It still works
+    The odoo.netsvc.LocalService() function is deprecated. It still works
     in two cases: workflows and reports. For workflows, instead of using
-    LocalService('workflow'), openerp.workflow should be used (better yet,
-    methods on openerp.osv.orm.Model should be used). For reports,
-    openerp.report.render_report() should be used (methods on the Model should
+    LocalService('workflow'), odoo.workflow should be used (better yet,
+    methods on odoo.osv.orm.Model should be used). For reports,
+    odoo.report.render_report() should be used (methods on the Model should
     be provided too in the future).
     """
     assert odoo.conf.deprecation.allow_local_service
@@ -204,22 +204,22 @@ def init_logger():
         _logger.debug('logger level set: "%s"', logconfig_item)
 
 DEFAULT_LOG_CONFIGURATION = [
-    'openerp.workflow.workitem:WARNING',
-    'openerp.http.rpc.request:INFO',
-    'openerp.http.rpc.response:INFO',
-    'openerp.addons.web.http:INFO',
-    'openerp.sql_db:INFO',
+    'odoo.workflow.workitem:WARNING',
+    'odoo.http.rpc.request:INFO',
+    'odoo.http.rpc.response:INFO',
+    'odoo.addons.web.http:INFO',
+    'odoo.sql_db:INFO',
     ':INFO',
 ]
 PSEUDOCONFIG_MAPPER = {
-    'debug_rpc_answer': ['openerp:DEBUG','openerp.http.rpc.request:DEBUG', 'openerp.http.rpc.response:DEBUG'],
-    'debug_rpc': ['openerp:DEBUG','openerp.http.rpc.request:DEBUG'],
-    'debug': ['openerp:DEBUG'],
-    'debug_sql': ['openerp.sql_db:DEBUG'],
+    'debug_rpc_answer': ['odoo:DEBUG','odoo.http.rpc.request:DEBUG', 'odoo.http.rpc.response:DEBUG'],
+    'debug_rpc': ['odoo:DEBUG','odoo.http.rpc.request:DEBUG'],
+    'debug': ['odoo:DEBUG'],
+    'debug_sql': ['odoo.sql_db:DEBUG'],
     'info': [],
-    'warn': ['openerp:WARNING', 'werkzeug:WARNING'],
-    'error': ['openerp:ERROR', 'werkzeug:ERROR'],
-    'critical': ['openerp:CRITICAL', 'werkzeug:CRITICAL'],
+    'warn': ['odoo:WARNING', 'werkzeug:WARNING'],
+    'error': ['odoo:ERROR', 'werkzeug:ERROR'],
+    'critical': ['odoo:CRITICAL', 'werkzeug:CRITICAL'],
 }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

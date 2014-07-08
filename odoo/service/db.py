@@ -29,7 +29,7 @@ self_id_protect = threading.Semaphore()
 class DatabaseExists(Warning):
     pass
 
-# This should be moved to openerp.modules.db, along side initialize().
+# This should be moved to odoo.modules.db, along side initialize().
 def _initialize_db(id, db_name, demo, lang, user_password):
     try:
         self_actions[id]['progress'] = 0
@@ -139,7 +139,7 @@ def exp_duplicate_database(db_original_name, db_name):
 
 def exp_get_progress(id):
     if self_actions[id]['thread'].isAlive():
-#       return openerp.modules.init_progress[db_name]
+#       return odoo.modules.init_progress[db_name]
         return min(self_actions[id].get('progress', 0), 0.95), []
     else:
         clean = self_actions[id]['clean']
@@ -354,7 +354,7 @@ def exp_rename(old_name, new_name):
         shutil.move(old_fs, new_fs)
     return True
 
-@odoo.tools.mute_logger('openerp.sql_db')
+@odoo.tools.mute_logger('odoo.sql_db')
 def exp_db_exist(db_name):
     ## Not True: in fact, check if connection to database is possible. The database may exists
     return bool(odoo.sql_db.db_connect(db_name))

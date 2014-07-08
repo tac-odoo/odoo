@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-The module :mod:`openerp.tests.common` provides unittest2 test cases and a few
+The module :mod:`odoo.tests.common` provides unittest2 test cases and a few
 helpers and classes to write tests.
 
 """
@@ -278,7 +278,7 @@ class HttpCase(TransactionCase):
     def _wait_remaining_requests(self):
         t0 = int(time.time())
         for thread in threading.enumerate():
-            if thread.name.startswith('openerp.service.http.request.'):
+            if thread.name.startswith('odoo.service.http.request.'):
                 while thread.isAlive():
                     # Need a busyloop here as thread.join() masks signals
                     # and would prevent the forced shutdown.

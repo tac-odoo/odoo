@@ -148,7 +148,7 @@ def _eval_xml(self, node, pool, cr, uid, idref, context=None):
             try:
                 return unsafe_eval(a_eval, idref2)
             except Exception:
-                logging.getLogger('openerp.tools.convert.init').error(
+                logging.getLogger('odoo.tools.convert.init').error(
                     'Could not eval(%s) for %s in %s', a_eval, node.get('name'), context)
                 raise
         def _process(s, idref):
