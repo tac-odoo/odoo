@@ -44,7 +44,6 @@
         'account_chart_template.xml',
         'account_chart_small_business_template.xml',
         'l10n_chart_cn_wizard.xml',
-        'base_data.xml',
     ],
     'license': 'GPL-3',
     'auto_install': False,
