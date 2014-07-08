@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="planner_action" model="ir.actions.act_window">
+            <field name="name">Planner</field>
+            <field name="res_model">ir.aplication.planner</field>
+            <field name="view_type">form</field>
+        </record>
+        <record id="planner_category" model="ir.actions.act_window">
+            <field name="name">Planner</field>
+            <field name="res_model">ir.application.planner.page.category</field>
+            <field name="view_type">form</field>
+        </record>
+        <record id="planner_search_view" model="ir.ui.view">
+            <field name="name">planner.xml.search</field>
+            <field name="model">ir.application.planner.page</field>
+            <field name="arch" type="xml">
+                <search string="Planner Search">
+                    <group expand="0" string="Group By" colspan="4">
+                        <filter string="Category" domain="[]" context="{'group_by':'category_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+  
+        <record id="planner_page" model="ir.actions.act_window">
+            <field name="name">page</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">ir.application.planner.page</field>
+            <field name="view_type">form</field>
+        </record>
+        
+        <record id="planner_view_tree" model="ir.ui.view">
+            <field name="name">planner.xml.tree</field>
+            <field name="model">ir.application.planner.page</field>
+            <field name="arch" type="xml">
+                <tree string="Report xml">
+                    <field name="category_id"/>
+                    <field name="planner_id"/>
+                    <field name="name"/>
+                    <field name="description"/>
+                    <field name="sequence"/>
+                    <field name="completed"/>
+                </tree>
+            </field>
+        </record>
+       
+     
+        <menuitem  name="Planner" id="planner_root_menu"/>
+        <menuitem name="planner" id="planner_main_menu" parent="planner_root_menu"/>
+        <menuitem action="planner_action" name="planner" id="plawwnner_application" parent="planner_main_menu"/>
+        <menuitem action="planner_category" name="category" id="plannedddr_category" parent="planner_main_menu"/>
+        <menuitem action="planner_page" name="page" id="plannerssss_page" parent="planner_main_menu"/>
+    </data>
+</openerp>

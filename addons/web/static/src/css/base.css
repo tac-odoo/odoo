@@ -70,6 +70,22 @@
   overflow: hidden;
 }
 
+#oe_main_menu_navbar.navbar .oe_planner_systray {
+  width: 100px;
+  height: 10px;
+  margin: 10px 20px 0 0;
+}
+#oe_main_menu_navbar.navbar .oe_planner_systray div.progress {
+  height: 10px;
+  cursor: pointer;
+}
+
+.planner-dialog {
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .openerp {
   padding: 0;
   margin: 0;
@@ -369,6 +385,16 @@
 .openerp .oe_form_dirty button.oe_highlight_on_dirty:hover {
   background: #ed6f6a;
 }
+.openerp .oe_warning_redirect {
+  border: none !important;
+  padding: 0 !important;
+  margin-left: 20px !important;
+  background: #f5f7f9 !important;
+  box-shadow: none !important;
+}
+.openerp .oe_warning_redirect:hover {
+  text-decoration: underline !important;
+}
 .openerp .oe_stat_button {
   font-weight: normal;
   width: 132px !important;
@@ -406,16 +432,6 @@
   height: 38px;
   display: inline;
   vertical-align: middle;
-}
-.openerp .oe_warning_redirect {
-  border: none !important;
-  padding: 0 !important;
-  margin-left: 20px !important;
-  background: #f5f7f9 !important;
-  box-shadow: none !important;
-}
-.openerp .oe_warning_redirect:hover {
-  text-decoration: underline !important;
 }
 .openerp .oe_stat_button:hover {
   background: #7c7bad;
