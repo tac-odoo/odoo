@@ -1,5 +1,6 @@
 (function(){
 var instance = openerp;
+var QWeb = instance.web.qweb;
 
 instance.web.Planner = instance.web.WebClient.include({
     show_application: function() {
@@ -9,8 +10,9 @@ instance.web.Planner = instance.web.WebClient.include({
         this.menu.$el.find(".oe_menu_toggler").each(function(el){
             root_menu.push($(this).data('menu'));
         });
-        var planner_manager = new instance.web.PlannerManager(); 
+        var planner_manager = new instance.web.PlannerManager();
         planner_manager.prependTo(window.$('.oe_systray'));
+
          // Hack, I can't convince my self to use .include for menu too ;)
         var open_menu = self.menu.open_menu;
         self.menu.open_menu = function(){
@@ -18,8 +20,8 @@ instance.web.Planner = instance.web.WebClient.include({
             var that = this;
             self.fetch_application_planner().then(function(application){
                 var id = that.$el.find('.active').children().data("menu");
-                if(_.intersection(application, root_menu, [id]).length){
-                    planner_manager.active_id = id;
+                if(_.intersection(_.values(application), root_menu, [id]).length){
+                    planner_manager.active_id =_.invert(application)[id];
                     planner_manager.show();
                 }else{
                     planner_manager.hide();
@@ -32,21 +34,20 @@ instance.web.Planner = instance.web.WebClient.include({
     fetch_application_planner: function(){
         self = this;
         var def = $.Deferred();
-        var planner_application = [];
-        if (this.planner_application){
-            def.resolve(self.planner_application);
+        if (this.planner_bymenu){
+            def.resolve(self.planner_bymenu);
         }else{
-            self.planner_application = [];
+            self.planner_bymenu = {};// {'apps_id': 'menu_id'}
             (new instance.web.Model('ir.aplication.planner')).query().all().then(function(res) {
-                _(res).each(function(menu){
-                    self.planner_application.push(menu.application_id[0]);
+                _(res).each(function(apps){
+                    self.planner_bymenu[apps.id] = apps.application_id[0];
                 });
-                def.resolve(self.planner_application);
+                def.resolve(self.planner_bymenu);
             }).fail(function() {def.reject();});
         }
         return def;
     },
-   
+
 });
 
 
@@ -58,32 +59,81 @@ instance.web.PlannerManager = instance.web.Widget.extend({
 
     init: function(){
         this.dialog = new instance.web.PlannerDialog();
+        this.dialog.planner_manger = this;
         this.dialog.appendTo(document.body);
-        this.applications = [];
-        this.active_id;
+        this.applications = {}; //{ 'apps_id': 'data'}
     },
 
     show: function(){
-       this.$el.show();
+        this.$el.show();
     },
 
     hide: function(){
-       this.$el.hide();
+        this.$el.hide();
     },
-    
+
+    load_apps:function(){
+        var self = this;
+        var def = $.Deferred();
+        var id = parseInt(this.active_id, 10);
+        // if application already fetch
+        if(!!this.applications[id]) {
+            def.resolve(this.applications[id]);
+        }else{
+            // fetch all fields except description
+            var fields = ['category_id', 'planner_id', 'name', 'description', 'sequence', 'completed'];
+            (new instance.web.Model('ir.application.planner.page')).query(fields)
+                        .filter([["planner_id", "=", id]]).order_by(['sequence']).all().then(function(res) {
+                            self.applications[id] = res;
+                            def.resolve(res);
+                        });
+        }
+        return def;
+    },
+
     toggle_dialog: function(){
-       this.dialog.$('#PlannerModal').modal('toggle');
+        this.dialog.$('#PlannerModal').modal('toggle');
     },
 });
 instance.web.PlannerDialog = instance.web.Widget.extend({
     template:'PlannerDialog',
-    show: function(){
-       this.$el.modal('show');
+    events: {
+        'show.bs.modal': 'show',
+        'click .menu-item': 'load_page',
+        'click button.done' : 'complete_page'
+        
     },
 
-    hide: function(){
-       this.$el.modal('hide');
+    render_menubar: function(data){
+        this.$('.menubar').html(QWeb.render("PlannerMenu", {'menu':data}));
     },
-});
+
+    render_page: function(data){
+        this.$('.content').html(data.description);
+    },
+
+    load_page: function(ev){
+        var id = $(ev.target).data('page');
+        (new instance.web.Model('ir.application.planner.page')).query(['description'])
+                        .filter([["id", "=", id]]).all().then(function(res) {
+                            self.render_page(res[0]);
+                        });
+
+    },
+
+    complete_page: function(){
+        console.log('eeee');
+    },
+
+    show: function(){
+        self = this;
+        this.planner_manger.load_apps().then(function(data){
+            var group = _.groupBy(data, function(obj){ return obj['category_id'][1]});
+            self.render_menubar(group);
+        });
+    },
+
+
+    });
 
 })();

@@ -33,14 +33,17 @@ class ir_application_planner(osv.Model):
 
 class ir_application_planner_page_category(osv.Model):
     _name = 'ir.application.planner.page.category'
+    _order = 'sequence'
     _columns = {
         'name': fields.char('Name'),
         'icon': fields.char('Icon'),
+        'sequence': fields.integer('Sequence')
     }
 
 
 class ir_application_planner_page(osv.Model):
     _name = 'ir.application.planner.page'
+    _order = 'sequence'
     _columns = {
         'category_id': fields.many2one('ir.application.planner.page.category'),
         'planner_id': fields.many2one('ir.aplication.planner'),

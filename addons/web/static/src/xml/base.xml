@@ -408,45 +408,44 @@
         </div>
     </li>
 </t>
+<t t-name="PlannerMenu">
+    <ul class="nav nav-list">
+        <t t-foreach="menu" t-as="category">
+            <li>
+                <label class="tree-toggle nav-header"><t t-esc="category"/></label>
+                <t t-foreach="menu[category]" t-as="item">
+                    <ul class="nav nav-list tree">
+                        <li class="menu-item"><a t-att-data-page="item.id" herf="#">
+                                <i class="fa fa-check fa-fw"/>
+                                <t t-esc="item.name"/></a></li>
+
+                    </ul>
+                </t>
+            </li>
+            <li class="divider"></li>
+        </t>
+
+    </ul>
+</t>
 <t t-name="PlannerDialog">
     <div>
         <div class="modal fade" id="PlannerModal" tabindex="-1" role="dialog" aria-labelledby="PlannerModalLabel" aria-hidden="true">
             <div class="modal-dialog planner-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">times</span><span class="sr-only">Close</span></button>
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">x</span><span class="sr-only">Close</span></button>
                         <h4 class="modal-title" id="PlannerLabel">Modal title</h4>
                     </div>
                     <div class="modal-body">
-
                         <div class="row">
-                            <div class="col-md-3">
-                                <ul class="nav nav-pills nav-stacked">
-                                    <li>
-                                        <li>
-                                            <a class="tree-toggle nav-header" href="http://www.jquery2dotnet.com"><i class="fa fa-file-o fa-fw"></i>Pages</a>
-                                            <ul class="nav tree">
-                                                <li><a href="#">JavaScript</a>
-                                                </li>
-                                                <li><a href="#">CSS</a>
-                                                </li>
-                                            </ul>
-
-                                        </li>
-
-                                    </li>
-                                    <li><a href="http://www.jquery2dotnet.com"><i class="fa fa-file-o fa-fw"></i>Pages</a></li>
-                                    <li><a href="http://www.jquery2dotnet.com"><i class="fa fa-bar-chart-o fa-fw"></i>Charts</a></li>
-                                    <li><a href="http://www.jquery2dotnet.com"><i class="fa fa-table fa-fw"></i>Table</a></li>
-                                    <li><a href="http://www.jquery2dotnet.com"><i class="fa fa-tasks fa-fw"></i>Forms</a></li>
-                                    <li><a href="http://www.jquery2dotnet.com"><i class="fa fa-calendar fa-fw"></i>Calender</a></li>
-                                    <li><a href="http://www.jquery2dotnet.com"><i class="fa fa-book fa-fw"></i>Library</a></li>
-                                    <li><a href="http://www.jquery2dotnet.com"><i class="fa fa-pencil fa-fw"></i>Applications</a></li>
-                                    <li><a href="http://www.jquery2dotnet.com"><i class="fa fa-cogs fa-fw"></i>Settings</a></li>
-                                </ul>
+                            <div class="col-md-3 menubar">
                             </div>
-                            <div class="col-md-9 well">
-                                Vertical admin menu
+                            <div class="col-md-9">
+                                <div class="content"></div>
+                                <footer>
+                                    <button type="button" class="btn btn-default done">Mark as done</button>
+                                    <button type="button" class="btn btn-default pull-right next">Next step</button>
+                                </footer>
                             </div>
                         </div>
                     </div>
