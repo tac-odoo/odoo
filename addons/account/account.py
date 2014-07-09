@@ -2042,15 +2042,14 @@ class account_tax(osv.osv):
                 tax_lines = []
                 if apply_on == 'invoice':
                     tax_lines = tax.tax_invoice_line_ids
-                if apply_on == 'refund':
+                elif apply_on == 'refund':
                     tax_lines = tax.tax_refund_line_ids
-                elif tax_lines:
-                    for tax_line in tax_lines:
-                        data = tax_line.compute_tax_line(price_unit, date=date)
-                        data[0]['todo'] = 0
-                        if tax.price_include:
-                            data[0]['todo'] = 1
-                        res.extend(data)
+                for tax_line in tax_lines:
+                    data = tax_line.compute_tax_line(price_unit, date=date)
+                    data[0]['todo'] = 0
+                    if tax.price_include:
+                        data[0]['todo'] = 1
+                    res.extend(data)
         total = 0.0
         for r in res:
             if r['todo'] and r['code_type'] == 'tax':
