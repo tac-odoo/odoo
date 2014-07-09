@@ -136,8 +136,8 @@ $(document).ready(function () {
                 cacheResults: true
             }
         });
-        // Adds: create tags on space + blur
-        $("input.load_tags").on('whitespaceKeyDown blur', function () {
+        // Adds: create tags on space + enter
+        $("input.load_tags").on('whitespaceKeyDown enterKeyDown', function () {
             var self = $(this);
             var tag = $(this).val();
             if(tag){
