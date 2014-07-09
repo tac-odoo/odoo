@@ -146,7 +146,7 @@ $(document).ready(function () {
                       alert("Sorry you need more than 30 Karma.");
                   }
                   else {
-                      self.textext()[0].tags().addTags([ tag ]);
+                      self.textext()[0].tags().addTags([ String(result) ]);
                   }
               });
             }
@@ -155,7 +155,6 @@ $(document).ready(function () {
         $("input.load_tags").on('isTagAllowed', function(e, data) {
             _.each($(this).textext()[0].tags()._formData, function( value ) {
                 if (value.toLowerCase() == data.tag.toLowerCase()) {
-                    alert("Tag \"" + value + "\" is already in the list");
                     data.result = false;
                 }
             });

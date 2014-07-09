@@ -136,8 +136,10 @@ class WebsiteForum(http.Controller):
     @http.route('/forum/check_tag', type='json', auth="public", methods=['POST'], website=True)
     def check_tag_existence(self, **post):
         cr, uid, context = request.cr, request.uid, request.context
-        if request.registry['forum.tag'].search(cr, uid, [('name','=',post['tags'])], context=context) or request.uid == SUPERUSER_ID or request.registry['res.users'].browse(cr, uid, uid, context=context).karma > 30:
-            return True
+        tags = request.registry['forum.tag'].search_read(request.cr, request.uid, [], ['name'], context=request.context)
+        data = [tag['name'] for tag in tags if tag['name'].lower() == post['tags'].lower()]
+        if data or request.uid == SUPERUSER_ID or request.registry['res.users'].browse(cr, uid, uid, context=context).karma > 30:
+            return data
         return False
 
     @http.route(['/forum/<model("forum.forum"):forum>/faq'], type='http', auth="public", website=True)
