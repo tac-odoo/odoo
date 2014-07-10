@@ -41,7 +41,7 @@ class crm_helpdesk_report(osv.osv):
     _columns = {
         'name': fields.char('Year', required=False, readonly=True),
         'user_id':fields.many2one('res.users', 'User', readonly=True),
-        'section_id':fields.many2one('crm.case.section', 'Section', readonly=True),
+        'section_id':fields.many2one('crm.team', 'Section', readonly=True),
         'nbr': fields.integer('# of Cases', readonly=True),
         'state': fields.selection(AVAILABLE_STATES, 'Status', readonly=True),
         'month':fields.selection([('01', 'January'), ('02', 'February'), \
@@ -56,10 +56,9 @@ class crm_helpdesk_report(osv.osv):
         'date_deadline': fields.date('Deadline', select=True),
         'priority': fields.selection([('5', 'Lowest'), ('4', 'Low'), \
                     ('3', 'Normal'), ('2', 'High'), ('1', 'Highest')], 'Priority'),
-        'channel_id': fields.many2one('crm.case.channel', 'Channel'),
-        'categ_id': fields.many2one('crm.case.categ', 'Category', \
-                            domain="[('section_id','=',section_id),\
-                            ('object_id.model', '=', 'crm.helpdesk')]"),
+        'channel_id': fields.many2one('crm.channel', 'Channel'),
+        'categ_id': fields.many2one('crm.helpdesk.category', 'Category', \
+                            domain="[('section_id','=',section_id)]"),
         'planned_cost': fields.float('Planned Costs'),
         'create_date': fields.date('Creation Date' , readonly=True, select=True),
         'date_closed': fields.date('Close Date', readonly=True, select=True),

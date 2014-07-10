@@ -35,7 +35,7 @@ class crm_partner_report_assign(osv.osv):
         'date_review' : fields.date('Latest Partner Review'),
         'date_partnership' : fields.date('Partnership Date'),
         'country_id':fields.many2one('res.country', 'Country', readonly=True),
-        'section_id':fields.many2one('crm.case.section', 'Sales Team', readonly=True),
+        'section_id':fields.many2one('crm.team', 'Sales Team', readonly=True),
         'opp': fields.integer('# of Opportunity', readonly=True),
         'turnover': fields.float('Turnover', readonly=True),
         'period_id': fields.many2one('account.period', 'Invoice Period', readonly=True),

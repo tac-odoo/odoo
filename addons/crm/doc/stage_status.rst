@@ -20,7 +20,7 @@ following models are impacted:
    - ``lost``: ``stage_id and stage_id.probability = 0 and stage_id.on_change = True
      and stage_id.sequence != 1``
 
- - ``crm.case.stage`` do not have any ``state`` field anymore. 
+ - ``crm.stage`` do not have any ``state`` field anymore. 
  - ``crm.lead.report`` do not have any ``state`` field anymore. 
 
 By default a newly created lead is in a new stage. It means that it will
@@ -57,5 +57,5 @@ The following subtypes are triggered on ``crm.lead``:
    and obj.stage_id and obj.stage_id.sequence != 1'``
 
 
-Those subtypes are also available on the ``crm.case.section`` model and are used
+Those subtypes are also available on the ``crm.team`` model and are used
 for the auto subscription.

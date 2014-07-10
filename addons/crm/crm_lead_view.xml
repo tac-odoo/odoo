@@ -7,7 +7,7 @@
         <!-- Stage Search view -->
         <record id="crm_lead_stage_search" model="ir.ui.view">
             <field name="name">Stage - Search</field>
-            <field name="model">crm.case.stage</field>
+            <field name="model">crm.stage</field>
             <field name="arch" type="xml">
                 <search string="Stage Search">
                     <field name="name"/>
@@ -21,9 +21,9 @@
         <!-- Stage Form view -->
         <record id="crm_lead_stage_act" model="ir.actions.act_window">
             <field name="name">Stages</field>
-            <field name="res_model">crm.case.stage</field>
+            <field name="res_model">crm.stage</field>
             <field name="view_type">form</field>
-            <field name="view_id" ref="crm.crm_case_stage_tree"/>
+            <field name="view_id" ref="crm.crm_stage_tree"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to set a new stage in your lead/opportunity pipeline.
@@ -43,11 +43,9 @@
         <!-- Categories Form View -->
         <record id="crm_lead_categ_action" model="ir.actions.act_window">
             <field name="name">Sales Tags</field>
-            <field name="res_model">crm.case.categ</field>
+            <field name="res_model">crm.lead.tag</field>
             <field name="view_type">form</field>
             <field name="view_id" ref="crm_case_categ_tree-view"/>
-            <field name="context" eval="{'object_id': ref('model_crm_lead')}"/>
-            <field name="domain">[('object_id.model', '=', 'crm.lead')]</field>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to define a new sales tag.
@@ -118,7 +116,7 @@
                             <field name="partner_id" string="Customer"
                                 on_change="on_change_partner_id(partner_id)"
                                 options='{"create_name_field": "name"}'
-                                context="{'default_name': contact_name, 'default_street': street, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id, 'default_function': function, 'default_phone': phone, 'default_mobile': mobile, 'default_fax': fax, 'default_email': email_from, 'default_user_id': user_id, 'default_section_id': section_id}"/>
+                                context="{'default_name': contact_name, 'default_street': street, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id, 'default_function': function, 'default_phone': phone, 'default_mobile': mobile, 'default_fax': fax, 'default_email': email_from, 'default_user_id': user_id}"/>
                             <label for="street" string="Address"/>
                             <div>
                                 <field name="street" placeholder="Street..."/>
@@ -157,10 +155,8 @@
                         </group>
                         <group>
                             <field name="priority" widget="priority"/>
-                            <field name="categ_ids"
+                            <field name="tag_ids"
                                 widget="many2many_tags"
-                                domain="[('object_id.model','=','crm.lead')]"
-                                context="{'object_name': 'crm.lead'}"
                             />
                         </group>
                     </group>
@@ -325,7 +321,7 @@
             <field name="arch" type="xml">
                 <search string="Search Leads">
                     <field name="name" string="Lead / Customer" filter_domain="['|','|','|',('partner_name','ilike',self),('email_from','ilike',self),('contact_name','ilike',self),('name','ilike',self)]"/>
-                    <field name="categ_ids" string="Tag" filter_domain="[('categ_ids', 'ilike', self)]"/>
+                    <field name="tag_ids" string="Tag" filter_domain="[('tag_ids', 'ilike', self)]"/>
                     <field name="section_id" groups="base.group_multi_salesteams"/>
                     <field name="user_id"/>
                     <field name="partner_id" operator="child_of"/>
@@ -429,10 +425,9 @@
                                 </div>
                             </group>
                             <group>
-                                <field name="categ_ids"
+                                <field name="tag_ids"
                                     widget="many2many_tags"
-                                    context="{'object_name': 'crm.lead'}"
-                                    domain="[('object_id.model', '=', 'crm.lead')]"/>
+                                    />
 
                             </group>
                         </group>
@@ -486,7 +481,6 @@
                         </page>
                         <page string="Fund Raising" groups="crm.group_fund_raising">
                             <group>
-                                <field name="payment_mode" widget="selection"/>
                                 <field name="planned_cost"/>
                             </group>
                         </page>
@@ -537,7 +531,7 @@
             <field name="arch" type="xml">
                 <search string="Search Opportunities">
                     <field name="name" string="Opportunity" filter_domain="['|','|','|',('partner_id','ilike',self),('partner_name','ilike',self),('email_from','ilike',self),('name', 'ilike', self)]"/>
-                    <field name="categ_ids" string="Tag" filter_domain="[('categ_ids', 'ilike', self)]"/>
+                    <field name="tag_ids" string="Tag" filter_domain="[('tag_ids', 'ilike', self)]"/>
                     <field name="section_id" groups="base.group_multi_salesteams"/>
                     <field name="user_id"/>
                     <field name="partner_id" operator="child_of"/>

@@ -11,7 +11,7 @@
   I check default stage of lead.
 -
   !python {model: crm.lead}: |
-    stage = self.pool.get('crm.case.stage').search_read(cr,uid,[('sequence','=',1)],['id'],context)[0]
+    stage = self.pool.get('crm.stage').search_read(cr,uid,[('sequence','=',1)],['id'],context)[0]
     lead = self.browse(cr, uid, ref('test_crm_lead_new'))
     stage_id = self.stage_find(cr, uid , [lead], lead.section_id.id or False,[], context)
     assert stage_id == stage['id'], "Default stage of lead is incorrect!"
@@ -24,7 +24,7 @@
   Now I check default stage after change type.
 -
   !python {model: crm.lead}: |
-    stage = self.pool.get('crm.case.stage').search_read(cr,uid,[('sequence','=',1)],['id'],context)[0]
+    stage = self.pool.get('crm.stage').search_read(cr,uid,[('sequence','=',1)],['id'],context)[0]
     opp = self.browse(cr, uid, ref('test_crm_lead_new'))
     stage_id = self.stage_find(cr, uid , [opp], opp.section_id.id or False,[], context)
     assert stage_id == stage['id'], "Default stage of opportunity is incorrect!"

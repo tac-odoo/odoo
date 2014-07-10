@@ -153,7 +153,7 @@ msgid "Cancelled"
 msgstr "Preklicano"
 
 #. module: crm_claim
-#: model:crm.case.resource.type,name:crm_claim.type_claim2
+#: model:crm.campaign,name:crm_claim.type_claim2
 msgid "Preventive"
 msgstr "Preventiven"
 
@@ -401,7 +401,7 @@ msgid "Configure"
 msgstr "Nastavitve"
 
 #. module: crm_claim
-#: model:crm.case.resource.type,name:crm_claim.type_claim1
+#: model:crm.campaign,name:crm_claim.type_claim1
 msgid "Corrective"
 msgstr "Korektiven"
 

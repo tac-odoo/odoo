@@ -35,7 +35,7 @@ class crm_merge_opportunity(osv.osv_memory):
     _columns = {
         'opportunity_ids': fields.many2many('crm.lead', rel='merge_opportunity_rel', id1='merge_id', id2='opportunity_id', string='Leads/Opportunities'),
         'user_id': fields.many2one('res.users', 'Salesperson', select=True),
-        'section_id': fields.many2one('crm.case.section', 'Sales Team', select=True),
+        'section_id': fields.many2one('crm.team', 'Sales Team', select=True),
     }
 
     def action_merge(self, cr, uid, ids, context=None):
@@ -84,12 +84,12 @@ class crm_merge_opportunity(osv.osv_memory):
             to the ones user_id is member of. """
         if user_id:
             if section_id:
-                user_in_section = self.pool.get('crm.case.section').search(cr, uid, [('id', '=', section_id), '|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context, count=True)
+                user_in_section = self.pool.get('crm.team').search(cr, uid, [('id', '=', section_id), '|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context, count=True)
             else:
                 user_in_section = False
             if not user_in_section:
                 section_id = False
-                section_ids = self.pool.get('crm.case.section').search(cr, uid, ['|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context)
+                section_ids = self.pool.get('crm.team').search(cr, uid, ['|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context)
                 if section_ids:
                     section_id = section_ids[0]
         return {'value': {'section_id': section_id}}

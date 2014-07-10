@@ -27,7 +27,7 @@
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
                 <field name="user_id" position="after">
-                    <field name="categ_ids" widget="many2many_tags"/>
+                    <field name="tag_ids" widget="many2many_tags"/>
                 </field>
             </field>
         </record>

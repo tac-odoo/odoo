@@ -134,12 +134,12 @@ msgid "Cancelled"
 msgstr "Cancelada"
 
 #. module: crm_claim
-#: model:crm.case.resource.type,name:crm_claim.type_claim2
+#: model:crm.campaign,name:crm_claim.type_claim2
 msgid "Preventive"
 msgstr "Preventivo"
 
 #. module: crm_claim
-#: model:crm.case.stage,name:crm_claim.stage_claim2
+#: model:crm.stage,name:crm_claim.stage_claim2
 msgid "Fixed"
 msgstr "Fijado"
 
@@ -327,12 +327,12 @@ msgid "CRM Claim Report"
 msgstr "Informe de reclamaciones CRM"
 
 #. module: crm_claim
-#: model:crm.case.stage,name:crm_claim.stage_claim1
+#: model:crm.stage,name:crm_claim.stage_claim1
 msgid "Accepted as Claim"
 msgstr "Aceptado como reclamación"
 
 #. module: crm_claim
-#: model:crm.case.resource.type,name:crm_claim.type_claim1
+#: model:crm.campaign,name:crm_claim.type_claim1
 msgid "Corrective"
 msgstr "Correctivo"
 
@@ -466,7 +466,7 @@ msgid "User"
 msgstr "Usuario"
 
 #. module: crm_claim
-#: model:crm.case.stage,name:crm_claim.stage_claim5
+#: model:crm.stage,name:crm_claim.stage_claim5
 msgid "Awaiting Response"
 msgstr "A la espera de respuesta"
 
@@ -571,7 +571,7 @@ msgid "Attachments"
 msgstr "Documentos adjuntos"
 
 #. module: crm_claim
-#: model:ir.model,name:crm_claim.model_crm_case_stage
+#: model:ir.model,name:crm_claim.model_crm_stage
 msgid "Stage of case"
 msgstr "Etapa del caso"
 
@@ -732,7 +732,7 @@ msgid "February"
 msgstr "Febrero"
 
 #. module: crm_claim
-#: model:crm.case.stage,name:crm_claim.stage_claim3
+#: model:crm.stage,name:crm_claim.stage_claim3
 msgid "Won't fix"
 msgstr "No se corregirá"
 

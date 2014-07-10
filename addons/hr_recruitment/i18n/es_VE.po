@@ -944,7 +944,7 @@ msgid "April"
 msgstr "Abril"
 
 #. module: hr_recruitment
-#: model:crm.case.section,name:hr_recruitment.section_hr_department
+#: model:crm.team,name:hr_recruitment.section_hr_department
 msgid "HR Department"
 msgstr "Departamento de RRHH"
 

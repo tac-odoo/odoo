@@ -33,7 +33,7 @@ msgstr ""
 
 #. module: crm
 #: code:addons/crm/crm_lead.py:897
-#: selection:crm.case.stage,type:0
+#: selection:crm.stage,type:0
 #: view:crm.lead:0
 #: selection:crm.lead,type:0
 #: view:crm.lead.report:0
@@ -92,8 +92,8 @@ msgid "Delay to close"
 msgstr "Demora cierre"
 
 #. module: crm
-#: view:crm.case.stage:0
-#: field:crm.case.stage,name:0
+#: view:crm.stage:0
+#: field:crm.stage,name:0
 msgid "Stage Name"
 msgstr "Nombre de etapa"
 
@@ -139,7 +139,7 @@ msgid "Exp. Closing"
 msgstr "Cierre Esperado"
 
 #. module: crm
-#: help:crm.case.section,message_unread:0
+#: help:crm.team,message_unread:0
 #: help:crm.lead,message_unread:0
 #: help:crm.phonecall,message_unread:0
 msgid "If checked new messages require your attention."
@@ -162,12 +162,12 @@ msgid "It's only possible to convert one phonecall at a time."
 msgstr "Sólo es posible convertir una llamada telefónica cada vez."
 
 #. module: crm
-#: view:crm.case.resource.type:0
+#: view:crm.campaign:0
 #: view:crm.lead:0
 #: field:crm.lead,type_id:0
 #: view:crm.lead.report:0
 #: field:crm.lead.report,type_id:0
-#: model:ir.model,name:crm.model_crm_case_resource_type
+#: model:ir.model,name:crm.model_crm_campaign
 msgid "Campaign"
 msgstr "Campaña"
 
@@ -182,7 +182,7 @@ msgid "Expected closing month"
 msgstr "Mes esperado de cierre"
 
 #. module: crm
-#: help:crm.case.section,message_summary:0
+#: help:crm.team,message_summary:0
 #: help:crm.lead,message_summary:0
 #: help:crm.phonecall,message_summary:0
 msgid ""
@@ -281,8 +281,8 @@ msgstr ""
 "<b>%s una llamada</b> para el <em>%s</em>."
 
 #. module: crm
-#: model:ir.actions.act_window,name:crm.crm_case_resource_type_act
-#: model:ir.ui.menu,name:crm.menu_crm_case_resource_type_act
+#: model:ir.actions.act_window,name:crm.crm_campaign_act
+#: model:ir.ui.menu,name:crm.menu_crm_campaign_act
 msgid "Campaigns"
 msgstr "Campañas"
 
@@ -358,7 +358,7 @@ msgid "Contact"
 msgstr "Contacto"
 
 #. module: crm
-#: help:crm.case.section,change_responsible:0
+#: help:crm.team,change_responsible:0
 msgid ""
 "When escalating to this team override the salesman with the team leader."
 msgstr ""
@@ -415,13 +415,13 @@ msgstr ""
 "            "
 
 #. module: crm
-#: model:crm.case.stage,name:crm.stage_lead7
+#: model:crm.stage,name:crm.stage_lead7
 #: view:crm.lead:0
 msgid "Dead"
 msgstr "Muerta"
 
 #. module: crm
-#: field:crm.case.section,message_unread:0
+#: field:crm.team,message_unread:0
 #: view:crm.lead:0
 #: field:crm.lead,message_unread:0
 #: field:crm.phonecall,message_unread:0
@@ -447,12 +447,12 @@ msgid "Update Date"
 msgstr "Actualizar fecha"
 
 #. module: crm
-#: field:crm.case.section,user_id:0
+#: field:crm.team,user_id:0
 msgid "Team Leader"
 msgstr "Jefe de equipo"
 
 #. module: crm
-#: help:crm.case.stage,probability:0
+#: help:crm.stage,probability:0
 msgid ""
 "This percentage depicts the default/average probability of the Case for this "
 "stage to be a success"
@@ -496,7 +496,7 @@ msgid "Partner Contact Email"
 msgstr "Email de contacto de la empresa"
 
 #. module: crm
-#: model:ir.actions.act_window,help:crm.crm_case_section_act
+#: model:ir.actions.act_window,help:crm.crm_team_act
 msgid ""
 "<p class=\"oe_view_nocontent_create\">\n"
 "                Click to define a new sales team.\n"
@@ -604,7 +604,7 @@ msgstr ""
 "realizada entonces el estado se establece a 'No realizada'"
 
 #. module: crm
-#: field:crm.case.section,message_summary:0
+#: field:crm.team,message_summary:0
 #: field:crm.lead,message_summary:0
 #: field:crm.phonecall,message_summary:0
 msgid "Summary"
@@ -650,7 +650,7 @@ msgid "#Phone calls"
 msgstr "#Llamadas telefónicas"
 
 #. module: crm
-#: sql_constraint:crm.case.section:0
+#: sql_constraint:crm.team:0
 msgid "The code of the sales team must be unique !"
 msgstr "¡El código del equipo de ventas debe ser único!"
 
@@ -660,7 +660,7 @@ msgid "Email address of the contact"
 msgstr "Dirección de email del contacto"
 
 #. module: crm
-#: selection:crm.case.stage,state:0
+#: selection:crm.stage,state:0
 #: view:crm.lead:0
 #: selection:crm.lead,state:0
 msgid "In Progress"
@@ -687,7 +687,7 @@ msgstr ""
 "        "
 
 #. module: crm
-#: help:crm.case.section,reply_to:0
+#: help:crm.team,reply_to:0
 msgid ""
 "The email address put in the 'Reply-To' of all emails sent by OpenERP about "
 "cases in this sales team"
@@ -702,7 +702,7 @@ msgid "Creation Month"
 msgstr "Mes de creación"
 
 #. module: crm
-#: field:crm.case.section,resource_calendar_id:0
+#: field:crm.team,resource_calendar_id:0
 #: model:ir.ui.menu,name:crm.menu_action_resource_calendar_form
 msgid "Working Time"
 msgstr "Horario de trabajo"
@@ -750,7 +750,7 @@ msgid "The name of the segmentation."
 msgstr "El nombre de la segmentación."
 
 #. module: crm
-#: field:crm.case.stage,probability:0
+#: field:crm.stage,probability:0
 msgid "Probability (%)"
 msgstr "Probabilidad (%)"
 
@@ -771,8 +771,8 @@ msgstr "Tablero de estadísticas"
 
 #. module: crm
 #: code:addons/crm/crm_lead.py:877
-#: model:crm.case.stage,name:crm.stage_lead2
-#: selection:crm.case.stage,type:0
+#: model:crm.stage,name:crm.stage_lead2
+#: selection:crm.stage,type:0
 #: view:crm.lead:0
 #: selection:crm.lead,type:0
 #: view:crm.lead.report:0
@@ -784,7 +784,7 @@ msgid "Opportunity"
 msgstr "Oportunidad"
 
 #. module: crm
-#: model:crm.case.resource.type,name:crm.type_lead7
+#: model:crm.campaign,name:crm.type_lead7
 msgid "Television"
 msgstr "Televisión"
 
@@ -804,7 +804,7 @@ msgid "Stop Process"
 msgstr "Parar el proceso"
 
 #. module: crm
-#: field:crm.case.section,alias_id:0
+#: field:crm.team,alias_id:0
 msgid "Alias"
 msgstr "Alias"
 
@@ -863,7 +863,7 @@ msgid "Reference 2"
 msgstr "Referencia 2"
 
 #. module: crm
-#: help:crm.case.stage,section_ids:0
+#: help:crm.stage,section_ids:0
 msgid ""
 "Link between stages and sales teams. When set, this limitate the current "
 "stage to the selected sales teams."
@@ -872,8 +872,8 @@ msgstr ""
 "limitadas al equipo de venta seleccionado."
 
 #. module: crm
-#: view:crm.case.stage:0
-#: field:crm.case.stage,requirements:0
+#: view:crm.stage:0
+#: field:crm.stage,requirements:0
 msgid "Requirements"
 msgstr "Requerimientos"
 
@@ -983,7 +983,7 @@ msgstr ""
 "Oportunidades que están asignadas a mi o a uno de los equipos que gestiono"
 
 #. module: crm
-#: help:crm.case.section,resource_calendar_id:0
+#: help:crm.team,resource_calendar_id:0
 msgid "Used to compute open days"
 msgstr "Utilizado para cálculo de días abiertos"
 
@@ -1050,7 +1050,7 @@ msgstr ""
 "Esto instalará el módulo 'crm_claim'."
 
 #. module: crm
-#: model:crm.case.stage,name:crm.stage_lead6
+#: model:crm.stage,name:crm.stage_lead6
 #: view:crm.lead:0
 msgid "Won"
 msgstr "Ganado"
@@ -1061,12 +1061,12 @@ msgid "Overpassed Deadline"
 msgstr "Fecha límite sobrepasada"
 
 #. module: crm
-#: model:crm.case.section,name:crm.section_sales_department
+#: model:crm.team,name:crm.section_sales_department
 msgid "Sales Department"
 msgstr "Departamento de ventas"
 
 #. module: crm
-#: field:crm.case.stage,type:0
+#: field:crm.stage,type:0
 #: field:crm.lead,type:0
 #: field:crm.lead.report,type:0
 #: view:crm.opportunity2phonecall:0
@@ -1111,7 +1111,7 @@ msgid "Year of call"
 msgstr "Año de la llamada"
 
 #. module: crm
-#: view:crm.case.stage:0
+#: view:crm.stage:0
 #: view:crm.lead:0
 #: field:crm.lead,stage_id:0
 #: view:crm.lead.report:0
@@ -1135,10 +1135,10 @@ msgid "Phone calls which are in pending state"
 msgstr "Llamadas con estado pendiente"
 
 #. module: crm
-#: view:crm.case.section:0
-#: field:crm.case.section,stage_ids:0
-#: view:crm.case.stage:0
-#: model:ir.actions.act_window,name:crm.crm_case_stage_act
+#: view:crm.team:0
+#: field:crm.team,stage_ids:0
+#: view:crm.stage:0
+#: model:ir.actions.act_window,name:crm.crm_stage_act
 #: model:ir.actions.act_window,name:crm.crm_lead_stage_act
 #: model:ir.ui.menu,name:crm.menu_crm_lead_stage_act
 msgid "Stages"
@@ -1208,7 +1208,7 @@ msgid "Max Partner ID processed"
 msgstr "Máx ID de empresa procesado"
 
 #. module: crm
-#: help:crm.case.stage,on_change:0
+#: help:crm.stage,on_change:0
 msgid ""
 "Setting this stage will change the probability automatically on the "
 "opportunity."
@@ -1222,11 +1222,6 @@ msgid "oe_kanban_text_red"
 msgstr "oe_kanban_text_red"
 
 #. module: crm
-#: model:ir.ui.menu,name:crm.menu_crm_payment_mode_act
-msgid "Payment Modes"
-msgstr "Formas de pago"
-
-#. module: crm
 #: field:crm.lead.report,opening_date:0
 #: field:crm.phonecall.report,opening_date:0
 msgid "Opening Date"
@@ -1238,7 +1233,7 @@ msgid "Duration in Minutes"
 msgstr "Duración en minutos"
 
 #. module: crm
-#: field:crm.case.channel,name:0
+#: field:crm.channel,name:0
 msgid "Channel Name"
 msgstr "Nombre del canal"
 
@@ -1248,7 +1243,7 @@ msgid "Expected closing day"
 msgstr "Fecha de cierre prevista"
 
 #. module: crm
-#: help:crm.case.section,active:0
+#: help:crm.team,active:0
 msgid ""
 "If the active field is set to true, it will allow you to hide the sales team "
 "without removing it."
@@ -1257,7 +1252,7 @@ msgstr ""
 "eliminarlo."
 
 #. module: crm
-#: help:crm.case.stage,case_default:0
+#: help:crm.stage,case_default:0
 msgid ""
 "If you check this field, this stage will be proposed by default on each "
 "sales team. It will not assign this stage to existing teams."
@@ -1266,7 +1261,7 @@ msgstr ""
 "equipo de ventas. No asignará esta etapa a equipos existentes."
 
 #. module: crm
-#: help:crm.case.stage,type:0
+#: help:crm.stage,type:0
 msgid ""
 "This field is used to distinguish stages related to Leads from stages "
 "related to Opportunities, or to specify stages available for both types."
@@ -1307,13 +1302,13 @@ msgstr "Días para el cierre"
 
 #. module: crm
 #: code:addons/crm/crm_lead.py:1075
-#: field:crm.case.section,complete_name:0
+#: field:crm.team,complete_name:0
 #, python-format
 msgid "unknown"
 msgstr "desconocido"
 
 #. module: crm
-#: field:crm.case.section,message_is_follower:0
+#: field:crm.team,message_is_follower:0
 #: field:crm.lead,message_is_follower:0
 #: field:crm.phonecall,message_is_follower:0
 msgid "Is a Follower"
@@ -1328,7 +1323,7 @@ msgid "Date"
 msgstr "Fecha"
 
 #. module: crm
-#: model:crm.case.section,name:crm.crm_case_section_4
+#: model:crm.team,name:crm.crm_team_4
 msgid "Online Support"
 msgstr "Soporte en línea"
 
@@ -1362,7 +1357,7 @@ msgstr ""
 "entonces el estado se establece a 'Pendiente'."
 
 #. module: crm
-#: model:crm.case.section,name:crm.crm_case_section_1
+#: model:crm.team,name:crm.crm_team_1
 msgid "Sales Marketing Department"
 msgstr "Departamento de ventas y marketing"
 
@@ -1410,7 +1405,7 @@ msgid "Consulting"
 msgstr "Consultoría"
 
 #. module: crm
-#: field:crm.case.section,code:0
+#: field:crm.team,code:0
 msgid "Code"
 msgstr "Código"
 
@@ -1420,7 +1415,7 @@ msgid "Features"
 msgstr "Características"
 
 #. module: crm
-#: field:crm.case.section,child_ids:0
+#: field:crm.team,child_ids:0
 msgid "Child Teams"
 msgstr "Equipos hijos"
 
@@ -1499,7 +1494,7 @@ msgid "Merge leads/opportunities"
 msgstr "Fusionar iniciativas/oportunidades"
 
 #. module: crm
-#: help:crm.case.stage,sequence:0
+#: help:crm.stage,sequence:0
 msgid "Used to order stages. Lower is better."
 msgstr "Utilizado para ordenar etapas. Bajo es más prioritario."
 
@@ -1524,12 +1519,12 @@ msgid "Stage Changed"
 msgstr "Etapa cambiada"
 
 #. module: crm
-#: field:crm.case.stage,section_ids:0
+#: field:crm.stage,section_ids:0
 msgid "Sections"
 msgstr "Secciones"
 
 #. module: crm
-#: constraint:crm.case.section:0
+#: constraint:crm.team:0
 msgid "Error ! You cannot create recursive Sales team."
 msgstr "¡Error! No puede crear equipos de ventas recursivos."
 
@@ -1567,7 +1562,6 @@ msgstr ""
 
 #. module: crm
 #: field:crm.case.categ,name:0
-#: field:crm.payment.mode,name:0
 #: field:crm.segmentation,name:0
 msgid "Name"
 msgstr "Nombre"
@@ -1589,7 +1583,7 @@ msgid "My Case(s)"
 msgstr "Mi(s) caso(s)"
 
 #. module: crm
-#: help:crm.case.section,message_ids:0
+#: help:crm.team,message_ids:0
 #: help:crm.lead,message_ids:0
 #: help:crm.phonecall,message_ids:0
 msgid "Messages and communication history"
@@ -1620,11 +1614,6 @@ msgid "Convert to prospect to business partner"
 msgstr "Convertir prospección a empresa"
 
 #. module: crm
-#: model:ir.model,name:crm.model_crm_payment_mode
-msgid "CRM Payment Mode"
-msgstr "CRM Forma de pago"
-
-#. module: crm
 #: view:crm.lead.report:0
 msgid "Leads/Opportunities which are in done state"
 msgstr "Iniciativas / Oportunidades que están en el estado realizado"
@@ -1648,7 +1637,7 @@ msgid "Merge Leads/Opportunities"
 msgstr "Fusionar iniciativas/oportunidades"
 
 #. module: crm
-#: field:crm.case.section,parent_id:0
+#: field:crm.team,parent_id:0
 msgid "Parent Team"
 msgstr "Equipo padre"
 
@@ -1665,7 +1654,7 @@ msgid "Next Action Date"
 msgstr "Fecha  de la próxima acción"
 
 #. module: crm
-#: help:crm.case.stage,state:0
+#: help:crm.stage,state:0
 msgid ""
 "The status of your document will automatically change regarding the selected "
 "stage. For example, if a stage is related to the status 'Close', when your "
@@ -1733,7 +1722,7 @@ msgid "Creation year"
 msgstr "Año de creación"
 
 #. module: crm
-#: view:crm.case.section:0
+#: view:crm.team:0
 #: field:crm.lead,description:0
 msgid "Notes"
 msgstr "Notas"
@@ -1749,7 +1738,7 @@ msgid "Customer Name"
 msgstr "Nombre del cliente"
 
 #. module: crm
-#: field:crm.case.section,reply_to:0
+#: field:crm.team,reply_to:0
 msgid "Reply-To"
 msgstr "Responder a"
 
@@ -1769,10 +1758,10 @@ msgid "Prospect is converting to business partner"
 msgstr "El prospecto se convierte a partner"
 
 #. module: crm
-#: view:crm.case.channel:0
-#: model:ir.actions.act_window,name:crm.crm_case_channel_action
-#: model:ir.model,name:crm.model_crm_case_channel
-#: model:ir.ui.menu,name:crm.menu_crm_case_channel
+#: view:crm.channel:0
+#: model:ir.actions.act_window,name:crm.crm_channel_action
+#: model:ir.model,name:crm.model_crm_channel
+#: model:ir.ui.menu,name:crm.menu_crm_channel
 msgid "Channels"
 msgstr "Canales"
 
@@ -1800,12 +1789,12 @@ msgid "Edit..."
 msgstr "Editar…"
 
 #. module: crm
-#: model:crm.case.resource.type,name:crm.type_lead5
+#: model:crm.campaign,name:crm.type_lead5
 msgid "Google Adwords"
 msgstr "Google Adwords"
 
 #. module: crm
-#: view:crm.case.section:0
+#: view:crm.team:0
 msgid "Select Stages for this Sales Team"
 msgstr "Seleccione etapas para este equipo de ventas"
 
@@ -1830,13 +1819,6 @@ msgstr "Iniciativa a Oportunidad"
 msgid "Linked partner (optional). Usually created when converting the lead."
 msgstr ""
 "Empresa asociada(opcional). Usualmente es creado al convertir la iniciativa."
-
-#. module: crm
-#: field:crm.lead,payment_mode:0
-#: view:crm.payment.mode:0
-#: model:ir.actions.act_window,name:crm.action_crm_payment_mode
-msgid "Payment Mode"
-msgstr "Modo de pago"
 
 #. module: crm
 #: model:ir.model,name:crm.model_crm_lead2opportunity_partner_mass
@@ -1866,7 +1848,7 @@ msgid "Schedule a normal or phone meeting"
 msgstr "Programar una reunión normal o telefónica"
 
 #. module: crm
-#: model:crm.case.resource.type,name:crm.type_lead1
+#: model:crm.campaign,name:crm.type_lead1
 msgid "Telesales"
 msgstr "Ventas a distancia"
 
@@ -1915,7 +1897,7 @@ msgid "Lead / Customer"
 msgstr "Iniciativa / Cliente"
 
 #. module: crm
-#: model:crm.case.section,name:crm.crm_case_section_2
+#: model:crm.team,name:crm.crm_team_2
 msgid "Support Department"
 msgstr "Departamento de soporte"
 
@@ -1925,14 +1907,14 @@ msgid "Show only lead"
 msgstr "Mostrar solo iniciativas"
 
 #. module: crm
-#: model:ir.actions.act_window,name:crm.crm_case_section_act
-#: model:ir.model,name:crm.model_crm_case_section
-#: model:ir.ui.menu,name:crm.menu_crm_case_section_act
+#: model:ir.actions.act_window,name:crm.crm_team_act
+#: model:ir.model,name:crm.model_crm_team
+#: model:ir.ui.menu,name:crm.menu_crm_team_act
 msgid "Sales Teams"
 msgstr "Equipos de ventas"
 
 #. module: crm
-#: field:crm.case.stage,case_default:0
+#: field:crm.stage,case_default:0
 msgid "Default to New Sales Team"
 msgstr "Por defecto a un nuevo equipo de ventas"
 
@@ -2030,7 +2012,7 @@ msgid "Low"
 msgstr "Bajo"
 
 #. module: crm
-#: selection:crm.case.stage,state:0
+#: selection:crm.stage,state:0
 #: field:crm.lead,date_closed:0
 #: selection:crm.lead,state:0
 #: view:crm.lead.report:0
@@ -2045,12 +2027,12 @@ msgid "Open Opportunities"
 msgstr "Oportunidades abiertas"
 
 #. module: crm
-#: model:crm.case.resource.type,name:crm.type_lead2
+#: model:crm.campaign,name:crm.type_lead2
 msgid "Email Campaign - Services"
 msgstr "Email campaña - servicios"
 
 #. module: crm
-#: selection:crm.case.stage,state:0
+#: selection:crm.stage,state:0
 #: selection:crm.lead,state:0
 #: view:crm.lead.report:0
 #: selection:crm.lead.report,state:0
@@ -2077,7 +2059,7 @@ msgid "Phone Calls"
 msgstr "Llamadas telefónicas"
 
 #. module: crm
-#: view:crm.case.stage:0
+#: view:crm.stage:0
 msgid "Stage Search"
 msgstr "Búsqueda de etapa"
 
@@ -2097,8 +2079,8 @@ msgid "Phone"
 msgstr "Teléfono"
 
 #. module: crm
-#: field:crm.case.channel,active:0
-#: field:crm.case.section,active:0
+#: field:crm.channel,active:0
+#: field:crm.team,active:0
 #: field:crm.lead,active:0
 #: field:crm.phonecall,active:0
 msgid "Active"
@@ -2132,7 +2114,7 @@ msgid "Software"
 msgstr "Software"
 
 #. module: crm
-#: field:crm.case.section,change_responsible:0
+#: field:crm.team,change_responsible:0
 msgid "Reassign Escalated"
 msgstr "Reasignar escalado"
 
@@ -2162,7 +2144,7 @@ msgid "City"
 msgstr "Ciudad"
 
 #. module: crm
-#: selection:crm.case.stage,type:0
+#: selection:crm.stage,type:0
 msgid "Both"
 msgstr "Ambos"
 
@@ -2178,7 +2160,7 @@ msgid "Responsible"
 msgstr "Responsable"
 
 #. module: crm
-#: model:crm.case.section,name:crm.crm_case_section_3
+#: model:crm.team,name:crm.crm_team_3
 msgid "Direct Marketing"
 msgstr "Marketing directo"
 
@@ -2198,7 +2180,7 @@ msgid "Conversion Options"
 msgstr "Opciones de conversión"
 
 #. module: crm
-#: view:crm.case.section:0
+#: view:crm.team:0
 msgid ""
 "Follow this salesteam to automatically track the events associated to users "
 "of this team."
@@ -2212,7 +2194,7 @@ msgid "Address"
 msgstr "Dirección"
 
 #. module: crm
-#: help:crm.case.section,alias_id:0
+#: help:crm.team,alias_id:0
 msgid ""
 "The email address associated with this team. New emails received will "
 "automatically create new leads assigned to the team."
@@ -2324,7 +2306,7 @@ msgstr ""
 "        "
 
 #. module: crm
-#: help:crm.case.stage,fold:0
+#: help:crm.stage,fold:0
 msgid ""
 "This stage is not visible, for example in status bar or kanban view, when "
 "there are no records in that stage to display."
@@ -2344,7 +2326,7 @@ msgid "Sales team to which Case belongs to."
 msgstr "Equipo de ventas al cual pertence el caso"
 
 #. module: crm
-#: model:crm.case.resource.type,name:crm.type_lead6
+#: model:crm.campaign,name:crm.type_lead6
 msgid "Banner Ads"
 msgstr "Anuncios"
 
@@ -2409,7 +2391,7 @@ msgid "After-Sale Services"
 msgstr "Servicios Post-venta"
 
 #. module: crm
-#: field:crm.case.section,message_ids:0
+#: field:crm.team,message_ids:0
 #: field:crm.lead,message_ids:0
 #: field:crm.phonecall,message_ids:0
 msgid "Messages"
@@ -2427,7 +2409,7 @@ msgid "Call summary"
 msgstr "Resumen de la llamada"
 
 #. module: crm
-#: selection:crm.case.stage,state:0
+#: selection:crm.stage,state:0
 #: selection:crm.lead,state:0
 #: selection:crm.lead.report,state:0
 #: selection:crm.phonecall,state:0
@@ -2454,12 +2436,12 @@ msgstr ""
 "añadiendo más grupos al informe."
 
 #. module: crm
-#: field:crm.case.stage,fold:0
+#: field:crm.stage,fold:0
 msgid "Fold by Default"
 msgstr "Replegar por defecto"
 
 #. module: crm
-#: field:crm.case.stage,state:0
+#: field:crm.stage,state:0
 msgid "Related Status"
 msgstr "Estado relacionado"
 
@@ -2521,7 +2503,7 @@ msgid "Optional Expression"
 msgstr "Expresión opcional"
 
 #. module: crm
-#: field:crm.case.section,message_follower_ids:0
+#: field:crm.team,message_follower_ids:0
 #: field:crm.lead,message_follower_ids:0
 #: field:crm.phonecall,message_follower_ids:0
 msgid "Followers"
@@ -2570,7 +2552,7 @@ msgid "Email"
 msgstr "Email"
 
 #. module: crm
-#: view:crm.case.channel:0
+#: view:crm.channel:0
 #: view:crm.lead:0
 #: field:crm.lead,channel_id:0
 #: view:crm.lead.report:0
@@ -2609,7 +2591,7 @@ msgid "Creating business opportunities from Leads"
 msgstr "Creando oportunidades de negocio desde iniciativas"
 
 #. module: crm
-#: model:crm.case.resource.type,name:crm.type_lead3
+#: model:crm.campaign,name:crm.type_lead3
 msgid "Email Campaign - Products"
 msgstr "Campaña email - productos"
 
@@ -2653,7 +2635,7 @@ msgid "Calls"
 msgstr "Llamadas"
 
 #. module: crm
-#: field:crm.case.stage,on_change:0
+#: field:crm.stage,on_change:0
 msgid "Change Probability Automatically"
 msgstr "Cambiar la probabilidad automáticamente"
 
@@ -2663,7 +2645,7 @@ msgid "My Phone Calls"
 msgstr "Mis llamadas"
 
 #. module: crm
-#: model:crm.case.stage,name:crm.stage_lead3
+#: model:crm.stage,name:crm.stage_lead3
 msgid "Qualification"
 msgstr "Calificación"
 
@@ -2765,8 +2747,8 @@ msgid "Opened"
 msgstr "Abierto"
 
 #. module: crm
-#: view:crm.case.section:0
-#: field:crm.case.section,member_ids:0
+#: view:crm.team:0
+#: field:crm.team,member_ids:0
 msgid "Team Members"
 msgstr "Miembros del equipo"
 
@@ -2810,7 +2792,7 @@ msgid "Opportunity Won"
 msgstr "Oportunidad ganada"
 
 #. module: crm
-#: model:ir.actions.act_window,name:crm.crm_case_section_act_tree
+#: model:ir.actions.act_window,name:crm.crm_team_act_tree
 msgid "Cases by Sales Team"
 msgstr "Casos por equipo de ventas"
 
@@ -2887,7 +2869,7 @@ msgid "Contract"
 msgstr "Contrato"
 
 #. module: crm
-#: model:crm.case.resource.type,name:crm.type_lead4
+#: model:crm.campaign,name:crm.type_lead4
 msgid "Twitter Ads"
 msgstr "Anuncios Twiter"
 
@@ -2912,7 +2894,7 @@ msgid "Expected closing year"
 msgstr "Año de cierre previsto"
 
 #. module: crm
-#: model:ir.model,name:crm.model_crm_case_stage
+#: model:ir.model,name:crm.model_crm_stage
 msgid "Stage of case"
 msgstr "Etapa del caso"
 
@@ -2962,8 +2944,8 @@ msgid "at"
 msgstr "en"
 
 #. module: crm
-#: model:crm.case.stage,name:crm.stage_lead1
-#: selection:crm.case.stage,state:0
+#: model:crm.stage,name:crm.stage_lead1
+#: selection:crm.stage,state:0
 #: view:crm.lead:0
 #: selection:crm.lead,state:0
 #: view:crm.lead.report:0
@@ -2976,7 +2958,7 @@ msgid "Function"
 msgstr "Función"
 
 #. module: crm
-#: field:crm.case.section,note:0
+#: field:crm.team,note:0
 #: field:crm.phonecall,description:0
 #: view:crm.segmentation:0
 #: field:crm.segmentation,description:0
@@ -2985,15 +2967,14 @@ msgstr "Descripción"
 
 #. module: crm
 #: field:crm.case.categ,section_id:0
-#: field:crm.case.resource.type,section_id:0
-#: view:crm.case.section:0
-#: field:crm.case.section,name:0
+#: field:crm.campaign,section_id:0
+#: view:crm.team:0
+#: field:crm.team,name:0
 #: field:crm.lead,section_id:0
 #: view:crm.lead.report:0
 #: field:crm.lead.report,section_id:0
 #: field:crm.lead2opportunity.partner.mass,section_id:0
 #: field:crm.opportunity2phonecall,section_id:0
-#: field:crm.payment.mode,section_id:0
 #: view:crm.phonecall:0
 #: field:crm.phonecall,section_id:0
 #: view:crm.phonecall.report:0
@@ -3010,7 +2991,7 @@ msgid "May"
 msgstr "Mayo"
 
 #. module: crm
-#: model:ir.actions.act_window,help:crm.crm_case_channel_action
+#: model:ir.actions.act_window,help:crm.crm_channel_action
 msgid ""
 "<p class=\"oe_view_nocontent_create\">\n"
 "                Click to define a new channel.\n"
@@ -3068,7 +3049,7 @@ msgid "Reset to Todo"
 msgstr "Cambiar a 'Para hacer'"
 
 #. module: crm
-#: field:crm.case.section,working_hours:0
+#: field:crm.team,working_hours:0
 msgid "Working Hours"
 msgstr "Horario de trabajo"
 
@@ -3095,7 +3076,7 @@ msgid "Schedule a Meeting"
 msgstr "Planificar una reunión"
 
 #. module: crm
-#: model:crm.case.stage,name:crm.stage_lead8
+#: model:crm.stage,name:crm.stage_lead8
 #: view:crm.lead:0
 msgid "Lost"
 msgstr "Perdido"
@@ -3137,7 +3118,7 @@ msgid "April"
 msgstr "Abril"
 
 #. module: crm
-#: field:crm.case.resource.type,name:0
+#: field:crm.campaign,name:0
 msgid "Campaign Name"
 msgstr "Nombre de la campaña"
 
@@ -3152,7 +3133,7 @@ msgid "Phone calls by user and section"
 msgstr "Llamadas telefónicas por usuario y sección"
 
 #. module: crm
-#: model:crm.case.stage,name:crm.stage_lead5
+#: model:crm.stage,name:crm.stage_lead5
 msgid "Negotiation"
 msgstr "Negociación"
 
@@ -3162,7 +3143,7 @@ msgid "Phonecall To Phonecall"
 msgstr "Llamada telefónica a llamada telefónica"
 
 #. module: crm
-#: field:crm.case.stage,sequence:0
+#: field:crm.stage,sequence:0
 msgid "Sequence"
 msgstr "Secuencia"
 
@@ -3172,7 +3153,7 @@ msgid "Control Variable"
 msgstr "Variable de control"
 
 #. module: crm
-#: model:crm.case.stage,name:crm.stage_lead4
+#: model:crm.stage,name:crm.stage_lead4
 msgid "Proposition"
 msgstr "Propuesta"
 
@@ -3190,7 +3171,7 @@ msgid "Year"
 msgstr "Año"
 
 #. module: crm
-#: model:crm.case.resource.type,name:crm.type_lead8
+#: model:crm.campaign,name:crm.type_lead8
 msgid "Newsletter"
 msgstr "Boletín de noticias"
 
