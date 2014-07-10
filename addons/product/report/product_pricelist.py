@@ -119,7 +119,7 @@ class product_pricelist(report_sxw.rml_parse):
         pool = pooler.get_pool(self.cr.dbname)
         pricelist = self.pool.get('product.pricelist').browse(self.cr, self.uid, [pricelist_id], context=self.localcontext)[0]
         price_dict = pool.get('product.pricelist').price_get(self.cr, self.uid, [pricelist_id], product_id, qty, context=self.localcontext)
-        if price_dict[pricelist_id]:
+        if pricelist_id in price_dict:
             price = self.formatLang(price_dict[pricelist_id], digits=sale_price_digits, currency_obj=pricelist.currency_id)
         else:
             res = pool.get('product.product').read(self.cr, self.uid, [product_id])
