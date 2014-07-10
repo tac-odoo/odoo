@@ -578,7 +578,7 @@
             <field name="tax_amount">210</field>
             <field name="debit_credit_amount">210</field>
             <field name="apply_on">invoice</field>
-            <field name="code_id" ref="atctn_54"/>
+            <field name="code_id" ref="atctn_59"/>
             <field name="account_id" ref="a411059"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-21"/>
         </record>
@@ -588,7 +588,7 @@
             <field name="tax_amount">210</field>
             <field name="debit_credit_amount">210</field>
             <field name="apply_on">refund</field>
-            <field name="code_id" ref="atctn_64"/>
+            <field name="code_id" ref="atctn_63"/>
             <field name="account_id" ref="a411059"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-21"/>
         </record>
