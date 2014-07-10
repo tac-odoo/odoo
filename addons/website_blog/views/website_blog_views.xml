@@ -145,12 +145,24 @@
                 </form>
             </field>
         </record>
+        <!-- History Search View  -->
+        <record model="ir.ui.view" id="view_blog_post_history_search">
+            <field name="name">blog.post.history.search</field>
+            <field name="model">blog.post.history</field>
+            <field name="arch" type="xml">
+                <search string="Blog Post History">
+                    <field name="post_id" string="Post" filter_domain="[('post_id','ilike',self)]"/>
+                </search>
+            </field>
+        </record>
+
         <!-- History Action  -->
         <record model="ir.actions.act_window" id="action_history">
             <field name="name">Page history</field>
             <field name="res_model">blog.post.history</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_blog_post_history_search"/>
         </record>
         <menuitem id="menu_page_history" parent="menu_wiki" name="Pages history" action="action_history" sequence="30" groups="base.group_no_one"/>
         <act_window
