@@ -81,7 +81,7 @@ instance.web.PlannerManager = instance.web.Widget.extend({
             def.resolve(this.applications[id]);
         }else{
             // fetch all fields except description
-            var fields = ['category_id', 'planner_id', 'name', 'description', 'sequence', 'completed'];
+            var fields = ['category_id', 'planner_id', 'name', 'description', 'sequence', 'template_id', 'completed'];
             (new instance.web.Model('ir.application.planner.page')).query(fields)
                         .filter([["planner_id", "=", id]]).order_by(['sequence']).all().then(function(res) {
                             self.applications[id] = res;
@@ -101,24 +101,22 @@ instance.web.PlannerDialog = instance.web.Widget.extend({
         'show.bs.modal': 'show',
         'click .menu-item': 'load_page',
         'click button.done' : 'complete_page'
-        
     },
 
     render_menubar: function(data){
         this.$('.menubar').html(QWeb.render("PlannerMenu", {'menu':data}));
     },
 
-    render_page: function(data){
-        this.$('.content').html(data.description);
-    },
-
     load_page: function(ev){
-        var id = $(ev.target).data('page');
-        (new instance.web.Model('ir.application.planner.page')).query(['description'])
-                        .filter([["id", "=", id]]).all().then(function(res) {
-                            self.render_page(res[0]);
-                        });
+        var self = this;
+        var template_id = $(ev.target).data('template');
+        this.get_page_template(template_id).then(function(res){
+            self.$('.content').html(res);
+        });
 
+    },
+    get_page_template: function(template_id){
+        return (new instance.web.DataSet(this, 'ir.ui.view')).call('render', [template_id]);
     },
 
     complete_page: function(){

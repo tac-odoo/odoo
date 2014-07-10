@@ -415,7 +415,7 @@
                 <label class="tree-toggle nav-header"><t t-esc="category"/></label>
                 <t t-foreach="menu[category]" t-as="item">
                     <ul class="nav nav-list tree">
-                        <li class="menu-item"><a t-att-data-page="item.id" herf="#">
+                        <li class="menu-item"><a t-att-data-page="item.id" t-att-data-template="item.template_id[0]" herf="#">
                                 <i class="fa fa-check fa-fw"/>
                                 <t t-esc="item.name"/></a></li>
 

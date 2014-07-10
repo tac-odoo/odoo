@@ -1,6 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
+        <template id="planner_page_1">
+            <html>
+                <body>
+
+                    <p id="demo"></p>
+                    <script>
+                        document.getElementById("demo").innerHTML = "Hello JavaScript!";
+                        (function(){alert('I am Fucking Anonymous function')})();
+                    </script> 
+
+                </body>
+            </html>
+        </template>
+
+        <template id="planner_page_6">
+            <html lang="en">
+                    <select name="sweets" multiple="multiple">
+                        <option>Chocolate</option>
+                        <option selected="selected">Candy</option>
+                        <option>Taffy</option>
+                        <option selected="selected">Caramel</option>
+                        <option>Fudge</option>
+                        <option>Cookie</option>
+                    </select>
+                    <div class="my_slection"></div>
+
+                    <script>
+                        $( "select" )
+                        .change(function () {
+                        var str = "";
+                        $( "select option:selected" ).each(function() {
+                        str += $( this ).text() + " ";
+                        });
+                        $( ".my_slection" ).text( str );
+                        })
+                        .change();
+                    </script>
+            </html>
+            </template>
+            <template id="planner_page_5">
+                <html>
+                    <body>
+
+                        <p id="demo"></p>
+
+                        <script>
+                            document.getElementById("demo").innerHTML = "Hello JavaScript!";
+                        </script> 
+
+                    </body>
+                </html>
+            </template>
+
+            <template id="planner_page_4">
+                <html>
+                    <body>
+
+                        <p id="demo"></p>
+
+                        <script>
+                            document.getElementById("demo").innerHTML = "Hello JavaScript!";
+                        </script> 
+
+                    </body>
+                </html>
+            </template>
+
+            <template id="planner_page_3">
+                <html>
+                <body>
+
+                    <p id="demo"></p>
+
+                    <script>
+                        document.getElementById("demo").innerHTML = "Hello JavaScript!";
+                    </script> 
+
+                </body>
+            </html>
+        </template>
+
+       <template id="planner_page_2">
+            <html>
+                <body>
+
+                    <p id="demo"></p>
+
+                    <script>
+                        document.getElementById("demo").innerHTML = "Hello JavaScript!";
+                    </script> 
+
+                </body>
+            </html>
+        </template>
+
+
+
         <record id="planner_action" model="ir.actions.act_window">
             <field name="name">Planner</field>
             <field name="res_model">ir.aplication.planner</field>

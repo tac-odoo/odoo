@@ -48,7 +48,7 @@ class ir_application_planner_page(osv.Model):
         'category_id': fields.many2one('ir.application.planner.page.category'),
         'planner_id': fields.many2one('ir.aplication.planner'),
         'name': fields.char('Title'),
-        'description': fields.html('Description'),
         'sequence': fields.integer('Sequence'),
-        'completed': fields.boolean('State')
+        'completed': fields.boolean('State'),
+        'template_id': fields.many2one('ir.ui.view')
     }
