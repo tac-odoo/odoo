@@ -319,5 +319,86 @@
         $('[data-target="#oe_applications"]').attr("data-target", "#oe_applications_collapse");
     });
 
+    website.countdown = function(counter){
+        var release_date = $(counter).attr('data-release_date');
+        var day=0,hh=0,mm=0,ss=0;
+        if(release_date){
+            var local_release_date = new Date(release_date);
+            var current_date = new Date();
+            var msec = local_release_date - current_date;
+            if (msec > 0){
+                day = Math.floor(msec / 1000 / 60 / 60 /24 );
+                msec -= day * 1000 * 60 * 60 *24;
+                hh = Math.floor(msec / 1000 / 60 / 60);
+                msec -= hh * 1000 * 60 * 60;
+                mm = Math.floor(msec / 1000 / 60);
+                msec -= mm * 1000 * 60;
+                ss = Math.floor(msec / 1000);
+                msec -= ss * 1000;
+            }
+        }
+        $(counter).find('.counter_day p.count_val').text(day);
+        $(counter).find('.counter_hour p.count_val').text(hh);
+        $(counter).find('.counter_min p.count_val').text(mm);
+        $(counter).find('.counter_sec p.count_val').text(ss);
+        var days = day;
+        var hours = hh;
+        var minutes = mm;
+        var seconds = ss;
+        if(days == 0 & hours == 0 & minutes == 0 & seconds == 0){
+
+              $(counter).find('.countdown_over').removeClass("css_editable_hidden");
+              $(counter).find('.countdown_main').addClass("css_editable_mode_display css_editable_hidden");
+        }else{
+            $(counter).find('.countdown_over').addClass("css_editable_hidden");
+            $(counter).find('.countdown_main').removeClass("css_editable_mode_display css_editable_hidden");
+            var count_interval;
+            count_interval = setInterval(function(){
+                if(seconds == 0){
+                    if(minutes == 0){
+                        if(hours == 0){
+                            if(days == 0){
+                                $(counter).find('.countdown_over').parent().slideToggle("slow" ,function(){
+                                    $(counter).find('.countdown_over').removeClass("css_editable_hidden");
+                                    $(counter).find('.countdown_main').addClass("css_editable_mode_display css_editable_hidden");
+                                    $(this).slideToggle("slow");
+                                });
+                                clearInterval(count_interval);
+                            }else{
+                                days-=1;
+                                hours=23;
+                                minutes=59;
+                                seconds=59;
+                                $(counter).find('.counter_day p.count_val').text(days);
+                                $(counter).find('.counter_hour p.count_val').text(hours);
+                                $(counter).find('.counter_min p.count_val').text(minutes);
+                                $(counter).find('.counter_sec p.count_val').text(seconds);
+                            }
+                        }else{
+                            hours-=1;
+                            minutes=59;
+                            seconds=59;
+                            $(counter).find('.counter_hour p.count_val').text(hours);
+                            $(counter).find('.counter_min p.count_val').text(minutes);
+                            $(counter).find('.counter_sec p.count_val').text(seconds);
+                        }
+                    }else{
+                        minutes-=1;
+                        seconds=59;
+                        $(counter).find('.counter_min p.count_val').text(minutes);
+                        $(counter).find('.counter_sec p.count_val').text(seconds);
+                    }
+                }else{
+                    seconds-=1;
+                    $(counter).find('.counter_sec p.count_val').text(seconds);
+                }
+            },1000);
+        }
+    };
+    $(document).ready(function(){
+        _.each($(".countdown"), function(counter){
+            website.countdown(counter);
+        });
+    });
     return website;
 })();

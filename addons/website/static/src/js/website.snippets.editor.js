@@ -1044,6 +1044,7 @@
             }
         },
     });
+
     website.snippet.options.carousel = website.snippet.options.slider.extend({
         getSize: function () {
             this.grid = this._super();
@@ -1121,6 +1122,66 @@
             this.$target.find('.carousel-image').attr('attributeEditable', 'true');
             this._super();
         },
+    });
+
+    website.editor.countdown = website.editor.Dialog.extend({
+        template: 'website.countdown_configuration',
+        events : _.extend({}, website.editor.Dialog.prototype.events, {
+            'click button[data-action=set_countdown]': 'set_countdown',
+        }),
+        init: function (parent) {
+            this.$target = parent.$target;
+            return this._super();
+        },
+        start: function () {
+            var self = this;
+            self.$el.find("#web_countdown_date").datepicker({ minDate: new Date() });
+            return this._super();
+        },
+        set_countdown: function () {
+            var self = this;
+            var date = self.$el.find("#web_countdown_date")[0].value;
+            var hour = self.$el.find("#web_countdown_hour")[0].value;
+            var minute = self.$el.find("#web_countdown_min")[0].value;
+            var second = self.$el.find("#web_countdown_sec")[0].value;
+            var local_date = new Date(date +' '+ hour.toString() + ':' + minute.toString() + ':'+ second.toString())
+            var add_warning = function (msg){
+                self.$el.find(".alert").remove();
+                self.$el.find(".modal-body").append('<div class="alert alert-danger mt8">'+ msg +'</div>');
+            }
+            if(hour > 23 | hour < 0 | hour == "" ){
+                add_warning("Enter valid HOURS (Between 0 to 23)");
+            }
+            else if(minute > 59 | minute < 0 | minute == ""){
+                add_warning("Enter valid MINUTES (Between 0 to 59)");
+            }
+            else if(second > 59 | second < 0 | second == ""){
+                add_warning("Enter valid SECONDS (Between 0 to 59)");
+            }
+            else if(local_date == "Invalid Date" ){
+                add_warning("Invalid date format. Valid Date format is DD/MM/YYYY");
+            }else{
+                self.$target.attr("data-release_date",local_date.toUTCString())
+                self.trigger('set_countdown');
+            }
+        },
+    });
+
+    website.snippet.options.countdown = website.snippet.Option.extend({
+        start : function () {
+            var self = this;
+            this._super();
+            this.$el.find(".set_countdown").on('click', function () {self.on_set_countdown(); return false;});
+        },
+        on_set_countdown:function(){
+            var self = this;
+            var set_dialog = new website.editor.countdown(self);
+            set_dialog.appendTo($(document.body));
+            set_dialog.on('set_countdown', this, function () {
+                website.countdown(self.$target[0]);
+                set_dialog.$el.modal('hide');
+            });
+        }
     });
 
     website.snippet.options.marginAndResize = website.snippet.Option.extend({
