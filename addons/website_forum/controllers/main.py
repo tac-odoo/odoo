@@ -139,7 +139,7 @@ class WebsiteForum(http.Controller):
         tags = request.registry['forum.tag'].search_read(request.cr, request.uid, [], ['name'], context=request.context)
         data = [tag['name'] for tag in tags if tag['name'].lower() == post['tags'].lower()]
         if data or request.uid == SUPERUSER_ID or request.registry['res.users'].browse(cr, uid, uid, context=context).karma > 30:
-            return data
+            return data if data else post['tags']
         return False
 
     @http.route(['/forum/<model("forum.forum"):forum>/faq'], type='http', auth="public", website=True)
