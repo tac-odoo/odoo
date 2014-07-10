@@ -8,6 +8,10 @@
             <field name="model">crm.lead.report.assign</field>
             <field name="arch" type="xml">
                 <search string="Leads Analysis">
+		    <filter string="Kept" name="won"
+                            domain="[('probability', '=', 100), ('stage_id.on_change', '=', 1)]"/>
+                    <filter string="Refused" name="lost"
+                            domain="[('probability', '=', 0), ('stage_id.sequence', '!=', 1)]"/>
                     <field name="section_id" context="{'invisible_section': False}" groups="base.group_multi_salesteams"/>
                     <field name="grade_id"/>
                     <field name="user_id"/>
@@ -35,9 +39,9 @@
                         <filter string="Stage" icon="terp-stage" domain="[]" context="{'group_by':'stage_id'}"/>
                         <filter string="Priority"  icon="terp-rating-rated" domain="[]" context="{'group_by':'priority'}" />
                         <filter string="Company" icon="terp-go-home" domain="[]" context="{'group_by':'company_id'}" />
-                        <filter string="Assign Date (day)" icon="terp-go-today" domain="[]" context="{'group_by':'date_assign:day'}"/>
-                        <filter string="Assign Date (month)" icon="terp-go-month" domain="[]" context="{'group_by':'date_assign:month'}"/>
-                        <filter string="Assign Date (year)" icon="terp-go-year" domain="[]" context="{'group_by':'date_assign:year'}"/>
+                        <filter string="Assign Day" icon="terp-go-today" domain="[]" context="{'group_by':'date_assign:day'}"/>
+                        <filter string="Assign Month" icon="terp-go-month" domain="[]" context="{'group_by':'date_assign:month'}"/>
+                        <filter string="Assign Year" icon="terp-go-year" domain="[]" context="{'group_by':'date_assign:year'}"/>
                     </group>
                 </search>
             </field>
