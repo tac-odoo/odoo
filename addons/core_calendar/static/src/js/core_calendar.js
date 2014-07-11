@@ -442,7 +442,7 @@ instance.web_calendar.CalendarView = instance.web_calendar.CalendarView.extend({
         if (this.model == 'core.calendar.event' && !!calendar_obj) {
             var data = {};
             if (mode === 'create') {
-                data[calendar_obj.fields.name] = event_data.title || this.new_event_default_name;
+                data[calendar_obj.fields.name] = event_data.title || this.new_event_default_name || null;
             }
             var field_start = calendar_obj.fields.date_start;
             data[field_start] = calendar_obj.fields_type[field_start] == 'date'
