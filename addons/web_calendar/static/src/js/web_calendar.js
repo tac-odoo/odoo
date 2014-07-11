@@ -29,6 +29,7 @@ openerp.web_calendar = function(instance) {
             dayNames: Date.CultureInfo.dayNames,
             dayNamesShort: Date.CultureInfo.abbreviatedDayNames,
             firstDay: Date.CultureInfo.firstDayOfWeek,
+            firstHour: 8,
             weekNumbers: true
         };
     }
