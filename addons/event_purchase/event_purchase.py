@@ -172,7 +172,7 @@ class EventParticipation(osv.Model):
         pol_to_terminate = []
         for p in self.browse(cr, uid, ids, context=context):
             if p.purchase_order_id and p.purchase_order_id.invoice_method == 'manual':
-                pol_to_terminate.append(p.id)
+                pol_to_terminate.append(p.purchase_order_line_id.id)
         if pol_to_terminate:
             self.pool.get('purchase.order.line').write(cr, uid, pol_to_terminate, {'state': 'done'}, context=context)
         return super(EventParticipation, self).button_set_done(cr, uid, ids, context=context)
