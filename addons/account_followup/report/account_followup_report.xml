@@ -7,7 +7,7 @@
            <field name="model">account_followup.stat</field>
            <field name="arch" type="xml">
                <graph string="Follow-up lines" type="pivot">
-                  <field name="partner_id" type="row"/>
+                  <field name="period_id" type="row"/>
                   <field name="balance" type="measure"/>
                </graph>
            </field>

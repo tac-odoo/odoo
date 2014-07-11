@@ -8,9 +8,7 @@
              <graph string="Invoices Analysis" type="pivot">
                  <field name="period_id" type="row"/>
                  <field name="categ_id" type="row"/>
-                 <field name="nbr" type="measure"/>
-                 <field name="product_qty" type="measure"/>
-                 <field name="price_total" type="measure"/>
+                 <field name="price_total"  type="measure"/>
              </graph>
          </field>
     </record>
@@ -58,11 +56,11 @@
         <field name="arch" type="xml">
             <search string="Invoices Analysis">
                 <field name="date"/>
-                <filter string="This Year" name="year" domain="['|', ('date', '=', False), '&amp;',('date','&lt;=', time.strftime('%%Y-12-31')),('date','&gt;=',time.strftime('%%Y-01-01'))]"/>
+                <filter string="Year's Period" name="year" domain="['|', ('date', '=', False), '&amp;',('date','&lt;=', time.strftime('%%Y-12-31')),('date','&gt;=',time.strftime('%%Y-01-01'))]"/>
                 <separator/>
                 <filter string="To Invoice" domain="[('state','=','draft')]" help = "Draft Invoices"/>
                 <filter string="Pro-forma" domain="['|', ('state','=','proforma'),('state','=','proforma2')]"/>
-                <filter string="Invoiced" name="current" domain="[('state','not in', ('draft','cancel','proforma','proforma2'))]"/>
+                <filter string="Invoiced Month" name="current" domain="[('state','not in', ('draft','cancel','proforma','proforma2'))]"/>
                 <separator/>
                 <filter string="Customer" name="customer" domain="['|', ('type','=','out_invoice'),('type','=','out_refund')]"/>
                 <filter string="Supplier" domain="['|', ('type','=','in_invoice'),('type','=','in_refund')]"/>
@@ -82,13 +80,10 @@
                     <filter string="Product" icon="terp-accessories-archiver" context="{'group_by':'product_id','set_visible':True,'residual_invisible':True}"/>
                     <filter string="Category of Product" name="category_product" icon="terp-stock_symbol-selection" context="{'group_by':'categ_id','residual_invisible':True}"/>
                     <filter string="Status" icon="terp-stock_effects-object-colorize" context="{'group_by':'state'}"/>
-                    <filter string="Type" icon="terp-stock_symbol-selection" context="{'group_by':'type'}"/>
                     <filter string="Journal" icon="terp-folder-orange" context="{'group_by':'journal_id'}"/>
                     <filter string="Account" icon="terp-folder-orange" context="{'group_by':'account_line_id'}"/>
                     <filter string="Company" icon="terp-go-home" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
-                    <filter string="Invoice Date (day)" name="day" icon="terp-go-today" context="{'group_by':'date:day'}" help="Group by Invoice Date"/>
-                    <filter string="Invoice Date (month)" name="month" icon="terp-go-month" context="{'group_by':'date:month'}" help="Group by month of Invoice Date"/>
-                    <filter string="Invoice Date (year)" name="group_year" icon="terp-go-year" context="{'group_by':'date:year'}" help="Group by year of Invoice Date"/>
+                    <filter string="Invoiced Month" name="month" icon="terp-go-month" context="{'group_by':'date:month'}" help="Group by month of Invoice Date"/>
                 </group>
             </search>
         </field>

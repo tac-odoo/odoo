@@ -38,6 +38,10 @@
                 <field name="fiscalyear_id"/>
                 <field name="period_id"/>
                 <field name="company_id" groups="base.group_multi_company"/>
+                <filter string="This Year" name="year" domain="['|', ('date', '=', False), '&amp;',('date','&lt;=', time.strftime('%%Y-12-31')),('date','&gt;=',time.strftime('%%Y-01-01'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Period" icon="terp-personal" context="{'group_by':'period_id'}"/>
+                </group>
             </search>
         </field>
     </record>
@@ -48,7 +52,7 @@
         <field name="view_mode">graph</field>
         <field name="search_view_id" ref="view_account_treasury_report_search"/>
         <field name="view_id" ref="view_account_treasury_report_graph"/>
-        <field name="context">{'group_by':[], 'group_by_no_leaf':0}</field>
+        <field name="context">{'group_by':[], 'search_default_year': 1, 'group_by_no_leaf':0}</field>
         <field name="help">From this view, have an analysis of your treasury. It sums the balance of every accounting entries made on liquidity accounts per period.</field>
     </record>
     <menuitem action="action_account_treasury_report_all" id="menu_action_account_treasury_report_all"
