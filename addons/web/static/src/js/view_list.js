@@ -504,10 +504,10 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
         var self = this;
         return this.reload_mutex.exec(function() {
             self.$el.find('.oe_list_record_selector').prop('checked', false);
-            this.records.reset();
+            self.records.reset();
             var reloaded = $.Deferred();
-            this.$el.find('.oe_list_content').append(
-                this.groups.render(function () {
+            self.$el.find('.oe_list_content').append(
+                self.groups.render(function () {
                     if (self.dataset.index == null) {
                         if (self.records.length) {
                             self.dataset.index = 0;
@@ -515,11 +515,11 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
                     } else if (self.dataset.index >= self.records.length) {
                         self.dataset.index = 0;
                     }
-    
+
                     self.compute_aggregates();
                     reloaded.resolve();
                 }));
-            this.do_push_state({
+            self.do_push_state({
                 page: this.page,
                 limit: this._limit
             });
@@ -1501,6 +1501,7 @@ instance.web.ListView.Groups = instance.web.Class.extend( /** @lends instance.we
                 }
 
                 var mtex = new $.Mutex();
+                var d = $.Deferred();
                 _.each(self.columns, function(column) {
                     if (column.tag != 'field' || column.type != 'many2many') {
                         return;
