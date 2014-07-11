@@ -22,7 +22,6 @@
 import crm
 from datetime import datetime
 from operator import itemgetter
-
 import openerp
 from openerp import SUPERUSER_ID
 from openerp import tools
