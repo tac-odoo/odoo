@@ -438,9 +438,9 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-3 menubar">
+                            <div class="col-md-2 menubar">
                             </div>
-                            <div class="col-md-9">
+                            <div class="col-md-10">
                                 <div class="content"></div>
                                 <footer>
                                     <button type="button" class="btn btn-default done">Mark as done</button>

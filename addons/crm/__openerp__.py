@@ -61,6 +61,7 @@ Dashboard for CRM will include:
     ],
     'data': [
         'crm_data.xml',
+        'crm_planner_data.xml',
         'crm_lead_data.xml',
         'crm_phonecall_data.xml',
 
