@@ -354,7 +354,19 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
                     var old_group = self.currently_dragging.group;
                     var new_group = ui.item.parents('.oe_kanban_column:first').data('widget');
                     if (!(old_group.title === new_group.title && old_group.value === new_group.value && old_index == new_index)) {
-                        self.on_record_moved(record, old_group, old_index, new_group, new_index);
+                        self.on_record_moved(record, old_group, old_index, new_group, new_index).done(function() {
+                            if (new_group !== old_group) {
+                                //Manually added new group will not have attributes until kanban is reloaded
+                                if (old_group.group.attributes) {
+                                    old_group.group.attributes.length -= 1;
+                                    old_group.recompute_aggregates();
+                                }
+                                if (new_group.group.attributes) {
+                                    new_group.group.attributes.length += 1;
+                                    new_group.recompute_aggregates();
+                                }
+                            }
+                        });
                     }
                     setTimeout(function() {
                         // A bit hacky but could not find a better solution for Firefox (problem not present in chrome)
@@ -409,18 +421,18 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
     on_record_moved : function(record, old_group, old_index, new_group, new_index) {
         var self = this;
         $.fn.tipsy.clear();
-        $(old_group.$el).add(new_group.$el).find('.oe_kanban_aggregates, .oe_kanban_group_length').hide();
         if (old_group === new_group) {
             new_group.records.splice(old_index, 1);
             new_group.records.splice(new_index, 0, record);
-            new_group.do_save_sequences();
+            return new_group.do_save_sequences();
         } else {
+            $(old_group.$el).add(new_group.$el).find('.oe_kanban_aggregates, .oe_kanban_group_length').hide();
             old_group.records.splice(old_index, 1);
             new_group.records.splice(new_index, 0, record);
             record.group = new_group;
             var data = {};
             data[this.group_by] = new_group.value;
-            this.dataset.write(record.id, data, {}).done(function() {
+            return this.dataset.write(record.id, data, {}).done(function() {
                 record.do_reload();
                 new_group.do_save_sequences();
             }).fail(function(error, evt) {
@@ -614,6 +626,25 @@ instance.web_kanban.KanbanGroup = instance.web.Widget.extend({
         this.is_started = true;
         return def;
     },
+    recompute_aggregates: function() {
+        var self = this;
+        var context = new instance.web.CompoundContext(self.dataset.get_context(), this.group.model.context())
+        var domain = this.group.model.domain();
+        var grouping_fields = this.view.group_by ? [this.view.group_by].concat(_.keys(this.view.aggregates)) : undefined; 
+        var grouping = new instance.web.Model(self.dataset.model, context, domain).query(self.fields_keys).group_by(grouping_fields);
+        self.alive($.when(grouping)).done(function(groups) {
+            if (groups.length) {
+                self.update_group_header(groups[0]);
+            }
+        });
+    },
+    update_group_header: function(group_value) {
+        var self = this;
+        _.each(this.view.aggregates, function(value, key) {
+            self.aggregates[value] = instance.web.format_value(group_value.get('aggregates')[key], {type: 'float'});
+       });
+        this.$el.find(".oe_kanban_group_title_horizontal").replaceWith(instance.web.qweb.render('KanbanView.group_header_title', { widget: this }));
+    },
     compute_cards_auto_height: function() {
         // oe_kanban_no_auto_height is an empty class used to disable this feature
         if (!this.view.group_by) {
@@ -717,10 +748,14 @@ instance.web_kanban.KanbanGroup = instance.web.Widget.extend({
     },
     do_save_sequences: function() {
         var self = this;
+        var def = $.Deferred();
         if (_.indexOf(this.view.fields_keys, 'sequence') > -1) {
             var new_sequence = _.pluck(this.records, 'id');
-            self.view.dataset.resequence(new_sequence);
+            def = self.view.dataset.resequence(new_sequence);
+        } else {
+            def.resolve();
         }
+        return def;
     },
     /**
      * Handles a newly created record

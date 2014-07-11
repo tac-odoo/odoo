@@ -35,9 +35,10 @@ openerp.project = function(openerp) {
         },
         on_record_moved: function(record, old_group, old_index, new_group, new_index){
             var self = this;
-            this._super.apply(this, arguments);
+            var super_result = this._super.apply(this, arguments);
             if(new_group.state.folded)
                 new_group.do_action_toggle_fold();
+            return super_result;
         }
     });
 
