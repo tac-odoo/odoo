@@ -892,7 +892,7 @@ From:
                         alarm.user_id.name, alarm.user_id.signature)
                     mail_to = alarm.user_id.email
                     for att in alarm.attendee_ids:
-                        mail_to = mail_to + " " + att.user_id.email
+                        mail_to = mail_to + "\n" + att.user_id.email
                     if mail_to:
                         vals = {
                             'state': 'outgoing',
@@ -1134,7 +1134,7 @@ rule or repeating pattern of time to exclude from the recurring rule."),
                     'email': partner.email
                 }, context=local_context)
                 if partner.email:
-                    mail_to = mail_to + " " + partner.email
+                    mail_to = mail_to + "\n" + partner.email
                 self.write(cr, uid, [event.id], {
                     'attendee_ids': [(4, att_id)]
                 }, context=context)
