@@ -974,7 +974,7 @@ class CoreCalendarEvent(osv.Model):
         ids_to_calendar = {}
         for cal_id, item_ids in ids_by_calendar.iteritems():
             for _id in item_ids:
-                ids_to_calendar['%d-%d' % (cal_id, _id)] = cal_id
+                ids_to_calendar['%d-%s' % (cal_id, _id)] = cal_id
         for _id in ids:
             spks = [x for x in result[_id]['attendee_ids'] if x in speaker_ids]
             if spks:
