@@ -3,209 +3,209 @@
 -->
 <openerp>
     <data>
-    	<!-- CRM Planner Template-->
-    	<template id="welcome">
-		    <div>
-		        <h1><b>Welcome !</b></h1>
-		        <p><span style="font-family:'Arial Regular', 'Arial';font-weight:400;">
-		            Congratulations on taking the leap to boost your sales activities!
-		        </span></p>
-		        <p><span style="font-family:'Arial Regular', 'Arial';font-weight:400;">
-		            This tool will help you implement your sales funnel and 
-		            give you best practices to bring your sales vision to life with Odoo.
-		        </span></p>
-		        <p><span style="font-family:'Arial Regular', 'Arial';font-weight:400;">
-		            The whole process may take a few hours, 
-		            some discussions with your colleagues and several cups of coffee to go through. 
-		            But don't worry, you can return to this tool at any time.
-		        </span></p>
-		        <p><span style="font-family:'Arial Regular', 'Arial';font-weight:400;">
-		            We are here to help you. 
-		            If you get stuck, do not hesitate to reach our CRM experts:
-		        </span></p>
-		        <p><span style="font-family:'Arial Regular', 'Arial';font-weight:400;">
-		            Have fun deploying your sales strategy,
-		        </span></p>
-		        <p><span style="font-family:'Arial Bold', 'Arial';font-weight:700;">
-		            For the Odoo Team,<br/>
-		            Fabien Pinckaers, Founder
-		        </span></p>
-		    </div>
-		</template>
+        <!-- CRM Planner Template-->
+        <template id="welcome">
+            <div>
+                <h1><b>Welcome !</b></h1>
+                <p><span style="font-family:'Arial Regular', 'Arial';font-weight:400;">
+                    Congratulations on taking the leap to boost your sales activities!
+                </span></p>
+                <p><span style="font-family:'Arial Regular', 'Arial';font-weight:400;">
+                    This tool will help you implement your sales funnel and 
+                    give you best practices to bring your sales vision to life with Odoo.
+                </span></p>
+                <p><span style="font-family:'Arial Regular', 'Arial';font-weight:400;">
+                    The whole process may take a few hours, 
+                    some discussions with your colleagues and several cups of coffee to go through. 
+                    But don't worry, you can return to this tool at any time.
+                </span></p>
+                <p><span style="font-family:'Arial Regular', 'Arial';font-weight:400;">
+                    We are here to help you. 
+                    If you get stuck, do not hesitate to reach our CRM experts:
+                </span></p>
+                <p><span style="font-family:'Arial Regular', 'Arial';font-weight:400;">
+                    Have fun deploying your sales strategy,
+                </span></p>
+                <p><span style="font-family:'Arial Bold', 'Arial';font-weight:700;">
+                    For the Odoo Team,<br/>
+                    Fabien Pinckaers, Founder
+                </span></p>
+            </div>
+        </template>
 
-		<template id="users">
-	        <div>
-	            <span><h1><b>Your users</b></h1>
-	            <h4>You're almost finished !</h4></span>
-	            <p>> <a href="#">Create your users here</a></p>
-	            <p>> <a href="#">Print your work</a> on this module and present it to your users</p>
-	            <p>> <a href="#"> Follow their day-to-day activites</a> to be sure that everyone uses it</p>
-	        </div>
-		</template>
+        <template id="users">
+            <div>
+                <span><h1><b>Your users</b></h1>
+                <h4>You're almost finished !</h4></span>
+                <p>> <a href="#">Create your users here</a></p>
+                <p>> <a href="#">Print your work</a> on this module and present it to your users</p>
+                <p>> <a href="#"> Follow their day-to-day activites</a> to be sure that everyone uses it</p>
+            </div>
+        </template>
 
-		<template id="reporting">
-	        <div>
-	            <h1><b>Reporting</b></h1>
-	            <p><strong>Click on 'Reporting' on the main menu </strong>and generate statistics relevent to each profiles:</p>
-	        </div>
-	        <section>
-	            <div class="row mt32">
-	                <div class="col-md-4">
-	                    <div class="panel panel-default">
-	                        <div class="panel-heading">
-	                            <h3 class="panel-title fa fa-anchor fa-4x">Exercise 1 (Lead Manager)</h3>
-	                        </div>
-	                        <div class="panel-body">
-	                        <p>
-	                            <strong>Exercice:</strong> Try to get the number of Leads per salesperson and by creation date
-	                        </p>
-	                        <p> > <a href="#">Leads analysis</a></p>
-	                        </div>
-	                    </div>
-	                </div>
-	                <div class="col-md-4">
-	                    <div class="panel panel-default">
-	                        <div class="panel-heading">
-	                            <h3 class="panel-title fa fa-anchor fa-4x">Exercise 2 (Sales Manager)</h3>
-	                        </div>
-	                        <div class="panel-body">
-	                            <p>
-	                                A sales manager will mostly use these two reports:
-	                                <li><a href="#">Opportunities Analysis</a></li>
-	                                <li><a href="#">Invoice Analysis</a></li>
-	                            </p>
-	                            <p>
-	                                <strong>Exercice: </strong>Try to analyse the average time to close a deal.
-	                                Group X Axis: Creation Date
-	                                Group Y Axis: Expected Closing Date
-	                                Filter: Won Opportunities
-	                            </p>
-	                        </div>
-	                    </div>
-	                </div>
-	                <div class="col-md-4">
-	                    <div class="panel panel-default">
-	                        <div class="panel-heading">
-	                            <h3 class="panel-title fa fa-anchor">Exercise 3 (Salesperson)</h3>
-	                        </div>
-	                        <div class="panel-body">
-	                            <p>Every salesperson can analyse his own pipe by clicking on the switch view to graph icon</p>
-	                            <p><strong>Exercice: </strong>Try to switch the kanban to graph view</p>
-	                            <p>> <a href="#">Opportunities pipeline</a></p>
-	                        </div>
-	                    </div>
-	                </div>
-	            </div>
-	        </section>
-	        <div>
-	            <span class="fa fa-info-circle"><strong>Tips</strong></span>
-	            <div class="alert alert-warning" role="alert">
-	                <li>You can save your reports to easily reuse it later</li>
-	                <li>You can even include any report in your dashboard</li>
-	            </div>
-	            <div class="well well-lg">
-	                <p><span><strong>We are here to help you:</strong><br/>
-	                    if you don't succeed to get your favorite KPIs, 
-	                    contact us and we can help you create your custom reports.
-	                    </span>
-	                    <span class="pull-right" style="margin-right:115px"><strong>Contact us now:</strong></span><br/>
-	                    <span>We have special options for unlimited number of customizations !</span>
-	                    <span><a class="pull-right fa fa-envelope-o">Email<br/> Our CRM Expert</a>
-	                    <a class="pull-right fa fa-comment-o" style="margin-right:10px">Live Chat on</a></span>
-	                </p>
-	        	</div>
-	        </div>
-		</template>
+        <template id="reporting">
+            <div>
+                <h1><b>Reporting</b></h1>
+                <p><strong>Click on 'Reporting' on the main menu </strong>and generate statistics relevent to each profiles:</p>
+            </div>
+            <section>
+                <div class="row mt32">
+                    <div class="col-md-4">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title fa fa-anchor fa-4x">Exercise 1 (Lead Manager)</h3>
+                            </div>
+                            <div class="panel-body">
+                            <p>
+                                <strong>Exercice:</strong> Try to get the number of Leads per salesperson and by creation date
+                            </p>
+                            <p> > <a href="#">Leads analysis</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title fa fa-anchor fa-4x">Exercise 2 (Sales Manager)</h3>
+                            </div>
+                            <div class="panel-body">
+                                <p>
+                                    A sales manager will mostly use these two reports:
+                                    <li><a href="#">Opportunities Analysis</a></li>
+                                    <li><a href="#">Invoice Analysis</a></li>
+                                </p>
+                                <p>
+                                    <strong>Exercice: </strong>Try to analyse the average time to close a deal.
+                                    Group X Axis: Creation Date
+                                    Group Y Axis: Expected Closing Date
+                                    Filter: Won Opportunities
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title fa fa-anchor">Exercise 3 (Salesperson)</h3>
+                            </div>
+                            <div class="panel-body">
+                                <p>Every salesperson can analyse his own pipe by clicking on the switch view to graph icon</p>
+                                <p><strong>Exercice: </strong>Try to switch the kanban to graph view</p>
+                                <p>> <a href="#">Opportunities pipeline</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div>
+                <span class="fa fa-info-circle"><strong>Tips</strong></span>
+                <div class="alert alert-warning" role="alert">
+                    <li>You can save your reports to easily reuse it later</li>
+                    <li>You can even include any report in your dashboard</li>
+                </div>
+                <div class="well well-lg">
+                    <p><span><strong>We are here to help you:</strong><br/>
+                        if you don't succeed to get your favorite KPIs, 
+                        contact us and we can help you create your custom reports.
+                        </span>
+                        <span class="pull-right" style="margin-right:115px"><strong>Contact us now:</strong></span><br/>
+                        <span>We have special options for unlimited number of customizations !</span>
+                        <span><a class="pull-right fa fa-envelope-o">Email<br/> Our CRM Expert</a>
+                        <a class="pull-right fa fa-comment-o" style="margin-right:10px">Live Chat on</a></span>
+                    </p>
+                </div>
+            </div>
+        </template>
 
-		<template id="meeting">
-	        <div>
-	            <h1><b>Weekly meetings</b></h1>
-	            <p class="text-muted">
-	                Once you’ve deployed your CRM, it’s time to grow your revenues. 
-	                Start by setting up a continuous improvement approach.
-	                We recommend you to organize weekly sales meeting with the team 
-	                during which you will do a pipeline review.
-	            </p>
-	            <p>
-	                <strong>Organize weekly sales meetings</strong><br/>
-	                Start the pipeline review by the big picture; 
-	                revenues and number of opportunities by stage, 
-	                by expected closing date and by salespeople. 
-	                The analysis of the pipeline by stage will answer 
-	                questions like "do we have enough leads?" and "how 
-	                should we use our time between qualified and new prospects?".
-	             </p>
-	             <p>
-	                The analysis of the pipeline by expected closing date will 
-	                help your team efficiently forecast its future revenues. 
-	                Finally, the analysis of the pipeline by salespeople will 
-	                allow you to identify mistakes or best practices amongst the 
-	                team to replicate to all salespeople.
-	            </p>
-	            <p>
-	                <strong>Analyze the best opportunities together</strong><br/>
-	                Once the big picture is clear, have a look at the best opportunities. 
-	                Start from stages on the right (negotiation, proposal, ...) and review 
-	                the biggest opportunities one by one with the team. For every deal, 
-	                identify risks and opportunities; check the next action and expected 
-	                closing, check latest customer feedback, review the quotation, etc.
-	            </p>
-	            <p>
-	                By asking a few questions, you should quickly understand what's good 
-	                and bad in your team's sales practices; What are the pain points? 
-	                Who decides? What's the next action?...
-	            </p>
-	            <p>
-	                <strong>Forecast the future revenues</strong><br/>
-	                One can check the maturity of a sales team by its ability to 
-	                forecasts future revenues for the next months or quarter. 
-	                To train the team to forecast efficiently, during the first 
-	                sales meeting of the month/quarter, you should fix expected 
-	                revenues of the next two months/quarters. This will allow the 
-	                team to compare expected revenues and real numbers afterwards.
-	            </p>
-	            <p>
-	                Depending on the complexity of the business, it may take 
-	                between 6 months and 18 months for a new sales team to 
-	                efficiently forecasts future revenues.
-	            </p>
-	        </div>
-		</template>
+        <template id="meeting">
+            <div>
+                <h1><b>Weekly meetings</b></h1>
+                <p class="text-muted">
+                    Once you’ve deployed your CRM, it’s time to grow your revenues. 
+                    Start by setting up a continuous improvement approach.
+                    We recommend you to organize weekly sales meeting with the team 
+                    during which you will do a pipeline review.
+                </p>
+                <p>
+                    <strong>Organize weekly sales meetings</strong><br/>
+                    Start the pipeline review by the big picture; 
+                    revenues and number of opportunities by stage, 
+                    by expected closing date and by salespeople. 
+                    The analysis of the pipeline by stage will answer 
+                    questions like "do we have enough leads?" and "how 
+                    should we use our time between qualified and new prospects?".
+                 </p>
+                 <p>
+                    The analysis of the pipeline by expected closing date will 
+                    help your team efficiently forecast its future revenues. 
+                    Finally, the analysis of the pipeline by salespeople will 
+                    allow you to identify mistakes or best practices amongst the 
+                    team to replicate to all salespeople.
+                </p>
+                <p>
+                    <strong>Analyze the best opportunities together</strong><br/>
+                    Once the big picture is clear, have a look at the best opportunities. 
+                    Start from stages on the right (negotiation, proposal, ...) and review 
+                    the biggest opportunities one by one with the team. For every deal, 
+                    identify risks and opportunities; check the next action and expected 
+                    closing, check latest customer feedback, review the quotation, etc.
+                </p>
+                <p>
+                    By asking a few questions, you should quickly understand what's good 
+                    and bad in your team's sales practices; What are the pain points? 
+                    Who decides? What's the next action?...
+                </p>
+                <p>
+                    <strong>Forecast the future revenues</strong><br/>
+                    One can check the maturity of a sales team by its ability to 
+                    forecasts future revenues for the next months or quarter. 
+                    To train the team to forecast efficiently, during the first 
+                    sales meeting of the month/quarter, you should fix expected 
+                    revenues of the next two months/quarters. This will allow the 
+                    team to compare expected revenues and real numbers afterwards.
+                </p>
+                <p>
+                    Depending on the complexity of the business, it may take 
+                    between 6 months and 18 months for a new sales team to 
+                    efficiently forecasts future revenues.
+                </p>
+            </div>
+        </template>
 
-		<template id="boost_sale">
-	        <div class="text-left">
-	            <h1><b>Boosting Sales</b></h1>
-	            <p class="text-muted">
-	                A systematic organization and a clear process is what will turn your 
-	                best salespersons into excellent ones. Great sales process are aligned 
-	                with the customer mind and buying cycle.  As an example, if you follow 
-	                a "Sollution Selling" sales cycle (Territory, Qualified, Qualified Sponsors, 
-	                Proposition ...), an opportunity should be set as "Qualified Sponsors" 
-	                when THE BYUER admited his pains, not when YOU understood his needs. 
-	                As an other example, an opportunity should be set as "Negociation" 
-	                when the buyer came back to you to discuss the price, not when you did a 
-	                follow up call.
-	            </p>
-	            <p>
-	                <strong>Check on your team discipline</strong><br/>
-	                During the firsts months of the implementation of the opportunities 
-	                pipeline, you will have to ensure that your team follows the defined 
-	                requirements at every stage. It's critical to continuously train your 
-	                team on the requirements to move opportunities from one stage to another one. 
-	                By reviewing the best opportunities one by one during the weekly sales meeting, 
-	                you will have to continuously check that your sales process is aligned with 
-	                the customer one.
-	            </p>
-	            <p>
-	                <strong>Remove the blocking points</strong><br/>
-	                You will achieve great improvement with an efficient follow up 
-	                of the pipeline. But to achieve excellence in your sales 
-	                organization, you need to provide sales tools to the team. 
-	                For every stage of the opportunities pipeline, identify the blocking points 
-	                and create documents to train the team.
-	            </p>
-	            <p>Here are a few examples:</p>
-	            <section>
+        <template id="boost_sale">
+            <div class="text-left">
+                <h1><b>Boosting Sales</b></h1>
+                <p class="text-muted">
+                    A systematic organization and a clear process is what will turn your 
+                    best salespersons into excellent ones. Great sales process are aligned 
+                    with the customer mind and buying cycle.  As an example, if you follow 
+                    a "Sollution Selling" sales cycle (Territory, Qualified, Qualified Sponsors, 
+                    Proposition ...), an opportunity should be set as "Qualified Sponsors" 
+                    when THE BYUER admited his pains, not when YOU understood his needs. 
+                    As an other example, an opportunity should be set as "Negociation" 
+                    when the buyer came back to you to discuss the price, not when you did a 
+                    follow up call.
+                </p>
+                <p>
+                    <strong>Check on your team discipline</strong><br/>
+                    During the firsts months of the implementation of the opportunities 
+                    pipeline, you will have to ensure that your team follows the defined 
+                    requirements at every stage. It's critical to continuously train your 
+                    team on the requirements to move opportunities from one stage to another one. 
+                    By reviewing the best opportunities one by one during the weekly sales meeting, 
+                    you will have to continuously check that your sales process is aligned with 
+                    the customer one.
+                </p>
+                <p>
+                    <strong>Remove the blocking points</strong><br/>
+                    You will achieve great improvement with an efficient follow up 
+                    of the pipeline. But to achieve excellence in your sales 
+                    organization, you need to provide sales tools to the team. 
+                    For every stage of the opportunities pipeline, identify the blocking points 
+                    and create documents to train the team.
+                </p>
+                <p>Here are a few examples:</p>
+                <section>
                     <div class="row">
                         <div class="well well-lg col-md-4 mb32">
                             <strong>New:</strong><br/>
@@ -234,22 +234,22 @@
                             Example of tags to create: no budget, competition, no pain found, etc.
                         </p>
                     </div>
-	            </section>
-	        </div>
-		</template>
+                </section>
+            </div>
+        </template>
 
-		<template id="boost_lead">
-	        <div>
-	            <h1>Boost Lead</h1>
-	            <p class="text-muted">
-	                Odoo is the world's only software to have a full integration 
-	                of marketing with all your sales channel (insight sales, point of sale, ecommerce).
-	            </p>
-	            <p>
-	                <strong>To boost your lead acquisition machine,</strong> you should have a look at our marketing apps:
-	            </p>
-	        </div>
-	        <section>
+        <template id="boost_lead">
+            <div>
+                <h1>Boost Lead</h1>
+                <p class="text-muted">
+                    Odoo is the world's only software to have a full integration 
+                    of marketing with all your sales channel (insight sales, point of sale, ecommerce).
+                </p>
+                <p>
+                    <strong>To boost your lead acquisition machine,</strong> you should have a look at our marketing apps:
+                </p>
+            </div>
+            <section>
                 <div class="row">
                     <div class="text-center col-md-3 mb32">
                         <span style="" class="fa fa-envelope fa-5x"></span>
@@ -296,40 +296,40 @@
                         <a href="https://www.odoo.com/page/e-commerce" style="background-color:#a24689; border-color:#903e7a" class="btn mt8 btn-primary">Sell Online</a>
                     </div>
                 </div>
-	        </section>
-		</template>
+            </section>
+        </template>
 
-		<template id="fine_tune">
-	        <div>
-	            <h1><b>Fine Tune</b></h1>
-	            <p>
-	                <strong>Create customer reports</strong><br/>
-	                To ease monitoring and weekly sales meeting, you 
-	                can create custom reports to frequently check on 
-	                your main KPIs.You can create reports for yourself 
-	                or share them with the team. Odoo also allows you 
-	                to save custom reports and create aggregated dashboard 
-	                to monitor the whole sales activity in a single screen.
-	            </p>
-	            <p>
-	                <strong>Integrate with Google Spreadsheet</strong>
-	                You can also use the Google Spreadsheet integration 
-	                to sync data from a spreadsheet and Odoo. This tool 
-	                is great to integrate some formulae for the computation 
-	                of the commissions, to integrate performance with 
-	                the budgets, etc.
-	            </p>
-	        </div>
-		</template>
+        <template id="fine_tune">
+            <div>
+                <h1><b>Fine Tune</b></h1>
+                <p>
+                    <strong>Create customer reports</strong><br/>
+                    To ease monitoring and weekly sales meeting, you 
+                    can create custom reports to frequently check on 
+                    your main KPIs.You can create reports for yourself 
+                    or share them with the team. Odoo also allows you 
+                    to save custom reports and create aggregated dashboard 
+                    to monitor the whole sales activity in a single screen.
+                </p>
+                <p>
+                    <strong>Integrate with Google Spreadsheet</strong>
+                    You can also use the Google Spreadsheet integration 
+                    to sync data from a spreadsheet and Odoo. This tool 
+                    is great to integrate some formulae for the computation 
+                    of the commissions, to integrate performance with 
+                    the budgets, etc.
+                </p>
+            </div>
+        </template>
 
-		<template id="mail">
-	        <h1><b>Incoming Emails</b></h1>
-	        <span class="text-muted">
-	            Incoming email create leads automatically when a new prospect contacts you.
-	            That's the easiest way to integrate Odoo with third party apps.
-	        </span>
-	        <span>The point of contact <strong>for all your prospects</strong></span>
-	        <section style=""  data-snippet-id="title">
+        <template id="mail">
+            <h1><b>Incoming Emails</b></h1>
+            <span class="text-muted">
+                Incoming email create leads automatically when a new prospect contacts you.
+                That's the easiest way to integrate Odoo with third party apps.
+            </span>
+            <span>The point of contact <strong>for all your prospects</strong></span>
+            <section style=""  data-snippet-id="title">
                 <div class="row">
                     <div class="well well-lg col-md-4 mb32 text-center">
                         <h4><span class="label label-default text-center">Incoming email</span></h4>
@@ -370,39 +370,39 @@
                         </div>
                     </div>
                 </div>
-	        </section>
-		</template>
+            </section>
+        </template>
 
-    	<template id="linkedin">
-	        <div>
-	            <h1><b>LinkedIn</b></h1>
-	            <p class="text-muted">
-	                When you create a new contact (person or company), 
-	                you can automatically load all its data from LinkedIn (photos, address,..).
-	            </p>
-	            <p><strong>
-	                Here is how to integrate LinkedIn with your contacts:
-	            </strong></p>
-	            <p>1. Go to this URL: <a href="#">https://www.linkedin.com/secure/developer</a></p>
-	            <p>2. Log into LinkedIn if necessary (link at the top right)</p>
-	            <p>3. Click on <span class="fa fa-plus"><a href="#">Add new Application</a></span></p>
-	            <p>4. Fill in the form with the following data:
-	                <li><strong> Company Name: </strong>Odoo</li>
-	                <li><strong> Application Name: </strong>Sales</li>
-	                <li><strong> Description: </strong>CRM module</li>
-	                <li><strong> Website URL: </strong>http://www.odoo.com</li>
-	                <li><strong> Application Use: </strong>Sales (CRM), marketing</li>
-	                <li><strong> Developer Contact Email: </strong>info@odoo.com</li>
-	                <li><strong> Phone: </strong>+32 81 81 37 00</li>
-	            </p>
-	            <p>Copy the <strong>API Key </strong>you will get in <a>Settings > Sales</a> and hit Apply. You're done !</p>
-	        </div>
-		</template>
+        <template id="linkedin">
+            <div>
+                <h1><b>LinkedIn</b></h1>
+                <p class="text-muted">
+                    When you create a new contact (person or company), 
+                    you can automatically load all its data from LinkedIn (photos, address,..).
+                </p>
+                <p><strong>
+                    Here is how to integrate LinkedIn with your contacts:
+                </strong></p>
+                <p>1. Go to this URL: <a href="#">https://www.linkedin.com/secure/developer</a></p>
+                <p>2. Log into LinkedIn if necessary (link at the top right)</p>
+                <p>3. Click on <span class="fa fa-plus"><a href="#">Add new Application</a></span></p>
+                <p>4. Fill in the form with the following data:
+                    <li><strong> Company Name: </strong>Odoo</li>
+                    <li><strong> Application Name: </strong>Sales</li>
+                    <li><strong> Description: </strong>CRM module</li>
+                    <li><strong> Website URL: </strong>http://www.odoo.com</li>
+                    <li><strong> Application Use: </strong>Sales (CRM), marketing</li>
+                    <li><strong> Developer Contact Email: </strong>info@odoo.com</li>
+                    <li><strong> Phone: </strong>+32 81 81 37 00</li>
+                </p>
+                <p>Copy the <strong>API Key </strong>you will get in <a>Settings > Sales</a> and hit Apply. You're done !</p>
+            </div>
+        </template>
 
 
-		<!-- Planner Page category-->
-		
-		<record model="ir.application.planner.page.category" id="category_welcome">
+        <!-- Planner Page category-->
+        
+        <record model="ir.application.planner.page.category" id="category_welcome">
             <field name="name">Welcome</field>
             <field name="sequence">1</field>
         </record>
