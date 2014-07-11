@@ -37,5 +37,23 @@
 
             </field>
         </record>
+
+        <record id="res_partner_sale_crm" model="ir.ui.view">
+            <field name="name">res.partner.view.sale_crm</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//label[@for='type'][following-sibling::div[@name='div_type']/field[@name='use_parent_address']] | //field[@name='child_ids']//
+                    label[@for='type']" position="attributes">
+                        <attribute name="invisible">False</attribute>
+                        <attribute name="groups">sale.group_delivery_invoice_address</attribute>
+                    </xpath>
+                <xpath expr="//div[@name='div_type'][field[@name='use_parent_address']] | //field[@name='child_ids']//
+                    div[@name='div_type']" position="attributes">
+                    <attribute name="invisible">False</attribute>
+                    <attribute name="groups">sale.group_delivery_invoice_address</attribute>
+                </xpath>
+            </field>
+        </record>
     </data>
 </openerp>

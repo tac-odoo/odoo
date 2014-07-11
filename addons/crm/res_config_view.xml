@@ -17,6 +17,10 @@
                                 <field name="group_scheduled_calls" class="oe_inline"/>
                                 <label for="group_scheduled_calls"/>
                             </div>
+                            <div>
+                                <field name="group_delivery_address" class="oe_inline"/>
+                                <label for="group_delivery_address"/>
+                            </div>
                         </div>
                     </group>
                     <group>
