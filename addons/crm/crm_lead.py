@@ -680,7 +680,7 @@ class crm_lead(format_address, osv.osv):
             vals = self._convert_opportunity_data(cr, uid, lead, customer, section_id, context=context)
             self.write(cr, uid, [lead.id], vals, context=context)
             if lead.partner_id and lead.contact_name:
-                self._lead_create_contact(cr, uid, lead, lead.contact_name, False, partner_id, context=context)
+                self._lead_create_contact(cr, uid, lead, lead.contact_name, False, lead.partner_id.id, context=context)
 
         if user_ids or section_id:
             self.allocate_salesman(cr, uid, ids, user_ids, section_id, context=context)
