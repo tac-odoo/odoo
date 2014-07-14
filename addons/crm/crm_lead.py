@@ -1037,6 +1037,7 @@ class crm_lead(format_address, osv.osv):
     def fields_view_get(self, cr, uid, view_id=None, view_type=False, context=None, toolbar=False, submenu=False):
         if context is None:
             context = {}
+            
         stage_type = context.get("stage_type", False)
         res = super(crm_lead,self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
         if stage_type and stage_type == "lead":
