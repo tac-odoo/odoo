@@ -133,15 +133,6 @@ class WebsiteForum(http.Controller):
         })
         return request.website.render("website_forum.forum_index", values)
 
-    @http.route('/forum/check_tag', type='json', auth="public", methods=['POST'], website=True)
-    def check_tag_existence(self, **post):
-        cr, uid, context = request.cr, request.uid, request.context
-        tags = request.registry['forum.tag'].search_read(request.cr, request.uid, [], ['name'], context=request.context)
-        data = [tag['name'] for tag in tags if tag['name'].lower() == post['tags'].lower()]
-        if data or request.uid == SUPERUSER_ID or request.registry['res.users'].browse(cr, uid, uid, context=context).karma > 30:
-            return data if data else post['tags']
-        return False
-
     @http.route(['/forum/<model("forum.forum"):forum>/faq'], type='http', auth="public", website=True)
     def forum_faq(self, forum, **post):
         values = self._prepare_forum_values(forum=forum, searches=dict(), header={'is_guidelines': True}, **post)

@@ -137,24 +137,14 @@ $(document).ready(function () {
             }
         });
         // Adds: create tags on space + enter
-        $("input.load_tags").on('whitespaceKeyDown enterKeyDown', function () {
-            var self = $(this);
-            var tag = $(this).val();
-            if(tag){
-              openerp.jsonRpc('/forum/check_tag', 'call', {'tags':tag}).then(function(result){
-                  if (!result) {
-                      alert("Sorry you need more than 30 Karma.");
-                  }
-                  else {
-                      self.textext()[0].tags().addTags([ String(result) ]);
-                  }
-              });
-            }
+        $("input.load_tags").on('whitespaceKeyDown', function () {
+            $(this).textext()[0].tags().addTags([ $(this).val() ]);
             $(this).val("");
         });
         $("input.load_tags").on('isTagAllowed', function(e, data) {
             _.each($(this).textext()[0].tags()._formData, function( value ) {
                 if (value.toLowerCase() == data.tag.toLowerCase()) {
+                    alert("\"" + data.tag + "\" is already in the list");
                     data.result = false;
                 }
             });
