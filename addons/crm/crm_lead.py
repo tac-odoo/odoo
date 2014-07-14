@@ -679,6 +679,8 @@ class crm_lead(format_address, osv.osv):
                 continue
             vals = self._convert_opportunity_data(cr, uid, lead, customer, section_id, context=context)
             self.write(cr, uid, [lead.id], vals, context=context)
+            if lead.partner_id and lead.contact_name:
+                self._lead_create_contact(cr, uid, lead, lead.contact_name, False, partner_id, context=context)
 
         if user_ids or section_id:
             self.allocate_salesman(cr, uid, ids, user_ids, section_id, context=context)
@@ -1032,4 +1034,16 @@ class crm_lead(format_address, osv.osv):
             return {'value':{'country_id':country_id}}
         return {}
 
+    def fields_view_get(self, cr, uid, view_id=None, view_type=False, context=None, toolbar=False, submenu=False):
+        if context is None:
+            context = {}
+        stage_type = context.get("stage_type", False)
+        res = super(crm_lead,self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
+        if stage_type and stage_type == "lead":
+            toolbar = res.get("toolbar", False)
+            if toolbar: 
+                toolbar["action"] = []
+                res.update({"toolbar": toolbar})
+        return res
+        
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
