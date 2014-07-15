@@ -172,6 +172,7 @@ class WebsiteForum(http.Controller):
     def question_create(self, forum, **post):
         cr, uid, context = request.cr, request.uid, request.context
         Tag = request.registry['forum.tag']
+        User = request.registry['res.users'].browse(cr, uid, uid, context=context)
         question_tag_ids = []
         if post.get('question_tags').strip('[]'):
             tags = post.get('question_tags').strip('[]').replace('"', '').split(",")
@@ -180,7 +181,8 @@ class WebsiteForum(http.Controller):
                 if tag_ids:
                     question_tag_ids.append((4, tag_ids[0]))
                 else:
-                    question_tag_ids.append((0, 0, {'name': tag, 'forum_id': forum.id}))
+                    if User.karma > 30 or User.id == SUPERUSER_ID:
+                        question_tag_ids.append((0, 0, {'name': tag, 'forum_id': forum.id}))
 
         new_question_id = request.registry['forum.post'].create(
             request.cr, request.uid, {
@@ -341,14 +343,16 @@ class WebsiteForum(http.Controller):
         question_tags = []
         if kwargs.get('question_tag') and kwargs.get('question_tag').strip('[]'):
             Tag = request.registry['forum.tag']
+            User = request.registry['res.users'].browse(cr, uid, uid, context=context)
             tags = kwargs.get('question_tag').strip('[]').replace('"', '').split(",")
             for tag in tags:
                 tag_ids = Tag.search(cr, uid, [('name', '=', tag)], context=context)
                 if tag_ids:
                     question_tags += tag_ids
                 else:
-                    new_tag = Tag.create(cr, uid, {'name': tag, 'forum_id': forum.id}, context=context)
-                    question_tags.append(new_tag)
+                    if User.karma > 30 or User.id == SUPERUSER_ID:
+                        new_tag = Tag.create(cr, uid, {'name': tag, 'forum_id': forum.id}, context=context)
+                        question_tags.append(new_tag)
         vals = {
             'tag_ids': [(6, 0, question_tags)],
             'name': kwargs.get('question_name'),
