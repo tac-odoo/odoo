@@ -608,7 +608,7 @@ class Tags(osv.Model):
         tag_id = super(Tags, self).create(cr, uid, vals, context=context)
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         if user.karma < 30 and not user.id == SUPERUSER_ID:
-            raise KarmaError('Not enough karma to create a new Tag')
+            raise osv.except_osv(_('Warning!'),_('Not enough Karma to create a new Tag!'))
         return tag_id
 
     def message_subscribe(self, cr, uid, ids, partner_ids, subtype_ids=None, context=None):
