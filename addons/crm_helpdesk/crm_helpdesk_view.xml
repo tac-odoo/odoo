@@ -10,11 +10,9 @@
 
         <record id="crm_helpdesk_categ_action" model="ir.actions.act_window">
             <field name="name">Helpdesk Categories</field>
-            <field name="res_model">crm.case.categ</field>
+            <field name="res_model">crm.helpdesk.category</field>
             <field name="view_type">form</field>
-            <field name="view_id" ref="crm.crm_case_categ_tree-view"/>
-            <field name="domain">[('object_id.model', '=', 'crm.helpdesk')]</field>
-            <field name="context" eval="{'object_id': ref('model_crm_helpdesk')}"/>
+            <field name="view_id" ref="crm.crm_case_category_tree-view"/>
             <field name="help">Create and manage helpdesk categories to better manage and classify your support requests.</field>
         </record>
 
@@ -52,7 +50,7 @@
                                 </group>
                                 <group string="Categorization">
                                     <field name="priority" widget="priority"/>
-                                    <field name="categ_id" domain="[('object_id.model', '=', 'crm.helpdesk')]" context="{'object_name': 'crm.helpdesk'}"/>
+                                    <field name="categ_id"/>
                                     <field name="channel_id"/>
                                 </group>
                             </group>

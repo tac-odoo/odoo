@@ -23,7 +23,7 @@ from openerp.osv import fields,osv
 class account_invoice_report(osv.osv):
     _inherit = 'account.invoice.report'
     _columns = {
-        'section_id': fields.many2one('crm.case.section', 'Sales Team'),
+        'section_id': fields.many2one('crm.team', 'Sales Team'),
     }
     _depends = {
         'account.invoice': ['section_id'],

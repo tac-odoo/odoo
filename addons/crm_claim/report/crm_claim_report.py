@@ -39,7 +39,7 @@ class crm_claim_report(osv.osv):
     _columns = {
         'name': fields.char('Year', required=False, readonly=True),
         'user_id':fields.many2one('res.users', 'User', readonly=True),
-        'section_id':fields.many2one('crm.case.section', 'Section', readonly=True),
+        'section_id':fields.many2one('crm.team', 'Section', readonly=True),
         'nbr': fields.integer('# of Cases', readonly=True),
         'month':fields.selection([('01', 'January'), ('02', 'February'), \
                                   ('03', 'March'), ('04', 'April'),\
@@ -51,10 +51,8 @@ class crm_claim_report(osv.osv):
         'create_date': fields.datetime('Create Date', readonly=True, select=True),
         'day': fields.char('Day', size=128, readonly=True),
         'delay_close': fields.float('Delay to close', digits=(16,2),readonly=True, group_operator="avg",help="Number of Days to close the case"),
-        'stage_id': fields.many2one ('crm.case.stage', 'Stage', readonly=True,domain="[('section_ids','=',section_id)]"),
-        'categ_id': fields.many2one('crm.case.categ', 'Category',\
-                         domain="[('section_id','=',section_id),\
-                        ('object_id.model', '=', 'crm.claim')]", readonly=True),
+        'stage_id': fields.many2one ('crm.stage', 'Stage', readonly=True,domain="[('section_ids','=',section_id)]"),
+        'categ_id': fields.many2one('crm.claim.category', 'Category',readonly=True),
         'partner_id': fields.many2one('res.partner', 'Partner', readonly=True),
         'company_id': fields.many2one('res.company', 'Company', readonly=True),
         'priority': fields.selection(AVAILABLE_PRIORITIES, 'Priority'),

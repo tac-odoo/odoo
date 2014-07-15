@@ -9,8 +9,8 @@ from openerp import tools
 from openerp.osv import fields, osv
 
 
-class crm_case_section(osv.osv):
-    _inherit = 'crm.case.section'
+class crm_team(osv.osv):
+    _inherit = 'crm.team'
 
     def _get_sale_orders_data(self, cr, uid, ids, field_name, arg, context=None):
         obj = self.pool['sale.order']

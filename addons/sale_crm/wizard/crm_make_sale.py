@@ -93,7 +93,7 @@ class crm_make_sale(osv.osv_memory):
                 vals = {
                     'origin': _('Opportunity: %s') % str(case.id),
                     'section_id': case.section_id and case.section_id.id or False,
-                    'categ_ids': [(6, 0, [categ_id.id for categ_id in case.categ_ids])],
+                    'tag_ids': [(6, 0, [categ_id.id for categ_id in case.tag_ids])],
                     'partner_id': partner.id,
                     'pricelist_id': pricelist,
                     'partner_invoice_id': partner_addr['invoice'],

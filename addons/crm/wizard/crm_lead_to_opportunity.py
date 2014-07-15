@@ -36,7 +36,7 @@ class crm_lead2opportunity_partner(osv.osv_memory):
             ], 'Conversion Action', required=True),
         'opportunity_ids': fields.many2many('crm.lead', string='Opportunities'),
         'user_id': fields.many2one('res.users', 'Salesperson', select=True),
-        'section_id': fields.many2one('crm.case.section', 'Sales Team', select=True),
+        'section_id': fields.many2one('crm.team', 'Sales Team', select=True),
     }
 
     def onchange_action(self, cr, uid, ids, action, context=None):
@@ -100,7 +100,7 @@ class crm_lead2opportunity_partner(osv.osv_memory):
             to the ones user_id is member of. """
         if user_id:
             if section_id:
-                user_in_section = self.pool.get('crm.case.section').search(cr, uid, [('id', '=', section_id), '|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context, count=True)
+                user_in_section = self.pool.get('crm.team').search(cr, uid, [('id', '=', section_id), '|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context, count=True)
             else:
                 user_in_section = False
             if not user_in_section:
@@ -194,7 +194,7 @@ class crm_lead2opportunity_mass_convert(osv.osv_memory):
 
     _columns = {
         'user_ids':  fields.many2many('res.users', string='Salesmen'),
-        'section_id': fields.many2one('crm.case.section', 'Sales Team'),
+        'section_id': fields.many2one('crm.team', 'Sales Team'),
         'deduplicate': fields.boolean('Apply deduplication', help='Merge with existing leads/opportunities of each partner'),        
         'action': fields.selection([
                 ('each_exist_or_create', 'Use existing partner or create'),
