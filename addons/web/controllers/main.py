@@ -213,7 +213,6 @@ def module_installed_bypass_session(dbname):
         with registry.cursor() as cr:
             m = registry.get('ir.module.module')
             # TODO The following code should move to ir.module.module.list_installed_modules()
-            domain = [('state','=','installed'), ('name','in', loadable)]
             ids = m.search(cr, 1, [('state','=','installed'), ('name','in', loadable)])
             for module in m.read(cr, 1, ids, ['name', 'dependencies_id']):
                 modules[module['name']] = []
@@ -222,7 +221,7 @@ def module_installed_bypass_session(dbname):
                     deps_read = registry.get('ir.module.module.dependency').read(cr, 1, deps, ['name'])
                     dependencies = [i['name'] for i in deps_read]
                     modules[module['name']] = dependencies
-    except Exception,e:
+    except Exception:
         pass
     sorted_modules = module_topological_sort(modules)
     return sorted_modules
@@ -294,16 +293,6 @@ def manifest_glob(extension, addons=None, db=None, include_remotes=False):
                 for path in glob.glob(os.path.normpath(os.path.join(addons_path, addon, pattern))):
                     r.append((path, fs2web(path[len(addons_path):])))
     return r
-
-def manifest_list(extension, mods=None, db=None, debug=None):
-    """ list ressources to load specifying either:
-    mods: a comma separated string listing modules
-    db: a database name (return all installed modules in that database)
-    """
-    if debug is not None:
-        _logger.warning("openerp.addons.web.main.manifest_list(): debug parameter is deprecated")
-    files = manifest_glob(extension, addons=mods, db=db, include_remotes=True)
-    return [wp for _fp, wp in files]
 
 def get_last_modified(files):
     """ Returns the modification time of the most recently modified
