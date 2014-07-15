@@ -172,6 +172,7 @@ class WebsiteForum(http.Controller):
         cr, uid, context = request.cr, request.uid, request.context
         Tag = request.registry['forum.tag']
         question_tag_ids = []
+        user = request.registry['res.users'].browse(cr, uid, uid, context=context)
         if post.get('question_tags').strip('[]'):
             tags = post.get('question_tags').strip('[]').replace('"', '').split(",")
             for tag in tags:
@@ -179,7 +180,8 @@ class WebsiteForum(http.Controller):
                 if tag_ids:
                     question_tag_ids.append((4, tag_ids[0]))
                 else:
-                    question_tag_ids.append((0, 0, {'name': tag, 'forum_id': forum.id}))
+                    if user.karma > 30 or user.id == SUPERUSER_ID:
+                        question_tag_ids.append((0, 0, {'name': tag, 'forum_id': forum.id}))
 
         new_question_id = request.registry['forum.post'].create(
             request.cr, request.uid, {
