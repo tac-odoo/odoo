@@ -65,7 +65,7 @@
         <link href="/base/static/src/css/modules.css" rel="stylesheet"/>
         <script type="text/javascript">
             $(function() {
-                var s = new openerp.init({{ modules|safe }});
+                var s = new openerp.init();
                 var wc = new s.web.WebClient(null, { action: 'database_manager' });
                 wc.setElement($(document.body));
                 wc.start();

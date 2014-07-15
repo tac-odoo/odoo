@@ -695,9 +695,7 @@ class Database(http.Controller):
     def manager(self, **kw):
         # TODO: migrate the webclient's database manager to server side views
         request.session.logout()
-        return env.get_template("database_manager.html").render({
-            'modules': simplejson.dumps(module_boot()),
-        })
+        return env.get_template("database_manager.html").render()
 
     @http.route('/web/database/get_list', type='json', auth="none")
     def get_list(self):
