@@ -24,106 +24,37 @@ from dateutil.relativedelta import relativedelta
 from dateutil import parser
 import time
 
-from openerp import fields, api, tools
-from openerp.osv import osv, orm
+from openerp import fields, api, tools, models
+#from openerp.osv import osv, orm
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DF
 
+class hr_evaluationStage(models.Model):
+    _name = 'hr_evaluation.stage'
+    _description = 'Evaluation Stage'
+    _order = 'sequence'
 
-#class hr_evaluation_plan(osv.Model):
-#    _name = "hr_evaluation.plan"
-#    _description = "Appraisal Plan"
-#    _columns = {
-#        'name': fields.char("Appraisal Plan", required=True),
-#        'company_id': fields.many2one('res.company', 'Company', required=True),
-#        'phase_ids': fields.one2many('hr_evaluation.plan.phase', 'plan_id', 'Appraisal Phases', copy=True),
-#        'month_first': fields.integer('First Appraisal in (months)', help="This number of months will be used to schedule the first evaluation date of the employee when selecting an evaluation plan. "),
-#        'month_next': fields.integer('Periodicity of Appraisal (months)', help="The number of month that depicts the delay between each evaluation of this plan (after the first one)."),
-#        'active': fields.boolean('Active')
-#    }
-#    _defaults = {
-#        'active': True,
-#        'month_first': 6,
-#        'month_next': 12,
-#        'company_id': lambda s, cr, uid, c: s.pool.get('res.company')._company_default_get(cr, uid, 'account.account', context=c),
-#    }
+    sequence = fields.Integer('Sequence')
+    name = fields.Char('Stage Name', required=True, translate=True)
 
-
-#class hr_evaluation_plan_phase(osv.Model):
-#    _name = "hr_evaluation.plan.phase"
-#    _description = "Appraisal Plan Phase"
-#    _order = "sequence"
-#    _columns = {
-#        'name': fields.char("Phase", size=64, required=True),
-#        'sequence': fields.integer("Sequence"),
-#        'company_id': fields.related('plan_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True),
-#        'plan_id': fields.many2one('hr_evaluation.plan', 'Appraisal Plan', ondelete='cascade'),
-#        'action': fields.selection([
-#            ('top-down', 'Top-Down Appraisal Requests'),
-#            ('bottom-up', 'Bottom-Up Appraisal Requests'),
-#            ('self', 'Self Appraisal Requests'),
-#            ('final', 'Final Interview')], 'Action', required=True),
-#        'survey_id': fields.many2one('survey.survey', 'Appraisal Form', required=True),
-#        'send_answer_manager': fields.boolean('All Answers',
-#            help="Send all answers to the manager"),
-#        'send_answer_employee': fields.boolean('All Answers',
-#            help="Send all answers to the employee"),
-#        'send_anonymous_manager': fields.boolean('Anonymous Summary',
-#            help="Send an anonymous summary to the manager"),
-#        'send_anonymous_employee': fields.boolean('Anonymous Summary',
-#            help="Send an anonymous summary to the employee"),
-#        'wait': fields.boolean('Wait Previous Phases',
-#            help="Check this box if you want to wait that all preceding phases " +
-#              "are finished before launching this phase."),
-#        'mail_feature': fields.boolean('Send mail for this phase', help="Check this box if you want to send mail to employees coming under this phase"),
-#        'mail_body': fields.text('Email'),
-#        'email_subject': fields.text('Subject')
-#    }
-#    _defaults = {
-#        'sequence': 1,
-#        'email_subject': _('''Regarding '''),
-#        'mail_body': lambda *a: _('''
-#Date: %(date)s
-#
-#Dear %(employee_name)s,
-#
-#I am doing an evaluation regarding %(eval_name)s.
-#
-#Kindly submit your response.
-#
-#
-#Thanks,
-#--
-#%(user_signature)s
-#
-#        '''),
-#    }
-
-class hr_evaluation(osv.Model):
+class hr_evaluation(models.Model):
     _name = "hr_evaluation.evaluation"
     _inherit = ['mail.thread']
     _description = "Employee Appraisal"
-    #_columns = {
-    #date = fields.Date("Appraisal Deadline", required=True, select=True)
+
+    @api.model
+    def _get_default_stage_id(self):
+        """ Gives default stage_id """
+        stage_obj = self.env['hr_evaluation.stage']
+        ids = stage_obj.search([])
+        return ids and ids[0] or False
+
     interview_deadline = fields.Date("Final Interview", select=True)
-    employee_id = fields.Many2one('hr.employee')
+    employee_id = fields.Many2one('hr.employee', required=True, string='Employee')
     department_id = fields.Many2one('hr.department', 'Department')
     note_summary = fields.Text('Appraisal Summary')
     evaluation = fields.Text('Evaluation Summary', help="If the evaluation does not meet the expectations, you can propose an action plan")
-        #'rating': fields.selection([
-#            ('0', 'Significantly below expectations'),
-#            ('1', 'Do not meet expectations'),
-#            ('2', 'Meet expectations'),
-#            ('3', 'Exceeds expectations'),
-#            ('4', 'Significantly exceeds expectations'),
-#        ], "Appreciation", help="This is the appreciation on which the evaluation is summarized."),
-#        'survey_request_ids': fields.one2many('hr.evaluation.interview', 'evaluation_id', 'Appraisal Forms'),
-#        'plan_id': fields.many2one('hr_evaluation.plan', 'Plan', required=True),
-    state = fields.Selection([
-            ('New', 'To Start'),
-            ('Appraisal Sent', 'Appraisal Sent'),
-            ('Done', 'Done'),
-    ], 'Status', required=True, readonly=True, copy=False)
+    stage_id = fields.Many2one('hr_evaluation.stage', 'Status', readonly=True, copy=False, default=_get_default_stage_id)
     date_close = fields.Date('Appraisal Deadline', select=True)
     appraisal_manager = fields.Boolean(string='Manger', store=True, related='employee_id.appraisal_manager', readonly=True)
     apprasial_manager_ids = fields.Many2many('hr.employee', related='employee_id.apprasial_manager_ids', readonly=True)
@@ -138,28 +69,27 @@ class hr_evaluation(osv.Model):
     appraisal_subordinates_ids = fields.Many2many('hr.employee', related='employee_id.appraisal_subordinates_ids', readonly=True)
     appraisal_subordinates_survey_id = fields.Many2one('survey.survey', store=True, related='employee_id.appraisal_subordinates_survey_id', readonly=True)
     color = fields.Integer('Color Index')
-#}
-    _defaults = {
-        #'date': lambda *a: (parser.parse(datetime.now().strftime('%Y-%m-%d')) + relativedelta(months=+1)).strftime('%Y-%m-%d'),
-        'state': lambda *a: 'New',
-    }
+    display_name = fields.Char(compute='_set_display_name')
 
+    @api.one
+    @api.depends('employee_id')
+    def _set_display_name(self):
+        for record in self:
+            self.display_name = record.employee_id.name_related
 
-#    def name_get(self, cr, uid, ids, context=None):
-#        if not ids:
-#            return []
-#        reads = self.browse(cr, uid, ids, context=context)
-#        res = []
-#        for record in reads:
-#            name = record.plan_id.name
-#            employee = record.employee_id.name_related
-#            res.append((record['id'], name + ' / ' + employee))
-#        return res
     @api.one
     @api.onchange('employee_id')
     def onchange_employee_id(self):
         self.apprasial_employee_id = self.employee_id
-#
+        self.department_id = self.employee_id.department_id
+
+    def _read_group_stage_ids(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
+        stage_obj = self.pool.get('hr_evaluation.stage')
+        stage_ids = stage_obj.search(cr, uid, [], context=context)
+        result = stage_obj.name_get(cr, uid, stage_ids, context=context)
+        return result, {}
+
+    _group_by_full = {'stage_id': _read_group_stage_ids,}
 #    def button_plan_in_progress(self, cr, uid, ids, context=None):
 #        hr_eval_inter_obj = self.pool.get('hr.evaluation.interview')
 #        if context is None:
@@ -241,18 +171,30 @@ class hr_evaluation(osv.Model):
 #                    obj_hr_eval_iterview.write(cr, uid, [survey_req.id], new_vals, context=context)
 #        return super(hr_evaluation, self).write(cr, uid, ids, vals, context=context)
 
-class hr_employee(osv.Model):
+class hr_employee(models.Model):
     _name = "hr.employee"
     _inherit="hr.employee"
 
-    #'evaluation_plan_id': fields.many2one('hr_evaluation.plan', 'Appraisal Plan'),
-    #appraisal_ids = fields.One2many('hr_evaluation.evaluation', 'employee_id', string='Appraisal')
     evaluation_date = fields.Date('Next Appraisal Date', help="The date of the next appraisal is computed by the appraisal plan's dates (first appraisal + periodicity).")
-    appraisal_manager = fields.Boolean('Manager', help="")
-    apprasial_manager_ids = fields.Many2many('hr.employee', 'apprasial_manager_rel', 'hr_evaluation_evaluation_id')
+    appraisal_manager = fields.Boolean('Manager', help="",)
+    apprasial_manager_ids = fields.Many2many('hr.employee', 'apprasial_manager_rel', 'hr_evaluation_evaluation_id', compute='_appraisal_manager')
+
+    @api.one
+    @api.depends('parent_id','coach_id')
+    def _appraisal_manager(self):
+        self.apprasial_manager_ids = [self.parent_id.id , self.coach_id.id]
+
     apprasial_manager_survey_id = fields.Many2one('survey.survey', 'Manager Appraisal',)
     appraisal_colleagues = fields.Boolean('Colleagues', help="")
-    appraisal_colleagues_ids = fields.Many2many('hr.employee', 'appraisal_colleagues_rel', 'hr_evaluation_evaluation_id')
+    appraisal_colleagues_ids = fields.Many2many('hr.employee', 'appraisal_colleagues_rel', 'hr_evaluation_evaluation_id', compute='_appraisal_colleagues')
+
+    @api.one
+    @api.depends('parent_id','coach_id')
+    def _appraisal_colleagues(self):
+        colleagues = self.search([('parent_id', '=', self.parent_id.id),('coach_id', '=', self.coach_id.id)])
+        if colleagues:
+            self.appraisal_colleagues_ids = [rec.id for rec in colleagues]
+
     appraisal_colleagues_survey_id = fields.Many2one('survey.survey', "Employee's Appraisal", )
     appraisal_self = fields.Boolean('Employee', help="")
     apprasial_employee_id = fields.Many2one('hr.employee', 'Employee', readonly=True)
@@ -272,18 +214,6 @@ class hr_employee(osv.Model):
         for rec in self:
             self.appraisal_count = Evaluation.search_count([('employee_id', '=', rec.id)],)
 
-    @api.one
-    @api.onchange('appraisal_manager')
-    def onchange_appraisal_manager(self):
-        if self.parent_id or self.coach_id:
-            self.apprasial_manager_ids = [self.parent_id.id , self.coach_id.id]
-
-    @api.one
-    @api.onchange('appraisal_colleagues')
-    def onchange_appraisal_colleagues(self):
-        colleagues = self.search([('parent_id', '=', self.parent_id.id),('coach_id', '=', self.coach_id.id)])
-        if colleagues:
-            self.appraisal_colleagues_ids = [rec.id for rec in colleagues]
 
 #        for i in self:
 #            print i
