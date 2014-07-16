@@ -355,6 +355,7 @@ class hr_timesheet_line(osv.osv):
         return ts_line_ids
 
     _columns = {
+        'date_start' : fields.datetime('Timer Start Date'),
         'sheet_id': fields.function(_sheet, string='Sheet', select="1",
             type='many2one', relation='hr_timesheet_sheet.sheet', ondelete="cascade",
             store={
@@ -679,4 +680,5 @@ class hr_employee(osv.osv):
     _columns = {
         'timesheet_count': fields.function(_timesheet_count, type='integer', string='Timesheets'),
     }
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
