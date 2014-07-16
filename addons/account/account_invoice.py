@@ -1552,8 +1552,7 @@ class account_invoice_tax(models.Model):
                 val['tax_amount'] = tax['tax_amount'] >= 0 and val['amount'] or -val['amount']
                 if tax['code_type'] == 'base':
                     continue
-
-                key = (val['tax_code_id'], val['base_code_id'], val['account_id'], val['account_analytic_id'])
+                key = (tax['tax_id'], tax['code_id'], val['account_id'], val['account_analytic_id'])
                 if not key in tax_grouped:
                     tax_grouped[key] = val
                 else:
