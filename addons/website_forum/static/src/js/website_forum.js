@@ -15,6 +15,14 @@
             }
         });
 
+    $('.tag_follow').hover(
+        function(event) {
+            $(this).find('.follow_box').stop().fadeIn().css('display','block');
+        },
+        function(event) {
+            $(this).find('.follow_box').stop().fadeOut().css('display','none');
+    });
+
         $('.vote_up,.vote_down').not('.karma_required').on('click', function (ev) {
             ev.preventDefault();
             var $link = $(ev.currentTarget);
@@ -141,6 +149,7 @@
                 openerp.jsonRpc("/forum/get_url_title", 'call', {'url': $link.attr("value")}).then(function (data) {
                     $("input[name='post_name']")[0].value = data;
                     $('button#btn_post_your_article').prop('disabled', false);
+                    $("input[name='post_tags']").prop('readonly', false);
                 });
             }
         });
@@ -155,7 +164,7 @@
             createSearchChoice: function (term) {
                 if ($(lastsearch).filter(function () { return this.text.localeCompare(term) === 0;}).length === 0) {
                     //check Karma
-                    if (parseInt($("#karma").val()) >= parseInt($("#karma_retag").val())) {
+                    if (parseInt($("#karma").val()) >= parseInt($("#karma_tag_create").val())) {
                         return {
                             id: "_" + $.trim(term),
                             text: $.trim(term) + ' *',
@@ -200,7 +209,20 @@
                 element.val('');
                 callback(data);
             },
+        }).on("select2-focus", function(ev) {
+            var $link = $(ev.currentTarget);
+            var karma_retag = parseInt($("#karma_retag").val());
+            var warning = karma_retag + ' karma is required to attach a tag to post';
+            if (parseInt($("#karma").val()) < karma_retag) {
+                $(this).select2("readonly", true);
+                $('.retag_alert').attr('data-content', warning).popover('show');
+            }
         });
+
+        $('body').on('click', function (e) {
+                $('.retag_alert').popover('destroy');
+        });
+
 
         if ($('textarea.load_editor').length) {
             $('textarea.load_editor').each(function () {
