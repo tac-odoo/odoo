@@ -95,7 +95,7 @@ Could you please send me the details ?</field>
             <field name="partner_id" ref=""/>
             <field name="country_id" ref="base.uk"/>
             <field name="city">Drury</field>
-            <field name="categ_ids" eval="[(6, 0, [categ_oppor5])]"/>
+            <field name="tag_ids" eval="[(6, 0, [categ_oppor5])]"/>
             <field name="priority">2</field>
             <field name="section_id" ref="sales_team.crm_team_2"/>
             <field name="user_id" ref="base.user_demo"/>
