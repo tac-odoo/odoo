@@ -181,9 +181,10 @@ def fs2web(path):
     """convert FS path into web path"""
     return '/'.join(path.split(os.path.sep))
 
-def manifest_glob(extension, addons=None, db=None, include_remotes=False):
-    IMM = request.registry['ir.module.module']
-    addons = IMM.get_topsorted_boot_modules(request.cr, openerp.SUPERUSER_ID)
+def manifest_glob(extension, addons=None):
+    if addons is None:
+        IMM = request.registry['ir.module.module']
+        addons = IMM.get_topsorted_boot_modules(request.cr, openerp.SUPERUSER_ID)
     r = []
     for addon in addons:
         manifest = http.addons_manifest.get(addon, None)
@@ -193,10 +194,7 @@ def manifest_glob(extension, addons=None, db=None, include_remotes=False):
         addons_path = os.path.join(manifest['addons_path'], '')[:-1]
         globlist = manifest.get(extension, [])
         for pattern in globlist:
-            if pattern.startswith(('http://', 'https://', '//')):
-                if include_remotes:
-                    r.append((None, pattern))
-            else:
+            if not pattern.startswith(('http://', 'https://', '//')):
                 for path in glob.glob(os.path.normpath(os.path.join(addons_path, addon, pattern))):
                     r.append((path, fs2web(path[len(addons_path):])))
     return r
@@ -479,8 +477,8 @@ class Home(http.Controller):
 class WebClient(http.Controller):
 
     @http.route('/web/webclient/qweb', type='http', auth="none")
-    def qweb(self, mods=None, db=None):
-        files = [f[0] for f in manifest_glob('qweb', addons=mods, db=db)]
+    def qweb(self, **kw):
+        files = [f[0] for f in manifest_glob('qweb')]
         last_modified = get_last_modified(files)
         if request.httprequest.if_modified_since and request.httprequest.if_modified_since >= last_modified:
             return werkzeug.wrappers.Response(status=304)

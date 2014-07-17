@@ -204,7 +204,6 @@ instance.web.Session.include( /** @lends instance.web.Session# */{
         this.debug = ($.deparam($.param.querystring()).debug !== undefined);
         // TODO: session store in cookie should be optional
         this.name = instance._session_id;
-        this.qweb_mutex = new $.Mutex();
     },
     /**
      * Setup a sessionm
@@ -227,8 +226,7 @@ instance.web.Session.include( /** @lends instance.web.Session# */{
     session_init: function () {
         var self = this;
         return this.session_reload().then(function(result) {
-            var modules = instance._modules.join(',');
-            var deferred = self.load_qweb(modules);
+            var deferred = self.load_qweb();
             if(self.session_is_valid()) {
                 return deferred.then(function() { return self.load_locales(); });
             }
@@ -340,15 +338,11 @@ instance.web.Session.include( /** @lends instance.web.Session# */{
         }
         return d;
     },
-    load_qweb: function(mods) {
-        var self = this;
-        self.qweb_mutex.exec(function() {
-            return self.rpc('/web/proxy/load', {path: '/web/webclient/qweb?mods=' + mods}).then(function(xml) {
-                if (!xml) { return; }
-                instance.web.qweb.add_template(_.str.trim(xml));
-            });
+    load_qweb: function() {
+        return this.rpc('/web/proxy/load', {path: '/web/webclient/qweb'}).then(function(xml) {
+            if (!xml) { return; }
+            instance.web.qweb.add_template(_.str.trim(xml));
         });
-        return self.qweb_mutex.def;
     },
     /**
      * Cooperative file download implementation, for ajaxy APIs.
