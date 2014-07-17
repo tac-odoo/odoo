@@ -331,10 +331,12 @@ class procurement_order(osv.osv):
     def _get_next_dates(self, cr, uid, orderpoint, context=None):
         calendar_obj = self.pool.get('resource.calendar')
         att_obj = self.pool.get('resource.calendar.attendance')
-        execute, group = self._get_group(cr, uid, orderpoint, context=context)
+        execute, group, new_date = self._get_group(cr, uid, orderpoint, context=context)
         context = context or {}
         context['no_round_hours'] = True
-        res = calendar_obj._schedule_days(cr, uid, orderpoint.calendar_id.id, 1, datetime.utcnow(), compute_leaves=True, context=context)
+        if not new_date:
+            new_date = datetime.utcnow()
+        res = calendar_obj._schedule_days(cr, uid, orderpoint.calendar_id.id, 1, new_date, compute_leaves=True, context=context)
         if res and res[0][0] < datetime.utcnow():
             new_date = res[0][1] + relativedelta(days=1)
             res = calendar_obj._schedule_days(cr, uid, orderpoint.calendar_id.id, 1, new_date, compute_leaves=True, context=context)
@@ -382,7 +384,7 @@ class procurement_order(osv.osv):
 
     def _get_group(self, cr, uid, orderpoint, context=None):
         """
-            Will check if the orderpoint needs to be executed and if yes, will also return group
+            Will check if the orderpoint needs to be executed and if yes, will also return group and date to start from
             :return execute, group
         """
         #Check if orderpoint has last execution date and calculate if we need to calculate again already
@@ -392,24 +394,23 @@ class procurement_order(osv.osv):
         group = False
         context = context or {}
         context['no_round_hours'] = True
+        date = False
         #TODO: Two cases are more or less similar
-        if orderpoint.last_execution_date and orderpoint.purchase_calendar_id:
-            new_date = datetime.strptime(orderpoint.last_execution_date, DEFAULT_SERVER_DATETIME_FORMAT)
+        if orderpoint.purchase_calendar_id:
+            if orderpoint.last_execution_date:
+                new_date = datetime.strptime(orderpoint.last_execution_date, DEFAULT_SERVER_DATETIME_FORMAT)
+            else:
+                new_date = datetime.utcnow()
             intervals = calendar_obj._schedule_days(cr, uid, orderpoint.purchase_calendar_id.id, 1, new_date, compute_leaves=True, context=context)
             for interval in intervals:
-                if interval[0] > new_date and interval[0] < datetime.utcnow():
+                # If last execution date, interval should start after it in order not to execute the same orderpoint twice
+                if (orderpoint.last_execution_date and (interval[0] > new_date and interval[0] < datetime.utcnow() and interval[1] > datetime.utcnow())) or (interval[0] < new_date and interval[1] > new_date):
                     execute = True
                     group = att_obj.browse(cr, uid, interval[2], context=context).group_id.id
-        elif orderpoint.purchase_calendar_id:
-            new_date = datetime.utcnow()
-            intervals = calendar_obj._schedule_days(cr, uid, orderpoint.purchase_calendar_id.id, 1, new_date, compute_leaves=True, context=context)
-            for interval in intervals: 
-                if interval[0] < new_date and interval[1] > new_date:
-                    execute = True
-                    group = att_obj.browse(cr, uid, interval[2], context=context).group_id.id
+                    date = interval[1]
         else:
             execute = True
-        return execute, group
+        return execute, group, date
         
 
 
@@ -433,7 +434,7 @@ class procurement_order(osv.osv):
         while ids:
             ids = orderpoint_obj.search(cr, uid, dom, offset=offset, limit=100)
             for op in orderpoint_obj.browse(cr, uid, ids, context=context):
-                execute, group = self._get_group(cr, uid, op, context=context)
+                execute, group, new_date = self._get_group(cr, uid, op, context=context)
                 if not execute:
                     continue
                 prods = self._product_virtual_get(cr, uid, op)

@@ -259,7 +259,7 @@ class purchase_order(osv.osv):
         'related_location_id': fields.related('picking_type_id', 'default_location_dest_id', type='many2one', relation='stock.location', string="Related location", store=True),        
         'shipment_count': fields.function(_count_all, type='integer', string='Incoming Shipments', multi=True),
         'invoice_count': fields.function(_count_all, type='integer', string='Invoices', multi=True),
-        'group_id': fields.many2one('procurement.order', string="Procurement Group"), 
+        'group_id': fields.many2one('procurement.group', string="Procurement Group"), 
     }
     _defaults = {
         'date_order': fields.date.context_today,
