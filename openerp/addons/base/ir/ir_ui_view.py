@@ -35,7 +35,7 @@ import HTMLParser
 from lxml import etree
 
 import openerp
-from openerp import tools, api
+from openerp import tools, api, SUPERUSER_ID
 from openerp.http import request
 from openerp.osv import fields, osv, orm
 from openerp.tools import graph, SKIPPED_ELEMENT_TYPES
@@ -1006,10 +1006,8 @@ class view(osv.osv):
         #       It is currently necessary because the ir.ui.view bundle inheritance does not
         #       match the module dependency graph.
         def get_modules_order():
-            if request:
-                from openerp.addons.web.controllers.main import module_boot
-                return simplejson.dumps(module_boot())
-            return '[]'
+            addons = self.pool['ir.module.module'].get_topsorted_boot_modules(cr, SUPERUSER_ID)
+            return simplejson.dumps(addons)
         qcontext['get_modules_order'] = get_modules_order
 
         def loader(name):

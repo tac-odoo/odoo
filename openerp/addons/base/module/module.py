@@ -812,12 +812,11 @@ class module(osv.osv):
             if not mod.description:
                 _logger.warning('module %s: description is empty !', mod.name)
 
-    def list_installed_modules_topsorted(self, cr, uid, names=None):
+    @tools.ormcache()
+    def get_topsorted_boot_modules(self, cr, uid):
         IMMD = self.pool['ir.module.module.dependency']
         modules = {}
         domain = [('state', '=', 'installed')]
-        if names:
-            domain.append(('name', 'in', names))
         for module in self.search_read(cr, uid, domain, ['name', 'dependencies_id']):
             modules[module['name']] = []
             deps = module.get('dependencies_id')
@@ -827,7 +826,9 @@ class module(osv.osv):
                 modules[module['name']] = dependencies
 
         sorted_modules = module_topological_sort(modules)
-        return sorted_modules
+        server_wide_modules = openerp.conf.server_wide_modules or ['web']
+        dbside = [mod for mod in sorted_modules if mod not in server_wide_modules]
+        return server_wide_modules + dbside
 
 
 DEP_STATES = [

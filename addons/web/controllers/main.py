@@ -149,20 +149,6 @@ def module_installed_bypass_session(dbname):
         loadable = http.addons_manifest.keys()
         return m.list_installed_modules_topsorted(cr, openerp.SUPERUSER_ID, loadable)
 
-def module_boot(db=None):
-    server_wide_modules = openerp.conf.server_wide_modules or ['web']
-    serverside = []
-    dbside = []
-    for i in server_wide_modules:
-        if i in http.addons_manifest:
-            serverside.append(i)
-    monodb = db or db_monodb()
-    if monodb:
-        dbside = module_installed_bypass_session(monodb)
-        dbside = [i for i in dbside if i not in serverside]
-    addons = serverside + dbside
-    return addons
-
 def concat_xml(file_list):
     """Concatenate xml files
 
@@ -196,10 +182,8 @@ def fs2web(path):
     return '/'.join(path.split(os.path.sep))
 
 def manifest_glob(extension, addons=None, db=None, include_remotes=False):
-    if addons is None:
-        addons = module_boot(db=db)
-    else:
-        addons = addons.split(',')
+    IMM = request.registry['ir.module.module']
+    addons = IMM.get_topsorted_boot_modules(request.cr, openerp.SUPERUSER_ID)
     r = []
     for addon in addons:
         manifest = http.addons_manifest.get(addon, None)
