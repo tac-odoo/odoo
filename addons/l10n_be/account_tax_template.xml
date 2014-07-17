@@ -2362,7 +2362,7 @@
             <field name="apply_on">refund</field>
             <field name="tax_id" ref="attn_VAT-IN-V83-12-CC"/>
         </record>
-
+<!--------------------------  TPA ---------------------------------------------------------->
         <record id="attn_VAT-IN-V83-06-CC" model="account.tax.template">
             <field name="sequence">630</field>
             <field name="description">VAT-IN-V83-06-CC</field>
