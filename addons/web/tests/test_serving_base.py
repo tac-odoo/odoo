@@ -3,7 +3,7 @@
 import random
 import unittest2
 
-from ..controllers.main import module_topological_sort as sort
+from openerp.addons.base.module import module_topological_sort as sort
 
 def sample(population):
     return random.sample(

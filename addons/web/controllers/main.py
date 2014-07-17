@@ -141,90 +141,13 @@ def ensure_db(redirect='/web/database/selector'):
 
     request.session.db = db
 
-def module_topological_sort(modules):
-    """ Return a list of module names sorted so that their dependencies of the
-    modules are listed before the module itself
-
-    modules is a dict of {module_name: dependencies}
-
-    :param modules: modules to sort
-    :type modules: dict
-    :returns: list(str)
-    """
-
-    dependencies = set(itertools.chain.from_iterable(modules.itervalues()))
-    # incoming edge: dependency on other module (if a depends on b, a has an
-    # incoming edge from b, aka there's an edge from b to a)
-    # outgoing edge: other module depending on this one
-
-    # [Tarjan 1976], http://en.wikipedia.org/wiki/Topological_sorting#Algorithms
-    #L ← Empty list that will contain the sorted nodes
-    L = []
-    #S ← Set of all nodes with no outgoing edges (modules on which no other
-    #    module depends)
-    S = set(module for module in modules if module not in dependencies)
-
-    visited = set()
-    #function visit(node n)
-    def visit(n):
-        #if n has not been visited yet then
-        if n not in visited:
-            #mark n as visited
-            visited.add(n)
-            #change: n not web module, can not be resolved, ignore
-            if n not in modules: return
-            #for each node m with an edge from m to n do (dependencies of n)
-            for m in modules[n]:
-                #visit(m)
-                visit(m)
-            #add n to L
-            L.append(n)
-    #for each node n in S do
-    for n in S:
-        #visit(n)
-        visit(n)
-    return L
-
-def module_installed():
-    # Candidates module the current heuristic is the /static dir
-    loadable = http.addons_manifest.keys()
-    modules = {}
-
-    # Retrieve database installed modules
-    # TODO The following code should move to ir.module.module.list_installed_modules()
-    Modules = request.session.model('ir.module.module')
-    domain = [('state','=','installed'), ('name','in', loadable)]
-    for module in Modules.search_read(domain, ['name', 'dependencies_id']):
-        modules[module['name']] = []
-        deps = module.get('dependencies_id')
-        if deps:
-            deps_read = request.session.model('ir.module.module.dependency').read(deps, ['name'])
-            dependencies = [i['name'] for i in deps_read]
-            modules[module['name']] = dependencies
-
-    sorted_modules = module_topological_sort(modules)
-    return sorted_modules
-
 def module_installed_bypass_session(dbname):
-    loadable = http.addons_manifest.keys()
-    modules = {}
-    try:
-        registry = openerp.modules.registry.RegistryManager.get(dbname)
-        with registry.cursor() as cr:
-            m = registry.get('ir.module.module')
-            # TODO The following code should move to ir.module.module.list_installed_modules()
-            ids = m.search(cr, 1, [('state','=','installed'), ('name','in', loadable)])
-            for module in m.read(cr, 1, ids, ['name', 'dependencies_id']):
-                modules[module['name']] = []
-                deps = module.get('dependencies_id')
-                if deps:
-                    deps_read = registry.get('ir.module.module.dependency').read(cr, 1, deps, ['name'])
-                    dependencies = [i['name'] for i in deps_read]
-                    modules[module['name']] = dependencies
-    except Exception:
-        pass
-    sorted_modules = module_topological_sort(modules)
-    return sorted_modules
+    registry = openerp.modules.registry.RegistryManager.get(dbname)
+    with registry.cursor() as cr:
+        m = registry.get('ir.module.module')
+        # Candidates module the current heuristic is the /static dir
+        loadable = http.addons_manifest.keys()
+        return m.list_installed_modules_topsorted(cr, openerp.SUPERUSER_ID, loadable)
 
 def module_boot(db=None):
     server_wide_modules = openerp.conf.server_wide_modules or ['web']
@@ -823,11 +746,6 @@ class Session(http.Controller):
             return request.session.proxy("db").list_lang() or []
         except Exception, e:
             return {"error": e, "title": _("Languages")}
-
-    @http.route('/web/session/modules', type='json', auth="user")
-    def modules(self):
-        # return all installed modules. Web client is smart enough to not load a module twice
-        return module_installed()
 
     @http.route('/web/session/save_session_action', type='json', auth="user")
     def save_session_action(self, the_action):

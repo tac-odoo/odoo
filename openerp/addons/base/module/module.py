@@ -23,6 +23,7 @@ from docutils.core import publish_string
 from docutils.transforms import Transform, writer_aux
 from docutils.writers.html4css1 import Writer
 import imp
+import itertools
 import logging
 from operator import attrgetter
 import os
@@ -76,6 +77,49 @@ def backup(path, raise_exception=True):
             return bck
         cnt += 1
 
+def module_topological_sort(modules):
+    """ Return a list of module names sorted so that their dependencies of the
+    modules are listed before the module itself
+
+    modules is a dict of {module_name: dependencies}
+
+    :param modules: modules to sort
+    :type modules: dict
+    :returns: list(str)
+    """
+
+    dependencies = set(itertools.chain.from_iterable(modules.itervalues()))
+    # incoming edge: dependency on other module (if a depends on b, a has an
+    # incoming edge from b, aka there's an edge from b to a)
+    # outgoing edge: other module depending on this one
+
+    # [Tarjan 1976], http://en.wikipedia.org/wiki/Topological_sorting#Algorithms
+    #L ← Empty list that will contain the sorted nodes
+    L = []
+    #S ← Set of all nodes with no outgoing edges (modules on which no other
+    #    module depends)
+    S = set(module for module in modules if module not in dependencies)
+
+    visited = set()
+    #function visit(node n)
+    def visit(n):
+        #if n has not been visited yet then
+        if n not in visited:
+            #mark n as visited
+            visited.add(n)
+            #change: n not web module, can not be resolved, ignore
+            if n not in modules: return
+            #for each node m with an edge from m to n do (dependencies of n)
+            for m in modules[n]:
+                #visit(m)
+                visit(m)
+            #add n to L
+            L.append(n)
+    #for each node n in S do
+    for n in S:
+        #visit(n)
+        visit(n)
+    return L
 
 class module_category(osv.osv):
     _name = "ir.module.category"
@@ -767,6 +811,23 @@ class module(osv.osv):
         for mod in self.browse(cr, uid, ids, context=context):
             if not mod.description:
                 _logger.warning('module %s: description is empty !', mod.name)
+
+    def list_installed_modules_topsorted(self, cr, uid, names=None):
+        IMMD = self.pool['ir.module.module.dependency']
+        modules = {}
+        domain = [('state', '=', 'installed')]
+        if names:
+            domain.append(('name', 'in', names))
+        for module in self.search_read(cr, uid, domain, ['name', 'dependencies_id']):
+            modules[module['name']] = []
+            deps = module.get('dependencies_id')
+            if deps:
+                deps_read = IMMD.read(cr, uid, deps, ['name'])
+                dependencies = [dep['name'] for dep in deps_read]
+                modules[module['name']] = dependencies
+
+        sorted_modules = module_topological_sort(modules)
+        return sorted_modules
 
 
 DEP_STATES = [
