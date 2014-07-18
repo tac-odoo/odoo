@@ -531,6 +531,11 @@ def Project():
 
         project_id = super(project, self).create(cr, uid, vals, context=create_context)
         project_rec = self.browse(cr, uid, project_id, context=context)
+        
+        contract_obj = self.pool.get('account.analytic.account')
+        updates = contract_obj.on_change_partner_id(cr, uid, ids, project_rec.partner_id, project_rec.analytic_account_id.name)
+        vals.update(updates.get('value'))
+
         self.pool.get('mail.alias').write(cr, uid, [project_rec.alias_id.id], {'alias_parent_thread_id': project_id, 'alias_defaults': {'project_id': project_id}}, context)
         return project_id
 
