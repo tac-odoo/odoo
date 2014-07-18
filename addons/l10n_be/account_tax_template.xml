@@ -4006,7 +4006,7 @@
             <field name="tax_amount">210</field>
             <field name="debit_credit_amount">210</field>
             <field name="apply_on">refund</field>
-            <field name="code_id" ref="atctn_59"/>
+            <field name="account_id" ref="a411059"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-21-EU"/>
         </record>
         <record id="attn_VAT-IN-V83-21-EU-C2_invoice_tax_line_1" model="account.tax.line.template">
@@ -4024,7 +4024,6 @@
             <field name="tax_amount">-210</field>
             <field name="debit_credit_amount">-210</field>
             <field name="apply_on">refund</field>
-            <field name="code_id" ref="atctn_55"/>
             <field name="account_id" ref="a451055"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-21-EU"/>
         </record>
@@ -4097,7 +4096,7 @@
             <field name="tax_amount">120</field>
             <field name="debit_credit_amount">120</field>
             <field name="apply_on">refund</field>
-            <field name="code_id" ref="atctn_59"/>
+            <field name="account_id" ref="a411059"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-12-EU"/>
         </record>
         <record id="attn_VAT-IN-V83-12-EU-C2_invoice_tax_line_1" model="account.tax.line.template">
@@ -4116,7 +4115,7 @@
             <field name="tax_amount">-120</field>
             <field name="debit_credit_amount">-120</field>
             <field name="apply_on">refund</field>
-            <field name="code_id" ref="atctn_55"/>
+            <field name="account_id" ref="a451055"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-12-EU"/>
         </record>
         <record id="attn_VAT-IN-V83-12-EU-C3_invoice_tax_line_1" model="account.tax.line.template">
@@ -4188,7 +4187,7 @@
             <field name="tax_amount">60</field>
             <field name="debit_credit_amount">60</field>
             <field name="apply_on">refund</field>
-            <field name="code_id" ref="atctn_59"/>
+            <field name="account_id" ref="a411059"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-06-EU"/>
         </record>
         <record id="attn_VAT-IN-V83-06-EU-C2_invoice_tax_line_1" model="account.tax.line.template">
@@ -4206,7 +4205,6 @@
             <field name="tax_amount">-60</field>
             <field name="debit_credit_amount">-60</field>
             <field name="apply_on">refund</field>
-            <field name="code_id" ref="atctn_55"/>
             <field name="account_id" ref="a451055"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-06-EU"/>
         </record>
