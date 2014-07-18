@@ -55,13 +55,12 @@ class hr_evaluation_report(osv.Model):
     _order = 'create_date desc'
 
     _depends = {
-        'hr.evaluation.interview': ['evaluation_id', 'id', 'request_id'],
         'hr_evaluation.evaluation': [
-            'create_date', 'date', 'date_close', 'employee_id', 'plan_id',
-            'rating', 'state',
+            'create_date', 'interview_deadline', 'date_close', 'employee_id','state',
         ],
     }
 
+<<<<<<< HEAD
     def init(self, cr):
         tools.drop_view_if_exists(cr, 'hr_evaluation_report')
         cr.execute("""
@@ -95,5 +94,7 @@ class hr_evaluation_report(osv.Model):
             )
         """)
 
+=======
+>>>>>>> [REM]hr_evaluation: remove commented code and remove code for related hr_evaluation.plan,hr_evaluation.plan.phase,hr_evaluation.interview
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

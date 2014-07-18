@@ -4,39 +4,6 @@
 
         <menuitem name="Appraisal" parent="hr.menu_hr_root" id="menu_eval_hr" sequence="25"/>
         <menuitem name="Periodic Appraisal" parent="hr.menu_hr_configuration" id="menu_eval_hr_config" sequence="4"/>
-        <record model="ir.ui.view" id="view_hr_evaluation_stage_form">
-            <field name="name">hr_evaluation.stage.form</field>
-            <field name="model">hr_evaluation.stage</field>
-            <field name="arch" type="xml">
-                <form string="Appraisal Stage">
-                    <sheet>
-	                    <group col="4">
-	                        <field name="sequence"/>
-	                        <field name="name"/>
-	                    </group>
-	                </sheet>
-                </form>
-            </field>
-        </record>
-        <record model="ir.ui.view" id="view_hr_evaluation_stage_tree">
-            <field name="name">hr_evaluation.stage.form</field>
-            <field name="model">hr_evaluation.stage</field>
-            <field name="arch" type="xml">
-                <tree string="Appraisal Stage">
-                    <field name="sequence"/>
-                    <field name="name"/>
-                </tree>
-            </field>
-        </record>
-
-         <record id="act_hr_evaluation_stage" model="ir.actions.act_window">
-            <field name="res_model">hr_evaluation.stage</field>
-            <field name="view_type">form</field>
-            <field name="name">Appraisal Stage</field>
-            <field name="view_mode">tree,form</field>
-        </record>
-
-         <menuitem name="Appraisal Stage" parent="hr.menu_hr_configuration" id="menu_hr_evaluation_stage" action="act_hr_evaluation_stage"/>
 
         <record model="ir.ui.view" id="view_hr_evaluation_form">
             <field name="name">hr_evaluation.evaluation.form</field>
@@ -44,12 +11,7 @@
             <field name="arch" type="xml">
                 <form string="Appraisal">
                 <header>
-                    <!--  button name="button_plan_in_progress" string="Start Appraisal" states="draft" type="object" class="oe_highlight"/>
-                    <button name="button_final_validation" string="Validate Appraisal" states="wait" type="object" class="oe_highlight"/>
-                    <button name="button_done" string="Done" states="progress" type="object" class="oe_highlight"/>
-                    <button name="button_draft" string="Reset to Draft" states="cancel" type="object" />
-                    <button name="button_cancel" string="Cancel Appraisal" states="draft,wait,progress" type="object"/>-->
-                    <field name="stage_id" widget="statusbar" options="{'fold_field': 'fold'}"/>
+                    <field name="state" widget="statusbar" options="{'fold_field': 'fold'}"/>
                 </header>
                 <sheet>
                     <label for="employee_id" class="oe_edit_only"/>
@@ -102,24 +64,6 @@
                             </group>
                         </page>
                     </notebook>
-                    <!--  label for="plan_id" class="oe_edit_only"/>
-                    <h2><field name="plan_id" attrs="{'readonly': [('state', '=', 'done')]}"/></h2>
-                    <group>
-                        <group colspan="4" attrs="{'invisible':['|', ('state','=','draft'), ('state', '=', 'wait')]}">
-                            <field name="rating" attrs="{'readonly':[('state','&lt;&gt;','progress')]}"/>
-                            <field name="date_close" readonly="1"/>
-                        </group>
-                    </group>
-                    <group string="Appraisal Forms" attrs="{'invisible':[('state','=','draft')]}">
-                        <field nolabel="1" name="survey_request_ids" attrs="{'readonly': [('state', '=', 'done')]}" />
-                    </group>
-                    <group string="Internal Notes" attrs="{'invisible':[('state','=','draft')]}">
-                        <field nolabel="1" name="note_action"
-                            groups="base.group_hr_manager" placeholder="Appraisal Summary..."/>
-                    </group>
-                    <group string="Public Notes" attrs="{'invisible':[('state','=','draft')]}">
-                        <field nolabel="1" name="note_summary" placeholder="Action Plan..."/>
-                    </group>-->
               </sheet>
 	          <div class="oe_chatter">
 	              <field name="message_follower_ids" widget="mail_followers"/>
@@ -137,7 +81,7 @@
                     <field name="employee_id" string="Name"/>
                     <field name="date_close"/>
                     <field name="interview_deadline"/>
-                    <field name="stage_id"/>
+                    <field name="state"/>
                 </tree>
             </field>
         </record>
@@ -147,15 +91,10 @@
             <field name="model">hr_evaluation.evaluation</field>
             <field name="arch" type="xml">
                 <search string="Search Appraisal">
-                    <!-- field name="date"/>
-                    <filter icon="terp-check" string="Pending" domain="[('state','=','wait')]" help="Appraisal that are in Plan In Progress state"/>
-                    <filter icon="terp-camera_test" string="In progress" domain="[('state','=','progress')]" help="Appraisal that are in waiting appreciation state"/>-->
                     <field name="employee_id"/>
                     <group expand='0' string='Group by...'>
                         <filter string='Employee' icon="terp-personal" domain="[]" context="{'group_by' : 'employee_id'}"/>
                         <filter string='Status' icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by' : 'stage_id'}" />
-                        <!--  filter string='Plan' icon="terp-stock_align_left_24" domain="[]" context="{'group_by' : 'plan_id'}" />
-                        <filter string='Appraisals Month' icon="terp-go-month" domain="[]" context="{'group_by' : 'date'}" help="Appraisals by Month" />-->
                    </group>
                </search>
             </field>
@@ -165,7 +104,7 @@
             <field name="name">hr_evaluation.evaluation_kanban</field>
             <field name="model">hr_evaluation.evaluation</field>
             <field name="arch" type="xml">
-                <kanban default_group_by="stage_id">
+                <kanban default_group_by="state">
                     <field name="employee_id"/>
                     <field name="department_id"/>
                     <field name="interview_deadline"/>

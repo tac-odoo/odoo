@@ -23,7 +23,6 @@
                 <filter string="Final Validation" domain="[('state','=','progress')]" help = "Final Validation Evaluations"/>
                 <filter string="Done" domain="[('state','=','done')]"/>
                 <field name="employee_id"/>
-                <field name="plan_id"/>
                 <group expand="0" string="Extended Filters...">
                     <field name="rating"/>
                     <field name="deadline"/>
