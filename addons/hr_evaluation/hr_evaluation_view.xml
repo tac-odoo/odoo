@@ -32,34 +32,34 @@
                         <page string="Final Evaluation">
                             <field name="evaluation"/>
                         </page>
-                        <page string="Plan" attrs="{'invisible':[('appraisal_manager','=',False),('appraisal_colleagues','=',False),('appraisal_self','=',False),('appraisal_subordinates','=',False)]}">
+                        <page string="Plan">
                             <group col="4">
                                 <label for="appraisal_manager" string="Send Apprasial Form To"/>
                                 <group col="3">
-                                    <div class="address_format" attrs="{'invisible':[('appraisal_manager','=',False)]}">
-                                        <field name="appraisal_manager" invisible="1"/>
+                                    <div class="address_format">
+                                        <field name="appraisal_manager"/>
                                         <label string="Mangare"/>
                                     </div>
-                                    <field name="apprasial_manager_ids" nolabel="1" widget="many2many_tags" attrs="{'invisible':[('appraisal_manager','=',False)]}"/>
-                                    <field name="apprasial_manager_survey_id" nolabel="1" attrs="{'invisible':[('appraisal_manager','=',False)]}"/>
-                                    <div class="address_format" attrs="{'invisible':[('appraisal_colleagues','=',False)]}">
-                                        <field name="appraisal_colleagues" invisible="1"/>
-                                        <label string="Colleagues"/>
+                                    <field name="apprasial_manager_ids" nolabel="1" widget="many2many_tags"/>
+                                    <field name="apprasial_manager_survey_id" nolabel="1"/>
+                                    <div class="address_format">
+                                        <field name="appraisal_colleagues"/>
+                                        <label string="Colleagues"/>  
                                     </div>
-                                    <field name="appraisal_colleagues_ids" nolabel="1" widget="many2many_tags" attrs="{'invisible':[('appraisal_colleagues','=',False)]}"/>
-                                    <field name="appraisal_colleagues_survey_id" nolabel="1" attrs="{'invisible':[('appraisal_colleagues','=',False)]}"/>
-                                    <div class="address_format" attrs="{'invisible':[('appraisal_self','=',False)]}">
-                                        <field name="appraisal_self" invisible="1"/>
+                                    <field name="appraisal_colleagues_ids" nolabel="1" widget="many2many_tags"/>
+                                    <field name="appraisal_colleagues_survey_id" nolabel="1" />
+                                    <div class="address_format">
+                                        <field name="appraisal_self"/>
                                         <label string="Self"/>
                                     </div>
-                                    <field name="apprasial_employee_id" nolabel="1" attrs="{'invisible':[('appraisal_self','=',False)]}"/>
-                                    <field name="appraisal_self_survey_id" nolabel="1" attrs="{'invisible':[('appraisal_self','=',False)]}"/>
-                                    <div class="address_format" attrs="{'invisible':[('appraisal_subordinates','=',False)]}">
-                                        <field name="appraisal_subordinates" invisible="1"/>
+                                    <field name="apprasial_employee_id" nolabel="1"/>
+                                    <field name="appraisal_self_survey_id" nolabel="1"/>
+                                    <div class="address_format">
+                                        <field name="appraisal_subordinates"/>
                                         <label string="Collaborator"/>
                                     </div>
-                                    <field name="appraisal_subordinates_ids" nolabel="1" widget="many2many_tags" attrs="{'invisible':[('appraisal_subordinates','=',False)]}"/>
-                                    <field name="appraisal_subordinates_survey_id" nolabel="1" attrs="{'invisible':[('appraisal_subordinates','=',False)]}"/>
+                                    <field name="appraisal_subordinates_ids" nolabel="1" widget="many2many_tags"/>
+                                    <field name="appraisal_subordinates_survey_id" nolabel="1"/>
                                 </group>
                             </group>
                         </page>
@@ -145,8 +145,7 @@
             <field name="res_model">hr_evaluation.evaluation</field>
             <field name="view_type">form</field>
             <field name="view_mode">kanban,tree,form</field>
-<!--             field name="search_view_id" ref="hr_evaluation.evaluation_search"/> -->
-             <field name="context">{"search_default_next_month":1}</field>
+            <field name="context">{"search_default_next_month":1}</field>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to create a new appraisal.
