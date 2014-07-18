@@ -628,7 +628,7 @@ instance.web_kanban.KanbanGroup = instance.web.Widget.extend({
     },
     recompute_aggregates: function() {
         var self = this;
-        var context = new instance.web.CompoundContext(self.dataset.get_context(), this.group.model.context())
+        var context = new instance.web.CompoundContext(self.dataset.get_context(), this.group.model.context(), {'no_group_by_full': true})
         var domain = this.group.model.domain();
         var grouping_fields = this.view.group_by ? [this.view.group_by].concat(_.keys(this.view.aggregates)) : undefined; 
         var grouping = new instance.web.Model(self.dataset.model, context, domain).query(self.fields_keys).group_by(grouping_fields);

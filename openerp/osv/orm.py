@@ -2783,7 +2783,7 @@ class BaseModel(object):
             d.update(alldata[d['id']])
             del d['id']
 
-        if groupby and groupby in self._group_by_full:
+        if groupby and groupby in self._group_by_full and not context.get('no_group_by_full'):
             result = self._read_group_fill_results(cr, uid, domain, groupby, groupby_list,
                                                    aggregated_fields, result, read_group_order=order,
                                                    context=context)
