@@ -26,6 +26,16 @@ class sale_advance_payment_inv(osv.osv_memory):
     _name = "sale.advance.payment.inv"
     _description = "Sales Advance Payment Invoice"
 
+    def default_get(self, cr, uid, fields, context=None):
+        res = super(sale_advance_payment_inv, self).default_get(cr, uid, fields, context=context)
+        vals = self.pool.get('sale.order')._amount_total(cr, uid, context=context)
+        res.update(vals)
+        return res
+
+    def _get_amounts(self, cr, uid, ids, field_name, arg, context=None):
+        vals = self.pool.get('sale.order')._amount_total(cr, uid, context=context)
+        return dict.fromkeys(ids, vals)
+
     _columns = {
         'advance_payment_method':fields.selection(
             [('all', 'Invoice the whole sales order'), ('percentage','Percentage'), ('fixed','Fixed price (deposit)'),
@@ -38,6 +48,12 @@ class sale_advance_payment_inv(osv.osv_memory):
             help="Select a product of type service which is called 'Advance Product'.\nYou may have to create it and set it as a default value on this field."),
         'amount': fields.float('Advance Amount', digits_compute= dp.get_precision('Account'),
             help="The amount to be invoiced in advance. \nTaxes are not taken into account for advance invoices."),
+        'amount_total': fields.function(_get_amounts, string='Invoice Amount', multi= '_get_amounts', type="float",
+            help="Order total amount."),
+        'amount_invoiced': fields.function(_get_amounts, string='Already Invoiced', multi= '_get_amounts', type="float",
+            help="The amount already invoiced as an advance."),
+        'amount_tobe_invoice': fields.function(_get_amounts, string='Remaining Balance', multi= '_get_amounts', type="float",
+            help="The amount to be invoiced."),
     }
 
     def _get_advance_product(self, cr, uid, context=None):

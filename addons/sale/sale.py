@@ -176,6 +176,20 @@ class sale_order(osv.osv):
                 return int(section_ids[0][0])
         return None
 
+    def _amount_total(self, cr, uid, context=None):
+        vals = {}
+        invoiced = 0.0
+        if context is None:
+            context = {}
+        order_id = context.get('active_id', False)
+        if order_id:
+            order = self.browse(cr, uid, order_id, context=context)
+            for invoice in order.invoice_ids:
+                 if invoice.state not in ('cancel'):
+                     invoiced += invoice.amount_total
+            vals.update({'amount_total': order.amount_total, 'amount_invoiced': invoiced, 'amount_tobe_invoice': order.amount_total-invoiced})
+        return vals
+
     _columns = {
         'name': fields.char('Order Reference', required=True, copy=False,
             readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, select=True),
