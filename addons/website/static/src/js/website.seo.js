@@ -30,6 +30,7 @@
         init: function (parent, options) {
             this.root = options.root;
             this.keyword = options.keyword;
+            this.language = options.language;
             this.htmlPage = options.page;
             this._super(parent);
         },
@@ -47,7 +48,7 @@
             return this.analyze().description;
         },
         select: function () {
-            this.trigger('selected', this.keyword);
+            this.trigger('selected', this.keyword, this.language);
         },
     });
 
@@ -55,6 +56,7 @@
         template: 'website.seo_suggestion_list',
         init: function (parent, options) {
             this.root = options.root;
+            this.language = options.language;
             this.htmlPage = options.page;
             this._super(parent);
         },
@@ -76,17 +78,19 @@
                     if (keyword) {
                         var suggestion = new website.seo.Suggestion(self, {
                             root: self.root,
+                            language: self.language,
                             keyword: keyword,
                             page: self.htmlPage,
                         });
-                        suggestion.on('selected', self, function (word) {
-                            self.trigger('selected', word);
+                        suggestion.on('selected', self, function (word, language) {
+                            self.trigger('selected', word, language);
                         });
                         suggestion.appendTo(self.$el);
                     }
                 });
             }
-            $.getJSON("/website/seo_suggest/" + encodeURIComponent(this.root + " "), addSuggestions);
+            var language = self.language || website.get_context().lang.toLowerCase();
+            $.getJSON("/website/seo_suggest/" + encodeURIComponent(this.root) +"/"+ encodeURIComponent(language), addSuggestions);
         },
     });
 
@@ -99,6 +103,7 @@
         init: function (parent, options) {
             this.keyword = options.word;
             this.htmlPage = options.page;
+            this.language = options.language;
             this._super(parent);
         },
         start: function () {
@@ -106,10 +111,11 @@
             this.htmlPage.on('description-changed', this, this.updateLabel);
             this.suggestionList = new website.seo.SuggestionList(this, {
                 root: this.keyword,
+                language: this.language,
                 page: this.htmlPage,
             });
-            this.suggestionList.on('selected', this, function (word) {
-                this.trigger('selected', word);
+            this.suggestionList.on('selected', this, function (word, language) {
+                this.trigger('selected', word, language);
             });
             this.suggestionList.appendTo(this.$('.js_seo_keyword_suggestion'));
         },
@@ -147,11 +153,6 @@
                 _.each(existingKeywords, function (word) {
                     self.add.call(self, word);
                 });
-            } else {
-                var companyName = self.htmlPage.company().toLowerCase();
-                if (companyName != 'yourcompany') {
-                    self.add(companyName);
-                }
             }
         },
         keywords: function () {
@@ -167,21 +168,22 @@
         exists: function (word) {
             return _.contains(this.keywords(), word);
         },
-        add: function (candidate) {
+        add: function (candidate, language) {
             var self = this;
             // TODO Refine
             var word = candidate ? candidate.replace(/[,;.:<>]+/g, " ").replace(/ +/g, " ").trim().toLowerCase() : "";
             if (word && !self.isFull() && !self.exists(word)) {
                 var keyword = new website.seo.Keyword(self, {
                     word: word,
+                    language: language,
                     page: this.htmlPage,
                 });
                 keyword.on('removed', self, function () {
                    self.trigger('list-not-full');
                    self.trigger('removed', word);
                 });
-                keyword.on('selected', self, function (word) {
-                    self.trigger('selected', word);
+                keyword.on('selected', self, function (word, language) {
+                    self.trigger('selected', word, language);
                 });
                 keyword.appendTo(self.$el);
             }
@@ -330,6 +332,7 @@
         canEditTitle: false,
         canEditDescription: false,
         canEditKeywords: false,
+        canEditLanguage: false,
         maxTitleSize: 65,
         maxDescriptionSize: 150,
         start: function () {
@@ -360,13 +363,34 @@
                 $modal.find('button[data-action=add]')
                     .prop('disabled', false).removeClass('disabled');
             });
-            self.keywordList.on('selected', self, function (word) {
-                self.keywordList.add(word);
+            self.keywordList.on('selected', self, function (word, language) {
+                self.keywordList.add(word, language);
             });
             self.keywordList.appendTo($modal.find('.js_seo_keywords_list'));
             self.disableUnsavableFields();
             self.renderPreview();
             $modal.modal();
+            self.getLanguages();
+        },
+        getLanguages: function(){
+            var self = this;
+            openerp.jsonRpc("/website/scan_languages","call",{}).then(function(result){
+                var default_lang = website.get_context().lang;
+                _.each(result, function(data){
+                    if(default_lang == data[0]){
+                        self.$('#language-box')
+                        .append($('<option selected></option>')
+                        .attr('value',data[0])
+                        .text(data[1]));
+                    }
+                    else {
+                    self.$('#language-box')
+                        .append($('<option></option>')
+                        .attr('value',data[0])
+                        .text(data[1]));
+                    }
+                });
+            });
         },
         disableUnsavableFields: function () {
             var self = this;
@@ -419,21 +443,24 @@
         },
         addKeyword: function (word) {
             var $input = this.$('input[name=seo_page_keywords]');
+            var $language = this.$('select[name=seo_page_language]');
             var keyword = _.isString(word) ? word : $input.val();
-            this.keywordList.add(keyword);
+            var language = _.isString(word) ? word : $language.val().toLowerCase();
+            this.keywordList.add(keyword,language);
             $input.val("");
+            this.getLanguages();
         },
         update: function () {
             var self = this;
             var data = {};
             if (self.canEditTitle) {
-                data.website_meta_title = self.htmlPage.title();
+                data.website_meta_title = self.htmlPage.title() || false;
             }
             if (self.canEditDescription) {
-                data.website_meta_description = self.htmlPage.description();
+                data.website_meta_description = self.htmlPage.description() || false;
             }
             if (self.canEditKeywords) {
-                data.website_meta_keywords = self.keywordList.keywords().join(", ");
+                data.website_meta_keywords = self.keywordList.keywords().join(", ") || false;
             }
             self.saveMetaData(data).then(function () {
                self.$el.modal('hide');

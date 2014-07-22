@@ -9,7 +9,8 @@ from openerp.http import request
 from openerp.osv import osv, fields
 
 class view(osv.osv):
-    _inherit = "ir.ui.view"
+    _name = "ir.ui.view"
+    _inherit = ["ir.ui.view", "website.seo.metadata"]
     _columns = {
         'page': fields.boolean("Whether this view is a web page template (complete)"),
         'website_meta_title': fields.char("Website meta title", size=70, translate=True),
@@ -160,6 +161,7 @@ class view(osv.osv):
 
             company = self.pool['res.company'].browse(cr, SUPERUSER_ID, request.website.company_id.id, context=context)
 
+            translatable = context.get('lang') != request.website.default_lang_code
             qcontext = dict(
                 context.copy(),
                 website=request.website,
@@ -167,7 +169,7 @@ class view(osv.osv):
                 slug=website.slug,
                 res_company=company,
                 user_id=self.pool.get("res.users").browse(cr, uid, uid),
-                translatable=context.get('lang') != request.website.default_lang_code,
+                translatable=translatable,
                 editable=request.website.is_publisher(),
                 menu_data=self.pool['ir.ui.menu'].load_menus_root(cr, uid, context=context) if request.website.is_user() else None,
             )
@@ -182,6 +184,28 @@ class view(osv.osv):
             view_obj = request.website.get_template(id_or_xml_id)
             if 'main_object' not in qcontext:
                 qcontext['main_object'] = view_obj
+
+            translate_pool = self.pool['ir.translation']
+            main_object = qcontext['main_object']
+            meta_fields = ['website_meta_keywords', 'website_meta_description', 'website_meta_title']
+            if translatable:
+                for meta_field in meta_fields:
+                    term_ids = translate_pool.search(cr, uid, [
+                        ('name','=',('%s,%s')%(main_object._name, meta_field)), 
+                        ('res_id', '=', main_object.id), 
+                        ('lang', '=', context.get('lang')),
+                        ('value', '!=', False),
+                    ])
+                    if term_ids:
+                        website_meta_value = hasattr(main_object, meta_field) and getattr(main_object, meta_field) or False
+                        qcontext.update({meta_field : website_meta_value})
+                    else:
+                        qcontext.update({meta_field : False})
+            else:
+                for meta_field in meta_fields:
+                    website_meta_value = hasattr(main_object, meta_field) and getattr(main_object, meta_field) or False
+                    if website_meta_value:
+                        qcontext.update({meta_field : website_meta_value})
 
             values = qcontext
 

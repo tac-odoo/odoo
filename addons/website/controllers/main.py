@@ -180,6 +180,10 @@ class Website(openerp.addons.web.controllers.main.Home):
     @http.route(['/website/snippets'], type='json', auth="public", website=True)
     def snippets(self):
         return request.website._render('website.snippets')
+        
+    @http.route('/website/scan_languages', type='json', auth="user", website=True)
+    def scan_languages(self):
+        return openerp.tools.scan_languages()
 
     @http.route('/website/reset_templates', type='http', auth='user', methods=['POST'], website=True)
     def reset_template(self, templates, redirect='/'):
@@ -355,12 +359,13 @@ class Website(openerp.addons.web.controllers.main.Home):
         obj = _object.browse(request.cr, request.uid, _id)
         return bool(obj.website_published)
 
-    @http.route(['/website/seo_suggest/<keywords>'], type='http', auth="public", website=True)
-    def seo_suggest(self, keywords):
+    @http.route(['/website/seo_suggest/<keywords>/<lang>'], type='http', auth="public", website=True)
+    def seo_suggest(self, keywords, lang):
+        language, country  = tuple(lang.split("_"))
         url = "http://google.com/complete/search"
         try:
             req = urllib2.Request("%s?%s" % (url, werkzeug.url_encode({
-                'ie': 'utf8', 'oe': 'utf8', 'output': 'toolbar', 'q': keywords})))
+                'ie': 'utf8', 'oe': 'utf8', 'output': 'toolbar', 'q': keywords, 'hl': language, 'gl': country})))
             request = urllib2.urlopen(req)
         except (urllib2.HTTPError, urllib2.URLError):
             return []
