@@ -1,10 +1,5 @@
 $(document).ready(function () {
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     $('.karma_required').on('click', function (ev) {
         var karma = $(ev.currentTarget).data('karma');
         if (karma) {
@@ -20,19 +15,6 @@ $(document).ready(function () {
         }
     });
 
-    $('.vote_up,.vote_down').not('.karma_required').on('click', function (ev) {
-=======
-    $('.collapse a').hover( function() {
-        console.log("I am on the button");
-        $(this).animate({fontSize: '2em' }, "fast");
-    },
-      function() {
-        console.log("I am out of the button");
-        $(this).animate({fontSize: '1.333em' }, "fast");
-      });
-=======
-=======
-
     $(":not(li .share_link)").click(function (e) {
         $("li .share_link").popover("hide");
         e.stopPropagation();
@@ -42,23 +24,16 @@ $(document).ready(function () {
         e.stopPropagation();
     });
 
-<<<<<<< HEAD
-    $(location.hash).bind("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function() {
-        $(this).css("background-color", "white");
-    }).css("background-color", '#82889E');
-
->>>>>>> 25b6112... [FIX,ADD] website_forum: Fixed the issue of URL when user shares post which is alredy shared. Added flash feature when the URL is open with hash(#) in URL
-    $("li .share_link").each(function(index) {
-=======
     var transition_value = "background-color 1s";
     /*JSH Note: It is required to set transition propery because of Jquery issue #14836 for Chrome*/
     $(location.hash).css({"-webkit-transition" : transition_value, "-moz-transition" : transition_value, "transition" : transition_value, "-o-transition" : transition_value});
-    $(location.hash).one("webkitTransitionEnd transitionend oTransitionEnd MSTransitionEnd", function() {
-        $(this).removeClass("label-primary");
-    }).addClass("label-primary");
- 
+
+    $(location.hash).one("webkitTransitionEnd transitionend oTransitionEnd MSTransitionEnd", 
+        function() {
+            $(this).removeClass("label-primary");
+        }).addClass("label-primary");
+
     $("li .share_link").each(function() {
->>>>>>> b436f98... [FIX] website_forum: The issue of Chrome of blincking feature for highliting user shared answer
         var target = $(this).data('target');
         $(this).popover({
             html : true,
@@ -67,19 +42,8 @@ $(document).ready(function () {
             }
         });
     });
-<<<<<<< HEAD
->>>>>>> 801606e... [IMP] View: Converted the sharing buttons in bootstrap popover.
-=======
 
->>>>>>> 25b6112... [FIX,ADD] website_forum: Fixed the issue of URL when user shares post which is alredy shared. Added flash feature when the URL is open with hash(#) in URL
     $('.vote_up ,.vote_down').on('click', function (ev) {
->>>>>>> d885757... [ADD] open graph meta description tag for facebook.
-=======
-    ('.vote_up ,.vote_down').on('click', function (ev) {
->>>>>>> 9fcf9e3... [IMP] Sharing functionality with schema description
-=======
-    $('.vote_up ,.vote_down').on('click', function (ev) {
->>>>>>> 6b8d06c... [IMP] Added OpenGraph tags for Facebook and Schema tag for Google Plus
         ev.preventDefault();
         var $link = $(ev.currentTarget);
         openerp.jsonRpc($link.data('href'), 'call', {})

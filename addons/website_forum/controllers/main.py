@@ -12,6 +12,7 @@ from openerp.addons.web.controllers.main import login_redirect
 from openerp.addons.web.http import request
 from openerp.addons.website.controllers.main import Website as controllers
 from openerp.addons.website.models.website import slug
+from openerp.tools import html2plaintext
 
 controllers = controllers()
 
@@ -46,8 +47,6 @@ class WebsiteForum(http.Controller):
         values.update(kwargs)
         return values
 
-<<<<<<< HEAD
-=======
     def _has_enough_karma(self, karma_name, uid=None):
         Forum = request.registry['forum.forum']
         karma = hasattr(Forum, karma_name) and getattr(Forum, karma_name) or 0
@@ -70,11 +69,7 @@ class WebsiteForum(http.Controller):
                 ('Content-Length', len(image)),
         ]
         return request.make_response(image, headers)
-<<<<<<< HEAD
->>>>>>> d727e85... [IMP] Trying to improve fetching method for sharing.
-=======
 
->>>>>>> 0ae8a1b... [IMP] website_forum : Improving the code for social network sharing
     # Forum
     # --------------------------------------------------
 
