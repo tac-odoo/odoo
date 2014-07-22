@@ -34,6 +34,15 @@ class hr_evaluation(models.Model):
     _inherit = ['mail.thread']
     _description = "Employee Appraisal"
 
+    @api.one
+    def _set_default_template(self):
+        model, template_id = self.env['ir.model.data'].get_object_reference('hr_evaluation', 'email_template_appraisal')
+        return template_id
+
+    @api.one
+    def _set_servey_link(self,):
+        self.survey_link = ''
+        self.email_list = ''
 
     interview_deadline = fields.Date("Final Interview", select=True)
     employee_id = fields.Many2one('hr.employee', required=True, string='Employee')
@@ -48,7 +57,7 @@ class hr_evaluation(models.Model):
     date_close = fields.Date('Appraisal Deadline', select=True)
     appraisal_manager = fields.Boolean('Manger',)
     apprasial_manager_ids = fields.Many2many('hr.employee', 'evaluation_apprasial_manager_rel', 'hr_evaluation_evaluation_id')
-    apprasial_manager_survey_id = fields.Many2one('survey.survey',)
+    apprasial_manager_survey_id = fields.Many2one('survey.survey', required=False)
     appraisal_colleagues = fields.Boolean('Colleagues')
     appraisal_colleagues_ids = fields.Many2many('hr.employee', 'evaluation_appraisal_colleagues_rel', 'hr_evaluation_evaluation_id')
     appraisal_colleagues_survey_id = fields.Many2one('survey.survey')
@@ -60,6 +69,9 @@ class hr_evaluation(models.Model):
     appraisal_subordinates_survey_id = fields.Many2one('survey.survey',)
     color = fields.Integer('Color Index')
     display_name = fields.Char(compute='_set_display_name')
+    mail_template = fields.Many2one('email.template', string="Email Template For Appraisal", default=_set_default_template)
+    email_list = fields.Char('Receiver', compute=_set_servey_link)
+    survey_link = fields.Char('Link', compute=_set_servey_link)
 
     @api.one
     @api.depends('employee_id')
@@ -83,6 +95,41 @@ class hr_evaluation(models.Model):
         self.appraisal_subordinates = self.employee_id.appraisal_subordinates
         self.appraisal_subordinates_ids = self.employee_id.appraisal_subordinates_ids
         self.appraisal_subordinates_survey_id = self.employee_id.appraisal_subordinates_survey_id
+
+    @api.cr_uid_ids_context
+    def update_survey_link(self, cr, uid, ids, link, email_to, context=None):
+        for rec in self.browse(cr, uid, ids, context):
+            rec.survey_link = link
+            rec.email_list = email_to
+        return True
+
+    @api.cr_uid_ids_context
+    def button_sent_appraisal(self, cr, uid, ids, context=None):
+        template_obj = self.pool.get('email.template')
+        for evaluation in self.browse(cr, uid, ids, context=context):
+            if evaluation.employee_id:
+                if evaluation.appraisal_manager and evaluation.apprasial_manager_survey_id:
+                    email_to = ''
+                    for rec in evaluation.apprasial_manager_ids: email_to += rec.work_email + ','
+                    self.update_survey_link(cr, uid, [evaluation.id], evaluation.apprasial_manager_survey_id.public_url, email_to, context)
+                    template_obj.send_mail(cr, uid, evaluation.mail_template.id, evaluation.id, force_send=True, context=context)
+                if evaluation.appraisal_colleagues and evaluation.appraisal_colleagues_ids:
+                    email_to = ''
+                    for rec in evaluation.appraisal_colleagues_ids: email_to += rec.work_email + ','
+                    self.update_survey_link(cr, uid, [evaluation.id], evaluation.appraisal_colleagues_survey_id.public_url, email_to, context)
+                    template_obj.send_mail(cr, uid, evaluation.mail_template.id, evaluation.id, force_send=True, context=context)
+                if evaluation.appraisal_subordinates and evaluation.appraisal_subordinates_ids:
+                    email_to = ''
+                    for rec in evaluation.appraisal_subordinates_ids: email_to += rec.work_email + ','
+                    self.update_survey_link(cr, uid, [evaluation.id], evaluation.appraisal_subordinates_survey_id.public_url, email_to, context)
+                    template_obj.send_mail(cr, uid, evaluation.mail_template.id, evaluation.id, force_send=True, context=context)
+                if evaluation.appraisal_self and evaluation.apprasial_employee_id:
+                    email_to = ''
+                    for rec in evaluation.apprasial_employee_id: email_to += rec.work_email + ','
+                    self.update_survey_link(cr, uid, [evaluation.id], evaluation.appraisal_self_survey_id.public_url, email_to, context)
+                    template_obj.send_mail(cr, uid, evaluation.mail_template.id, evaluation.id, force_send=True, context=context)
+            self.write(cr, uid, [evaluation.id], {'state': 'pending'})
+        return True
 
 class hr_employee(models.Model):
     _name = "hr.employee"

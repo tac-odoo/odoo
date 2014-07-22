@@ -11,18 +11,21 @@
             <field name="arch" type="xml">
                 <form string="Appraisal">
                 <header>
+                    <button name="button_sent_appraisal" string="Start Appraisal" states="new" type="object" class="oe_highlight"/>
+                    <button name="button_cancel" string="Cancel Appraisal" states="new,pending" type="object"/>
                     <field name="state" widget="statusbar" options="{'fold_field': 'fold'}"/>
                 </header>
                 <sheet>
                     <label for="employee_id" class="oe_edit_only"/>
                     <h1>
-                        <field name="employee_id" class="oe_inline"  on_change="1"/>
+                        <field name="employee_id" class="oe_inline"  on_change="1" attrs="{'readonly':[('state','not in',('new'))]}"/>
                     </h1>
                     <group>
                         <group col="4">
-                            <field name="department_id"/>
+                            <field name="department_id" attrs="{'readonly':[('state','not in',('new'))]}"/>
                             <field name="interview_deadline"/>
                             <field name="date_close"/>
+                            <field name="mail_template" attrs="{'readonly':[('state','not in',('new'))]}"/>
                         </group>
                     </group>
                     <notebook>
@@ -37,29 +40,29 @@
                                 <label for="appraisal_manager" string="Send Apprasial Form To"/>
                                 <group col="3">
                                     <div class="address_format">
-                                        <field name="appraisal_manager"/>
+                                        <field name="appraisal_manager" attrs="{'readonly':[('state','not in',('new'))]}"/>
                                         <label string="Mangare"/>
                                     </div>
-                                    <field name="apprasial_manager_ids" nolabel="1" widget="many2many_tags"/>
-                                    <field name="apprasial_manager_survey_id" nolabel="1"/>
+                                    <field name="apprasial_manager_ids" nolabel="1" widget="many2many_tags" attrs="{'readonly':[('state','not in',('new'))]}"/>
+                                    <field name="apprasial_manager_survey_id" nolabel="1" on_change="1" attrs="{'readonly':[('state','not in',('new'))]}"/>
                                     <div class="address_format">
-                                        <field name="appraisal_colleagues"/>
-                                        <label string="Colleagues"/>  
+                                        <field name="appraisal_colleagues" attrs="{'readonly':[('state','not in',('new'))]}"/>
+                                        <label string="Colleagues"/>
                                     </div>
-                                    <field name="appraisal_colleagues_ids" nolabel="1" widget="many2many_tags"/>
-                                    <field name="appraisal_colleagues_survey_id" nolabel="1" />
+                                    <field name="appraisal_colleagues_ids" nolabel="1" widget="many2many_tags" attrs="{'readonly':[('state','not in',('new'))]}"/>
+                                    <field name="appraisal_colleagues_survey_id" nolabel="1" on_change="1" attrs="{'readonly':[('state','not in',('new'))]}"/>
                                     <div class="address_format">
-                                        <field name="appraisal_self"/>
+                                        <field name="appraisal_self" attrs="{'readonly':[('state','not in',('new'))]}"/>
                                         <label string="Self"/>
                                     </div>
-                                    <field name="apprasial_employee_id" nolabel="1"/>
-                                    <field name="appraisal_self_survey_id" nolabel="1"/>
+                                    <field name="apprasial_employee_id" nolabel="1" attrs="{'readonly':[('state','not in',('new'))]}"/>
+                                    <field name="appraisal_self_survey_id" nolabel="1" on_change="1" attrs="{'readonly':[('state','not in',('new'))]}"/>
                                     <div class="address_format">
-                                        <field name="appraisal_subordinates"/>
+                                        <field name="appraisal_subordinates" attrs="{'readonly':[('state','not in',('new'))]}"/>
                                         <label string="Collaborator"/>
                                     </div>
-                                    <field name="appraisal_subordinates_ids" nolabel="1" widget="many2many_tags"/>
-                                    <field name="appraisal_subordinates_survey_id" nolabel="1"/>
+                                    <field name="appraisal_subordinates_ids" nolabel="1" widget="many2many_tags" attrs="{'readonly':[('state','not in',('new'))]}"/>
+                                    <field name="appraisal_subordinates_survey_id" nolabel="1" on_change="1" attrs="{'readonly':[('state','not in',('new'))]}"/>
                                 </group>
                             </group>
                         </page>
