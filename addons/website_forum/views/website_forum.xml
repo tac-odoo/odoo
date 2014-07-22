@@ -619,9 +619,6 @@
                                     <t t-set="karma" t-value="not answer.can_edit and answer.karma_edit or 0"/>
                                 </t>
                             </li>
-                            <li t-if="(user.id == answer.create_uid.id and can_edit_own) or can_edit_all">
-                                <a class="text-muted fa fa-edit" t-attf-href="/forum/#{slug(forum)}/post/#{slug(answer)}/edit"> Edit</a>
-                            </li>
                             <li>
                                 <t t-call="website_forum.link_button">
                                     <t t-set="url" t-value="'/forum/' + slug(forum) + '/post/' + slug(answer) + '/delete'"/>
