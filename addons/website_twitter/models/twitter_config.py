@@ -1,4 +1,5 @@
 import logging
+from urllib2 import Request, URLError, HTTPError
 
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
@@ -26,17 +27,46 @@ class twitter_config_settings(osv.osv_memory):
                 "It does not have to match the API Key/Secret."),
     }
     
+    def _get_twitter_exception_message(self, error_code, context=None):
+        TWITTER_EXCEPTION = {
+            304 : _('There was no new data to return.'),
+            400 : _('The request was invalid or cannot be otherwise served. Requests without authentication are considered invalid and will yield this response.'),
+            401 : _('Authentication credentials were missing or incorrect (May be Screen name tweets are protected!).'),
+            403 : _('The request is understood, but it has been refused or access is not allowed. (Check your Twitter API Key and Secret).'),
+            429 : _('Request cannot be served due to the applications rate limit having been exhausted for the resource.'),
+            500 : _('Something is broken. Please post to issue to a developer forums so the Twitter team can investigate.'),
+            502 : _('Twitter is down or being upgraded.'),
+            503 : _('The Twitter servers are up, but overloaded with requests. Try again later.'),
+            504 : _('The Twitter servers are up, but the request could not be serviced due to some failure within our stack. Try again later.')
+        }
+        if error_code in TWITTER_EXCEPTION:
+            return TWITTER_EXCEPTION[error_code]
+        else:
+            return _('HTTP Error Something is mis-configured!')
+
     def _check_twitter_authorization(self, cr, uid, config_id, context=None):
         website_obj = self.pool['website']
         website_config = self.browse(cr, uid, config_id, context=context)
         try:
             website_obj.fetch_favorite_tweets(cr, uid, [website_config.website_id.id], context=context)
-        except Exception:
-            _logger.warning('Failed to verify twitter API authorization', exc_info=True)
-            raise osv.except_osv(_('Twitter authorization error!'), _('Please double-check your Twitter API Key and Secret'))
+        except HTTPError, e:
+            _logger.warning("%s - %s" % (e.code, e.reason), exc_info=True)
+            raise osv.except_osv("%s - %s" % (e.code, e.reason), self._get_twitter_exception_message(e.code, context))
+        except URLError, e:
+            _logger.warning(_('We failed to reach a twitter server.'), exc_info=True)
+            raise osv.except_osv(_('Internet connection refused'), _('We failed to reach a twitter server.'))
+        except Exception, e:
+            _logger.warning(_('Please double-check your Twitter API Key and Secret!'), exc_info=True)
+            raise osv.except_osv(_('Twitter authorization error!'), _('Please double-check your Twitter API Key and Secret!'))
 
     def create(self, cr, uid, vals, context=None):
         res_id = super(twitter_config_settings, self).create(cr, uid, vals, context=context)
-        if vals.get('twitter_api_key') and vals.get('twitter_api_secret'):
+        if vals.get('twitter_api_key') and vals.get('twitter_api_secret') and vals.get('twitter_screen_name'):
             self._check_twitter_authorization(cr, uid, res_id, context=context)
+        return res_id
+
+    def write(self, cr, uid, ids, vals, context=None):
+        res_id = super(twitter_config_settings, self).write(cr, uid, ids, vals, context=context)
+        if vals.get('twitter_api_key') or vals.get('twitter_api_secret') or vals.get('twitter_screen_name'):
+            self._check_twitter_authorization(cr, uid, ids, context=context)
         return res_id
