@@ -3288,7 +3288,7 @@ class stock_warehouse(osv.osv):
         #Check routes that are being delivered by this warehouse and change the rule going to transit location
         route_obj = self.pool.get("stock.location.route")
         pull_obj = self.pool.get("procurement.rule")
-        routes = route_obj.search(cr, uid, [('supplier_wh_id','=', warehouse.id)], context=context)
+        routes = route_obj.search(cr, uid, [('supplied_wh_id','=', warehouse.id)], context=context)
         pulls= pull_obj.search(cr, uid, ['&', ('route_id', 'in', routes), ('location_id.usage', '=', 'transit')], context=context)
         if pulls:
             pull_obj.write(cr, uid, pulls, {'location_src_id': new_location, 'procure_method': change_to_multiple and "make_to_order" or "make_to_stock"}, context=context)
@@ -3355,7 +3355,8 @@ class stock_warehouse(osv.osv):
                 # switch between route
                 self.change_route(cr, uid, ids, warehouse, vals.get('reception_steps', False), vals.get('delivery_steps', False), context=context_with_inactive)
                 # Check if we need to change something to resupply warehouses and associated MTO rules
-                self._check_resupply(cr, uid, warehouse, vals.get('reception_steps'), vals.get('delivery_steps'), context=context)
+                if warehouse.resupply_wh_ids:
+                    self._check_resupply(cr, uid, warehouse, vals.get('reception_steps'), vals.get('delivery_steps'), context=context)
                 warehouse.refresh()
             if vals.get('code') or vals.get('name'):
                 name = warehouse.name
