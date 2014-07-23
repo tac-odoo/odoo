@@ -590,6 +590,8 @@ class BaseModel(object):
             inherits.update(cls._inherits)
 
             depends = dict(parent_class._depends)
+            depends.update(cls._depends)
+
             for m, fs in cls._depends.iteritems():
                 depends.setdefault(m, []).extend(fs)
 
