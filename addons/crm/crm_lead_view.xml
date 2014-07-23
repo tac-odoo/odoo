@@ -7,7 +7,7 @@
         <!-- Stage Search view -->
         <record id="crm_lead_stage_search" model="ir.ui.view">
             <field name="name">Stage - Search</field>
-            <field name="model">crm.case.stage</field>
+            <field name="model">crm.stage</field>
             <field name="arch" type="xml">
                 <search string="Stage Search">
                     <field name="name"/>
@@ -21,9 +21,9 @@
         <!-- Stage Form view -->
         <record id="crm_lead_stage_act" model="ir.actions.act_window">
             <field name="name">Stages</field>
-            <field name="res_model">crm.case.stage</field>
+            <field name="res_model">crm.stage</field>
             <field name="view_type">form</field>
-            <field name="view_id" ref="crm.crm_case_stage_tree"/>
+            <field name="view_id" ref="crm.crm_stage_tree"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to set a new stage in your lead/opportunity pipeline.
@@ -43,11 +43,9 @@
         <!-- Categories Form View -->
         <record id="crm_lead_categ_action" model="ir.actions.act_window">
             <field name="name">Sales Tags</field>
-            <field name="res_model">crm.case.categ</field>
+            <field name="res_model">crm.lead.tag</field>
             <field name="view_type">form</field>
-            <field name="view_id" ref="crm_case_categ_tree-view"/>
-            <field name="context" eval="{'object_id': ref('model_crm_lead')}"/>
-            <field name="domain">[('object_id.model', '=', 'crm.lead')]</field>
+            <field name="view_id" ref="crm_case_category_tree-view"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to define a new sales tag.
@@ -103,7 +101,8 @@
                     <div class="oe_right oe_button_box" name="buttons">
                         <button class="oe_inline oe_stat_button" type="action" 
                             context="{'default_opportunity_id': active_id, 'search_default_opportunity_id': active_id, 'default_partner_id': partner_id, 'default_duration': 1.0}"
-                            name="%(crm.crm_case_categ_phone_incoming0)d" icon="fa-phone">
+                            name="%(crm.crm_phonecall_category_phone_incoming0)d"
+                            icon="fa-phone">
                             <div>Schedule/Log<br/>Calls</div>
                         </button>
                     </div>
@@ -157,11 +156,8 @@
                         </group>
                         <group>
                             <field name="priority" widget="priority"/>
-                            <field name="categ_ids"
-                                widget="many2many_tags"
-                                domain="[('object_id.model','=','crm.lead')]"
-                                context="{'object_name': 'crm.lead'}"
-                            />
+                            <field name="tag_ids"
+                                widget="many2many_tags"/>
                         </group>
                     </group>
                     <notebook colspan="4">
@@ -277,8 +273,8 @@
                                     <ul class="oe_dropdown_menu">
                                         <t t-if="widget.view.is_action_enabled('edit')"><li><a type="edit">Edit...</a></li></t>
                                         <t t-if="widget.view.is_action_enabled('delete')"><li><a type="delete">Delete</a></li></t>
-                                        <li><a name="%(mail.action_email_compose_message_wizard)d" type="action">Send Email</a></li>
-                                        <li><a type="action" name="%(crm.crm_case_categ_phone_incoming0)d" >Calls</a></li>
+                                        <li><a name="%(mail.action_email_compose_message_wizard)d" type="action" >Send Email</a></li>
+                                        <li><a type="action" name="%(crm.crm_phonecall_category_phone_incoming0)d">Calls</a></li>
                                         <li><a name="action_schedule_meeting" type="object">Schedule Meeting</a></li>
                                         <li><ul class="oe_kanban_colorpicker" data-field="color"/></li>
                                     </ul>
@@ -325,7 +321,7 @@
             <field name="arch" type="xml">
                 <search string="Search Leads">
                     <field name="name" string="Lead / Customer" filter_domain="['|','|','|',('partner_name','ilike',self),('email_from','ilike',self),('contact_name','ilike',self),('name','ilike',self)]"/>
-                    <field name="categ_ids" string="Tag" filter_domain="[('categ_ids', 'ilike', self)]"/>
+                    <field name="tag_ids" string="Tag" filter_domain="[('tag_ids', 'ilike', self)]"/>
                     <field name="section_id" groups="base.group_multi_salesteams"/>
                     <field name="user_id"/>
                     <field name="partner_id" operator="child_of"/>
@@ -378,8 +374,8 @@
                     <sheet>
                         <div class="oe_right oe_button_box">
                             <button class="oe_inline oe_stat_button" type="action" 
-                                name="%(crm.crm_case_categ_phone_incoming0)d" icon="fa-phone"
-                                context="{'default_opportunity_id': active_id, 'search_default_opportunity_id': active_id, 'default_partner_id': partner_id, 'default_duration': 1.0}">
+                                icon="fa-phone"
+                                context="{'default_opportunity_id': active_id, 'search_default_opportunity_id': active_id, 'default_partner_id': partner_id, 'default_duration': 1.0}" name="%(crm.crm_phonecall_category_phone_incoming0)d">
                                 <div>Schedule/Log<br/>Calls</div>
                             </button>
                             <button class="oe_inline oe_stat_button" type="object" 
@@ -429,10 +425,8 @@
                                 </div>
                             </group>
                             <group>
-                                <field name="categ_ids"
-                                    widget="many2many_tags"
-                                    context="{'object_name': 'crm.lead'}"
-                                    domain="[('object_id.model', '=', 'crm.lead')]"/>
+                                <field name="tag_ids"
+                                    widget="many2many_tags"/>
 
                             </group>
                         </group>
@@ -486,7 +480,6 @@
                         </page>
                         <page string="Fund Raising" groups="crm.group_fund_raising">
                             <group>
-                                <field name="payment_mode" widget="selection"/>
                                 <field name="planned_cost"/>
                             </group>
                         </page>
@@ -538,7 +531,7 @@
             <field name="arch" type="xml">
                 <search string="Search Opportunities">
                     <field name="name" string="Opportunity" filter_domain="['|','|','|',('partner_id','ilike',self),('partner_name','ilike',self),('email_from','ilike',self),('name', 'ilike', self)]"/>
-                    <field name="categ_ids" string="Tag" filter_domain="[('categ_ids', 'ilike', self)]"/>
+                    <field name="tag_ids" string="Tag" filter_domain="[('tag_ids', 'ilike', self)]"/>
                     <field name="section_id" groups="base.group_multi_salesteams"/>
                     <field name="user_id"/>
                     <field name="partner_id" operator="child_of"/>

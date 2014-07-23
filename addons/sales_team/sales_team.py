@@ -24,8 +24,8 @@ from openerp import tools
 from openerp.osv import fields, osv
 
 
-class crm_case_section(osv.osv):
-    _name = "crm.case.section"
+class crm_team(osv.osv):
+    _name = "crm.team"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
     _description = "Sales Teams"
     _order = "complete_name"
@@ -73,8 +73,8 @@ class crm_case_section(osv.osv):
         'user_id': fields.many2one('res.users', 'Team Leader'),
         'member_ids': fields.many2many('res.users', 'sale_member_rel', 'section_id', 'member_id', 'Team Members'),
         'reply_to': fields.char('Reply-To', size=64, help="The email address put in the 'Reply-To' of all emails sent by OpenERP about cases in this sales team"),
-        'parent_id': fields.many2one('crm.case.section', 'Parent Team'),
-        'child_ids': fields.one2many('crm.case.section', 'parent_id', 'Child Teams'),
+        'parent_id': fields.many2one('crm.team', 'Parent Team'),
+        'child_ids': fields.one2many('crm.team', 'parent_id', 'Child Teams'),
         'note': fields.text('Description'),
         'working_hours': fields.float('Working Hours', digits=(16, 2)),
         'color': fields.integer('Color Index'),
@@ -112,19 +112,5 @@ class crm_case_section(osv.osv):
 class res_partner(osv.Model):
     _inherit = 'res.partner'
     _columns = {
-        'section_id': fields.many2one('crm.case.section', 'Sales Team'),
+        'section_id': fields.many2one('crm.team', 'Sales Team'),
     }
-
-
-class res_users(osv.Model):
-    _inherit = 'res.users'
-    _columns = {
-        'default_section_id': fields.many2one('crm.case.section', 'Default Sales Team'),
-    }
-
-    def __init__(self, pool, cr):
-        init_res = super(res_users, self).__init__(pool, cr)
-        # duplicate list to avoid modifying the original reference
-        self.SELF_WRITEABLE_FIELDS = list(self.SELF_WRITEABLE_FIELDS)
-        self.SELF_WRITEABLE_FIELDS.extend(['default_section_id'])
-        return init_res

@@ -36,7 +36,7 @@ class crm_phonecall(osv.osv):
         'date_action_last': fields.datetime('Last Action', readonly=1),
         'date_action_next': fields.datetime('Next Action', readonly=1),
         'create_date': fields.datetime('Creation Date' , readonly=True),
-        'section_id': fields.many2one('crm.case.section', 'Sales Team', \
+        'section_id': fields.many2one('crm.team', 'Sales Team', \
                         select=True, help='Sales team to which Case belongs to.'),
         'user_id': fields.many2one('res.users', 'Responsible'),
         'partner_id': fields.many2one('res.partner', 'Contact'),
@@ -57,9 +57,7 @@ class crm_phonecall(osv.osv):
         'name': fields.char('Call Summary', required=True),
         'active': fields.boolean('Active', required=False),
         'duration': fields.float('Duration', help='Duration in minutes and seconds.'),
-        'categ_id': fields.many2one('crm.case.categ', 'Category', \
-                        domain="['|',('section_id','=',section_id),('section_id','=',False),\
-                        ('object_id.model', '=', 'crm.phonecall')]"),
+        'categ_id': fields.many2one('crm.phonecall.category', 'Category'),
         'partner_phone': fields.char('Phone'),
         'partner_mobile': fields.char('Mobile'),
         'priority': fields.selection([('0','Low'), ('1','Normal'), ('2','High')], 'Priority'),
@@ -298,5 +296,13 @@ class crm_phonecall(osv.osv):
 
     def _call_set_partner_send_note(self, cr, uid, ids, context=None):
         return self.message_post(cr, uid, ids, body=_("Partner has been <b>created</b>."), context=context)
+
+class crm_phonecall_category(osv.Model):
+    _name = "crm.phonecall.category"
+    _description = "Category of phonecall"
+    _columns = {
+        'name': fields.char('Name', required=True, translate=True),
+        'section_id': fields.many2one('crm.team', 'Sales Team'),
+    }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

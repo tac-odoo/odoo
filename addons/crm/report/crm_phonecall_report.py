@@ -41,7 +41,7 @@ class crm_phonecall_report(osv.osv):
     
     _columns = {
         'user_id':fields.many2one('res.users', 'User', readonly=True),
-        'section_id':fields.many2one('crm.case.section', 'Section', readonly=True),
+        'section_id':fields.many2one('crm.team', 'Section', readonly=True),
         'priority': fields.selection([('0','Low'), ('1','Normal'), ('2','High')], 'Priority'),
         'nbr': fields.integer('# of Cases', readonly=True),
         'state': fields.selection(AVAILABLE_STATES, 'Status', readonly=True),
@@ -49,9 +49,7 @@ class crm_phonecall_report(osv.osv):
         'delay_close': fields.float('Delay to close', digits=(16,2),readonly=True, group_operator="avg",help="Number of Days to close the case"),
         'duration': fields.float('Duration', digits=(16,2),readonly=True, group_operator="avg"),
         'delay_open': fields.float('Delay to open',digits=(16,2),readonly=True, group_operator="avg",help="Number of Days to open the case"),
-        'categ_id': fields.many2one('crm.case.categ', 'Category', \
-                        domain="[('section_id','=',section_id),\
-                        ('object_id.model', '=', 'crm.phonecall')]"),
+        'categ_id': fields.many2one('crm.phonecall.category', 'Category'),
         'partner_id': fields.many2one('res.partner', 'Partner' , readonly=True),
         'company_id': fields.many2one('res.company', 'Company', readonly=True),
         'opening_date': fields.date('Opening Date', readonly=True, select=True),

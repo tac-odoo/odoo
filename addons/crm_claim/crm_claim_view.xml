@@ -10,11 +10,9 @@
 
         <record id="crm_claim_categ_action" model="ir.actions.act_window">
             <field name="name">Claim Categories</field>
-            <field name="res_model">crm.case.categ</field>
+            <field name="res_model">crm.claim.category</field>
             <field name="view_type">form</field>
-            <field name="view_id" ref="crm.crm_case_categ_tree-view"/>
-            <field name="domain">[('object_id.model', '=', 'crm.claim')]</field>
-            <field name="context" eval="{'object_id': ref('model_crm_claim')}"/>
+            <field name="view_id" ref="crm.crm_case_category_tree-view"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to create a claim category.
@@ -125,8 +123,7 @@
                                 <group colspan="2" col="2" groups="base.group_user">
                                     <separator colspan="2" string="Responsibilities"/>
                                     <field name="user_fault"/>
-                                    <field name="categ_id" widget="selection"
-                                        domain="[('object_id.model', '=', 'crm.claim')]"/>
+                                    <field name="categ_id" widget="selection"/>
                                     <field name="ref"/>
                                 </group>
                                 <separator colspan="4" string="Claim/Action Description" groups="base.group_user"/>

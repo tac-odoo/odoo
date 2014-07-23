@@ -84,7 +84,7 @@ class crm_lead(format_address, osv.osv):
     def get_empty_list_help(self, cr, uid, help, context=None):
         context = dict(context or {})
         if context.get('default_type') == 'lead':
-            context['empty_list_help_model'] = 'crm.case.section'
+            context['empty_list_help_model'] = 'crm.team'
             context['empty_list_help_id'] = context.get('default_section_id')
         context['empty_list_help_document_name'] = _("leads")
         return super(crm_lead, self).get_empty_list_help(cr, uid, help, context=context)
@@ -111,7 +111,7 @@ class crm_lead(format_address, osv.osv):
         if type(context.get('default_section_id')) in (int, long):
             return context.get('default_section_id')
         if isinstance(context.get('default_section_id'), basestring):
-            section_ids = self.pool.get('crm.case.section').name_search(cr, uid, name=context['default_section_id'], context=context)
+            section_ids = self.pool.get('crm.team').name_search(cr, uid, name=context['default_section_id'], context=context)
             if len(section_ids) == 1:
                 return int(section_ids[0][0])
         return None
@@ -126,7 +126,7 @@ class crm_lead(format_address, osv.osv):
 
     def _read_group_stage_ids(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
         access_rights_uid = access_rights_uid or uid
-        stage_obj = self.pool.get('crm.case.stage')
+        stage_obj = self.pool.get('crm.stage')
         order = stage_obj._order
         # lame hack to allow reverting search, should just work in the trivial case
         if read_group_order == 'stage_id desc':
@@ -207,14 +207,13 @@ class crm_lead(format_address, osv.osv):
         'date_action_last': fields.datetime('Last Action', readonly=1),
         'date_action_next': fields.datetime('Next Action', readonly=1),
         'email_from': fields.char('Email', size=128, help="Email address of the contact", select=1),
-        'section_id': fields.many2one('crm.case.section', 'Sales Team',
+        'section_id': fields.many2one('crm.team', 'Sales Team',
                         select=True, track_visibility='onchange', help='When sending mails, the default email address is taken from the sales team.'),
         'create_date': fields.datetime('Creation Date', readonly=True),
         'email_cc': fields.text('Global CC', help="These email addresses will be added to the CC field of all inbound and outbound emails for this record before being sent. Separate multiple email addresses with a comma"),
         'description': fields.text('Notes'),
         'write_date': fields.datetime('Update Date', readonly=True),
-        'categ_ids': fields.many2many('crm.case.categ', 'crm_lead_category_rel', 'lead_id', 'category_id', 'Tags', \
-            domain="['|', ('section_id', '=', section_id), ('section_id', '=', False), ('object_id.model', '=', 'crm.lead')]", help="Classify and analyze your lead/opportunity categories like: Training, Service"),
+        'tag_ids': fields.many2many('crm.lead.tag', 'crm_lead_category_rel', 'lead_id', 'category_id', 'Tags',help="Classify and analyze your lead/opportunity categories like: Training, Service"),
         'contact_name': fields.char('Contact Name', size=64),
         'partner_name': fields.char("Customer Name", size=64,help='The name of the future partner company that will be created while converting the lead into opportunity', select=1),
         'opt_out': fields.boolean('Opt-Out', oldname='optout',
@@ -223,7 +222,7 @@ class crm_lead(format_address, osv.osv):
         'type': fields.selection([ ('lead','Lead'), ('opportunity','Opportunity'), ],'Type', select=True, help="Type is used to separate Leads and Opportunities"),
         'priority': fields.selection(crm.AVAILABLE_PRIORITIES, 'Priority', select=True),
         'date_closed': fields.datetime('Closed', readonly=True, copy=False),
-        'stage_id': fields.many2one('crm.case.stage', 'Stage', track_visibility='onchange', select=True,
+        'stage_id': fields.many2one('crm.stage', 'Stage', track_visibility='onchange', select=True,
                         domain="['&', ('section_ids', '=', section_id), '|', ('type', '=', type), ('type', '=', 'both')]"),
         'user_id': fields.many2one('res.users', 'Salesperson', select=True, track_visibility='onchange'),
         'referred': fields.char('Referred By'),
@@ -265,8 +264,6 @@ class crm_lead(format_address, osv.osv):
         'function': fields.char('Function'),
         'title': fields.many2one('res.partner.title', 'Title'),
         'company_id': fields.many2one('res.company', 'Company', select=1),
-        'payment_mode': fields.many2one('crm.payment.mode', 'Payment Mode', \
-                            domain="[('section_id','=',section_id)]"),
         'planned_cost': fields.float('Planned Costs'),
         'meeting_count': fields.function(_meeting_count, string='# Meetings', type='integer'),
     }
@@ -290,7 +287,7 @@ class crm_lead(format_address, osv.osv):
     def onchange_stage_id(self, cr, uid, ids, stage_id, context=None):
         if not stage_id:
             return {'value': {}}
-        stage = self.pool.get('crm.case.stage').browse(cr, uid, stage_id, context=context)
+        stage = self.pool.get('crm.stage').browse(cr, uid, stage_id, context=context)
         if not stage.on_change:
             return {'value': {}}
         vals = {'probability': stage.probability}
@@ -323,7 +320,7 @@ class crm_lead(format_address, osv.osv):
             to the ones user_id is member of. """
         section_id = self._get_default_section_id(cr, uid, context=context) or False
         if user_id and not section_id:
-            section_ids = self.pool.get('crm.case.section').search(cr, uid, ['|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context)
+            section_ids = self.pool.get('crm.team').search(cr, uid, ['|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context)
             if section_ids:
                 section_id = section_ids[0]
         return {'value': {'section_id': section_id}}
@@ -368,7 +365,7 @@ class crm_lead(format_address, osv.osv):
         # AND with the domain in parameter
         search_domain += list(domain)
         # perform search, return the first found
-        stage_ids = self.pool.get('crm.case.stage').search(cr, uid, search_domain, order=order, limit=1, context=context)
+        stage_ids = self.pool.get('crm.stage').search(cr, uid, search_domain, order=order, limit=1, context=context)
         if stage_ids:
             return stage_ids[0]
         return False
@@ -634,7 +631,7 @@ class crm_lead(format_address, osv.osv):
         self._merge_notify(cr, uid, highest.id, opportunities, context=context)
         # Check if the stage is in the stages of the sales team. If not, assign the stage with the lowest sequence
         if merged_data.get('section_id'):
-            section_stage_ids = self.pool.get('crm.case.stage').search(cr, uid, [('section_ids', 'in', merged_data['section_id']), ('type', '=', merged_data.get('type'))], order='sequence', context=context)
+            section_stage_ids = self.pool.get('crm.stage').search(cr, uid, [('section_ids', 'in', merged_data['section_id']), ('type', '=', merged_data.get('type'))], order='sequence', context=context)
             if merged_data.get('stage_id') not in section_stage_ids:
                 merged_data['stage_id'] = section_stage_ids and section_stage_ids[0] or False
         # Write merged data into first opportunity
@@ -646,7 +643,7 @@ class crm_lead(format_address, osv.osv):
         return highest.id
 
     def _convert_opportunity_data(self, cr, uid, lead, customer, section_id=False, context=None):
-        crm_stage = self.pool.get('crm.case.stage')
+        crm_stage = self.pool.get('crm.stage')
         contact_id = False
         if customer:
             contact_id = self.pool.get('res.partner').address_get(cr, uid, [customer.id])['default']
@@ -918,7 +915,7 @@ class crm_lead(format_address, osv.osv):
 
     def get_empty_list_help(self, cr, uid, help, context=None):
         context = dict(context or {})
-        context['empty_list_help_model'] = 'crm.case.section'
+        context['empty_list_help_model'] = 'crm.team'
         context['empty_list_help_id'] = context.get('default_section_id', None)
         context['empty_list_help_document_name'] = _("opportunity")
         if context.get('default_type') == 'lead':
@@ -933,7 +930,7 @@ class crm_lead(format_address, osv.osv):
         """ Override to get the reply_to of the parent project. """
         leads = self.browse(cr, SUPERUSER_ID, ids, context=context)
         section_ids = set([lead.section_id.id for lead in leads if lead.section_id])
-        aliases = self.pool['crm.case.section'].message_get_reply_to(cr, uid, list(section_ids), context=context)
+        aliases = self.pool['crm.team'].message_get_reply_to(cr, uid, list(section_ids), context=context)
         return dict((lead.id, aliases.get(lead.section_id and lead.section_id.id or 0, False)) for lead in leads)
 
     def get_formview_id(self, cr, uid, id, context=None):
@@ -1031,5 +1028,12 @@ class crm_lead(format_address, osv.osv):
             country_id=self.pool.get('res.country.state').browse(cr, uid, state_id, context).country_id.id
             return {'value':{'country_id':country_id}}
         return {}
+class crm_lead_tag(osv.Model):
+    _name = "crm.lead.tag"
+    _description = "Category of lead"
+    _columns = {
+        'name': fields.char('Name', required=True, translate=True),
+        'section_id': fields.many2one('crm.team', 'Sales Team'),
+    }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

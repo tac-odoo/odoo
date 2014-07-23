@@ -41,7 +41,7 @@ class crm_claim_stage(osv.osv):
     _columns = {
         'name': fields.char('Stage Name', required=True, translate=True),
         'sequence': fields.integer('Sequence', help="Used to order stages. Lower is better."),
-        'section_ids':fields.many2many('crm.case.section', 'section_claim_stage_rel', 'stage_id', 'section_id', string='Sections',
+        'section_ids':fields.many2many('crm.team', 'section_claim_stage_rel', 'stage_id', 'section_id', string='Sections',
                         help="Link between stages and sales teams. When set, this limitate the current stage to the selected sales teams."),
         'case_default': fields.boolean('Common to All Teams',
                         help="If you check this field, this stage will be proposed by default on each sales team. It will not assign this stage to existing teams."),
@@ -82,14 +82,12 @@ class crm_claim(osv.osv):
         'date_closed': fields.datetime('Closed', readonly=True),
         'date': fields.datetime('Claim Date', select=True),
         'ref': fields.reference('Reference', selection=openerp.addons.base.res.res_request.referencable_models),
-        'categ_id': fields.many2one('crm.case.categ', 'Category', \
-                            domain="[('section_id','=',section_id),\
-                            ('object_id.model', '=', 'crm.claim')]"),
+        'categ_id': fields.many2one('crm.claim.category', 'Category'),
         'priority': fields.selection([('0','Low'), ('1','Normal'), ('2','High')], 'Priority'),
         'type_action': fields.selection([('correction','Corrective Action'),('prevention','Preventive Action')], 'Action Type'),
         'user_id': fields.many2one('res.users', 'Responsible', track_visibility='always'),
         'user_fault': fields.char('Trouble Responsible'),
-        'section_id': fields.many2one('crm.case.section', 'Sales Team', \
+        'section_id': fields.many2one('crm.team', 'Sales Team', \
                         select=True, help="Responsible sales team."\
                                 " Define Responsible user and Email account for"\
                                 " mail gateway."),
@@ -202,6 +200,13 @@ class res_partner(osv.osv):
 
     _columns = {
         'claim_count': fields.function(_claim_count, string='# Claims', type='integer'),
+    }
+class crm_claim_category(osv.Model):
+    _name = "crm.claim.category"
+    _description = "Category of claim"
+    _columns = {
+        'name': fields.char('Name', required=True, translate=True),
+        'section_id': fields.many2one('crm.team', 'Sales Team'),
     }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

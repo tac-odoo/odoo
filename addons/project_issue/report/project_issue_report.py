@@ -30,7 +30,7 @@ class project_issue_report(osv.osv):
 
     _columns = {
         'name': fields.char('Year', size=64, required=False, readonly=True),
-        'section_id':fields.many2one('crm.case.section', 'Sale Team', readonly=True),
+        'section_id':fields.many2one('crm.team', 'Sale Team', readonly=True),
         'month':fields.selection(fields.date.MONTHS, 'Month', readonly=True),
         'company_id': fields.many2one('res.company', 'Company', readonly=True),
         'day': fields.char('Day', size=128, readonly=True),
