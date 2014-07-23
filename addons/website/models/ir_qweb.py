@@ -415,6 +415,14 @@ class Contact(orm.AbstractModel):
     _name = 'website.qweb.field.contact'
     _inherit = ['ir.qweb.field.contact', 'website.qweb.field.many2one']
 
+    def from_html(self, cr, uid, model, column, element, context=None):
+        # FIXME: this behavior is really weird, what if the user wanted to edit the name of the related thingy? Should m2os really be editable without a widget?
+        divs = element.xpath(".//div")
+        for div in divs:
+            if div != divs[0]:
+                div.getparent().remove(div)
+        return super(Contact, self).from_html(cr, uid, model, column, element, context=context)
+
 class QwebView(orm.AbstractModel):
     _name = 'website.qweb.field.qweb'
     _inherit = ['ir.qweb.field.qweb']

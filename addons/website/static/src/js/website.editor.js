@@ -344,7 +344,6 @@
                     editables: {
                         text: {
                             selector: '*',
-                            allowedContent: { }
                         },
                     },
                     upcast: function (el) {
