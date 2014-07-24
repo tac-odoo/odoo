@@ -35,20 +35,12 @@ from openerp import SUPERUSER_ID
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 
 BASE_API_URL = "https://api.linkedin.com/v1"
+company_fields = "(id,name,logo-url,description,industry,website-url,locations,universal-name)"
+people_fields = '(id,picture-url,public-profile-url,first-name,last-name,' \
+                    'formatted-name,location,phone-numbers,im-accounts,' \
+                    'main-address,headline,positions,summary,specialties)'
 _logger = logging.getLogger(__name__)
 
-#TODO: Move into controllers file
-class Binary(openerp.http.Controller):
-    @openerp.http.route('/web_linkedin/binary/url2binary', type='json', auth='user')
-    def url2binary(self, url):
-        """Used exclusively to load images from LinkedIn profiles, must not be used for anything else."""
-        _scheme, _netloc, path, params, query, fragment = urlparse(url)
-        # media.linkedin.com is the master domain for LinkedIn media (replicated to CDNs),
-        # so forcing it should always work and prevents abusing this method to load arbitrary URLs
-        url = urlunparse(('http', 'media.licdn.com', path, params, query, fragment))
-        bfile = urllib2.urlopen(url)
-        return base64.b64encode(bfile.read())
-    
 class web_linkedin_settings(osv.osv_memory):
     _inherit = 'sale.config.settings'
     _columns = {
@@ -110,15 +102,19 @@ class web_linkedin_fields(osv.Model):
     }
 
     def get_empty_list_help(self, cr, uid, help, context=None):
-        #action_xmlid = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'base', )
-        #TODO: check if pool(sale.config.setting).get_default_linkedin, if apikey and secret key is set then show following help else super
-        return _("""<p class="oe_view_nocontent_create">
-                Click to add a contact in your address book or <a href='/web'>Import Contacts from Linkedin</a>.
-              </p><p>
-                OpenERP helps you easily track all activities related to
-                a customer; discussions, history of business opportunities,
-                documents, etc.
-              </p>""") #%{'action_xmlid': action_xmlid}
+        apikey = self.pool.get('ir.config_parameter').get_param(cr, uid, 'web.linkedin.apikey', default=False, context=context)
+        secret_key = self.pool.get('ir.config_parameter').get_param(cr, uid, 'web.linkedin.secretkey', default=False, context=context)
+        if apikey and secret_key:
+            #Either we can achive it by including no_result method
+            return _("""<p class="oe_view_nocontent_create">
+                    Click to add a contact in your address book or <a href='#' class="oe_import_contacts">Import Contacts from Linkedin</a>.
+                  </p><p>
+                    OpenERP helps you easily track all activities related to
+                    a customer; discussions, history of business opportunities,
+                    documents, etc.
+                  </p>""")
+        else:
+            return super(web_linkedin_fields, self).super(cr, uid, help, context=context)
 
 class linkedin_users(osv.Model):
     _inherit = 'res.users'
@@ -133,16 +129,34 @@ class linkedin(osv.AbstractModel):
     _name = 'linkedin'
     limit = 5
 
+    #TO Implement
+    def sync_linkedin_contacts(self, cr, uid, from_url, context=None):
+        #This method will import all first level contact from linkedin
+        headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'x-li-format': 'json'}
+        token = self.get_token(cr, uid, context=context)
+        params = {
+            'oauth2_access_token': token
+        }
+        if not self.need_authorization(cr, uid, context=context):
+            connection_uri = BASE_API_URL + "/people/~/connections:{people_fields}".format(people_fields=people_fields)
+            status, res = self.send_request(cr, connection_uri, params=params, headers=headers, type="GET", context=context)
+            print "\n\nres is ::: ",res
+            #fetch menu_id and return particular menu_id of customer, may be main root menu of Sale will be enough
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'reload',
+                'params': { #'menu_id': menu_id 
+                           }
+            }
+        else:
+            return {'status': 'need_auth', 'url': self._get_authorize_uri(cr, uid, from_url=from_url, context=context)}
+
     def get_customer_popup_data(self, cr, uid, context=None, **kw):
         result_data = {}
         if context is None:
             context = {}
         context.update(kw.get('local_context') or {})
         token = self.get_token(cr, uid, context=context)
-        company_fields = "(id,name,logo-url,description,industry,website-url,locations,universal-name)"
-        people_fields = '(id,picture-url,public-profile-url,first-name,last-name,' \
-                            'formatted-name,location,phone-numbers,im-accounts,' \
-                            'main-address,headline,positions,summary,specialties)'
         companies = {}
         people = {}
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'x-li-format': 'json'}
@@ -170,14 +184,23 @@ class linkedin(osv.AbstractModel):
         #People search is allowed to only vetted API access request, please go through following link
         #https://help.linkedin.com/app/api-dvr
         #Note: Enable this code once our application have vetted API approval
-        """
         people_search_uri = BASE_API_URL + "/people-search:(people:{people_fields})".format(people_fields=people_fields)
         status, res = self.send_request(cr, people_search_uri, params=search_params, headers=headers, type="GET", context=context)
         people.update(res)
-        """
+
         result_data['companies'] = companies
-        result_data['people'] = [people]
+        result_data['people'] = people
         return result_data
+
+    #To Implement, and simplify methods for need_auth and from_url part
+    def get_people_from_company(self, cr, uid, company_universalname, current_company, limit, from_url, context=None):
+        if context is None:
+            context = {}
+
+        if not self.need_authorization(cr, uid, context=context):
+            return {}
+        else:
+            return {'status': 'need_auth', 'url': self._get_authorize_uri(cr, uid, from_url=from_url, context=context)}
 
     def send_request(self, cr, uri, params={}, headers={}, type="GET", context=None):
         result = ""
@@ -206,8 +229,8 @@ class linkedin(osv.AbstractModel):
                 raise e
 
             _logger.exception("Bad linkedin request : %s !" % e.read())
-            error_key = simplejson.loads(e.read())
-            error_key = error_key.get('error', {}).get('message', 'nc')
+            #error_key = simplejson.loads(e.read())
+            #error_key = error_key.get('error', {}).get('message', 'nc')
             #for 404 do not raise config warning
             #raise self.pool.get('res.config.settings').get_config_warning(cr, _("Something went wrong with your request to linkedin. \n\n %s"%(error_key)), context=context)
         return (status, result)

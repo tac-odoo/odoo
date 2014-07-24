@@ -1,5 +1,7 @@
+import base64
 import simplejson
 import urllib2
+from urlparse import urlparse, urlunparse
 
 import openerp
 from openerp.addons.web import http
@@ -61,3 +63,14 @@ class Linkedin(http.Controller):
         else:
             print "\n\nInside elseeeee "
             return {'status': 'need_auth', 'url': linkedin_obj._get_authorize_uri(request.cr, request.session.uid, from_url=post.get('from_url'), context=post.get('local_context'))}
+
+class Binary(http.Controller):
+    @openerp.http.route('/web_linkedin/binary/url2binary', type='json', auth='user')
+    def url2binary(self, url):
+        """Used exclusively to load images from LinkedIn profiles, must not be used for anything else."""
+        _scheme, _netloc, path, params, query, fragment = urlparse(url)
+        # media.linkedin.com is the master domain for LinkedIn media (replicated to CDNs),
+        # so forcing it should always work and prevents abusing this method to load arbitrary URLs
+        url = urlunparse(('http', 'media.licdn.com', path, params, query, fragment))
+        bfile = urllib2.urlopen(url)
+        return base64.b64encode(bfile.read())

@@ -69,10 +69,10 @@ openerp.web_linkedin = function(instance) {
                     //instance.web_linkedin.tester.test_authentication().done(function() {
                     //self.rpc("/linkedin/").done(function(result) {
                         var pop = new instance.web_linkedin.LinkedinSearchPopup(self, text);
-                        pop.on("search_completed", this, function() {
+                        pop.on("search_completed", self, function() {
                             pop.open();
                         });
-                        pop.on("selected", this, function(entity) {
+                        pop.on("selected", self, function(entity) {
                             self.selected_entity(entity);
                         });
                         pop.do_search();
@@ -83,23 +83,78 @@ openerp.web_linkedin = function(instance) {
         selected_entity: function(entity) {
             var self = this;
             //TODO
+            console.log("this is ::: ",this)
+            this.create_on_change(entity).done(function(to_change) {
+                console.log("to_change is ::: ",to_change);
+                var values = self.view.get_fields_values();
+                _.each(to_change, function (value, key) {
+                    if (!/linkedin/.test(key) && !!values[key]) {
+                        if(!_.isArray(values[key])) {
+                            delete to_change[key];
+                        }
+                    }
+                })
+                self.view.set_values(to_change);
+            });
         },
         create_on_change: function(entity) {
-            //TODO
+            return entity.__type === "company" ? this.create_or_modify_company(entity) : this.create_or_modify_partner(entity);
         },
         create_or_modify_company: function (entity) {
+            console.log("Inside modify company ::: ");
             var self = this;
-            //TODO
+            var to_change = {};
+            var image_def = null;
+            to_change.is_company = true;
+            to_change.name = entity.name;
+            to_change.image = false;
+            if (entity.logoUrl) {
+                image_def = self.rpc('/web_linkedin/binary/url2binary',
+                                   {'url': entity.logoUrl}).then(function(data){
+                    to_change.image = data;
+                });
+            }
+            to_change.website = entity.websiteUrl;
+            to_change.phone = false;
+            _.each((entity.locations || {}).values || [], function(el) {
+                to_change.phone = el.contactInfo.phone1;
+            });
+            to_change.linkedin_url = _.str.sprintf("http://www.linkedin.com/company/%d", entity.id);
+
+            console.log("to_change is before overritting value :::: ",to_change)
+            _.each(to_change, function (val, key) {
+                if (self.field_manager.datarecord[key]) {
+                    to_change[key] = self.field_manager.datarecord[key];
+                }
+            });
+
+            to_change.child_ids = [];
+            var children_def = $.Deferred();
+            //TODO: People-search and get partner related data
+            var context = instance.web.pyeval.eval('context');
+            res = new instance.web.Model("linkedin").call("get_people_from_company", [entity.universalName, true, 50, window.location.href, context]).done(function(result) {
+                console.log("result is ::: ",result);
+                children_def.resolve();
+            });
+
+            //TODO: add children_def, if both deferred objects are resolved then call callback function
+            return $.when(image_def, children_def).then(function () {
+                return to_change;
+            });
         },
         create_or_modify_partner: function (entity, rpc_search_similar_partner) {
+            console.log("Inside modify partner ::: ");
             var self = this;
             //TODO
+            return $.Deferred().resolve();
         },
         create_or_modify_partner_change: function (entity) {
             //TODO
+            return $.Deferred().resolve();
         },
         create_or_modify_company_partner: function (entities) {
             //TODO
+            return $.Deferred().resolve();
         }
     });
     instance.web.form.widgets.add('linkedin', 'instance.web_linkedin.Linkedin');
@@ -121,10 +176,6 @@ openerp.web_linkedin = function(instance) {
         template: "Linkedin.popup",
         init: function(parent, search) {
             var self = this;
-            //if (!IN.User.isAuthorized()) {
-            //    this.$buttons = $("<div/>");
-            //    this.destroy();
-            //}
             this._super(parent, { 'title': QWeb.render('LinkedIn.AdvancedSearch', {'title': _t("LinkedIn search")}) });
             this.search = search;
             this.limit = 5;
@@ -177,11 +228,9 @@ openerp.web_linkedin = function(instance) {
                 var url = url.replace(/\/+$/, '');
                 var uid = url.replace(/(.*linkedin\.com\/[a-z]+\/)|(^.*\/company\/)|(\&.*$)/gi, '');
                 _.extend(params, {'search_uid': uid});
-                console.log("params are :: ",params);
 
                 this.search = url;
             }
-            console.log("search term is ::: ",this.search);
             var context = instance.web.pyeval.eval('context');
             self.rpc("/linkedin/get_popup_data", _.extend({'search_term': this.search, 'from_url': window.location.href, 'local_context': context}, params)).done(function(result) {
                 if(result.status && result.status == 'need_auth' && confirm(_t("You will be redirected to LinkedIn authentication page, once authenticated after that you use this widget."))) {
@@ -196,7 +245,6 @@ openerp.web_linkedin = function(instance) {
         },
         do_result_companies: function(companies) {
             var lst = (companies.companies || {}).values || [];
-            console.log("companies is :::",lst);
             //lst = _.first(companies, this.limit);
             lst = _.map(lst, function(el) {
                 el.__type = "company";
@@ -207,7 +255,7 @@ openerp.web_linkedin = function(instance) {
         },
         do_result_people: function(people) {
             var plst = (people.people || {}).values || [];
-            plst = _.first(plst, this.limit);
+            //plst = _.first(plst, this.limit);
             plst = _.map(plst, function(el) {
                 el.__type = "people";
                 return el;
@@ -261,6 +309,34 @@ openerp.web_linkedin = function(instance) {
                 self.$(".oe_linkedin_entity_headline").text(this.data.headline);
             }
         },
+    });
+
+    /*
+    Kanban include for adding import button on button bar for res.partner model to import linkedin contacts
+    */
+    openerp.web_kanban.KanbanView.include({
+        load_kanban: function() {
+            var self = this;
+            var super_res = this._super.apply(this, arguments);
+            //TODO: test linkedin here first, if there is no apikey or secret_key set then do not add button
+            if(this.dataset.model == 'res.partner') {
+                $linkedin_button = $(QWeb.render("KanbanView.linkedinButton", {'widget': this}));
+                $linkedin_button.appendTo(this.$buttons);
+                $linkedin_button.click(function() {
+                    var context = instance.web.pyeval.eval('context');
+                    res = new instance.web.Model("linkedin").call("sync_linkedin_contacts", [window.location.href, context]).done(function(result) {
+                        if(result.status && result.status == 'need_auth' && confirm(_t("You will be redirected to LinkedIn authentication page, once authenticated after that you use this widget."))) {
+                            instance.web.redirect(result.url);
+                        } else {
+                            console.log("result is ::: ",result);
+                            self.do_action(result);
+                        }
+                        //Reload the kanban once records are synchronized
+                    });
+                })
+            }
+            return super_res;
+        }
     });
 };
 // vim:et fdc=0 fdl=0:

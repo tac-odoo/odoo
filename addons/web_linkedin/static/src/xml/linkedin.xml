@@ -46,4 +46,10 @@
         </div>
     </t>
 
+    <t t-name="KanbanView.linkedinButton">
+        <span class="oe_fade">or</span>
+        <div class="oe_kanban_import_contact">
+            <a href="#" class="oe_bold">Import Contacts from Linkedin</a>
+        </div>
+    </t>
 </templates>

@@ -1,4 +1,6 @@
-
+.openerp .oe_kanban_import_contact {
+    display: inline;
+}
 
 .openerp .oe_linkedin_img {
     float: right;
