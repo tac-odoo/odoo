@@ -28,23 +28,21 @@
            <field eval="'run_employee_evaluation'" name="function" />
            <field eval="'(False,)'" name="args" />
         </record>
-<<<<<<< HEAD
-    </data>
-=======
 
         <record id="email_template_appraisal" model="email.template">
             <field name="name">Appraisal Survey - Send by Email</field>
             <field name="model_id" ref="model_hr_evaluation_evaluation" />
             <field name="auto_delete" eval="True" />
             <field name="subject">Apprasial Regarding</field>
-            <field name="email_to">${object.email_list}</field>
+            <field name="email_to">${object.email_to}</field>
             <field name="email_from">${object.employee_id.work_email}</field>
             <field name="body_html">
                 <![CDATA[
                 <div style="font-family: 'Lucida Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); ">
                     <p>Hello,</p>
-                    <p>We are conducting a survey, and your response would be appreciated.</p>
-                    <p><a href="${object.survey_link}">Please, click here to start survey</a></p>
+                    <p>We are conducting an Apprasial for ${object.employee_id.name}, and your response would be appreciated.</p>
+                    <p><a href="${object.appraisal_url}">Please, click here to start Appraisal</a></p>
+                    <p>Kindly post your response for the appraisal on till Date : ${object.date_close}</p>
                     <p>Thanks for your participation!</p>
                 </div>
                 ]]>
@@ -52,5 +50,13 @@
         </record>
      </data>
 
->>>>>>> [IMP]hr_evaluation: add a new template. apprasial mails will be sent with survey link to manager,colleagues,collaborator and self. apprasial form's some fields readonly,when state is not new
+    <data>
+        <!-- Apprasia-related subtypes for messaging / Chatter -->
+        <record id="mt_apprasial_stage" model="mail.message.subtype">
+            <field name="name">Stage Changed</field>
+            <field name="res_model">hr_evaluation.evaluation</field>
+            <field name="default" eval="False"/>
+            <field name="description">Stage changed</field>
+        </record>
+    </data>
 </openerp>

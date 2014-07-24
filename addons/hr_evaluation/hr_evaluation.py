@@ -34,15 +34,21 @@ class hr_evaluation(models.Model):
     _inherit = ['mail.thread']
     _description = "Employee Appraisal"
 
+    _track = {
+        'state': {
+            'hr_evaluation.mt_apprasial_stage': lambda self, cr, uid, obj, ctx=None: True,
+        },
+    }
+
     @api.one
     def _set_default_template(self):
         model, template_id = self.env['ir.model.data'].get_object_reference('hr_evaluation', 'email_template_appraisal')
         return template_id
 
     @api.one
-    def _set_servey_link(self,):
-        self.survey_link = ''
-        self.email_list = ''
+    def _set_appraisal_url(self,):
+        self.appraisal_url = ''
+        self.email_to = ''
 
     interview_deadline = fields.Date("Final Interview", select=True)
     employee_id = fields.Many2one('hr.employee', required=True, string='Employee')
@@ -70,8 +76,8 @@ class hr_evaluation(models.Model):
     color = fields.Integer('Color Index')
     display_name = fields.Char(compute='_set_display_name')
     mail_template = fields.Many2one('email.template', string="Email Template For Appraisal", default=_set_default_template)
-    email_list = fields.Char('Receiver', compute=_set_servey_link)
-    survey_link = fields.Char('Link', compute=_set_servey_link)
+    email_to = fields.Char('Receiver', compute=_set_appraisal_url)
+    appraisal_url = fields.Char('Link', compute=_set_appraisal_url)
 
     @api.one
     @api.depends('employee_id')
@@ -96,39 +102,32 @@ class hr_evaluation(models.Model):
         self.appraisal_subordinates_ids = self.employee_id.appraisal_subordinates_ids
         self.appraisal_subordinates_survey_id = self.employee_id.appraisal_subordinates_survey_id
 
-    @api.cr_uid_ids_context
-    def update_survey_link(self, cr, uid, ids, link, email_to, context=None):
-        for rec in self.browse(cr, uid, ids, context):
-            rec.survey_link = link
-            rec.email_list = email_to
+    @api.one
+    def update_appraisal_url(self, url, email_to):
+        self.appraisal_url = url
+        self.email_to = email_to
         return True
 
-    @api.cr_uid_ids_context
-    def button_sent_appraisal(self, cr, uid, ids, context=None):
-        template_obj = self.pool.get('email.template')
-        for evaluation in self.browse(cr, uid, ids, context=context):
-            if evaluation.employee_id:
-                if evaluation.appraisal_manager and evaluation.apprasial_manager_survey_id:
-                    email_to = ''
-                    for rec in evaluation.apprasial_manager_ids: email_to += rec.work_email + ','
-                    self.update_survey_link(cr, uid, [evaluation.id], evaluation.apprasial_manager_survey_id.public_url, email_to, context)
-                    template_obj.send_mail(cr, uid, evaluation.mail_template.id, evaluation.id, force_send=True, context=context)
-                if evaluation.appraisal_colleagues and evaluation.appraisal_colleagues_ids:
-                    email_to = ''
-                    for rec in evaluation.appraisal_colleagues_ids: email_to += rec.work_email + ','
-                    self.update_survey_link(cr, uid, [evaluation.id], evaluation.appraisal_colleagues_survey_id.public_url, email_to, context)
-                    template_obj.send_mail(cr, uid, evaluation.mail_template.id, evaluation.id, force_send=True, context=context)
-                if evaluation.appraisal_subordinates and evaluation.appraisal_subordinates_ids:
-                    email_to = ''
-                    for rec in evaluation.appraisal_subordinates_ids: email_to += rec.work_email + ','
-                    self.update_survey_link(cr, uid, [evaluation.id], evaluation.appraisal_subordinates_survey_id.public_url, email_to, context)
-                    template_obj.send_mail(cr, uid, evaluation.mail_template.id, evaluation.id, force_send=True, context=context)
-                if evaluation.appraisal_self and evaluation.apprasial_employee_id:
-                    email_to = ''
-                    for rec in evaluation.apprasial_employee_id: email_to += rec.work_email + ','
-                    self.update_survey_link(cr, uid, [evaluation.id], evaluation.appraisal_self_survey_id.public_url, email_to, context)
-                    template_obj.send_mail(cr, uid, evaluation.mail_template.id, evaluation.id, force_send=True, context=context)
-            self.write(cr, uid, [evaluation.id], {'state': 'pending'})
+    @api.one
+    def create_receiver_list(self, apprasial, url):
+        email_to = ''
+        for rec in apprasial: email_to += rec.work_email + ','
+        self.update_appraisal_url(url, email_to)
+        self.mail_template.send_mail(self.id, force_send=True)
+        return True
+
+    @api.one
+    def button_sent_appraisal(self):
+        if self.employee_id:
+            if self.appraisal_manager and self.apprasial_manager_ids:
+                self.create_receiver_list(self.apprasial_manager_ids, self.apprasial_manager_survey_id.public_url)
+            if self.appraisal_colleagues and self.appraisal_colleagues_ids:
+                self.create_receiver_list(self.appraisal_colleagues_ids, self.appraisal_colleagues_survey_id.public_url)
+            if self.appraisal_subordinates and self.appraisal_subordinates_ids:
+                self.create_receiver_list(self.appraisal_subordinates_ids, self.appraisal_subordinates_survey_id.public_url)
+            if self.appraisal_self and self.apprasial_employee_id:
+                self.create_receiver_list(self.apprasial_employee_id, self.appraisal_self_survey_id.public_url)
+            #self.write({'state': 'pending'})
         return True
 
 class hr_employee(models.Model):
@@ -148,14 +147,52 @@ class hr_employee(models.Model):
     appraisal_subordinates = fields.Boolean('Collaborator', help="")
     appraisal_subordinates_ids = fields.Many2many('hr.employee', 'appraisal_subordinates_rel', 'hr_evaluation_evaluation_id')
     appraisal_subordinates_survey_id = fields.Many2one('survey.survey', "Employee's Appraisal" )
-    appraisal_repeat = fields.Boolean('Repeat', help="")
-    appraisal_repeat_number = fields.Integer('Repeat')
-    appraisal_repeat_delay = fields.Selection([('year','Year'),('month','Month')], 'Repeat Delay', copy=False)
-    date_from = fields.Date('From', select=True)
+    appraisal_repeat = fields.Boolean('Repeat Every', help="", default=True)
+    appraisal_repeat_number = fields.Integer('Appraisal Repeat Number', default=1, required=True)
+    appraisal_repeat_delay = fields.Selection([('year','Year'),('month','Month')], 'Repeat Delay', copy=False, default='month', required=True)
     appraisal_count = fields.Integer(compute='_appraisal_count', string='Appraisal Interviews')
-    #user_id = fields.Many2one('res.users','employee_ids',)
+
     @api.one
     def _appraisal_count(self):
         Evaluation = self.env['hr_evaluation.evaluation']
         for rec in self:
             self.appraisal_count = Evaluation.search_count([('employee_id', '=', rec.id)],)
+
+    @api.cr_uid_ids_context
+    def run_employee_evaluation(self, cr, uid, automatic=False, use_new_cursor=False, context=None):  # cronjob
+        now = parser.parse(datetime.now().strftime('%Y-%m-%d'))
+        obj_evaluation = self.pool.get('hr_evaluation.evaluation')
+        emp_ids = self.search(cr, uid, [('evaluation_date', '=', False)], context=context)
+        first_date = datetime.now()
+        next_date = datetime.now()
+        for emp in self.browse(cr, uid, emp_ids, context=context):
+            if emp.appraisal_repeat_delay == 'month':
+                first_date = (now + relativedelta(months=emp.appraisal_repeat_number)).strftime('%Y-%m-%d')
+            else:
+                first_date = (now + relativedelta(months=emp.appraisal_repeat_number * 12)).strftime('%Y-%m-%d')
+            self.write(cr, uid, [emp.id], {'evaluation_date': first_date}, context=context)
+
+        emp_ids = self.search(cr, uid, [('evaluation_date', '<=', time.strftime("%Y-%m-%d"))], context=context)
+        for emp in self.browse(cr, uid, emp_ids, context=context):
+            if emp.appraisal_repeat_delay == 'month':
+                next_date = (now + relativedelta(months=emp.appraisal_repeat_number)).strftime('%Y-%m-%d')
+            else:
+                next_date = (now + relativedelta(months=emp.appraisal_repeat_number * 12)).strftime('%Y-%m-%d')
+            self.write(cr, uid, [emp.id], {'evaluation_date': next_date}, context=context)
+            vals = {'employee_id': emp.id,
+                    'appraisal_manager': emp.appraisal_manager,
+                    'apprasial_manager_ids': [(4,manager.id) for manager in emp.apprasial_manager_ids],
+                    'apprasial_manager_survey_id' : emp.apprasial_manager_survey_id.id,
+                    'appraisal_colleagues': emp.appraisal_colleagues,
+                    'appraisal_colleagues_ids': [(4,colleagues.id) for colleagues in emp.appraisal_colleagues_ids],
+                    'appraisal_colleagues_survey_id': emp.appraisal_colleagues_survey_id.id,
+                    'appraisal_self': emp.appraisal_self,
+                    'apprasial_employee_id': emp.id,
+                    'appraisal_self_survey_id': emp.appraisal_self_survey_id.id,
+                    'appraisal_subordinates': emp.appraisal_subordinates,
+                    'appraisal_subordinates_ids': [(4,subordinates.id) for subordinates in emp.appraisal_subordinates_ids],
+                    'appraisal_subordinates_survey_id': emp.appraisal_subordinates_survey_id.id
+            }
+            obj_evaluation.create(cr, uid, vals, context=context)
+        return True
+

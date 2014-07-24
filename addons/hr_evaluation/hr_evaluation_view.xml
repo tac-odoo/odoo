@@ -32,7 +32,7 @@
                         <page string="Internal Note">
                             <field name="note_summary"/>
                         </page>
-                        <page string="Final Evaluation">
+                        <page string="Final Evaluation" attrs="{'invisible':[('state','=','new')]}">
                             <field name="evaluation"/>
                         </page>
                         <page string="Plan">
@@ -69,7 +69,7 @@
                     </notebook>
               </sheet>
 	          <div class="oe_chatter">
-	              <field name="message_follower_ids" widget="mail_followers"/>
+	              <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
 	              <field name="message_ids" widget="mail_thread"/>
 	          </div>
               </form>
@@ -179,11 +179,6 @@
             <field name="model">hr.employee</field>
             <field name="inherit_id" ref="hr.view_employee_form"/>
             <field name="arch" type="xml">
-            <xpath expr="//group[@name='active_group']" position="before">
-                <group string="Appraisals">
-                    <field name="evaluation_date"/>
-                </group>
-            </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="%(open_view_hr_evaluation_tree2)d"
                     class="oe_stat_button"
@@ -223,17 +218,11 @@
                             <field name="appraisal_subordinates_survey_id" nolabel="1" attrs="{'invisible':[('appraisal_subordinates','=',False)]}"/>
                         </group>
                     </group>
-                    <group col="4">
-                        <label for="appraisal_repeat" string="Periodicity"/>
-                        <group col="4">
-                            <div>
-                                <field name="appraisal_repeat" nolabel="1"/>
-                                <label string="Repeat Every"/>
-                            </div>
-                            <field name="appraisal_repeat_number" nolabel="1"/>
-                            <field name="appraisal_repeat_delay" nolabel="1"/>
-                            <field name="date_from" nolabel="1"/>
-                        </group>
+                    <group string="Periodicity" col="4">
+                        <field name="appraisal_repeat"/>
+                        <field name="appraisal_repeat_number"/>
+                        <field name="appraisal_repeat_delay"/>
+                        <field name="evaluation_date"/>
                     </group>
                 </page>
             </xpath>
