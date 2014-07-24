@@ -3792,6 +3792,9 @@ class stock_pack_operation(osv.osv):
             operation in two to process the one with the qty moved
         '''
         processed_ids = []
+        for obj in self.browse(cr,uid,ids):
+            for move in obj.linked_move_operation_ids:
+                self.pool.get('stock.move').check_tracking(cr, uid, move.move_id, obj.package_id.id or obj.lot_id.id, context=context)
         for pack_op in self.browse(cr, uid, ids, context=None):
             op = pack_op.id
             if pack_op.qty_done < pack_op.product_qty:
