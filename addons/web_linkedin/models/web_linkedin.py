@@ -140,16 +140,17 @@ class linkedin(osv.AbstractModel):
         if not self.need_authorization(cr, uid, context=context):
             connection_uri = BASE_API_URL + "/people/~/connections:{people_fields}".format(people_fields=people_fields)
             status, res = self.send_request(cr, connection_uri, params=params, headers=headers, type="GET", context=context)
-            print "\n\nres is ::: ",res
-            #fetch menu_id and return particular menu_id of customer, may be main root menu of Sale will be enough
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'reload',
-                'params': { #'menu_id': menu_id 
-                           }
-            }
+            #TODO: It is possible that update_contacts return osv.exception if user doesn't have rights, handle the exception nicely
+            self.update_contacts(cr, uid, res, context=context)
+            return True
         else:
             return {'status': 'need_auth', 'url': self._get_authorize_uri(cr, uid, from_url=from_url, context=context)}
+
+    def update_contacts(self, cr, uid, records, context=None):
+        li_records_obj = LinkedinRecords(self, cr, uid, records.get('values'), records.get('_total'))
+        #there may be an issue of rights, current user may now have rights of create or write
+        li_records_obj.create_contacts()
+        li_records_obj.update_contacts()
 
     def get_customer_popup_data(self, cr, uid, context=None, **kw):
         result_data = {}
@@ -181,24 +182,34 @@ class linkedin(osv.AbstractModel):
         status, res = self.send_request(cr, company_search_uri, params=search_params, headers=headers, type="GET", context=context)
         companies.update(res)
 
-        #People search is allowed to only vetted API access request, please go through following link
+        #Note: People search is allowed to only vetted API access request, please go through following link
         #https://help.linkedin.com/app/api-dvr
-        #Note: Enable this code once our application have vetted API approval
         people_search_uri = BASE_API_URL + "/people-search:(people:{people_fields})".format(people_fields=people_fields)
         status, res = self.send_request(cr, people_search_uri, params=search_params, headers=headers, type="GET", context=context)
-        people.update(res)
+        people.update(res or {})
 
         result_data['companies'] = companies
         result_data['people'] = people
         return result_data
 
     #To Implement, and simplify methods for need_auth and from_url part
-    def get_people_from_company(self, cr, uid, company_universalname, current_company, limit, from_url, context=None):
+    def get_people_from_company(self, cr, uid, company_universalname, limit, from_url, context=None):
         if context is None:
             context = {}
 
         if not self.need_authorization(cr, uid, context=context):
-            return {}
+            #Facet based search
+            headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'x-li-format': 'json'}
+            params = {
+                'oauth2_access_token': self.get_token(cr, uid, context=context),
+                'company-name': company_universalname,
+                'current-company': 'true',
+                'count': limit
+                
+            }
+            people_criteria_uri = BASE_API_URL + "/people-search:(people:{people_fields})".format(people_fields=people_fields)
+            status, res = self.send_request(cr, people_criteria_uri, params=params, headers=headers, type="GET", context=context)
+            return res
         else:
             return {'status': 'need_auth', 'url': self._get_authorize_uri(cr, uid, from_url=from_url, context=context)}
 
@@ -225,7 +236,6 @@ class linkedin(osv.AbstractModel):
                 result = simplejson.loads(content)
         except urllib2.HTTPError, e:
             if e.code in (400, 401, 410):
-                print "\n\ne.read() is :: ",e.read()
                 raise e
 
             _logger.exception("Bad linkedin request : %s !" % e.read())
@@ -286,3 +296,46 @@ class linkedin(osv.AbstractModel):
 
     def get_uri_oauth(self, a=''):  # a = action
         return "https://www.linkedin.com/uas/oauth2/%s" % (a,)
+
+class LinkedinRecords(object):
+    """
+    This represents linkedin records, it provides utility to differentiate reocrds,
+    whether records is to create or it is to update, 
+    basically it creates or updates records fetched from linkedin
+    cursor: database cursor,
+    user_id: current user,
+    linkedin_obj: Its a linkedin model object
+    """
+
+    def __init__(self, linkedin_obj, cursor, user_id, records, total, context=None):
+        self.records = records
+        self.id_based_records = dict((d['id'], d) for d in records)
+        self.total = total
+        #We can also remove records which are there in table but not retrieved from linkedin,
+        #that means linkedin user has removed that contact from his/her account
+        self.records_to_create = []
+        self.records_to_update = []
+        self.cr = cursor
+        self.uid = user_id
+        self.context = context or {}
+        self.linkedin_obj = linkedin_obj
+        self.check_create_or_update()
+
+    def check_create_or_update(self):
+        ids = self.id_based_records.keys()
+        read_res = self.linkedin_obj.pool.get('res.partner').search_read(self.cr, self.uid, [('linkedin_id', 'in', ids)], ['linkedin_id'], context=self.context)
+        to_update = [x['linkedin_id'] for x in read_res]
+        to_create = list(set(ids).difference(to_update))
+        for id in to_update:
+            self.records_to_update.append(self.id_based_records.get(id))
+        for id in to_create:
+            self.records_to_create.append(self.id_based_records.get(id))
+        print "\n\nrecords_to_create and records_to_update are ::: ",self.records_to_create,"\n\n\n", self.records_to_update
+
+    def create_contacts(self):
+        #Create contact from self.records_to_create
+        pass
+
+    def update_contacts(self):
+        #Write contact from self.records_to_update
+        pass
