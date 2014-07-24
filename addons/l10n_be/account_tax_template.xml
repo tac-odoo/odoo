@@ -746,7 +746,7 @@
             <field name="sequence">140</field>
             <field name="description">VAT-IN-V81-00</field>
             <field name="name">TVA à l'entrée 0% - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">0</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -769,30 +769,6 @@
             <field name="code_id" ref="atctn_85"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-00"/>
         </record>
-        <record id="attn_VAT-IN-V81-00-C1_invoice_tax_line" model="account.tax.line.template">
-            <field name="sequence">141</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
-            <field name="amount">0</field>
-            <field name="apply_on">invoice</field>
-            <field name="tax_id" ref="attn_VAT-IN-V81-00"/>
-        </record>
-        <record id="attn_VAT-IN-V81-00-C1_refund_tax_line" model="account.tax.line.template">
-            <field name="sequence">141</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">refund</field>
-            <field name="tax_id" ref="attn_VAT-IN-V81-00"/>
-        </record>
-        <!--record id="attn_VAT-IN-V81-00-C2_invoice_tax_line" model="account.tax.line.template">
-            <field name="sequence">142</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">invoice</field>
-            <field name="tax_id" ref="attn_VAT-IN-V81-00"/>
-        </record-->
         <record id="attn_VAT-IN-V81-00-C2_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">142</field>
             <field name="code_type">base</field>
