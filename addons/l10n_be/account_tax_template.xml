@@ -1549,7 +1549,7 @@
             <field name="sequence">410</field>
             <field name="description">VAT-IN-V81-21-CC</field>
             <field name="name">TVA Déductible 21% Cocontract. - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1593,7 +1593,7 @@
             <field name="sequence">412</field>
             <field name="code_type">tax</field>
             <field name="tax_amount">210</field>
-            <field name="debit_credit_amount">210</field>
+            <field name="debit_credit_amount">-210</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_56"/>
             <field name="account_id" ref="a451056"/>
@@ -1603,7 +1603,7 @@
             <field name="sequence">412</field>
             <field name="code_type">tax</field>
             <field name="tax_amount">-210</field>
-            <field name="debit_credit_amount">210</field>
+            <field name="debit_credit_amount">-210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451056"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-21-CC"/>
@@ -1633,17 +1633,6 @@
             <field name="apply_on">refund</field>
             <field name="code_id" ref="atctn_87"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-21-CC"/>
-        </record>
-
-        <record id="attn_VAT-IN-V81-21-CC-C3_refund_tax_line_1" model="account.tax.line.template">
-            <field name="sequence">414</field>
-            <field name="code_type">base</field>
-            <field name="tax_amount">-1000</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">refund</field>
-            <field name="code_id" ref="atctn_87"/>
-            <field name="tax_id" ref="attn_VAT-IN-V81-21-CC"/>
-        </record>
 
         <record id="attn_VAT-IN-V81-12-CC" model="account.tax.template">
             <field name="sequence">420</field>
