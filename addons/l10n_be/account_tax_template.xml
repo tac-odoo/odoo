@@ -1608,14 +1608,15 @@
             <field name="account_id" ref="a451056"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-21-CC"/>
         </record>
-        <!--record id="attn_VAT-IN-V81-21-CC-C3_invoice_tax_line" model="account.tax.line.template">
+        <record id="attn_VAT-IN-V81-21-CC-C3_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">413</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="code_id" ref="atctn_87"/>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="attn_VAT-IN-V81-21-CC"/>
-        </record-->
+        </record>
         <record id="attn_VAT-IN-V81-21-CC-C3_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">413</field>
             <field name="code_type">base</field>
@@ -1633,6 +1634,7 @@
             <field name="apply_on">refund</field>
             <field name="code_id" ref="atctn_87"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-21-CC"/>
+        </record>
 
         <record id="attn_VAT-IN-V81-12-CC" model="account.tax.template">
             <field name="sequence">420</field>
