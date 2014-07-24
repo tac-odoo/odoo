@@ -12,7 +12,7 @@
                 <form string="Appraisal">
                 <header>
                     <button name="button_sent_appraisal" string="Start Appraisal" states="new" type="object" class="oe_highlight"/>
-                    <button name="button_cancel" string="Cancel Appraisal" states="new,pending" type="object"/>
+                    <button name="button_done_appraisal" string="Done" states="pending" type="object"/>
                     <field name="state" widget="statusbar" options="{'fold_field': 'fold'}"/>
                 </header>
                 <sheet>
@@ -23,7 +23,7 @@
                     <group>
                         <group col="4">
                             <field name="department_id" attrs="{'readonly':[('state','not in',('new'))]}"/>
-                            <field name="interview_deadline"/>
+                            <field name="interview_deadline" attrs="{'required':[('state','in', ('pending','done'))]}"/>
                             <field name="date_close"/>
                             <field name="mail_template" attrs="{'readonly':[('state','not in',('new'))]}"/>
                         </group>
@@ -107,11 +107,12 @@
             <field name="name">hr_evaluation.evaluation_kanban</field>
             <field name="model">hr_evaluation.evaluation</field>
             <field name="arch" type="xml">
-                <kanban default_group_by="state">
+                <kanban default_group_by="state" quick_create="0">
                     <field name="employee_id"/>
                     <field name="department_id"/>
                     <field name="interview_deadline"/>
                     <field name="color"/>
+                    <field name="state"/>
                     <templates>
                         <t t-name="kanban-box">
                             <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click">
@@ -187,7 +188,7 @@
                     <field name="appraisal_count" widget="statinfo" string="Appraisals"/>
                 </button>
             </xpath>
-            <xpath expr="//page[@string='HR Settings']" position="after">
+            <xpath expr="//page[@name='hr_setting']" position="after">
                 <page string="Apprasial">
                     <group col="4">
                         <label for="appraisal_manager" string="Send Apprasial Form To"/>

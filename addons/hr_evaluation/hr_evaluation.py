@@ -49,18 +49,21 @@ class hr_evaluation(models.Model):
     def _set_appraisal_url(self,):
         self.appraisal_url = ''
         self.email_to = ''
+        self.send_mail_status = False
+
+    @api.cr_uid
+    def _get_state_list(self, cr, uid, context=None):
+        return [('new', 'To Start'),
+                ('pending', 'Appraisal Sent'),
+                ('done', 'Done'),]
 
     interview_deadline = fields.Date("Final Interview", select=True)
     employee_id = fields.Many2one('hr.employee', required=True, string='Employee')
     department_id = fields.Many2one('hr.department', 'Department')
     note_summary = fields.Text('Appraisal Summary')
     evaluation = fields.Text('Evaluation Summary', help="If the evaluation does not meet the expectations, you can propose an action plan")
-    state = fields.Selection([
-            ('new', 'To Start'),
-            ('pending', 'Appraisal Sent'),
-            ('done', 'Done'),
-    ], 'Status', required=True, readonly=True, copy=False, default='new')
-    date_close = fields.Date('Appraisal Deadline', select=True)
+    state = fields.Selection(_get_state_list, 'Status', required=True, readonly=True, copy=False, default='new', select=True)
+    date_close = fields.Date('Appraisal Deadline', select=True, required=True)
     appraisal_manager = fields.Boolean('Manger',)
     apprasial_manager_ids = fields.Many2many('hr.employee', 'evaluation_apprasial_manager_rel', 'hr_evaluation_evaluation_id')
     apprasial_manager_survey_id = fields.Many2one('survey.survey', required=False)
@@ -76,8 +79,9 @@ class hr_evaluation(models.Model):
     color = fields.Integer('Color Index')
     display_name = fields.Char(compute='_set_display_name')
     mail_template = fields.Many2one('email.template', string="Email Template For Appraisal", default=_set_default_template)
-    email_to = fields.Char('Receiver', compute=_set_appraisal_url)
-    appraisal_url = fields.Char('Link', compute=_set_appraisal_url)
+    email_to = fields.Char('Appraisal Receiver', compute=_set_appraisal_url)
+    appraisal_url = fields.Char('Appraisal URL', compute=_set_appraisal_url)
+    send_mail_status = fields.Boolean('Appraisal Send Mail Status', compute=_set_appraisal_url)
 
     @api.one
     @api.depends('employee_id')
@@ -111,7 +115,8 @@ class hr_evaluation(models.Model):
     @api.one
     def create_receiver_list(self, apprasial, url):
         email_to = ''
-        for rec in apprasial: email_to += rec.work_email + ','
+        for rec in apprasial: 
+            if rec.work_email: email_to += rec.work_email + ','
         self.update_appraisal_url(url, email_to)
         self.mail_template.send_mail(self.id, force_send=True)
         return True
@@ -127,8 +132,40 @@ class hr_evaluation(models.Model):
                 self.create_receiver_list(self.appraisal_subordinates_ids, self.appraisal_subordinates_survey_id.public_url)
             if self.appraisal_self and self.apprasial_employee_id:
                 self.create_receiver_list(self.apprasial_employee_id, self.appraisal_self_survey_id.public_url)
-            self.write({'state': 'pending'})
+            if self.state == 'new':
+                self.write({'state': 'pending', 'send_mail_status': True})
         return True
+
+    @api.one
+    def button_done_appraisal(self):
+        return self.write({'state': 'done'})
+
+    @api.multi
+    def write(self, vals):
+        if vals.get('state') == 'pending' and not vals.get('send_mail_status'):
+            self.button_sent_appraisal()
+        return super(hr_evaluation, self).write(vals)
+
+    @api.cr_uid_ids_context
+    def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False, lazy=True):
+        """ Override read_group to always display all states. """
+        if groupby and groupby[0] == "state":
+            states = self._get_state_list(cr, uid, context=context)
+            read_group_all_states = [{
+                        '__context': {'group_by': groupby[1:]},
+                        '__domain': domain + [('state', '=', state_value)],
+                        'state': state_value,
+                    } for state_value, state_name in states]
+            read_group_res = super(hr_evaluation, self).read_group(cr, uid, domain, fields, groupby, offset, limit, context, orderby, lazy)
+            result = []
+            for state_value, state_name in states:
+                res = filter(lambda x: x['state'] == state_value, read_group_res)
+                if not res:
+                    res = filter(lambda x: x['state'] == state_value, read_group_all_states)
+                result.append(res[0])
+            return result
+        else:
+            return super(hr_evaluation, self).read_group(cr, uid, domain, fields, groupby, offset=offset, limit=limit, context=context, orderby=orderby, lazy=lazy)
 
 class hr_employee(models.Model):
     _name = "hr.employee"
