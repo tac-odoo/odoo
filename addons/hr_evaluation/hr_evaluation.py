@@ -127,7 +127,7 @@ class hr_evaluation(models.Model):
                 self.create_receiver_list(self.appraisal_subordinates_ids, self.appraisal_subordinates_survey_id.public_url)
             if self.appraisal_self and self.apprasial_employee_id:
                 self.create_receiver_list(self.apprasial_employee_id, self.appraisal_self_survey_id.public_url)
-            #self.write({'state': 'pending'})
+            self.write({'state': 'pending'})
         return True
 
 class hr_employee(models.Model):
