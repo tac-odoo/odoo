@@ -35,4 +35,10 @@ class account_invoice_report(osv.osv):
     def _group_by(self):
         return super(account_invoice_report, self)._group_by() + ", ai.section_id"
 
+    def init(self, cr):
+        super(account_invoice_report, self).init(cr)
+        crm_partner_assign_obj = self.pool.get("crm.partner.report.assign")
+        if crm_partner_assign_obj:
+            crm_partner_assign_obj.init(cr)
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
