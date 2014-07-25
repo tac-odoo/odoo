@@ -1960,9 +1960,10 @@
         <record id="attn_VAT-IN-V82-21-CC-C2_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">511</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-210</field>
+            <field name="tax_amount">210</field>
             <field name="debit_credit_amount">-210</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_56"/>
             <field name="account_id" ref="a451056"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-21-CC"/>
         </record>
@@ -4040,7 +4041,7 @@
             <field name="sequence">1321</field>
             <field name="code_type">tax</field>
             <field name="tax_amount">120</field>
-            <field name="debit_credit_amount">-120</field>
+            <field name="debit_credit_amount">120</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_59"/>
             <field name="account_id" ref="a411059"/>
