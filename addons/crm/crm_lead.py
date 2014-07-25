@@ -92,8 +92,6 @@ class crm_lead(format_address, osv.osv):
     def _get_default_section_id(self, cr, uid, context=None):
         """ Gives default section by checking if present in the context """
         section_id = self._resolve_section_id_from_context(cr, uid, context=context) or False
-        if not section_id:
-            section_id = self.pool.get('res.users').browse(cr, uid, uid, context).default_section_id.id or False
         return section_id
 
     def _get_default_stage_id(self, cr, uid, context=None):
@@ -314,16 +312,6 @@ class crm_lead(format_address, osv.osv):
                 'zip': partner.zip,
             }
         return {'value': values}
-
-    def on_change_user(self, cr, uid, ids, user_id, context=None):
-        """ When changing the user, also set a section_id or restrict section id
-            to the ones user_id is member of. """
-        section_id = self._get_default_section_id(cr, uid, context=context) or False
-        if user_id and not section_id:
-            section_ids = self.pool.get('crm.team').search(cr, uid, ['|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context)
-            if section_ids:
-                section_id = section_ids[0]
-        return {'value': {'section_id': section_id}}
 
     def stage_find(self, cr, uid, cases, section_id, domain=None, order='sequence', context=None):
         """ Override of the base.stage method
@@ -1028,6 +1016,7 @@ class crm_lead(format_address, osv.osv):
             country_id=self.pool.get('res.country.state').browse(cr, uid, state_id, context).country_id.id
             return {'value':{'country_id':country_id}}
         return {}
+
 class crm_lead_tag(osv.Model):
     _name = "crm.lead.tag"
     _description = "Category of lead"

@@ -8,11 +8,35 @@
 
         <!-- Claims categories  -->
 
+        <record id="crm_claim_category_form" model="ir.ui.view">
+            <field name="name">crm.claim.category.form</field>
+            <field name="model">crm.claim.category</field>
+            <field name="arch" type="xml">
+                <form string="Claim Categories">
+                    <group>
+                        <field name="name"/>
+                        <field name="section_id" groups="base.group_multi_salesteams"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="crm_claim_category_tree" model="ir.ui.view">
+            <field name="name">crm.claim.category.tree</field>
+            <field name="model">crm.claim.category</field>
+            <field name="arch" type="xml">
+                <tree string="Claim Categories">
+                    <field name="name"/>
+                    <field name="section_id" groups="base.group_multi_salesteams"/>
+                </tree>
+            </field>
+        </record>
+
         <record id="crm_claim_categ_action" model="ir.actions.act_window">
             <field name="name">Claim Categories</field>
             <field name="res_model">crm.claim.category</field>
             <field name="view_type">form</field>
-            <field name="view_id" ref="crm.crm_case_category_tree-view"/>
+            <field name="view_id" ref="crm_claim_category_tree"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to create a claim category.

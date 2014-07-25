@@ -141,7 +141,7 @@ class crm_helpdesk(osv.osv):
 
 class crm_helpdesk_category(osv.Model):
     _name = "crm.helpdesk.category"
-    _description = "Category of Case"
+    _description = "Helpdesk Category"
     _columns = {
         'name': fields.char('Name', required=True, translate=True),
         'section_id': fields.many2one('crm.team', 'Sales Team'),

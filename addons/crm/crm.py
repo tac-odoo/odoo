@@ -105,7 +105,7 @@ class crm_tracking_mixin(osv.AbstractModel):
     }
 
 
-class crm_stage(osv.osv):
+class crm_stage(osv.Model):
     """ Model for case stages. This models the main stages of a document
         management flow. Main CRM objects (leads, opportunities, project
         issues, ...) will now use only stages, instead of state and stages.

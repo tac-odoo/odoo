@@ -6,13 +6,37 @@
         groups="base.group_no_one"
         parent="base.menu_base_config" sequence="60" />
 
-        <!-- Helpdesk Support Categories Form View -->
+        <!-- Helpdesk Support Categories -->
+
+        <record id="crm_helpdesk_category_form" model="ir.ui.view">
+            <field name="name">crm.helpdesk.category.form</field>
+            <field name="model">crm.helpdesk.category</field>
+            <field name="arch" type="xml">
+                <form string="Helpdesk Categories">
+                    <group>
+                        <field name="name"/>
+                        <field name="section_id" groups="base.group_multi_salesteams"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="crm_helpdesk_category_tree" model="ir.ui.view">
+            <field name="name">crm.helpdesk.category.tree</field>
+            <field name="model">crm.helpdesk.category</field>
+            <field name="arch" type="xml">
+                <tree string="Helpdesk Categories">
+                    <field name="name"/>
+                    <field name="section_id" groups="base.group_multi_salesteams"/>
+                </tree>
+            </field>
+        </record>
 
         <record id="crm_helpdesk_categ_action" model="ir.actions.act_window">
             <field name="name">Helpdesk Categories</field>
             <field name="res_model">crm.helpdesk.category</field>
             <field name="view_type">form</field>
-            <field name="view_id" ref="crm.crm_case_category_tree-view"/>
+            <field name="view_id" ref="crm_helpdesk_category_tree"/>
             <field name="help">Create and manage helpdesk categories to better manage and classify your support requests.</field>
         </record>
 

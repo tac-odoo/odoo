@@ -151,8 +151,6 @@ class sale_order(osv.osv):
     def _get_default_section_id(self, cr, uid, context=None):
         """ Gives default section by checking if present in the context """
         section_id = self._resolve_section_id_from_context(cr, uid, context=context) or False
-        if not section_id:
-            section_id = self.pool.get('res.users').browse(cr, uid, uid, context).default_section_id.id or False
         return section_id
 
     def _resolve_section_id_from_context(self, cr, uid, context=None):
@@ -1215,8 +1213,6 @@ class account_invoice(osv.Model):
     def _get_default_section_id(self, cr, uid, context=None):
         """ Gives default section by checking if present in the context """
         section_id = self._resolve_section_id_from_context(cr, uid, context=context) or False
-        if not section_id:
-            section_id = self.pool.get('res.users').browse(cr, uid, uid, context).default_section_id.id or False
         return section_id
 
     def _resolve_section_id_from_context(self, cr, uid, context=None):

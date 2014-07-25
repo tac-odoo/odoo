@@ -70,6 +70,7 @@ class res_partner(osv.osv):
 
     def make_opportunity(self, cr, uid, ids, opportunity_summary, planned_revenue=0.0, probability=0.0, partner_id=None, context=None):
         lead_obj = self.pool.get('crm.lead')
+        tag_ids = self.pool.get('crm.lead.tag').search(cr, uid, [])
         opportunity_ids = {}
         for partner in self.browse(cr, uid, ids, context=context):
             if not partner_id:
@@ -79,6 +80,7 @@ class res_partner(osv.osv):
                 'planned_revenue' : planned_revenue,
                 'probability' : probability,
                 'partner_id' : partner_id,
+                'tag_ids' : tag_ids and tag_ids[0] or [],
                 'type': 'opportunity'
             }, context=context)
             opportunity_ids[partner_id] = opportunity_id

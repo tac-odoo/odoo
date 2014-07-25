@@ -205,5 +205,5 @@
             groups="base.group_no_one"
             parent="base.menu_crm_config_lead"/>
 
-           </data>
+    </data>
 </openerp>

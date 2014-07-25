@@ -201,6 +201,7 @@ class res_partner(osv.osv):
     _columns = {
         'claim_count': fields.function(_claim_count, string='# Claims', type='integer'),
     }
+
 class crm_claim_category(osv.Model):
     _name = "crm.claim.category"
     _description = "Category of claim"

@@ -24,7 +24,7 @@ from openerp import tools
 from openerp.osv import fields, osv
 
 
-class crm_team(osv.osv):
+class crm_team(osv.Model):
     _name = "crm.team"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
     _description = "Sales Teams"

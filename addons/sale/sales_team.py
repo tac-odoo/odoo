@@ -9,7 +9,7 @@ from openerp import tools
 from openerp.osv import fields, osv
 
 
-class crm_team(osv.osv):
+class crm_team(osv.Model):
     _inherit = 'crm.team'
 
     def _get_sale_orders_data(self, cr, uid, ids, field_name, arg, context=None):
