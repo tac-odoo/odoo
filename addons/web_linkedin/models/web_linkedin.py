@@ -63,7 +63,6 @@ class web_linkedin_settings(osv.osv_memory):
         config_pool.set_param(cr, uid, "web.linkedin.apikey", apikey, groups=['base.group_users'])
         config_pool.set_param(cr, uid, "web.linkedin.secretkey", secret_key, groups=['base.group_users'])
 
-#TODO: Change name to linkedin_partner
 class web_linkedin_fields(osv.Model):
     _inherit = 'res.partner'
 
@@ -129,9 +128,10 @@ class linkedin(osv.AbstractModel):
     _name = 'linkedin'
     limit = 5
 
-    #TO Implement
     def sync_linkedin_contacts(self, cr, uid, from_url, context=None):
-        #This method will import all first level contact from linkedin
+        """
+            This method will import all first level contact from LinkedIn
+        """
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'x-li-format': 'json'}
         token = self.get_token(cr, uid, context=context)
         params = {
@@ -152,8 +152,13 @@ class linkedin(osv.AbstractModel):
         li_records_obj.create_contacts()
         li_records_obj.update_contacts()
 
+    #TODO: Simplify this method
     def get_customer_popup_data(self, cr, uid, context=None, **kw):
-        result_data = {}
+        """
+            This method will return all needed data for LinkedIn Search Popup in single call.
+            It returns companies(including search by universal name), people and warnings if any
+        """
+        result_data = {'warnings': []}
         if context is None:
             context = {}
         context.update(kw.get('local_context') or {})
@@ -169,14 +174,27 @@ class linkedin(osv.AbstractModel):
             uri = BASE_API_URL + "/companies/universal-name={company_name}:{company_fields}".format(company_name=kw['search_uid'], company_fields=company_fields)
             status, res = self.send_request(cr, uri, params=params, headers=headers, type="GET", context=context)
             companies.update(res)
-            """
-            #Not able to trace why this code returns 400 bad request error
-            public_profile_url = werkzeug.url_quote_plus("http://www.linkedin.com/pub/%s"%(kw['search_uid']))
-            print "\n\npublic_profile_url is ::: ",public_profile_url
-            profile_uri = BASE_API_URL + "/people/url={public_profile_url}:{people_fields}".format(public_profile_url=public_profile_url, people_fields=people_fields)
-            status, profile = self.send_request(cr, profile_uri, params=params, headers=headers, type="GET", context=context)
-            print "\n\nprofile is ::: ", profile
-            """
+
+            #Unable to get why this code returns 400 bad request error, as per linked API doc the call is proper but it returns 400 bad request error always
+            #add warning in response and handle warning at client side
+            try:
+                public_profile_url = werkzeug.url_quote_plus("http://www.linkedin.com/pub/%s"%(kw['search_uid']))
+                print "\n\npublic_profile_url is ::: ",public_profile_url
+                profile_uri = BASE_API_URL + "/people/url={public_profile_url}:{people_fields}".format(public_profile_url=public_profile_url, people_fields=people_fields)
+                status, profile = self.send_request(cr, profile_uri, params=params, headers=headers, type="GET", context=context)
+                people.update(profile)
+            except urllib2.HTTPError, e:
+                if e.code == 400:
+                    result_data['warnings'].append([_('LinkedIn error'), _('LinkedIn is temporary down for the searches by url.')])
+                elif e.code in (401, 410):
+                    raise e
+
+        #Profile Information of current user
+        profile_uri = BASE_API_URL + "/people/~:(first-name,last-name)"
+        status, res = self.send_request(cr, profile_uri, params=params, headers=headers, type="GET", context=context)
+        result_data['current_profile'] = res
+
+        #Companies search
         search_params = dict(params.copy(), keywords=kw.get('search_term', "") or "", count=self.limit)
         company_search_uri = BASE_API_URL + "/company-search:(companies:{company_fields})".format(company_fields=company_fields)
         status, res = self.send_request(cr, company_search_uri, params=search_params, headers=headers, type="GET", context=context)
@@ -192,13 +210,12 @@ class linkedin(osv.AbstractModel):
         result_data['people'] = people
         return result_data
 
-    #To Implement, and simplify methods for need_auth and from_url part
+    #To simplify method for need_auth and from_url part
     def get_people_from_company(self, cr, uid, company_universalname, limit, from_url, context=None):
         if context is None:
             context = {}
 
         if not self.need_authorization(cr, uid, context=context):
-            #Facet based search
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'x-li-format': 'json'}
             params = {
                 'oauth2_access_token': self.get_token(cr, uid, context=context),
@@ -220,6 +237,7 @@ class linkedin(osv.AbstractModel):
             if type.upper() == "GET":
                 data = werkzeug.url_encode(params)
                 req = urllib2.Request(uri+ "?"+data)
+                print "\n\nreq uri is ::: ",req.get_full_url()
                 #req.add_header('x-li-format', 'json')
                 for header_key, header_val in headers.iteritems():
                     req.add_header(header_key, header_val)
@@ -235,6 +253,7 @@ class linkedin(osv.AbstractModel):
                 content = request.read()
                 result = simplejson.loads(content)
         except urllib2.HTTPError, e:
+            #Should simply raise exception or simply add logger
             if e.code in (400, 401, 410):
                 raise e
 
@@ -269,14 +288,12 @@ class linkedin(osv.AbstractModel):
         return uri
 
     def set_all_tokens(self, cr, uid, token_datas, context=None):
-        #TODO: Set expires_in and access_token here in res.users
         data = {
             'linkedin_token': token_datas.get('access_token'),
             'linkedin_token_validity': datetime.now() + timedelta(seconds=token_datas.get('expires_in'))
         }
         self.pool['res.users'].write(cr, SUPERUSER_ID, uid, data, context=context)
 
-    #TODO: This should only check whether refresh_token is there or not, if no then need to to authorize and return True 
     def need_authorization(self, cr, uid, context=None):
         current_user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         print "\n\ncurrent_user.linkedin_token_validity is ::: ",current_user.linkedin_token_validity, datetime.now(), current_user.login
@@ -284,6 +301,9 @@ class linkedin(osv.AbstractModel):
                 datetime.strptime(current_user.linkedin_token_validity.split('.')[0], DEFAULT_SERVER_DATETIME_FORMAT) < (datetime.now() + timedelta(minutes=1)):
             return True
         return False
+
+    def destroy_token(self, cr, uid, context=None):
+        return self.pool['res.users'].write(cr, uid, uid, {'linkedin_token': False, 'linkedin_token_validity': False})
 
     def get_base_url(self, cr, uid, context=None):
         return self.pool.get('ir.config_parameter').get_param(cr, uid, 'web.base.url', default='http://www.openerp.com?NoBaseUrl', context=context)

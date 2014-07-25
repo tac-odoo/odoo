@@ -15,6 +15,7 @@ openerp.web_linkedin = function(instance) {
     */
     instance.web_linkedin.LinkedinTester = instance.web.Class.extend({
         init: function() {
+            //Useless deferreds
             this.linkedin_def = $.Deferred();
             this.auth_def = $.Deferred();
         },
@@ -260,17 +261,24 @@ openerp.web_linkedin = function(instance) {
             this.limit = 5;
         },
         start: function() {
+            var self = this;
             this._super();
             this.bind_event();
-            //this.display_account();
-            //this.do_search();
+            this.has_been_loaded = $.Deferred()
+            $.when(this.has_been_loaded).done(function(profile) {
+                self.display_account(profile);
+            });
         },
         bind_event: function() {
             var self = this;
             this.$el.parents('.modal').on("click", ".oe_linkedin_logout", function () {
-                IN.User.logout();
-                self.destroy();
+                self.rpc("/linkedin/linkedin_logout", {}).done(function(result) {
+                    if (result) {
+                        self.destroy();
+                    }
+                });
             });
+
             this.$search = this.$el.parents('.modal').find(".oe_linkedin_advanced_search" );
             this.$url = this.$search.find("input[name='search']" );
             this.$button = this.$search.find("button");
@@ -289,13 +297,9 @@ openerp.web_linkedin = function(instance) {
                     }
                 });
         },
-        display_account: function() {
+        display_account: function(profile) {
             var self = this;
-            IN.API.Profile("me")
-                .fields(["firstName", "lastName"])
-                .result(function (result) {
-                    $(QWeb.render('LinkedIn.loginInformation', result.values[0])).appendTo(self.$el.parents('.modal').find(".oe_dialog_custom_buttons"));   
-            })
+            $(QWeb.render('LinkedIn.loginInformation', profile)).appendTo(self.$el.parents('.modal').find(".oe_dialog_custom_buttons"));
         },
         do_search: function(url) {
             var self = this;
@@ -314,10 +318,12 @@ openerp.web_linkedin = function(instance) {
             self.rpc("/linkedin/get_popup_data", _.extend({'search_term': this.search, 'from_url': window.location.href, 'local_context': context}, params)).done(function(result) {
                 if(result.status && result.status == 'need_auth' && confirm(_t("You will be redirected to LinkedIn authentication page, once authenticated after that you use this widget."))) {
                     instance.web.redirect(result.url);
-                } else { //We can check else if (result.status == 'authorized') and other status
+                } else { //We can check (result.status == 'OK') and other status
                     self.trigger('search_completed');
+                    self.has_been_loaded.resolve(result.current_profile)
                     self.do_result_companies(result.companies);
                     self.do_result_people(result.people);
+                    if (result.warnings) { self.show_warnings(result.warnings); }
                 }
             });
             return $.when.apply($, deferrers);
@@ -364,7 +370,12 @@ openerp.web_linkedin = function(instance) {
                 $elem.append($('<div class="oe_no_result">').text(_t("No results found")));
             }
         },
-        
+        show_warnings: function(warnings) {
+            var self = this;
+            _.each(warnings, function(warning) {
+                self.do_warn(warning[0], warning[1]);
+            });
+        },
     });
     
     instance.web_linkedin.EntityWidget = instance.web.Widget.extend({

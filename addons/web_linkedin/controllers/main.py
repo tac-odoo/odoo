@@ -15,7 +15,6 @@ class Linkedin(http.Controller):
     def authentication_callback(self, **kw):
         state = simplejson.loads(kw['state'])
         dbname = state.get('d')
-        #service = state.get('s')
         url_return = state.get('f')
 
         registry = openerp.modules.registry.RegistryManager.get(dbname)
@@ -57,12 +56,16 @@ class Linkedin(http.Controller):
         linkedin_obj = request.registry['linkedin']
         need_auth = linkedin_obj.need_authorization(request.cr, request.session.uid, context=post.get('local_context'))
         if not need_auth:
-            #get access token of user and request to linked in
             return linkedin_obj.get_customer_popup_data(request.cr, request.session.uid, **post)
-            #return {'people': {'people': []}, 'companies': {'companies': ['Mohammed', 'Vidhin']}, 'status': 'authorized'}
         else:
-            print "\n\nInside elseeeee "
             return {'status': 'need_auth', 'url': linkedin_obj._get_authorize_uri(request.cr, request.session.uid, from_url=post.get('from_url'), context=post.get('local_context'))}
+
+    @http.route("/linkedin/linkedin_logout", type='json', auth='none')
+    def linkedin_logout(self, **post):
+        #Revoking access token from database, no need to invalidate token using API
+        #because there is no programmatic way to invalidate token(https://developer.linkedin.com/forum/revoke-authorization-access-token)
+        linkedin_obj = request.registry['linkedin']
+        return linkedin_obj.destroy_token(request.cr, request.session.uid)
 
 class Binary(http.Controller):
     @openerp.http.route('/web_linkedin/binary/url2binary', type='json', auth='user')
