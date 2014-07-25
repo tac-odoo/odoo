@@ -212,6 +212,12 @@ class Post(osv.Model):
             })
         return res
 
+    def _get_plain_content(self, cr, uid, ids, field_name, arg, context=None):
+        res = {}
+        for post in self.browse(cr, uid, ids, context=context):
+            res[post.id] = 'No description found' if not post.content else html2plaintext(post.content).strip()
+        return res
+
     _columns = {
         'name': fields.char('Title'),
         'forum_id': fields.many2one('forum.forum', 'Forum', required=True),
@@ -228,6 +234,7 @@ class Post(osv.Model):
             ],
             string='Post Messages', help="Comments on forum post",
         ),
+        'plain_content' : fields.function(_get_plain_content, string="Plain content", type='text'),
         # history
         'create_date': fields.datetime('Asked on', select=True, readonly=True),
         'create_uid': fields.many2one('res.users', 'Created by', select=True, readonly=True),

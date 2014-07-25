@@ -55,7 +55,7 @@
             </t>
             <t t-if="question">
                 <meta property="og:title" t-attf-content="#{question.name}" />
-                <meta property="og:description" t-attf-content="#{plaintxt_content}" />
+                <meta property="og:description" t-attf-content="#{question.plain_content}" />
             </t>
             <meta property="og:url" t-attf-content="#{url}" />
         </t>
@@ -584,6 +584,9 @@
                 <t t-call="website_forum.share">
                     <t t-set="object" t-value="question"/>
                 </t>
+                 <t t-if="greet_share_id">
+                    <t t-call="website_forum.share_dialog" />
+                </t>
             </div>
         </div>
         <hr/>
@@ -678,6 +681,22 @@
     </t>
 </template>
 
+<!-- Share Dialog -->
+<template id="share_dialog">
+    <div class="modal fade" t-attf-data-target="#{greet_share_id}" id="share_dialog_box" tabindex="-1" role="dialog" aria-labelledby="shareDialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&amp;times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="share_dialog_title">Thanks for sharing</h4>
+                </div>
+                <div class="modal-body">
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
 <!-- Utility template: Share question and answer -->
 <template id="share">
     <div class="row clearfix">
@@ -691,12 +710,6 @@
                     <t t-set="url" t-value="'\'' + url + '\''" />
                     <t t-set="question_name" t-value="'\'' + object.name + '\''" />
                 </t>
-                <t t-if="object.content">
-                    <t t-set="content_description" t-value="'\'' + object.content[0:100].rstrip() + '...\'.replace(/&lt;\/?[^&gt;]+(&gt;|$)/g,\'\')'" />
-                </t>
-                <t t-if="not object.content">
-                    <t t-set="content_description" t-value="'\'No description found. \''" />
-                </t>
                 <div t-attf-id="share#{ object._name.replace('.','') + '-' + str(object.id) }" class="collapse share_buttons oe_comment_grey">
                     <a style="cursor: pointer" t-attf-onclick="javascript: window.open('https://twitter.com/share?url=' + encodeURIComponent( #{url}), '', 'menubar=no, toolbar=no, resizable=yes, scrollbar=yes, height=600,width=600'); return false;" class="fa-stack fa-lg">
                         <span class="fa fa-circle fa-stack-2x"></span>
@@ -706,7 +719,7 @@
                         <span class="fa fa-circle fa-stack-2x"></span>
                         <span class="fa fa-facebook fa-stack-1x fa-inverse"></span>
                     </a>
-                    <a style="cursor: pointer" t-attf-onclick="javascript: window.open('https://www.linkedin.com/shareArticle?mini=true&amp;url=' + encodeURIComponent(#{url}) + '&amp;title=' + encodeURIComponent(#{question_name}) + '&amp;summary=' + encodeURIComponent(#{content_description} ) + '&amp;source=' + encodeURIComponent('Source'),'','menubar=no, toolbar=no, resizable=yes, srollbars=yes, height=600,width=600'); return false;" class="fa-stack fa-lg">
+                    <a style="cursor: pointer" t-attf-onclick="javascript: window.open('https://www.linkedin.com/shareArticle?mini=true&amp;url=' + encodeURIComponent(#{url}) + '&amp;title=' + encodeURIComponent(#{question_name}) + '&amp;summary=' + encodeURIComponent('#{object.plain_content}') + '&amp;source=' + encodeURIComponent('Source'),'','menubar=no, toolbar=no, resizable=yes, srollbars=yes, height=600,width=600'); return false;" class="fa-stack fa-lg">
                         <span class="fa fa-circle fa-stack-2x"></span>
                         <span class="fa fa-linkedin fa-stack-1x fa-inverse"></span>
                     </a>

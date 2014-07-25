@@ -14,10 +14,22 @@ $(document).ready(function () {
             }
         }
     });
+    var target_share_dialog = $("#share_dialog_box").data('target');
+    if(typeof target_share_dialog !== 'undefined') {
+        if(location.search.search('type=a') != -1) {
+            var title_text = "Thanks for answering this question";
+            var body = "Share the question and your answer to get more feedback from contributers\n";
+        } else {
+            var title_text = "Thanks for posting your question";
+            var body = "Share your question to improve your to chance of having an answer\n";
+        }
+        $("#share_dialog_box .modal-dialog .modal-title").text(title_text);
+        $("#share_dialog_box .modal-dialog .modal-body").html(body + '<div>' + $(target_share_dialog).html() + '</div>');
+        $("#share_dialog_box").modal("show");
+    }
 
-    $(":not(li .share_link)").click(function (e) {
+    $(":not(li .share_link)").click(function () {
         $("li .share_link").popover("hide");
-        e.stopPropagation();
     });
 
     $("li .share_link").click(function (e) {
