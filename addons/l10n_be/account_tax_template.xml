@@ -2258,14 +2258,6 @@
             <field name="code_id" ref="atctn_85"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-00-CC"/>
         </record>
-        <record id="attn_VAT-IN-V82-00-CC_refund_tax_line" model="account.tax.line.template">
-            <field name="sequence">540</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">1000</field>
-            <field name="debit_credit_amount">1000</field>
-            <field name="apply_on">refund</field>
-            <field name="tax_id" ref="attn_VAT-IN-V82-00-CC"/>
-        </record>
         <record id="attn_VAT-IN-V82-00-CC-C1_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">541</field>
             <field name="code_type">tax</field>
@@ -2282,24 +2274,6 @@
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a411059"/>
-            <field name="tax_id" ref="attn_VAT-IN-V82-00-CC"/>
-        </record>
-        <record id="attn_VAT-IN-V82-00-CC-C2_invoice_tax_line" model="account.tax.line.template">
-            <field name="sequence">542</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">-0</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">invoice</field>
-            <field name="account_id" ref="a451056"/>
-            <field name="tax_id" ref="attn_VAT-IN-V82-00-CC"/>
-        </record>
-        <record id="attn_VAT-IN-V82-00-CC-C2_refund_tax_line" model="account.tax.line.template">
-            <field name="sequence">542</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">refund</field>
-            <field name="account_id" ref="a451056"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-00-CC"/>
         </record>
         <record id="attn_VAT-IN-V82-00-CC-C3_invoice_tax_line" model="account.tax.line.template">
@@ -2380,7 +2354,7 @@
         <record id="attn_VAT-IN-V83-21-CC-C2_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">612</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-210</field>
+            <field name="tax_amount">210</field>
             <field name="debit_credit_amount">-210</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_56"/>
@@ -2390,7 +2364,7 @@
         <record id="attn_VAT-IN-V83-21-CC-C2_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">612</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">210</field>
+            <field name="tax_amount">-210</field>
             <field name="debit_credit_amount">-210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451056"/>
@@ -2425,6 +2399,15 @@
             <field name="tax_id" ref="attn_VAT-IN-V83-21-CC"/>
         </record>
 
+        <record id="attn_VAT-IN-V83-21-CC-C3_refund_tax_line_2" model="account.tax.line.template">
+            <field name="sequence">610</field>
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="attn_VAT-IN-V83-21-CC"/>
+        </record>
+        
         <record id="attn_VAT-IN-V83-12-CC" model="account.tax.template">
             <field name="sequence">620</field>
             <field name="description">VAT-IN-V83-12-CC</field>
@@ -2474,7 +2457,7 @@
         <record id="attn_VAT-IN-V83-12-CC-C2_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">622</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-120</field>
+            <field name="tax_amount">120</field>
             <field name="debit_credit_amount">-120</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_56"/>
@@ -2484,7 +2467,7 @@
         <record id="attn_VAT-IN-V83-12-CC-C2_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">622</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">120</field>
+            <field name="tax_amount">-120</field>
             <field name="debit_credit_amount">-120</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451056"/>
@@ -2519,6 +2502,24 @@
             <field name="tax_id" ref="attn_VAT-IN-V83-12-CC"/>
         </record>
 
+        <record id="attn_VAT-IN-V83-12-CC-C2_invoice_tax_line_1" model="account.tax.line.template">
+            <field name="sequence">620</field>
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="tax_id" ref="attn_VAT-IN-V83-12-CC"/>
+        </record>
+
+        <record id="attn_VAT-IN-V83-12-CC-C2_refund_tax_line_2" model="account.tax.line.template">
+            <field name="sequence">620</field>
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="apply_on">refund</field>
+            <field name="tax_id" ref="attn_VAT-IN-V83-12-CC"/>
+        </record>
+        
         <record id="attn_VAT-IN-V83-06-CC" model="account.tax.template">
             <field name="sequence">630</field>
             <field name="description">VAT-IN-V83-06-CC</field>
@@ -2550,7 +2551,7 @@
         <record id="attn_VAT-IN-V83-06-CC_invoice_tax_line_3" model="account.tax.line.template">
             <field name="sequence">632</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-60</field>
+            <field name="tax_amount">60</field>
             <field name="debit_credit_amount">60</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_56"/>
@@ -2566,6 +2567,16 @@
             <field name="code_id" ref="atctn_87"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-06-CC"/>
         </record>
+
+        <record id="attn_VAT-IN-V83-06-CC_invoice_tax_line_5" model="account.tax.line.template">
+            <field name="sequence">631</field>
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="tax_id" ref="attn_VAT-IN-V83-06-CC"/>
+        </record>
+
         <record id="attn_VAT-IN-V83-06-CC_refund_base_line" model="account.tax.line.template">
             <field name="sequence">630</field>
             <field name="code_type">base</field>
@@ -2587,7 +2598,7 @@
         <record id="attn_VAT-IN-V83-06-CC_refund_tax_line_3" model="account.tax.line.template">
             <field name="sequence">632</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">60</field>
+            <field name="tax_amount">-60</field>
             <field name="debit_credit_amount">-60</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451056"/>
@@ -2609,6 +2620,15 @@
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="atctn_87"/>
+            <field name="tax_id" ref="attn_VAT-IN-V83-06-CC"/>
+        </record>
+
+        <record id="attn_VAT-IN-V83-06-CC_refund_tax_line_6" model="account.tax.line.template">
+            <field name="sequence">631</field>
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="apply_on">refund</field>
             <field name="tax_id" ref="attn_VAT-IN-V83-06-CC"/>
         </record>
 
@@ -2639,15 +2659,6 @@
             <field name="account_id" ref="a411059"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-00-CC"/>
         </record>
-        <record id="attn_VAT-IN-V83-00-CC_invoice_tax_line_3" model="account.tax.line.template">
-            <field name="sequence">642</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">invoice</field>
-            <field name="account_id" ref="a451056"/>
-            <field name="tax_id" ref="attn_VAT-IN-V83-00-CC"/>
-        </record>
         <record id="attn_VAT-IN-V83-00-CC_invoice_tax_line_4" model="account.tax.line.template">
             <field name="sequence">643</field>
             <field name="code_type">base</field>
@@ -2673,15 +2684,6 @@
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a411059"/>
-            <field name="tax_id" ref="attn_VAT-IN-V83-00-CC"/>
-        </record>
-        <record id="attn_VAT-IN-V83-00-CC_refund_tax_line_3" model="account.tax.line.template">
-            <field name="sequence">642</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">refund</field>
-            <field name="account_id" ref="a451056"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-00-CC"/>
         </record>
         <record id="attn_VAT-IN-V83-00-CC_refund_tax_line_4" model="account.tax.line.template">
@@ -2719,6 +2721,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_82"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-CAR-INC"/>
         </record>
         <record id="attn_VAT-IN-V82-CAR-INC_invoice_tax_line_2" model="account.tax.line.template">
@@ -2876,7 +2879,7 @@
         <record id="attn_VAT-IN-V81-21-EU_invoice_tax_line_3" model="account.tax.line.template">
             <field name="sequence">1112</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-210</field>
+            <field name="tax_amount">210</field>
             <field name="debit_credit_amount">-210</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_55"/>
@@ -2913,7 +2916,7 @@
         <record id="attn_VAT-IN-V81-21-EU_refund_tax_line_3" model="account.tax.line.template">
             <field name="sequence">1112</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">210</field>
+            <field name="tax_amount">-210</field>
             <field name="debit_credit_amount">-210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451055"/>
@@ -2928,7 +2931,7 @@
             <field name="code_id" ref="atctn_86"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-21-EU"/>
         </record>
-        <record id="attn_VAT-IN-V81-21-EU_refund_tax_line_4" model="account.tax.line.template">
+        <record id="attn_VAT-IN-V81-21-EU_refund_tax_line_5" model="account.tax.line.template">
             <field name="sequence">1114</field>
             <field name="code_type">base</field>
             <field name="tax_amount">-1000</field>
@@ -2969,7 +2972,7 @@
         <record id="attn_VAT-IN-V81-12-EU_invoice_tax_line_3" model="account.tax.line.template">
             <field name="sequence">1122</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-120</field>
+            <field name="tax_amount">120</field>
             <field name="debit_credit_amount">-120</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_55"/>
@@ -3006,7 +3009,7 @@
         <record id="attn_VAT-IN-V81-12-EU_refund_tax_line_3" model="account.tax.line.template">
             <field name="sequence">1122</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">120</field>
+            <field name="tax_amount">-120</field>
             <field name="debit_credit_amount">120</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451055"/>
@@ -3063,7 +3066,7 @@
         <record id="attn_VAT-IN-V81-06-EU_child2_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">1132</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-60</field>
+            <field name="tax_amount">60</field>
             <field name="debit_credit_amount">-60</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_86"/>
@@ -3100,7 +3103,7 @@
         <record id="attn_VAT-IN-V81-06-EU_child2_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">1132</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">60</field>
+            <field name="tax_amount">-60</field>
             <field name="debit_credit_amount">-60</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451055"/>
@@ -3153,14 +3156,6 @@
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="attn_VAT-IN-V81-00-EU"/>
         </record>
-        <record id="attn_VAT-IN-V81-00-EU_child2_invoice_tax_line" model="account.tax.line.template">
-            <field name="sequence">1142</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">invoice</field>
-            <field name="tax_id" ref="attn_VAT-IN-V81-00-EU"/>
-        </record>
         <record id="attn_VAT-IN-V81-00-EU_child3_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">1143</field>
             <field name="code_type">base</field>
@@ -3181,14 +3176,6 @@
         </record>
         <record id="attn_VAT-IN-V81-00-EU_child1_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">1141</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">refund</field>
-            <field name="tax_id" ref="attn_VAT-IN-V81-00-EU"/>
-        </record>
-        <record id="attn_VAT-IN-V81-00-EU_child2_refund_tax_line" model="account.tax.line.template">
-            <field name="sequence">1142</field>
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
             <field name="debit_credit_amount">0</field>
@@ -3247,7 +3234,7 @@
         <record id="attn_VAT-IN-V82-21-EU-S_child2_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">1212</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-210</field>
+            <field name="tax_amount">210</field>
             <field name="debit_credit_amount">-210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="a451055"/>
@@ -3284,7 +3271,7 @@
         <record id="attn_VAT-IN-V82-21-EU-S_child2_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">1212</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">210</field>
+            <field name="tax_amount">-210</field>
             <field name="debit_credit_amount">-210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451055"/>
@@ -3342,7 +3329,7 @@
         <record id="attn_VAT-IN-V82-21-EU-G_child2_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">1222</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-210</field>
+            <field name="tax_amount">210</field>
             <field name="debit_credit_amount">-210</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_55"/>
@@ -3379,7 +3366,7 @@
         <record id="attn_VAT-IN-V82-21-EU-G_child2_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">1222</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">210</field>
+            <field name="tax_amount">-210</field>
             <field name="debit_credit_amount">-210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451055"/>
@@ -3437,7 +3424,7 @@
         <record id="attn_VAT-IN-V82-12-EU-S_child2_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">1232</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-120</field>
+            <field name="tax_amount">120</field>
             <field name="debit_credit_amount">-120</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_55"/>
@@ -3459,6 +3446,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
+            <field name="code_id" ref="atctn_84"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-12-EU-S"/>
         </record>
         <record id="attn_VAT-IN-V82-12-EU-S_child1_refund_tax_line" model="account.tax.line.template">
@@ -3468,13 +3456,12 @@
             <field name="debit_credit_amount">120</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a411059"/>
-            <field name="code_id" ref="atctn_84"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-12-EU-S"/>
         </record>
         <record id="attn_VAT-IN-V82-12-EU-S_child2_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">1232</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">120</field>
+            <field name="tax_amount">-120</field>
             <field name="debit_credit_amount">-120</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451055"/>
@@ -3532,8 +3519,8 @@
         <record id="attn_VAT-IN-V82-12-EU-G_child2_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">1242</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-12</field>
-            <field name="debit_credit_amount">-12</field>
+            <field name="tax_amount">120</field>
+            <field name="debit_credit_amount">-120</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_55"/>
             <field name="account_id" ref="a451055"/>
@@ -3569,7 +3556,7 @@
         <record id="attn_VAT-IN-V82-12-EU-G_child2_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">1242</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">120</field>
+            <field name="tax_amount">-120</field>
             <field name="debit_credit_amount">-120</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451055"/>
@@ -3627,7 +3614,7 @@
         <record id="attn_VAT-IN-V82-06-EU-S_child2_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">1252</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-60</field>
+            <field name="tax_amount">60</field>
             <field name="debit_credit_amount">-60</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_55"/>
@@ -3664,7 +3651,7 @@
         <record id="attn_VAT-IN-V82-06-EU-S_child2_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">1252</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">60</field>
+            <field name="tax_amount">-60</field>
             <field name="debit_credit_amount">-60</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451055"/>
@@ -3712,7 +3699,7 @@
         <record id="attn_VAT-IN-V82-06-EU-G_child1_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">1261</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">6</field>
+            <field name="tax_amount">60</field>
             <field name="debit_credit_amount">60</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_59"/>
@@ -3722,7 +3709,7 @@
         <record id="attn_VAT-IN-V82-06-EU-G_child2_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">1262</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-60</field>
+            <field name="tax_amount">60</field>
             <field name="debit_credit_amount">-60</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_55"/>
@@ -3759,7 +3746,7 @@
         <record id="attn_VAT-IN-V82-06-EU-G_child2_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">1262</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">60</field>
+            <field name="tax_amount">-60</field>
             <field name="debit_credit_amount">-60</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451055"/>
@@ -3812,14 +3799,6 @@
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="attn_VAT-IN-V82-00-EU-S"/>
         </record>
-        <record id="attn_VAT-IN-V82-00-EU-S_child2_invoice_tax_line" model="account.tax.line.template">
-            <field name="sequence">1272</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">invoice</field>
-            <field name="tax_id" ref="attn_VAT-IN-V82-00-EU-S"/>
-        </record>
         <record id="attn_VAT-IN-V82-00-EU-S_child3_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">1273</field>
             <field name="code_type">base</field>
@@ -3840,14 +3819,6 @@
         </record>
         <record id="attn_VAT-IN-V82-00-EU-S_child1_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">1271</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">refund</field>
-            <field name="tax_id" ref="attn_VAT-IN-V82-00-EU-S"/>
-        </record>
-        <record id="attn_VAT-IN-V82-00-EU-S_child2_refund_tax_line" model="account.tax.line.template">
-            <field name="sequence">1272</field>
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
             <field name="debit_credit_amount">0</field>
@@ -3900,14 +3871,6 @@
             <field name="apply_on">invoice</field>
             <field name="tax_id" ref="attn_VAT-IN-V82-00-EU-G"/>
         </record>
-        <record id="attn_VAT-IN-V82-00-EU-G_child2_invoice_tax_line" model="account.tax.line.template">
-            <field name="sequence">1282</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">invoice</field>
-            <field name="tax_id" ref="attn_VAT-IN-V82-00-EU-G"/>
-        </record>
         <record id="attn_VAT-IN-V82-00-EU-G_child3_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">1283</field>
             <field name="code_type">base</field>
@@ -3928,14 +3891,6 @@
         </record>
         <record id="attn_VAT-IN-V82-00-EU-G_child1_refund_tax_line" model="account.tax.line.template">
             <field name="sequence">1281</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">refund</field>
-            <field name="tax_id" ref="attn_VAT-IN-V82-00-EU-G"/>
-        </record>
-        <record id="attn_VAT-IN-V82-00-EU-G_child2_refund_tax_line" model="account.tax.line.template">
-            <field name="sequence">1282</field>
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
             <field name="debit_credit_amount">0</field>
@@ -3977,6 +3932,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_83"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-21-EU"/>
         </record>
         <record id="attn_VAT-IN-V83-21-EU_refund_base_line" model="account.tax.line.template">
@@ -4010,7 +3966,7 @@
         <record id="attn_VAT-IN-V83-21-EU-C2_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">1312</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-210</field>
+            <field name="tax_amount">210</field>
             <field name="debit_credit_amount">-210</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_55"/>
@@ -4019,7 +3975,7 @@
         <record id="attn_VAT-IN-V83-21-EU-C2_refund_tax_line_2" model="account.tax.line.template">
             <field name="sequence">1312</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-210</field>
+            <field name="tax_amount">210</field>
             <field name="debit_credit_amount">-210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451055"/>
@@ -4027,10 +3983,11 @@
         </record>
         <record id="attn_VAT-IN-V83-21-EU-C3_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">1313</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_86"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-21-EU"/>
         </record>
         <record id="attn_VAT-IN-V83-21-EU-C3_refund_base_line_2" model="account.tax.line.template">
@@ -4067,6 +4024,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_83"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-12-EU"/>
         </record>
         <record id="attn_VAT-IN-V83-12-EU_refund_base_line" model="account.tax.line.template">
@@ -4081,7 +4039,7 @@
         <record id="attn_VAT-IN-V83-12-EU-C1_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">1321</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-120</field>
+            <field name="tax_amount">120</field>
             <field name="debit_credit_amount">-120</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_59"/>
@@ -4100,7 +4058,7 @@
         <record id="attn_VAT-IN-V83-12-EU-C2_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">1322</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-120</field>
+            <field name="tax_amount">120</field>
             <field name="debit_credit_amount">-120</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_55"/>
@@ -4118,10 +4076,11 @@
         </record>
         <record id="attn_VAT-IN-V83-12-EU-C3_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">1323</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_86"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-12-EU"/>
         </record>
         <record id="attn_VAT-IN-V83-12-EU-C4_refund_base_line_2" model="account.tax.line.template">
@@ -4158,6 +4117,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_83"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-06-EU"/>
         </record>
         <record id="attn_VAT-IN-V83-06-EU_refund_base_line" model="account.tax.line.template">
@@ -4192,7 +4152,7 @@
             <field name="sequence">1332</field>
             <field name="code_type">tax</field>
             <field name="tax_amount">60</field>
-            <field name="debit_credit_amount">60</field>
+            <field name="debit_credit_amount">-60</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_55"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-06-EU"/>
@@ -4208,10 +4168,11 @@
         </record>
         <record id="attn_VAT-IN-V83-06-EU-C3_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">1333</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_86"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-06-EU"/>
         </record>
         <record id="attn_VAT-IN-V83-06-EU-C3_refund_base_line_2" model="account.tax.line.template">
@@ -4248,6 +4209,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_83"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-00-EU"/>
         </record>
         <record id="attn_VAT-IN-V83-00-EU_refund_base_line" model="account.tax.line.template">
@@ -4276,12 +4238,12 @@
 	     <field name="code_id" ref="atctn_83"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-00-EU"/>
         </record>
-        <record id="attn_VAT-IN-V83-00-EU-C2_invoice_tax_line_1" model="account.tax.line.template">
-            <field name="sequence">1342</field>
+        <record id="attn_VAT-IN-V83-00-EU-C1_refund_base_line_21" model="account.tax.line.template">
+            <field name="sequence">1341</field>
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
             <field name="debit_credit_amount">0</field>
-            <field name="apply_on">invoice</field>
+            <field name="apply_on">refund</field>
             <field name="tax_id" ref="attn_VAT-IN-V83-00-EU"/>
         </record>
         <record id="attn_VAT-IN-V83-00-EU-C2_refund_base_line_2" model="account.tax.line.template">
@@ -4295,10 +4257,11 @@
         </record>
         <record id="attn_VAT-IN-V83-00-EU-C3_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">1343</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_86"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-00-EU"/>
         </record>
 
@@ -4317,7 +4280,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
-            <field name="code_id" ref="atctn_03"/>
+            <field name="code_id" ref="atctn_81"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-21-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V81-21-ROW-CC_refund_base_line" model="account.tax.line.template">
@@ -4331,10 +4294,11 @@
         </record>
         <record id="attn_VAT-IN-V81-21-ROW-CC-C1_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">2111</field>
-            <field name="code_type">tax</field>
+            <field name="code_type">base</field>
             <field name="tax_amount">1000</field>
-            <field name="debit_credit_amount">1000</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_87"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-21-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V81-21-ROW-CC-C1_refund_tax_line_2" model="account.tax.line.template">
@@ -4349,9 +4313,11 @@
         <record id="attn_VAT-IN-V81-21-ROW-CC-C2_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">2112</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-0.21</field>
-            <field name="debit_credit_amount">1000</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">-210</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_57"/>
+            <field name="account_id" ref="a451057"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-21-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V81-21-ROW-CC-C2_refund_tax_line_2" model="account.tax.line.template">
@@ -4366,9 +4332,11 @@
         <record id="attn_VAT-IN-V81-21-ROW-CC-C3_invoice_tax_line_1" model="account.tax.line.template">
             <field name="sequence">2112</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
-            <field name="debit_credit_amount">0</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">210</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_59"/>
+            <field name="account_id" ref="a411059"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-21-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V81-21-ROW-CC-C3_refund_base_line_2" model="account.tax.line.template">
@@ -4405,14 +4373,36 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_81"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-12-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V81-12-ROW-CC_invoice_tax_line" model="account.tax.line.template">
             <field name="sequence">2120</field>
-            <field name="code_type">tax</field>
+            <field name="code_type">base</field>
             <field name="tax_amount">1000</field>
-            <field name="debit_credit_amount">1000</field>
+            <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_87"/>
+            <field name="tax_id" ref="attn_VAT-IN-V81-12-ROW-CC"/>
+        </record>
+        <record id="attn_VAT-IN-V81-12-ROW-CC_invoice_tax_line_1" model="account.tax.line.template">
+            <field name="sequence">2120</field>
+            <field name="code_type">tax</field>
+            <field name="tax_amount">120</field>
+            <field name="debit_credit_amount">-120</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_57"/>
+            <field name="account_id" ref="a451057"/>
+            <field name="tax_id" ref="attn_VAT-IN-V81-12-ROW-CC"/>
+        </record>
+        <record id="attn_VAT-IN-V81-12-ROW-CC_invoice_tax_line_2" model="account.tax.line.template">
+            <field name="sequence">2120</field>
+            <field name="code_type">tax</field>
+            <field name="tax_amount">120</field>
+            <field name="debit_credit_amount">120</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_59"/>
+            <field name="account_id" ref="a411059"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-12-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V81-12-ROW-CC_refund_base_line" model="account.tax.line.template">
@@ -4476,6 +4466,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_81"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-06-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V81-06-ROW-C_refund_base_line" model="account.tax.line.template">
@@ -4509,7 +4500,7 @@
         <record id="attn_VAT-IN-V81-06-ROW-CC_invoice_tax_line_3" model="account.tax.line.template">
             <field name="sequence">2132</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-60</field>
+            <field name="tax_amount">60</field>
             <field name="debit_credit_amount">-60</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="a451057"/>
@@ -4527,10 +4518,11 @@
         </record>
         <record id="attn_VAT-IN-V81-06-ROW-CC_invoice_tax_line_5" model="account.tax.line.template">
             <field name="sequence">2133</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_87"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-06-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V81-06-ROW-CC_refund_base_line_6" model="account.tax.line.template">
@@ -4567,6 +4559,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_81"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-00-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V81-00-ROW-CC_refund_base_line" model="account.tax.line.template">
@@ -4595,12 +4588,12 @@
             <field name="code_id" ref="atctn_81"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-00-ROW-CC"/>
         </record>
-        <record id="attn_VAT-IN-V81-00-ROW-CC_invoice_tax_line_3" model="account.tax.line.template">
+        <record id="attn_VAT-IN-V81-00-ROW-CC_refund_tax_line_3" model="account.tax.line.template">
             <field name="sequence">2142</field>
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
             <field name="debit_credit_amount">0</field>
-            <field name="apply_on">invoice</field>
+            <field name="apply_on">refund</field>
             <field name="tax_id" ref="attn_VAT-IN-V81-00-ROW-CC"/>
         </record>
 
@@ -4619,6 +4612,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_82"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-21-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V82-21-ROW-CC_refund_base_line" model="account.tax.line.template">
@@ -4652,8 +4646,8 @@
         <record id="attn_VAT-IN-V82-21-ROW-CC_invoice_tax_line_3" model="account.tax.line.template">
             <field name="sequence">2212</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-21</field>
-            <field name="debit_credit_amount">-21</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">-210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="a451057"/>
             <field name="code_id" ref="atctn_57"/>
@@ -4670,10 +4664,11 @@
         </record>
        <record id="attn_VAT-IN-V82-21-ROW-CC_invoice_tax_line_5" model="account.tax.line.template">
             <field name="sequence">2213</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_87"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-21-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V82-21-ROW-CC_refund_base_line_5" model="account.tax.line.template">
@@ -4710,6 +4705,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+             <field name="code_id" ref="atctn_82"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-12-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V82-12-ROW-CC_refund_base_line" model="account.tax.line.template">
@@ -4743,7 +4739,7 @@
         <record id="attn_VAT-IN-V82-12-ROW-CC_invoice_tax_line_3" model="account.tax.line.template">
             <field name="sequence">2222</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-120</field>
+            <field name="tax_amount">120</field>
             <field name="debit_credit_amount">-120</field>
             <field name="account_id" ref="a451057"/>
             <field name="code_id" ref="atctn_57"/>
@@ -4761,10 +4757,11 @@
         </record>
         <record id="attn_VAT-IN-V82-12-ROW-CC_invoice_tax_line_5" model="account.tax.line.template">
             <field name="sequence">2223</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
+             <field name="code_id" ref="atctn_87"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-12-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V82-12-ROW-CC_refund_base_line_6" model="account.tax.line.template">
@@ -4801,6 +4798,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_82"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-06-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V82-06-ROW-CC_refund_base_line" model="account.tax.line.template">
@@ -4834,7 +4832,7 @@
         <record id="attn_VAT-IN-V82-06-ROW-CC_invoice_tax_line_3" model="account.tax.line.template">
             <field name="sequence">2232</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">-60</field>
+            <field name="tax_amount">60</field>
             <field name="debit_credit_amount">-60</field>
             <field name="account_id" ref="a451057"/>
             <field name="code_id" ref="atctn_57"/>
@@ -4852,10 +4850,11 @@
         </record>
         <record id="attn_VAT-IN-V82-06-ROW-CC_invoice_tax_line_5" model="account.tax.line.template">
             <field name="sequence">2233</field>
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_87"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-06-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V82-06-ROW-CC_refund_base_line_6" model="account.tax.line.template">
@@ -4892,6 +4891,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_82"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-00-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V82-00-ROW-CC_refund_base_line" model="account.tax.line.template">
@@ -4920,12 +4920,12 @@
 	     <field name="code_id" ref="atctn_82"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-00-ROW-CC"/>
         </record>
-        <record id="attn_VAT-IN-V82-00-ROW-CC-C2_invoice_tax_line" model="account.tax.line.template">
+        <record id="attn_VAT-IN-V82-00-ROW-CC-C2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="sequence">2242</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">0</field>
             <field name="debit_credit_amount">0</field>
-            <field name="apply_on">invoice</field>
+            <field name="apply_on">refund</field>
             <field name="tax_id" ref="attn_VAT-IN-V82-00-ROW-CC"/>
         </record>
 
@@ -4944,6 +4944,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_83"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-21-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V83-21-ROW-CC_refund_base_line" model="account.tax.line.template">
@@ -4992,11 +4993,12 @@
             <field name="tax_id" ref="attn_VAT-IN-V83-21-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V83-21-ROW-CC-C3_invoice_tax_line" model="account.tax.line.template">
-            <field name="code_type">tax</field>
+            <field name="code_type">base</field>
             <field name="sequence">2313</field>
-            <field name="tax_amount">0</field>
+            <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_87"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-21-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V83-21-ROW-CC-C3_refund_base_line" model="account.tax.line.template">
@@ -5033,6 +5035,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_83"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-12-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V83-12-ROW-CC_refund_base_line" model="account.tax.line.template">
@@ -5057,8 +5060,8 @@
         <record id="attn_VAT-IN-V83-12-ROW-CC-C1_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="sequence">2321</field>
-            <field name="tax_amount">-120</field>
-            <field name="debit_credit_amount">-120</field>
+            <field name="tax_amount">120</field>
+            <field name="debit_credit_amount">120</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a411059"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-12-ROW-CC"/>
@@ -5067,7 +5070,7 @@
             <field name="code_type">tax</field>
             <field name="sequence">2322</field>
             <field name="tax_amount">120</field>
-            <field name="debit_credit_amount">120</field>
+            <field name="debit_credit_amount">-120</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_57"/>
             <field name="account_id" ref="a451057"/>
@@ -5076,18 +5079,19 @@
         <record id="attn_VAT-IN-V83-12-ROW-CC-C2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="sequence">2322</field>
-            <field name="tax_amount">120</field>
-            <field name="debit_credit_amount">120</field>
+            <field name="tax_amount">-120</field>
+            <field name="debit_credit_amount">-120</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="a451057"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-12-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V83-12-ROW-CC-C3_invoice_tax_line" model="account.tax.line.template">
-            <field name="code_type">tax</field>
+            <field name="code_type">base</field>
             <field name="sequence">2323</field>
-            <field name="tax_amount">0</field>
+            <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_87"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-12-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V83-12-ROW-CC-C3_refund_base_line" model="account.tax.line.template">
@@ -5124,6 +5128,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_83"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-06-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V83-06-ROW-CC_refund_base_line" model="account.tax.line.template">
@@ -5174,11 +5179,12 @@
             <field name="tax_id" ref="attn_VAT-IN-V83-06-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V83-06-ROW-CC-C3_invoice_tax_line" model="account.tax.line.template">
-            <field name="code_type">tax</field>
+            <field name="code_type">base</field>
             <field name="sequence">2333</field>
-            <field name="tax_amount">0</field>
+            <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_87"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-06-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V83-06-ROW-CC-C3_refund_base_line" model="account.tax.line.template">
@@ -5215,6 +5221,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="atctn_83"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-00-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V83-00-ROW-CC_refund_base_line" model="account.tax.line.template">
@@ -5240,14 +5247,6 @@
             <field name="tax_amount">0</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
-            <field name="tax_id" ref="attn_VAT-IN-V83-00-ROW-CC"/>
-        </record>
-        <record id="attn_VAT-IN-V83-00-ROW-CC-C2_invoice_tax_line" model="account.tax.line.template">
-            <field name="code_type">tax</field>
-            <field name="sequence">2342</field>
-            <field name="tax_amount">0</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">invoice</field>
             <field name="tax_id" ref="attn_VAT-IN-V83-00-ROW-CC"/>
         </record>
         <record id="attn_VAT-IN-V83-00-ROW-CC-C2_refund_tax_line" model="account.tax.line.template">
