@@ -584,7 +584,7 @@
                 <t t-call="website_forum.share">
                     <t t-set="object" t-value="question"/>
                 </t>
-                 <t t-if="greet_share_id">
+                <t t-if="greet_share_id">
                     <t t-call="website_forum.share_dialog" />
                 </t>
             </div>

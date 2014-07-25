@@ -55,7 +55,7 @@ $(document).ready(function () {
         });
     });
 
-    $('.vote_up ,.vote_down').not('.karma_required').on('click', function (ev) {
+    $('.vote_up,.vote_down').not('.karma_required').on('click', function (ev) {
         ev.preventDefault();
         var $link = $(ev.currentTarget);
         openerp.jsonRpc($link.data('href'), 'call', {})

@@ -12,7 +12,6 @@ from openerp.addons.web.controllers.main import login_redirect
 from openerp.addons.web.http import request
 from openerp.addons.website.controllers.main import Website as controllers
 from openerp.addons.website.models.website import slug
-from openerp.tools import html2plaintext
 
 controllers = controllers()
 
@@ -211,9 +210,9 @@ class WebsiteForum(http.Controller):
     def question(self, forum, question, **post):
         cr, uid, context = request.cr, request.uid, request.context
         if ('type' in post) and (post['type'] == "q"):
-            greet_share_id = "#share%s-%s"%(question._name.replace('.',''),str(question.id))
+            greet_share_id = "#share%s-%s"%(question._name.replace('.',''), str(question.id))
         elif ('type' in post) and (post['type'] == "a"):
-            greet_share_id = "#share%s-%s"%(question._name.replace('.',''),post['sh'])
+            greet_share_id = "#share%s-%s"%(question._name.replace('.',''), post['sh'])
         else:
             greet_share_id = None
         # increment view counter
