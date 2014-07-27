@@ -147,10 +147,54 @@ class linkedin(osv.AbstractModel):
             return {'status': 'need_auth', 'url': self._get_authorize_uri(cr, uid, from_url=from_url, context=context)}
 
     def update_contacts(self, cr, uid, records, context=None):
-        li_records_obj = LinkedinRecords(self, cr, uid, records.get('values'), records.get('_total'))
         #there may be an issue of rights, current user may now have rights of create or write
-        li_records_obj.create_contacts()
-        li_records_obj.update_contacts()
+        li_records = dict((d['id'], d) for d in records.get('values', []))
+        records_to_create, records_to_update = self.check_create_or_update(cr, uid, li_records, context=context)
+        self.create_contacts(records_to_create)
+        self.write_contacts(records_to_update)
+
+    def check_create_or_update(self, cr, uid, records, context=None):
+        records_to_update = {}
+        records_to_create = []
+        ids = records.keys()
+        read_res = self.pool.get('res.partner').search_read(cr, uid, [('linkedin_id', 'in', ids)], ['linkedin_id'], context=context)
+        to_update = [x['linkedin_id'] for x in read_res]
+        to_create = list(set(ids).difference(to_update))
+        for id in to_create:
+            records_to_create.append(records.get(id))
+        for res in read_res:
+            records_to_update[res['id']] = records.get(res['linkedin_id'])
+        print "\n\nrecords_to_create and records_to_update are ::: ",records_to_create,"\n\n\n", records_to_update
+        return records_to_create, records_to_update
+
+    def create_contacts(self, records_to_create):
+        #Create contact from self.records_to_create
+        """
+        for record in records_to_create:
+            data_dict = self.create_data_dict(record)
+            self.pool.get('res.partner').create(cr, uid, data_dict, context=context)
+        """
+        pass
+
+    def write_contacts(self, records_to_update):
+        #Write contact from self.records_to_update
+        """
+        for id, record in records_to_update.iteritems():
+            data_dict = self.create_data_dict(record)
+            self.pool.get('res.partner').write(cr, uid, id, data_dict, context=context)
+        """
+        pass
+
+    def create_data_dict(self, record):
+        position = record.get('position') and record['position']['values']
+        #check is_current is true and check if company already exist in our db then set that company as parent_id
+        #Add all fields while fetching related to res.partner 
+        return {
+            'name': record['formattedName'],
+            'image': '', #convert into binary self.url2binary(record['pictureUrl])
+            'linkedin_url': record['publicProfileUrl'],
+            'linkedin_id': record['id'],
+        }
 
     #TODO: Simplify this method
     def get_customer_popup_data(self, cr, uid, context=None, **kw):
@@ -252,6 +296,7 @@ class linkedin(osv.AbstractModel):
             else:
                 content = request.read()
                 result = simplejson.loads(content)
+        #manage URLError when there is no internet connection
         except urllib2.HTTPError, e:
             #Should simply raise exception or simply add logger
             if e.code in (400, 401, 410):
@@ -316,46 +361,3 @@ class linkedin(osv.AbstractModel):
 
     def get_uri_oauth(self, a=''):  # a = action
         return "https://www.linkedin.com/uas/oauth2/%s" % (a,)
-
-class LinkedinRecords(object):
-    """
-    This represents linkedin records, it provides utility to differentiate reocrds,
-    whether records is to create or it is to update, 
-    basically it creates or updates records fetched from linkedin
-    cursor: database cursor,
-    user_id: current user,
-    linkedin_obj: Its a linkedin model object
-    """
-
-    def __init__(self, linkedin_obj, cursor, user_id, records, total, context=None):
-        self.records = records
-        self.id_based_records = dict((d['id'], d) for d in records)
-        self.total = total
-        #We can also remove records which are there in table but not retrieved from linkedin,
-        #that means linkedin user has removed that contact from his/her account
-        self.records_to_create = []
-        self.records_to_update = []
-        self.cr = cursor
-        self.uid = user_id
-        self.context = context or {}
-        self.linkedin_obj = linkedin_obj
-        self.check_create_or_update()
-
-    def check_create_or_update(self):
-        ids = self.id_based_records.keys()
-        read_res = self.linkedin_obj.pool.get('res.partner').search_read(self.cr, self.uid, [('linkedin_id', 'in', ids)], ['linkedin_id'], context=self.context)
-        to_update = [x['linkedin_id'] for x in read_res]
-        to_create = list(set(ids).difference(to_update))
-        for id in to_update:
-            self.records_to_update.append(self.id_based_records.get(id))
-        for id in to_create:
-            self.records_to_create.append(self.id_based_records.get(id))
-        print "\n\nrecords_to_create and records_to_update are ::: ",self.records_to_create,"\n\n\n", self.records_to_update
-
-    def create_contacts(self):
-        #Create contact from self.records_to_create
-        pass
-
-    def update_contacts(self):
-        #Write contact from self.records_to_update
-        pass
