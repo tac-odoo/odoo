@@ -47,6 +47,14 @@
     <t t-call="website.layout">
         <t t-set="head">
             <t t-call-assets="website_forum.assets_forum"/>
+            <meta property="og:type" content="website" />
+            <meta content="summary" name="twitter:card" />
+            <t t-if="host_url">
+                <meta name="twitter:domain" t-attf-content="#{host_url}" />
+                <meta property="og:image" t-attf-content="#{host_url}logo.png" />
+            </t>
+            <meta property="og:description" t-attf-content="" />
+            <meta property="og:url" t-attf-content="#{url}" />
         </t>
         <div class="container mt16">
             <div class="navbar navbar-default">
@@ -580,6 +588,9 @@
                 <t t-call="website_forum.post_comment">
                     <t t-set="object" t-value="question"/>
                 </t>
+                <t t-if="last_post_id">
+                    <t t-call="website_forum.share_dialog" />
+                </t>
             </div>
         </div>
         <hr/>
@@ -667,6 +678,51 @@
             <span class="text-muted">(only one answer per question is allowed)</span>
         </div>
     </t>
+</template>
+
+<!-- Sharing Dialog -->
+<template id="share_dialog">
+    <div class="modal fade" id="share_dialog_box" tabindex="-1" role="dialog" aria-labelledby="shareDialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&amp;times;</span><span class="sr-only">Close</span></button>
+                    <t t-if = "last_post_id.parent_id">
+                        <t t-set="title" t-value="'Thanks of answering this question'" />
+                        <t t-set="body" t-value="'Share the question and your answer to get more feedback from contributors'" />
+                        <t t-set="url" t-value="'\'' + url + '#answer-' + str(last_post_id.id) + '\''" />
+                        <t t-set="question_name" t-value="'\'' + last_post_id.parent_id.name + '\''" />
+                    </t>
+                    <t t-if = "not last_post_id.parent_id">
+                        <t t-set="title" t-value="'Thanks for poasting your question'" />
+                        <t t-set="body" t-value="'Share your question to improve your chance of having an answer'" />
+                        <t t-set="url" t-value="'\'' + url + '\''" />
+                        <t t-set="question_name" t-value="'\'' + last_post_id.name + '\''" />
+                    </t>
+                    <h4 class="modal-title" id="share_dialog_title">
+                        <t t-esc="title" />
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <t t-esc="body" />
+                    <div id="share_buttons row span12" style="text-align: center">
+                        <a style="cursor: pointer" t-attf-onclick="javascript: window.open('https://twitter.com/share?url=' + encodeURIComponent( #{url}), '', 'menubar=no, toolbar=no, resizable=yes, scrollbar=yes, height=600,width=600'); return false;" class="fa-stack fa-lg">
+                            <span class="fa fa-circle fa-stack-2x"></span>
+                            <span class="fa fa-twitter fa-stack-1x fa-inverse"></span>
+                        </a>
+                        <a style="cursor: pointer" t-attf-onclick="javascript: window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(#{url}),'','menubar=no, toolbar=no, resizable=yes, scrollbars=yes, height=600,width=600'); return false;" class="fa-stack fa-lg">
+                            <span class="fa fa-circle fa-stack-2x"></span>
+                            <span class="fa fa-facebook fa-stack-1x fa-inverse"></span>
+                        </a>
+                        <a style="cursor: pointer" t-attf-onclick="javascript: window.open('https://www.linkedin.com/shareArticle?mini=true&amp;url=' + encodeURIComponent(#{url}) + '&amp;title=' + encodeURIComponent(#{question_name}) + '&amp;summary=' + encodeURIComponent('#{last_post_id.content}') + '&amp;source=' + encodeURIComponent('Source'),'','menubar=no, toolbar=no, resizable=yes, srollbars=yes, height=600,width=600'); return false;" class="fa-stack fa-lg">
+                            <span class="fa fa-circle fa-stack-2x"></span>
+                            <span class="fa fa-linkedin fa-stack-1x fa-inverse"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <!-- Utility template: Post a Comment -->

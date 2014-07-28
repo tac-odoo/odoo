@@ -19,6 +19,7 @@ controllers = controllers()
 class WebsiteForum(http.Controller):
     _post_per_page = 10
     _user_per_page = 30
+    _last_post_id = None
 
     def _get_notifications(self):
         cr, uid, context = request.cr, request.uid, request.context
@@ -189,17 +190,24 @@ class WebsiteForum(http.Controller):
                 'content': post.get('content'),
                 'tag_ids': question_tag_ids,
             }, context=context)
+        self._last_post_id = new_question_id
         return werkzeug.utils.redirect("/forum/%s/question/%s" % (slug(forum), new_question_id))
 
     @http.route(['''/forum/<model("forum.forum"):forum>/question/<model("forum.post", "[('forum_id','=',forum[0]),('parent_id','=',False)]"):question>'''], type='http', auth="public", website=True)
     def question(self, forum, question, **post):
         cr, uid, context = request.cr, request.uid, request.context
         # increment view counter
-        request.registry['forum.post'].set_viewed(cr, SUPERUSER_ID, [question.id], context=context)
+        forum_post = request.registry['forum.post']
+        forum_post.set_viewed(cr, SUPERUSER_ID, [question.id], context=context)
 
         if question.parent_id:
             redirect_url = "/forum/%s/question/%s" % (slug(forum), slug(question.parent_id))
             return werkzeug.utils.redirect(redirect_url, 301)
+        if self._last_post_id:
+            last_post_id = forum_post.browse(cr, uid, self._last_post_id, context=context)
+            self._last_post_id = None
+        else:
+            last_post_id = False
 
         filters = 'question'
         values = self._prepare_forum_values(forum=forum, searches=post)
@@ -209,6 +217,9 @@ class WebsiteForum(http.Controller):
             'header': {'question_data': True},
             'filters': filters,
             'reversed': reversed,
+            'host_url': request.httprequest.host_url,
+            'url' : request.httprequest.url,
+            'last_post_id' : last_post_id,
         })
         return request.website.render("website_forum.post_description_full", values)
 
@@ -276,7 +287,7 @@ class WebsiteForum(http.Controller):
     def post_new(self, forum, post, **kwargs):
         if not request.session.uid:
             return login_redirect()
-        request.registry['forum.post'].create(
+        self._last_post_id = request.registry['forum.post'].create(
             request.cr, request.uid, {
                 'forum_id': forum.id,
                 'parent_id': post.id,

@@ -15,6 +15,18 @@ $(document).ready(function () {
         }
     });
 
+    if(typeof $("#share_dialog_box") !== 'undefined') {
+        $("#share_dialog_box").modal("show");
+    }
+
+    var transition_value = "background-color 1s";
+    /*JSH Note: It is required to set transition propery because of Jquery issue #14836 for Chrome*/
+    $(location.hash).css({"-webkit-transition" : transition_value, "-moz-transition" : transition_value, "transition" : transition_value, "-o-transition" : transition_value})
+    .one("webkitTransitionEnd transitionend oTransitionEnd MSTransitionEnd",
+        function() {
+            $(this).removeClass("label-primary");
+        }).addClass("label-primary");
+
     $('.vote_up,.vote_down').not('.karma_required').on('click', function (ev) {
         ev.preventDefault();
         var $link = $(ev.currentTarget);
