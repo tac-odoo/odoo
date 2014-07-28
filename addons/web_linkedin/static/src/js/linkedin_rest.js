@@ -15,30 +15,26 @@ openerp.web_linkedin = function(instance) {
     */
     instance.web_linkedin.LinkedinTester = instance.web.Class.extend({
         init: function() {
-            //Useless deferreds
-            this.linkedin_def = $.Deferred();
-            this.auth_def = $.Deferred();
+            this.is_set_keys = false;
         },
-        test_linkedin: function() {
+        test_linkedin: function(show_dialog) {
             var self = this;
-            return this.test_api_key();
-        },
-        test_api_key: function() {
-            var self = this;
-            if (this.api_key) {
+            if (this.is_set_keys) {
                 return $.when();
             }
-            return new instance.web.Model("ir.config_parameter").call("get_param", ["web.linkedin.apikey"]).then(function(a) {
+            return new instance.web.Model("linkedin").call("test_linkedin_keys", []).then(function(a) {
                 if (!!a) {
-                    self.api_key = a;
+                    self.is_set_keys = a;
                     return true;
                 } else {
-                    var dialog = new instance.web.Dialog(self, {
-                        title: _t("LinkedIn is not enabled"),
-                        buttons: [
-                            {text: _t("Ok"), click: function() { self.parents('.modal').modal('hide'); }}
-                        ],
-                    }, QWeb.render('LinkedIn.DisabledWarning')).open();
+                    if (show_dialog) {
+                        var dialog = new instance.web.Dialog(self, {
+                            title: _t("LinkedIn is not enabled"),
+                            buttons: [
+                                {text: _t("Ok"), click: function() { self.parents('.modal').modal('hide'); }}
+                            ],
+                        }, QWeb.render('LinkedIn.DisabledWarning')).open();
+                    }
                     return $.Deferred().reject();
                 }
             });
@@ -64,20 +60,17 @@ openerp.web_linkedin = function(instance) {
             var self = this;
             if (!this.open_in_process) {
                 this.open_in_process = true;
-                this.display_dm.add(instance.web_linkedin.tester.test_linkedin()).done(function() {
+                this.display_dm.add(instance.web_linkedin.tester.test_linkedin(true)).done(function() {
                     self.open_in_process = false;
                     var text = (self.get("value") || "").replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
-                    //instance.web_linkedin.tester.test_authentication().done(function() {
-                    //self.rpc("/linkedin/").done(function(result) {
-                        var pop = new instance.web_linkedin.LinkedinSearchPopup(self, text);
-                        pop.on("search_completed", self, function() {
-                            pop.open();
-                        });
-                        pop.on("selected", self, function(entity) {
-                            self.selected_entity(entity);
-                        });
-                        pop.do_search();
-                    //});
+                    var pop = new instance.web_linkedin.LinkedinSearchPopup(self, text);
+                    pop.on("search_completed", self, function() {
+                        pop.open();
+                    });
+                    pop.on("selected", self, function(entity) {
+                        self.selected_entity(entity);
+                    });
+                    pop.do_search();
                 });
             }
         },
@@ -315,7 +308,7 @@ openerp.web_linkedin = function(instance) {
                 this.search = url;
             }
             var context = instance.web.pyeval.eval('context');
-            self.rpc("/linkedin/get_popup_data", _.extend({'search_term': this.search, 'from_url': window.location.href, 'local_context': context}, params)).done(function(result) {
+            self.rpc("/linkedin/get_search_popup_data", _.extend({'search_term': this.search, 'from_url': window.location.href, 'local_context': context}, params)).done(function(result) {
                 if(result.status && result.status == 'need_auth' && confirm(_t("You will be redirected to LinkedIn authentication page, once authenticated after that you use this widget."))) {
                     instance.web.redirect(result.url);
                 } else { //We can check (result.status == 'OK') and other status
@@ -405,25 +398,33 @@ openerp.web_linkedin = function(instance) {
     Kanban include for adding import button on button bar for res.partner model to import linkedin contacts
     */
     openerp.web_kanban.KanbanView.include({
+        init: function() {
+            this.display_dm = new instance.web.DropMisordered(true);
+            return this._super.apply(this, arguments);
+        },
         load_kanban: function() {
             var self = this;
             var super_res = this._super.apply(this, arguments);
-            //TODO: test linkedin here first, if there is no apikey or secret_key set then do not add button
             if(this.dataset.model == 'res.partner') {
-                $linkedin_button = $(QWeb.render("KanbanView.linkedinButton", {'widget': this}));
-                $linkedin_button.appendTo(this.$buttons);
-                $linkedin_button.click(function() {
-                    var context = instance.web.pyeval.eval('context');
-                    res = new instance.web.Model("linkedin").call("sync_linkedin_contacts", [window.location.href, context]).done(function(result) {
-                        if (result instanceof Object && result.status && result.status == 'need_auth') {
-                            if (confirm(_t("You will be redirected to LinkedIn authentication page, once authenticated after that you use this widget."))) {
-                                instance.web.redirect(result.url);
+                this.display_dm.add(instance.web_linkedin.tester.test_linkedin(false)).done(function() {
+                    $linkedin_button = $(QWeb.render("KanbanView.linkedinButton", {'widget': self}));
+                    $linkedin_button.appendTo(self.$buttons);
+                    $linkedin_button.click(function() {
+                        var context = instance.web.pyeval.eval('context');
+                        res = self.rpc("/linkedin/sync_linkedin_contacts", {
+                            from_url: window.location.href,
+                            local_context: context
+                        }).done(function(result) {
+                            if (result instanceof Object && result.status && result.status == 'need_auth') {
+                                if (confirm(_t("You will be redirected to LinkedIn authentication page, once authenticated after that you use this widget."))) {
+                                    instance.web.redirect(result.url);
+                                }
+                            } else {
+                                self.do_reload();
                             }
-                        } else {
-                            self.do_reload();
-                        }
+                        });
                     });
-                })
+                });
             }
             return super_res;
         }

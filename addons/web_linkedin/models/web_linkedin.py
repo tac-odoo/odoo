@@ -38,7 +38,7 @@ BASE_API_URL = "https://api.linkedin.com/v1"
 company_fields = "(id,name,logo-url,description,industry,website-url,locations,universal-name)"
 people_fields = '(id,picture-url,public-profile-url,first-name,last-name,' \
                     'formatted-name,location,phone-numbers,im-accounts,' \
-                    'main-address,headline,positions,summary,specialties)'
+                    'main-address,headline,positions,summary,specialties,email-address)'
 _logger = logging.getLogger(__name__)
 
 class web_linkedin_settings(osv.osv_memory):
@@ -132,13 +132,12 @@ class linkedin(osv.AbstractModel):
         """
             This method will import all first level contact from LinkedIn
         """
-        headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'x-li-format': 'json'}
-        token = self.get_token(cr, uid, context=context)
-        params = {
-            'oauth2_access_token': token
-        }
         if not self.need_authorization(cr, uid, context=context):
-            connection_uri = BASE_API_URL + "/people/~/connections:{people_fields}".format(people_fields=people_fields)
+            headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'x-li-format': 'json'}
+            params = {
+                'oauth2_access_token': self.get_token(cr, uid, context=context)
+            }
+            connection_uri = "/people/~/connections:{people_fields}".format(people_fields=people_fields)
             status, res = self.send_request(cr, connection_uri, params=params, headers=headers, type="GET", context=context)
             #TODO: It is possible that update_contacts return osv.exception if user doesn't have rights, handle the exception nicely
             self.update_contacts(cr, uid, res, context=context)
@@ -147,11 +146,10 @@ class linkedin(osv.AbstractModel):
             return {'status': 'need_auth', 'url': self._get_authorize_uri(cr, uid, from_url=from_url, context=context)}
 
     def update_contacts(self, cr, uid, records, context=None):
-        #there may be an issue of rights, current user may now have rights of create or write
         li_records = dict((d['id'], d) for d in records.get('values', []))
         records_to_create, records_to_update = self.check_create_or_update(cr, uid, li_records, context=context)
-        self.create_contacts(records_to_create)
-        self.write_contacts(records_to_update)
+        self.create_contacts(cr, uid, records_to_create, context=context)
+        self.write_contacts(cr, uid, records_to_update, context=context)
 
     def check_create_or_update(self, cr, uid, records, context=None):
         records_to_update = {}
@@ -164,40 +162,54 @@ class linkedin(osv.AbstractModel):
             records_to_create.append(records.get(id))
         for res in read_res:
             records_to_update[res['id']] = records.get(res['linkedin_id'])
-        print "\n\nrecords_to_create and records_to_update are ::: ",records_to_create,"\n\n\n", records_to_update
         return records_to_create, records_to_update
 
-    def create_contacts(self, records_to_create):
-        #Create contact from self.records_to_create
-        """
+    def create_contacts(self, cr, uid, records_to_create, context=None):
         for record in records_to_create:
-            data_dict = self.create_data_dict(record)
-            self.pool.get('res.partner').create(cr, uid, data_dict, context=context)
-        """
-        pass
+            if record['id'] != 'private':
+                data_dict = self.create_data_dict(cr, uid, record, context=context)
+                self.pool.get('res.partner').create(cr, uid, data_dict, context=context)
 
-    def write_contacts(self, records_to_update):
-        #Write contact from self.records_to_update
-        """
+    #Currently all fields are re-written
+    def write_contacts(self, cr, uid, records_to_update, context=None):
         for id, record in records_to_update.iteritems():
-            data_dict = self.create_data_dict(record)
+            data_dict = self.create_data_dict(cr, uid, record, context=context)
             self.pool.get('res.partner').write(cr, uid, id, data_dict, context=context)
-        """
-        pass
 
-    def create_data_dict(self, record):
-        position = record.get('position') and record['position']['values']
-        #check is_current is true and check if company already exist in our db then set that company as parent_id
-        #Add all fields while fetching related to res.partner 
-        return {
-            'name': record['formattedName'],
-            'image': '', #convert into binary self.url2binary(record['pictureUrl])
-            'linkedin_url': record['publicProfileUrl'],
-            'linkedin_id': record['id'],
+    def create_data_dict(self, cr, uid, record, context=None):
+        data_dict = {
+            'name': record.get('formattedName', record.get("firstName", "")),
+            'linkedin_url': record.get('publicProfileUrl', False),
+            'linkedin_id': record.get('id', False),
         }
+        #Should we add: email-address,summary
+        positions = (record.get('positions') or {}).get('values', [])
+        for position in positions:
+            if position.get('isCurrent'):
+                data_dict['function'] = position.get('title')
+                company_name = False
+                if position.get('company'):
+                    company_name = position['company'].get('name')
+                #To avoid recursion, it is quite possible that connection name and company_name is same 
+                #in such cases import goes fail meanwhile due to osv exception, hence skipped such connection for parent_id
+                if company_name != data_dict['name']:
+                    parent_id = self.pool.get('res.partner').search(cr, uid, [('name', '=', company_name)])
+                    if parent_id:
+                        data_dict['parent_id'] = parent_id[0]
+                
+        image = record.get('pictureUrl') and self.url2binary(record['pictureUrl']) or False
+        data_dict['image'] = image
+
+        phone_numbers = (record.get('phoneNumbers') or {}).get('values', [])
+        for phone in phone_numbers:
+            if phone.get('phoneType') == 'mobile':
+                data_dict['mobile'] = phone['phoneNumber']
+            else:
+                data_dict['phone'] = phone['phoneNumber']
+        return data_dict 
 
     #TODO: Simplify this method
-    def get_customer_popup_data(self, cr, uid, context=None, **kw):
+    def get_search_popup_data(self, cr, uid, context=None, **kw):
         """
             This method will return all needed data for LinkedIn Search Popup in single call.
             It returns companies(including search by universal name), people and warnings if any
@@ -206,25 +218,23 @@ class linkedin(osv.AbstractModel):
         if context is None:
             context = {}
         context.update(kw.get('local_context') or {})
-        token = self.get_token(cr, uid, context=context)
         companies = {}
         people = {}
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'x-li-format': 'json'}
         params = {
-            'oauth2_access_token': token
+            'oauth2_access_token': self.get_token(cr, uid, context=context)
         }
         #search by universal-name
         if kw.get('search_uid'):
-            uri = BASE_API_URL + "/companies/universal-name={company_name}:{company_fields}".format(company_name=kw['search_uid'], company_fields=company_fields)
-            status, res = self.send_request(cr, uri, params=params, headers=headers, type="GET", context=context)
+            universal_search_uri = "/companies/universal-name={company_name}:{company_fields}".format(company_name=kw['search_uid'], company_fields=company_fields)
+            status, res = self.send_request(cr, universal_search_uri, params=params, headers=headers, type="GET", context=context)
             companies.update(res)
 
             #Unable to get why this code returns 400 bad request error, as per linked API doc the call is proper but it returns 400 bad request error always
             #add warning in response and handle warning at client side
             try:
                 public_profile_url = werkzeug.url_quote_plus("http://www.linkedin.com/pub/%s"%(kw['search_uid']))
-                print "\n\npublic_profile_url is ::: ",public_profile_url
-                profile_uri = BASE_API_URL + "/people/url={public_profile_url}:{people_fields}".format(public_profile_url=public_profile_url, people_fields=people_fields)
+                profile_uri = "/people/url={public_profile_url}:{people_fields}".format(public_profile_url=public_profile_url, people_fields=people_fields)
                 status, profile = self.send_request(cr, profile_uri, params=params, headers=headers, type="GET", context=context)
                 people.update(profile)
             except urllib2.HTTPError, e:
@@ -234,20 +244,22 @@ class linkedin(osv.AbstractModel):
                     raise e
 
         #Profile Information of current user
-        profile_uri = BASE_API_URL + "/people/~:(first-name,last-name)"
+        profile_uri = "/people/~:(first-name,last-name)"
         status, res = self.send_request(cr, profile_uri, params=params, headers=headers, type="GET", context=context)
         result_data['current_profile'] = res
 
         #Companies search
         search_params = dict(params.copy(), keywords=kw.get('search_term', "") or "", count=self.limit)
-        company_search_uri = BASE_API_URL + "/company-search:(companies:{company_fields})".format(company_fields=company_fields)
+        company_search_uri = "/company-search:(companies:{company_fields})".format(company_fields=company_fields)
         status, res = self.send_request(cr, company_search_uri, params=search_params, headers=headers, type="GET", context=context)
+        #TODO: If companies is there then update the values attribute of companies result(it is possible that comapnies come up with universal-search)
         companies.update(res)
 
         #Note: People search is allowed to only vetted API access request, please go through following link
         #https://help.linkedin.com/app/api-dvr
-        people_search_uri = BASE_API_URL + "/people-search:(people:{people_fields})".format(people_fields=people_fields)
+        people_search_uri = "/people-search:(people:{people_fields})".format(people_fields=people_fields)
         status, res = self.send_request(cr, people_search_uri, params=search_params, headers=headers, type="GET", context=context)
+        #TODO: If people is there then update the values attribute of people result(it is possible that people come up with public-url-search)
         people.update(res or {})
 
         result_data['companies'] = companies
@@ -268,25 +280,23 @@ class linkedin(osv.AbstractModel):
                 'count': limit
                 
             }
-            people_criteria_uri = BASE_API_URL + "/people-search:(people:{people_fields})".format(people_fields=people_fields)
+            people_criteria_uri = "/people-search:(people:{people_fields})".format(people_fields=people_fields)
             status, res = self.send_request(cr, people_criteria_uri, params=params, headers=headers, type="GET", context=context)
             return res
         else:
             return {'status': 'need_auth', 'url': self._get_authorize_uri(cr, uid, from_url=from_url, context=context)}
 
-    def send_request(self, cr, uri, params={}, headers={}, type="GET", context=None):
+    def send_request(self, cr, uri, pre_uri=BASE_API_URL, params={}, headers={}, type="GET", context=None):
         result = ""
         status = ""
         try:
             if type.upper() == "GET":
                 data = werkzeug.url_encode(params)
-                req = urllib2.Request(uri+ "?"+data)
-                print "\n\nreq uri is ::: ",req.get_full_url()
-                #req.add_header('x-li-format', 'json')
+                req = urllib2.Request(pre_uri + uri + "?"+data)
                 for header_key, header_val in headers.iteritems():
                     req.add_header(header_key, header_val)
             elif type.upper() == 'POST':
-                req = urllib2.Request(uri, params, headers)
+                req = urllib2.Request(pre_uri + uri, params, headers)
             else:
                 raise ('Method not supported [%s] not in [GET, POST]!' % (type))
             request = urllib2.urlopen(req)
@@ -296,20 +306,18 @@ class linkedin(osv.AbstractModel):
             else:
                 content = request.read()
                 result = simplejson.loads(content)
-        #manage URLError when there is no internet connection
         except urllib2.HTTPError, e:
             #Should simply raise exception or simply add logger
             if e.code in (400, 401, 410):
                 raise e
 
             _logger.exception("Bad linkedin request : %s !" % e.read())
-            #error_key = simplejson.loads(e.read())
-            #error_key = error_key.get('error', {}).get('message', 'nc')
+        except urllib2.URLError, e:
+            _logger.exception("Either there is no connection or remote server is down : %s !" % e.read())
             #for 404 do not raise config warning
             #raise self.pool.get('res.config.settings').get_config_warning(cr, _("Something went wrong with your request to linkedin. \n\n %s"%(error_key)), context=context)
         return (status, result)
 
-    #Get token must called after checking need_authorization
     def get_token(self, cr, uid, context=None):
         current_user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         return current_user.linkedin_token
@@ -348,10 +356,10 @@ class linkedin(osv.AbstractModel):
         return False
 
     def destroy_token(self, cr, uid, context=None):
-        return self.pool['res.users'].write(cr, uid, uid, {'linkedin_token': False, 'linkedin_token_validity': False})
+        return self.pool['res.users'].write(cr, SUPERUSER_ID, uid, {'linkedin_token': False, 'linkedin_token_validity': False})
 
     def get_base_url(self, cr, uid, context=None):
-        return self.pool.get('ir.config_parameter').get_param(cr, uid, 'web.base.url', default='http://www.openerp.com?NoBaseUrl', context=context)
+        return self.pool.get('ir.config_parameter').get_param(cr, SUPERUSER_ID, 'web.base.url', default='http://www.openerp.com?NoBaseUrl', context=context)
 
     def get_client_id(self, cr, uid, context=None):
         return self.pool.get('ir.config_parameter').get_param(cr, SUPERUSER_ID, 'web.linkedin.apikey', default=False, context=context)
@@ -359,5 +367,17 @@ class linkedin(osv.AbstractModel):
     def get_client_secret(self, cr, uid, context=None):
         return self.pool.get('ir.config_parameter').get_param(cr, SUPERUSER_ID, 'web.linkedin.secretkey', default=False, context=context)
 
+    def test_linkedin_keys(self, cr, uid, context=None):
+        return self.get_client_id(cr, uid, context=context) and self.get_client_secret(cr, uid, context=context) and True
+
     def get_uri_oauth(self, a=''):  # a = action
         return "https://www.linkedin.com/uas/oauth2/%s" % (a,)
+
+    def url2binary(self, url):
+        """Used exclusively to load images from LinkedIn profiles, must not be used for anything else."""
+        _scheme, _netloc, path, params, query, fragment = urlparse(url)
+        # media.linkedin.com is the master domain for LinkedIn media (replicated to CDNs),
+        # so forcing it should always work and prevents abusing this method to load arbitrary URLs
+        url = urlunparse(('http', 'media.licdn.com', path, params, query, fragment))
+        bfile = urllib2.urlopen(url)
+        return base64.b64encode(bfile.read())
