@@ -551,7 +551,7 @@
             <field name="sequence">110</field>
             <field name="description">VAT-IN-V81-21</field>
             <field name="name">TVA Déductible 21% - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -616,7 +616,7 @@
             <field name="sequence">120</field>
             <field name="description">VAT-IN-V81-12</field>
             <field name="name">TVA Déductible 12% - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">12</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -681,7 +681,7 @@
             <field name="sequence">130</field>
             <field name="description">VAT-IN-V81-06</field>
             <field name="name">TVA Déductible 6% - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">6</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -783,7 +783,7 @@
             <field name="sequence">210</field>
             <field name="description">VAT-IN-V82-21-S</field>
             <field name="name">TVA Déductible 21% - Services</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -848,7 +848,7 @@
             <field name="sequence">220</field>
             <field name="description">VAT-IN-V82-21-G</field>
             <field name="name">TVA Déductible 21% - Biens divers</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -913,7 +913,7 @@
             <field name="sequence">230</field>
             <field name="description">VAT-IN-V82-12-S</field>
             <field name="name">TVA Déductible 12% - Services</field>
-            <field name="amount">100</field>
+            <field name="amount">12</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -978,7 +978,7 @@
             <field name="sequence">240</field>
             <field name="description">VAT-IN-V82-12-G</field>
             <field name="name">TVA Déductible 12% - Biens divers</field>
-            <field name="amount">100</field>
+            <field name="amount">12</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1041,7 +1041,7 @@
             <field name="sequence">250</field>
             <field name="description">VAT-IN-V82-06-S</field>
             <field name="name">TVA Déductible 6% - Services</field>
-            <field name="amount">100</field>
+            <field name="amount">6</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1106,7 +1106,7 @@
             <field name="sequence">260</field>
             <field name="description">VAT-IN-V82-06-G</field>
             <field name="name">TVA Déductible 6% - Biens divers</field>
-            <field name="amount">100</field>
+            <field name="amount">6</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1171,7 +1171,7 @@
             <field name="sequence">270</field>
             <field name="description">VAT-IN-V82-00-S</field>
             <field name="name">TVA à l'entrée 0% - Services</field>
-            <field name="amount">100</field>
+            <field name="amount">0</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1232,7 +1232,7 @@
             <field name="sequence">280</field>
             <field name="description">VAT-IN-V82-00-G</field>
             <field name="name">TVA à l'entrée 0% - Biens divers</field>
-            <field name="amount">100</field>
+            <field name="amount">0</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1293,7 +1293,7 @@
             <field name="sequence">310</field>
             <field name="description">VAT-IN-V83-21</field>
             <field name="name">TVA Déductible 21% - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1358,7 +1358,7 @@
             <field name="sequence">320</field>
             <field name="description">VAT-IN-V83-12</field>
             <field name="name">TVA Déductible 12% - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">12</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1423,7 +1423,7 @@
             <field name="sequence">330</field>
             <field name="description">VAT-IN-V83-06</field>
             <field name="name">TVA Déductible 6% - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">6</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1488,7 +1488,7 @@
             <field name="sequence">340</field>
             <field name="description">VAT-IN-V83-00</field>
             <field name="name">TVA à l'entrée 0% - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">0</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1640,7 +1640,7 @@
             <field name="sequence">420</field>
             <field name="description">VAT-IN-V81-12-CC</field>
             <field name="name">TVA Déductible 12% Cocontract. - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">12</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1744,7 +1744,7 @@
             <field name="sequence">430</field>
             <field name="description">VAT-IN-V81-06-CC</field>
             <field name="name">TVA Déductible 6% Cocontract. - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">06</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1840,7 +1840,7 @@
             <field name="sequence">440</field>
             <field name="description">VAT-IN-V81-00-CC</field>
             <field name="name">TVA à l'entrée 0% Cocontract. - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">0</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -1915,7 +1915,7 @@
             <field name="sequence">510</field>
             <field name="description">VAT-IN-V82-21-CC</field>
             <field name="name">TVA Déductible 21% Cocontract. - Services and other goods</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -2020,7 +2020,7 @@
             <field name="sequence">520</field>
             <field name="description">VAT-IN-V82-12-CC</field>
             <field name="name">TVA Déductible 12% Cocontract. - Services and other goods</field>
-            <field name="amount">100</field>
+            <field name="amount">12</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -2124,7 +2124,7 @@
             <field name="sequence">530</field>
             <field name="description">VAT-IN-V82-06-CC</field>
             <field name="name">TVA Déductible 6% Cocontract. - Services and other goods</field>
-            <field name="amount">100</field>
+            <field name="amount">06</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -2236,7 +2236,7 @@
             <field name="sequence">540</field>
             <field name="description">VAT-IN-V82-00-CC</field>
             <field name="name">TVA à l'entrée 0% Cocontract. - Services and other goods</field>
-            <field name="amount">100</field>
+            <field name="amount">0</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -2310,7 +2310,7 @@
             <field name="sequence">610</field>
             <field name="description">VAT-IN-V83-21-CC</field>
             <field name="name">TVA Déductible 21% Cocontract. - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -2413,7 +2413,7 @@
             <field name="sequence">620</field>
             <field name="description">VAT-IN-V83-12-CC</field>
             <field name="name">TVA Déductible 12% Cocontract. - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">12</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -2525,7 +2525,7 @@
             <field name="sequence">630</field>
             <field name="description">VAT-IN-V83-06-CC</field>
             <field name="name">TVA Déductible 6% Cocontract. - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">06</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -2637,7 +2637,7 @@
             <field name="sequence">640</field>
             <field name="description">VAT-IN-V83-00-CC</field>
             <field name="name">TVA à l'entrée 0% Cocontract. - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">0</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -2711,7 +2711,7 @@
             <field name="description">VAT-IN-V82-CAR-INC</field>
             <field name="name">TVA Entrant - Frais de voiture - VAT 50% Non Deductible (Price Incl.)</field>
             <field name="price_include" eval="1"/>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -2719,8 +2719,8 @@
         <record id="attn_VAT-IN-V82-CAR-INC_invoice_base_line" model="account.tax.line.template">
             <field name="sequence">710</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
-            <field name="debit_credit_amount">1000</field>
+            <field name="tax_amount">913.24</field>
+            <field name="debit_credit_amount">913.24</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_82"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-CAR-INC"/>
@@ -2728,8 +2728,8 @@
         <record id="attn_VAT-IN-V82-CAR-INC_invoice_tax_line_2" model="account.tax.line.template">
             <field name="sequence">711</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">95</field>
-            <field name="debit_credit_amount">95</field>
+            <field name="tax_amount">86.76</field>
+            <field name="debit_credit_amount">86.76</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_59"/>
             <field name="account_id" ref="a411059"/>
@@ -2738,8 +2738,8 @@
         <record id="attn_VAT-IN-V82-CAR-INC_refund_base_line" model="account.tax.line.template">
             <field name="sequence">710</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
-            <field name="debit_credit_amount">1000</field>
+            <field name="tax_amount">-913.24</field>
+            <field name="debit_credit_amount">913.24</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="atctn_82"/>
             <field name="tax_id" ref="attn_VAT-IN-V82-CAR-INC"/>
@@ -2747,8 +2747,8 @@
         <record id="attn_VAT-IN-V82-CAR-INC_refund_tax_line_2" model="account.tax.line.template">
             <field name="sequence">711</field>
             <field name="code_type">tax</field>
-            <field name="tax_amount">95</field>
-            <field name="debit_credit_amount">95</field>
+            <field name="tax_amount">86.76</field>
+            <field name="debit_credit_amount">86.76</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="atctn_63"/>
             <field name="account_id" ref="a411059"/>
@@ -2757,7 +2757,7 @@
         <record id="attn_VAT-IN-V82-CAR-INC_refund_tax_line_3" model="account.tax.line.template">
             <field name="sequence">712</field>
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">913.24</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="atctn_85"/>
@@ -2768,7 +2768,7 @@
             <field name="sequence">720</field>
             <field name="description">VAT-IN-V82-CAR-EXC</field>
             <field name="name">TVA Entrant - Frais de voiture - VAT 50% Non Deductible (Price Excl.)</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -2853,7 +2853,7 @@
             <field name="sequence">1110</field>
             <field name="description">VAT-IN-V81-21-EU</field>
             <field name="name">TVA Déductible 21% Intracomm. - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -2946,7 +2946,7 @@
             <field name="sequence">1120</field>
             <field name="description">VAT-IN-V81-12-EU</field>
             <field name="name">TVA Déductible 12% Intracomm. - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -3040,7 +3040,7 @@
             <field name="sequence">1130</field>
             <field name="description">VAT-IN-V81-06-EU</field>
             <field name="name">TVA Déductible 6% Intracomm. - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">06</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -3070,7 +3070,7 @@
             <field name="tax_amount">60</field>
             <field name="debit_credit_amount">-60</field>
             <field name="apply_on">invoice</field>
-            <field name="code_id" ref="atctn_86"/>
+            <field name="code_id" ref="atctn_55"/>
             <field name="account_id" ref="a451055"/>
             <field name="tax_id" ref="attn_VAT-IN-V81-06-EU"/>
         </record>
@@ -3134,7 +3134,7 @@
             <field name="sequence">1140</field>
             <field name="description">VAT-IN-V81-00-EU</field>
             <field name="name">TVA à l'entrée 0% Intracomm. - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">0</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -3207,7 +3207,7 @@
             <field name="sequence">1210</field>
             <field name="description">VAT-IN-V82-21-EU-S</field>
             <field name="name">TVA Déductible 21% Intracomm. - Services</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -3302,7 +3302,7 @@
             <field name="sequence">1220</field>
             <field name="description">VAT-IN-V82-21-EU-G</field>
             <field name="name">TVA Déductible 21% Intracomm. - Biens divers</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -3397,7 +3397,7 @@
             <field name="sequence">1230</field>
             <field name="description">VAT-IN-V82-12-EU-S</field>
             <field name="name">TVA Déductible 12% Intracomm. - Services</field>
-            <field name="amount">100</field>
+            <field name="amount">12</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -3492,7 +3492,7 @@
             <field name="sequence">1240</field>
             <field name="description">VAT-IN-V82-12-EU-G</field>
             <field name="name">TVA Déductible 12% Intracomm. - Biens divers</field>
-            <field name="amount">100</field>
+            <field name="amount">12</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -3587,7 +3587,7 @@
             <field name="sequence">1250</field>
             <field name="description">VAT-IN-V82-06-EU-S</field>
             <field name="name">TVA Déductible 6% Intracomm. - Services</field>
-            <field name="amount">100</field>
+            <field name="amount">6</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -3682,7 +3682,7 @@
             <field name="sequence">1260</field>
             <field name="description">VAT-IN-V82-06-EU-G</field>
             <field name="name">TVA Déductible 6% Intracomm. - Biens divers</field>
-            <field name="amount">100</field>
+            <field name="amount">6</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -3777,7 +3777,7 @@
             <field name="sequence">1270</field>
             <field name="description">VAT-IN-V82-00-EU-S</field>
             <field name="name">TVA à l'entrée 0% Intracomm. - Services</field>
-            <field name="amount">100</field>
+            <field name="amount">0</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -3850,7 +3850,7 @@
             <field name="sequence">1280</field>
             <field name="description">VAT-IN-V82-00-EU-G</field>
             <field name="name">TVA à l'entrée 0% Intracomm. - Biens divers</field>
-            <field name="amount">100</field>
+            <field name="amount">0</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -3922,7 +3922,7 @@
             <field name="sequence">1310</field>
             <field name="description">VAT-IN-V83-21-EU</field>
             <field name="name">TVA Déductible 21% Intracomm. - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -4015,7 +4015,7 @@
             <field name="sequence">1320</field>
             <field name="description">VAT-IN-V83-12-EU</field>
             <field name="name">TVA Déductible 12% Intracomm. - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">12</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -4108,7 +4108,7 @@
             <field name="sequence">1330</field>
             <field name="description">VAT-IN-V83-06-EU</field>
             <field name="name">TVA Déductible 6% Intracomm. - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">6</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -4157,6 +4157,7 @@
             <field name="debit_credit_amount">-60</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="atctn_55"/>
+            <field name="account_id" ref="a451055"/>
             <field name="tax_id" ref="attn_VAT-IN-V83-06-EU"/>
         </record>
         <record id="attn_VAT-IN-V83-06-EU-C2_refund_tax_line_2" model="account.tax.line.template">
@@ -4200,7 +4201,7 @@
             <field name="sequence">1340</field>
             <field name="description">VAT-IN-V83-00-EU</field>
             <field name="name">TVA à l'entrée 0% Intracomm. - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">0</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -4271,7 +4272,7 @@
             <field name="sequence">2110</field>
             <field name="description">VAT-IN-V81-21-ROW-CC</field>
             <field name="name">TVA Déductible 21% Hors EU - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -4364,7 +4365,7 @@
             <field name="sequence">2120</field>
             <field name="description">VAT-IN-V81-12-ROW-CC</field>
             <field name="name">TVA Déductible 12% Hors EU - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">12</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -4457,7 +4458,7 @@
             <field name="sequence">2130</field>
             <field name="description">VAT-IN-V81-06-ROW-CC</field>
             <field name="name">TVA Déductible 6% Hors EU - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">6</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -4550,7 +4551,7 @@
             <field name="sequence">2140</field>
             <field name="description">VAT-IN-V81-00-ROW-CC</field>
             <field name="name">TVA à l'entrée 0% Hors EU - Approvisionn. et marchandises</field>
-            <field name="amount">100</field>
+            <field name="amount">0</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -4603,7 +4604,7 @@
             <field name="sequence">2210</field>
             <field name="description">VAT-IN-V82-21-ROW-CC</field>
             <field name="name">TVA Déductible 21% Hors EU - Services and other goods</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -4696,7 +4697,7 @@
             <field name="sequence">2220</field>
             <field name="description">VAT-IN-V82-12-ROW-CC</field>
             <field name="name">TVA Déductible 12% Hors EU - Services and other goods</field>
-            <field name="amount">100</field>
+            <field name="amount">12</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -4789,7 +4790,7 @@
             <field name="sequence">2230</field>
             <field name="description">VAT-IN-V82-06-ROW-CC</field>
             <field name="name">TVA Déductible 6% Hors EU - Services and other goods</field>
-            <field name="amount">100</field>
+            <field name="amount">6</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -4882,7 +4883,7 @@
             <field name="sequence">2240</field>
             <field name="description">VAT-IN-V82-00-ROW-CC</field>
             <field name="name">TVA à l'entrée 0% Hors EU - Services and other goods</field>
-            <field name="amount">100</field>
+            <field name="amount">0</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -4935,7 +4936,7 @@
             <field name="sequence">2310</field>
             <field name="description">VAT-IN-V83-21-ROW-CC</field>
             <field name="name">TVA Déductible 21% Hors EU - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">21</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -5026,7 +5027,7 @@
             <field name="sequence">2320</field>
             <field name="description">VAT-IN-V83-12-ROW-CC</field>
             <field name="name">TVA Déductible 12% Hors EU - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">12</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -5119,7 +5120,7 @@
             <field name="sequence">2330</field>
             <field name="description">VAT-IN-V83-06-ROW-CC</field>
             <field name="name">TVA Déductible 6% Hors EU - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">6</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
@@ -5212,7 +5213,7 @@
             <field name="sequence">2340</field>
             <field name="description">VAT-IN-V83-00-ROW-CC</field>
             <field name="name">TVA à l'entrée 0% Hors EU - Biens d'investissement</field>
-            <field name="amount">100</field>
+            <field name="amount">0</field>
             <field name="type">percent</field>
             <field name="type_tax_use">purchase</field>
             <field name="chart_template_id" ref="l10nbe_chart_template"/>
