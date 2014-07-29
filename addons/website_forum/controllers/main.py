@@ -200,6 +200,10 @@ class WebsiteForum(http.Controller):
         forum_post = request.registry['forum.post']
         forum_post.set_viewed(cr, SUPERUSER_ID, [question.id], context=context)
 
+        if ('type' in post) and (post['type'] == 'a'):
+            sharing_content = "Just answered #odoo " + question.name
+        else:
+            sharing_content = question.name + " #odoo #help"
         if question.parent_id:
             redirect_url = "/forum/%s/question/%s" % (slug(forum), slug(question.parent_id))
             return werkzeug.utils.redirect(redirect_url, 301)
@@ -220,6 +224,7 @@ class WebsiteForum(http.Controller):
             'host_url': request.httprequest.host_url,
             'url' : request.httprequest.url,
             'last_post_id' : last_post_id,
+            'sharing_content' : sharing_content,
         })
         return request.website.render("website_forum.post_description_full", values)
 

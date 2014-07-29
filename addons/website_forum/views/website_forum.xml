@@ -53,7 +53,8 @@
                 <meta name="twitter:domain" t-attf-content="#{host_url}" />
                 <meta property="og:image" t-attf-content="#{host_url}logo.png" />
             </t>
-            <meta property="og:description" t-attf-content="" />
+            <meta property="og:title" t-attf-content="#{sharing_content}" />
+            <meta property="og:description" content="Odoo Forum" />
             <meta property="og:url" t-attf-content="#{url}" />
         </t>
         <div class="container mt16">
@@ -690,14 +691,14 @@
                     <t t-if = "last_post_id.parent_id">
                         <t t-set="title" t-value="'Thanks of answering this question'" />
                         <t t-set="body" t-value="'Share the question and your answer to get more feedback from contributors'" />
-                        <t t-set="url" t-value="'\'' + url + '#answer-' + str(last_post_id.id) + '\''" />
-                        <t t-set="question_name" t-value="'\'' + last_post_id.parent_id.name + '\''" />
+                        <t t-set="url" t-value="'\'' + url + '?type=a#answer-' + str(last_post_id.id) + '\''" />
+                        <t t-set="content" t-value="'\'' + 'Just answered #odoo ' + question.name + '\''" />
                     </t>
                     <t t-if = "not last_post_id.parent_id">
                         <t t-set="title" t-value="'Thanks for poasting your question'" />
                         <t t-set="body" t-value="'Share your question to improve your chance of having an answer'" />
                         <t t-set="url" t-value="'\'' + url + '\''" />
-                        <t t-set="question_name" t-value="'\'' + last_post_id.name + '\''" />
+                        <t t-set="content" t-value="'\'' + question.name + '#odoo #help' + '\''" />
                     </t>
                     <h4 class="modal-title" id="share_dialog_title">
                         <t t-esc="title" />
@@ -706,7 +707,7 @@
                 <div class="modal-body">
                     <t t-esc="body" />
                     <div id="share_buttons row span12" style="text-align: center">
-                        <a style="cursor: pointer" t-attf-onclick="javascript: window.open('https://twitter.com/share?url=' + encodeURIComponent( #{url}), '', 'menubar=no, toolbar=no, resizable=yes, scrollbar=yes, height=600,width=600'); return false;" class="fa-stack fa-lg">
+                        <a style="cursor: pointer" t-attf-onclick="javascript: window.open('https://twitter.com/intent/tweet?original_referer=' + encodeURIComponent(#{url}) + '&amp;text=' + encodeURIComponent(#{content}) + '&amp;url=' + encodeURIComponent(#{url}), '', 'menubar=no, toolbar=no, resizable=yes, scrollbar=yes, height=600,width=600'); return false;" class="fa-stack fa-lg">
                             <span class="fa fa-circle fa-stack-2x"></span>
                             <span class="fa fa-twitter fa-stack-1x fa-inverse"></span>
                         </a>
@@ -714,7 +715,7 @@
                             <span class="fa fa-circle fa-stack-2x"></span>
                             <span class="fa fa-facebook fa-stack-1x fa-inverse"></span>
                         </a>
-                        <a style="cursor: pointer" t-attf-onclick="javascript: window.open('https://www.linkedin.com/shareArticle?mini=true&amp;url=' + encodeURIComponent(#{url}) + '&amp;title=' + encodeURIComponent(#{question_name}) + '&amp;summary=' + encodeURIComponent('#{last_post_id.content}') + '&amp;source=' + encodeURIComponent('Source'),'','menubar=no, toolbar=no, resizable=yes, srollbars=yes, height=600,width=600'); return false;" class="fa-stack fa-lg">
+                        <a style="cursor: pointer" t-attf-onclick="javascript: window.open('https://www.linkedin.com/shareArticle?mini=true&amp;url=' + encodeURIComponent(#{url}) + '&amp;title=' + encodeURIComponent(#{content}) + '&amp;summary=Odoo Forum&amp;source=Odoo forum','','menubar=no, toolbar=no, resizable=yes, srollbars=yes, height=600,width=600'); return false;" class="fa-stack fa-lg">
                             <span class="fa fa-circle fa-stack-2x"></span>
                             <span class="fa fa-linkedin fa-stack-1x fa-inverse"></span>
                         </a>
