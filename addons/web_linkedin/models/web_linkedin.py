@@ -123,7 +123,6 @@ class linkedin_users(osv.Model):
         'linkedin_token_validity': fields.datetime("LinkedIn Token Validity")
     }
 
-#TODO: Need to check mechanism about Refresh token in linkedin so that authorization part not asked, otherwise we will get authorization part each time
 class linkedin(osv.AbstractModel):
     _name = 'linkedin'
     limit = 5
@@ -220,6 +219,8 @@ class linkedin(osv.AbstractModel):
         context.update(kw.get('local_context') or {})
         companies = {}
         people = {}
+        universal_company = {}
+        public_profile = {}
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'x-li-format': 'json'}
         params = {
             'oauth2_access_token': self.get_token(cr, uid, context=context)
@@ -227,40 +228,40 @@ class linkedin(osv.AbstractModel):
         #search by universal-name
         if kw.get('search_uid'):
             universal_search_uri = "/companies/universal-name={company_name}:{company_fields}".format(company_name=kw['search_uid'], company_fields=company_fields)
-            status, res = self.send_request(cr, universal_search_uri, params=params, headers=headers, type="GET", context=context)
-            companies.update(res)
+            status, universal_company = self.send_request(cr, universal_search_uri, params=params, headers=headers, type="GET", context=context)
+            print "\n\nres after universal search ::: ",universal_company
 
             #Unable to get why this code returns 400 bad request error, as per linked API doc the call is proper but it returns 400 bad request error always
             #add warning in response and handle warning at client side
             try:
                 public_profile_url = werkzeug.url_quote_plus("http://www.linkedin.com/pub/%s"%(kw['search_uid']))
                 profile_uri = "/people/url={public_profile_url}:{people_fields}".format(public_profile_url=public_profile_url, people_fields=people_fields)
-                status, profile = self.send_request(cr, profile_uri, params=params, headers=headers, type="GET", context=context)
-                people.update(profile)
+                status, public_profile = self.send_request(cr, profile_uri, params=params, headers=headers, type="GET", context=context)
+
             except urllib2.HTTPError, e:
                 if e.code == 400:
                     result_data['warnings'].append([_('LinkedIn error'), _('LinkedIn is temporary down for the searches by url.')])
                 elif e.code in (401, 410):
                     raise e
 
+        #Companies search
+        search_params = dict(params.copy(), keywords=kw.get('search_term', "") or "", count=self.limit)
+        company_search_uri = "/company-search:(companies:{company_fields})".format(company_fields=company_fields)
+        status, companies = self.send_request(cr, company_search_uri, params=search_params, headers=headers, type="GET", context=context)
+        if companies and companies['companies'].get('values') and universal_company:
+            companies['companies']['values'].append(universal_company)
+
         #Profile Information of current user
         profile_uri = "/people/~:(first-name,last-name)"
         status, res = self.send_request(cr, profile_uri, params=params, headers=headers, type="GET", context=context)
         result_data['current_profile'] = res
 
-        #Companies search
-        search_params = dict(params.copy(), keywords=kw.get('search_term', "") or "", count=self.limit)
-        company_search_uri = "/company-search:(companies:{company_fields})".format(company_fields=company_fields)
-        status, res = self.send_request(cr, company_search_uri, params=search_params, headers=headers, type="GET", context=context)
-        #TODO: If companies is there then update the values attribute of companies result(it is possible that comapnies come up with universal-search)
-        companies.update(res)
-
         #Note: People search is allowed to only vetted API access request, please go through following link
         #https://help.linkedin.com/app/api-dvr
         people_search_uri = "/people-search:(people:{people_fields})".format(people_fields=people_fields)
-        status, res = self.send_request(cr, people_search_uri, params=search_params, headers=headers, type="GET", context=context)
-        #TODO: If people is there then update the values attribute of people result(it is possible that people come up with public-url-search)
-        people.update(res or {})
+        status, people = self.send_request(cr, people_search_uri, params=search_params, headers=headers, type="GET", context=context)
+        if people and people['people'].get('values') and public_profile:
+            people['people']['values'].append(public_profile)
 
         result_data['companies'] = companies
         result_data['people'] = people

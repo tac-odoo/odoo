@@ -301,8 +301,12 @@ openerp.web_linkedin = function(instance) {
             this.$(".oe_linkedin_pop_c, .oe_linkedin_pop_p").empty();
 
             if (url && url.length) {
-                var url = url.replace(/\/+$/, '');
+                var url = url.replace(/\/+$/, ''); //Will remove trailing forward slace
                 var uid = url.replace(/(.*linkedin\.com\/[a-z]+\/)|(^.*\/company\/)|(\&.*$)/gi, '');
+                var re = /[^\w\d-_]/g //Will replace special characters except - and _
+                if (re.test(uid)) { //Test whether url having special characters other than - and _
+                    uid = uid.replace(re, '');
+                }
                 _.extend(params, {'search_uid': uid});
 
                 this.search = url;
