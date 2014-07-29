@@ -23,11 +23,19 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from dateutil import parser
 import time
-
+import re
+import uuid
+import urlparse
 from openerp import fields, api, tools, models
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DF
 
+emails_split = re.compile(r"[;,\n\r]+")
+
+class survey_user_input(models.Model):
+    _inherit = "survey.user_input"
+
+    employee_id = fields.Many2one('hr.employee', string='Employee')
 
 class hr_evaluation(models.Model):
     _name = "hr_evaluation.evaluation"
@@ -46,7 +54,7 @@ class hr_evaluation(models.Model):
         return template_id
 
     @api.one
-    def _set_appraisal_url(self,):
+    def _set_appraisal_url(self):
         self.appraisal_url = ''
         self.email_to = ''
         self.send_mail_status = False
@@ -56,6 +64,22 @@ class hr_evaluation(models.Model):
         return [('new', 'To Start'),
                 ('pending', 'Appraisal Sent'),
                 ('done', 'Done'),]
+
+    @api.one
+    def _get_tot_sent_appraisal(self):
+        sur_res_obj = self.env['survey.user_input']
+        self.tot_sent_appraisal = len(sur_res_obj.search([
+                                  ('survey_id', 'in', [self.apprasial_manager_survey_id.id, self.appraisal_colleagues_survey_id.id, self.appraisal_self_survey_id.id, self.appraisal_subordinates_survey_id.id]),
+                                  ('type', '=', 'link'), ('deadline','=', self.date_close),
+                                  ('employee_id','=',self.employee_id.id)]))
+
+    @api.one
+    def _get_tot_completed_appraisal(self):
+        sur_res_obj = self.env['survey.user_input']
+        self.tot_comp_appraisal = len(sur_res_obj.search([
+                                  ('survey_id', 'in', [self.apprasial_manager_survey_id.id, self.appraisal_colleagues_survey_id.id, self.appraisal_self_survey_id.id, self.appraisal_subordinates_survey_id.id]),
+                                  ('type', '=', 'link'), ('deadline','=', self.date_close),  ('state', '=', 'done'),
+                                  ('employee_id','=',self.employee_id.id)])) or 0
 
     interview_deadline = fields.Date("Final Interview", select=True)
     employee_id = fields.Many2one('hr.employee', required=True, string='Employee')
@@ -81,6 +105,8 @@ class hr_evaluation(models.Model):
     email_to = fields.Char('Appraisal Receiver', compute=_set_appraisal_url)
     appraisal_url = fields.Char('Appraisal URL', compute=_set_appraisal_url)
     send_mail_status = fields.Boolean('Appraisal Send Mail Status', compute=_set_appraisal_url)
+    tot_sent_appraisal = fields.Integer('Number of sent appraisal', compute=_get_tot_sent_appraisal, defualt=0, store=True)
+    tot_comp_appraisal = fields.Integer('Number of completed appraisal', compute=_get_tot_completed_appraisal, defualt=0, store=True)
 
     @api.one
     @api.depends('employee_id')
@@ -120,31 +146,59 @@ class hr_evaluation(models.Model):
         return res
 
     @api.one
-    def update_appraisal_url(self, url, email_to):
+    def update_appraisal_url(self, url, email_to, token):
+        url = urlparse.urlparse(url).path[1:]
+        if token:
+            url = url + '/' + token
         self.appraisal_url = url
         self.email_to = email_to
         return True
 
     @api.one
+    def create_token(self, email, url, partner_id, employee_id):
+        survey_response_obj = self.env['survey.user_input']
+        token = uuid.uuid4().__str__()
+        # create response with token
+        survey_response_obj.create({
+            'survey_id': url.id,
+            'deadline': self.date_close,
+            'date_create': datetime.now(),
+            'type': 'link',
+            'state': 'new',
+            'token': token,
+            'employee_id': employee_id.id if employee_id else None,
+            'partner_id': partner_id.id if partner_id else None,
+            'email': email})
+        return token
+
+    @api.one
     def create_receiver_list(self, apprasial, url):
-        email_to = ''
-        for rec in apprasial: 
-            if rec.work_email: email_to += rec.work_email + ','
-        self.update_appraisal_url(url, email_to)
-        self.mail_template.send_mail(self.id, force_send=True)
+        partner_obj = self.env['res.partner']
+        emails_list = []
+        for rec in apprasial:
+            if rec.work_email: 
+                email = rec.work_email.strip()
+                if re.search(r"^[^@]+@[^@]+$", email):
+                    emails_list.append(email)
+
+        for email in emails_list:
+            partner_id = partner_obj.search([('email', '=', email)]) or None
+            token = self.create_token(email, url, partner_id, self.employee_id)[0]
+            self.update_appraisal_url(url.public_url, email, token)
+            self.mail_template.send_mail(self.id, force_send=True)
         return True
 
     @api.one
     def button_sent_appraisal(self):
         if self.employee_id:
             if self.appraisal_manager and self.apprasial_manager_ids:
-                self.create_receiver_list(self.apprasial_manager_ids, self.apprasial_manager_survey_id.public_url)
+                self.create_receiver_list(self.apprasial_manager_ids, self.apprasial_manager_survey_id)
             if self.appraisal_colleagues and self.appraisal_colleagues_ids:
-                self.create_receiver_list(self.appraisal_colleagues_ids, self.appraisal_colleagues_survey_id.public_url)
+                self.create_receiver_list(self.appraisal_colleagues_ids, self.appraisal_colleagues_survey_id)
             if self.appraisal_subordinates and self.appraisal_subordinates_ids:
-                self.create_receiver_list(self.appraisal_subordinates_ids, self.appraisal_subordinates_survey_id.public_url)
+                self.create_receiver_list(self.appraisal_subordinates_ids, self.appraisal_subordinates_survey_id)
             if self.appraisal_self and self.apprasial_employee:
-                self.create_receiver_list(self.employee_id, self.appraisal_self_survey_id.public_url)
+                self.create_receiver_list(self.employee_id, self.appraisal_self_survey_id)
             if self.state == 'new':
                 self.write({'state': 'pending', 'send_mail_status': True})
         return True
@@ -231,6 +285,8 @@ class hr_employee(models.Model):
                 next_date = (now + relativedelta(months=emp.appraisal_repeat_number * 12)).strftime('%Y-%m-%d')
             self.write(cr, uid, [emp.id], {'evaluation_date': next_date}, context=context)
             vals = {'employee_id': emp.id,
+                    'date_close': now,
+                    'department_id': emp.department_id.id,
                     'appraisal_manager': emp.appraisal_manager,
                     'apprasial_manager_ids': [(4,manager.id) for manager in emp.apprasial_manager_ids],
                     'apprasial_manager_survey_id' : emp.apprasial_manager_survey_id.id,
@@ -238,7 +294,7 @@ class hr_employee(models.Model):
                     'appraisal_colleagues_ids': [(4,colleagues.id) for colleagues in emp.appraisal_colleagues_ids],
                     'appraisal_colleagues_survey_id': emp.appraisal_colleagues_survey_id.id,
                     'appraisal_self': emp.appraisal_self,
-                    'apprasial_employee_id': emp.id,
+                    'apprasial_employee': emp.name,
                     'appraisal_self_survey_id': emp.appraisal_self_survey_id.id,
                     'appraisal_subordinates': emp.appraisal_subordinates,
                     'appraisal_subordinates_ids': [(4,subordinates.id) for subordinates in emp.appraisal_subordinates_ids],
