@@ -20,7 +20,6 @@ $(document).ready(function () {
     }
 
     var transition_value = "background-color 1s";
-    /*JSH Note: It is required to set transition propery because of Jquery issue #14836 for Chrome*/
     $(location.hash).css({"-webkit-transition" : transition_value, "-moz-transition" : transition_value, "transition" : transition_value, "-o-transition" : transition_value})
     .one("webkitTransitionEnd transitionend oTransitionEnd MSTransitionEnd",
         function() {

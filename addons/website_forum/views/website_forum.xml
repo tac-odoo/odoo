@@ -697,7 +697,7 @@
                         <t t-set="title" t-value="'Thanks for poasting your question'" />
                         <t t-set="body" t-value="'Share your question to improve your chance of having an answer'" />
                         <t t-set="url" t-value="'\'' + url + '\''" />
-                        <t t-set="content" t-value="'\'' + question.name + '#odoo #help' + '\''" />
+                        <t t-set="content" t-value="'\'' + question.name + ' #odoo #help' + '\''" />
                     </t>
                     <h4 class="modal-title" id="share_dialog_title">
                         <t t-esc="title" />
