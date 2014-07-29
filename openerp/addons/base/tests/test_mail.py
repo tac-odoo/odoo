@@ -22,13 +22,29 @@
 #
 ##############################################################################
 
+import re
 import unittest2
-
-from lxml import etree
 
 from openerp.tools import html_sanitize, html_email_clean, append_content_to_html, plaintext2html, email_split
 
 import test_mail_examples
+
+
+class Test_Regexes(unittest2.TestCase):
+    bounce_alias = 'mybounce'
+    print '-----------------'
+    bounce_re = re.compile("%s-(\d+)-?([\w.]+)?-?(\d+)?" % bounce_alias, re.UNICODE)
+    for email in ['cacamou',
+                  'mybounce-145@mydomain.com',
+                  'mybounce-145-project.task-45@mydomain.com',
+                  ' mybounce-145-project.task-45@mydomain.com',
+                  'otherbounce-145@mydomain.com',
+                  'mybounce2-145-project.task-45@mydomain.com'
+                  ]:
+        match = bounce_re.search(email)
+        if match:
+            print match.group(), match.groups()
+    print '-----------------'
 
 
 class TestSanitizer(unittest2.TestCase):

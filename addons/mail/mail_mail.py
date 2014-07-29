@@ -22,7 +22,6 @@
 import base64
 import logging
 import re
-from urllib import urlencode
 from urlparse import urljoin
 
 from openerp import tools

@@ -20,8 +20,8 @@
 ##############################################################################
 
 import logging
+import re
 
-from openerp import tools
 from openerp.addons.mail.mail_message import decode
 from openerp.addons.mail.mail_thread import decode_header
 from openerp.osv import osv
@@ -46,7 +46,8 @@ class MailThread(osv.AbstractModel):
 
         # 0. Verify whether this is a bounced email (wrong destination,...) -> use it to collect data, such as dead leads
         if bounce_alias in email_to:
-            bounce_match = tools.bounce_re.search(email_to)
+            bounce_re = re.compile("%s-(\d+)-?([\w.]+)?-?(\d+)?" % bounce_alias, re.UNICODE)
+            bounce_match = bounce_re.search(email_to)
             if bounce_match:
                 bounced_model, bounced_thread_id = None, False
                 bounced_mail_id = bounce_match.group(1)

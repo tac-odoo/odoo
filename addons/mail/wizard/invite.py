@@ -19,6 +19,8 @@
 #
 ##############################################################################
 
+from urlparse import urljoin
+
 from openerp import tools
 from openerp.osv import osv
 from openerp.osv import fields
@@ -60,10 +62,18 @@ class invite_wizard(osv.osv_memory):
             help="If checked, the partners will receive an email warning they have been "
                     "added in the document's followers."),
     }
-    
+
     _defaults = {
-        'send_mail' : True,
+        'send_mail': True,
     }
+
+    def _get_partner_access_link(self, cr, uid, mail, model, res_id, partner, context=None):
+        footer = None
+        if partner and partner.user_ids:
+            base_url = self.pool.get('ir.config_parameter').get_param(cr, uid, 'web.base.url')
+            url = urljoin(base_url, self.pool[model]._get_access_link(cr, uid, mail, partner, context=context))
+            footer = _("<a style='color:inherit' href='%s'>Click here to access the document</a>") % url
+        return footer
 
     def add_followers(self, cr, uid, ids, context=None):
         for wizard in self.browse(cr, uid, ids, context=context):
@@ -71,8 +81,8 @@ class invite_wizard(osv.osv_memory):
             document = model_obj.browse(cr, uid, wizard.res_id, context=context)
 
             # filter partner_ids to get the new followers, to avoid sending email to already following partners
-            new_follower_ids = [p.id for p in wizard.partner_ids if p not in document.message_follower_ids]
-            model_obj.message_subscribe(cr, uid, [wizard.res_id], new_follower_ids, context=context)
+            new_followers = [p for p in wizard.partner_ids if p not in document.message_follower_ids]
+            model_obj.message_subscribe(cr, uid, [wizard.res_id], [p.id for p in new_followers], context=context)
 
             ir_model = self.pool.get('ir.model')
             model_ids = ir_model.search(cr, uid, [('model', '=', model_obj._name)], context=context)
@@ -88,13 +98,21 @@ class invite_wizard(osv.osv_memory):
                 # send mail to new followers
                 # the invite wizard should create a private message not related to any object -> no model, no res_id
                 mail_mail = self.pool.get('mail.mail')
-                mail_id = mail_mail.create(cr, uid, {
-                    'model': wizard.res_model,
-                    'res_id': wizard.res_id,
-                    'subject': _('Invitation to follow %s: %s') % (model_name, document.name_get()[0][1]),
-                    'body_html': '%s' % wizard.message,
-                    'auto_delete': True,
-                    'recipient_ids': [(4, id) for id in new_follower_ids]
+                mail_ids = []
+                for partner in new_followers:
+                    mail_id = mail_mail.create(cr, uid, {
+                        'model': None,
+                        'res_id': 0,
+                        'subject': _('Invitation to follow %s: %s') % (model_name, document.name_get()[0][1]),
+                        'body_html': '%s' % wizard.message,
+                        'auto_delete': True,
+                        'recipient_ids': [(4, partner.id)]
                     }, context=context)
-                mail_mail.send(cr, uid, [mail_id], context=context)
+                    mail = mail_mail.browse(cr, uid, mail_id, context=context)
+                    footer = self._get_partner_access_link(cr, uid, mail, wizard.res_model, wizard.res_id, partner, context=context)
+                    if footer:
+                        message = tools.append_content_to_html(wizard.message, footer, plaintext=False, container_tag='div')
+                        mail_mail.write(cr, uid, [mail_id], {'body_html': message}, context=context)
+                    mail_ids.append(mail_id)
+                mail_mail.send(cr, uid, mail_ids, context=context)
         return {'type': 'ir.actions.act_window_close'}

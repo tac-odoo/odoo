@@ -700,8 +700,12 @@ class mail_message(osv.Model):
             author_ids = [mid for mid, message in message_values.iteritems()
                 if message.get('author_id') and message.get('author_id') == partner_id]
         elif operation == 'create':
+            print author_ids
             author_ids = [mid for mid, message in message_values.iteritems()
                 if not message.get('model') and not message.get('res_id')]
+            for mid, message in message_values.iteritems():
+                print mid, message
+            print author_ids
 
         # Parent condition, for create (check for received notifications for the created message parent)
         notified_ids = []
