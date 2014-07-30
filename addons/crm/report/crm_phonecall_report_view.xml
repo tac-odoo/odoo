@@ -55,7 +55,7 @@
                         <filter string="Company" icon="terp-go-home" domain="[]" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
                         <filter string="Creation Date (day)" icon="terp-go-today" domain="[]" context="{'group_by':'create_date:day'}" help="Date of call"/>
                         <filter string="Creation Date (month)" icon="terp-go-month" domain="[]" context="{'group_by':'create_date:month'}" help="Month of call"/>
-                        <filter string="Creation Date (year)" icon="terp-go-year" domain="[]" context="{'group_by':'create_date:name'}" help="Year of call"/>
+                        <filter string="Creation Date (year)" icon="terp-go-year" domain="[]" context="{'group_by':'create_date:year'}" help="Year of call"/>
                     </group>
                 </search>
             </field>
