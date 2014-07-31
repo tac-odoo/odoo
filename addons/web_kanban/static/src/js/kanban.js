@@ -112,7 +112,7 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
     extract_aggregates: function(node) {
         for (var j = 0, jj = this.group_operators.length; j < jj;  j++) {
             if (node.attrs[this.group_operators[j]]) {
-                this.aggregates[node.attrs.name] = node.attrs[this.group_operators[j]];
+                this.aggregates[node.attrs.name] = [node.attrs[this.group_operators[j]], this.group_operators[j]];
                 break;
             }
         }
@@ -354,7 +354,11 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
                     var old_group = self.currently_dragging.group;
                     var new_group = ui.item.parents('.oe_kanban_column:first').data('widget');
                     if (!(old_group.title === new_group.title && old_group.value === new_group.value && old_index == new_index)) {
-                        self.on_record_moved(record, old_group, old_index, new_group, new_index);
+                        self.on_record_moved(record, old_group, old_index, new_group, new_index).done(function() {
+                            old_group.group.attributes.length -= 1; //Move this to on_record_moved
+                            new_group.group.attributes.length += 1; //Move this to on_record_moved
+                            self.recompute_aggregates(record, old_group, old_index, new_group, new_index);
+                        });
                     }
                     setTimeout(function() {
                         // A bit hacky but could not find a better solution for Firefox (problem not present in chrome)
@@ -406,21 +410,26 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
         }
         this.postprocess_m2m_tags();
     },
+    recompute_aggregates: function(record, old_group, old_index, new_group, new_index) {
+        //on_record_moved will deduct record and add record in records list, we need to recalculate the aggregates based on records
+        old_group.recompute_aggregates();
+        new_group.recompute_aggregates();
+    },
     on_record_moved : function(record, old_group, old_index, new_group, new_index) {
         var self = this;
         $.fn.tipsy.clear();
-        $(old_group.$el).add(new_group.$el).find('.oe_kanban_aggregates, .oe_kanban_group_length').hide();
+        //$(old_group.$el).add(new_group.$el).find('.oe_kanban_aggregates, .oe_kanban_group_length').hide();
         if (old_group === new_group) {
             new_group.records.splice(old_index, 1);
             new_group.records.splice(new_index, 0, record);
-            new_group.do_save_sequences();
+            return new_group.do_save_sequences();
         } else {
             old_group.records.splice(old_index, 1);
             new_group.records.splice(new_index, 0, record);
             record.group = new_group;
             var data = {};
             data[this.group_by] = new_group.value;
-            this.dataset.write(record.id, data, {}).done(function() {
+            return this.dataset.write(record.id, data, {}).done(function() {
                 record.do_reload();
                 new_group.do_save_sequences();
             }).fail(function(error, evt) {
@@ -538,7 +547,7 @@ instance.web_kanban.KanbanGroup = instance.web.Widget.extend({
                 } catch(e) {}
             }
             _.each(this.view.aggregates, function(value, key) {
-                self.aggregates[value] = instance.web.format_value(group.get('aggregates')[key], {type: 'float'});
+                self.aggregates[value[0]] = instance.web.format_value(group.get('aggregates')[key], {type: 'float'});
             });
         }
 
@@ -613,6 +622,52 @@ instance.web_kanban.KanbanGroup = instance.web.Widget.extend({
         });
         this.is_started = true;
         return def;
+    },
+    recompute_aggregates: function() {
+        var self = this;
+        console.log("self.records are ::: ",self.records);
+        //on_record_moved will deduct record and add record in records list, we need to recalculate the aggregates based on records
+        //Manually compute aggregate at client side because when record is dragged from one stage to another aggregate value also changed
+        _.each(this.view.aggregates, function(value, key) {
+            console.log("aggregate field is ::: ",key)
+            var group_val = 0;
+            switch (value[1]) {
+                case 'sum':
+                    //No need to do sum, it is returned by read_group itself for integer and float field
+                    _.each(self.records, function(record) {
+                        group_val += record.values[key].value;
+                    });
+                    self.aggregates[value[0]] = group_val;
+                    break;
+                case 'avg':
+                    _.each(self.records, function(record) {
+                        group_val += record.values[key].value;
+                    });
+                    self.aggregates[value[0]] = group_val / self.group.attributes.length;
+                    break;
+                case 'min':
+                    //Check the min value with dragged group's value and compare it with current value of aggregate min
+                    //OR simply get the lowest value of records for aggregate field
+                    _.each(self.records, function(record) {
+                        if (group_val && group_val > record.values[key].value) {
+                            group_val = record.values[key].value;
+                        }
+                    });
+                    break;
+                case 'max':
+                    //Check the max value with dragged group's value and compare it with current value of aggregate max
+                    //OR simply get the highest value of records for aggregate field
+                    _.each(self.records, function(record) {
+                        if (group_val && group_val < record.values[key].value) {
+                            group_val = record.values[key].value;
+                        }
+                    });
+                    break;
+            }
+            
+        });
+        //Re-render the header to update the aggregates
+        this.$el.find(".oe_kanban_group_title_horizontal").replaceWith(instance.web.qweb.render('KanbanView.group_header_title', { widget: this }));
     },
     compute_cards_auto_height: function() {
         // oe_kanban_no_auto_height is an empty class used to disable this feature
@@ -719,8 +774,11 @@ instance.web_kanban.KanbanGroup = instance.web.Widget.extend({
         var self = this;
         if (_.indexOf(this.view.fields_keys, 'sequence') > -1) {
             var new_sequence = _.pluck(this.records, 'id');
-            self.view.dataset.resequence(new_sequence);
+            def = self.view.dataset.resequence(new_sequence);
+        } else {
+            def.resolve();
         }
+        return def;
     },
     /**
      * Handles a newly created record
