@@ -249,7 +249,7 @@ openerp.web_linkedin = function(instance) {
         template: "Linkedin.popup",
         init: function(parent, search) {
             var self = this;
-            this._super(parent, { 'title': QWeb.render('LinkedIn.AdvancedSearch', {'title': _t("LinkedIn search")}) });
+            this._super(parent, { 'title': QWeb.render('LinkedIn.AdvancedSearch') });
             this.search = search;
             this.limit = 5;
         },
@@ -274,9 +274,10 @@ openerp.web_linkedin = function(instance) {
 
             this.$search = this.$el.parents('.modal').find(".oe_linkedin_advanced_search" );
             this.$url = this.$search.find("input[name='search']" );
-            this.$button = this.$search.find("button");
+            this.$url.val(this.search);
+            this.$span = this.$search.find("span");
 
-            this.$button.on("click", function (e) {
+            this.$span.on("click", function (e) {
                 e.stopPropagation();
                 self.do_search(self.$url.val() || '');
             });
@@ -286,7 +287,7 @@ openerp.web_linkedin = function(instance) {
                 }).on("keydown", function (e) {
                     if(e.keyCode == 13) {
                         $(e.target).blur();
-                        self.$button.click();
+                        self.$span.click();
                     }
                 });
         },
