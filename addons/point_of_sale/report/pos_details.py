@@ -162,8 +162,8 @@ class pos_details(report_sxw.rml_parse):
             for line in order.lines:
                 line_taxes = account_tax_obj.compute_all(self.cr, self.uid, line.product_id.taxes_id, line.price_unit, line.qty, product=line.product_id, partner=line.order_id.partner_id or False)
                 for tax in line_taxes['taxes']:
-                    taxes.setdefault(tax['id'], {'name': tax['name'], 'amount':0.0})
-                    taxes[tax['id']]['amount'] += tax['amount']
+                    taxes.setdefault(tax['tax_id'], {'name': tax['name'], 'amount':0.0})
+                    taxes[tax['tax_id']]['amount'] += tax['amount']
         return taxes.values()
 
     def _get_user_names(self, user_ids):
