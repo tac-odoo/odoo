@@ -26,7 +26,11 @@
             </div>
             <div class="oe_msg_center">
                 <div class="oe_msg_content">
-                    <button class="oe_full" title="Open the full mail composer"><span class='oe_e'>&amp;ograve</span></button>
+                    <t t-if="!widget.is_log">
+                        <button class="oe_full" title="Open the full mail composer">
+                            <span class='oe_e'>&amp;ograve</span>
+                        </button>
+                    </t>
                     <t t-call="mail.thread.list_recipients"/>
                     <textarea class="field_text"></textarea>
                 </div>
@@ -46,6 +50,7 @@
                     <t t-if="widget.options.compose_placeholder" t-raw="widget.options.compose_placeholder"/>
                     <t t-if="!widget.options.compose_placeholder and widget.options.view_mailbox">Share with my followers...</t>
                 </div>
+                <div class="mark_all_read btn btn-default btn-sm pull-right">Mark all read</div>
             </t>
             <t t-if="!widget.options.view_mailbox">
                 <div class="field_text oe_compact oe_compact_record">
