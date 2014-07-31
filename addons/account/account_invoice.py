@@ -1522,7 +1522,7 @@ class account_invoice_tax(models.Model):
         apply_on = 'refund'
         if invoice.type in ['out_invoice','in_invoice']:
             apply_on = 'invoice'
-        for line in inv.invoice_line:
+        for line in invoice.invoice_line:
             taxes = line.invoice_line_tax_id.compute_all(
                 (line.price_unit * (1 - (line.discount or 0.0) / 100.0)),
                 line.quantity, line.product_id, invoice.partner_id, date=invoice.date_invoice, apply_on=apply_on)['taxes']
