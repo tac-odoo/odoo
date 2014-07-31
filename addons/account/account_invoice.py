@@ -1412,7 +1412,7 @@ class account_invoice_line(models.Model):
                         res[-1]['tax_code_id'] = tax['code_id']
                         res[-1]['tax_amount'] = tax['code_id'] and (tax['tax_amount'] >= 0 and tax['price_unit'] * line.quantity or -tax['price_unit'] * line.quantity) or 0.0
                     elif tax_code_found and tax['code_id']:
-                        res.append(self.move_line_get_item(cr, uid, line, context))
+                        res.append(dict(mres))
                         res[-1]['price'] = 0.0
                         res[-1]['account_analytic_id'] = False
                         res[-1]['tax_code_id'] = tax['code_id']
