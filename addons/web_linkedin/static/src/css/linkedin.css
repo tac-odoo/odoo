@@ -81,3 +81,10 @@
 .openerp .oe_linkedin_search_title span {
     color: #287bbc;
 }
+
+.openerp .oe_linkedin_show_more {
+    //display: table-row;
+    width: 100%;
+    clear: both;
+    text-align: center;
+}

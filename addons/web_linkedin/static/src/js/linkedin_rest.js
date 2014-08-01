@@ -77,6 +77,7 @@ openerp.web_linkedin = function(instance) {
         selected_entity: function(entity) {
             var self = this;
             this.create_on_change(entity).done(function(to_change) {
+                //Why ?, why should we delete some keys from to_change, old code since version 6.1
                 var values = self.view.get_fields_values();
                 _.each(to_change, function (value, key) {
                     if (!/linkedin/.test(key) && !!values[key]) {
@@ -84,7 +85,7 @@ openerp.web_linkedin = function(instance) {
                             delete to_change[key];
                         }
                     }
-                })
+                });
                 self.view.set_values(to_change);
             });
         },
@@ -123,16 +124,18 @@ openerp.web_linkedin = function(instance) {
             //Here limit will be 25 because count range can between 0 to 25
             //https://developer.linkedin.com/documents/people-search-api
             res = new instance.web.Model("linkedin").call("get_people_from_company", [entity.universalName, 25, window.location.href, context]).done(function(result) {
-                var result = _.reject(result.people.values || [], function(el) {
-                        return ! el.formattedName;
-                });
-                self.create_or_modify_company_partner(result).then(function (childs_to_change) {
-                    _.each(childs_to_change, function (data) {
-                        // [0,0,data] if it's a new partner
-                        to_change.child_ids.push( data.id ? [1, data.id, data] : [0, 0, data] );
+                if (result.people) {
+                    var result = _.reject(result.people.values || [], function(el) {
+                            return ! el.formattedName;
                     });
-                    children_def.resolve();
-                });
+                    self.create_or_modify_company_partner(result).then(function (childs_to_change) {
+                        _.each(childs_to_change, function (data) {
+                            // [0,0,data] if it's a new partner
+                            to_change.child_ids.push( data.id ? [1, data.id, data] : [0, 0, data] );
+                        });
+                        children_def.resolve();
+                    });
+                } else { children_def.resolve(); /*No people found for the company, simply resolve child_def*/}
             }).fail(function () {
                     children_def.reject();
             });
@@ -252,6 +255,8 @@ openerp.web_linkedin = function(instance) {
             this._super(parent, { 'title': QWeb.render('LinkedIn.AdvancedSearch') });
             this.search = search;
             this.limit = 5;
+            this.company_offset = 0;
+            this.people_offset = 0;
         },
         start: function() {
             var self = this;
@@ -299,7 +304,9 @@ openerp.web_linkedin = function(instance) {
             var self = this;
             var deferrers = [];
             var params = {};
-            this.$(".oe_linkedin_pop_c, .oe_linkedin_pop_p").empty();
+            this.$(".oe_linkedin_pop_c .oe_linkedin_company_entities, .oe_linkedin_pop_c .oe_linkedin_show_more, .oe_linkedin_pop_p .oe_linkedin_people_entities, .oe_linkedin_pop_p .oe_linkedin_show_more").empty();
+            this.company_offset = 0;
+            this.people_offset = 0;
 
             if (url && url.length) {
                 var url = url.replace(/\/+$/, ''); //Will remove trailing forward slace
@@ -313,14 +320,31 @@ openerp.web_linkedin = function(instance) {
                 this.search = url;
             }
             var context = instance.web.pyeval.eval('context');
-            self.rpc("/linkedin/get_search_popup_data", _.extend({'search_term': this.search, 'from_url': window.location.href, 'local_context': context}, params)).done(function(result) {
+            _.extend(params, {'search_term': this.search, 'from_url': window.location.href, 'local_context': context});
+            self.rpc("/linkedin/get_search_popup_data", params).done(function(result) {
                 if(result.status && result.status == 'need_auth' && confirm(_t("You will be redirected to LinkedIn authentication page, once authenticated after that you use this widget."))) {
                     instance.web.redirect(result.url);
                 } else { //We can check (result.status == 'OK') and other status
                     self.trigger('search_completed');
                     self.has_been_loaded.resolve(result.current_profile)
                     self.do_result_companies(result.companies);
+                    if (result.companies && result.companies.companies._total > (self.company_offset + self.limit)) {
+                        var remaining = result.companies.companies._total - (self.company_offset + self.limit)
+                        var $company_more = $(QWeb.render("Linkedin.show_more", {'remaining': remaining, class: 'company'}));
+                        $company_more.on("click", self, function(e) {
+                            self.do_more_companies(e, params);
+                        });
+                        $company_more.appendTo(self.$(".oe_linkedin_pop_c .oe_linkedin_show_more"));
+                    }
                     self.do_result_people(result.people);
+                    if (result.people && result.people.people._total > (self.people_offset + self.limit)) {
+                        var remaining = result.people.people._total - (self.people_offset + self.limit)
+                        var $people_more = $(QWeb.render("Linkedin.show_more", {'remaining': remaining, class: 'people'}));
+                        $people_more.on("click", self, function(e) {
+                            self.do_more_people(e, params);
+                        });
+                        $people_more.appendTo(self.$(".oe_linkedin_pop_p .oe_linkedin_show_more"));
+                    }
                     if (result.warnings) { self.show_warnings(result.warnings); }
                 }
             });
@@ -334,7 +358,7 @@ openerp.web_linkedin = function(instance) {
                 return el;
             });
             console.debug("Linkedin companies found:", (companies.companies || {})._total, '=>', lst.length, lst);
-            return this.display_result(lst, this.$(".oe_linkedin_pop_c"));
+            return this.display_result(lst, this.$(".oe_linkedin_pop_c .oe_linkedin_company_entities"));
         },
         do_result_people: function(people) {
             var plst = (people.people || {}).values || [];
@@ -344,7 +368,7 @@ openerp.web_linkedin = function(instance) {
                 return el;
             });
             console.debug("Linkedin people found:", people.numResults, '=>', plst.length, plst);
-            return this.display_result(plst, this.$(".oe_linkedin_pop_p"));
+            return this.display_result(plst, this.$(".oe_linkedin_pop_p .oe_linkedin_people_entities"));
         },
         display_result: function(result, $elem) {
             var self = this;
@@ -367,6 +391,28 @@ openerp.web_linkedin = function(instance) {
             if (!$elem.find("div").size()) {
                 $elem.append($('<div class="oe_no_result">').text(_t("No results found")));
             }
+        },
+        do_more_people: function(event, params) {
+            var self = this;
+            new instance.web.Model("linkedin").call("get_people_data", [this.people_offset += this.limit, this.limit, {}, {}], params).done(function(result) {
+                self.do_result_people(result[1]);
+                if (result[0] == 200 && result[1].people && (result[1].people._total - (self.people_offset+self.limit)) > 0) {
+                    self.$el.find(".oe_linkedin_show_more .people .oe_linkedin_remaining").text(result[1].people._total - (self.people_offset+self.limit));
+                } else if (result[0] == 200) {
+                    self.$el.find(".oe_linkedin_show_more .people").remove();
+                }
+            });
+        },
+        do_more_companies: function(event, params) {
+            var self = this;
+            new instance.web.Model("linkedin").call("get_company_data", [this.company_offset += this.limit, this.limit, {}, {}], params).done(function(result) {
+                self.do_result_companies(result[1]);
+                if (result[0] == 200 && result[1].companies && (result[1].companies._total - (self.company_offset+self.limit)) > 0) {
+                    self.$el.find(".oe_linkedin_show_more .company .oe_linkedin_remaining").text(result[1].companies._total - (self.company_offset+self.limit));
+                } else if (result[0] == 200) {
+                    self.$el.find(".oe_linkedin_show_more .company").remove();
+                }
+            });
         },
         show_warnings: function(warnings) {
             var self = this;

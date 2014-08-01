@@ -12,10 +12,19 @@
     <t t-name="Linkedin.popup">
         <div>
             <h2 style="margin-top:-10px;">Contacts</h2>
-            <div class="oe_linkedin_pop_p"></div>
+            <div class="oe_linkedin_pop_p">
+                <div class="oe_linkedin_people_entities"></div>
+                <div class="oe_linkedin_show_more"></div>
+            </div>
             <h2>Companies</h2>
-            <div class="oe_linkedin_pop_c"></div>
+            <div class="oe_linkedin_pop_c">
+                <div class="oe_linkedin_company_entities"></div>
+                <div class="oe_linkedin_show_more"></div>
+            </div>
         </div>
+    </t>
+    <t t-name="Linkedin.show_more">
+        <button t-attf-class="#{class} oe_button">Show more... (<span class="oe_linkedin_remaining"><t t-esc="remaining"></t></span> remaining)</button>
     </t>
     <t t-name="Linkedin.EntityWidget">
         <div class="oe_linkedin_entity">

@@ -125,7 +125,6 @@ class linkedin_users(osv.Model):
 
 class linkedin(osv.AbstractModel):
     _name = 'linkedin'
-    limit = 5
 
     def sync_linkedin_contacts(self, cr, uid, from_url, context=None):
         """
@@ -208,12 +207,13 @@ class linkedin(osv.AbstractModel):
         return data_dict 
 
     #TODO: Simplify this method
-    def get_search_popup_data(self, cr, uid, context=None, **kw):
+    def get_search_popup_data(self, cr, uid, offset=0, limit=5, context=None, **kw):
         """
             This method will return all needed data for LinkedIn Search Popup in single call.
             It returns companies(including search by universal name), people and warnings if any
         """
         result_data = {'warnings': []}
+        
         if context is None:
             context = {}
         context.update(kw.get('local_context') or {})
@@ -225,12 +225,54 @@ class linkedin(osv.AbstractModel):
         params = {
             'oauth2_access_token': self.get_token(cr, uid, context=context)
         }
+
+        #Profile Information of current user
+        profile_uri = "/people/~:(first-name,last-name)"
+        status, res = self.send_request(cr, profile_uri, params=params, headers=headers, type="GET", context=context)
+        result_data['current_profile'] = res
+
+        status, companies, warnings = self.get_company_data(cr, uid, offset, limit, params=params, headers=headers, context=context, **kw)
+        result_data['companies'] = companies
+        result_data['warnings'] += warnings
+        status, people, warnings = self.get_people_data(cr, uid, offset, limit, params=params, headers=headers, context=context, **kw)
+        result_data['people'] = people
+        result_data['warnings'] += warnings
+        return result_data
+
+    def get_company_data(self, cr, uid, offset=0, limit=5, params={}, headers={}, context=None, **kw):
+        companies = {}
+        universal_company = {}
+        if context is None:
+            context = {}
+        if not params:
+            params = {'oauth2_access_token': self.get_token(cr, uid, context=context)}
+        if not headers:
+            headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'x-li-format': 'json'}
+        context.update(kw.get('local_context') or {})
         #search by universal-name
         if kw.get('search_uid'):
             universal_search_uri = "/companies/universal-name={company_name}:{company_fields}".format(company_name=kw['search_uid'], company_fields=company_fields)
             status, universal_company = self.send_request(cr, universal_search_uri, params=params, headers=headers, type="GET", context=context)
-            print "\n\nres after universal search ::: ",universal_company
+        #Companies search
+        search_params = dict(params.copy(), keywords=kw.get('search_term', "") or "", start=offset, count=limit)
+        company_search_uri = "/company-search:(companies:{company_fields})".format(company_fields=company_fields)
+        status, companies = self.send_request(cr, company_search_uri, params=search_params, headers=headers, type="GET", context=context)
+        if companies and companies['companies'].get('values') and universal_company:
+            companies['companies']['values'].append(universal_company)
+        return status, companies, []
 
+    def get_people_data(self, cr, uid, offset=0, limit=5, params={}, headers={}, context=None, **kw):
+        people = {}
+        public_profile = {}
+        warnings = []
+        if context is None:
+            context = {}
+        if not params:
+            params = {'oauth2_access_token': self.get_token(cr, uid, context=context)}
+        if not headers:
+            headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'x-li-format': 'json'}
+        context.update(kw.get('local_context') or {})
+        if kw.get('search_uid'):
             #Unable to get why this code returns 400 bad request error, as per linked API doc the call is proper but it returns 400 bad request error always
             #add warning in response and handle warning at client side
             try:
@@ -240,32 +282,17 @@ class linkedin(osv.AbstractModel):
 
             except urllib2.HTTPError, e:
                 if e.code == 400:
-                    result_data['warnings'].append([_('LinkedIn error'), _('LinkedIn is temporary down for the searches by url.')])
+                    warnings.append([_('LinkedIn error'), _('LinkedIn is temporary down for the searches by url.')])
                 elif e.code in (401, 410):
                     raise e
-
-        #Companies search
-        search_params = dict(params.copy(), keywords=kw.get('search_term', "") or "", count=self.limit)
-        company_search_uri = "/company-search:(companies:{company_fields})".format(company_fields=company_fields)
-        status, companies = self.send_request(cr, company_search_uri, params=search_params, headers=headers, type="GET", context=context)
-        if companies and companies['companies'].get('values') and universal_company:
-            companies['companies']['values'].append(universal_company)
-
-        #Profile Information of current user
-        profile_uri = "/people/~:(first-name,last-name)"
-        status, res = self.send_request(cr, profile_uri, params=params, headers=headers, type="GET", context=context)
-        result_data['current_profile'] = res
-
+        search_params = dict(params.copy(), keywords=kw.get('search_term', "") or "", start=offset, count=limit)
         #Note: People search is allowed to only vetted API access request, please go through following link
         #https://help.linkedin.com/app/api-dvr
         people_search_uri = "/people-search:(people:{people_fields})".format(people_fields=people_fields)
         status, people = self.send_request(cr, people_search_uri, params=search_params, headers=headers, type="GET", context=context)
         if people and people['people'].get('values') and public_profile:
             people['people']['values'].append(public_profile)
-
-        result_data['companies'] = companies
-        result_data['people'] = people
-        return result_data
+        return status, people, warnings
 
     #To simplify method for need_auth and from_url part
     def get_people_from_company(self, cr, uid, company_universalname, limit, from_url, context=None):
