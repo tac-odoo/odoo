@@ -422,6 +422,12 @@ class account_move_line(osv.osv):
                 result.append(line.id)
         return result
 
+    def _get_ref_move_lines(self, cr, uid, ids, context=None):
+        return self.pool.get('account.move.line').search(cr, uid, [('move_id','in', ids),('ref','!=','move_id.ref')], context=context)
+
+    def _get_company_move_lines(self, cr, uid, ids, context=None):
+        return self.pool.get('account.move.line').search(cr, uid, [('company_id','in', ids),('company_id','!=','account_id.company_id')], context=context)
+
     def _get_reconcile(self, cr, uid, ids,name, unknow_none, context=None):
         res = dict.fromkeys(ids, False)
         for line in self.browse(cr, uid, ids, context=context):
@@ -441,7 +447,10 @@ class account_move_line(osv.osv):
         'account_id': fields.many2one('account.account', 'Account', required=True, ondelete="cascade", domain=[('type','<>','view'), ('type', '<>', 'closed')], select=2),
         'move_id': fields.many2one('account.move', 'Journal Entry', ondelete="cascade", help="The move of this entry line.", select=2, required=True),
         'narration': fields.related('move_id','narration', type='text', relation='account.move', string='Internal Note'),
-        'ref': fields.related('move_id', 'ref', string='Reference', type='char', size=64, store=True),
+        'ref': fields.related('move_id', 'ref', string='Reference', type='char', size=64,
+                               store={
+                                   'account.move': (_get_ref_move_lines, ['ref'], 20)
+                               }),
         'statement_id': fields.many2one('account.bank.statement', 'Statement', help="The bank statement used for bank reconciliation", select=1),
         'reconcile_id': fields.many2one('account.move.reconcile', 'Reconcile', readonly=True, ondelete='set null', select=2),
         'reconcile_partial_id': fields.many2one('account.move.reconcile', 'Partial Reconcile', readonly=True, ondelete='set null', select=2),
@@ -477,8 +486,11 @@ class account_move_line(osv.osv):
             type='many2one', relation='account.invoice', fnct_search=_invoice_search),
         'account_tax_id':fields.many2one('account.tax', 'Tax'),
         'analytic_account_id': fields.many2one('account.analytic.account', 'Analytic Account'),
-        'company_id': fields.related('account_id', 'company_id', type='many2one', relation='res.company', 
-                            string='Company', store=True, readonly=True)
+        'company_id': fields.related('account_id', 'company_id', type='many2one', relation='res.company',
+                                      string='Company', readonly=True,
+                                      store={
+                                          'account.account': (_get_company_move_lines, ['company_id'], 20)
+                                      }),
     }
 
     def _get_date(self, cr, uid, context=None):
@@ -576,53 +588,91 @@ class account_move_line(osv.osv):
         for l in lines:
             if l.account_id.type in ('view', 'consolidation'):
                 return False
+        query = """SELECT count(aml.id) FROM account_move_line aml
+                   LEFT JOIN account_account aa ON aml.account_id = aa.id
+                   WHERE aml.id IN (%s) AND aa.type IN ('view', 'consolidation')"""
+        cr.execute(query, tuple(ids))
+        res = cr.fetchall()
+        if res[0][0]:
+            return False
         return True
 
     def _check_no_closed(self, cr, uid, ids, context=None):
-        lines = self.browse(cr, uid, ids, context=context)
-        for l in lines:
-            if l.account_id.type == 'closed':
-                raise osv.except_osv(_('Error!'), _('You cannot create journal items on a closed account %s %s.') % (l.account_id.code, l.account_id.name))
+        query = """SELECT count(aml.id) FROM account_move_line aml, account_account aa
+                   WHERE aml.id IN (%s) AND aml.account_id = aa.id AND aa.type = 'closed'""" % (','.join(map(str, ids)))
+        cr.execute(query, ids)
+        res = cr.fetchall()
+        if res[0][0]:
+            lines = self.browse(cr, uid, ids, context=context)
+            for l in lines:
+                if l.account_id.type == 'closed':
+                    raise osv.except_osv(_('Error!'), _('You cannot create journal items on a closed account %s %s.') % (l.account_id.code, l.account_id.name))
         return True
 
     def _check_company_id(self, cr, uid, ids, context=None):
-        lines = self.browse(cr, uid, ids, context=context)
-        for l in lines:
-            if l.company_id != l.account_id.company_id or l.company_id != l.period_id.company_id:
-                return False
+        query = """SELECT count(aml.id) FROM account_move_line aml,
+                   account_account aa,
+                   account_period ap
+                   WHERE aml.id IN (%s) AND aml.account_id = aa.id AND aml.period_id = ap.id
+                  AND (aa.company_id != aml.company_id
+                      OR ap.company_id != aml.company_id)""" % (','.join(map(str, ids)))
+        cr.execute(query, ids)
+        res = cr.fetchall()
+        if res[0][0]:
+            return False
         return True
 
     def _check_date(self, cr, uid, ids, context=None):
-        for l in self.browse(cr, uid, ids, context=context):
-            if l.journal_id.allow_date:
-                if not time.strptime(l.date[:10],'%Y-%m-%d') >= time.strptime(l.period_id.date_start, '%Y-%m-%d') or not time.strptime(l.date[:10], '%Y-%m-%d') <= time.strptime(l.period_id.date_stop, '%Y-%m-%d'):
-                    return False
+        query = """SELECT count(aml.id) FROM account_move_line aml, account_journal aj, account_period ap
+                   WHERE aml.id IN (%s) AND aml.journal_id = aj.id AND aml.period_id = ap.id AND aj.allow_date = 't'
+                  AND (aml.date < ap.date_start
+                      OR aml.date > ap.date_stop)""" % (','.join(map(str, ids)))
+        cr.execute(query, ids)
+        res = cr.fetchall()
+        if res[0][0]:
+            return False
         return True
 
     def _check_currency(self, cr, uid, ids, context=None):
-        for l in self.browse(cr, uid, ids, context=context):
-            if l.account_id.currency_id:
-                if not l.currency_id or not l.currency_id.id == l.account_id.currency_id.id:
-                    return False
+        query = """SELECT count(aml.id) FROM account_move_line aml, account_account aa
+                   WHERE aml.id IN (%s) AND aml.journal_id = aa.id
+                   AND aa.currency_id IS NOT NULL
+                      AND aml.currency_id != aa.currency_id""" % (','.join(map(str, ids)))
+        cr.execute(query, ids)
+        res = cr.fetchall()
+        if res[0][0]:
+            return False
         return True
 
     def _check_currency_and_amount(self, cr, uid, ids, context=None):
-        for l in self.browse(cr, uid, ids, context=context):
-            if (l.amount_currency and not l.currency_id):
-                return False
+        query = """SELECT count(aml.id) FROM account_move_line aml
+                   WHERE aml.id IN (%s)
+                   AND ((aml.currency_id IS NOT NULL AND COALESCE(aml.amount_currency,0.0) = 0.0)
+                        OR (aml.currency_id IS NULL AND COALESCE(aml.amount_currency,0.0) != 0.0))""" % (','.join(map(str, ids)))
+        cr.execute(query, ids)
+        res = cr.fetchall()
+        if res[0][0]:
+            return False
         return True
 
     def _check_currency_amount(self, cr, uid, ids, context=None):
-        for l in self.browse(cr, uid, ids, context=context):
-            if l.amount_currency:
-                if (l.amount_currency > 0.0 and l.credit > 0.0) or (l.amount_currency < 0.0 and l.debit > 0.0):
-                    return False
+        query = """SELECT count(aml.id) FROM account_move_line aml
+                   WHERE aml.id IN (%s) AND aml.amount_currency is not null
+                   AND ((aml.amount_currency > 0 AND credit > 0) OR (aml.amount_currency < 0 AND debit > 0))"""
+        cr.execute(query, ids)
+        res = cr.fetchall()
+        if res[0][0]:
+            return False
         return True
 
     def _check_currency_company(self, cr, uid, ids, context=None):
-        for l in self.browse(cr, uid, ids, context=context):
-            if l.currency_id.id == l.company_id.currency_id.id:
-                return False
+        query = """SELECT count(aml.id) FROM account_move_line aml, res_company rc
+                   WHERE aml.id IN (%s) AND aml.company_id = rc.id
+                   AND rc.currency_id != aml.currency_id"""
+        cr.execute(query, tuple(ids))
+        res = cr.fetchall()
+        if res[0][0]:
+            return False
         return True
 
     _constraints = [
@@ -1180,20 +1230,19 @@ class account_move_line(osv.osv):
                 res = self._check_moves(cr, uid, context)
                 if res:
                     vals['move_id'] = res[0]
-            if not vals.get('move_id', False):
-                if journal.sequence_id:
-                    #name = self.pool.get('ir.sequence').next_by_id(cr, uid, journal.sequence_id.id)
-                    v = {
-                        'date': vals.get('date', time.strftime('%Y-%m-%d')),
-                        'period_id': context['period_id'],
-                        'journal_id': context['journal_id']
-                    }
-                    if vals.get('ref', ''):
-                        v.update({'ref': vals['ref']})
-                    move_id = move_obj.create(cr, uid, v, context)
-                    vals['move_id'] = move_id
-                else:
-                    raise osv.except_osv(_('No Piece Number!'), _('Cannot create an automatic sequence for this piece.\nPut a sequence in the journal definition for automatic numbering or create a sequence manually for this piece.'))
+            if journal.sequence_id:
+                #name = self.pool.get('ir.sequence').next_by_id(cr, uid, journal.sequence_id.id)
+                v = {
+                    'date': vals.get('date', time.strftime('%Y-%m-%d')),
+                    'period_id': context['period_id'],
+                    'journal_id': context['journal_id']
+                }
+                if vals.get('ref', ''):
+                    v.update({'ref': vals['ref']})
+                move_id = move_obj.create(cr, uid, v, context)
+                vals['move_id'] = move_id
+            else:
+                raise osv.except_osv(_('No Piece Number!'), _('Cannot create an automatic sequence for this piece.\nPut a sequence in the journal definition for automatic numbering or create a sequence manually for this piece.'))
         ok = not (journal.type_control_ids or journal.account_control_ids)
         if ('account_id' in vals):
             account = account_obj.browse(cr, uid, vals['account_id'], context=context)

@@ -190,17 +190,13 @@ class account_invoice(osv.osv):
         return result
 
     def _get_invoice_from_line(self, cr, uid, ids, context=None):
-        move = {}
-        for line in self.pool.get('account.move.line').browse(cr, uid, ids, context=context):
-            if line.reconcile_partial_id:
-                for line2 in line.reconcile_partial_id.line_partial_ids:
-                    move[line2.move_id.id] = True
-            if line.reconcile_id:
-                for line2 in line.reconcile_id.line_id:
-                    move[line2.move_id.id] = True
+        query = """ SELECT COALESCE(aml2.move_id,aml3.move_id) FROM account_move_line aml, account_move_line aml2, account_move_line aml3
+        WHERE aml.id IN (%s) AND aml2.reconcile_id = aml.reconcile_id AND aml2.reconcile_partial_id = aml.reconcile_partial_id """ % (','.join(map(str, ids)))
+        cr.execute(query)
+        res = cr.fetchall()
         invoice_ids = []
-        if move:
-            invoice_ids = self.pool.get('account.invoice').search(cr, uid, [('move_id','in',move.keys())], context=context)
+        if res and res[0] and res[0][0]:
+            invoice_ids = self.pool.get('account.invoice').search(cr, uid, [('move_id','in',[m[0] for m in res])], context=context)
         return invoice_ids
 
     def _get_invoice_from_reconcile(self, cr, uid, ids, context=None):
