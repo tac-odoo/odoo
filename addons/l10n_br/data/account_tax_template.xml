@@ -900,7 +900,7 @@
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_template_ipi"/>
             <field name="account_id" ref="account_template_201010301"/>
-            <field name="tax_id" ref="tax_template_out_ipi"/>
+            <field name="tax_id" ref="tax_template_out_ipi35"/>
         </record>
 
         <record id="tax_template_out_ipi35_refund_base_line" model="account.tax.line.template">
@@ -1084,7 +1084,7 @@
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_template_ipi"/>
             <field name="account_id" ref="account_template_201010301"/>
-            <field name="tax_id" ref="tax_template_out_ipi"/>
+            <field name="tax_id" ref="tax_template_out_ipi50"/>
         </record>
 
         <record id="tax_template_out_ipi50_refund_base_line" model="account.tax.line.template">
@@ -2509,7 +2509,7 @@
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_template_icms"/>
-            <field name="account_id" ref="account_template_101050505"/>
+            <field name="account_id" ref="account_template_201010302"/>
             <field name="tax_id" ref="tax_template_out_icms_interno"/>
         </record>
 
@@ -3272,7 +3272,7 @@
             <field ref="l10n_br_account_chart_template" name="chart_template_id"/>
         </record>
 
-        <record id="tax_template_in_pis_invoice_base_line" model="account.tax.line.template">
+        <record id="tax_template_in_pis065_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
@@ -3281,7 +3281,7 @@
             <field name="tax_id" ref="tax_template_in_pis065"/>
         </record>
 
-        <record id="tax_template_in_pis_invoice_tax_line" model="account.tax.line.template">
+        <record id="tax_template_in_pis065_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">6.5</field>
             <field name="debit_credit_amount">6.5</field>
@@ -3291,7 +3291,7 @@
             <field name="tax_id" ref="tax_template_in_pis065"/>
         </record>
 
-        <record id="tax_template_in_pis_refund_base_line" model="account.tax.line.template">
+        <record id="tax_template_in_pis065_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
@@ -3300,7 +3300,7 @@
             <field name="tax_id" ref="tax_template_in_pis065"/>
         </record>
 
-        <record id="tax_template_in_pis_refund_tax_line" model="account.tax.line.template">
+        <record id="tax_template_in_pis065_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">6.5</field>
             <field name="debit_credit_amount">6.5</field>
@@ -3425,7 +3425,7 @@
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="tax_code_template_cofins"/>
-            <field name="account_id" ref="account_template_201010500"/>
+            <field name="account_id" ref="account_template_101050503"/>
             <field name="tax_id" ref="tax_template_in_cofins"/>
         </record>
 

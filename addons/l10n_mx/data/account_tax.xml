@@ -383,7 +383,6 @@
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="vat_code_base_due"/>
-            <field name="account_id" ref="cuenta2201118000"/>
             <field name="tax_id" ref="tax8"/>
         </record>
 
@@ -393,6 +392,7 @@
             <field name="debit_credit_amount">-106.7</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="vat_code_due_tva"/>
+            <field name="account_id" ref="cuenta2201118000"/>
             <field name="tax_id" ref="tax8"/>
         </record>
 
@@ -402,7 +402,6 @@
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="vat_code_receivable_net"/>
-            <field name="account_id" ref="cuenta2201118000"/>
             <field name="tax_id" ref="tax8"/>
         </record>
 
@@ -412,6 +411,7 @@
             <field name="debit_credit_amount">-106.7</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="vat_code_payable"/>
+            <field name="account_id" ref="cuenta2201118000"/>
             <field name="tax_id" ref="tax8"/>
         </record>
 

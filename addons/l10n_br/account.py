@@ -98,6 +98,12 @@ def get_precision_tax():
         return (16, res+2)
     return change_digit_tax
 
+
+# Note: as per new design of tax this fields (except type) should be now moved to tax.line and
+# all related code should be improved but at this time this total code seems useless as fields
+# are just added in model and data file but not used anywhere in invoice or report. we are not
+# refactoring this code but if l10n_br expert will say then will be improved or total code will
+# be simply removed.
 class account_tax_template(osv.osv):
     """ Add fields used to define some brazilian taxes """
     _inherit = 'account.tax.template'
@@ -111,12 +117,7 @@ class account_tax_template(osv.osv):
                'amount_mva': fields.float('MVA Percent', required=True, 
                                           digits_compute=get_precision_tax(), 
                                           help="Um percentual decimal em % entre 0-1."),
-               'type': fields.selection([('percent','Percentage'), 
-                                         ('fixed','Fixed Amount'), 
-                                         ('none','None'), 
-                                         ('code','Python Code'), 
-                                         ('balance','Balance'), 
-                                         ('quantity','Quantity')], 'Tax Type', required=True,
+               'type': fields.selection(account.TAX_TYPE + [('quantity', 'Quantity')], 'Tax Type', required=True,
                                         help="The computation method for the tax amount."),
                }
     _defaults = TAX_DEFAULTS
@@ -139,14 +140,16 @@ class account_tax_template(osv.osv):
                                                                  tax_code_template_ref, 
                                                                  company_id, 
                                                                  context)
-        tax_templates = self.browse(cr, uid, result['tax_template_to_tax'].keys(), context)   
-        obj_acc_tax = self.pool.get('account.tax')
-        for tax_template in tax_templates:
-            if tax_template.tax_code_id:
-                obj_acc_tax.write(cr, uid, result['tax_template_to_tax'][tax_template.id], {'domain': tax_template.tax_code_id.domain,
-                                                                                            'tax_discount': tax_template.tax_code_id.tax_discount})    
+        # Note: tax_code_id is removed from tax model.
+        #tax_templates = self.browse(cr, uid, result['tax_template_to_tax'].keys(), context)   
+        #obj_acc_tax = self.pool.get('account.tax')
+        #for tax_template in tax_templates:
+        #    if tax_template.tax_code_id:
+        #        obj_acc_tax.write(cr, uid, result['tax_template_to_tax'][tax_template.id], {'domain': tax_template.tax_code_id.domain,
+        #                                                                                    'tax_discount': tax_template.tax_code_id.tax_discount})    
         return result
     
+    #NOTE: Dead Code
     def onchange_tax_code_id(self, cr, uid, ids, tax_code_id, context=None):
 
         result = {'value': {}}
@@ -182,6 +185,7 @@ class account_tax(osv.osv):
                }
     _defaults = TAX_DEFAULTS
     
+    #NOTE: Dead Code
     def onchange_tax_code_id(self, cr, uid, ids, tax_code_id, context=None):
 
         result = {'value': {}}

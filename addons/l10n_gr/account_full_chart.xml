@@ -8115,7 +8115,7 @@
             <field name="code">64.98</field>
             <field name="name">Διάφορα έξοδα </field>
             <field eval="chartgr_64" name="parent_id"/>
-            <field name="type">view</field>
+            <field name="type">other</field>
             <field name="nocreate" eval="False"/>
             <field name="user_type" ref="account_type_expense"/>
             <field name="note"></field>
