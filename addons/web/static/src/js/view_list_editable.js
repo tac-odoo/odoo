@@ -258,7 +258,8 @@
                         if (!focus_field){
                             focus_field = _.find(self.editor.form.fields_order, function(field){ return fields[field] && fields[field].$el.is(':visible:has(input)'); });
                         }
-                        if (focus_field) fields[focus_field].$el.find('input').select();
+                        field_focus_field = _.find(fields, function(field) { return field && focus_field;});
+                        if(field_focus_field) field_focus_field.$el.find('input').select();
                         return record.attributes;
                     });
                 }).fail(function () {
