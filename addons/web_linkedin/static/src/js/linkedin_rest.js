@@ -319,7 +319,7 @@ openerp.web_linkedin = function(instance) {
 
                 this.search = url;
             }
-            var context = instance.web.pyeval.eval('context');
+            var context = _.extend(instance.web.pyeval.eval('context'), {'from_url': window.location.href});
             _.extend(params, {'search_term': this.search, 'from_url': window.location.href, 'local_context': context});
             self.rpc("/linkedin/get_search_popup_data", params).done(function(result) {
                 if(result.status && result.status == 'need_auth' && confirm(_t("You will be redirected to LinkedIn authentication page, once authenticated after that you use this widget."))) {
@@ -346,6 +346,16 @@ openerp.web_linkedin = function(instance) {
                         $people_more.appendTo(self.$(".oe_linkedin_pop_p .oe_linkedin_show_more"));
                     }
                     if (result.warnings) { self.show_warnings(result.warnings); }
+                }
+            }).fail(function (error, event) {
+                console.log("result is ::: ",error, event);
+                if (error.data.arguments[0] == 401) {
+                    var url = error.data.arguments[2].url || "";
+                    if (confirm(_t("It seems that Access Token has been expired, you will be redirected to LinkedIn authentication page."))) {
+                        instance.web.redirect(url);
+                    }
+                    //prevent crashmanager to diplay error
+                    event.preventDefault();
                 }
             });
             return $.when.apply($, deferrers);
@@ -471,6 +481,13 @@ openerp.web_linkedin = function(instance) {
                                     instance.web.redirect(result.url);
                                 }
                             } else {
+                                if (result.status && result.status == "AccessError") {
+                                    var message = _.str.sprintf("Total %s records retrieved from Linkedin\n\n", result._total);
+                                    _(result.fail_warnings).each(function(msg) {
+                                        message += _.str.sprintf("%s      %s\n\n", msg[0], msg[1]);
+                                    });
+                                    alert(message);
+                                }
                                 self.do_reload();
                             }
                         });

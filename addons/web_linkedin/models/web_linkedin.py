@@ -41,6 +41,17 @@ people_fields = '(id,picture-url,public-profile-url,first-name,last-name,' \
                     'main-address,headline,positions,summary,specialties,email-address)'
 _logger = logging.getLogger(__name__)
 
+class except_auth(Exception):
+    """ Class for authorization exceptions """
+    def __init__(self, name, value, status=None):
+        Exception.__init__(self)
+        self.name = name
+        self.code = 401 #HTTP status code for authorization
+        if status is not None:
+            self.code = status
+        self.args = (self.code, name, value)
+
+
 class web_linkedin_settings(osv.osv_memory):
     _inherit = 'sale.config.settings'
     _columns = {
@@ -128,26 +139,41 @@ class linkedin(osv.AbstractModel):
 
     def sync_linkedin_contacts(self, cr, uid, from_url, context=None):
         """
-            This method will import all first level contact from LinkedIn
+            This method will import all first level contact from LinkedIn,
+            It may raise AccessError, because user may or may not have create or write access,
+            Here if user does not have one of the right from create or write then this method will allow at least for allowed operation,
+            AccessError is handled as a special case, AccessError wil not raise exception instead it will return result with warning and status=AccessError.
         """
+        sync_result = False
         if not self.need_authorization(cr, uid, context=context):
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'x-li-format': 'json'}
             params = {
                 'oauth2_access_token': self.get_token(cr, uid, context=context)
             }
             connection_uri = "/people/~/connections:{people_fields}".format(people_fields=people_fields)
-            status, res = self.send_request(cr, connection_uri, params=params, headers=headers, type="GET", context=context)
-            #TODO: It is possible that update_contacts return osv.exception if user doesn't have rights, handle the exception nicely
-            self.update_contacts(cr, uid, res, context=context)
-            return True
+            status, res = self.send_request(cr, uid, connection_uri, params=params, headers=headers, type="GET", context=context)
+            if not isinstance(res, str):
+                sync_result = self.update_contacts(cr, uid, res, context=context)
+            return sync_result
         else:
             return {'status': 'need_auth', 'url': self._get_authorize_uri(cr, uid, from_url=from_url, context=context)}
 
     def update_contacts(self, cr, uid, records, context=None):
         li_records = dict((d['id'], d) for d in records.get('values', []))
+        result = {'_total': len(records.get('values', [])), 'fail_warnings': [], 'status': ''}
         records_to_create, records_to_update = self.check_create_or_update(cr, uid, li_records, context=context)
-        self.create_contacts(cr, uid, records_to_create, context=context)
-        self.write_contacts(cr, uid, records_to_update, context=context)
+        #Do not raise exception for AccessError, if user doesn't have one of the right from create or write
+        try:
+            self.create_contacts(cr, uid, records_to_create, context=context)
+        except openerp.exceptions.AccessError, e:
+            result['fail_warnings'].append((e[0], str(len(records_to_create))+" records are not created\n"+e[1]))
+            result['status'] = "AccessError"
+        try:
+            self.write_contacts(cr, uid, records_to_update, context=context)
+        except openerp.exceptions.AccessError, e:
+            result['fail_warnings'].append((e[0], str(len(records_to_update))+" records are not updated\n"+e[1]))
+            result['status'] = "AccessError"
+        return result
 
     def check_create_or_update(self, cr, uid, records, context=None):
         records_to_update = {}
@@ -163,6 +189,7 @@ class linkedin(osv.AbstractModel):
         return records_to_create, records_to_update
 
     def create_contacts(self, cr, uid, records_to_create, context=None):
+        #append successful create in result so that we can show this much record sync
         for record in records_to_create:
             if record['id'] != 'private':
                 data_dict = self.create_data_dict(cr, uid, record, context=context)
@@ -170,6 +197,7 @@ class linkedin(osv.AbstractModel):
 
     #Currently all fields are re-written
     def write_contacts(self, cr, uid, records_to_update, context=None):
+        #append successful write in result so that we can show this much record sync
         for id, record in records_to_update.iteritems():
             data_dict = self.create_data_dict(cr, uid, record, context=context)
             self.pool.get('res.partner').write(cr, uid, id, data_dict, context=context)
@@ -206,7 +234,6 @@ class linkedin(osv.AbstractModel):
                 data_dict['phone'] = phone['phoneNumber']
         return data_dict 
 
-    #TODO: Simplify this method
     def get_search_popup_data(self, cr, uid, offset=0, limit=5, context=None, **kw):
         """
             This method will return all needed data for LinkedIn Search Popup in single call.
@@ -228,7 +255,7 @@ class linkedin(osv.AbstractModel):
 
         #Profile Information of current user
         profile_uri = "/people/~:(first-name,last-name)"
-        status, res = self.send_request(cr, profile_uri, params=params, headers=headers, type="GET", context=context)
+        status, res = self.send_request(cr, uid, profile_uri, params=params, headers=headers, type="GET", context=context)
         result_data['current_profile'] = res
 
         status, companies, warnings = self.get_company_data(cr, uid, offset, limit, params=params, headers=headers, context=context, **kw)
@@ -252,11 +279,11 @@ class linkedin(osv.AbstractModel):
         #search by universal-name
         if kw.get('search_uid'):
             universal_search_uri = "/companies/universal-name={company_name}:{company_fields}".format(company_name=kw['search_uid'], company_fields=company_fields)
-            status, universal_company = self.send_request(cr, universal_search_uri, params=params, headers=headers, type="GET", context=context)
+            status, universal_company = self.send_request(cr, uid, universal_search_uri, params=params, headers=headers, type="GET", context=context)
         #Companies search
         search_params = dict(params.copy(), keywords=kw.get('search_term', "") or "", start=offset, count=limit)
         company_search_uri = "/company-search:(companies:{company_fields})".format(company_fields=company_fields)
-        status, companies = self.send_request(cr, company_search_uri, params=search_params, headers=headers, type="GET", context=context)
+        status, companies = self.send_request(cr, uid, company_search_uri, params=search_params, headers=headers, type="GET", context=context)
         if companies and companies['companies'].get('values') and universal_company:
             companies['companies']['values'].append(universal_company)
         return status, companies, []
@@ -278,18 +305,18 @@ class linkedin(osv.AbstractModel):
             try:
                 public_profile_url = werkzeug.url_quote_plus("http://www.linkedin.com/pub/%s"%(kw['search_uid']))
                 profile_uri = "/people/url={public_profile_url}:{people_fields}".format(public_profile_url=public_profile_url, people_fields=people_fields)
-                status, public_profile = self.send_request(cr, profile_uri, params=params, headers=headers, type="GET", context=context)
+                status, public_profile = self.send_request(cr, uid, profile_uri, params=params, headers=headers, type="GET", context=context)
 
             except urllib2.HTTPError, e:
-                if e.code == 400:
+                if e.code in (400, 410):
                     warnings.append([_('LinkedIn error'), _('LinkedIn is temporary down for the searches by url.')])
-                elif e.code in (401, 410):
+                elif e.code in (401):
                     raise e
         search_params = dict(params.copy(), keywords=kw.get('search_term', "") or "", start=offset, count=limit)
         #Note: People search is allowed to only vetted API access request, please go through following link
         #https://help.linkedin.com/app/api-dvr
         people_search_uri = "/people-search:(people:{people_fields})".format(people_fields=people_fields)
-        status, people = self.send_request(cr, people_search_uri, params=search_params, headers=headers, type="GET", context=context)
+        status, people = self.send_request(cr, uid, people_search_uri, params=search_params, headers=headers, type="GET", context=context)
         if people and people['people'].get('values') and public_profile:
             people['people']['values'].append(public_profile)
         return status, people, warnings
@@ -309,12 +336,12 @@ class linkedin(osv.AbstractModel):
                 
             }
             people_criteria_uri = "/people-search:(people:{people_fields})".format(people_fields=people_fields)
-            status, res = self.send_request(cr, people_criteria_uri, params=params, headers=headers, type="GET", context=context)
+            status, res = self.send_request(cr, uid, people_criteria_uri, params=params, headers=headers, type="GET", context=context)
             return res
         else:
             return {'status': 'need_auth', 'url': self._get_authorize_uri(cr, uid, from_url=from_url, context=context)}
 
-    def send_request(self, cr, uri, pre_uri=BASE_API_URL, params={}, headers={}, type="GET", context=None):
+    def send_request(self, cr, uid, uri, pre_uri=BASE_API_URL, params={}, headers={}, type="GET", context=None):
         result = ""
         status = ""
         try:
@@ -336,12 +363,14 @@ class linkedin(osv.AbstractModel):
                 result = simplejson.loads(content)
         except urllib2.HTTPError, e:
             #Should simply raise exception or simply add logger
-            if e.code in (400, 401, 410):
+            if e.code in (400, 410):
                 raise e
 
+            if e.code == 401:
+                raise except_auth('AuthorizationError', {'url': self._get_authorize_uri(cr, uid, from_url=context.get('from_url'), context=context)})
             _logger.exception("Bad linkedin request : %s !" % e.read())
         except urllib2.URLError, e:
-            _logger.exception("Either there is no connection or remote server is down : %s !" % e.read())
+            _logger.exception("Either there is no connection or remote server is down !")
             #for 404 do not raise config warning
             #raise self.pool.get('res.config.settings').get_config_warning(cr, _("Something went wrong with your request to linkedin. \n\n %s"%(error_key)), context=context)
         return (status, result)

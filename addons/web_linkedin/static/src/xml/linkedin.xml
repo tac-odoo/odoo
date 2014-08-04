@@ -60,7 +60,9 @@
     </t>
 
     <t t-name="KanbanView.linkedinButton">
-        <span class="oe_fade">or</span>
+        <t t-if="widget.is_action_enabled('create')">
+            <span class="oe_fade">or</span>
+        </t>
         <div class="oe_kanban_import_contact">
             <a href="#" class="oe_bold">Import Contacts from Linkedin</a>
         </div>
