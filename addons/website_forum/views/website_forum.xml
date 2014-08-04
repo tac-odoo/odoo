@@ -633,7 +633,12 @@
                                 </t>
                             </li>
                         </ul>
-                        <img class="pull-left img img-circle img-avatar" t-attf-src="/forum/user/#{answer.create_uid.id}/avatar"/>
+                        <div class="user-tooltip" t-if="answer.can_view_userinfo">
+                            <t t-call="website_forum.forum_user_tooltip"/>
+                        </div>
+                        <a t-attf-href="/forum/#{ slug(forum) }/user/#{ answer.create_uid.id }" class="user-info">
+                            <img class="pull-left img img-circle img-avatar" t-attf-src="/forum/user/#{answer.create_uid.id}/avatar"/>
+                        </a>
                         <div>
                             <a t-attf-href="/forum/#{ slug(forum) }/user/#{ answer.create_uid.id }"
                                 t-field="answer.create_uid"
@@ -667,6 +672,39 @@
             <span class="text-muted">(only one answer per question is allowed)</span>
         </div>
     </t>
+</template>
+
+<!-- Template for user tooltip  -->
+<template id="forum_user_tooltip">
+    <div class="forum_tooltip">
+        <div class="tt-description">
+            <a t-attf-href="/forum/#{ slug(forum) }/user/#{ answer.create_uid.id }">
+                <img class="pull-left img img-circle img-avatar-big" t-attf-src="/forum/user/#{answer.create_uid.id}/avatar"/>
+            </a>
+            <div>
+                <h4 style="padding: 0px;margin: 0px;"><a t-attf-href="/forum/#{ slug(forum) }/user/#{ answer.create_uid.id }"
+                    t-field="answer.create_uid"
+                    t-field-options='{"widget": "contact", "country_image": true, "fields": ["name", "country_id"]}'
+                    style="display: inline-block;"/>
+                </h4>
+                <div class="tt-discription-line">
+                    <div><span t-field="answer.create_uid.company_id.name"/></div>
+                    <a t-att-href="answer.create_uid.company_id.website" t-if="answer.create_uid.company_id.website">
+                        <span t-field="answer.create_uid.company_id.website"/>
+                    </a>
+                </div>
+            </div>
+            <div t-field="answer.create_uid" t-field-options='{"widget": "contact", "badges": true, "fields": ["karma"]}'/>
+            <div class="tt-discription-line" t-if="answer.create_uid.country_id">
+                <span t-field="answer.create_uid.city"/><span t-if="answer.create_uid.city and user.country_id">, </span><span t-field="answer.create_uid.country_id"/>
+            </div>
+            <div class="tt-discription-line" t-if="not answer.create_uid.company_id.website"/>
+            <div class="tt-discription-line" t-if="not answer.create_uid.country_id"/>
+            <div t-if="answer.create_uid.website_description">
+                <span t-field="answer.create_uid.website_description"/>
+            </div>
+        </div>
+    </div>
 </template>
 
 <!-- Utility template: Post a Comment -->

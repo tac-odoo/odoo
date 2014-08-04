@@ -1,5 +1,23 @@
 $(document).ready(function () {
 
+    $('.user-info').hover(
+        function(){
+           var self = this;
+           setTimeout(function(){
+               if($(self).is(":hover")){
+                   $(self).parent().find('.user-tooltip').toggle('fast');
+               }
+           },1000);
+        },
+        function(){}
+    );
+    $('.user-tooltip').hover(
+        function(){},
+        function(){
+            $(this).fadeOut('fast');
+        }
+    );
+
     $('.karma_required').on('click', function (ev) {
         var karma = $(ev.currentTarget).data('karma');
         if (karma) {

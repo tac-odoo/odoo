@@ -58,6 +58,7 @@ class Forum(osv.Model):
         'karma_comment_unlink_all': fields.integer('Karma to unlinnk all comments'),
         'karma_retag': fields.integer('Karma to change question tags'),
         'karma_flag': fields.integer('Karma to flag a post as offensive'),
+        'karma_expand_user': fields.integer('Karma to view expanded user info'),
     }
 
     def _get_default_faq(self, cr, uid, context=None):
@@ -99,6 +100,7 @@ class Forum(osv.Model):
         'karma_comment_unlink_all': 500,
         'karma_retag': 75,
         'karma_flag': 500,
+        'karma_expand_user': 750,
     }
 
     def create(self, cr, uid, values, context=None):
@@ -197,6 +199,7 @@ class Post(osv.Model):
                 'karma_downvote': post.forum_id.karma_downvote,
                 'karma_comment': post.create_uid.id == uid and post.forum_id.karma_comment_own or post.forum_id.karma_comment_all,
                 'karma_comment_convert': post.create_uid.id == uid and post.forum_id.karma_comment_convert_own or post.forum_id.karma_comment_convert_all,
+                'karma_expand_user': post.forum_id.karma_expand_user,
             }
             res[post.id].update({
                 'can_ask': uid == SUPERUSER_ID or user.karma >= res[post.id]['karma_ask'],
@@ -209,6 +212,7 @@ class Post(osv.Model):
                 'can_downvote': uid == SUPERUSER_ID or user.karma >= res[post.id]['karma_downvote'],
                 'can_comment': uid == SUPERUSER_ID or user.karma >= res[post.id]['karma_comment'],
                 'can_comment_convert': uid == SUPERUSER_ID or user.karma >= res[post.id]['karma_comment_convert'],
+                'can_view_userinfo': id == SUPERUSER_ID or post.create_uid.karma >= res[post.id]['karma_expand_user'],
             })
         return res
 
@@ -287,6 +291,7 @@ class Post(osv.Model):
         'karma_downvote': fields.function(_get_post_karma_rights, string='Karma to downvote', type='integer', multi='_get_post_karma_rights'),
         'karma_comment': fields.function(_get_post_karma_rights, string='Karma to comment', type='integer', multi='_get_post_karma_rights'),
         'karma_comment_convert': fields.function(_get_post_karma_rights, string='karma to convert as a comment', type='integer', multi='_get_post_karma_rights'),
+        'karma_expand_user': fields.function(_get_post_karma_rights, string='Karma to view expanded user info', type='integer', multi='_get_post_karma_rights'),
         # access rights
         'can_ask': fields.function(_get_post_karma_rights, string='Can Ask', type='boolean', multi='_get_post_karma_rights'),
         'can_answer': fields.function(_get_post_karma_rights, string='Can Answer', type='boolean', multi='_get_post_karma_rights'),
@@ -298,6 +303,7 @@ class Post(osv.Model):
         'can_downvote': fields.function(_get_post_karma_rights, string='Can Downvote', type='boolean', multi='_get_post_karma_rights'),
         'can_comment': fields.function(_get_post_karma_rights, string='Can Comment', type='boolean', multi='_get_post_karma_rights'),
         'can_comment_convert': fields.function(_get_post_karma_rights, string='Can Convert to Comment', type='boolean', multi='_get_post_karma_rights'),
+        'can_view_userinfo': fields.function(_get_post_karma_rights, string='Can View User Info', type='boolean', multi='_get_post_karma_rights'),
     }
 
     _defaults = {
