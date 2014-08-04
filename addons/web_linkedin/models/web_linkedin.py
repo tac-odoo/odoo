@@ -189,7 +189,6 @@ class linkedin(osv.AbstractModel):
         return records_to_create, records_to_update
 
     def create_contacts(self, cr, uid, records_to_create, context=None):
-        #append successful create in result so that we can show this much record sync
         for record in records_to_create:
             if record['id'] != 'private':
                 data_dict = self.create_data_dict(cr, uid, record, context=context)
@@ -197,7 +196,6 @@ class linkedin(osv.AbstractModel):
 
     #Currently all fields are re-written
     def write_contacts(self, cr, uid, records_to_update, context=None):
-        #append successful write in result so that we can show this much record sync
         for id, record in records_to_update.iteritems():
             data_dict = self.create_data_dict(cr, uid, record, context=context)
             self.pool.get('res.partner').write(cr, uid, id, data_dict, context=context)
@@ -236,8 +234,8 @@ class linkedin(osv.AbstractModel):
 
     def get_search_popup_data(self, cr, uid, offset=0, limit=5, context=None, **kw):
         """
-            This method will return all needed data for LinkedIn Search Popup in single call.
-            It returns companies(including search by universal name), people and warnings if any
+            This method will return all needed data for LinkedIn Search Popup.
+            It returns companies(including search by universal name), people, current user data and it may return warnings if any
         """
         result_data = {'warnings': []}
         
@@ -321,7 +319,6 @@ class linkedin(osv.AbstractModel):
             people['people']['values'].append(public_profile)
         return status, people, warnings
 
-    #To simplify method for need_auth and from_url part
     def get_people_from_company(self, cr, uid, company_universalname, limit, from_url, context=None):
         if context is None:
             context = {}
@@ -371,8 +368,6 @@ class linkedin(osv.AbstractModel):
             _logger.exception("Bad linkedin request : %s !" % e.read())
         except urllib2.URLError, e:
             _logger.exception("Either there is no connection or remote server is down !")
-            #for 404 do not raise config warning
-            #raise self.pool.get('res.config.settings').get_config_warning(cr, _("Something went wrong with your request to linkedin. \n\n %s"%(error_key)), context=context)
         return (status, result)
 
     def get_token(self, cr, uid, context=None):
@@ -390,7 +385,6 @@ class linkedin(osv.AbstractModel):
             'response_type': 'code',
             'client_id': client_id,
             'state': simplejson.dumps(state_obj),
-            #'scope': scope #Check scope attribute
             'redirect_uri': base_url + '/linkedin/authentication',
         }
 

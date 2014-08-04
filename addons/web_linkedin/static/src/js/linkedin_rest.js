@@ -348,7 +348,6 @@ openerp.web_linkedin = function(instance) {
                     if (result.warnings) { self.show_warnings(result.warnings); }
                 }
             }).fail(function (error, event) {
-                console.log("result is ::: ",error, event);
                 if (error.data.arguments[0] == 401) {
                     var url = error.data.arguments[2].url || "";
                     if (confirm(_t("It seems that Access Token has been expired, you will be redirected to LinkedIn authentication page."))) {
@@ -377,7 +376,7 @@ openerp.web_linkedin = function(instance) {
                 el.__type = "people";
                 return el;
             });
-            console.debug("Linkedin people found:", people.numResults, '=>', plst.length, plst);
+            console.debug("Linkedin people found:", people.people._total, '=>', plst.length, plst);
             return this.display_result(plst, this.$(".oe_linkedin_pop_p .oe_linkedin_people_entities"));
         },
         display_result: function(result, $elem) {
@@ -385,10 +384,13 @@ openerp.web_linkedin = function(instance) {
             var $row;
             $elem.find(".oe_no_result").remove();
             _.each(result, function(el) {
+                if (self.$el.find(".linkedin_id_"+el.id).length) { return; }
                 var pc = new instance.web_linkedin.EntityWidget(self, el);
                 if (!$elem.find("div").size() || $elem.find(" > div:last > div").size() >= 5) {
                     $row = $("<div style='display: table-row;width:100%'/>");
                     $row.appendTo($elem);
+                } else {
+                    $row = $elem.find(" > div:last");
                 }
                 pc.appendTo($row);
                 pc.$el.css("display", "table-cell");
@@ -444,6 +446,7 @@ openerp.web_linkedin = function(instance) {
                 self.trigger("selected", self.data);
             });
             if (this.data.__type === "company") {
+                this.$el.addClass("linkedin_id_"+this.data.id)
                 this.$("h3").text(this.data.name);
                 self.$("img").attr("src", this.data.logoUrl);
                 self.$(".oe_linkedin_entity_headline").text(this.data.industry);
