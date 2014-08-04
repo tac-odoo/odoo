@@ -29,6 +29,7 @@ import urlparse
 from openerp import fields, api, tools, models
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DF
+from openerp.exceptions import except_orm
 
 emails_split = re.compile(r"[;,\n\r]+")
 
@@ -129,8 +130,7 @@ class hr_evaluation(models.Model):
     @api.one
     @api.depends('employee_id')
     def _set_display_name(self):
-        for record in self:
-            self.display_name = record.employee_id.name_related
+        self.display_name = self.employee_id.name_related
 
     @api.one
     @api.onchange('employee_id')
@@ -148,6 +148,20 @@ class hr_evaluation(models.Model):
         self.appraisal_subordinates = self.employee_id.appraisal_subordinates
         self.appraisal_subordinates_ids = self.employee_id.appraisal_subordinates_ids
         self.appraisal_subordinates_survey_id = self.employee_id.appraisal_subordinates_survey_id
+
+    @api.one
+    @api.constrains('employee_id', 'department_id', 'date_close')
+    def _check_employee_appraisal_duplication(self):
+        if self.employee_id and self.department_id and self.date_close:
+            appraisal_ids = self.search([('employee_id', '=', self.employee_id.id),('department_id', '=', self.department_id.id)])
+            if appraisal_ids:
+                duplicat_list = [(datetime.strptime(rec.date_close, "%Y-%m-%d").month,datetime.strptime(rec.date_close, "%Y-%m-%d").year) for rec in appraisal_ids]
+                found_duplicat_data = []
+                for rec in duplicat_list:
+                    if rec in found_duplicat_data:
+                        raise except_orm(_('Warning'),_("You cannot create more than one appraisal for same Month & Year"))
+                    else:
+                        found_duplicat_data.append(rec)
 
     @api.one
     def create_message_subscribe_users_list(self, val):
@@ -180,7 +194,7 @@ class hr_evaluation(models.Model):
         survey_response_obj.create({
             'survey_id': url.id,
             'deadline': self.date_close,
-            'date_create': date.today(),
+            'date_create': datetime.now(),
             'type': 'link',
             'state': 'new',
             'token': token,
@@ -194,7 +208,7 @@ class hr_evaluation(models.Model):
         partner_obj = self.env['res.partner']
         emails_list = []
         for rec in apprasial:
-            if rec.work_email: 
+            if rec.work_email:
                 email = rec.work_email.strip()
                 if re.search(r"^[^@]+@[^@]+$", email):
                     emails_list.append(email)
