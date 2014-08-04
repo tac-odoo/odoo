@@ -19,7 +19,7 @@
 #
 ##############################################################################
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from dateutil.relativedelta import relativedelta
 from dateutil import parser
 import time
@@ -31,6 +31,19 @@ from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DF
 
 emails_split = re.compile(r"[;,\n\r]+")
+
+class calendar_event(models.Model):
+    """ Model for Calendar Event """
+    _inherit = 'calendar.event'
+
+    @api.model
+    def create(self, vals):
+        res = super(calendar_event, self).create(vals)
+        if self.env.context.get('active_model') == 'hr_evaluation.evaluation':
+            evaluation_obj = self.env['hr_evaluation.evaluation'].browse(self.env.context.get('active_id', []))
+            evaluation_obj.log_meeting(res.name, res.start, res.duration,)
+            evaluation_obj.write({'meeting_id': res.id, 'interview_deadline': res.start_date if res.allday else res.start_datetime})
+        return res
 
 class survey_user_input(models.Model):
     _inherit = "survey.user_input"
@@ -66,24 +79,28 @@ class hr_evaluation(models.Model):
                 ('done', 'Done'),]
 
     @api.one
+    @api.depends('state','interview_deadline')
     def _get_tot_sent_appraisal(self):
         sur_res_obj = self.env['survey.user_input']
-        self.tot_sent_appraisal = len(sur_res_obj.search([
+        self.tot_sent_appraisal = sur_res_obj.search_count([
                                   ('survey_id', 'in', [self.apprasial_manager_survey_id.id, self.appraisal_colleagues_survey_id.id, self.appraisal_self_survey_id.id, self.appraisal_subordinates_survey_id.id]),
-                                  ('type', '=', 'link'), ('deadline','=', self.date_close),
-                                  ('employee_id','=',self.employee_id.id)]))
+                                  ('type', '=', 'link'), ('deadline','=', self.date_close), ('date_create', '=', self.appraisal_sent_date),
+                                  ('employee_id','=',self.employee_id.id)])
 
     @api.one
+    @api.depends('state','interview_deadline')
     def _get_tot_completed_appraisal(self):
         sur_res_obj = self.env['survey.user_input']
-        self.tot_comp_appraisal = len(sur_res_obj.search([
+        self.tot_comp_appraisal = sur_res_obj.search_count([
                                   ('survey_id', 'in', [self.apprasial_manager_survey_id.id, self.appraisal_colleagues_survey_id.id, self.appraisal_self_survey_id.id, self.appraisal_subordinates_survey_id.id]),
-                                  ('type', '=', 'link'), ('deadline','=', self.date_close),  ('state', '=', 'done'),
-                                  ('employee_id','=',self.employee_id.id)])) or 0
+                                  ('type', '=', 'link'), ('deadline','=', self.date_close), ('state', '=', 'done'), ('date_create', '=', self.appraisal_sent_date),
+                                  ('employee_id','=',self.employee_id.id)])
 
+    meeting_id = fields.Many2one('calendar.event', 'Meeting')
     interview_deadline = fields.Date("Final Interview", select=True)
     employee_id = fields.Many2one('hr.employee', required=True, string='Employee')
     department_id = fields.Many2one('hr.department', 'Department')
+    appraisal_sent_date = fields.Date("Appraisal Sent Date", select=True)
     evaluation = fields.Text('Evaluation Summary', help="If the evaluation does not meet the expectations, you can propose an action plan")
     state = fields.Selection(_get_state_list, 'Status', track_visibility='onchange', required=True, readonly=True, copy=False, default='new', select=True)
     date_close = fields.Date('Appraisal Deadline', select=True, required=True)
@@ -107,6 +124,7 @@ class hr_evaluation(models.Model):
     send_mail_status = fields.Boolean('Appraisal Send Mail Status', compute=_set_appraisal_url)
     tot_sent_appraisal = fields.Integer('Number of sent appraisal', compute=_get_tot_sent_appraisal, defualt=0, store=True)
     tot_comp_appraisal = fields.Integer('Number of completed appraisal', compute=_get_tot_completed_appraisal, defualt=0, store=True)
+    user_id = fields.Many2one('res.users', string='Related User')
 
     @api.one
     @api.depends('employee_id')
@@ -162,7 +180,7 @@ class hr_evaluation(models.Model):
         survey_response_obj.create({
             'survey_id': url.id,
             'deadline': self.date_close,
-            'date_create': datetime.now(),
+            'date_create': date.today(),
             'type': 'link',
             'state': 'new',
             'token': token,
@@ -200,7 +218,7 @@ class hr_evaluation(models.Model):
             if self.appraisal_self and self.apprasial_employee:
                 self.create_receiver_list(self.employee_id, self.appraisal_self_survey_id)
             if self.state == 'new':
-                self.write({'state': 'pending', 'send_mail_status': True})
+                self.write({'state': 'pending', 'send_mail_status': True, 'appraisal_sent_date': date.today()})
         return True
 
     @api.one
@@ -211,6 +229,14 @@ class hr_evaluation(models.Model):
     def write(self, vals):
         if vals.get('state') == 'pending' and not vals.get('send_mail_status'):
             self.button_sent_appraisal()
+        if vals.get('interview_deadline') and not vals.get('meeting_id'):
+            if  self.meeting_id.allday:
+                self.meeting_id.write({'start_date': vals['interview_deadline'], 'stop_date': vals['interview_deadline']})
+            else:
+                date_obj = datetime.strptime(vals['interview_deadline'], "%Y-%m-%d")
+                set_date = datetime.strftime(date_obj, "%Y-%m-%d %H:%M:%S")
+                self.meeting_id.write({'start_datetime': set_date, 'stop_datetime': set_date})
+            self.log_meeting(self.meeting_id.name, self.meeting_id.start, self.meeting_id.duration)
         return super(hr_evaluation, self).write(vals)
 
     @api.cr_uid_ids_context
@@ -233,6 +259,64 @@ class hr_evaluation(models.Model):
             return result
         else:
             return super(hr_evaluation, self).read_group(cr, uid, domain, fields, groupby, offset=offset, limit=limit, context=context, orderby=orderby, lazy=lazy)
+
+    @api.cr_uid_ids_context
+    def get_sent_appraisal(self, cr, uid, ids, context=None):
+        sur_res_obj = self.pool.get('survey.user_input')
+        sent_appraisal_ids = []
+        for rec in self.browse(cr, uid, ids, context=context):
+            sent_ids = sur_res_obj.search(cr, uid, [
+                                      ('survey_id', 'in', [rec.apprasial_manager_survey_id.id, rec.appraisal_colleagues_survey_id.id, rec.appraisal_self_survey_id.id, rec.appraisal_subordinates_survey_id.id]),
+                                      ('type', '=', 'link'), ('deadline','=', rec.date_close), ('date_create', '=', rec.appraisal_sent_date),
+                                      ('employee_id','=',rec.employee_id.id)])
+            for id in sent_ids:
+                sent_appraisal_ids.append(id)
+        model, action_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'survey', 'action_survey_user_input')
+        action = self.pool.get(model).read(cr, uid, action_id, context=context)
+        action['domain'] = str([('id', 'in', sent_appraisal_ids)])  
+        return action
+
+    @api.cr_uid_ids_context
+    def get_result_appraisal(self, cr, uid, ids, context=None):
+        sur_res_obj = self.pool.get('survey.user_input')
+        sent_appraisal_ids = []
+        for rec in self.browse(cr, uid, ids, context=context):
+            sent_ids = sur_res_obj.search(cr, uid, [
+                                      ('survey_id', 'in', [rec.apprasial_manager_survey_id.id, rec.appraisal_colleagues_survey_id.id, rec.appraisal_self_survey_id.id, rec.appraisal_subordinates_survey_id.id]),
+                                      ('type', '=', 'link'), ('deadline','=', rec.date_close), ('date_create', '=', rec.appraisal_sent_date),
+                                      ('employee_id','=',rec.employee_id.id), ('state', '=', 'done')])
+            for id in sent_ids:
+                sent_appraisal_ids.append(id)
+        model, action_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'survey', 'action_survey_user_input')
+        action = self.pool.get(model).read(cr, uid, action_id, context=context)
+        action['domain'] = str([('id', 'in', sent_appraisal_ids)])  
+        return action
+
+    @api.cr_uid_ids_context
+    def schedule_interview_date(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        partner_ids = []
+        for rec in self.browse(cr, uid, ids, context=context):
+            for manager in rec.apprasial_manager_ids:
+                if manager.user_id:
+                    partner_ids.append(manager.user_id.partner_id.id)
+            partner_ids.append(rec.employee_id.user_id.partner_id.id)
+            partner_id .append(rec.employee_id.user_id.partner_id.id)
+        res = self.pool.get('ir.actions.act_window').for_xml_id(cr, uid, 'calendar', 'action_calendar_event', context)
+        res['context'] = {
+            'default_partner_ids': partner_ids,
+        }
+        return res
+
+    @api.one
+    def log_meeting(self, meeting_subject, meeting_date, duration):
+        if not duration:
+            duration = _('unknown')
+        else:
+            duration = str(duration)
+        message = _("Meeting scheduled at '%s'<br> Subject: %s <br> Duration: %s hour(s)") % (meeting_date, meeting_subject, duration)
+        return self.message_post(body=message)
 
 class hr_employee(models.Model):
     _name = "hr.employee"

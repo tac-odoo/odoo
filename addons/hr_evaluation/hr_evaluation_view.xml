@@ -18,13 +18,13 @@
                 <sheet>
                     <label for="employee_id" class="oe_edit_only"/>
                     <h1>
-                        <field name="employee_id" class="oe_inline"  on_change="1" attrs="{'readonly':[('state','not in',('new'))]}"/>
+                        <field name="employee_id" class="oe_inline" on_change="1" attrs="{'readonly':[('state','not in',('new'))]}"/>
                     </h1>
                     <group>
                         <group col="4">
                             <field name="department_id" attrs="{'readonly':[('state','not in',('new'))]}"/>
                             <field name="interview_deadline" attrs="{'required':[('state','in', ('pending','done'))]}"/>
-                            <field name="date_close"/>
+                            <field name="date_close" attrs="{'readonly':[('state','in', ('pending','done'))]}"/>
                             <field name="mail_template" attrs="{'readonly':[('state','not in',('new'))]}"/>
                         </group>
                     </group>
@@ -116,7 +116,7 @@
                     <field name="tot_sent_appraisal"/>
                     <templates>
                         <t t-name="kanban-box">
-                            <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click">
+                            <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click cal_appraisal" style="height: 200px; width: 300px;">
                             <div class="oe_dropdown_toggle oe_dropdown_kanban" groups="base.group_user">
                                 <span class="oe_e">í</span>
                                 <ul class="oe_dropdown_menu">
@@ -131,23 +131,28 @@
                                 <div>
                                     <field name="department_id"/><br/>
                                     <t t-if="record.date_close.raw_value and record.date_close.raw_value lt (new Date())" t-set="red">oe_kanban_text_red</t>
-                                    Deadline: <span t-attf-class="#{red || ''}"><i><field name="date_close"/></i></span>
+                                    <span t-attf-class="#{red || ''}"><i><field name="date_close"/></i></span>
                                     <br/>
+                                </div>
+                                <div>
                                     <li>
                                         <t t-if="! record.interview_deadline.raw_value and record.state.raw_value != 'new'">
-                                        <strong><a style="color: #7c7bad;">Schedule The Final Interview Date</a></strong></t>
+                                        <strong><a style="color: #7c7bad;" name="schedule_interview_date" type="object">Schedule The Final Interview</a></strong></t>
                                         <t t-if="record.interview_deadline.raw_value and record.state.raw_value != 'new' and record.interview_deadline.raw_value lt (new Date())" t-set="deadline">oe_kanban_text_red</t>
-                                        <t t-if="record.interview_deadline.raw_value and record.state.raw_value != 'new'"><strong><span style="color: #7c7bad;">Final Interview Date: </span></strong>
+                                        <t t-if="record.interview_deadline.raw_value and record.state.raw_value != 'new'"><strong><span style="color: #7c7bad;">Final Interview: </span></strong>
                                         <span t-attf-class="#{deadline || ''}"><i><field name="interview_deadline"/></i></span></t>
                                     </li>
-                                    <t t-if="record.tot_sent_appraisal.raw_value &gt; 0"><a>Sent Appraisal</a> <span t-if="record.tot_sent_appraisal.raw_value &gt; 0">(<field name="tot_sent_appraisal"/>)</span></t>
                                 </div>
-                                <div class="oe_kanban_bottom_right">
+                                <div style="display: inline-block">
+                                    <a name="get_sent_appraisal" type="object"><field name="tot_sent_appraisal" widget="gauge" style="width:120px; height: 90px;" options="{'max_field': 'tot_sent_appraisal'}">Sent Appraisal </field></a>
+                                    <a name="get_result_appraisal" type="object"><field name="tot_comp_appraisal" widget="gauge" style="width:120px; height: 90px;" options="{'max_field': 'tot_sent_appraisal'}">Answers </field></a>
+                                </div>
+                                <div class="oe_kanban_bottom_right_appraisal">
                                     <img t-att-src="kanban_image('hr.employee', 'image_small', record.employee_id.raw_value)" t-att-title="record.employee_id.value" width="24" height="24" class="oe_kanban_avatar pull-right"/>
                                 </div>
+                                <div class="oe_clear"></div>
                             </div>
-                            <div class="oe_clear"></div>
-                            </div>
+                          </div>
                         </t>
                     </templates>
                 </kanban>
