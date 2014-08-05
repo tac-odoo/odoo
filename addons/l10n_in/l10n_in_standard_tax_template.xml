@@ -362,9 +362,9 @@
     <record id="sale_Excise_Duty_12_child1_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">20</field>
+        <field name="tax_amount">2.4</field>
         <field name="apply_on">invoice</field>
-        <field name="debit_credit_amount">20</field>
+        <field name="debit_credit_amount">2.4</field>
         <field name="code_id" ref="edu_vat_code_tax_exice_sale"/>
         <field name="account_id" ref="p112332"/>
         <field name="tax_id" ref="sale_Excise_Duty_12"/>
@@ -372,9 +372,9 @@
     <record id="sale_Excise_Duty_12_child2_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">3</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">10</field>
+        <field name="tax_amount">1.22</field>
         <field name="apply_on">invoice</field>
-        <field name="debit_credit_amount">10</field>
+        <field name="debit_credit_amount">1.22</field>
         <field name="code_id" ref="hedu_vat_code_tax_exice_sale"/>
         <field name="account_id" ref="p112333"/>
         <field name="tax_id" ref="sale_Excise_Duty_12"/>
@@ -398,17 +398,17 @@
     <record id="sale_Excise_Duty_12_child1_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">20</field>
+        <field name="tax_amount">2.4</field>
         <field name="apply_on">refund</field>
-        <field name="debit_credit_amount">20</field>
+        <field name="debit_credit_amount">2.4</field>
         <field name="tax_id" ref="sale_Excise_Duty_12"/>
     </record>
     <record id="sale_Excise_Duty_12_child2_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">3</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">10</field>
+        <field name="tax_amount">1.22</field>
         <field name="apply_on">refund</field>
-        <field name="debit_credit_amount">10</field>
+        <field name="debit_credit_amount">1.22</field>
         <field name="tax_id" ref="sale_Excise_Duty_12"/>
     </record>
 
@@ -444,9 +444,9 @@
     <record id="sale_service_tax_12_child1_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">20</field>
+        <field name="tax_amount">2.4</field>
         <field name="apply_on">invoice</field>
-        <field name="debit_credit_amount">20</field>
+        <field name="debit_credit_amount">2.4</field>
         <field name="code_id" ref="edu_vat_code_service_tax_sale"/>
         <field name="account_id" ref="p112342"/>
         <field name="tax_id" ref="sale_service_tax_12"/>
@@ -454,9 +454,9 @@
     <record id="sale_service_tax_12_child2_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">10</field>
+        <field name="tax_amount">1.22</field>
         <field name="apply_on">invoice</field>
-        <field name="debit_credit_amount">10</field>
+        <field name="debit_credit_amount">1.22</field>
         <field name="code_id" ref="hedu_vat_code_service_tax_sale"/>
         <field name="account_id" ref="p112343"/>
         <field name="tax_id" ref="sale_service_tax_12"/>
@@ -480,17 +480,17 @@
     <record id="sale_service_tax_12_child1_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">20</field>
+        <field name="tax_amount">2.4</field>
         <field name="apply_on">refund</field>
-        <field name="debit_credit_amount">20</field>
+        <field name="debit_credit_amount">2.4</field>
         <field name="tax_id" ref="sale_service_tax_12"/>
     </record>
     <record id="sale_service_tax_12_child2_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">10</field>
+        <field name="tax_amount">1.22</field>
         <field name="apply_on">refund</field>
-        <field name="debit_credit_amount">10</field>
+        <field name="debit_credit_amount">1.22</field>
         <field name="tax_id" ref="sale_service_tax_12"/>
     </record>
 
@@ -937,9 +937,9 @@
     <record id="purchase_Excise_Duty_12_child1_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">-20</field>
+        <field name="tax_amount">-2.4</field>
         <field name="apply_on">invoice</field>
-        <field name="debit_credit_amount">20</field>
+        <field name="debit_credit_amount">2.4</field>
         <field name="code_id" ref="edu_vat_code_tax_exice_purchase"/>
         <field name="account_id" ref="p100522"/>
         <field name="tax_id" ref="purchase_Excise_Duty_12"/>
@@ -947,9 +947,9 @@
     <record id="purchase_Excise_Duty_12_child2_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">3</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">-10</field>
+        <field name="tax_amount">-1.22</field>
         <field name="apply_on">invoice</field>
-        <field name="debit_credit_amount">10</field>
+        <field name="debit_credit_amount">1.22</field>
         <field name="code_id" ref="hedu_vat_code_tax_exice_purchase"/>
         <field name="account_id" ref="p100523"/>
         <field name="tax_id" ref="purchase_Excise_Duty_12"/>
@@ -973,17 +973,17 @@
     <record id="purchase_Excise_Duty_12_child1_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">2</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">20</field>
+        <field name="tax_amount">2.4</field>
         <field name="apply_on">refund</field>
-        <field name="debit_credit_amount">20</field>
+        <field name="debit_credit_amount">2.4</field>
         <field name="tax_id" ref="purchase_Excise_Duty_12"/>
     </record>
     <record id="purchase_Excise_Duty_12_child2_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">3</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">10</field>
+        <field name="tax_amount">1.22</field>
         <field name="apply_on">refund</field>
-        <field name="debit_credit_amount">10</field>
+        <field name="debit_credit_amount">1.22</field>
         <field name="tax_id" ref="purchase_Excise_Duty_12"/>
     </record>
 
@@ -1019,9 +1019,9 @@
     <record id="st_purchase_service_tax_12_child1_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">-20</field>
+        <field name="tax_amount">-2.4</field>
         <field name="apply_on">invoice</field>
-        <field name="debit_credit_amount">20</field>
+        <field name="debit_credit_amount">2.4</field>
         <field name="code_id" ref="edu_vat_code_service_tax_pur"/>
         <field name="account_id" ref="p100532"/>
         <field name="tax_id" ref="st_purchase_service_tax_12"/>
@@ -1029,9 +1029,9 @@
     <record id="st_purchase_service_tax_12_child2_invoice_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">-10</field>
+        <field name="tax_amount">-1.22</field>
         <field name="apply_on">invoice</field>
-        <field name="debit_credit_amount">10</field>
+        <field name="debit_credit_amount">1.22</field>
         <field name="code_id" ref="hedu_vat_code_service_tax_pur"/>
         <field name="account_id" ref="p100533"/>
         <field name="tax_id" ref="st_purchase_service_tax_12"/>
@@ -1055,17 +1055,17 @@
     <record id="st_purchase_service_tax_12_child1_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">20</field>
+        <field name="tax_amount">2.4</field>
         <field name="apply_on">refund</field>
-        <field name="debit_credit_amount">20</field>
+        <field name="debit_credit_amount">2.4</field>
         <field name="tax_id" ref="st_purchase_service_tax_12"/>
     </record>
     <record id="st_purchase_service_tax_12_child2_refund_tax_line" model="account.tax.line.template">
         <field name="sequence">10</field>
         <field name="code_type">tax</field>
-        <field name="tax_amount">10</field>
+        <field name="tax_amount">1.22</field>
         <field name="apply_on">refund</field>
-        <field name="debit_credit_amount">10</field>
+        <field name="debit_credit_amount">1.22</field>
         <field name="tax_id" ref="st_purchase_service_tax_12"/>
     </record>
 

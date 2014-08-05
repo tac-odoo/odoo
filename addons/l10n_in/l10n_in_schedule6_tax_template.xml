@@ -355,7 +355,7 @@
         <field name="tax_amount">120</field>
         <field name="apply_on">invoice</field>
         <field name="debit_credit_amount">120</field>
-        <field name="code_id" ref="10vat_on_sale"/>
+        <field name="code_id" ref="vat_code_tax_exice_sale"/>
         <field name="account_id" ref="c1142111"/>
         <field name="tax_id" ref="schedule6_sale_Excise_Duty_12"/>
     </record>
