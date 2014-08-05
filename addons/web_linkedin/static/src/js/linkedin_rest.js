@@ -28,16 +28,20 @@ openerp.web_linkedin = function(instance) {
                     return true;
                 } else {
                     if (show_dialog) {
-                        var dialog = new instance.web.Dialog(self, {
-                            title: _t("LinkedIn is not enabled"),
-                            buttons: [
-                                {text: _t("Ok"), click: function() { self.parents('.modal').modal('hide'); }}
-                            ],
-                        }, QWeb.render('LinkedIn.DisabledWarning')).open();
+                        self.show_error({'name': "Linkedin API key not set."})
                     }
                     return $.Deferred().reject();
                 }
             });
+        },
+        show_error: function(error) {
+            var self = this;
+            var dialog = new instance.web.Dialog(self, {
+                title: _t("LinkedIn is not enabled"),
+                buttons: [
+                    {text: _t("Ok"), click: function() { dialog.$dialog_box.modal('hide'); }}
+                ],
+            }, QWeb.render('LinkedIn.DisabledWarning', {error: error})).open();
         },
     });
     
@@ -322,8 +326,10 @@ openerp.web_linkedin = function(instance) {
             var context = _.extend(instance.web.pyeval.eval('context'), {'from_url': window.location.href});
             _.extend(params, {'search_term': this.search, 'from_url': window.location.href, 'local_context': context});
             self.rpc("/linkedin/get_search_popup_data", params).done(function(result) {
-                if(result.status && result.status == 'need_auth' && confirm(_t("You will be redirected to LinkedIn authentication page, once authenticated after that you use this widget."))) {
-                    instance.web.redirect(result.url);
+                if(result.status && result.status == 'need_auth') {
+                    if (confirm(_t("You may redirected to LinkedIn authorization page, once you authorized after that you can use this widget."))) {
+                        instance.web.redirect(result.url);
+                    }
                 } else { //We can check (result.status == 'OK') and other status
                     self.trigger('search_completed');
                     self.has_been_loaded.resolve(result.current_profile)
@@ -384,6 +390,7 @@ openerp.web_linkedin = function(instance) {
             var $row;
             $elem.find(".oe_no_result").remove();
             _.each(result, function(el) {
+                //To prevent creation of same entity twice, it is possible due to show more button or universal name which returns same entity twice
                 if (self.$el.find(".linkedin_id_"+el.id).length) { return; }
                 var pc = new instance.web_linkedin.EntityWidget(self, el);
                 if (!$elem.find("div").size() || $elem.find(" > div:last > div").size() >= 5) {

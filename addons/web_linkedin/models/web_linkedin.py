@@ -111,21 +111,6 @@ class web_linkedin_fields(osv.Model):
             help="This url is set automatically when you join the partner with a LinkedIn account."),
     }
 
-    def get_empty_list_help(self, cr, uid, help, context=None):
-        apikey = self.pool.get('ir.config_parameter').get_param(cr, uid, 'web.linkedin.apikey', default=False, context=context)
-        secret_key = self.pool.get('ir.config_parameter').get_param(cr, uid, 'web.linkedin.secretkey', default=False, context=context)
-        if apikey and secret_key:
-            #Either we can achive it by including no_result method
-            return _("""<p class="oe_view_nocontent_create">
-                    Click to add a contact in your address book or <a href='#' class="oe_import_contacts">Import Contacts from Linkedin</a>.
-                  </p><p>
-                    OpenERP helps you easily track all activities related to
-                    a customer; discussions, history of business opportunities,
-                    documents, etc.
-                  </p>""")
-        else:
-            return super(web_linkedin_fields, self).super(cr, uid, help, context=context)
-
 class linkedin_users(osv.Model):
     _inherit = 'res.users'
 
@@ -206,7 +191,7 @@ class linkedin(osv.AbstractModel):
             'linkedin_url': record.get('publicProfileUrl', False),
             'linkedin_id': record.get('id', False),
         }
-        #Should we add: email-address,summary
+        #TODO: Should we add: email-address,summary
         positions = (record.get('positions') or {}).get('values', [])
         for position in positions:
             if position.get('isCurrent'):
@@ -298,8 +283,8 @@ class linkedin(osv.AbstractModel):
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain', 'x-li-format': 'json'}
         context.update(kw.get('local_context') or {})
         if kw.get('search_uid'):
-            #Unable to get why this code returns 400 bad request error, as per linked API doc the call is proper but it returns 400 bad request error always
-            #add warning in response and handle warning at client side
+            #this code may returns 400 bad request error, as per linked API doc the call is proper 
+            #but generated url may not have proper public url and may raise 400 or 410 status hence added a warning in response and handle warning at client side
             try:
                 public_profile_url = werkzeug.url_quote_plus("http://www.linkedin.com/pub/%s"%(kw['search_uid']))
                 profile_uri = "/people/url={public_profile_url}:{people_fields}".format(public_profile_url=public_profile_url, people_fields=people_fields)
@@ -365,6 +350,7 @@ class linkedin(osv.AbstractModel):
 
             if e.code == 401:
                 raise except_auth('AuthorizationError', {'url': self._get_authorize_uri(cr, uid, from_url=context.get('from_url'), context=context)})
+            #TODO: Should handle 403 for throttle limit and should display user freindly message
             _logger.exception("Bad linkedin request : %s !" % e.read())
         except urllib2.URLError, e:
             _logger.exception("Either there is no connection or remote server is down !")
