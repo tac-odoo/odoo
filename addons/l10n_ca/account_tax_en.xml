@@ -20,6 +20,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_receivable_gst_en"/>
+        <field name="tax_id" ref="gstpst_bc_sale_en"/>
+    </record>
+
+    <record id="gstpst_bc_sale_en_invoice_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_receivable_pst_en"/>
         <field name="tax_id" ref="gstpst_bc_sale_en"/>
     </record>
 
@@ -28,6 +38,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_receivable_gst_en"/>
+        <field name="tax_id" ref="gstpst_bc_sale_en"/>
+    </record>
+
+    <record id="gstpst_bc_sale_en_refund_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_receivable_pst_en"/>
         <field name="tax_id" ref="gstpst_bc_sale_en"/>
     </record>
 
@@ -93,6 +113,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_receivable_gst_en"/>
+        <field name="tax_id" ref="gstpst_mb_sale_en"/>
+    </record>
+
+    <record id="gstpst_mb_sale_en_invoice_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_receivable_pst_en"/>
         <field name="tax_id" ref="gstpst_mb_sale_en"/>
     </record>
 
@@ -101,6 +131,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_receivable_gst_en"/>
+        <field name="tax_id" ref="gstpst_mb_sale_en"/>
+    </record>
+
+    <record id="gstpst_mb_sale_en_refund_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_receivable_pst_en"/>
         <field name="tax_id" ref="gstpst_mb_sale_en"/>
     </record>
 
@@ -166,6 +206,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_receivable_gst_en"/>
+        <field name="tax_id" ref="gstqst_sale_en"/>
+    </record>
+
+    <record id="gstqst_sale_en_invoice_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_receivable_pst_en"/>
         <field name="tax_id" ref="gstqst_sale_en"/>
     </record>
 
@@ -174,6 +224,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_receivable_gst_en"/>
+        <field name="tax_id" ref="gstqst_sale_en"/>
+    </record>
+
+    <record id="gstqst_sale_en_refund_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_receivable_pst_en"/>
         <field name="tax_id" ref="gstqst_sale_en"/>
     </record>
 
@@ -239,6 +299,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_receivable_gst_en"/>
+        <field name="tax_id" ref="gstpst_sk_sale_en"/>
+    </record>
+
+    <record id="gstpst_sk_sale_en_invoice_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_receivable_pst_en"/>
         <field name="tax_id" ref="gstpst_sk_sale_en"/>
     </record>
 
@@ -247,6 +317,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_receivable_gst_en"/>
+        <field name="tax_id" ref="gstpst_sk_sale_en"/>
+    </record>
+
+    <record id="gstpst_sk_sale_en_refund_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_receivable_pst_en"/>
         <field name="tax_id" ref="gstpst_sk_sale_en"/>
     </record>
 
@@ -506,6 +586,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_payable_gst_en"/>
+        <field name="tax_id" ref="gstpst_bc_purc_en"/>
+    </record>
+
+    <record id="gstpst_bc_purc_en_invoice_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_payable_pst_en"/>
         <field name="tax_id" ref="gstpst_bc_purc_en"/>
     </record>
 
@@ -514,6 +604,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_payable_gst_en"/>
+        <field name="tax_id" ref="gstpst_bc_purc_en"/>
+    </record>
+
+    <record id="gstpst_bc_purc_en_refund_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_payable_pst_en"/>
         <field name="tax_id" ref="gstpst_bc_purc_en"/>
     </record>
 
@@ -579,6 +679,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_payable_gst_en"/>
+        <field name="tax_id" ref="gstpst_mb_purc_en"/>
+    </record>
+
+    <record id="gstpst_mb_purc_en_invoice_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_payable_pst_en"/>
         <field name="tax_id" ref="gstpst_mb_purc_en"/>
     </record>
 
@@ -587,6 +697,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_payable_gst_en"/>
+        <field name="tax_id" ref="gstpst_mb_purc_en"/>
+    </record>
+
+    <record id="gstpst_mb_purc_en_refund_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_payable_pst_en"/>
         <field name="tax_id" ref="gstpst_mb_purc_en"/>
     </record>
 
@@ -652,6 +772,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_payable_gst_en"/>
+        <field name="tax_id" ref="gstqst_purc_en"/>
+    </record>
+
+    <record id="gstqst_purc_en_invoice_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_payable_pst_en"/>
         <field name="tax_id" ref="gstqst_purc_en"/>
     </record>
 
@@ -660,6 +790,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_payable_gst_en"/>
+        <field name="tax_id" ref="gstqst_purc_en"/>
+    </record>
+
+    <record id="gstqst_purc_en_refund_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">refund</field>
+         <field name="code_id" ref="vat_code_base_payable_pst_en"/>
         <field name="tax_id" ref="gstqst_purc_en"/>
     </record>
 
@@ -725,6 +865,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_payable_gst_en"/>
+        <field name="tax_id" ref="gstpst_sk_purc_en"/>
+    </record>
+
+    <record id="gstpst_sk_purc_en_invoice_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">invoice</field>
+        <field name="code_id" ref="vat_code_base_payable_pst_en"/>
         <field name="tax_id" ref="gstpst_sk_purc_en"/>
     </record>
 
@@ -733,6 +883,16 @@
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">1000</field>
         <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_payable_gst_en"/>
+        <field name="tax_id" ref="gstpst_sk_purc_en"/>
+    </record>
+
+    <record id="gstpst_sk_purc_en_refund_base_line_1" model="account.tax.line.template">
+        <field name="code_type">base</field>
+        <field name="tax_amount">1000</field>
+        <field name="debit_credit_amount">0</field>
+        <field name="apply_on">refund</field>
+        <field name="code_id" ref="vat_code_base_payable_pst_en"/>
         <field name="tax_id" ref="gstpst_sk_purc_en"/>
     </record>
 
