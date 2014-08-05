@@ -63,6 +63,9 @@ class Post(osv.Model):
         'documentation_stage_id': fields.many2one('forum.documentation.stage', 'Documentation Stage'),
         'color': fields.integer('Color Index')
     }
+    _defaults = {
+        'documentation_stage_id': 1,
+    }
     def _read_group_stage_ids(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
         stage_obj = self.pool.get('forum.documentation.stage')
         stage_ids = stage_obj.search(cr, uid, [], context=context)
