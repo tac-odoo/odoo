@@ -35,7 +35,7 @@
             <field name="auto_delete" eval="True" />
             <field name="subject">Apprasial Regarding</field>
             <field name="email_to">${object.email_to}</field>
-            <field name="email_from">${object.employee_id.work_email}</field>
+            <field name="email_from">${object.user_id.partner_id.email}</field>
             <field name="body_html">
                 <![CDATA[
                 <div style="font-family: 'Lucida Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); ">

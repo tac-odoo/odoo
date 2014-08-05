@@ -26,6 +26,8 @@
                             <field name="interview_deadline" attrs="{'required':[('state','in', ('pending','done'))]}"/>
                             <field name="date_close" attrs="{'readonly':[('state','in', ('pending','done'))]}"/>
                             <field name="mail_template" attrs="{'readonly':[('state','not in',('new'))]}"/>
+                            <field name="user_id" invisible="True"/>
+                            <field name="meeting_id" invisible="True"/>
                         </group>
                     </group>
                     <notebook>
