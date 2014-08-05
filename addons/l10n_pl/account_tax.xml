@@ -33,17 +33,17 @@
         </record>
         <record id="vs_kraj_23_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_dost_kraj_22"/>
             <field name="tax_id" ref="vs_kraj_23"/>
         </record>
         <record id="vs_kraj_23_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount"></field>
+            <field name="tax_amount">-230</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-230</field>
+            <field name="debit_credit_amount">230</field>
             <field name="code_id" ref="v_dost_kraj_22"/>
             <field name="account_id" ref="chart22030400"/>
             <field name="tax_id" ref="vs_kraj_23"/>
@@ -77,17 +77,17 @@
         </record>
         <record id="vs_kraj_22_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_dost_kraj_22"/>
             <field name="tax_id" ref="vs_kraj_22"/>
         </record>
         <record id="vs_kraj_22_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">220</field>
+            <field name="tax_amount">-220</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-220</field>
+            <field name="debit_credit_amount">220</field>
             <field name="code_id" ref="v_dost_kraj_22"/>
             <field name="account_id" ref="chart22030100"/>
             <field name="tax_id" ref="vs_kraj_22"/>
@@ -121,17 +121,17 @@
         </record>
         <record id="vs_kraj_8_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_dost_kraj_7"/>
             <field name="tax_id" ref="vs_kraj_8"/>
         </record>
         <record id="vs_kraj_8_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">80</field>
+            <field name="tax_amount">-80</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-80</field>
+            <field name="debit_credit_amount">80</field>
             <field name="code_id" ref="v_dost_kraj_7"/>
             <field name="account_id" ref="chart22030500"/>
             <field name="tax_id" ref="vs_kraj_8"/>
@@ -165,17 +165,17 @@
         </record>
         <record id="vs_kraj_7_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_dost_kraj_7"/>
             <field name="tax_id" ref="vs_kraj_7"/>
         </record>
         <record id="vs_kraj_7_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">70</field>
+            <field name="tax_amount">-70</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-70</field>
+            <field name="debit_credit_amount">70</field>
             <field name="code_id" ref="v_dost_kraj_7"/>
             <field name="account_id" ref="chart22030200"/>
             <field name="tax_id" ref="vs_kraj_7"/>
@@ -209,17 +209,17 @@
         </record>
         <record id="vs_kraj_5_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_dost_kraj_3"/>
             <field name="tax_id" ref="vs_kraj_5"/>
         </record>
         <record id="vs_kraj_5_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">50</field>
+            <field name="tax_amount">-50</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-50</field>
+            <field name="debit_credit_amount">50</field>
             <field name="code_id" ref="v_dost_kraj_3"/>
             <field name="account_id" ref="chart22030600"/>
             <field name="tax_id" ref="vs_kraj_5"/>
@@ -253,17 +253,17 @@
         </record>
         <record id="vs_kraj_3_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_dost_kraj_3"/>
             <field name="tax_id" ref="vs_kraj_3"/>
         </record>
         <record id="vs_kraj_3_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">30</field>
+            <field name="tax_amount">-30</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-30</field>
+            <field name="debit_credit_amount">30</field>
             <field name="code_id" ref="v_dost_kraj_3"/>
             <field name="account_id" ref="chart22030300"/>
             <field name="tax_id" ref="vs_kraj_3"/>
@@ -295,9 +295,9 @@
         </record>
         <record id="vs_kraj_0_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_dost_kraj_0"/>
             <field name="tax_id" ref="vs_kraj_0"/>
         </record>
@@ -305,7 +305,7 @@
             <field name="code_type">tax</field>
             <field name="tax_amount">0</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-0</field>
+            <field name="debit_credit_amount">0</field>
             <field name="tax_id" ref="vs_kraj_0"/>
         </record>
 
@@ -335,9 +335,9 @@
         </record>
         <record id="vs_kraj_zw_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_dost_kraj_zw"/>
             <field name="tax_id" ref="vs_kraj_zw"/>
         </record>
@@ -377,17 +377,17 @@
         </record>
         <record id="vs_kraj_usl_23_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_dost_kraj_22"/>
             <field name="tax_id" ref="vs_kraj_usl_23"/>
         </record>
         <record id="vs_kraj_usl_23_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">230</field>
+            <field name="tax_amount">-230</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-230</field>
+            <field name="debit_credit_amount">230</field>
             <field name="code_id" ref="v_dost_kraj_22"/>
             <field name="account_id" ref="chart22030400"/>
             <field name="tax_id" ref="vs_kraj_usl_23"/>
@@ -421,17 +421,17 @@
         </record>
         <record id="vs_kraj_usl_22_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_dost_kraj_22"/>
             <field name="tax_id" ref="vs_kraj_usl_22"/>
         </record>
         <record id="vs_kraj_usl_22_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">220</field>
+            <field name="tax_amount">-220</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-220</field>
+            <field name="debit_credit_amount">220</field>
             <field name="code_id" ref="v_dost_kraj_22"/>
             <field name="account_id" ref="chart22030100"/>
             <field name="tax_id" ref="vs_kraj_usl_22"/>
@@ -470,17 +470,17 @@
         </record>
         <record id="vz_kraj_23_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_nab_tow_usluga"/>
             <field name="tax_id" ref="vz_kraj_23"/>
         </record>
         <record id="vz_kraj_23_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">230</field>
+            <field name="tax_amount">-230</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-230</field>
+            <field name="debit_credit_amount">230</field>
             <field name="code_id" ref="v_nab_tow_usluga"/>
             <field name="account_id" ref="chart22020400"/>
             <field name="tax_id" ref="vz_kraj_23"/>
@@ -514,17 +514,17 @@
         </record>
         <record id="vz_kraj_22_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_nab_tow_usluga"/>
             <field name="tax_id" ref="vz_kraj_22"/>
         </record>
         <record id="vz_kraj_22_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">220</field>
+            <field name="tax_amount">-220</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-220</field>
+            <field name="debit_credit_amount">220</field>
             <field name="code_id" ref="v_nab_tow_usluga"/>
             <field name="account_id" ref="chart22020100"/>
             <field name="tax_id" ref="vz_kraj_22"/>
@@ -560,15 +560,15 @@
         </record>
         <record id="vz_kraj_8_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_nab_tow_usluga"/>
             <field name="tax_id" ref="vz_kraj_8"/>
         </record>
         <record id="vz_kraj_8_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">80</field>
+            <field name="tax_amount">-80</field>
             <field name="apply_on">refund</field>
             <field name="debit_credit_amount">80</field>
             <field name="code_id" ref="v_nab_tow_usluga"/>
@@ -605,17 +605,17 @@
         </record>
         <record id="vz_kraj_7_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_nab_tow_usluga"/>
             <field name="tax_id" ref="vz_kraj_7"/>
         </record>
         <record id="vz_kraj_7_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">70</field>
+            <field name="tax_amount">-70</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-70</field>
+            <field name="debit_credit_amount">70</field>
             <field name="code_id" ref="v_nab_tow_usluga"/>
             <field name="account_id" ref="chart22020200"/>
             <field name="tax_id" ref="vz_kraj_7"/>
@@ -649,17 +649,17 @@
         </record>
         <record id="vz_kraj_5_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_nab_tow_usluga"/>
             <field name="tax_id" ref="vz_kraj_5"/>
         </record>
         <record id="vz_kraj_5_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">50</field>
+            <field name="tax_amount">-50</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-50</field>
+            <field name="debit_credit_amount">50</field>
             <field name="code_id" ref="v_nab_tow_usluga"/>
             <field name="account_id" ref="chart22020600"/>
             <field name="tax_id" ref="vz_kraj_5"/>
@@ -693,17 +693,17 @@
         </record>
         <record id="vz_kraj_3_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_nab_tow_usluga"/>
             <field name="tax_id" ref="vz_kraj_3"/>
         </record>
         <record id="vz_kraj_3_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">30</field>
+            <field name="tax_amount">-30</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-30</field>
+            <field name="debit_credit_amount">30</field>
             <field name="code_id" ref="v_nab_tow_usluga"/>
             <field name="account_id" ref="chart22020300"/>
             <field name="tax_id" ref="vz_kraj_3"/>
@@ -736,9 +736,9 @@
         </record>
         <record id="vz_kraj_0_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_nab_tow_usluga"/>
             <field name="tax_id" ref="vz_kraj_0"/>
         </record>
@@ -778,9 +778,9 @@
         </record>
         <record id="vz_kraj_zw_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_nab_tow_usluga"/>
             <field name="tax_id" ref="vz_kraj_zw"/>
         </record>
@@ -821,17 +821,17 @@
         </record>
         <record id="vz_kraj_usl_23_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_nab_tow_usluga"/>
             <field name="tax_id" ref="vz_kraj_usl_23"/>
         </record>
         <record id="vz_kraj_usl_23_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">230</field>
+            <field name="tax_amount">-230</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-230</field>
+            <field name="debit_credit_amount">230</field>
             <field name="code_id" ref="v_nab_tow_usluga"/>
             <field name="account_id" ref="chart22020400"/>
             <field name="tax_id" ref="vz_kraj_usl_23"/>
@@ -865,17 +865,17 @@
         </record>
         <record id="vz_kraj_usl_22_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_nab_tow_usluga"/>
             <field name="tax_id" ref="vz_kraj_usl_22"/>
         </record>
         <record id="vz_kraj_usl_22_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">220</field>
+            <field name="tax_amount">-220</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-220</field>
+            <field name="debit_credit_amount">220</field>
             <field name="code_id" ref="v_nab_tow_usluga"/>
             <field name="account_id" ref="chart22020100"/>
             <field name="tax_id" ref="vz_kraj_usl_22"/>
@@ -910,9 +910,9 @@
         </record>
         <record id="vs_unia_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_dost_wspol"/>
             <field name="tax_id" ref="vs_unia"/>
         </record>
@@ -951,18 +951,18 @@
 
         <record id="vz_unia_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">invoice</field>
-            <field name="debit_credit_amount">100</field>
+            <field name="debit_credit_amount">230</field>
             <field name="code_id" ref="v_wew_wspol_nab_tow"/>
             <field name="account_id" ref="chart22020400"/>
             <field name="tax_id" ref="vz_unia"/>
         </record>
         <record id="vz_unia_1_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">100</field>
+            <field name="debit_credit_amount">230</field>
             <field name="code_id" ref="v_wew_wspol_nab_tow"/>
             <field name="account_id" ref="chart22020400"/>
             <field name="tax_id" ref="vz_unia"/>
@@ -970,17 +970,17 @@
 
         <record id="vz_unia_2_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">invoice</field>
-            <field name="debit_credit_amount">-100</field>
+            <field name="debit_credit_amount">-230</field>
             <field name="account_id" ref="chart22040300"/>
             <field name="tax_id" ref="vz_unia"/>
         </record>
         <record id="vz_unia_2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-100</field>
+            <field name="debit_credit_amount">-230</field>
             <field name="account_id" ref="chart22040300"/>
             <field name="tax_id" ref="vz_unia"/>
         </record>
@@ -1010,14 +1010,14 @@
             <field name="tax_amount">0</field>
             <field name="apply_on">invoice</field>
             <field name="debit_credit_amount">0</field>
-            <field name="code_id" ref="p_eksport"/>
             <field name="tax_id" ref="vs_eksp_tow"/>
         </record>
         <record id="vs_eksp_tow_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="p_eksport"/>
             <field name="tax_id" ref="vs_eksp_tow"/>
         </record>
         <record id="vs_eksp_tow_refund_tax_line" model="account.tax.line.template">
@@ -1056,18 +1056,18 @@
 
         <record id="vz_imp_tow_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">invoice</field>
-            <field name="debit_credit_amount">100</field>
+            <field name="debit_credit_amount">230</field>
             <field name="code_id" ref="v_import_tow_art33a"/>
             <field name="account_id" ref="chart22020400"/>
             <field name="tax_id" ref="vz_imp_tow"/>
         </record>
         <record id="vz_imp_tow_1_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">100</field>
+            <field name="debit_credit_amount">230</field>
             <field name="code_id" ref="v_import_tow_art33a"/>
             <field name="account_id" ref="chart22020400"/>
             <field name="tax_id" ref="vz_imp_tow"/>
@@ -1075,17 +1075,17 @@
 
         <record id="vz_imp_tow_2_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">invoice</field>
-            <field name="debit_credit_amount">-100</field>
+            <field name="debit_credit_amount">-230</field>
             <field name="account_id" ref="chart22040300"/>
             <field name="tax_id" ref="vz_imp_tow"/>
         </record>
         <record id="vz_imp_tow_2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-100</field>
+            <field name="debit_credit_amount">-230</field>
             <field name="account_id" ref="chart22040300"/>
             <field name="tax_id" ref="vz_imp_tow"/>
         </record>
@@ -1117,17 +1117,17 @@
         </record>
         <record id="vs_ekspu_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_dost_poza_kraj"/>
             <field name="tax_id" ref="vs_ekspu"/>
         </record>
         <record id="vs_ekspu_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount"></field>
+            <field name="tax_amount">0</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount"></field>
+            <field name="debit_credit_amount">0</field>
             <field name="tax_id" ref="vs_ekspu"/>
         </record>
 
@@ -1157,9 +1157,9 @@
         </record>
         <record id="vs_dostu_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_us_poza_kraj_art100"/>
             <field name="tax_id" ref="vs_dostu"/>
         </record>
@@ -1200,18 +1200,18 @@
 
         <record id="vz_impu_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">invoice</field>
-            <field name="debit_credit_amount">100</field>
+            <field name="debit_credit_amount">230</field>
             <field name="code_id" ref="v_import_uslug"/>
             <field name="account_id" ref="chart22020400"/>
             <field name="tax_id" ref="vz_impu"/>
         </record>
         <record id="vz_impu_1_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">100</field>
+            <field name="debit_credit_amount">230</field>
             <field name="code_id" ref="v_import_uslug"/>
             <field name="account_id" ref="chart22020400"/>
             <field name="tax_id" ref="vz_impu"/>
@@ -1219,17 +1219,17 @@
 
         <record id="vz_impu_2_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">invoice</field>
-            <field name="debit_credit_amount">-100</field>
+            <field name="debit_credit_amount">-230</field>
             <field name="account_id" ref="chart22040300"/>
             <field name="tax_id" ref="vz_impu"/>
         </record>
         <record id="vz_impu_2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-100</field>
+            <field name="debit_credit_amount">-230</field>
             <field name="account_id" ref="chart22040300"/>
             <field name="tax_id" ref="vz_impu"/>
         </record>
@@ -1252,7 +1252,7 @@
         </record>
         <record id="vz_nabu_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
             <field name="debit_credit_amount">-1000</field>
             <field name="code_id" ref="p_import_uslug_art28b"/>
@@ -1261,18 +1261,18 @@
 
         <record id="vz_nabu_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">invoice</field>
-            <field name="debit_credit_amount">100</field>
+            <field name="debit_credit_amount">230</field>
             <field name="code_id" ref="v_import_uslug_art28b"/>
             <field name="account_id" ref="chart22020400"/>
             <field name="tax_id" ref="vz_nabu"/>
         </record>
         <record id="vz_nabu_1_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">100</field>
+            <field name="debit_credit_amount">230</field>
             <field name="code_id" ref="v_import_uslug_art28b"/>
             <field name="account_id" ref="chart22020400"/>
             <field name="tax_id" ref="vz_nabu"/>
@@ -1280,17 +1280,17 @@
 
         <record id="vz_nabu_2_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">invoice</field>
-            <field name="debit_credit_amount">-100</field>
+            <field name="debit_credit_amount">-230</field>
             <field name="account_id" ref="chart22040300"/>
             <field name="tax_id" ref="vz_nabu"/>
         </record>
         <record id="vz_nabu_2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
+            <field name="tax_amount">230</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-100</field>
+            <field name="debit_credit_amount">-230</field>
             <field name="account_id" ref="chart22040300"/>
             <field name="tax_id" ref="vz_nabu"/>
         </record>
@@ -1312,6 +1312,7 @@
                     <field name="tax_amount">1000</field>
                     <field name="apply_on">invoice</field>
                     <field name="debit_credit_amount">1000</field>
+                    <field name="code_id" ref="p_nab_tow_usluga"/>
                     <field name="tax_id" ref="vp_leas"/>
                 </record>
                 <record id="vp_leas_refund_base_line" model="account.tax.line.template">
@@ -1319,6 +1320,7 @@
                     <field name="tax_amount">1000</field>
                     <field name="apply_on">refund</field>
                     <field name="debit_credit_amount">1000</field>
+                    <field name="code_id" ref="p_nab_tow_usluga"/>
                     <field name="tax_id" ref="vp_leas"/>
                 </record>
 
