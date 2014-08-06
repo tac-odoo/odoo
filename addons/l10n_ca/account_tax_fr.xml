@@ -321,7 +321,7 @@
         <field name="tax_id" ref="gstpst_sk_sale_fr"/>
     </record>
 
-    <record id="gstpst_sk_sale_fr_refund_base_line" model="account.tax.line.template">
+    <record id="gstpst_sk_sale_fr_refund_base_line_1" model="account.tax.line.template">
         <field name="code_type">base</field>
         <field name="tax_amount">1000</field>
         <field name="debit_credit_amount">0</field>
