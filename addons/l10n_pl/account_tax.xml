@@ -942,9 +942,9 @@
         </record>
         <record id="vz_unia_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_wew_wspol_nab_tow"/>
             <field name="tax_id" ref="vz_unia"/>
         </record>
@@ -1047,9 +1047,9 @@
         </record>
         <record id="vz_imp_tow_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
-            <field name="debit_credit_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_import_tow_art33a"/>
             <field name="tax_id" ref="vz_imp_tow"/>
         </record>
@@ -1191,7 +1191,7 @@
         </record>
         <record id="vz_impu_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">1000</field>
+            <field name="tax_amount">-1000</field>
             <field name="apply_on">refund</field>
             <field name="debit_credit_amount">1000</field>
             <field name="code_id" ref="p_import_uslug"/>
