@@ -248,8 +248,8 @@
         
         <record id="iva_sop_12_agr_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
-            <field name="debit_credit_amount">100</field>
+            <field name="tax_amount">120</field>
+            <field name="debit_credit_amount">120</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_34"/>
@@ -267,8 +267,8 @@
         
         <record id="iva_sop_12_agr_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
-            <field name="debit_credit_amount">100</field>
+            <field name="tax_amount">-120</field>
+            <field name="debit_credit_amount">120</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_34"/>
@@ -436,21 +436,21 @@
             <field name="tax_id" ref="iva_X0_compras_bi"/>
         </record>
         
-        <record id="iva_X0_compras_bi_invoice_tax_line" model="account.tax.line.template">
-            <field name="code_type">tax</field>
-            <field name="tax_amount">0</field>
-            <field name="debit_credit_amount">0</field>
-            <field name="apply_on">invoice</field>
-            <field name="code_id" ref="iva_ded_29"/>
-            <field name="tax_id" ref="iva_X0_compras_bi"/>
-        </record>
-        
         <record id="iva_X0_compras_bi_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
             <field name="tax_amount">-1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
             <field name="code_id" ref="iva_ded_28"/>
+            <field name="tax_id" ref="iva_X0_compras_bi"/>
+        </record>
+        
+        <record id="iva_X0_compras_bi_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_ded_29"/>
             <field name="tax_id" ref="iva_X0_compras_bi"/>
         </record>
         
@@ -757,7 +757,7 @@
             <field name="type_tax_use">sale</field>
         </record>
         
-        <record id="iva_X0_compras_bi_invoice_base_line" model="account.tax.line.template">
+        <record id="iva_X0_compras_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
@@ -766,14 +766,14 @@
             <field name="tax_id" ref="iva_X0"/>
         </record>
         
-        <record id="iva_X0_compras_bi_invoice_tax_line" model="account.tax.line.template">
+        <record id="iva_X0_compras_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">210</field>
             <field name="debit_credit_amount">210</field>
             <field name="apply_on">invoice</field>
         </record>
         
-        <record id="iva_X0_compras_bi_refund_base_line" model="account.tax.line.template">
+        <record id="iva_X0_compras_refund_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
             <field name="tax_amount">-1000</field>
             <field name="debit_credit_amount">1000</field>
@@ -782,7 +782,7 @@
             <field name="tax_id" ref="iva_X0"/>
         </record>
         
-        <record id="iva_X0_compras_bi_refund_tax_line" model="account.tax.line.template">
+        <record id="iva_X0_compras_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">0.0</field>
             <field name="debit_credit_amount">0.0</field>
@@ -805,6 +805,27 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="base_extra_44"/>
+            <field name="tax_id" ref="iva_ISP_compras_21"/>
+        </record>
+        
+        <record id="iva_ISP_compras_21_1_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_dev_07_21"/>
+            <field name="account_id" ref="pgc_600"/>
+            <field name="tax_id" ref="iva_ISP_compras_21"/>
+        </record>
+        
+        <record id="iva_ISP_compras_21_2_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_ded_22_21"/>
+            <field name="account_id" ref="pgc_600"/>
             <field name="tax_id" ref="iva_ISP_compras_21"/>
         </record>
         
@@ -813,6 +834,27 @@
             <field name="tax_amount">-1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
+            <field name="code_id" ref="base_extra_44"/>
+            <field name="tax_id" ref="iva_ISP_compras_21"/>
+        </record>
+        
+        <record id="iva_ISP_compras_21_1_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="iva_dev_07_21"/>
+            <field name="account_id" ref="pgc_600"/>
+            <field name="tax_id" ref="iva_ISP_compras_21"/>
+        </record>
+        
+        <record id="iva_ISP_compras_21_2_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="iva_ded_22_21"/>
+            <field name="account_id" ref="pgc_600"/>
             <field name="tax_id" ref="iva_ISP_compras_21"/>
         </record>
         
@@ -1179,8 +1221,8 @@
         
         <record id="re_buy_05_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">50</field>
-            <field name="debit_credit_amount">50</field>
+            <field name="tax_amount">5</field>
+            <field name="debit_credit_amount">5</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_12"/>
@@ -1198,8 +1240,8 @@
         
         <record id="re_buy_05_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-50</field>
-            <field name="debit_credit_amount">50</field>
+            <field name="tax_amount">-5</field>
+            <field name="debit_credit_amount">5</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_12"/>
@@ -1226,8 +1268,8 @@
         
         <record id="re_buy_14_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">140</field>
-            <field name="debit_credit_amount">140</field>
+            <field name="tax_amount">14</field>
+            <field name="debit_credit_amount">14</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_15_14"/>
@@ -1245,8 +1287,8 @@
         
         <record id="re_buy_14_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-140</field>
-            <field name="debit_credit_amount">140</field>
+            <field name="tax_amount">-14</field>
+            <field name="debit_credit_amount">14</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_15_14"/>
@@ -1273,8 +1315,8 @@
         
         <record id="re_buy_52_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">520</field>
-            <field name="debit_credit_amount">520</field>
+            <field name="tax_amount">52</field>
+            <field name="debit_credit_amount">52</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_18_52"/>
@@ -1292,8 +1334,8 @@
         
         <record id="re_buy_52_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-520</field>
-            <field name="debit_credit_amount">520</field>
+            <field name="tax_amount">-52</field>
+            <field name="debit_credit_amount">52</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
             <field name="code_id" ref="iva_ded_18_52"/>
@@ -1365,6 +1407,17 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_ded_30_4"/>
+            <field name="tax_id" ref="iva_IC_compras_4_bc"/>
+        </record>
+        
+        <record id="iva_IC_compras_4_bc_1_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_dev_19"/>
+            <field name="account_id" ref="pgc_600"/>
             <field name="tax_id" ref="iva_IC_compras_4_bc"/>
         </record>
         
@@ -1373,9 +1426,20 @@
             <field name="tax_amount">-1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
+            <field name="code_id" ref="iva_ded_30_4"/>
             <field name="tax_id" ref="iva_IC_compras_4_bc"/>
         </record>
-
+        
+        <record id="iva_IC_compras_4_bc_1_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="iva_dev_19"/>
+            <field name="account_id" ref="pgc_600"/>
+            <field name="tax_id" ref="iva_IC_compras_4_bc"/>
+        </record>
+        
         <record id="iva_IC_compras_4_bc_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">40</field>
@@ -1430,6 +1494,17 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_ded_32_4"/>
+            <field name="tax_id" ref="iva_IC_compras_4_bi"/>
+        </record>
+        
+        <record id="iva_IC_compras_4_bi_1_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_dev_19"/>
+            <field name="account_id" ref="pgc_600"/>
             <field name="tax_id" ref="iva_IC_compras_4_bi"/>
         </record>
         
@@ -1438,9 +1513,19 @@
             <field name="tax_amount">-1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
+            <field name="code_id" ref="iva_ded_32_4"/>
             <field name="tax_id" ref="iva_IC_compras_4_bi"/>
         </record>
-
+        <record id="iva_IC_compras_4_bi_1_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="iva_dev_19"/>
+            <field name="account_id" ref="pgc_600"/>
+            <field name="tax_id" ref="iva_IC_compras_4_bi"/>
+        </record>
+        
         <record id="iva_IC_compras_4_bi_1_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
             <field name="tax_amount">40</field>
@@ -1495,6 +1580,17 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_ded_30_10"/>
+            <field name="tax_id" ref="iva_IC_compras_10_bc"/>
+        </record>
+        
+        <record id="iva_IC_compras_10_1_bc_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_dev_19"/>
+            <field name="account_id" ref="pgc_600"/>
             <field name="tax_id" ref="iva_IC_compras_10_bc"/>
         </record>
         
@@ -1503,6 +1599,17 @@
             <field name="tax_amount">-1000</field>
             <field name="debit_credit_am0ount">1000</field>
             <field name="apply_on">refund</field>
+            <field name="code_id" ref="iva_ded_30_10"/>
+            <field name="tax_id" ref="iva_IC_compras_10_bc"/>
+        </record>
+        
+        <record id="iva_IC_compras_10_bc_1_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_am0ount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="pgc_600"/>
+            <field name="code_id" ref="iva_dev_19"/>
             <field name="tax_id" ref="iva_IC_compras_10_bc"/>
         </record>
         
@@ -1560,6 +1667,17 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_ded_32_10"/>
+            <field name="tax_id" ref="iva_IC_compras_10_bi"/>
+        </record>
+        
+        <record id="iva_IC_compras_10_bi_1_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="account_id" ref="pgc_600"/>
+            <field name="code_id" ref="iva_dev_19"/>
             <field name="tax_id" ref="iva_IC_compras_10_bi"/>
         </record>
         
@@ -1568,6 +1686,17 @@
             <field name="tax_amount">-1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
+            <field name="code_id" ref="iva_ded_32_10"/>
+            <field name="tax_id" ref="iva_IC_compras_10_bi"/>
+        </record>
+        
+        <record id="iva_IC_compras_10_bi_1_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="account_id" ref="pgc_600"/>
+            <field name="code_id" ref="iva_dev_19"/>
             <field name="tax_id" ref="iva_IC_compras_10_bi"/>
         </record>
         
@@ -1577,7 +1706,7 @@
             <field name="debit_credit_amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
-            <field name="code_id" ref="iva_ded_31_10"/>
+            <field name="code_id" ref="iva_ded_33_10"/>
             <field name="tax_id" ref="iva_IC_compras_10_bi"/>
         </record>
         
@@ -1587,7 +1716,7 @@
             <field name="debit_credit_amount">100</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
-            <field name="code_id" ref="iva_ded_31_10"/>
+            <field name="code_id" ref="iva_ded_33_10"/>
             <field name="tax_id" ref="iva_IC_compras_10_bi"/>
         </record>
         
@@ -1625,6 +1754,17 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_ded_30_21"/>
+            <field name="tax_id" ref="iva_IC_compras_21_bc"/>
+        </record>
+        
+        <record id="iva_IC_compras_21_bc_1_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_dev_19"/>
+            <field name="account_id" ref="pgc_600"/>
             <field name="tax_id" ref="iva_IC_compras_21_bc"/>
         </record>
         
@@ -1633,6 +1773,17 @@
             <field name="tax_amount">-1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
+            <field name="code_id" ref="iva_ded_30_21"/>
+            <field name="tax_id" ref="iva_IC_compras_21_bc"/>
+        </record>
+        
+        <record id="iva_IC_compras_21_bc_1_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="iva_dev_19"/>
+            <field name="account_id" ref="pgc_600"/>
             <field name="tax_id" ref="iva_IC_compras_21_bc"/>
         </record>
         
@@ -1658,8 +1809,8 @@
         
         <record id="iva_IC_compras_21_bc_2_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">-100</field>
-            <field name="debit_credit_amount">-100</field>
+            <field name="tax_amount">-210</field>
+            <field name="debit_credit_amount">-210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1668,8 +1819,8 @@
         
         <record id="iva_IC_compras_21_bc_2_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">100</field>
-            <field name="debit_credit_amount">-100</field>
+            <field name="tax_amount">210</field>
+            <field name="debit_credit_amount">-210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_477_child"/>
             <field name="code_id" ref="iva_dev_20"/>
@@ -1691,6 +1842,17 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_ded_32_21"/>
+            <field name="tax_id" ref="iva_IC_compras_21_bi"/>
+        </record>
+        
+        <record id="iva_IC_compras_21_bi_1_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_dev_19"/>
+            <field name="account_id" ref="pgc_600"/>
             <field name="tax_id" ref="iva_IC_compras_21_bi"/>
         </record>
         
@@ -1699,6 +1861,17 @@
             <field name="tax_amount">-1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
+            <field name="code_id" ref="iva_ded_32_21"/>
+            <field name="tax_id" ref="iva_IC_compras_21_bi"/>
+        </record>
+        
+        <record id="iva_IC_compras_21_bi_1_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="iva_dev_19"/>
+            <field name="account_id" ref="pgc_600"/>
             <field name="tax_id" ref="iva_IC_compras_21_bi"/>
         </record>
         
@@ -1708,7 +1881,7 @@
             <field name="debit_credit_amount">210</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="pgc_472_child"/>
-            <field name="code_id" ref="iva_ded_31_21"/>
+            <field name="code_id" ref="iva_ded_33_21"/>
             <field name="tax_id" ref="iva_IC_compras_21_bi"/>
         </record>
         
@@ -1718,7 +1891,7 @@
             <field name="debit_credit_amount">210</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="pgc_472_child"/>
-            <field name="code_id" ref="iva_ded_31_21"/>
+            <field name="code_id" ref="iva_ded_33_21"/>
             <field name="tax_id" ref="iva_IC_compras_21_bi"/>
         </record>
         
@@ -1757,6 +1930,17 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_ded_30_21"/>
+            <field name="tax_id" ref="iva_IC_compras_21_sv"/>
+        </record>
+        
+        <record id="iva_IC_compras_21_sv_1_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="code_id" ref="iva_dev_19"/>
+            <field name="account_id" ref="pgc_600"/>
             <field name="tax_id" ref="iva_IC_compras_21_sv"/>
         </record>
         
@@ -1764,7 +1948,18 @@
             <field name="code_type">base</field>
             <field name="tax_amount">-1000</field>
             <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="iva_ded_30_21"/>
             <field name="apply_on">refund</field>
+            <field name="tax_id" ref="iva_IC_compras_21_sv"/>
+        </record>
+        
+        <record id="iva_IC_compras_21_sv_1_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="apply_on">refund</field>
+            <field name="code_id" ref="iva_dev_19"/>
+            <field name="account_id" ref="pgc_600"/>
             <field name="tax_id" ref="iva_IC_compras_21_sv"/>
         </record>
         
