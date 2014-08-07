@@ -163,8 +163,8 @@
     
     <record id="tax_sale_vat10_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
-            <field name="debit_credit_amount">10</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">invoice</field>
             <field name="account_id" ref="chart33311"/>
             <field name="code_id" ref="l10n_vn.vat_code_tax_out_local_10_balance"/>
@@ -182,8 +182,8 @@
     
     <record id="tax_sale_vat10_refund_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">10</field>
-            <field name="debit_credit_amount">10</field>
+            <field name="tax_amount">100</field>
+            <field name="debit_credit_amount">100</field>
             <field name="apply_on">refund</field>
             <field name="account_id" ref="chart33311"/>
             <field name="code_id" ref="l10n_vn.vat_code_tax_out_local_10_balance"/>
