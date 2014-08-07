@@ -11,8 +11,8 @@
             <field name="arch" type="xml">
                 <form string="Appraisal">
                 <header>
-                    <button name="button_sent_appraisal" string="Start Appraisal" states="new" type="object" class="oe_highlight"/>
-                    <button name="button_done_appraisal" string="Done" states="pending" type="object"/>
+                    <button name="button_sent_appraisal" string="Start Appraisal" states="new" type="object" class="oe_highlight"  groups="base.group_hr_user"/>
+                    <button name="button_done_appraisal" string="Done" states="pending" type="object"  groups="base.group_hr_user"/>
                     <field name="state" widget="statusbar" options="{'fold_field': 'fold'}"/>
                 </header>
                 <sheet>
@@ -182,7 +182,7 @@
         </record>
 
         <menuitem name="Appraisals" parent="menu_eval_hr" id="menu_open_view_hr_evaluation_tree"
-            action="open_view_hr_evaluation_tree" groups="base.group_hr_user"/>
+            action="open_view_hr_evaluation_tree" groups="base.group_survey_manager"/>
 
         <record model="ir.actions.act_window" id="open_view_hr_evaluation_tree2">
             <field name="name">Appraisal</field>
