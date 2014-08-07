@@ -43,7 +43,7 @@ This module consists :
         'data/account.account.template.csv',
         'data/account.tax.code.template.csv',
         'data/account.chart.template.csv',
-        'data/account.tax.template.csv',
+        'data/account_tax_template.xml',
         'data/account.fiscal.position.template.csv',
         'data/account.fiscal.position.tax.template.csv',
         'data/res.bank.csv',

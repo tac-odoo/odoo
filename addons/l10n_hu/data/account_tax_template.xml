@@ -1,0 +1,672 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+        <record id="F27" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Fizetendő - 27%</field>
+            <field name="description">27%</field>
+            <field name="amount">27</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">sale</field>
+        </record>
+        <record id="tax_f27_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1011"/>
+            <field name="tax_id" ref="F27"/>
+        </record>
+        <record id="tax_f27_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">270</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">270</field>
+            <field name="code_id" ref="tax_code_hu_1010"/>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="F27"/>
+        </record>
+        <record id="tax_f27_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1011"/>
+            <field name="tax_id" ref="F27"/>
+        </record>
+        <record id="tax_f27_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-270</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">270</field>
+            <field name="code_id" ref="tax_code_hu_1010"/>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="F27"/>
+        </record>
+        
+        <record id="F18" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Fizetendő – 18%</field>
+            <field name="description">18%</field>
+            <field name="amount">18</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">sale</field>
+        </record>
+        <record id="tax_f18_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1021"/>
+            <field name="tax_id" ref="F18"/>
+        </record>
+        <record id="tax_f18_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">180</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">180</field>
+            <field name="code_id" ref="tax_code_hu_1020"/>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="F18"/>
+        </record>
+        <record id="tax_f18_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1021"/>
+            <field name="tax_id" ref="F18"/>
+        </record>
+        <record id="tax_f18_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-180</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">180</field>
+            <field name="code_id" ref="tax_code_hu_1020"/>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="F18"/>
+        </record>
+        
+        <record id="F5" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Fizetendő – 5%</field>
+            <field name="description">5%</field>
+            <field name="amount">5</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">sale</field>
+        </record>
+        <record id="tax_f5_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1031"/>
+            <field name="tax_id" ref="F5"/>
+        </record>
+        <record id="tax_f5_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">50</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">50</field>
+            <field name="code_id" ref="tax_code_hu_1030"/>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="F5"/>
+        </record>
+        <record id="tax_f5_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1031"/>
+            <field name="tax_id" ref="F5"/>
+        </record>
+        <record id="tax_f5_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-50</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">50</field>
+            <field name="code_id" ref="tax_code_hu_1030"/>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="F5"/>
+        </record>
+        
+        <record id="FA" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Fizetendő – Alanyi Adómentes</field>
+            <field name="description">AAM</field>
+            <field name="amount">0</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">sale</field>
+        </record>
+        <record id="tax_fa_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1041"/>
+            <field name="tax_id" ref="FA"/>
+        </record>
+        <record id="tax_fa_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="FA"/>
+        </record>
+        <record id="tax_fa_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1041"/>
+            <field name="tax_id" ref="FA"/>
+        </record>
+        <record id="tax_fa_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-0</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="FA"/>
+        </record>
+        
+        <record id="FT" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Fizetendő – Tárgyi Adómentes</field>
+            <field name="description">TAM</field>
+            <field name="amount">0</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">sale</field>
+        </record>
+        <record id="tax_ft_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1061"/>
+            <field name="tax_id" ref="FT"/>
+        </record>
+        <record id="tax_ft_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="FT"/>
+        </record>
+        <record id="tax_ft_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1061"/>
+            <field name="tax_id" ref="FT"/>
+        </record>
+        <record id="tax_ft_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-0</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="FT"/>
+        </record>
+        
+        <record id="FF" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Fizetendő – Fordított ÁFA</field>
+            <field name="description">FORD</field>
+            <field name="amount">0</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">sale</field>
+        </record>
+        <record id="tax_ff_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1081"/>
+            <field name="tax_id" ref="FF"/>
+        </record>
+        <record id="tax_ff_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="FF"/>
+        </record>
+        <record id="tax_ff_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1081"/>
+            <field name="tax_id" ref="FF"/>
+        </record>
+        <record id="tax_ff_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-0</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="FF"/>
+        </record>
+        
+        <record id="FEUO" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Fizetendő – Export</field>
+            <field name="description">Export</field>
+            <field name="amount">0</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">sale</field>
+        </record>
+        <record id="tax_feuo_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1071"/>
+            <field name="tax_id" ref="FEUO"/>
+        </record>
+        <record id="tax_feuo_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="FEUO"/>
+        </record>
+        <record id="tax_feuo_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1071"/>
+            <field name="tax_id" ref="FEUO"/>
+        </record>
+        <record id="tax_feuo_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-0</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="FEUO"/>
+        </record>
+        
+        <record id="FEU" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Fizetendő – EU</field>
+            <field name="description">EU</field>
+            <field name="amount">0</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">sale</field>
+        </record>
+        <record id="tax_feu_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1051"/>
+            <field name="tax_id" ref="FEU"/>
+        </record>
+        <record id="tax_feu_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="FEU"/>
+        </record>
+        <record id="tax_feu_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1051"/>
+            <field name="tax_id" ref="FEU"/>
+        </record>
+        <record id="tax_feu_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-0</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_467"/>
+            <field name="tax_id" ref="FEU"/>
+        </record>
+        
+        <record id="V18" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Visszaigényelhető – 18%</field>
+            <field name="description">18%</field>
+            <field name="amount">18</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">purchase</field>
+        </record>
+        <record id="tax_v18_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1221"/>
+            <field name="tax_id" ref="V18"/>
+        </record>
+        <record id="tax_v18_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">180</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">180</field>
+            <field name="code_id" ref="tax_code_hu_1220"/>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="V18"/>
+        </record>
+        <record id="tax_v18_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1221"/>
+            <field name="tax_id" ref="V18"/>
+        </record>
+        <record id="tax_v18_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-180</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">180</field>
+            <field name="code_id" ref="tax_code_hu_1220"/>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="V18"/>
+        </record>
+        
+        <record id="V27" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Visszaigényelhető – 27%</field>
+            <field name="description">27%</field>
+            <field name="amount">27</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">purchase</field>
+        </record>
+        <record id="tax_v27_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1211"/>
+            <field name="tax_id" ref="V27"/>
+        </record>
+        <record id="tax_v27_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">270</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">270</field>
+            <field name="code_id" ref="tax_code_hu_1210"/>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="V27"/>
+        </record>
+        <record id="tax_v27_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1211"/>
+            <field name="tax_id" ref="V27"/>
+        </record>
+        <record id="tax_v27_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-270</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">270</field>
+            <field name="code_id" ref="tax_code_hu_1210"/>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="V27"/>
+        </record>
+        
+        <record id="V5" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Visszaigényelhető – 5%</field>
+            <field name="description">5%</field>
+            <field name="amount">5</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">purchase</field>
+        </record>
+        <record id="tax_v5_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1231"/>
+            <field name="tax_id" ref="V5"/>
+        </record>
+        <record id="tax_v5_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">50</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">50</field>
+            <field name="code_id" ref="tax_code_hu_1230"/>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="V5"/>
+        </record>
+        <record id="tax_v5_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1231"/>
+            <field name="tax_id" ref="V5"/>
+        </record>
+        <record id="tax_v5_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-50</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">50</field>
+            <field name="code_id" ref="tax_code_hu_1230"/>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="V5"/>
+        </record>
+        
+        <record id="VA" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Visszaigényelhető – Alanyi Adómentes</field>
+            <field name="description">AAM</field>
+            <field name="amount">0</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">purchase</field>
+        </record>
+        <record id="tax_va_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1240"/>
+            <field name="tax_id" ref="VA"/>
+        </record>
+        <record id="tax_va_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="VA"/>
+        </record>
+        <record id="tax_va_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1240"/>
+            <field name="tax_id" ref="VA"/>
+        </record>
+        <record id="tax_va_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-0</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="VA"/>
+        </record>
+        
+        <record id="VT" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Visszaigényelhető – Tárgyi Adómentes</field>
+            <field name="description">TAM</field>
+            <field name="amount">0</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">purchase</field>
+        </record>
+        <record id="tax_vt_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1260"/>
+            <field name="tax_id" ref="VT"/>
+        </record>
+        <record id="tax_vt_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="VT"/>
+        </record>
+        <record id="tax_vt_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1260"/>
+            <field name="tax_id" ref="VT"/>
+        </record>
+        <record id="tax_vt_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-0</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="VT"/>
+        </record>
+        
+        <record id="VEU" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Visszaigényelhető – EU</field>
+            <field name="description">EU</field>
+            <field name="amount">0</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">purchase</field>
+        </record>
+        <record id="tax_veu_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1250"/>
+            <field name="tax_id" ref="VEU"/>
+        </record>
+        <record id="tax_veu_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="VEU"/>
+        </record>
+        <record id="tax_veu_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1250"/>
+            <field name="tax_id" ref="VEU"/>
+        </record>
+        <record id="tax_veu_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-0</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="VEU"/>
+        </record>
+        
+        <record id="VEUO" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Visszaigényelhető – Import</field>
+            <field name="description">Import</field>
+            <field name="amount">0</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">purchase</field>
+        </record>
+        <record id="tax_veuo_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1270"/>
+            <field name="tax_id" ref="VEUO"/>
+        </record>
+        <record id="tax_veuo_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="VEUO"/>
+        </record>
+        <record id="tax_veuo_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1270"/>
+            <field name="tax_id" ref="VEUO"/>
+        </record>
+        <record id="tax_veuo_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-0</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="VEUO"/>
+        </record>
+        
+        <record id="VF" model="account.tax.template">
+            <field name="chart_template_id" ref="hungarian_chart_template"/>
+            <field name="name">Visszaigényelhető – Fordított ÁFA</field>
+            <field name="description">FORD</field>
+            <field name="amount">0</field>
+            <field name="type">percent</field>
+            <field name="type_tax_use">purchase</field>
+        </record>
+        <record id="tax_vf_invoice_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">1000</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1280"/>
+            <field name="tax_id" ref="VF"/>
+        </record>
+        <record id="tax_vf_invoice_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">0</field>
+            <field name="apply_on">invoice</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="VF"/>
+        </record>
+        <record id="tax_vf_refund_base_line" model="account.tax.line.template">
+            <field name="code_type">base</field>
+            <field name="tax_amount">-1000</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">1000</field>
+            <field name="code_id" ref="tax_code_hu_1280"/>
+            <field name="tax_id" ref="VF"/>
+        </record>
+        <record id="tax_vf_refund_tax_line" model="account.tax.line.template">
+            <field name="code_type">tax</field>
+            <field name="tax_amount">-0</field>
+            <field name="apply_on">refund</field>
+            <field name="debit_credit_amount">0</field>
+            <field name="account_id" ref="chart_hu_466"/>
+            <field name="tax_id" ref="VF"/>
+        </record>
+    </data>
+</openerp>
