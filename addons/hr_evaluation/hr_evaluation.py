@@ -174,13 +174,16 @@ class hr_evaluation(models.Model):
         user_ids = [emp.user_id.id for rec in val for emp in rec if emp.user_id]
         if self.employee_id.user_id:
             user_ids.append(self.employee_id.user_id.id)
+        if self.employee_id.department_id.manager_id:
+            user_ids.append(self.employee_id.department_id.manager_id.user_id.id)
+        if self.employee_id.parent_id.user_id:
+            user_ids.append(self.employee_id.parent_id.user_id.id)
         return self.message_subscribe_users(user_ids=user_ids)
 
     @api.model
     def create(self, vals):
         res = super(hr_evaluation, self).create(vals)
-        val = [res.apprasial_manager_ids,res.appraisal_colleagues_ids,res.appraisal_subordinates_ids]
-        res.create_message_subscribe_users_list(val)
+        res.create_message_subscribe_users_list([res.apprasial_manager_ids])
         return res
 
     @api.one
@@ -272,6 +275,11 @@ class hr_evaluation(models.Model):
                 if create_meeting_id:
                     self.meeting_id = create_meeting_id
             self.log_meeting(self.meeting_id.name, self.meeting_id.start, self.meeting_id.duration)
+        if vals.get('apprasial_manager_ids'):
+            emp_obj = self.env['hr.employee']
+            for follower_id in emp_obj.browse(vals['apprasial_manager_ids'][0][2]):
+                if follower_id.user_id:
+                    self.message_subscribe_users(user_ids=[follower_id.user_id.id])
         return super(hr_evaluation, self).write(vals)
 
     @api.cr_uid_ids_context
