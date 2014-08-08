@@ -125,8 +125,8 @@
     <record id="tva_intermediaire_tax_id" model="account.tax.line.template">
       <field name="sequence" eval="10"/>
       <field name="code_type">tax</field>
-      <field name="tax_amount">85</field>
-      <field name="debit_credit_amount">85</field>
+      <field name="tax_amount">100</field>
+      <field name="debit_credit_amount">100</field>
       <field name="account_id" ref="pcg_445712"/>
       <field name="code_id" ref="tax_col_100"/>
       <field name="apply_on">invoice</field>
@@ -144,8 +144,8 @@
     <record id="tva_intermediaire_ref_tax_id" model="account.tax.line.template">
       <field name="sequence" eval="10"/>
       <field name="code_type">tax</field>
-      <field name="tax_amount">-85</field>
-      <field name="debit_credit_amount">85</field>
+      <field name="tax_amount">-100</field>
+      <field name="debit_credit_amount">100</field>
       <field name="apply_on">refund</field>
       <field name="account_id" ref="pcg_445712"/>
       <field name="code_id" ref="tax_col_100"/>
@@ -867,7 +867,7 @@
       <field name="tax_amount">1000</field>
       <field name="debit_credit_amount">1000</field>
       <field name="apply_on">refund</field>
-      <field name="code_id" ref="tax_imm_100"/>
+      <field name="code_id" ref="tax_imm_100_ht"/>
       <field name="tax_id" ref="tva_imm_intermediaire"/>
     </record>
     <record id="tva_imm_intermediaire_ref_tax_id" model="account.tax.line.template">
@@ -877,7 +877,7 @@
       <field name="debit_credit_amount">100</field>
       <field name="apply_on">refund</field>
       <field name="account_id" ref="pcg_44562"/>
-      <field name="code_id" ref="tax_imm_100_ht"/>
+      <field name="code_id" ref="tax_imm_100"/>
       <field name="tax_id" ref="tva_imm_intermediaire"/>
     </record>
 
@@ -999,7 +999,7 @@
     <record id="tva_intra_normale_tax_id" model="account.tax.line.template">
       <field name="sequence" eval="10"/>
       <field name="code_type">tax</field>
-      <field name="tax_amount">200</field>
+      <field name="tax_amount">-200</field>
       <field name="debit_credit_amount">-200</field>
       <field name="account_id" ref="pcg_445201"/>
       <field name="code_id" ref="tax_intra_200"/>
@@ -1018,7 +1018,7 @@
     <record id="tva_intra_normale_ref_tax_id" model="account.tax.line.template">
       <field name="sequence" eval="10"/>
       <field name="code_type">tax</field>
-      <field name="tax_amount">-200</field>
+      <field name="tax_amount">200</field>
       <field name="debit_credit_amount">-200</field>
       <field name="apply_on">refund</field>
       <field name="account_id" ref="pcg_445201"/>
@@ -1047,7 +1047,7 @@
     <record id="tva_intra_specifique_tax_id" model="account.tax.line.template">
       <field name="sequence" eval="10"/>
       <field name="code_type">tax</field>
-      <field name="tax_amount">85</field>
+      <field name="tax_amount">-85</field>
       <field name="debit_credit_amount">-85</field>
       <field name="account_id" ref="pcg_445203"/>
       <field name="code_id" ref="tax_intra_85"/>
@@ -1066,7 +1066,7 @@
     <record id="tva_intra_specifique_ref_tax_id" model="account.tax.line.template">
       <field name="sequence" eval="10"/>
       <field name="code_type">tax</field>
-      <field name="tax_amount">-85</field>
+      <field name="tax_amount">85</field>
       <field name="debit_credit_amount">-85</field>
       <field name="apply_on">refund</field>
       <field name="account_id" ref="pcg_445203"/>
@@ -1095,7 +1095,7 @@
     <record id="tva_intra_intermediaire_tax_id" model="account.tax.line.template">
       <field name="sequence" eval="10"/>
       <field name="code_type">tax</field>
-      <field name="tax_amount">100</field>
+      <field name="tax_amount">-100</field>
       <field name="debit_credit_amount">-100</field>
       <field name="account_id" ref="pcg_445202"/>
       <field name="code_id" ref="tax_intra_100"/>
@@ -1114,7 +1114,7 @@
     <record id="tva_intra_intermediaire_ref_tax_id" model="account.tax.line.template">
       <field name="sequence" eval="10"/>
       <field name="code_type">tax</field>
-      <field name="tax_amount">-100</field>
+      <field name="tax_amount">100</field>
       <field name="debit_credit_amount">-100</field>
       <field name="apply_on">refund</field>
       <field name="account_id" ref="pcg_445202"/>
@@ -1143,7 +1143,7 @@
     <record id="tva_intra_reduite_tax_id" model="account.tax.line.template">
       <field name="sequence" eval="10"/>
       <field name="code_type">tax</field>
-      <field name="tax_amount">55</field>
+      <field name="tax_amount">-55</field>
       <field name="debit_credit_amount">-55</field>
       <field name="account_id" ref="pcg_445203"/>
       <field name="code_id" ref="tax_intra_55"/>
@@ -1162,7 +1162,7 @@
     <record id="tva_intra_reduite_ref_tax_id" model="account.tax.line.template">
       <field name="sequence" eval="10"/>
       <field name="code_type">tax</field>
-      <field name="tax_amount">-55</field>
+      <field name="tax_amount">55</field>
       <field name="debit_credit_amount">-55</field>
       <field name="apply_on">refund</field>
       <field name="account_id" ref="pcg_445203"/>
@@ -1191,7 +1191,7 @@
     <record id="tva_intra_super_reduite_tax_id" model="account.tax.line.template">
       <field name="sequence" eval="10"/>
       <field name="code_type">tax</field>
-      <field name="tax_amount">21</field>
+      <field name="tax_amount">-21</field>
       <field name="debit_credit_amount">-21</field>
       <field name="account_id" ref="pcg_445203"/>
       <field name="code_id" ref="tax_intra_21"/>
@@ -1210,7 +1210,7 @@
     <record id="tva_intra_super_reduite_ref_tax_id" model="account.tax.line.template">
       <field name="sequence" eval="10"/>
       <field name="code_type">tax</field>
-      <field name="tax_amount">-21</field>
+      <field name="tax_amount">21</field>
       <field name="debit_credit_amount">-21</field>
       <field name="apply_on">refund</field>
       <field name="account_id" ref="pcg_445203"/>
@@ -1623,7 +1623,7 @@
     <record id="tva_import_0_ref_base_id" model="account.tax.line.template">
       <field name="sequence" eval="10"/>
       <field name="code_type">base</field>
-      <field name="tax_amount">-1000</field>
+      <field name="tax_amount">1000</field>
       <field name="debit_credit_amount">1000</field>
       <field name="apply_on">refund</field>
       <field name="code_id" ref="tax_import_0_ht"/>
