@@ -374,7 +374,7 @@ class account_voucher(osv.osv):
             ('pay_now','Pay Directly'),
             ('pay_later','Pay Later or Group Funds'),
         ],'Payment', select=True, readonly=True, states={'draft':[('readonly',False)]}),
-        'tax_id': fields.many2one('account.tax', 'Tax', readonly=True, states={'draft':[('readonly',False)]}, domain=[('price_include','=', False)], help="Only for tax excluded from price"),
+        'tax_id': fields.many2one('account.tax', 'Tax', readonly=True, states={'draft':[('readonly',False)]}),
         'pre_line':fields.boolean('Previous Payments ?', required=False),
         'date_due': fields.date('Due Date', readonly=True, select=True, states={'draft':[('readonly',False)]}),
         'payment_option':fields.selection([
@@ -482,14 +482,19 @@ class account_voucher(osv.osv):
             line_amount = line.get('amount',0.0)
 
             if tax_id:
-                tax = [tax_pool.browse(cr, uid, tax_id, context=context)]
+                tax = tax_pool.browse(cr, uid, tax_id, context=context)
+
                 if partner_id:
                     partner = partner_pool.browse(cr, uid, partner_id, context=context) or False
-                    taxes = position_pool.map_tax(cr, uid, partner and partner.property_account_position or False, tax)
-                    tax = tax_pool.browse(cr, uid, taxes, context=context)
+                    taxes = position_pool.map_tax(cr, uid, partner and partner.property_account_position or False, [tax])
+                    # map_tax returns at most the same number as taxes to map
+                    if taxes and taxes[0] != tax_id:
+                        tax = tax_pool.browse(cr, uid, taxes[0], context=context)
+                        res['tax_id'] = tax.id
 
-                if not tax[0].price_include:
-                    for tax_line in tax_pool.compute_all(cr, uid, tax, line_amount, 1).get('taxes', []):
+                # skip tax with price included
+                if not tax.price_include:
+                    for tax_line in tax_pool.compute_all(cr, uid, [tax], line_amount, 1).get('taxes', []):
                         total_tax += tax_line.get('amount')
 
             voucher_total += line_amount
@@ -930,6 +935,7 @@ class account_voucher(osv.osv):
         return {'type': 'ir.actions.act_window_close'}
 
     def proforma_voucher(self, cr, uid, ids, context=None):
+        self._set_untax_amount(cr, uid, ids, context=context)
         self.action_move_line_create(cr, uid, ids, context=context)
         return True
 
@@ -1189,9 +1195,8 @@ class account_voucher(osv.osv):
         rec_lst_ids = []
 
         date = self.read(cr, uid, [voucher_id], ['date'], context=context)[0]['date']
-        ctx = context.copy()
-        ctx.update({'date': date})
-        voucher = self.pool.get('account.voucher').browse(cr, uid, voucher_id, context=ctx)
+        ctx = dict(context, date=date)
+        voucher = self.browse(cr, uid, voucher_id, context=ctx)
         voucher_currency = voucher.journal_id.currency or voucher.company_id.currency_id
         ctx.update({
             'voucher_special_currency_rate': voucher_currency.rate * voucher.payment_rate ,
@@ -1205,6 +1210,13 @@ class account_voucher(osv.osv):
             # convert the amount set on the voucher line into the currency of the voucher's company
             # this calls res_curreny.compute() with the right context, so that it will take either the rate on the voucher if it is relevant or will use the default behaviour
             amount = self._convert_amount(cr, uid, line.untax_amount or line.amount, voucher.id, context=ctx)
+            if line.untax_amount and line.untax_amount < line.amount:
+                # the tax is included in price, reduce the total to avoid writeoff
+                # the tax line will be created in the create of account.move.line
+                if (line.type=='dr'):
+                    tot_line += (line.amount - line.untax_amount)
+                else:
+                    tot_line -= (line.amount - line.untax_amount)
             # if the amount encoded in voucher is equal to the amount unreconciled, we need to compute the
             # currency rate difference
             if line.amount == line.amount_unreconciled:
@@ -1255,7 +1267,9 @@ class account_voucher(osv.osv):
             # compute the amount in foreign currency
             foreign_currency_diff = 0.0
             amount_currency = False
+            rec_ids = []
             if line.move_line_id:
+                rec_ids.append(line.move_line_id.id)
                 # We want to set it on the account move line as soon as the original line had a foreign currency
                 if line.move_line_id.currency_id and line.move_line_id.currency_id.id != company_currency:
                     # we compute the amount in that foreign currency.
@@ -1272,8 +1286,7 @@ class account_voucher(osv.osv):
                     foreign_currency_diff = sign * line.move_line_id.amount_residual_currency + amount_currency
 
             move_line['amount_currency'] = amount_currency
-            voucher_line = move_line_obj.create(cr, uid, move_line)
-            rec_ids = [voucher_line, line.move_line_id.id]
+            rec_ids.append( move_line_obj.create(cr, uid, move_line) )
 
             if not currency_obj.is_zero(cr, uid, voucher.company_id.currency_id, currency_rate_difference):
                 # Change difference entry in company currency
@@ -1371,6 +1384,17 @@ class account_voucher(osv.osv):
         voucher = self.pool.get('account.voucher').browse(cr,uid,voucher_id,context)
         return voucher.currency_id.id or self._get_company_currency(cr,uid,voucher.id,context)
 
+    def _set_untax_amount(self, cr, uid, ids, context=None):
+        """ Compute the untax_amount based on tax_id """
+        account_voucher_line = self.pool['account.voucher.line']
+        account_tax = self.pool['account.tax']
+        for voucher in self.browse(cr, uid, ids, context=context):
+            tax = voucher.tax_id
+            for line in voucher.line_ids:
+                tax_amount = account_tax.compute_all(cr, uid, [tax], line.amount, 1, partner=line.partner_id)
+                account_voucher_line.write(cr, uid, line.id, {'untax_amount': tax_amount['total']}, context=context)
+        return True
+
     def action_move_line_create(self, cr, uid, ids, context=None):
         '''
         Confirm the vouchers given in ids and create the journal entries for each of them
@@ -1388,8 +1412,7 @@ class account_voucher(osv.osv):
             # we select the context to use accordingly if it's a multicurrency case or not
             context = self._sel_context(cr, uid, voucher.id, context)
             # But for the operations made by _convert_amount, we always need to give the date in the context
-            ctx = context.copy()
-            ctx.update({'date': voucher.date})
+            ctx = dict(context, date=voucher.date)
             # Create the account move record.
             move_id = move_pool.create(cr, uid, self.account_move_get(cr, uid, voucher.id, context=context), context=context)
             # Get the name of the account_move just created
