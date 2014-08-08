@@ -70,7 +70,7 @@
     <record id="OTAX_21_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
         <field name="tax_amount">130</field>
-        <field name="amount">130</field>
+        <field name="debit_credit_amount">130</field>
         <field name="apply_on">invoice</field>
         <field name="account_id" ref="231"/>
         <field name="code_id" ref="vat_code_IVA_pay"/>
@@ -116,8 +116,8 @@
 
    <record id="ITAX_03_invoice_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">300</field>
-        <field name="debit_credit_amount">300</field>
+        <field name="tax_amount">230.77</field>
+        <field name="debit_credit_amount">230.77</field>
         <field name="apply_on">invoice</field>
         <field name="account_id" ref="232"/>
         <field name="code_id" ref="vat_code_transacciones"/>
@@ -135,8 +135,8 @@
     
     <record id="ITAX_03_refund_tax_line" model="account.tax.line.template">
         <field name="code_type">tax</field>
-        <field name="tax_amount">300</field>
-        <field name="debit_credit_amount">300</field>
+        <field name="tax_amount">230.77</field>
+        <field name="debit_credit_amount">230.77</field>
         <field name="apply_on">refund</field>
         <field name="account_id" ref="232"/>
         <field name="code_id" ref="vat_code_transacciones"/>
