@@ -348,7 +348,7 @@
             <field name="tax_amount">-100</field>
             <field name="debit_credit_amount">100</field>
             <field name="apply_on">invoice</field>
-            <field name="code_id" ref="template_ivacode_pagata_10"/>
+            <field name="code_id" ref="template_ivacode_pagata_10ind"/>
             <field name="tax_id" ref="10AO"/>
         </record>
 
@@ -357,7 +357,7 @@
             <field name="tax_amount">100</field>
             <field name="debit_credit_amount">100</field>
             <field name="apply_on">refund</field>
-            <field name="code_id" ref="template_ivacode_pagata_10"/>
+            <field name="code_id" ref="template_ivacode_pagata_10ind"/>
             <field name="tax_id" ref="10AO"/>
         </record>
 
@@ -368,7 +368,7 @@
             <field name="tax_amount">0</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">invoice</field>
-            <field name="code_id" ref="template_ivacode_pagata_10ind"/>
+            <field name="code_id" ref="template_ivacode_pagata_10"/>
             <field name="tax_id" ref="10AO"/>
             <field name="account_id" ref="1601"/>
         </record>
@@ -378,7 +378,7 @@
             <field name="tax_amount">0</field>
             <field name="debit_credit_amount">0</field>
             <field name="apply_on">refund</field>
-            <field name="code_id" ref="template_ivacode_pagata_10ind"/>
+            <field name="code_id" ref="template_ivacode_pagata_10"/>
             <field name="tax_id" ref="10AO"/>
             <field name="account_id" ref="1601"/>
         </record>
@@ -1294,7 +1294,7 @@
             <field name="tax_amount">180.33</field>
             <field name="debit_credit_amount">180.33</field>
             <field name="apply_on">invoice</field>
-            <field name="code_id" ref="l10n_it.template_impcode_riscossa_22"/>
+            <field name="code_id" ref="l10n_it.template_ivacode_riscossa_22"/>
             <field name="tax_id" ref="22v INC"/>
             <field name="account_id" ref="l10n_it.2601"/>
         </record>
@@ -1313,7 +1313,7 @@
             <field name="tax_amount">-180.33</field>
             <field name="debit_credit_amount">180.33</field>
             <field name="apply_on">refund</field>
-            <field name="code_id" ref="l10n_it.template_impcode_riscossa_22"/>
+            <field name="code_id" ref="l10n_it.template_ivacode_riscossa_22"/>
             <field name="tax_id" ref="22v INC"/>
             <field name="account_id" ref="l10n_it.2601"/>
         </record>
@@ -1334,7 +1334,7 @@
             <field name="tax_amount">173.55</field>
             <field name="debit_credit_amount">173.55</field>
             <field name="apply_on">invoice</field>
-            <field name="code_id" ref="l10n_it.template_impcode_riscossa_21"/>
+            <field name="code_id" ref="l10n_it.template_ivacode_riscossa_21"/>
             <field name="tax_id" ref="21v INC"/>
             <field name="account_id" ref="l10n_it.2601"/>
         </record>
@@ -1353,7 +1353,7 @@
             <field name="tax_amount">-173.55</field>
             <field name="debit_credit_amount">173.55</field>
             <field name="apply_on">refund</field>
-            <field name="code_id" ref="l10n_it.template_impcode_riscossa_21"/>
+            <field name="code_id" ref="l10n_it.template_ivacode_riscossa_21"/>
             <field name="tax_id" ref="21v INC"/>
             <field name="account_id" ref="l10n_it.2601"/>
         </record>
@@ -1374,7 +1374,7 @@
             <field name="tax_amount">166.67</field>
             <field name="debit_credit_amount">166.67</field>
             <field name="apply_on">invoice</field>
-            <field name="code_id" ref="l10n_it.template_impcode_riscossa_20"/>
+            <field name="code_id" ref="l10n_it.template_ivacode_riscossa_20"/>
             <field name="tax_id" ref="20v INC"/>
             <field name="account_id" ref="l10n_it.2601"/>
         </record>
@@ -1393,7 +1393,7 @@
             <field name="tax_amount">-166.67</field>
             <field name="debit_credit_amount">166.67</field>
             <field name="apply_on">refund</field>
-            <field name="code_id" ref="l10n_it.template_impcode_riscossa_20"/>
+            <field name="code_id" ref="l10n_it.template_ivacode_riscossa_20"/>
             <field name="tax_id" ref="20v INC"/>
             <field name="account_id" ref="l10n_it.2601"/>
         </record>
@@ -1454,7 +1454,7 @@
             <field name="tax_amount">107.14</field>
             <field name="debit_credit_amount">107.14</field>
             <field name="apply_on">invoice</field>
-            <field name="code_id" ref="l10n_it.template_impcode_riscossa_12"/>
+            <field name="code_id" ref="l10n_it.template_ivacode_riscossa_12"/>
             <field name="tax_id" ref="12v INC"/>
             <field name="account_id" ref="l10n_it.2601"/>
         </record>
@@ -1473,7 +1473,7 @@
             <field name="tax_amount">-107.14</field>
             <field name="debit_credit_amount">107.14</field>
             <field name="apply_on">refund</field>
-            <field name="code_id" ref="l10n_it.template_impcode_riscossa_12"/>
+            <field name="code_id" ref="l10n_it.template_ivacode_riscossa_12"/>
             <field name="tax_id" ref="12v INC"/>
             <field name="account_id" ref="l10n_it.2601"/>
         </record>
@@ -1791,7 +1791,7 @@
             <field name="tax_amount">-1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">invoice</field>
-            <field name="code_id" ref="template_impcode_pagata_21det40"/>
+            <field name="code_id" ref="template_impcode_pagata_21ind"/>
             <field name="tax_id" ref="21AO"/>
         </record>
 
@@ -1800,7 +1800,7 @@
             <field name="tax_amount">1000</field>
             <field name="debit_credit_amount">1000</field>
             <field name="apply_on">refund</field>
-            <field name="code_id" ref="template_impcode_pagata_21det40"/>
+            <field name="code_id" ref="template_impcode_pagata_21ind"/>
             <field name="tax_id" ref="21AO"/>
         </record>
 
