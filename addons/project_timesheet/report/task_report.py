@@ -61,12 +61,12 @@ class report_timesheet_task_user(osv.osv):
                r.id as user_id,
                to_char(to_date(months.name, 'YYYY/MM/DD'),'YYYY') as year,
                to_char(to_date(months.name, 'YYYY/MM/DD'),'MM') as month,
-               (select sum(hours) from project_task_work where user_id = r.id and date between to_date(months.name, 'YYYY/MM/DD') and (to_date(months.name, 'YYYY/MM/DD') + interval '1 month' -
-            interval '1 day') ) as task_hrs
+               (select sum(unit_amount) from account_analytic_line where user_id = r.id and date between to_date(months.name, 'YYYY/MM/DD') and (to_date(months.name, 'YYYY/MM/DD') + interval '1 month' -
+            interval '1 day')and id IN (select line_id from hr_analytic_timesheet where task_id in (select id from project_task))) as task_hrs
         from res_users r,
                 (select to_char(p.date,'YYYY-MM-01') as name,
             to_char(p.date,'YYYYMM') as m_id
-                from project_task_work p
+                from account_analytic_line p
 
             union
                 select to_char(h.name,'YYYY-MM-01') as name,
@@ -79,5 +79,22 @@ class report_timesheet_task_user(osv.osv):
                 to_char(to_date(months.name, 'YYYY/MM/DD'),'MM')
               ) """)
 
+
+class report_project_task_user(osv.Model):
+    _inherit = "report.project.task.user"
+    _columns = {
+        'hours_planned': fields.float('Planned Hours', readonly=True),
+        'hours_effective': fields.float('Effective Hours', readonly=True),
+        'hours_delay': fields.float('Avg. Plan.-Eff.', readonly=True),
+        'remaining_hours': fields.float('Remaining Hours', readonly=True),
+        'progress': fields.float('Progress', readonly=True, group_operator='avg'),
+        'total_hours': fields.float('Total Hours', readonly=True),
+    }
+
+    def _select(self):
+        return  super(report_project_task_user, self)._select() + ", progress as progress, t.effective_hours as hours_effective, remaining_hours as remaining_hours, total_hours as total_hours, t.delay_hours as hours_delay, planned_hours as hours_planned"
+
+    def _group_by(self):
+        return super(report_project_task_user, self)._group_by() + ", remaining_hours, t.effective_hours, progress, total_hours, planned_hours, hours_delay"
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
