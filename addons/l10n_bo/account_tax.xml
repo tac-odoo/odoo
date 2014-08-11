@@ -107,8 +107,8 @@
     
     <record id="ITAX_03_invoice_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">1000</field>
-        <field name="debit_credit_amount">1000</field>
+        <field name="tax_amount">769.23</field>
+        <field name="debit_credit_amount">769.23</field>
         <field name="apply_on">invoice</field>
         <field name="code_id" ref="vat_code_base_sale"/>
         <field name="tax_id" ref="ITAX_03"/>
@@ -126,8 +126,8 @@
     
     <record id="ITAX_03_refund_base_line" model="account.tax.line.template">
         <field name="code_type">base</field>
-        <field name="tax_amount">1000</field>
-        <field name="debit_credit_amount">1000</field>
+        <field name="tax_amount">769.23</field>
+        <field name="debit_credit_amount">769.23</field>
         <field name="apply_on">refund</field>
         <field name="code_id" ref="vat_code_base_sale"/>
         <field name="tax_id" ref="ITAX_03"/>
