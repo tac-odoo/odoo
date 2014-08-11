@@ -37,6 +37,7 @@
                     <separator/>
                     <filter string="New Mail" name="message_unread" domain="[('message_unread','=',True)]"/>
                     <group expand="0" string="Group By">
+<<<<<<< HEAD
                         <filter string="Project" name="project" context="{'group_by':'project_id'}"/>
                         <filter string="Task" context="{'group_by':'name'}"/>
                         <filter string="Assigned to" name="User" context="{'group_by':'user_id'}"/>
@@ -45,6 +46,13 @@
                         <separator/>
                         <filter string="Last Message" name="group_message_last_post" context="{'group_by':'message_last_post:week'}"/>
                         <filter string="Assignation Month" context="{'group_by':'date_start:month'}" help="Creation Date"/>
+=======
+                        <filter string="Users" name="group_user_id" icon="terp-personal" domain="[]"  context="{'group_by':'user_id'}"/>
+                        <filter string="Project" name="group_project_id" icon="terp-folder-violet" domain="[]" context="{'group_by':'project_id'}"/>
+                        <filter string="Stage" name="group_stage_id" icon="terp-stage" domain="[]" context="{'group_by':'stage_id'}"/>
+                        <filter string="Last Stage Update" icon="terp-go-month" domain="[]" context="{'group_by':'date_last_stage_update'}"/>
+                        <filter string="Last Message" name="group_message_last_post" domain="[]" context="{'group_by':'message_last_post:week'}"/>
+>>>>>>> [IMP] project : remove copy() method in res_partner and remove search() method,
                     </group>
                 </search>
             </field>
