@@ -33,16 +33,16 @@
 
         <record id="impuestos_plantilla_isv_por_cobrar_invoice_base_line" model="account.tax.line.template">
             <field name="code_type">base</field>
-            <field name="tax_amount">869.43</field>
-            <field name="debit_credit_amount">869.43</field>
+            <field name="tax_amount">869.57</field>
+            <field name="debit_credit_amount">869.75</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="impuestos_base_isv_compras"/>
             <field name="tax_id" ref="impuestos_plantilla_isv_por_cobrar"/>
         </record>
         <record id="impuestos_plantilla_isv_por_cobrar_invoice_tax_line" model="account.tax.line.template">
             <field name="code_type">tax</field>
-            <field name="tax_amount">130.57</field>
-            <field name="debit_credit_amount">130.57</field>
+            <field name="tax_amount">130.43</field>
+            <field name="debit_credit_amount">130.43</field>
             <field name="apply_on">invoice</field>
             <field name="code_id" ref="impuestos_isv_por_cobrar"/>
             <field name="tax_id" ref="impuestos_plantilla_isv_por_cobrar"/>
