@@ -48,9 +48,7 @@
                 ]]>
             </field>
         </record>
-     </data>
 
-    <data>
         <!-- Apprasia-related subtypes for messaging / Chatter -->
         <record id="mt_apprasial_stage" model="mail.message.subtype">
             <field name="name">Stage Changed</field>

@@ -22,16 +22,12 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from dateutil import parser
-import time
-import re
 import uuid
 import urlparse
 from openerp import fields, api, tools, models
 from openerp.tools.translate import _
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DF
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 from openerp.exceptions import except_orm
-
-emails_split = re.compile(r"[;,\n\r]+")
 
 class calendar_event(models.Model):
     """ Model for Calendar Event """
@@ -56,6 +52,12 @@ class hr_evaluation(models.Model):
     _inherit = ['mail.thread']
     _description = "Employee Appraisal"
 
+    EVALUATION_STATE = [
+        ('new', 'To Start'),
+        ('pending', 'Appraisal Sent'),
+        ('done', 'Done')
+    ]
+
     _track = {
         'state': {
             'hr_evaluation.mt_apprasial_stage': lambda self, cr, uid, obj, ctx=None: True,
@@ -72,12 +74,6 @@ class hr_evaluation(models.Model):
         self.appraisal_url = ''
         self.email_to = ''
         self.send_mail_status = False
-
-    @api.cr_uid
-    def _get_state_list(self, cr, uid, context=None):
-        return [('new', 'To Start'),
-                ('pending', 'Appraisal Sent'),
-                ('done', 'Done'),]
 
     @api.one
     @api.depends('state','interview_deadline')
@@ -109,7 +105,7 @@ class hr_evaluation(models.Model):
     employee_id = fields.Many2one('hr.employee', required=True, string='Employee')
     department_id = fields.Many2one('hr.department', 'Department')
     evaluation = fields.Text('Evaluation Summary', help="If the evaluation does not meet the expectations, you can propose an action plan")
-    state = fields.Selection(_get_state_list, 'Status', track_visibility='onchange', required=True, readonly=True, copy=False, default='new', select=True)
+    state = fields.Selection(EVALUATION_STATE, 'Status', track_visibility='onchange', required=True, readonly=True, copy=False, default='new', select=True)
     date_close = fields.Date('Appraisal Deadline', select=True, required=True)
     appraisal_manager = fields.Boolean('Manger',)
     apprasial_manager_ids = fields.Many2many('hr.employee', 'evaluation_apprasial_manager_rel', 'hr_evaluation_evaluation_id')
@@ -161,13 +157,15 @@ class hr_evaluation(models.Model):
         if self.employee_id and self.department_id and self.date_close:
             appraisal_ids = self.search([('employee_id', '=', self.employee_id.id),('department_id', '=', self.department_id.id)])
             if appraisal_ids:
-                duplicat_list = [(datetime.strptime(rec.date_close, "%Y-%m-%d").month,datetime.strptime(rec.date_close, "%Y-%m-%d").year) for rec in appraisal_ids]
+                duplicat_list = [(datetime.strptime(rec.date_close, DEFAULT_SERVER_DATE_FORMAT).month,datetime.strptime(rec.date_close, DEFAULT_SERVER_DATE_FORMAT).year) for rec in appraisal_ids]
                 found_duplicat_data = []
                 for rec in duplicat_list:
                     if rec in found_duplicat_data:
                         raise except_orm(_('Warning'),_("You cannot create more than one appraisal for same Month & Year"))
                     else:
                         found_duplicat_data.append(rec)
+        else:
+            return True
 
     @api.one
     def create_message_subscribe_users_list(self, val):
@@ -196,7 +194,7 @@ class hr_evaluation(models.Model):
         return True
 
     @api.one
-    def create_token(self, email, url, partner_id, employee_id):
+    def create_token(self, email, url, partner_id):
         survey_response_obj = self.env['survey.user_input']
         token = uuid.uuid4().__str__()
         # create response with token
@@ -213,33 +211,31 @@ class hr_evaluation(models.Model):
         return token
 
     @api.one
-    def create_receiver_list(self, apprasial, url):
-        partner_obj = self.env['res.partner']
-        emails_list = []
+    def create_receiver_list(self, apprasial):
+        mail_obj = self.env['mail.thread']
         for rec in apprasial:
-            if rec.work_email:
-                email = rec.work_email.strip()
-                if re.search(r"^[^@]+@[^@]+$", email):
-                    emails_list.append(email)
-
-        for email in emails_list:
-            partner_id = partner_obj.search([('email', '=', email)]) or None
-            token = self.create_token(email, url, partner_id, self.employee_id)[0]
-            self.update_appraisal_url(url.public_url, email, token)
-            self.mail_template.send_mail(self.id, force_send=True)
+            for emp in rec[1]:
+                if emp.work_email:
+                    email = tools.email_split(emp.work_email)[0]
+                    partner_id = mail_obj._find_partner_from_emails(email) or None
+                    token = self.create_token(email, rec[0], partner_id)[0]
+                    self.update_appraisal_url(rec[0].public_url, email, token)
+                    self.mail_template.send_mail(self.id, force_send=True)
         return True
 
     @api.one
     def button_sent_appraisal(self):
         if self.employee_id:
+            appraisal_receiver = []
             if self.appraisal_manager and self.apprasial_manager_ids:
-                self.create_receiver_list(self.apprasial_manager_ids, self.apprasial_manager_survey_id)
+                appraisal_receiver.append((self.apprasial_manager_survey_id,self.apprasial_manager_ids))
             if self.appraisal_colleagues and self.appraisal_colleagues_ids:
-                self.create_receiver_list(self.appraisal_colleagues_ids, self.appraisal_colleagues_survey_id)
+                appraisal_receiver.append((self.appraisal_colleagues_survey_id,self.appraisal_colleagues_ids))
             if self.appraisal_subordinates and self.appraisal_subordinates_ids:
-                self.create_receiver_list(self.appraisal_subordinates_ids, self.appraisal_subordinates_survey_id)
+                appraisal_receiver.append((self.appraisal_subordinates_survey_id,self.appraisal_subordinates_ids))
             if self.appraisal_self and self.apprasial_employee:
-                self.create_receiver_list(self.employee_id, self.appraisal_self_survey_id)
+                appraisal_receiver.append((self.appraisal_self_survey_id,self.employee_id))
+            self.create_receiver_list(appraisal_receiver)
             if self.state == 'new':
                 self.write({'state': 'pending', 'send_mail_status': True})
         return True
@@ -249,32 +245,36 @@ class hr_evaluation(models.Model):
         return self.write({'state': 'done'})
 
     @api.multi
+    def create_update_meeting(self, vals):
+        create_meeting_id = False
+        if self.meeting_id and self.meeting_id.allday:
+            self.meeting_id.write({'start_date': vals['interview_deadline'], 'stop_date': vals['interview_deadline']})
+        elif self.meeting_id and not self.meeting_id.allday:
+            date_obj = datetime.strptime(vals['interview_deadline'], DEFAULT_SERVER_DATE_FORMAT)
+            set_date = datetime.strftime(date_obj, DEFAULT_SERVER_DATETIME_FORMAT)
+            self.meeting_id.write({'start_datetime': set_date, 'stop_datetime': set_date})
+        else:
+            partner_ids = [(4,manager.user_id.partner_id.id) for manager in self.apprasial_manager_ids if manager.user_id]
+            if self.employee_id.user_id:
+                partner_ids.append((4,self.employee_id.user_id.partner_id.id))
+            create_meeting_id = self.env['calendar.event'].create({
+                'name': 'Appraisal For '+ self.employee_id.name_related,
+                'start': vals['interview_deadline'],
+                'stop': vals['interview_deadline'],
+                'allday': True,
+                'partner_ids': partner_ids,
+                }
+            )
+            if create_meeting_id:
+                self.meeting_id = create_meeting_id
+        return self.log_meeting(self.meeting_id.name, self.meeting_id.start, self.meeting_id.duration)
+
+    @api.multi
     def write(self, vals):
         if vals.get('state') == 'pending' and not vals.get('send_mail_status'):
             self.button_sent_appraisal()
         if vals.get('interview_deadline') and not vals.get('meeting_id'):
-            create_meeting_id = False
-            if self.meeting_id and self.meeting_id.allday:
-                self.meeting_id.write({'start_date': vals['interview_deadline'], 'stop_date': vals['interview_deadline']})
-            elif self.meeting_id and not self.meeting_id.allday:
-                date_obj = datetime.strptime(vals['interview_deadline'], "%Y-%m-%d")
-                set_date = datetime.strftime(date_obj, "%Y-%m-%d %H:%M:%S")
-                self.meeting_id.write({'start_datetime': set_date, 'stop_datetime': set_date})
-            else:
-                partner_ids = [(4,manager.user_id.partner_id.id) for manager in self.apprasial_manager_ids if manager.user_id]
-                if self.employee_id.user_id:
-                    partner_ids.append((4,self.employee_id.user_id.partner_id.id))
-                create_meeting_id = self.env['calendar.event'].create({
-                    'name': 'Appraisal For '+ self.employee_id.name_related,
-                    'start': vals['interview_deadline'],
-                    'stop': vals['interview_deadline'],
-                    'allday': True,
-                    'partner_ids': partner_ids,
-                    }
-                )
-                if create_meeting_id:
-                    self.meeting_id = create_meeting_id
-            self.log_meeting(self.meeting_id.name, self.meeting_id.start, self.meeting_id.duration)
+            self.create_update_meeting(vals)
         if vals.get('apprasial_manager_ids'):
             emp_obj = self.env['hr.employee']
             for follower_id in emp_obj.browse(vals['apprasial_manager_ids'][0][2]):
@@ -286,7 +286,7 @@ class hr_evaluation(models.Model):
     def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False, lazy=True):
         """ Override read_group to always display all states. """
         if groupby and groupby[0] == "state":
-            states = self._get_state_list(cr, uid, context=context)
+            states = self.EVALUATION_STATE
             read_group_all_states = [{
                         '__context': {'group_by': groupby[1:]},
                         '__domain': domain + [('state', '=', state_value)],
@@ -368,21 +368,21 @@ class hr_employee(models.Model):
     _inherit="hr.employee"
 
     evaluation_date = fields.Date('Next Appraisal Date', help="The date of the next appraisal is computed by the appraisal plan's dates (first appraisal + periodicity).")
-    appraisal_manager = fields.Boolean('Manager', help="",)
-    apprasial_manager_ids = fields.Many2many('hr.employee', 'apprasial_manager_rel', 'hr_evaluation_evaluation_id',)
-    apprasial_manager_survey_id = fields.Many2one('survey.survey', 'Manager Appraisal',)
-    appraisal_colleagues = fields.Boolean('Colleagues', help="")
-    appraisal_colleagues_ids = fields.Many2many('hr.employee', 'appraisal_colleagues_rel', 'hr_evaluation_evaluation_id',)
-    appraisal_colleagues_survey_id = fields.Many2one('survey.survey', "Employee's Appraisal", )
-    appraisal_self = fields.Boolean('Employee', help="")
-    apprasial_employee = fields.Char('Employee Name',)
-    appraisal_self_survey_id = fields.Many2one('survey.survey', 'self Appraisal',)
-    appraisal_subordinates = fields.Boolean('Collaborator', help="")
+    appraisal_manager = fields.Boolean('Manager')
+    apprasial_manager_ids = fields.Many2many('hr.employee', 'apprasial_manager_rel', 'hr_evaluation_evaluation_id')
+    apprasial_manager_survey_id = fields.Many2one('survey.survey', 'Manager Appraisal')
+    appraisal_colleagues = fields.Boolean('Colleagues')
+    appraisal_colleagues_ids = fields.Many2many('hr.employee', 'appraisal_colleagues_rel', 'hr_evaluation_evaluation_id')
+    appraisal_colleagues_survey_id = fields.Many2one('survey.survey', "Employee's Appraisal")
+    appraisal_self = fields.Boolean('Employee')
+    apprasial_employee = fields.Char('Employee Name')
+    appraisal_self_survey_id = fields.Many2one('survey.survey', 'self Appraisal')
+    appraisal_subordinates = fields.Boolean('Collaborator')
     appraisal_subordinates_ids = fields.Many2many('hr.employee', 'appraisal_subordinates_rel', 'hr_evaluation_evaluation_id')
-    appraisal_subordinates_survey_id = fields.Many2one('survey.survey', "Employee's Appraisal" )
-    appraisal_repeat = fields.Boolean('Repeat', help="", default=False)
-    appraisal_repeat_number = fields.Integer('Appraisal Cycle', default=1,)
-    appraisal_repeat_delay = fields.Selection([('year','Year'),('month','Month')], 'Repeat Every', copy=False, default='year',)
+    appraisal_subordinates_survey_id = fields.Many2one('survey.survey', "Employee's Appraisal")
+    appraisal_repeat = fields.Boolean('Repeat', default=False)
+    appraisal_repeat_number = fields.Integer('Appraisal Cycle', default=1)
+    appraisal_repeat_delay = fields.Selection([('year','Year'),('month','Month')], 'Repeat Every', copy=False, default='year')
     appraisal_count = fields.Integer(compute='_appraisal_count', string='Appraisal Interviews')
 
     @api.one
@@ -403,15 +403,15 @@ class hr_employee(models.Model):
 
     @api.model
     def run_employee_evaluation(self, automatic=False, use_new_cursor=False):  # cronjob
-        now = parser.parse(datetime.now().strftime('%Y-%m-%d'))
+        now = parser.parse(datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT))
         obj_evaluation = self.env['hr_evaluation.evaluation']
         next_date = datetime.now()
-        emp_ids = self.search([('evaluation_date', '<=', time.strftime("%Y-%m-%d"))])
+        emp_ids = self.search([('evaluation_date', '<=', datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT))])
         for emp in emp_ids:
             if emp.appraisal_repeat_delay == 'month':
-                next_date = (now + relativedelta(months=emp.appraisal_repeat_number)).strftime('%Y-%m-%d')
+                next_date = (now + relativedelta(months=emp.appraisal_repeat_number)).strftime(DEFAULT_SERVER_DATE_FORMAT)
             else:
-                next_date = (now + relativedelta(months=emp.appraisal_repeat_number * 12)).strftime('%Y-%m-%d')
+                next_date = (now + relativedelta(months=emp.appraisal_repeat_number * 12)).strftime(DEFAULT_SERVER_DATE_FORMAT)
             emp.write({'evaluation_date': next_date})
             vals = {'employee_id': emp.id,
                     'date_close': now,
