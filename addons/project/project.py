@@ -529,28 +529,12 @@ class task(osv.osv):
 
     def _get_default_project_id(self, cr, uid, context=None):
         """ Gives default section by checking if present in the context """
-        return (self._resolve_project_id_from_context(cr, uid, context=context) or False)
+        return (context.get('default_project_id') or False)
 
     def _get_default_stage_id(self, cr, uid, context=None):
         """ Gives default stage_id """
         project_id = self._get_default_project_id(cr, uid, context=context)
         return self.stage_find(cr, uid, [], project_id, [('fold', '=', False)], context=context)
-
-    def _resolve_project_id_from_context(self, cr, uid, context=None):
-        """ Returns ID of project based on the value of 'default_project_id'
-            context key, or None if it cannot be resolved to a single
-            project.
-        """
-        if context is None:
-            context = {}
-        if type(context.get('default_project_id')) in (int, long):
-            return context['default_project_id']
-        if isinstance(context.get('default_project_id'), basestring):
-            project_name = context['default_project_id']
-            project_ids = self.pool.get('project.project').name_search(cr, uid, name=project_name, context=context)
-            if len(project_ids) == 1:
-                return project_ids[0][0]
-        return None
 
     def _read_group_stage_ids(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
         stage_obj = self.pool.get('project.task.type')
@@ -559,7 +543,7 @@ class task(osv.osv):
         if read_group_order == 'stage_id desc':
             order = '%s desc' % order
         search_domain = []
-        project_id = self._resolve_project_id_from_context(cr, uid, context=context)
+        project_id = context.get('default_project_id')
         if project_id:
             search_domain += ['|', ('project_ids', '=', project_id)]
         search_domain += [('id', 'in', ids)]
@@ -575,7 +559,7 @@ class task(osv.osv):
 
     def _read_group_user_id(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
         res_users = self.pool.get('res.users')
-        project_id = self._resolve_project_id_from_context(cr, uid, context=context)
+        project_id = context.get('default_project_id')
         access_rights_uid = access_rights_uid or uid
         if project_id:
             ids += self.pool.get('project.project').read(cr, access_rights_uid, project_id, ['members'], context=context)['members']
