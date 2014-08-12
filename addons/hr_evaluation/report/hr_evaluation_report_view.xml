@@ -19,23 +19,35 @@
         <field name="model">hr.evaluation.report</field>
         <field name="arch" type="xml">
             <search string="Appraisal Analysis">
+<<<<<<< HEAD
                 <filter string="In Progress" domain="[('state', '=' ,'wait')]" help = "In progress Evaluations"/>
                 <filter string="Final Validation" domain="[('state','=','progress')]" help = "Final Validation Evaluations"/>
                 <filter string="Done" domain="[('state','=','done')]"/>
+=======
+                <filter string="To Start" icon="terp-camera_test" domain="[('state', '=' ,'new')]" help = "In progress Evaluations"/>
+                <filter string="Appraisal Sent" icon="terp-camera_test" domain="[('state','=','pending')]" help = "Final Interview Date"/>
+                <filter icon="terp-dialog-close" string="Done" domain="[('state','=','done')]"/>
+>>>>>>> [IMP]hr_evaluation: add typo and help for method. update access rights. create/update hr_evaluation report according to new hr_evaluation. remove hr_evaluation_installer.xml file.
                 <field name="employee_id"/>
                 <group expand="0" string="Extended Filters...">
-                    <field name="rating"/>
                     <field name="deadline"/>
                     <field name="state"/>
                     <field name="create_date"/>
+                    <field name="final_interview"/>
                 </group>
                 <group expand="1" string="Group By">
+<<<<<<< HEAD
                     <filter string="Employee" name="employee" context="{'group_by':'employee_id'}"/>
                     <filter string="Plan" context="{'group_by':'plan_id'}"/>
                     <filter string="Appreciation" context="{'group_by':'rating'}"/>
                     <filter string="Status" context="{'group_by':'state'}"/>
                     <separator/>
                     <filter string="Month" context="{'group_by':'create_date:month'}" help="Creation Month"/>
+=======
+                    <filter string="Employee" name="employee" icon="terp-personal" context="{'group_by':'employee_id'}"/>
+                    <filter string="Status" icon="terp-stock_effects-object-colorize" context="{'group_by':'state'}"/>
+                    <filter string="Creation Date" icon="terp-go-month" context="{'group_by':'create_date'}" help="Creation Date"/>
+>>>>>>> [IMP]hr_evaluation: add typo and help for method. update access rights. create/update hr_evaluation report according to new hr_evaluation. remove hr_evaluation_installer.xml file.
                 </group>
             </search>
         </field>
@@ -46,7 +58,7 @@
         <field name="res_model">hr.evaluation.report</field>
         <field name="view_type">form</field>
         <field name="view_mode">graph</field>
-        <field name="context">{'search_default_year':1,'search_default_month':1,'search_default_employee':1,'group_by_no_leaf':1,'group_by':[]}</field>
+        <field name="context">{'search_default_employee':1,'group_by_no_leaf':1,'group_by':[]}</field>
         <field name="search_view_id" ref="view_evaluation_report_search"/>
     </record>
 

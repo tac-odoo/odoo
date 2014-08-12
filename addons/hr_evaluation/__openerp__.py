@@ -56,6 +56,7 @@ Key Features
         'report/hr_evaluation_report_view.xml',
         'survey_data_appraisal.xml',
         'hr_evaluation_data.xml',
+        'views/hr_evaluation.xml',
     ],
     "demo": ["hr_evaluation_demo.xml"],
     'test': ['test/test_hr_evaluation.yml'],

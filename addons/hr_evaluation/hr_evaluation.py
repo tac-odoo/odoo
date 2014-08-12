@@ -38,7 +38,7 @@ class calendar_event(models.Model):
         res = super(calendar_event, self).create(vals)
         if self.env.context.get('active_model') == 'hr_evaluation.evaluation':
             evaluation_obj = self.env['hr_evaluation.evaluation'].browse(self.env.context.get('active_id', []))
-            evaluation_obj.log_meeting(res.name, res.start, res.duration,)
+            evaluation_obj.log_meeting(res.name, res.start, res.duration)
             evaluation_obj.write({'meeting_id': res.id, 'interview_deadline': res.start_date if res.allday else res.start_datetime})
         return res
 
@@ -46,6 +46,16 @@ class survey_user_input(models.Model):
     _inherit = "survey.user_input"
 
     evaluation_id = fields.Many2one('hr_evaluation.evaluation', string='Appraisal')
+
+    @api.multi
+    def write(self, vals):
+        """ Trigger the _get_tot_completed_appraisal method when user fill up the appraisal form
+            and update kanban image gauge in employee evaluation.
+        """
+        res = super(survey_user_input, self).write(vals)
+        if vals.get('state'):
+            self.sudo().evaluation_id._get_tot_completed_appraisal()
+        return res
 
 class hr_evaluation(models.Model):
     _name = "hr_evaluation.evaluation"
@@ -73,7 +83,6 @@ class hr_evaluation(models.Model):
     def _set_appraisal_url(self):
         self.appraisal_url = ''
         self.email_to = ''
-        self.send_mail_status = False
 
     @api.one
     @api.depends('state','interview_deadline')
@@ -85,14 +94,6 @@ class hr_evaluation(models.Model):
                                   ('evaluation_id','=',self.id)])
 
     @api.one
-    @api.depends(
-        'state',
-        'interview_deadline',
-        'apprasial_manager_survey_id.user_input_ids.state',
-        'appraisal_colleagues_survey_id.user_input_ids.state',
-        'appraisal_self_survey_id.user_input_ids.state',
-        'appraisal_subordinates_survey_id.user_input_ids.state',
-    )
     def _get_tot_completed_appraisal(self):
         sur_res_obj = self.env['survey.user_input']
         self.tot_comp_appraisal = sur_res_obj.search_count([
@@ -109,24 +110,23 @@ class hr_evaluation(models.Model):
     date_close = fields.Date('Appraisal Deadline', select=True, required=True)
     appraisal_manager = fields.Boolean('Manger',)
     apprasial_manager_ids = fields.Many2many('hr.employee', 'evaluation_apprasial_manager_rel', 'hr_evaluation_evaluation_id')
-    apprasial_manager_survey_id = fields.Many2one('survey.survey', required=False)
+    apprasial_manager_survey_id = fields.Many2one('survey.survey', 'Manager Appraisal', required=False)
     appraisal_colleagues = fields.Boolean('Colleagues')
     appraisal_colleagues_ids = fields.Many2many('hr.employee', 'evaluation_appraisal_colleagues_rel', 'hr_evaluation_evaluation_id')
-    appraisal_colleagues_survey_id = fields.Many2one('survey.survey')
+    appraisal_colleagues_survey_id = fields.Many2one('survey.survey', "Employee's Appraisal")
     appraisal_self = fields.Boolean('Employee',)
     apprasial_employee = fields.Char('Employee Name',)
-    appraisal_self_survey_id = fields.Many2one('survey.survey',string='self Appraisal',)
+    appraisal_self_survey_id = fields.Many2one('survey.survey',string='Self Appraisal',)
     appraisal_subordinates = fields.Boolean('Collaborator')
     appraisal_subordinates_ids = fields.Many2many('hr.employee', 'evaluation_appraisal_subordinates_rel', 'hr_evaluation_evaluation_id')
-    appraisal_subordinates_survey_id = fields.Many2one('survey.survey',)
+    appraisal_subordinates_survey_id = fields.Many2one('survey.survey', "collaborate's Appraisal")
     color = fields.Integer('Color Index')
     display_name = fields.Char(compute='_set_display_name')
     mail_template = fields.Many2one('email.template', string="Email Template For Appraisal", default=_set_default_template)
-    email_to = fields.Char('Appraisal Receiver', compute=_set_appraisal_url)
-    appraisal_url = fields.Char('Appraisal URL', compute=_set_appraisal_url)
-    send_mail_status = fields.Boolean('Appraisal Send Mail Status', compute=_set_appraisal_url)
-    tot_sent_appraisal = fields.Integer('Number of sent appraisal', compute=_get_tot_sent_appraisal, defualt=0, store=True)
-    tot_comp_appraisal = fields.Integer('Number of completed appraisal', compute=_get_tot_completed_appraisal, defualt=0, store=True)
+    email_to = fields.Char('Appraisal Receiver', compute='_set_appraisal_url')
+    appraisal_url = fields.Char('Appraisal URL', compute='_set_appraisal_url')
+    tot_sent_appraisal = fields.Integer('Number of sent appraisal', compute='_get_tot_sent_appraisal', defualt=0, store=True)
+    tot_comp_appraisal = fields.Integer('Number of completed appraisal', defualt=0)
     user_id = fields.Many2one('res.users', string='Related User', default=lambda self: self.env.uid)
 
     @api.one
@@ -154,6 +154,7 @@ class hr_evaluation(models.Model):
     @api.one
     @api.constrains('employee_id', 'department_id', 'date_close')
     def _check_employee_appraisal_duplication(self):
+        """ Avoid duplication"""
         if self.employee_id and self.department_id and self.date_close:
             appraisal_ids = self.search([('employee_id', '=', self.employee_id.id),('department_id', '=', self.department_id.id)])
             if appraisal_ids:
@@ -195,9 +196,9 @@ class hr_evaluation(models.Model):
 
     @api.one
     def create_token(self, email, url, partner_id):
+        """ Create response with token """
         survey_response_obj = self.env['survey.user_input']
         token = uuid.uuid4().__str__()
-        # create response with token
         survey_response_obj.create({
             'survey_id': url.id,
             'deadline': self.date_close,
@@ -212,6 +213,7 @@ class hr_evaluation(models.Model):
 
     @api.one
     def create_receiver_list(self, apprasial):
+        """ Create one mail by recipients and __URL__ by link with identification token """
         mail_obj = self.env['mail.thread']
         for rec in apprasial:
             for emp in rec[1]:
@@ -225,6 +227,9 @@ class hr_evaluation(models.Model):
 
     @api.one
     def button_sent_appraisal(self):
+        """ Changes To Start state to Appraisal Sent.
+        @return: True
+        """
         if self.employee_id:
             appraisal_receiver = []
             if self.appraisal_manager and self.apprasial_manager_ids:
@@ -237,15 +242,21 @@ class hr_evaluation(models.Model):
                 appraisal_receiver.append((self.appraisal_self_survey_id,self.employee_id))
             self.create_receiver_list(appraisal_receiver)
             if self.state == 'new':
-                self.write({'state': 'pending', 'send_mail_status': True})
+                self.with_context(send_mail_status=True).write({'state': 'pending'})#avoid recursive process
         return True
 
     @api.one
     def button_done_appraisal(self):
+        """ Changes Appraisal Sent state to Done.
+        @return: True
+        """
         return self.write({'state': 'done'})
 
     @api.multi
     def create_update_meeting(self, vals):
+        """ Creates event when user enters date manually from the form view.
+            If users edits the already entered date, created meeting is updated accordingly.
+        """
         create_meeting_id = False
         if self.meeting_id and self.meeting_id.allday:
             self.meeting_id.write({'start_date': vals['interview_deadline'], 'stop_date': vals['interview_deadline']})
@@ -271,12 +282,13 @@ class hr_evaluation(models.Model):
 
     @api.multi
     def write(self, vals):
-        if vals.get('state') == 'pending' and not vals.get('send_mail_status'):
+        if vals.get('state') == 'pending' and not self.env.context.get('send_mail_status'): #avoid recursive process
             self.button_sent_appraisal()
         if vals.get('interview_deadline') and not vals.get('meeting_id'):
-            self.create_update_meeting(vals)
+            self.create_update_meeting(vals) #creating employee meeting and interview date
         if vals.get('apprasial_manager_ids'):
             emp_obj = self.env['hr.employee']
+            # add followers
             for follower_id in emp_obj.browse(vals['apprasial_manager_ids'][0][2]):
                 if follower_id.user_id:
                     self.message_subscribe_users(user_ids=[follower_id.user_id.id])
@@ -305,6 +317,7 @@ class hr_evaluation(models.Model):
 
     @api.cr_uid_ids_context
     def get_sent_appraisal(self, cr, uid, ids, context=None):
+        """ Link to open sent appraisal"""
         sur_res_obj = self.pool.get('survey.user_input')
         sent_appraisal_ids = []
         for rec in self.browse(cr, uid, ids, context=context):
@@ -321,6 +334,7 @@ class hr_evaluation(models.Model):
 
     @api.cr_uid_ids_context
     def get_result_appraisal(self, cr, uid, ids, context=None):
+        """ Link to open answers appraisal"""
         sur_res_obj = self.pool.get('survey.user_input')
         sent_appraisal_ids = []
         for rec in self.browse(cr, uid, ids, context=context):
@@ -337,6 +351,7 @@ class hr_evaluation(models.Model):
 
     @api.cr_uid_ids_context
     def schedule_interview_date(self, cr, uid, ids, context=None):
+        """ Link to open calendar view for creating employee interview and meeting"""
         if context is None:
             context = {}
         partner_ids = []
@@ -364,8 +379,7 @@ class hr_evaluation(models.Model):
         return self.message_post(body=message)
 
 class hr_employee(models.Model):
-    _name = "hr.employee"
-    _inherit="hr.employee"
+    _inherit = "hr.employee"
 
     evaluation_date = fields.Date('Next Appraisal Date', help="The date of the next appraisal is computed by the appraisal plan's dates (first appraisal + periodicity).")
     appraisal_manager = fields.Boolean('Manager')
@@ -376,10 +390,10 @@ class hr_employee(models.Model):
     appraisal_colleagues_survey_id = fields.Many2one('survey.survey', "Employee's Appraisal")
     appraisal_self = fields.Boolean('Employee')
     apprasial_employee = fields.Char('Employee Name')
-    appraisal_self_survey_id = fields.Many2one('survey.survey', 'self Appraisal')
+    appraisal_self_survey_id = fields.Many2one('survey.survey', 'Self Appraisal')
     appraisal_subordinates = fields.Boolean('Collaborator')
     appraisal_subordinates_ids = fields.Many2many('hr.employee', 'appraisal_subordinates_rel', 'hr_evaluation_evaluation_id')
-    appraisal_subordinates_survey_id = fields.Many2one('survey.survey', "Employee's Appraisal")
+    appraisal_subordinates_survey_id = fields.Many2one('survey.survey', "collaborate's Appraisal")
     appraisal_repeat = fields.Boolean('Repeat', default=False)
     appraisal_repeat_number = fields.Integer('Appraisal Cycle', default=1)
     appraisal_repeat_delay = fields.Selection([('year','Year'),('month','Month')], 'Repeat Every', copy=False, default='year')

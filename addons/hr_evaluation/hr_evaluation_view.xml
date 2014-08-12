@@ -118,7 +118,7 @@
                     <field name="tot_sent_appraisal"/>
                     <templates>
                         <t t-name="kanban-box">
-                            <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click cal_appraisal" style="height: 200px; width: 300px;">
+                            <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click oe_apprasial_kanban_box">
                             <div class="oe_dropdown_toggle oe_dropdown_kanban" groups="base.group_user">
                                 <span class="oe_e">í</span>
                                 <ul class="oe_dropdown_menu">
@@ -188,7 +188,7 @@
             <field name="name">Appraisal</field>
             <field name="res_model">hr_evaluation.evaluation</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">kanban,tree,form</field>
             <field name="context">{"search_default_employee_id": [active_id]}</field>
         </record>
 

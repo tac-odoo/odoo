@@ -28,28 +28,18 @@ class hr_evaluation_report(osv.Model):
     _description = "Evaluations Statistics"
     _auto = False
     _columns = {
-        'create_date': fields.datetime('Create Date', readonly=True),
+        'create_date': fields.date('Create Date', readonly=True),
+        'department_id' : fields.many2one('hr.department', 'Department'),
         'delay_date': fields.float('Delay to Start', digits=(16, 2), readonly=True),
         'overpass_delay': fields.float('Overpassed Deadline', digits=(16, 2), readonly=True),
         'deadline': fields.date("Deadline", readonly=True),
-        'request_id': fields.many2one('survey.user_input', 'Request ID', readonly=True),
-        'closed': fields.date("Close Date", readonly=True),  # TDE FIXME master: rename into date_close
-        'plan_id': fields.many2one('hr_evaluation.plan', 'Plan', readonly=True),
+        'final_interview': fields.date("Interview", readonly=True),
         'employee_id': fields.many2one('hr.employee', "Employee", readonly=True),
-        'rating': fields.selection([
-            ('0', 'Significantly bellow expectations'),
-            ('1', 'Did not meet expectations'),
-            ('2', 'Meet expectations'),
-            ('3', 'Exceeds expectations'),
-            ('4', 'Significantly exceeds expectations'),
-        ], "Overall Rating", readonly=True),
-        'nbr': fields.integer('# of Requests', readonly=True),  # TDE FIXME master: rename into nbr_requests
+        'nbr': fields.integer('# of Requests', readonly=True),
         'state': fields.selection([
-            ('draft', 'Draft'),
-            ('wait', 'Plan In Progress'),
-            ('progress', 'Final Validation'),
-            ('done', 'Done'),
-            ('cancel', 'Cancelled'),
+            ('new', 'To Start'),
+            ('pending', 'Appraisal Sent'),
+            ('done', 'Done')
         ], 'Status', readonly=True),
     }
     _order = 'create_date desc'
@@ -60,41 +50,31 @@ class hr_evaluation_report(osv.Model):
         ],
     }
 
-<<<<<<< HEAD
     def init(self, cr):
         tools.drop_view_if_exists(cr, 'hr_evaluation_report')
         cr.execute("""
             create or replace view hr_evaluation_report as (
                  select
-                     min(l.id) as id,
-                     s.create_date as create_date,
+                     min(s.id) as id,
+                     date(s.create_date) as create_date,
                      s.employee_id,
-                     l.request_id,
-                     s.plan_id,
-                     s.rating,
-                     s.date as deadline,
-                     s.date_close as closed,
-                     count(l.*) as nbr,
+                     s.department_id as department_id,
+                     s.date_close as deadline,
+                     s.interview_deadline as final_interview,
+                     count(s.*) as nbr,
                      s.state,
                      avg(extract('epoch' from age(s.create_date,CURRENT_DATE)))/(3600*24) as  delay_date,
-                     avg(extract('epoch' from age(s.date,CURRENT_DATE)))/(3600*24) as overpass_delay
-                     from
-                 hr_evaluation_interview l
-                LEFT JOIN
-                     hr_evaluation_evaluation s on (s.id=l.evaluation_id)
+                     avg(extract('epoch' from age(s.date_close,CURRENT_DATE)))/(3600*24) as overpass_delay
+                     from hr_evaluation_evaluation s
                  GROUP BY
+                     s.id,
                      s.create_date,
                      s.state,
                      s.employee_id,
-                     s.date,
                      s.date_close,
-                     l.request_id,
-                     s.rating,
-                     s.plan_id
-            )
-        """)
-
-=======
->>>>>>> [REM]hr_evaluation: remove commented code and remove code for related hr_evaluation.plan,hr_evaluation.plan.phase,hr_evaluation.interview
+                     s.interview_deadline,
+                     s.department_id
+                )
+            """)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
