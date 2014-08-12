@@ -519,7 +519,7 @@ class ir_model_constraint(Model):
     def _module_data_uninstall(self, cr, uid, ids, context=None):
         """
         Delete PostgreSQL foreign keys and constraints tracked by this model.
-        """ 
+        """
 
         if uid != SUPERUSER_ID and not self.pool.get('ir.model.access').check_groups(cr, uid, "base.group_system"):
             raise except_orm(_('Permission Denied'), (_('Administrator access is required to uninstall a module')))
@@ -580,7 +580,7 @@ class ir_model_relation(Model):
     def _module_data_uninstall(self, cr, uid, ids, context=None):
         """
         Delete PostgreSQL many2many relations tracked by this model.
-        """ 
+        """
 
         if uid != SUPERUSER_ID and not self.pool.get('ir.model.access').check_groups(cr, uid, "base.group_system"):
             raise except_orm(_('Permission Denied'), (_('Administrator access is required to uninstall a module')))
@@ -1035,11 +1035,11 @@ class ir_model_data(osv.osv):
         ``ids`` along with their corresponding database backed (including
         dropping tables, columns, FKs, etc, as long as there is no other
         ir.model.data entry holding a reference to them (which indicates that
-        they are still owned by another module). 
+        they are still owned by another module).
         Attempts to perform the deletion in an appropriate order to maximize
         the chance of gracefully deleting all records.
         This step is performed as part of the full uninstallation of a module.
-        """ 
+        """
 
         ids = self.search(cr, uid, [('module', 'in', modules_to_remove)])
 
@@ -1139,7 +1139,8 @@ class ir_model_data(osv.osv):
                 to_unlink.append((model,res_id))
         if not config.get('import_partial'):
             for (model, res_id) in to_unlink:
-                if self.pool.get(model):
+                obj = self.pool.get(model)
+                if obj and obj.search(cr, uid, [('id','=',res_id)]):
                     _logger.info('Deleting %s@%s', res_id, model)
                     self.pool.get(model).unlink(cr, uid, [res_id])
 
