@@ -63,11 +63,14 @@ class TableExporter(http.Controller):
         cr, uid, context = request.cr, openerp.SUPERUSER_ID, request.context
         snap = request.registry['website_version.snapshot']
         ids=snap.search(cr, uid, [])
-        result=snap.read(cr, uid, ids,['id','name','create_date'],context=context)
+        result=snap.read(cr, uid, ids,['id','name','website_ids'],context=context)
         res=[]
-        res.append('Master')
+        res.append({'name':'Master','link':''})
         for ob in result:
-            res.append(ob['name'])
+            if ob['website_ids']:
+                res.append({'name':ob['name'],'link':'linked'})
+            else:
+                res.append({'name':ob['name'],'link':'unlinked'})
         return res
 
 

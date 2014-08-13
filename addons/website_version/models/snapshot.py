@@ -8,5 +8,6 @@ class Snapshot(osv.Model):
     _columns = {
         'name' : fields.char(string="Title", size=256, required=True),
         'view_ids': fields.one2many('ir.ui.view', 'snapshot_id',string="view_ids"),
-        'create_date': fields.datetime('Create Date', readonly=True),
+        'website_ids': fields.one2many('website', 'snapshot_id',string="Websites"),
+        'create_date': fields.datetime('Create Date'),
     }
