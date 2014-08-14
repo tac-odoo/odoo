@@ -1479,6 +1479,8 @@
                                 <field name="location_id" groups="stock.group_locations"/>
                                 <field name="group_id" groups="stock.group_adv_location"/>
                                 <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+                                <field name="calendar_id"/>
+                                <field name="purchase_calendar_id"/>
                             </group>
                         </group>
                         <group>
@@ -1509,6 +1511,19 @@
               </p><p>You can define your minimum stock rules, so that Odoo will automatically create draft manufacturing orders or request for quotations according to the stock level. Once the virtual stock of a product (= stock on hand minus all confirmed orders and reservations) is below the minimum quantity, Odoo will generate a procurement request to increase the stock up to the maximum quantity.</p>
             </field>
         </record>
+
+        <!-- Procurement group to be used on the calendar attendance to match triggers and purchases-->
+        <record id="view_resource_calendar_attendance_tree_procurement_group" model="ir.ui.view">
+            <field name="name">resource.calendar.attendance.tree.procurement</field>
+            <field name="inherit_id" ref="resource.view_resource_calendar_attendance_tree"/>
+            <field name="model">resource.calendar.attendance</field>
+            <field name="arch" type="xml">
+                <field name="date_to" position="after">
+                    <field name="group_id"/>
+                </field>
+            </field>
+        </record>
+
 
         <act_window
             context="{'search_default_warehouse_id': active_id, 'default_warehouse_id': active_id}"

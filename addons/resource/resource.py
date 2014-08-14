@@ -28,6 +28,7 @@ from openerp import tools
 from openerp.osv import fields, osv
 from openerp.tools.float_utils import float_compare
 from openerp.tools.translate import _
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 
 class resource_calendar(osv.osv):
     """ Calendar model for a resource. It has
@@ -43,6 +44,18 @@ class resource_calendar(osv.osv):
     _name = "resource.calendar"
     _description = "Resource Calendar"
 
+
+    def _calculate_next_day(self, cr, uid, ids, fields, names, context=None):
+        res = {}
+        for calend in self.browse(cr, uid, ids, context=context):
+            #date1 = self.get_next_day(cr, uid, calend.id, datetime.utcnow() + relativedelta(days = 1))
+            _format = '%Y-%m-%d %H:%M:%S'
+            sched_date = self.schedule_days_get_date(
+            cr, uid, calend.id, 1, day_date=datetime.datetime.utcnow(), compute_leaves=True)
+            res[calend.id] = sched_date and sched_date.strftime(_format) or False
+        return res
+        
+        
     _columns = {
         'name': fields.char("Name", required=True),
         'company_id': fields.many2one('res.company', 'Company', required=False),
@@ -52,6 +65,7 @@ class resource_calendar(osv.osv):
             'resource.calendar.leaves', 'calendar_id', 'Leaves',
             help=''
         ),
+        'next_day': fields.function(_calculate_next_day, string='Next day it should trigger', type='datetime'),
     }
     _defaults = {
         'company_id': lambda self, cr, uid, context: self.pool.get('res.company')._company_default_get(cr, uid, 'resource.calendar', context=context)
@@ -129,7 +143,10 @@ class resource_calendar(osv.osv):
             if current_interval[0] <= leave[1]:
                 current_interval[0] = leave[1]
         if current_interval and current_interval[0] < interval[1]:  # remove intervals moved outside base interval due to leaves
-            intervals.append((current_interval[0], current_interval[1]))
+            if len(interval) > 2:
+                intervals.append((current_interval[0], current_interval[1], interval[2]))
+            else:
+                intervals.append((current_interval[0], current_interval[1],))
         return intervals
 
     def interval_schedule_hours(self, intervals, hour, remove_at_end=True):
@@ -173,6 +190,17 @@ class resource_calendar(osv.osv):
         """ Given a list of weekdays, return matching resource.calendar.attendance"""
         calendar = self.browse(cr, uid, id, context=None)
         return [att for att in calendar.attendance_ids if int(att.dayofweek) in weekdays]
+    
+    def get_attendances_for_weekday_date(self, cr, uid, id, weekdays, date, context=None):
+        calendar = self.browse(cr, uid, id, context=None)
+        res = [att for att in calendar.attendance_ids if int(att.dayofweek) in weekdays]
+        date = date.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        res = []
+        for att in calendar.attendance_ids:
+            if int(att.dayofweek) in weekdays:
+                if not((att.date_from and date < att.date_from) or (att.date_to and date > att.date_to)):
+                    res.append(att)
+        return res
 
     def get_weekdays(self, cr, uid, id, default_weekdays=None, context=None):
         """ Return the list of weekdays that contain at least one working interval.
@@ -334,11 +362,22 @@ class resource_calendar(osv.osv):
             return intervals
 
         working_intervals = []
-        for calendar_working_day in self.get_attendances_for_weekdays(cr, uid, id, [start_dt.weekday()], context):
-            working_interval = (
-                work_dt.replace(hour=int(calendar_working_day.hour_from)),
-                work_dt.replace(hour=int(calendar_working_day.hour_to))
-            )
+        for calendar_working_day in self.get_attendances_for_weekday_date(cr, uid, id, [start_dt.weekday()], start_dt, context):
+            if context and context.get('no_round_hours'):
+                min_from = int((calendar_working_day.hour_from - int(calendar_working_day.hour_from)) * 60)
+                min_to = int((calendar_working_day.hour_to - int(calendar_working_day.hour_to)) * 60)
+                working_interval = (
+                    work_dt.replace(hour=int(calendar_working_day.hour_from), minute=min_from),
+                    work_dt.replace(hour=int(calendar_working_day.hour_to), minute=min_to), 
+                    calendar_working_day.id,
+                ) 
+            else:
+                working_interval = (
+                    work_dt.replace(hour=int(calendar_working_day.hour_from)),
+                    work_dt.replace(hour=int(calendar_working_day.hour_to)), 
+                    calendar_working_day.id,
+                )
+            
             working_intervals += self.interval_remove_leaves(working_interval, work_limits)
 
         # find leave intervals
@@ -470,6 +509,10 @@ class resource_calendar(osv.osv):
 
         return intervals
 
+
+    
+
+
     def schedule_hours_get_date(self, cr, uid, id, hours, day_dt=None,
                                 compute_leaves=False, resource_id=None,
                                 default_interval=None, context=None):
@@ -549,7 +592,6 @@ class resource_calendar(osv.osv):
                 current_datetime = self.get_next_day(cr, uid, id, current_datetime, context)
             # avoid infinite loops
             iterations += 1
-
         return intervals
 
     def schedule_days_get_date(self, cr, uid, id, days, day_date=None, compute_leaves=False,
@@ -641,6 +683,7 @@ class resource_calendar_attendance(osv.osv):
         'name' : fields.char("Name", required=True),
         'dayofweek': fields.selection([('0','Monday'),('1','Tuesday'),('2','Wednesday'),('3','Thursday'),('4','Friday'),('5','Saturday'),('6','Sunday')], 'Day of Week', required=True, select=True),
         'date_from' : fields.date('Starting Date'),
+        'date_to': fields.date('End Date'),
         'hour_from' : fields.float('Work from', required=True, help="Start and End time of working.", select=True),
         'hour_to' : fields.float("Work to", required=True),
         'calendar_id' : fields.many2one("resource.calendar", "Resource's Calendar", required=True),

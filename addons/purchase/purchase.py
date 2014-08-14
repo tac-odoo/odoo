@@ -287,7 +287,8 @@ class purchase_order(osv.osv):
                                            states={'confirmed': [('readonly', True)], 'approved': [('readonly', True)], 'done': [('readonly', True)]}),
         'related_location_id': fields.related('picking_type_id', 'default_location_dest_id', type='many2one', relation='stock.location', string="Related location", store=True),        
         'shipment_count': fields.function(_count_all, type='integer', string='Incoming Shipments', multi=True),
-        'invoice_count': fields.function(_count_all, type='integer', string='Invoices', multi=True)
+        'invoice_count': fields.function(_count_all, type='integer', string='Invoices', multi=True),
+        'group_id': fields.many2one('procurement.group', string="Procurement Group"), 
     }
     _defaults = {
         'date_order': fields.datetime.now,
@@ -774,6 +775,7 @@ class purchase_order(osv.osv):
         stock_move = self.pool.get('stock.move')
         todo_moves = []
         new_group = self.pool.get("procurement.group").create(cr, uid, {'name': order.name, 'partner_id': order.partner_id.id}, context=context)
+        
 
         for order_line in order_lines:
             if not order_line.product_id:
@@ -1318,10 +1320,13 @@ class procurement_order(osv.osv):
                 schedule_date = self._get_purchase_schedule_date(cr, uid, procurement, company, context=context)
                 purchase_date = self._get_purchase_order_date(cr, uid, procurement, company, schedule_date, context=context) 
                 line_vals = self._get_po_line_values_from_proc(cr, uid, procurement, partner, company, schedule_date, context=context)
-                #look for any other draft PO for the same supplier, to attach the new line on instead of creating a new draft one
-                available_draft_po_ids = po_obj.search(cr, uid, [
+                dom = [
                     ('partner_id', '=', partner.id), ('state', '=', 'draft'), ('picking_type_id', '=', procurement.rule_id.picking_type_id.id),
-                    ('location_id', '=', procurement.location_id.id), ('company_id', '=', procurement.company_id.id), ('dest_address_id', '=', procurement.partner_dest_id.id)], context=context)
+                    ('location_id', '=', procurement.location_id.id), ('company_id', '=', procurement.company_id.id), ('dest_address_id', '=', procurement.partner_dest_id.id)]
+                if procurement.group_id and procurement.group_id.propagate_to_purchase:
+                    dom += [('group_id', '=', procurement.group_id.id)]
+                #look for any other draft PO for the same supplier, to attach the new line on instead of creating a new draft one
+                available_draft_po_ids = po_obj.search(cr, uid, dom, context=context)
                 if available_draft_po_ids:
                     po_id = available_draft_po_ids[0]
                     po_rec = po_obj.browse(cr, uid, po_id, context=context)
@@ -1353,6 +1358,7 @@ class procurement_order(osv.osv):
                         'fiscal_position': partner.property_account_position and partner.property_account_position.id or False,
                         'payment_term_id': partner.property_supplier_payment_term.id or False,
                         'dest_address_id': procurement.partner_dest_id.id,
+                        'group_id': (procurement.group_id and procurement.group_id.propagate_to_purchase and procurement.group_id.id) or False, 
                     }
                     po_id = self.create_procurement_purchase_order(cr, SUPERUSER_ID, procurement, po_vals, line_vals, context=context)
                     po_line_id = po_obj.browse(cr, uid, po_id, context=context).order_line[0].id
@@ -1488,5 +1494,12 @@ class account_invoice_line(osv.Model):
             readonly=True),
     }
 
+class procurement_group(osv.osv):
+    _inherit = 'procurement.group'
+    
+    _columns = {
+        'propagate_to_purchase': fields.boolean('Propagate grouping to purchase order', 
+                                                help="When from a procurement belonging to this procurement group a purchase order is made, purchase orders will be grouped by this procurement group"), 
+        }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
