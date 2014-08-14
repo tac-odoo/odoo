@@ -1,0 +1,59 @@
+@charset "utf-8";
+.openerp .oe_timesheet_daily .oe_timesheet_daily_add_row {
+  text-align: left;
+}
+.openerp .oe_timesheet_daily .oe_timesheet_daily_add_row .oe_form_field_many2one {
+  display: inline-block;
+  width: 250px;
+}
+.openerp .oe_timesheet_daily .oe_active_day {
+  background-color: #428BCA;
+  color: #FFFFFF;
+}
+.openerp .oe_timesheet_daily .oe_view_nocontent .oe_view_nocontent_create:before {
+  margin: 30px 0 0 -85px;
+  -ms-transform: scaleY(-1);
+  -o-transform: scaleY(-1);
+  -moz-transform: scaleY(-1);
+  -webkit-transform: scaleY(-1);
+  transform: scaleY(-1);
+}
+.openerp .oe_timesheet_daily .oe_view_nocontent {
+  padding: 10px 0 0 80px;
+  margin-top: -40px;
+}
+.openerp .oe_timesheet_daily .oe_margin {
+  margin-top: 20px;
+}
+.openerp .oe_timesheet_daily .oe_timesheet_daily_white {
+  color: #FFFFFF;
+}
+.openerp .oe_timesheet_daily .oe_timesheet_daily_background_white {
+  background: #FFFFFF;
+}
+.openerp .oe_timesheet_daily .oe_daily_header {
+  width: 100%;
+}
+.openerp .oe_timesheet_daily .oe_header {
+  width: 12.5%;
+}
+.openerp .oe_timesheet_daily .oe_timesheet_daily_black {
+  font-weight: bold;
+  color: #000000;
+}
+.openerp .oe_timesheet_daily .oe_hide {
+  display: none;
+}
+.openerp .oe_timesheet_daily .oe_timer .fa-spin {
+  bottom: 0;
+  right: 0px;
+  left: initial;
+  line-height: initial;
+  width: initial;
+}
+.openerp .oe_timesheet_daily .oe_text_center {
+  text-align: center;
+}
+.openerp .oe_timesheet_daily .oe_display_day_total {
+  font-size: 12px;
+}

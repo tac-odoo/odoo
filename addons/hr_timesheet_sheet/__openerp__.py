@@ -63,6 +63,6 @@ The validation can be configured in the company:
     'installable': True,
     'auto_install': False,
     'application': True,
-    'qweb': ['static/src/xml/timesheet.xml',],
+    'qweb': ['static/src/xml/timesheet.xml', 'static/src/xml/timesheet_day.xml',],
 }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

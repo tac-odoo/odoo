@@ -6,7 +6,10 @@
         <template id="assets_backend" name="hr_timesheet_sheet assets" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
                 <link rel="stylesheet" href="/hr_timesheet_sheet/static/src/css/timesheet.css"/>
+                <link rel="stylesheet" href="/hr_timesheet_sheet/static/src/css/timesheet_day.css"/>
                 <script type="text/javascript" src="/hr_timesheet_sheet/static/src/js/timesheet.js"></script>
+                <script type="text/javascript" src="/hr_timesheet_sheet/static/src/js/timesheet_day.js"></script>
+                <script type="text/javascript" src="/hr_timesheet_sheet/static/src/js/timesheet_week.js"></script>
             </xpath>
         </template>
     </data>

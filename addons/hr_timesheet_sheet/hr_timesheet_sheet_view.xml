@@ -102,11 +102,8 @@
                             <field name="total_difference" widget="float_time"/>
                         </group>
                     </group>
-                    <notebook>
-                        <page string="Summary">
-                            <widget type="weekly_timesheet" attrs="{'readonly': [['state', 'not in', ['new', 'draft']]]}">
-                            </widget>
-                        </page>
+                    <widget type="weekly_timesheet" attrs="{'readonly': [['state', 'not in', ['new', 'draft']]]}" />
+                    <notebook invisible="1">
                         <page string="Details">
                             <field context="{'employee_id': employee_id, 'user_id':user_id, 'timesheet_date_from': date_from, 'timesheet_date_to': date_to}" name="timesheet_ids" nolabel="1">
                                 <tree editable="top" string="Timesheet Activities">
