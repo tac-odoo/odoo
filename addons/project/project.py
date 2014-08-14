@@ -29,39 +29,33 @@ import time
 from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.addons.resource.faces import task as Task
-from openerp.osv import fields, osv
 from openerp.tools.translate import _
 
+from openerp import models, fields, api, _
 
-class project_task_type(osv.osv):
+class project_task_type(models.Model):
     _name = 'project.task.type'
     _description = 'Task Stage'
     _order = 'sequence'
-    _columns = {
-        'name': fields.char('Stage Name', required=True, translate=True),
-        'description': fields.text('Description'),
-        'sequence': fields.integer('Sequence'),
-        'case_default': fields.boolean('Default for New Projects',
-                        help="If you check this field, this stage will be proposed by default on each new project. It will not assign this stage to existing projects."),
-        'project_ids': fields.many2many('project.project', 'project_task_type_rel', 'type_id', 'project_id', 'Projects'),
-        'fold': fields.boolean('Folded in Kanban View',
-                               help='This stage is folded in the kanban view when'
-                               'there are no records in that stage to display.'),
-    }
 
-    def _get_default_project_ids(self, cr, uid, ctx={}):
-        project_id = self.pool['project.task']._get_default_project_id(cr, uid, context=ctx)
+    @api.model
+    def _get_default_project_ids(self):
+        project_id = self.env['project.task']._get_default_project_id()
         if project_id:
             return [project_id]
         return None
 
-    _defaults = {
-        'sequence': 1,
-        'project_ids': _get_default_project_ids,
-    }
-    _order = 'sequence'
+    name = fields.Char('Stage Name', required=True, translate=True)
+    description = fields.Text('Description')
+    sequence= fields.Integer('Sequence', default=1)
+    case_default = fields.Boolean('Default for New Projects',
+                    help="If you check this field, this stage will be proposed by default on each new project. It will not assign this stage to existing projects.")
+    project_ids = fields.Many2many('project.project', 'project_task_type_rel', 'type_id', 'project_id', 'Projects', default=_get_default_project_ids)
+    fold = fields.Boolean('Folded in Kanban View',
+                           help='This stage is folded in the kanban view when'
+                           'there are no records in that stage to display.')
 
-
+from openerp.osv import fields, osv
 class project(osv.osv):
     _name = "project.project"
     _description = "Project"
@@ -1075,7 +1069,8 @@ class project_project(osv.osv):
         'use_tasks': True
     }
 
-class project_task_history(osv.osv):
+from openerp import models, fields, api, _
+class project_task_history(models.Model):
     """
     Tasks History, used for cumulative flow charts (Lean/Agile)
     """
@@ -1084,68 +1079,44 @@ class project_task_history(osv.osv):
     _rec_name = 'task_id'
     _log_access = False
 
-    def _get_date(self, cr, uid, ids, name, arg, context=None):
-        result = {}
-        for history in self.browse(cr, uid, ids, context=context):
-            if history.type_id and history.type_id.fold:
-                result[history.id] = history.date
-                continue
-            cr.execute('''select
-                    date
+    @api.one
+    @api.depends('task_id.id')
+    def _get_date(self):
+        res = False
+        if self.type_id and self.type_id.fold:
+            self.end_date = self.date
+        if self.task_id:
+            self.env.cr.execute('''select
+                date
                 from
                     project_task_history
                 where
                     task_id=%s and
                     id>%s
-                order by id limit 1''', (history.task_id.id, history.id))
-            res = cr.fetchone()
-            result[history.id] = res and res[0] or False
-        return result
+                order by id limit 1''', (self.task_id.id, self.id))
+            res = self.env.cr.fetchone()
+        self.end_date = res and res[0] or False
 
-    def _get_related_date(self, cr, uid, ids, context=None):
-        result = []
-        for history in self.browse(cr, uid, ids, context=context):
-            cr.execute('''select
-                    id
-                from
-                    project_task_history
-                where
-                    task_id=%s and
-                    id<%s
-                order by id desc limit 1''', (history.task_id.id, history.id))
-            res = cr.fetchone()
-            if res:
-                result.append(res[0])
-        return result
+    task_id = fields.Many2one('project.task', 'Task', ondelete='cascade', required=True, select=True)
+    type_id = fields.Many2one('project.task.type', 'Stage')
+    kanban_state = fields.Selection([('normal', 'Normal'), ('blocked', 'Blocked'), ('done', 'Ready for next stage')], 'Kanban State', required=False)
+    date = fields.Date('Date', select=True, default=date.today())
+    end_date = fields.Date(string='End Date', compute="_get_date", store=True)
+    remaining_hours = fields.Float('Remaining Time', digits=(16, 2))
+    planned_hours = fields.Float('Planned Time', digits=(16, 2))
+    user_id = fields.Many2one('res.users', 'Responsible')
 
-    _columns = {
-        'task_id': fields.many2one('project.task', 'Task', ondelete='cascade', required=True, select=True),
-        'type_id': fields.many2one('project.task.type', 'Stage'),
-        'kanban_state': fields.selection([('normal', 'Normal'), ('blocked', 'Blocked'), ('done', 'Ready for next stage')], 'Kanban State', required=False),
-        'date': fields.date('Date', select=True),
-        'end_date': fields.function(_get_date, string='End Date', type="date", store={
-            'project.task.history': (_get_related_date, None, 20)
-        }),
-        'remaining_hours': fields.float('Remaining Time', digits=(16, 2)),
-        'planned_hours': fields.float('Planned Time', digits=(16, 2)),
-        'user_id': fields.many2one('res.users', 'Responsible'),
-    }
-    _defaults = {
-        'date': fields.date.context_today,
-    }
-
-class project_task_history_cumulative(osv.osv):
+class project_task_history_cumulative(models.Model):
     _name = 'project.task.history.cumulative'
     _table = 'project_task_history_cumulative'
     _inherit = 'project.task.history'
     _auto = False
 
-    _columns = {
-        'end_date': fields.date('End Date'),
-        'nbr_tasks': fields.integer('# of Tasks', readonly=True),
-        'project_id': fields.many2one('project.project', 'Project'),
-    }
+    end_date = fields.Date('End Date')
+    nbr_tasks = fields.Integer('# of Tasks', readonly=True),
+    project_id = fields.Many2one('project.project', 'Project')
 
+    @api.v7
     def init(self, cr):
         tools.drop_view_if_exists(cr, 'project_task_history_cumulative')
 
@@ -1174,11 +1145,11 @@ class project_task_history_cumulative(osv.osv):
         )
         """)
 
-class project_tags(osv.osv):
+class project_tags(models.Model):
     """ Category of project's task (or issue) """
     _name = "project.tags"
     _description = "Category of project's task, issue, ..."
-    _columns = {
-        'name': fields.char('Name', required=True, translate=True),
-    }
+
+    name = fields.Char('Name', required=True, translate=True)
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
