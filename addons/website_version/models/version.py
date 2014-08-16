@@ -24,7 +24,7 @@ class ViewVersion(osv.Model):
         #We write in a snapshot
         version_name=context.get('version_name')
         print "VERSION NAME={}".format(version_name)
-        if version_name and not context.get('mykey') and not version_name=='Master':
+        if version_name and not context.get('mykey'):
             ctx = dict(context, mykey=True)
             snap = request.registry['website_version.snapshot']
             snapshot_id=snap.search(cr, uid, [('name','=',version_name),])[0]
@@ -56,19 +56,8 @@ class ViewVersion(osv.Model):
                     snap_ids.append(copy_id)
             super(ViewVersion, self).write(cr, uid, snap_ids, vals, context=context)
         else:
-            # We write in master
-            if version_name=='Master' and not context.get('mykey'):
-                ctx = dict(context, mykey=True)
-                #from pudb import set_trace; set_trace()
-                for id in ids:
-                    copy_id=self.copy(cr,uid,id,{'master_id':None,'version_ids':None},context=ctx)
-                    super(ViewVersion, self).write(cr, uid,[copy_id], {'master_id': id}, context=ctx)
-                    vals['version_ids'] = [(4, copy_id)]
-                super(ViewVersion, self).write(cr, uid, ids, vals, context=ctx)
-            else:
-                # We launch the application
-                ctx = dict(context, mykey=True)
-                super(ViewVersion, self).write(cr, uid, ids, vals, context=ctx)
+            ctx = dict(context, mykey=True)
+            super(ViewVersion, self).write(cr, uid, ids, vals, context=ctx)
         
     def read(self, cr, uid, ids, fields=None, context=None, load='_classic_read'):
         if context is None:
@@ -76,9 +65,15 @@ class ViewVersion(osv.Model):
         self.clear_cache()
         snapshot_id=context.get('snapshot_id')
         #print "READ CONTEXT ID={}".format(context.get('snapshot_id'))
-        if snapshot_id==None:
-            snapshot_id='Master'
-        if not context.get('mykey') and not snapshot_id=='Master':
+        if snapshot_id==None and not context.get('mykey'):
+            ctx = dict(context, mykey=True)
+            snap = request.registry['website_version.snapshot']
+            id_master=snap.search(cr, uid, [('name', '=', 'master')],context=ctx)[0]
+            if id_master is None:
+                snapshot_id=snap.create(cr, uid,{'name':'master'}, context=ctx)
+            else:
+                snapshot_id=id_master
+        if False and not context.get('mykey'):
             ctx = dict(context, mykey=True)
             snap = request.registry['website_version.snapshot']
             snapshot=snap.browse(cr, uid, [snapshot_id], context=ctx)[0]
@@ -92,26 +87,9 @@ class ViewVersion(osv.Model):
                     if view.master_id.id == id:
                         snap_trad[view.id]=[view.master_id.id,view.master_id.xml_id,view.master_id.mode]
                         snap_ids.append(view.id)
-                        check=False
-                #The view corresponding to id must be found with its create_date
+                #The view corresponding to id is not in the snapshot
                 if check:
-                    current=self.browse(cr, uid, [id], context=ctx)[0]
-                    result_id=id
-                    check_two=True
-                    if current.version_ids:
-                        current_date=current.version_ids[0].create_date
-                        for previous in current.version_ids:
-                            if previous.create_date>=snapshot_date:
-                                result_id=previous.id
-                                check_two=False
-                                break
-                    #The view corresponding to id is in master
-                    if check_two:
-                        snap_ids.append(id)
-                    else:
-                        master=self.browse(cr, uid, [id], context=ctx)[0]
-                        snap_trad[result_id]=[master.id,master.xml_id,master.mode]
-                        snap_ids.append(result_id)
+                    snap_ids.append(id)        
             all_needed_views_snapshot= super(ViewVersion, self).read(cr, uid, snap_ids, fields=fields, context=ctx, load=load)
 
             for view in all_needed_views_snapshot:

@@ -12,8 +12,8 @@ class NewWebsite(osv.Model):
 
     def get_current_snapshot(self,cr,uid,context=None):
         id=request.session.get('snapshot_id')
-        if id=='Master' or id==None:
-            return 'Master'
+        if id is None:
+            return 'master'
         else:
             ob=self.pool['website_version.snapshot'].browse(cr,uid,[id],context=context)
             return ob[0].name

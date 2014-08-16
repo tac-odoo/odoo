@@ -14,35 +14,23 @@ class TableExporter(http.Controller):
         cr, uid, context = request.cr, openerp.SUPERUSER_ID, request.context
         #website_object = request.registry['website']
         #my_website = website_object.get_current_website(self, cr, uid, context=context)
-
-        if snapshot_name=='Master':
-            request.session['snapshot_id']='Master'
-            #request.session['website_%s_snapshot_id'%(my_website.id)]=0
-            return 'Master'
-        else:
-            cr, uid, context = request.cr, openerp.SUPERUSER_ID, request.context
-            snap = request.registry['website_version.snapshot']
-            id=snap.search(cr, uid, [('name', '=', snapshot_name)],context=context)
-            request.session['snapshot_id']=id[0]
-            #request.session['website_%s_snapshot_id'%(my_website.id)]=id[0]
-            return id
+        cr, uid, context = request.cr, openerp.SUPERUSER_ID, request.context
+        snap = request.registry['website_version.snapshot']
+        id=snap.search(cr, uid, [('name', '=', snapshot_name)],context=context)[0]
+        request.session['snapshot_id']=id
+        #request.session['website_%s_snapshot_id'%(my_website.id)]=id[0]
+        return id
 
     @http.route(['/create_snapshot'], type='json', auth="user", website=True)
     def create_snapshot(self,name):
         cr, uid, context = request.cr, openerp.SUPERUSER_ID, request.context
         if name=="":
             name=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        snap = request.registry['website_version.snapshot']
         snapshot_id=request.session.get('snapshot_id')
-        if snapshot_id=='Master' or snapshot_id==None:
-            new_snapshot_id=snap.create(cr, uid,{'name':name}, context=context)
-            request.session['snapshot_id']=new_snapshot_id
-        else:
-            iuv = request.registry['ir.ui.view']
-            date=snap.browse(cr, uid, [snapshot_id], context=context)[0].create_date
-            new_snapshot_id=snap.create(cr, uid,{'name':name,'create_date':date}, context=context)
-            iuv.copy_snapshot(cr, uid, snapshot_id,new_snapshot_id,context=context)
-            request.session['snapshot_id']=new_snapshot_id
+        iuv = request.registry['ir.ui.view']
+        new_snapshot_id=snap.create(cr, uid,{'name':name}, context=context)
+        iuv.copy_snapshot(cr, uid, snapshot_id,new_snapshot_id,context=context)
+        request.session['snapshot_id']=new_snapshot_id
         return name
 
     @http.route(['/delete_snapshot'], type='json', auth="user", website=True)
@@ -50,10 +38,11 @@ class TableExporter(http.Controller):
         cr, uid, context = request.cr, openerp.SUPERUSER_ID, request.context
         snap = request.registry['website_version.snapshot']
         snapshot_id=request.session.get('snapshot_id')
-        if not snapshot_id=='Master':
+        id_master=snap.search(cr, uid, [('name', '=', 'master')],context=context)[0]
+        if not snapshot_id==id_master:
             name=snap.browse(cr,uid,[snapshot_id],context=context).name
             snap.unlink(cr, uid, [snapshot_id], context=context)
-            request.session['snapshot_id']='Master'
+            request.session['snapshot_id']=id_master
         else:
             name="nothing"
         return name
@@ -65,12 +54,11 @@ class TableExporter(http.Controller):
         ids=snap.search(cr, uid, [])
         result=snap.read(cr, uid, ids,['id','name','website_ids'],context=context)
         res=[]
-        res.append({'name':'Master','link':''})
         for ob in result:
             if ob['website_ids']:
                 res.append({'name':ob['name'],'link':'linked'})
             else:
-                res.append({'name':ob['name'],'link':'unlinked'})
+                res.append({'name':ob['name'],'link':''})
         return res
 
 
