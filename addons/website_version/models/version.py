@@ -64,13 +64,14 @@ class ViewVersion(osv.Model):
             context = {}
         self.clear_cache()
         snapshot_id=context.get('snapshot_id')
+        website_id=context.get('website_id')
         #print "READ CONTEXT ID={}".format(context.get('snapshot_id'))
-        if context.get('initialisation'):
+        if website_id and context.get('initialisation'):
             ctx = dict(context, mykey=True)
             snap = request.registry['website_version.snapshot']
-            id_master=snap.search(cr, uid, [('name', '=', 'master')],context=ctx)
+            id_master=snap.search(cr, uid, [('name', '=', 'master_'+str(website_id)),('website_id','=',website_id)],context=ctx)
             if id_master == []:
-                snapshot_id=snap.create(cr, uid,{'name':'master'}, context=ctx)
+                snapshot_id=snap.create(cr, uid,{'name':'master_'+str(website_id),'website_id':website_id}, context=ctx)
 
         if snapshot_id and not context.get('mykey'):
             #from pudb import set_trace; set_trace()

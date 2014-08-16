@@ -27,9 +27,10 @@ class TableExporter(http.Controller):
         if name=="":
             name=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         snapshot_id=request.session.get('snapshot_id')
+        website_id=request.session.get('website_id')
         iuv = request.registry['ir.ui.view']
         snap = request.registry['website_version.snapshot']
-        new_snapshot_id=snap.create(cr, uid,{'name':name}, context=context)
+        new_snapshot_id=snap.create(cr, uid,{'name':name, 'website_id':website_id}, context=context)
         iuv.copy_snapshot(cr, uid, snapshot_id,new_snapshot_id,context=context)
         request.session['snapshot_id']=new_snapshot_id
         return name
@@ -52,7 +53,8 @@ class TableExporter(http.Controller):
     def get_all_snapshots(self):
         cr, uid, context = request.cr, openerp.SUPERUSER_ID, request.context
         snap = request.registry['website_version.snapshot']
-        ids=snap.search(cr, uid, [])
+        website_id=request.session.get('website_id')
+        ids=snap.search(cr, uid, [('website_id','=',website_id)])
         result=snap.read(cr, uid, ids,['id','name','website_ids'],context=context)
         res=[]
         for ob in result:

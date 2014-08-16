@@ -21,6 +21,9 @@ class NewWebsite(osv.Model):
     def get_current_website(self, cr, uid, context=None):
         #from pudb import set_trace; set_trace()
         website = super(NewWebsite,self).get_current_website(cr, uid, context=context)
+        
+        request.context['website_id'] = website.id
+        request.session['website_id'] = website.id
 
         #key = 'website_%s_snapshot_id' % request.website.id
         key='snapshot_id'
