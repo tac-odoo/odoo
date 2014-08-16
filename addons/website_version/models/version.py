@@ -65,19 +65,18 @@ class ViewVersion(osv.Model):
         self.clear_cache()
         snapshot_id=context.get('snapshot_id')
         #print "READ CONTEXT ID={}".format(context.get('snapshot_id'))
-        if snapshot_id==None and not context.get('mykey'):
+        if context.get('initialisation'):
             ctx = dict(context, mykey=True)
             snap = request.registry['website_version.snapshot']
-            id_master=snap.search(cr, uid, [('name', '=', 'master')],context=ctx)[0]
-            if id_master is None:
+            id_master=snap.search(cr, uid, [('name', '=', 'master')],context=ctx)
+            if id_master == []:
                 snapshot_id=snap.create(cr, uid,{'name':'master'}, context=ctx)
-            else:
-                snapshot_id=id_master
-        if False and not context.get('mykey'):
+
+        if snapshot_id and not context.get('mykey'):
+            #from pudb import set_trace; set_trace()
             ctx = dict(context, mykey=True)
             snap = request.registry['website_version.snapshot']
             snapshot=snap.browse(cr, uid, [snapshot_id], context=ctx)[0]
-            snapshot_date=snapshot.create_date
             snap_ids=[]
             snap_trad={}
             for id in ids:
@@ -87,6 +86,7 @@ class ViewVersion(osv.Model):
                     if view.master_id.id == id:
                         snap_trad[view.id]=[view.master_id.id,view.master_id.xml_id,view.master_id.mode]
                         snap_ids.append(view.id)
+                        check=False
                 #The view corresponding to id is not in the snapshot
                 if check:
                     snap_ids.append(id)        

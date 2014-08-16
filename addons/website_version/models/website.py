@@ -29,5 +29,7 @@ class NewWebsite(osv.Model):
         elif website.snapshot_id:
             request.context['snapshot_id'] = website.snapshot_id.id
             request.session['snapshot_id'] = website.snapshot_id.id
+        else:
+            request.context['initialisation'] = True
 
         return website

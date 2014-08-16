@@ -28,6 +28,7 @@ class TableExporter(http.Controller):
             name=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         snapshot_id=request.session.get('snapshot_id')
         iuv = request.registry['ir.ui.view']
+        snap = request.registry['website_version.snapshot']
         new_snapshot_id=snap.create(cr, uid,{'name':name}, context=context)
         iuv.copy_snapshot(cr, uid, snapshot_id,new_snapshot_id,context=context)
         request.session['snapshot_id']=new_snapshot_id
