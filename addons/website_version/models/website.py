@@ -3,6 +3,11 @@ from openerp.osv import osv,fields
 from openerp.http import request
 
 
+#domain=[('website_id','=',_my_fonction())]
+def _my_fonction():
+    return 1
+
+
 class NewWebsite(osv.Model):
     _inherit = "website"
 

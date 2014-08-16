@@ -40,7 +40,8 @@ class TableExporter(http.Controller):
         cr, uid, context = request.cr, openerp.SUPERUSER_ID, request.context
         snap = request.registry['website_version.snapshot']
         snapshot_id=request.session.get('snapshot_id')
-        id_master=snap.search(cr, uid, [('name', '=', 'master')],context=context)[0]
+        website_id=request.session.get('website_id')
+        id_master=snap.search(cr, uid, [('name', '=', 'master_'+str(website_id))],context=context)[0]
         if not snapshot_id==id_master:
             name=snap.browse(cr,uid,[snapshot_id],context=context).name
             snap.unlink(cr, uid, [snapshot_id], context=context)
