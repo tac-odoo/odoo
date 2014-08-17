@@ -13,7 +13,7 @@ OpenERP Website CMS
     'installable': True,
     'data': [
         'security/ir.model.access.csv',
-        'security/record_rule.xml',
+        #'security/record_rule.xml',
         'views/website_version_assets.xml',
         'views/menu.xml',
         'views/marketing_view.xml',
