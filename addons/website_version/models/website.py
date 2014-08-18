@@ -12,7 +12,7 @@ class NewWebsite(osv.Model):
     _inherit = "website"
 
     _columns = {
-        'snapshot_id':fields.many2one("website_version.snapshot",string="Snapshot"),
+        'snapshot_id':fields.many2one("website_version.snapshot",string="Snapshot", domain="[('website_id','=',context.get('active_id'))]")
     }
 
     def get_current_snapshot(self,cr,uid,context=None):

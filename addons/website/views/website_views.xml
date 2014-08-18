@@ -80,6 +80,7 @@
         <record id="action_website_menu" model="ir.actions.act_window">
             <field name="name">Website Domain</field>
             <field name="res_model">website</field>
+            <!-- <field name="domain">[('id','=',context.get('active_id'))]</field> -->
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
         </record>
