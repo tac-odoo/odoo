@@ -27,8 +27,9 @@ class NewWebsite(osv.Model):
                 request.session['snapshot_id']=snapshot_id
             return 'master_'+str(website_id)
         else:
-            ob=self.pool['website_version.snapshot'].browse(cr,uid,[id],context=context)
-            return ob[0].name
+            #from pudb import set_trace; set_trace()
+            ob=self.pool['website_version.snapshot'].read(cr,uid,[id],['name'],context=context)
+            return ob[0]['name']
 
     def get_current_website(self, cr, uid, context=None):
         #from pudb import set_trace; set_trace()

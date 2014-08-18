@@ -4,7 +4,7 @@
         <record id="website_version_rule" model="ir.rule">
             <field name="name">Versions</field>
             <field name="model_id" ref="model_website_version_snapshot"/>
-            <field name="domain_force">['|','|',('website_id', '=', 1),('website_id', '=', 2),('website_id', '=', False)]</field>
+            <field name="domain_force">['|',('website_id', '=', 1),('website_id', '=', False)]</field>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
