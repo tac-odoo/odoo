@@ -77,10 +77,29 @@
             </field>
         </record>
 
+
+
+        <!-- <record id="view_website_filter" model="ir.ui.view">
+            <field name="name">website.search</field>
+            <field name="model">website</field> 
+            <field name="arch" type="xml">
+                <search string="Webiste Search">
+                    <filter string="current website" icon="terp-partner" name="your_website"
+                        domain="[('id','=',context.get('active_id'))]"
+                        help="My own website" />
+                    <field name="name"/>
+                </search>
+            </field>
+        </record> -->
+
+
+
+
         <record id="action_website_menu" model="ir.actions.act_window">
             <field name="name">Website Domain</field>
             <field name="res_model">website</field>
-            <!-- <field name="domain">[('id','=',context.get('active_id'))]</field> -->
+            <!-- <field name="domain">[('id','=',context.get('website_id'))]</field> -->
+            <!-- <field name="context">{’your_website’:1}</field> -->
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
         </record>
