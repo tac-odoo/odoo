@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<template id="display_menu" name="Jobs Menu">
+			<div class="container mt16">
+		      <div class="navbar navbar-default">
+		        <div class="navbar-header">
+		          <button data-toggle="collapse" type="button" class="navbar-toggle" data-target="#oe-help-navbar-collapse">
+		            <span class="sr-only">Toggle navigation</span>
+		            <span class="icon-bar"></span>
+		            
+		            <span class="icon-bar"></span>
+		          </button>
+		          <a class="navbar-brand" href="/page/jobs">
+		            <span>Jobs</span>
+		          </a>
+		        </div>
+		        <div class="collapse navbar-collapse" id="oe-help-navbar-collapse">
+		          <ul class="nav navbar-nav">
+		            <li class="active">
+		              <a href="/page/jobs">Jobs</a>
+		            </li>
+		            <li>
+		              <a href="/page/employees">People</a>
+		            </li>
+		            <li>
+		              <a href="/page/jobs">Tags</a>
+		            </li>
+		            <li>
+		              <a href="/page/jobs">Badges</a>
+		            </li>
+		          </ul>
+		          <form action="/page/jobs" role="search" class="navbar-form navbar-right" method="get">
+		            <div class="form-group">
+		              <input placeholder="Search a jobs..." type="search" class="form-control" name="search"/>
+		              <button type="submit" class="btn btn-default">Search</button>
+		            </div>
+		          </form>
+		        </div>
+		      </div>
+		    </div>
+		</template>
+
+		<!-- Display a post -->
+		<template id="display_jobs" name="Jobs">
+			<div class="question clearfix">
+				<div class="pull-left text-center">
+		            <div class="alert alert-info text-muted" style="padding: 0px;padding-left: 10px;padding-right: 10px;margin-bottom:10px;">
+		                <span style="font-size: 40px;"><b t-field="job.number_view"/></span>
+		                <div class="subtitle">Applicants</div>
+		            </div>
+		        </div>
+
+				<div class="col-md-9 clearfix">
+					<a t-attf-href="/page/jobs/#{job.id}" t-field="job.name" class="lead" style="padding-top: 1px;"/>
+					<span t-if="not job.website_published" class="pull-righ label label-danger">Not Published</span>
+					<div style="padding-top: 5px;">
+						<!--, <b t-field="job.analytic_account_id.quantity_max"/> <span class="text-muted">hours of work.</span>-->
+						<b t-field="job.partner_id.name"/> 
+						<span class="text-muted"> posted on <i t-field="job.create_date"/>,</span>
+						
+						<span t-if="job.analytic_account_id.fix_price_invoices and not job.analytic_account_id.invoice_on_timesheets"> <b t-field="job.analytic_account_id.amount_max"/> <span class="text-muted">Fixed price</span> </span> 
+						
+						<span t-if="job.analytic_account_id.invoice_on_timesheets and not job.analytic_account_id.fix_price_invoices"><b t-field="job.analytic_account_id.hours_qtt_est"/> <span class="text-muted">hours of estimated work</span></span>
+
+						<span t-if="job.analytic_account_id.invoice_on_timesheets and job.analytic_account_id.fix_price_invoices"><b t-field="job.analytic_account_id.hours_qtt_est"/> <span class="text-muted">hours of work, for </span> <b t-field="job.analytic_account_id.amount_max"/> <span class="text-muted">Fixed price</span></span>
+
+						<span t-if="not job.analytic_account_id.invoice_on_timesheets and not job.analytic_account_id.fix_price_invoices">
+							<span class="text-muted">connect through chatter for more information</span>
+						</span>
+
+					</div>
+					<div class="pull-righ" style="padding-top: 5px;">
+						<span class="label label-default">Web Modules</span> <span class="label label-default">Accounting</span> <span class="label label-default">Purchase</span>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<!-- Page Index -->
+		<template id="website_jobs.jobslist" name="Job List">
+			<t t-set="head">
+				<link rel='stylesheet' href='/website_jobs/static/src/css/website_forum.css' />
+			</t>
+			<t t-call="website.layout">
+				<t t-call="website_jobs.display_menu" />
+				<div id="wrap" class="container">
+					<div class="row">
+						<div class="col-sm-9">
+							<h1 class="page-header mt0">
+								<t t-esc="job_count"/>
+								<span>Jobs</span>
+								<small class="dropdown">Recent Jobs</small>
+							</h1>
+
+							<div t-foreach="jobs" t-as="job" class="mb16">
+								<t t-call="website_jobs.display_jobs" />
+							</div>
+
+							<div class="row text-center">
+								<t t-call="website.pager" />
+							</div>
+						</div>
+						<div class="col-sm-3" id="right-column">
+							<a class="btn btn-primary btn-lg btn-block mb16" t-attf-href="/page/jobs/new">
+								Post Job
+							</a>
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h3 class="panel-title">About Odoo Jobs</h3>
+								</div>
+								<div class="panel-body">
+									<p>Odoo Jobs is running on the Oldest Odoo Professionals by being a bridge between Community and Companies looking for customizations.</p>
+
+									<p><a class="fa fa-arrow-right" href="#"> Read Guidelines</a></p>
+									<p><a class="fa fa-arrow-right" href="#"> Back to </a></p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="oe_structure" />
+			</t>
+		</template>
+
+		<!-- Job View -->
+		<template id="website_jobs.jobpost" name="Job Post">
+			<t t-set="head">
+				<link rel='stylesheet' href='/website_jobs/static/src/css/website_forum.css' />
+			</t>
+			<t t-call="website.layout">
+				<t t-call="website_jobs.display_menu" />
+				<div id="wrap" class="container">
+					<div class="row">
+						<div class="col-sm-9">
+							<h1 class="page-header mt0" t-field="job.name" style="margin-bottom:10px;"></h1>
+							<t t-call="website.publish_management" class="pull-righ"> 
+						        <t t-set="object" t-value="job"/>
+						        <t t-set="publish_edit" t-value="True"/>
+						    </t>
+							<div class="mt0">
+								<b t-field="job.partner_id.name"/> <span class="text-muted"> posted on <i t-field="job.create_date"/></span>, <b t-field="job.analytic_account_id.quantity_max"/> hours of work.
+							</div>
+							<div class="mt0">
+								<span class="label label-default">Web Modules</span> <span class="label label-default">Accounting</span> <span class="label label-default">Purchase</span>
+							</div>
+							<div t-field="job.website_description"/>
+
+							<form id="comment" t-attf-action="/jobs/comment/#{job.id}" method="POST" style="margin-bottom: 10px;">
+				                <div class="media">
+				                    <span class="pull-left">
+				                        <img class="img img-circle media-object" t-att-src="'/website/image?model=res.partner&amp;field=image_small&amp;id='+str(user_id.partner_id.id)" style="width: 30px"/>
+				                    </span>
+				                    <div class="media-body">
+				                        <textarea rows="3" name="comment" class="form-control" placeholder="Write a comment..."></textarea>
+				                        <button type="submit" class="btn btn-primary mt8">Post</button>
+				                    </div>
+				                </div>
+				            </form>
+
+							<ul class="media-list">
+					            <li t-foreach="job.message_ids" t-as="message" class="media">
+					                <span class="pull-left">
+					                    <img class="media-object img img-circle" t-att-src="'/website/image?model=mail.message&amp;field=author_avatar&amp;id='+str(message.id)" style="width: 30px"/>
+					                </span>
+					                <div class="media-body">
+					                    <t t-call="website.publish_short">
+					                        <t t-set="object" t-value="message"/>
+					                    </t>
+					                    <span t-field="message.author_id" style="display: inline-block;" t-field-options='{
+					                            "widget": "contact",
+					                            "fields": ["name"]
+					                        }'/>
+					                    <span class="text-muted">on <span t-field="message.date"/></span>
+					                    <div t-field="message.body" class="discussion_scroll_post"/>
+					                </div>
+					            </li>
+					        </ul>
+
+						</div>
+
+						<div class="col-sm-3" id="right-column">
+							<a class="btn btn-danger btn-lg btn-block mb16" t-attf-href="jobs/#{job.id}/apply">
+								Apply for this job
+							</a>
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h3 class="panel-title">About Odoo Jobs</h3>
+								</div>
+								<div class="panel-body">
+									<p>Odoo Jobs is running on the Oldest Odoo Professionals by being a bridge between Community and Companies looking for customizations.</p>
+
+									<p><a class="fa fa-arrow-right" href="#"> Read Guidelines</a></p>
+									<p><a class="fa fa-arrow-right" href="#"> Back to </a></p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</t>
+		</template>
+
+		<template id="project_new" name="New Project">
+			<t t-set="head">
+				<link rel='stylesheet' href='/website_jobs/static/src/css/website_forum.css' />
+			</t>
+			<t t-call="website.layout">
+				<t t-call="website_jobs.display_menu" />
+				<div id="wrap" class="container">
+					<div class="row">
+						<div class="col-sm-9">
+					        <form action="/page/jobs/post" method="post" class="form-horizontal mt32" enctype="multipart/form-data">
+					            <div t-attf-class="form-group #{error and 'name' in error and 'has-error' or ''}">
+					                <label class="col-md-3 col-sm-4 control-label" for="name">Project Name</label>
+					                <div class="col-md-7 col-sm-8">
+					                    <input type="text" class="form-control" name="name" required="True" t-attf-value="#{name or ''}"/>
+					                </div>
+					            </div>
+					            <div t-attf-class="form-group #{error and 'cost' in error and 'has-error' or ''}">
+					                <label class="col-md-3 col-sm-4 control-label" for="cost">Project Cost</label>
+					                <div class="col-md-3 col-sm-4">
+					                    <input type="text" class="form-control" name="amount_max" placeholder="Fixed 1500 $" t-attf-value="#{amount_max or ''}"/>
+					                </div>
+					                <div class="col-md-4 col-sm-4">
+					                    <input type="text" class="form-control" name="hours_qtt_est" placeholder="Fixed for 50 hrs" t-attf-value="#{hours_qtt_est or ''}"/>
+					                </div>
+					            </div>
+					            <div t-attf-class="form-group #{error and 'description' in error and 'has-error' or ''}">
+					                <label class="col-md-3 col-sm-4 control-label" for="description">Desccription</label>
+					                <div class="col-md-7 col-sm-8">
+					                    <textarea  class="form-control" name="description" style="min-height: 120px" required="True"><t t-esc="description or ''"/></textarea>
+					                </div>
+					            </div>
+					            <div class="form-group">
+					                <div class="col-md-offset-3 col-sm-offset-4 col-sm-8 col-md-7">
+					                    <button class="btn btn-primary btn-lg">Post Project</button>
+					                </div>
+					            </div>
+					        </form>
+					    </div>
+
+					    <div class="col-sm-3" id="right-column">
+							<a class="btn btn-danger btn-lg btn-block mb16" t-attf-href="jobs/contact">
+								Contact Us
+							</a>
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h3 class="panel-title">About Odoo Jobs</h3>
+								</div>
+								<div class="panel-body">
+									<p>Odoo Jobs is running on the Oldest Odoo Professionals by being a bridge between Community and Companies looking for customizations.</p>
+
+									<p><a class="fa fa-arrow-right" href="#"> Read Guidelines</a></p>
+									<p><a class="fa fa-arrow-right" href="#"> Back to </a></p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</t>
+		</template>
+
+
+		<!-- Display an Employee -->
+		<template id="display_employees" name="Jobs">
+			<div class="col-md-4 text-center" style="min-height: 200px;">
+
+				<div class="pull-center">
+					<img t-attf-src="/page/employee/#{employee.id}/avatar"/>
+		            <!--div class="alert alert-success text-muted" style="padding: 0px;padding-left: 10px;padding-right: 10px;margin-bottom:10px;">
+		                <span style="font-size: 40px;"><b>0</b></span>
+		                <div class="subtitle">Jobs Done</div>
+		            </div-->
+		        </div>
+
+				<div class="text-center">
+					<a t-attf-href="/page/jobs/#{employee.id}" t-field="employee.name" class="lead"/>
+					<p>
+						Joined on <i t-field="employee.create_date"/>
+					</p>
+					<p>
+						<span class="label label-default">Web Modules</span> <span class="label label-default">Accounting</span>
+					</p>
+				</div>
+
+			</div>
+		</template>
+
+		<!-- Page Index -->
+		<template id="website_jobs.employees" name="Employee List">
+			<t t-set="head">
+				<link rel='stylesheet' href='/website_jobs/static/src/css/website_forum.css' />
+			</t>
+			<t t-call="website.layout">
+				<t t-call="website_jobs.display_menu" />
+				<div id="wrap" class="container">
+					<div class="row">
+						<div class="col-sm-9">
+							<h1 class="page-header mt0">
+								<t t-esc="employees_count"/>
+								<span>Employees</span>
+								<small class="dropdown">Recent Joinees</small>
+							</h1>
+
+							<div t-foreach="employees" t-as="employee" class="mb16">
+								<t t-call="website_jobs.display_employees" />
+							</div>
+						</div>
+						<div class="col-sm-3" id="right-column">
+							<a class="btn btn-success btn-lg btn-block mb16" t-attf-href="/forum/ask">
+								Join Odoo Jobs
+							</a>
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h3 class="panel-title">About Odoo Jobs</h3>
+								</div>
+								<div class="panel-body">
+									<p>Odoo Jobs is running on the Oldest Odoo Professionals by being a bridge between Community and Companies looking for customizations.</p>
+
+									<p><a class="fa fa-arrow-right" href="#"> Read Guidelines</a></p>
+									<p><a class="fa fa-arrow-right" href="#"> Back to </a></p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="oe_structure" />
+			</t>
+		</template>
+
+
+	</data>
+</openerp>
