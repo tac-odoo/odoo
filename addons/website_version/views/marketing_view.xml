@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+            
+        <record id="action_snapshot" model="ir.actions.act_window">
+            <field name="name">Snapshot</field>
+            <field name="res_model">website_version.snapshot</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+
+        <record model="ir.ui.view" id="snapshot_form_view">
+            <field name="name">snapshot.form</field>
+            <field name="model">website_version.snapshot</field> 
+            <field name="arch" type="xml">
+                <form string="Snapshot Form">
+                    <field name="name" colspan="4" />
+                    <notebook colspan="4">
+                        <page string="Views in snapshot" colspan="4" >
+                            <field name="view_ids" colspan="4"/>
+                        </page>
+                        <page string="create date">
+                            <field name="create_date" colspan="4"/>
+                        </page>
+                    </notebook>
+                </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="snapshot_tree_view">
+            <field name="name">snapshot.tree</field>
+            <field name="model">website_version.snapshot</field> 
+            <field name="arch" type="xml">
+                <tree string="Snapshot tree">
+                    <field name="name" />
+                    <field name="create_date" />
+                </tree>
+            </field>
+        </record>
+        <record id="action_website_view" model="ir.actions.act_window">
+            <field name="name">Website Domain</field>
+            <field name="res_model">website</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+
+        <menuitem name="website" id="website_menu" sequence="10" parent="base.marketing_menu" />
+        <menuitem action="action_website_view" id="menu_website_view" parent="website_menu"/>
+        <menuitem action="action_snapshot" id="menu_action_snapshot" parent="website_menu"/>
+
+    </data>
+</openerp>
