@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from openerp import models, api
+from openerp.addons.analytic.models import analytic
+from openerp import models, fields, api
 
 
 class sale_order_line(models.Model):
@@ -23,3 +24,10 @@ class sale_order_line(models.Model):
                 analytic_values['partner_id'] = self.order_id.partner_id.id
             self.order_id.project_id.write(analytic_values)
         return super(sale_order_line, self).button_confirm()
+
+
+class sale_order(models.Model):
+    _inherit = "sale.order"
+    
+    contract_state = fields.Selection(analytic.ANALYTIC_ACCOUNT_STATE, string="Contract Status", related="project_id.state")
+        

@@ -6245,6 +6245,15 @@ instance.web.form.StatInfo = instance.web.form.AbstractField.extend({
 
 });
 
+openerp.web.form.LabelSelection = openerp.web.form.FieldSelection.extend({
+    render_value: function(){
+        this._super();
+        var label = this.options;
+        var found = _.find(this.get("values"), function(el) { return el[0] === this.get("value"); }, this);
+        this.$el.html(QWeb.render("Widget_label_selection", {'value': found, 'state': label}));
+    },
+});
+
 
 /**
  * Registry of form fields, called by :js:`instance.web.FormView`.
@@ -6289,6 +6298,7 @@ instance.web.form.widgets = new instance.web.Registry({
     'priority':'instance.web.form.Priority',
     'kanban_state_selection':'instance.web.form.KanbanSelection',
     'statinfo': 'instance.web.form.StatInfo',
+    'label_selection': 'openerp.web.form.LabelSelection',
 });
 
 /**

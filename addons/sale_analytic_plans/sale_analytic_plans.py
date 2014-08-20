@@ -19,7 +19,9 @@
 #
 ##############################################################################
 
+from lxml import etree
 from openerp.osv import fields, osv
+from openerp.osv.orm import setup_modifiers
 
 class sale_order_line(osv.osv):
     _inherit = 'sale.order.line'
@@ -36,6 +38,20 @@ class sale_order_line(osv.osv):
             line_obj.write(cr, uid, [create_ids[i]], {'analytics_id': line.analytics_id.id})
             i = i + 1
         return create_ids
+
+
+class sale_order(osv.Model):
+    _inherit = 'sale.order'
+    
+    def fields_view_get(self, cr, user, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
+        res = super(sale_order, self).fields_view_get(cr, user, view_id, view_type, context, toolbar=toolbar, submenu=submenu)
+        doc = etree.XML(res['arch'])
+        nodes = doc.xpath("//field[@class='sale_project']")
+        for node in nodes:
+            node.set('invisible', '1')
+            setup_modifiers(node, res['fields'][node.get('name')])
+        res['arch'] = etree.tostring(doc)
+        return res
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
