@@ -29,7 +29,7 @@ class NewWebsite(osv.Model):
                         'website_ids': [(4, website_id)]
                     }, context=context)
                 request.session['snapshot_id'] = snapshot_id
-
+                request.context['snapshot_id'] = snapshot_id
         return snap.name_get(cr, uid, [snapshot_id], context=context)[0];
 
     def get_current_website(self, cr, uid, context=None):
