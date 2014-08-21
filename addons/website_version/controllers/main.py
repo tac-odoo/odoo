@@ -10,17 +10,25 @@ class TableExporter(http.Controller):
         request.session['snapshot_id'] = int(snapshot_id)
         return snapshot_id
 
+    @http.route(['/master'], type = 'json', auth = "user", website = True)
+    def master(self):
+        request.session['snapshot_id'] = 0
+        return 0
+
     @http.route(['/create_snapshot'], type = 'json', auth = "user", website = True)
     def create_snapshot(self,name):
         cr, uid, context = request.cr, openerp.SUPERUSER_ID, request.context
         if name == "":
             name = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         snapshot_id = context.get('snapshot_id')
-        website_id = request.website.id
         iuv = request.registry['ir.ui.view']
         snap = request.registry['website_version.snapshot']
-        new_snapshot_id = snap.create(cr, uid,{'name':name, 'website_id':website_id}, context=context)
-        iuv.copy_snapshot(cr, uid, snapshot_id,new_snapshot_id,context=context)
+        website_id = request.website.id
+        if not snapshot_id:
+            new_snapshot_id = snap.create(cr, uid,{'name':name, 'website_id':website_id}, context=context)
+        else:
+            new_snapshot_id = snap.create(cr, uid,{'name':name, 'website_id':website_id}, context=context)
+            iuv.copy_snapshot(cr, uid, snapshot_id,new_snapshot_id,context=context)
         request.session['snapshot_id'] = new_snapshot_id
         return name
 
@@ -30,13 +38,13 @@ class TableExporter(http.Controller):
         snap = request.registry['website_version.snapshot']
         snapshot_id = context.get('snapshot_id')
         website_id = request.website.id
-        id_master = snap.search(cr, uid, [('name', '=', 'master_'+str(website_id))],context=context)[0]
-        if not snapshot_id == id_master:
+        id_master = snap.search(cr, uid, [('name', '=', 'Default_'+str(website_id))],context=context)[0]
+        if snapshot_id:
             name = snap.browse(cr,uid,[snapshot_id],context=context).name
             snap.unlink(cr, uid, [snapshot_id], context=context)
-            request.session['snapshot_id'] = id_master
+            request.session['snapshot_id'] = 0
         else:
-            name = "nothing"
+            name = "nothing to do"
         return name
     
     @http.route(['/all_snapshots'], type = 'json', auth = "public", website = True)

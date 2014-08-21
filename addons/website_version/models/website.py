@@ -21,15 +21,19 @@ class NewWebsite(osv.Model):
 
         if not snapshot_id:
             website_id = request.website.id
-            id_master = snap.search(cr, uid, [('name', '=', 'master_'+str(website_id)),('website_id','=',website_id)],context=context)
+            id_master = snap.search(cr, uid, [('name', '=', 'Default_'+str(website_id)),('website_id','=',website_id)],context=context)
             if id_master == []:
                 snapshot_id = snap.create(cr, uid,{
-                        'name':'master_'+str(website_id),
+                        'name':'Default_'+str(website_id),
                         'website_id':website_id,
                         'website_ids': [(4, website_id)]
                     }, context=context)
                 request.session['snapshot_id'] = snapshot_id
                 request.context['snapshot_id'] = snapshot_id
+            else:
+                request.session['snapshot_id'] = 0
+                request.context['snapshot_id'] = 0
+                return (0, 'master')
         return snap.name_get(cr, uid, [snapshot_id], context=context)[0];
 
     def get_current_website(self, cr, uid, context=None):
