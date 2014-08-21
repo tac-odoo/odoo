@@ -75,7 +75,9 @@ class ir_attachment(osv.osv):
             string='Website Messages',
             help="Website communication history",
         ),
-        'website_description': fields.html('Website Description', tranalate=True)
+        'website_description': fields.html('Website Description', tranalate=True),
+        'likes': fields.integer('Likes'),
+        'dislikes': fields.integer('Dislikes'),
     }
 
     def _get_slide_setting(self, cr, uid, context):

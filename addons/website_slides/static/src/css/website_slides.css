@@ -57,3 +57,16 @@
 .badge-active {
   background-color: #428bca;
 }
+
+.like-box {
+  position: absolute;
+  right: 20px;
+  top: 7px;
+  font-weight: bold;
+  width: 54px;
+  height: 64px;
+  background-color: rgba(0,0,0,0.7);
+  border-radius: 3px;
+  display: block;
+  overflow: auto;
+}

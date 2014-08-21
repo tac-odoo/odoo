@@ -151,8 +151,8 @@ class main(http.Controller):
         return request.website.render('website_slides.home', values)
 
 
-    @http.route('/slides/view/<model("ir.attachment"):slideview>', type='http', auth="public", website=True)
-    def slide_view(self, slideview, filters='', sorting='', search='', tags=''):
+    @http.route('/channel/<model("document.directory"):channel>/view/<model("ir.attachment"):slideview>', type='http', auth="public", website=True)
+    def slide_view(self, channel, slideview, filters='', sorting='', search='', tags=''):
         cr, uid, context = request.cr, SUPERUSER_ID, request.context
         attachment = request.registry['ir.attachment']
         user = request.registry['res.users'].browse(cr, uid, uid, context=context)

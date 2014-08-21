@@ -196,14 +196,23 @@
         <template id='gridview' name="Slides">
             <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="margin-top: 15px;margin-bottom: 15px;"  t-foreach="attachment_ids" t-as="attachment">
                 <div class="oe-slides-grid-thumbnail">
-                    <a t-attf-href="/slides/view/#{attachment.id}#{url_for('') + '?' + keep_query( 'search', 'filters', 'sorting', 'tags')}">
+                    <a t-attf-href="/channel/#{slug(channel)}/view/#{slug(attachment)}#{url_for('') + '?' + keep_query( 'search', 'filters', 'sorting', 'tags')}">
                         <img t-if="not attachment.youtube_id" t-attf-src="/slides/thumb/#{attachment.id}" class="img-responsive"/>
                         <img t-if="attachment.youtube_id" t-att-src="attachment.image" class="img-responsive"/>
                     </a>
+
+                    <span class="like-box" t-if="attachment.website_published">
+                        <a href="#">
+                            <div class="text-center">
+                                <i class="fa fa-heart fa-2x" style="margin-top: 8px;color: white;"></i>Like
+                            </div>
+                        </a>
+                    </span>
+
                     <span t-if="not attachment.website_published" class="label label-danger" style="position: absolute;right: 20px;top: 7px;">Not Published</span>
 
                     <div style="padding: 5px;">
-                        <a t-attf-href="/slides/view/#{attachment.id}#{url_for('') + '?' + keep_query( 'search', 'filters', 'sorting', 'tags')}">
+                        <a t-attf-href="/channel/#{slug(channel)}/view/#{slug(attachment)}#{url_for('') + '?' + keep_query( 'search', 'filters', 'sorting', 'tags')}">
                             <h4 class="oe-slides-text-truncation">
                                 <t t-esc="attachment.name"/>
                             </h4>
@@ -238,19 +247,11 @@
                     <iframe t-if="slideview.youtube_id" t-attf-src="//www.youtube.com/embed/#{slideview.youtube_id}?theme=light"></iframe>
                 </div>
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
-                    <h3>
+                    <h3 class="oe-slides-text-truncation">
                         <t t-esc="slideview.name"/>
-                        <small class="pull-right" style="margin-top: 10px;">
-                            <t t-esc="slideview.slide_views"/> Views
-                        </small>
                     </h3>
-                </div>
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
-                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2" style="padding: 0px;">
-                        <img src="/website_slides/static/description/odoo-logo.jpg" class="img-responsive shadow"/>
-                    </div>
-                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10" style="padding-right:0px;padding-left: 10px;">
-                        <div class="pull-right" t-if="slideview.tag_ids">
+
+                    <div class="pull-left mb16" t-if="slideview.tag_ids">
                             <i class="fa fa-tags"></i>
                             <t t-foreach="slideview.tag_ids" t-as="att_tag">
                                 <a t-att-href="url_for('/slides') + '?' + keep_query( 'search', 'filters', 'sorting' ,tags=att_tag.name)">
@@ -258,9 +259,20 @@
                                 </a>
                             </t>
                         </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2" style="padding: 0px;">
+                        <img src="/website_slides/static/description/odoo-logo.jpg" class="img-responsive shadow"/>
+                    </div>
+                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10" style="padding-right:0px;padding-left: 10px;">
+                        <div class="pull-right">
+                            <b><t t-esc="slideview.slide_views"/></b> Views
+                        </div>
+
                         <a t-attf-href="/channel/#{slug(channel)}">
                             <p t-field="channel.name"/>
                         </a>
+                        
                         <div class="col-md-6" style="padding-left:0">
                             <t t-call="website_mail.follow">
                                 <t t-set="email" t-value="user.email"/>
@@ -375,7 +387,7 @@
 
         <template id="slide-box" name="Slide Box">
             <li class="media slide-container">
-                <a class="pull-left" t-attf-href="/slides/view/#{attachment.id}#{url_for('') + '?' + keep_query( 'search', 'filters', 'sorting', 'tags')}">
+                <a class="pull-left" t-attf-href="/channel/#{slug(channel)}/view/#{slug(attachment)}#{url_for('') + '?' + keep_query( 'search', 'filters', 'sorting', 'tags')}">
                     <t t-if="not attachment.youtube_id">
                         <img class="media-object image-box" t-attf-src="/slides/thumb/#{attachment.id}"/>
                     </t>
