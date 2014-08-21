@@ -45,6 +45,39 @@ class stock_picking(osv.osv):
         'purchase_id': False,
     }
 
+    def do_partial(self, cr, uid, ids, partial_datas, context=None):
+        product_obj = self.pool.get('product.product')
+        currency_obj = self.pool.get('res.currency')
+        uom_obj = self.pool.get('product.uom')
+        for pick in self.browse(cr, uid, ids, context=context):
+            for move in pick.move_lines:
+                if (pick.type == 'out' and pick.purchase_id) and (move.product_id.cost_method == 'average'):
+                    if move.state in ('done', 'cancel'):
+                        continue
+                    partial_data = partial_datas.get('move%s'%(move.id), False)
+                    product = product_obj.browse(cr, uid, move.product_id.id)
+                    context['currency_id'] = move.company_id.currency_id.id
+                    product_qty = partial_data.get('product_qty',0.0)
+                    product_uom = partial_data.get('product_uom',False)
+                    product_currency = partial_data.get('product_currency',False)
+                    product_price = partial_data.get('product_price',0.0)
+                    move_currency_id = move.company_id.currency_id.id
+                    prod_available = product.qty_available
+                    qty = uom_obj._compute_qty(cr, uid, product_uom, product_qty, product.uom_id.id)
+                    new_price = currency_obj.compute(cr, uid, product_currency,
+                                move_currency_id, product_price, round=False)
+                    new_price = uom_obj._compute_price(cr, uid, product_uom, new_price,
+                                product.uom_id.id)
+                    if qty > 0 and qty != prod_available:
+                        new_price = move.price_unit
+                        if prod_available <= 0:
+                            new_std_price = new_price
+                        else:
+                            old_price = product.price_get('standard_price', context=context)[product.id]
+                            new_std_price = ((old_price * prod_available) - (new_price * qty))/(prod_available - qty)
+                        product_obj.write(cr, uid, [product.id],{'standard_price': new_std_price})
+        return super(stock_picking, self).do_partial(cr, uid, ids, partial_datas, context=context)
+
     def _get_partner_to_invoice(self, cr, uid, picking, context=None):
         """ Inherit the original function of the 'stock' module
             We select the partner of the sale order as the partner of the customer invoice
