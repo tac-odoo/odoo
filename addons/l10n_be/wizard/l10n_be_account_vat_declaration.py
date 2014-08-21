@@ -41,7 +41,8 @@ class l10n_be_vat_declaration(osv.osv_memory):
 
     _columns = {
         'name': fields.char('File Name', size=32),
-        'period_id': fields.many2one('account.period','Period', required=True),
+        'start_period_id': fields.many2one('account.period','Period', required=True),
+        'end_period_id': fields.many2one('account.period','Period'),
         'tax_code_id': fields.many2one('account.tax.code', 'Tax Code', domain=[('parent_id', '=', False)], required=True),
         'msg': fields.text('File created', size=64, readonly=True),
         'file_save': fields.binary('Save File'),
@@ -88,30 +89,30 @@ class l10n_be_vat_declaration(osv.osv_memory):
         vat_no = vat_no.replace(' ','').upper()
         vat = vat_no[2:]
 
-        tax_code_ids = obj_tax_code.search(cr, uid, [('parent_id','child_of',data_tax.tax_code_id.id), ('company_id','=',obj_company.id)], context=context)
-        ctx = context.copy()
+
+
         data  = self.read(cr, uid, ids)[0]
-        ctx['period_id'] = data['period_id'][0]
-        tax_info = obj_tax_code.read(cr, uid, tax_code_ids, ['code','sum_period'], context=ctx)
 
         default_address = obj_partner.address_get(cr, uid, [obj_company.partner_id.id])
         default_address_id = default_address.get("default", obj_company.partner_id.id)
         address_id= obj_partner.browse(cr, uid, default_address_id, context)
 
-        account_period = obj_acc_period.browse(cr, uid, data['period_id'][0], context=context)
-        issued_by = vat_no[:2]
-        comments = data['comments'] or ''
-
-        send_ref = str(obj_company.partner_id.id) + str(account_period.date_start[5:7]) + str(account_period.date_stop[:4])
-
-        starting_month = account_period.date_start[5:7]
-        ending_month = account_period.date_stop[5:7]
-        quarter = str(((int(starting_month) - 1) / 3) + 1)
-
         if not address_id.email:
             raise osv.except_osv(_('Insufficient Data!'),_('No email address associated with the company.'))
         if not address_id.phone:
             raise osv.except_osv(_('Insufficient Data!'),_('No phone associated with the company.'))
+
+        issued_by = vat_no[:2]
+        comments = data['comments'] or ''
+
+
+        if data['end_period_id']:
+            dates = obj_acc_period.read(cr, uid, [data['start_period_id'][0],data['end_period_id'][0]], ['date_start'], context=context)
+            period_ids = obj_acc_period.search(cr, uid, [('date_start', '>=', dates[0]['date_start']),('date_start','<=', dates[1]['date_start'])], order='date_start', context=context)
+        else:
+            period_ids = [data['start_period_id'][0]]
+
+
         file_data = {
                         'issued_by': issued_by,
                         'vat_no': vat_no,
@@ -123,10 +124,8 @@ class l10n_be_vat_declaration(osv.osv_memory):
                         'country_code': address_id.country_id and address_id.country_id.code or "",
                         'email': address_id.email or "",
                         'phone': address_id.phone.replace('.','').replace('/','').replace('(','').replace(')','').replace(' ',''),
-                        'send_ref': send_ref,
-                        'quarter': quarter,
-                        'month': starting_month,
-                        'year': str(account_period.date_stop[:4]),
+                        'vat_declaration_nbr': len(period_ids),
+                        'sequence_number': 0,
                         'client_nihil': (data['client_nihil'] and 'YES' or 'NO'),
                         'ask_restitution': (data['ask_restitution'] and 'YES' or 'NO'),
                         'ask_payment': (data['ask_payment'] and 'YES' or 'NO'),
@@ -134,7 +133,7 @@ class l10n_be_vat_declaration(osv.osv_memory):
                      }
 
         data_of_file = """<?xml version="1.0"?>
-<ns2:VATConsignment xmlns="http://www.minfin.fgov.be/InputCommon" xmlns:ns2="http://www.minfin.fgov.be/VATConsignment" VATDeclarationsNbr="1">
+<ns2:VATConsignment xmlns="http://www.minfin.fgov.be/InputCommon" xmlns:ns2="http://www.minfin.fgov.be/VATConsignment" VATDeclarationsNbr="%(vat_declaration_nbr)s">
     <ns2:Representative>
         <RepresentativeID identificationType="NVAT" issuedBy="%(issued_by)s">%(only_vat)s</RepresentativeID>
         <Name>%(cmpny_name)s</Name>
@@ -144,8 +143,30 @@ class l10n_be_vat_declaration(osv.osv_memory):
         <CountryCode>%(country_code)s</CountryCode>
         <EmailAddress>%(email)s</EmailAddress>
         <Phone>%(phone)s</Phone>
-    </ns2:Representative>
-    <ns2:VATDeclaration SequenceNumber="1" DeclarantReference="%(send_ref)s">
+    </ns2:Representative>""" % (file_data)
+
+
+        for account_period in obj_acc_period.browse(cr, uid, period_ids, context=context):
+            starting_month = account_period.date_start[5:7]
+            ending_month = account_period.date_stop[5:7]
+            quarter = str(((int(starting_month) - 1) / 3) + 1)
+
+            ctx = context.copy()
+            ctx['period_id'] = account_period.id
+            tax_code_ids = obj_tax_code.search(cr, uid, [('parent_id','child_of',data_tax.tax_code_id.id), ('company_id','=',obj_company.id)], context=context)
+            tax_info = obj_tax_code.read(cr, uid, tax_code_ids, ['code','sum_period'], context=ctx)
+
+            file_data.update({
+                'sequence_number': file_data['sequence_number'] + 1,
+                'send_ref': ''.join([str(obj_company.partner_id.id),
+                                     str(account_period.date_start[5:7]),
+                                     str(account_period.date_stop[:4])]),
+                'quarter': quarter,
+                'month': starting_month,
+                'year': str(account_period.date_stop[:4]),
+            })
+            data_of_file += """
+    <ns2:VATDeclaration SequenceNumber="%(sequence_number)s" DeclarantReference="%(send_ref)s">
         <ns2:Declarant>
             <VATNumber xmlns="http://www.minfin.fgov.be/InputCommon">%(only_vat)s</VATNumber>
             <Name>%(cmpny_name)s</Name>
@@ -159,41 +180,47 @@ class l10n_be_vat_declaration(osv.osv_memory):
         <ns2:Period>
     """ % (file_data)
 
-        if starting_month != ending_month:
-            #starting month and ending month of selected period are not the same
-            #it means that the accounting isn't based on periods of 1 month but on quarters
-            data_of_file += '\t\t<ns2:Quarter>%(quarter)s</ns2:Quarter>\n\t\t' % (file_data)
-        else:
-            data_of_file += '\t\t<ns2:Month>%(month)s</ns2:Month>\n\t\t' % (file_data)
-        data_of_file += '\t<ns2:Year>%(year)s</ns2:Year>' % (file_data)
-        data_of_file += '\n\t\t</ns2:Period>\n'
-        data_of_file += '\t\t<ns2:Data>\t'
-        cases_list = []
-        for item in tax_info:
-            if item['code'] == '91' and ending_month != 12:
-                #the tax code 91 can only be send for the declaration of December
-                continue
-            if item['code'] and item['sum_period']:
-                if item['code'] == 'VI':
-                    if item['sum_period'] >= 0:
-                        item['code'] = '71'
-                    else:
-                        item['code'] = '72'
-                if item['code'] in list_of_tags:
-                    cases_list.append(item)
-        cases_list.sort()
-        for item in cases_list:
-            grid_amount_data = {
-                    'code': str(int(item['code'])),
-                    'amount': '%.2f' % abs(item['sum_period']),
-                    }
-            data_of_file += '\n\t\t\t<ns2:Amount GridNumber="%(code)s">%(amount)s</ns2:Amount''>' % (grid_amount_data)
+            if starting_month != ending_month:
+                #starting month and ending month of selected period are not the same
+                #it means that the accounting isn't based on periods of 1 month but on quarters
+                data_of_file += '\t\t<ns2:Quarter>%(quarter)s</ns2:Quarter>\n\t\t' % (file_data)
+            else:
+                data_of_file += '\t\t<ns2:Month>%(month)s</ns2:Month>\n\t\t' % (file_data)
+            data_of_file += '\t<ns2:Year>%(year)s</ns2:Year>' % (file_data)
+            data_of_file += '\n\t\t</ns2:Period>\n'
+            data_of_file += '\t\t<ns2:Data>\t'
 
-        data_of_file += '\n\t\t</ns2:Data>'
-        data_of_file += '\n\t\t<ns2:ClientListingNihil>%(client_nihil)s</ns2:ClientListingNihil>' % (file_data)
-        data_of_file += '\n\t\t<ns2:Ask Restitution="%(ask_restitution)s" Payment="%(ask_payment)s"/>' % (file_data)
-        data_of_file += '\n\t\t<ns2:Comment>%(comments)s</ns2:Comment>' % (file_data)
-        data_of_file += '\n\t</ns2:VATDeclaration> \n</ns2:VATConsignment>'
+            cases_list = []
+            for item in tax_info:
+                if item['code'] == '91' and ending_month != 12:
+                    #the tax code 91 can only be send for the declaration of December
+                    continue
+                if item['code'] and item['sum_period']:
+                    if item['code'] == 'VI':
+                        if item['sum_period'] >= 0:
+                            item['code'] = '71'
+                        else:
+                            item['code'] = '72'
+                    if item['code'] in list_of_tags:
+                        cases_list.append(item)
+            cases_list.sort()
+            for item in cases_list:
+                grid_amount_data = {
+                        'code': str(int(item['code'])),
+                        'amount': '%.2f' % abs(item['sum_period']),
+                        }
+                data_of_file += '\n\t\t\t<ns2:Amount GridNumber="%(code)s">%(amount)s</ns2:Amount''>' % (grid_amount_data)
+
+            data_of_file += '\n\t\t</ns2:Data>'
+            data_of_file += '\n\t\t<ns2:ClientListingNihil>%(client_nihil)s</ns2:ClientListingNihil>' % (file_data)
+            data_of_file += '\n\t\t<ns2:Ask Restitution="%(ask_restitution)s" Payment="%(ask_payment)s"/>' % (file_data)
+            data_of_file += '\n\t\t<ns2:Comment>%(comments)s</ns2:Comment>' % (file_data)
+            data_of_file += '\n\t</ns2:VATDeclaration>'
+
+
+        data_of_file += '\n</ns2:VATConsignment>'
+
+
         model_data_ids = mod_obj.search(cr, uid,[('model','=','ir.ui.view'),('name','=','view_vat_save')], context=context)
         resource_id = mod_obj.read(cr, uid, model_data_ids, fields=['res_id'], context=context)[0]['res_id']
         context['file_save'] = data_of_file
