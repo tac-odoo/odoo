@@ -16,15 +16,14 @@
             <field name="model">website_version.snapshot</field> 
             <field name="arch" type="xml">
                 <form string="Snapshot Form">
-                    <field name="name" colspan="4" />
-                    <notebook colspan="4">
-                        <page string="Views in snapshot" colspan="4" >
-                            <field name="view_ids" colspan="4"/>
-                        </page>
-                        <page string="create date">
-                            <field name="create_date" colspan="4"/>
-                        </page>
-                    </notebook>
+                    <group colspan="4">
+                        <field name="name" colspan="4" />
+                        <field name="website_id" colspan="4" />
+                        <field name="create_date" colspan="4"/>
+                    </group>
+                    <group colspan="4">
+                        <field name="view_ids" colspan="4"/>
+                    </group>
                 </form>
             </field>
         </record>
