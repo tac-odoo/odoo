@@ -42,7 +42,7 @@
             <field name="model">ir.attachment</field>
             <field name="arch" type="xml">
                 <form string="Attachments">
-                   <sheet>
+                 <sheet>
                     <field name="image" widget="image" class="oe_left oe_avatar"/>
                     <div class="oe_title oe_left">
                         <div class="oe_edit_only">
@@ -76,55 +76,55 @@
                     <group name="index_content_group" string="Index Content" colspan="4">
                         <field name="index_content" nolabel="1"/>
                     </group>
-                  </sheet>
-                  <div class="oe_chatter">
+                </sheet>
+                <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers"/>
                     <field name="message_ids" widget="mail_thread"/>
                 </div>
-                </form>
-            </field>
-        </record>
+            </form>
+        </field>
+    </record>
 
-        <record id="view_slides_attachment_tree" model="ir.ui.view">
-            <field name="model">ir.attachment</field>
-            <field name="arch" type="xml">
-                <tree string="Attachments">
-                    <field name="name" string="Name"/>
-                    <field name="datas_fname"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
-                    <field name="create_uid"/>
-                    <field name="create_date"/>
-                </tree>
-            </field>
-        </record>
+    <record id="view_slides_attachment_tree" model="ir.ui.view">
+        <field name="model">ir.attachment</field>
+        <field name="arch" type="xml">
+            <tree string="Attachments">
+                <field name="name" string="Name"/>
+                <field name="datas_fname"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="create_uid"/>
+                <field name="create_date"/>
+            </tree>
+        </field>
+    </record>
 
-        <record id="action_slides_attachment" model="ir.actions.act_window">
-            <field name="name">Presentations</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="res_model">ir.attachment</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">kanban,tree,form</field>
-            <field name="view_id" eval="False"/>
-            <field name="domain">[('is_slide','=',True)]</field>
-            <field name="context">{'is_slide':True, 'slide_type':'ppt'}</field>
-            <field name="search_view_id" ref="base.view_attachment_search"/>
-        </record>
-        <record id="action_slides_attachment_tree_view1" model="ir.actions.act_window.view">
-            <field eval="1" name="sequence"/>
-            <field name="view_mode">tree</field>
-            <field name="view_id" ref="view_slides_attachment_tree"/>
-            <field name="act_window_id" ref="action_slides_attachment"/>
-        </record>
-        <record id="action_slides_attachment_tree_view2" model="ir.actions.act_window.view">
-            <field eval="2" name="sequence"/>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="view_slides_attachment_form"/>
-            <field name="act_window_id" ref="action_slides_attachment"/>
-        </record>
-        <menuitem action="action_slides_attachment" id="submenu_slides_attachment" parent="main_slides"/>
+    <record id="action_slides_attachment" model="ir.actions.act_window">
+        <field name="name">Presentations</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ir.attachment</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_id" eval="False"/>
+        <field name="domain">[('is_slide','=',True)]</field>
+        <field name="context">{'is_slide':True, 'slide_type':'ppt'}</field>
+        <field name="search_view_id" ref="base.view_attachment_search"/>
+    </record>
+    <record id="action_slides_attachment_tree_view1" model="ir.actions.act_window.view">
+        <field eval="1" name="sequence"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_slides_attachment_tree"/>
+        <field name="act_window_id" ref="action_slides_attachment"/>
+    </record>
+    <record id="action_slides_attachment_tree_view2" model="ir.actions.act_window.view">
+        <field eval="2" name="sequence"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_slides_attachment_form"/>
+        <field name="act_window_id" ref="action_slides_attachment"/>
+    </record>
+    <menuitem action="action_slides_attachment" id="submenu_slides_attachment" parent="main_slides"/>
 
-        <!-- Change the directory view -->
-        <record model="ir.ui.view" id="document.view_document_directory_form">
+    <!-- Change the directory view -->
+    <record model="ir.ui.view" id="document.view_document_directory_form">
         <field name="name">document.directory</field>
         <field name="model">document.directory</field>
         <field name="arch" type="xml">
@@ -159,73 +159,73 @@
                             <group col="4" attrs="{'invisible': [('type','!=','ressource')]}">
                                 <field name="ressource_type_id"  on_change="onchange_content_id(ressource_type_id)"
                                     attrs="{'required': [('type','=','ressource')] }"/>
-                                <newline/>
-                                <field name="resource_field"     domain="[('model_id','=',ressource_type_id), ('ttype', 'in', ('char', 'selection', 'date', 'datetime'))]"/>
-                                <field name="ressource_tree"/>
-                                <newline/>
-                                <field name="domain" attrs="{'required': [('type','=','ressource')], 'readonly': [('type','=','static')]}"/>
-                            </group>
-                            <group col="4">
-                                <field name="ressource_parent_type_id"/>
-                                <field name="ressource_id" readonly="1"/>
-                            </group>
-                            <group col="2" attrs="{'invisible': [('type','!=','ressource'),('ressource_parent_type_id','=',False)]}">
-                                <field name="resource_find_all"/>
-                            </group>
+                                    <newline/>
+                                    <field name="resource_field"     domain="[('model_id','=',ressource_type_id), ('ttype', 'in', ('char', 'selection', 'date', 'datetime'))]"/>
+                                    <field name="ressource_tree"/>
+                                    <newline/>
+                                    <field name="domain" attrs="{'required': [('type','=','ressource')], 'readonly': [('type','=','static')]}"/>
+                                </group>
+                                <group col="4">
+                                    <field name="ressource_parent_type_id"/>
+                                    <field name="ressource_id" readonly="1"/>
+                                </group>
+                                <group col="2" attrs="{'invisible': [('type','!=','ressource'),('ressource_parent_type_id','=',False)]}">
+                                    <field name="resource_find_all"/>
+                                </group>
 
-                        </page>
-                        <page string="Generated Files" groups="base.group_no_one">
-                            <label colspan="4" string="For each entry here, virtual files will appear in this folder." />
-                            <field name="content_ids" nolabel="1" colspan="4" >
-                                <form string="Contents">
-                                    <group col="4">
+                            </page>
+                            <page string="Generated Files" groups="base.group_no_one">
+                                <label colspan="4" string="For each entry here, virtual files will appear in this folder." />
+                                <field name="content_ids" nolabel="1" colspan="4" >
+                                    <form string="Contents">
+                                        <group col="4">
+                                            <field name="name"/>
+                                            <field name="sequence"/>
+                                            <field name="prefix"/>
+                                            <field name="suffix"/>
+                                            <field name="extension"/>
+                                            <field name="include_name"/>
+                                            <separator string="PDF Report" colspan="4"/>
+                                            <field name="report_id" domain="[('model_id','=',parent.ressource_type_id)]"/>
+                                        </group>
+                                    </form>
+                                    <tree string="Contents">
+                                        <field name="sequence" string="Seq."/>
                                         <field name="name"/>
-                                        <field name="sequence"/>
-                                        <field name="prefix"/>
                                         <field name="suffix"/>
                                         <field name="extension"/>
-                                        <field name="include_name"/>
-                                        <separator string="PDF Report" colspan="4"/>
-                                        <field name="report_id" domain="[('model_id','=',parent.ressource_type_id)]"/>
-                                    </group>
-                                </form>
-                                <tree string="Contents">
-                                    <field name="sequence" string="Seq."/>
-                                    <field name="name"/>
-                                    <field name="suffix"/>
-                                    <field name="extension"/>
-                                </tree>
-                            </field>
-                        </page>
-                        <page string="Dynamic context" groups="base.group_no_one">
-                            <label colspan="4" string="Define words in the context, for all child directories and files" />
-                            <field name="dctx_ids" nolabel="1" colspan="4">
-                                <tree string="Fields" editable="bottom">
-                                    <field name="field"/>
-                                    <field name="expr"/>
-                                </tree>
-                                <form string="Fields">
-                                    <group col="4">
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Dynamic context" groups="base.group_no_one">
+                                <label colspan="4" string="Define words in the context, for all child directories and files" />
+                                <field name="dctx_ids" nolabel="1" colspan="4">
+                                    <tree string="Fields" editable="bottom">
                                         <field name="field"/>
                                         <field name="expr"/>
-                                    </group>
-                                </form>
-                            </field>
-                        </page>
-                        <page string="Security">
-                            <label colspan="4" string="Only members of these groups will have access to this directory and its files." />
-                            <label colspan="4" string="These groups, however, do NOT apply to children directories, which must define their own groups." />
-                            <field name="group_ids" colspan="4" nolabel="1"/>
-                        </page>
-                    </notebook>
-                </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids" widget="mail_followers"/>
-                    <field name="message_ids" widget="mail_thread"/>
-                </div>
-            </form>
-        </field>
-    </record>
+                                    </tree>
+                                    <form string="Fields">
+                                        <group col="4">
+                                            <field name="field"/>
+                                            <field name="expr"/>
+                                        </group>
+                                    </form>
+                                </field>
+                            </page>
+                            <page string="Security">
+                                <label colspan="4" string="Only members of these groups will have access to this directory and its files." />
+                                <label colspan="4" string="These groups, however, do NOT apply to children directories, which must define their own groups." />
+                                <field name="group_ids" colspan="4" nolabel="1"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
 
     </data>
 </openerp>

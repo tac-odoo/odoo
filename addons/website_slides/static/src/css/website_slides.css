@@ -24,9 +24,9 @@
 }
 
 .oe-slides-grid-thumbnail {
-  background-color: #f8f8f8 !important;
-  min-height: 290px;
-  border: none;
+  background-color: #fcfcfc !important;
+  min-height: 300px;
+  border: 1px solid #ccc;
 }
 
 .oe-slides-text-truncation {
@@ -51,8 +51,7 @@
 }
 
 .slide-badge {
-  background-color: #cccccc;
-  margin-left: 4px;
+  font-weight: normal;
 }
 
 .badge-active {
