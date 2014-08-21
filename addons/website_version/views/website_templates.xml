@@ -12,8 +12,10 @@
                                     )<span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu version_menu" role="menu">
-                            <li><a href="#" data-action="master">Master</a></li>
-                            <li class="divider"> </li>
+                            <span t-if="not website.snapshot_id">
+                                <li><a href="#" data-action="master">Master</a></li>
+                                <li class="divider"> </li>
+                            </span>
                             <li><a href="#" data-action="create_snapshot">Create a new snapshot</a></li>
                             <li class="divider"> </li>
                             <li><a href="#" data-action="delete_snapshot">Delete snapshot</a></li>
