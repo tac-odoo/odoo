@@ -12,3 +12,7 @@ class Snapshot(osv.Model):
         'website_id': fields.many2one('website',ondelete='cascade', string="Website"),
         'create_date': fields.datetime('Create Date'),
     }
+
+    _sql_constraints = [
+        ('name_uniq', 'unique(name)', 'You cannot have multiple snapshots with the same name!'),
+    ]

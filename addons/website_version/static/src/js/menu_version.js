@@ -38,7 +38,10 @@
             }).then(function (name) {
                 var context = website.get_context();
                 openerp.jsonRpc( '/create_snapshot', 'call', { 'name': name }).then(function (result) {
+
                     location.reload();
+                }).fail(function(){
+                    alert("This name already exists.");
                 });
             });
         },
