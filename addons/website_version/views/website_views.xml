@@ -25,15 +25,15 @@
             parent="base.marketing_menu" />
         <menuitem action="action_website_view" id="menu_website_view" parent="website_menu"/>
 
-        <!-- <record model="ir.ui.view" id="view_view_form_extend"> 
+        <record model="ir.ui.view" id="view_view_form_extend"> 
             <field name="model">ir.ui.view</field>
-            <field name="inherit_id" ref="ir.view_view_form"/>
+            <field name="inherit_id" ref="base.view_view_form"/>
             <field name="arch" type="xml">
                 <field name="name" position="after">
                     <field name="snapshot_id"/>
                 </field>
             </field>
-        </record> -->
+        </record> 
 
 
     </data>
