@@ -2,45 +2,67 @@
 <openerp>
     <data>
 
+    	<record id="second_website" model="website">
+    		<field name="name">0.0.0.0</field>
+    	</record>
 
-    	<record model="website" id="default_website_extend"> 
-            <field name="inherit_id" ref="website.default_website"/>
-            <field name="snapshot_id" ref="Snapshot_localhost"/>
+        <record id="default_1" model="website_version.snapshot">
+        	<field name="name">Default_1</field>
         </record>
 
-        <record id="Default_2" model="website_version.snapshot">
-            <field name="name">Default_1</field>
-            <field name="website_id" ref="default_website_extend"/>
+        <record id="default_2" model="website_version.snapshot">
+        	<field name="name">Default_2</field>
+        </record>
+
+        <record id="snapshot_localhost" model="website_version.snapshot">
+        	<field name="name">Snapshot localhost</field>
+        </record>
+
+        <record id="snapshot_0_0_0_0" model="website_version.snapshot">
+        	<field name="name">Snapshot 0.0.0.0</field>
+        </record>
+
+    	<record model="website" id="website.default_website"> 
+            <field name="snapshot_id" ref="snapshot_localhost"/>
+        </record>
+
+        <record model="website" id="second_website"> 
+            <field name="snapshot_id" ref="snapshot_0_0_0_0"/>
         </record>
 
     	<record id="second_website" model="website">
-            <field name="name">0.0.0.0</field>
-            <field name="snapshot_id" ref="Snapshot_0_0_0_0"/>
+            <field name="social_twitter">https://twitter.com/odooapps</field>
+            <field name="social_facebook">https://www.facebook.com/Odoo</field>
+            <field name="social_googleplus">https://plus.google.com/+Odooapps</field>
+            <field name="social_linkedin">http://www.linkedin.com/company/odoo</field>
+            <field name="language_ids" eval="[(6, 0, [ ref('base.lang_en')])]"/>
+            <field name="default_lang_id" ref="base.lang_en"/>
         </record>
 
-        <record id="Default_2" model="website_version.snapshot">
-            <field name="name">Default_2</field>
-            <field name="website_id" ref="second_website"/>
-        </record>
-
-        <record id="Snapshot_0_0_0_0" model="website_version.snapshot">
-            <field name="name">Snapshot 0.0.0.0</field>
-            <field name="website_id" ref="second_website"/>
-        </record>
-
-        <record id="Snapshot_localhost" model="website_version.snapshot">
-            <field name="name">Snapshot localhost</field>
+        <record id="default_1" model="website_version.snapshot">
             <field name="website_id" ref="website.default_website"/>
         </record>
 
-        <record id="homepage" model="ir.ui.view">
+        <record id="default_2" model="website_version.snapshot">
+            <field name="website_id" ref="second_website"/>
+        </record>
+
+        <record id="snapshot_localhost" model="website_version.snapshot">
+            <field name="website_id" ref="website.default_website"/>
+        </record>
+
+        <record id="snapshot_0_0_0_0" model="website_version.snapshot">
+            <field name="website_id" ref="second_website"/>
+        </record>
+
+        <record id="homepage_0_0_0_0" model="ir.ui.view">
             <field name="name">Homepage</field>
-            <field name="type">Qweb</field>
+            <field name="type">qweb</field>
             <field name="master_id" ref="website.homepage"/>
-            <field name="snapshot_id" ref="Snapshot_0_0_0_0"/>
+            <field name="snapshot_id" ref="snapshot_0_0_0_0"/>
             <field name="priority">29</field>
-            <field name="application">Always applied</field>
             <field name="arch">
+            	<![CDATA[
             	<t name="Homepage" priority="29" t-name="website.homepage">
 				  <t t-call="website.layout">
 				    <div id="wrap" class="oe_structure oe_empty">
@@ -74,17 +96,18 @@
 				    </div>
 				  </t>
 				</t>
+				]]>
             </field>
         </record>
 
-        <record id="homepage" model="ir.ui.view">
+        <record id="homepage_localhost" model="ir.ui.view">
             <field name="name">Homepage</field>
-            <field name="type">Qweb</field>
+            <field name="type">qweb</field>
             <field name="master_id" ref="website.homepage"/>
-            <field name="snapshot_id" ref="Snapshot_localhost"/>
+            <field name="snapshot_id" ref="snapshot_localhost"/>
             <field name="priority">29</field>
-            <field name="application">Always applied</field>
             <field name="arch">
+            	<![CDATA[
             	<t name="Homepage" priority="29" t-name="website.homepage">
 				  	<t t-call="website.layout">
 					    <div id="wrap" class="oe_structure oe_empty">
@@ -118,17 +141,23 @@
 						</div>
 					</t>
 				</t>
+				]]>
             </field>
         </record>
 
-        <record id="homepage" model="ir.ui.view">
+        <!-- <record id="snapshot_localhost" model="website_version.snapshot">
+            <field name="view_ids" ref="base.homepage_localhost"/>
+        </record> -->
+
+        <record id="homepage_default_2" model="ir.ui.view">
             <field name="name">Homepage</field>
-            <field name="type">Qweb</field>
+            <field name="type">qweb</field>
             <field name="master_id" ref="website.homepage"/>
-            <field name="snapshot_id" ref="Default_2"/>
+            <field name="snapshot_id" ref="default_2"/>
             <field name="priority">29</field>
-            <field name="application">Always applied</field>
+            <!-- <field name="application">Always applied</field> -->
             <field name="arch">
+            	<![CDATA[
             	<t name="Homepage" priority="29" t-name="website.homepage">
 				  <t t-call="website.layout">
 				    <div id="wrap" class="oe_structure oe_empty">
@@ -163,9 +192,12 @@
 				      </div>
 				    </div>
 				  </t>
-				</t>	
+				</t>
+				]]>	
             </field>
         </record>
+
+ 
 
     </data>
 </openerp>
