@@ -3,16 +3,22 @@
     <data>
     	<record id="second_website" model="website">
             <field name="name">0.0.0.0</field>
+            <field name="snapshot_id" ref="Snapshot_0_0_0_0"/>
         </record>
 
-        <record id="Default_2" model="website">
+        <record id="Default_2" model="website_version.snapshot">
             <field name="name">Default_2</field>
             <field name="website_id" ref="second_website"/>
         </record>
 
-        <record id="Snapshot_0_0_0_0" model="website">
+        <record id="Snapshot_0_0_0_0" model="website_version.snapshot">
             <field name="name">Snapshot 0.0.0.0</field>
             <field name="website_id" ref="second_website"/>
+        </record>
+
+        <record id="Snapshot_localhost" model="website_version.snapshot">
+            <field name="name">Snapshot localhost</field>
+            <field name="website_id" ref="website.default_website"/>
         </record>
 
         <record id="homepage" model="ir.ui.view">
@@ -55,6 +61,51 @@
 				      </div>
 				    </div>
 				  </t>
+				</t>
+            </field>
+        </record>
+
+
+        <record id="homepage" model="ir.ui.view">
+            <field name="name">Homepage</field>
+            <field name="type">Qweb</field>
+            <field name="master_id" ref="website.homepage"/>
+            <field name="snapshot_id" ref="Snapshot_localhost"/>
+            <field name="priority">29</field>
+            <field name="application">Always applied</field>
+            <field name="arch">
+            	<t name="Homepage" priority="29" t-name="website.homepage">
+				  	<t t-call="website.layout">
+					    <div id="wrap" class="oe_structure oe_empty">
+					      <div class="carousel slide mb32" id="myCarousel0" style="height: 320px;">
+					        <ol class="carousel-indicators hidden">
+					          <li class="active" data-slide-to="0" data-target="#myCarousel0"/>
+					        </ol>
+					        <div class="carousel-inner">
+					          <div class="item image_text oe_img_bg active" style="background-image: url(http://localhost:8069/website/static/src/img/banner/greenfields.jpg);">
+					            <div class="container">
+					              <div class="row content">
+					                <div class="carousel-content col-md-6 col-sm-12">
+					                  <h2>Snapshot localhost</h2>
+					                  <h3>Click to customize this text</h3>
+					                  <p>
+					                    <a class="btn btn-success btn-large" href="/page/website.contactus">Contact us</a>
+					                  </p>
+					                </div>
+					                <span class="carousel-img col-md-6 hidden-sm hidden-xs"> </span>
+					              </div>
+					            </div>
+					          </div>
+					        </div>
+					        <div class="carousel-control left hidden" data-slide="prev" data-target="#myCarousel0" href="#myCarousel0" style="width: 10%">
+					          <i class="fa fa-chevron-left"/>
+					        </div>
+					        <div class="carousel-control right hidden" data-slide="next" data-target="#myCarousel0" href="#myCarousel0" style="width: 10%">
+					          <i class="fa fa-chevron-right"/>
+					        </div>
+					      </div>
+						</div>
+					</t>
 				</t>
             </field>
         </record>
