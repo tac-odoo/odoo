@@ -35,100 +35,141 @@
             </form>
         </template>
 
-        <template id="header" name="header">
-            <div class="container">
-                <div class="row page-header mt0 mb0">
-                    <h1>
-                        <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
-                            <t t-esc="attachment_count" />
-                            <span>Slides</span>
-                            <small class="dropdown" t-if="filters in ('all', 'ppt','doc','video')">
-                                <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown">
-                                    <t t-if="filters == 'all'">All</t>
-                                    <t t-if="filters == 'ppt'">Presentations</t>
-                                    <t t-if="filters == 'doc'">Documents</t>
-                                    <t t-if="filters == 'video'">Videos</t>
-                                    <t t-if="search"><t t-esc="search" /></t>
-                                    <t t-if="tags"><t t-esc="tags" /></t>
-                                    <t t-if="sorting == 'creation'"> by Latest Published</t>
-                                    <t t-if="sorting == 'date'"> by Last Activity date</t>
-                                    <t t-if="sorting == 'view'"> by Most viewed</t>
-                                    <b class="caret" />
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li class="dropdown-header">Filter on</li>
-                                    <li t-att-class="filters == 'all' and 'active' or '' ">
-                                        <a
-                                            t-att-href="url_for('/slides') + '?' + keep_query( 'search', 'sorting', 'tags', filters='all')">All</a>
-                                    </li>
-                                    <li t-att-class="filters == 'ppt' and 'active' or '' ">
-                                        <a
-                                            t-att-href="url_for('/slides') + '?' + keep_query( 'search', 'sorting', 'tags', filters='ppt')">Presentations</a>
-                                    </li>
-                                    <li t-att-class="filters == 'doc' and 'active' or '' ">
-                                        <a
-                                            t-att-href="url_for('/slides') + '?' + keep_query( 'search', 'sorting', 'tags', filters='doc')">Documents</a>
-                                    </li>
-                                    <li t-att-class="filters == 'video' and 'active' or '' ">
-                                        <a
-                                            t-att-href="url_for('/slides') + '?' + keep_query( 'search', 'sorting', 'tags', filters='video')">Videos</a>
-                                    </li>
-                                    <li class="dropdown-header">Search</li>
-                                    <li t-if="search" t-att-class="search and 'active' or '' ">
-                                        <a t-att-href="url_for('/slides') + '?' + keep_query('filters', 'tags', 'sorting', search='')">
-                                            <span class="glyphicon glyphicon-remove"></span><t t-esc="search" />
-                                        </a>
-                                    </li>
-                                    <li class="dropdown-header">Tags</li>
-                                    <li t-if="tags" t-att-class="tags and 'active' or '' ">
-                                        <a t-att-href="url_for('/slides') + '?' + keep_query('filters', 'sorting', 'search', tags='')">
-                                            <span class="glyphicon glyphicon-remove"></span><t t-esc="tags" />
-                                        </a>
-                                    </li>
-                                    <li class="dropdown-header">Sort by</li>
-                                    <li t-att-class="sorting == 'creation' and 'active' or '' ">
-                                        <a
-                                            t-att-href="url_for('/slides') + '?' + keep_query( 'search', 'filters', 'tags', sorting='creation')">Latest Published</a>
-                                    </li>
-                                    <li t-att-class="sorting == 'date' and 'active' or '' ">
-                                        <a
-                                            t-att-href="url_for('/slides') + '?' + keep_query( 'search', 'filters', 'tags', sorting='date')">Last Activity date</a>
-                                    </li>
-                                    <li t-att-class="sorting == 'view' and 'active' or '' ">
-                                        <a
-                                            t-att-href="url_for('/slides') + '?' + keep_query( 'search', 'filters', 'tags', sorting='view')">Most viewed</a>
-                                    </li>
-                                </ul>
-                            </small>
+        <template id='pdfview' name="Slide Viewer">
+            <div class="row">
+                <div class="panel panel-default" style="border-radius: 0px;">
+                    <div class="panel-body" style="padding: 0px;">
+                        <img id="pdfimage" class="img-responsive" src="" />
+                    </div>
+                    <div class="panel-footer" style="position: relative;">
+                        <div class="text-center">
+                            <a id="prev" href="#carousel-example-generic" role="button" data-slide="prev">
+                                <i class="fa fa-chevron-circle-left fa-2x"></i>
+                            </a>
+                            <a id="next" href="#carousel-example-generic" role="button" data-slide="next">
+                                <i class="fa fa-chevron-circle-right fa-2x"></i> 
+                            </a>
                         </div>
-                        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12" style="margin-top: 5px;">
-                            <t t-call="website_slides.search"/>
+                        <div class="text-muted" style="position: absolute;top: 15px;right: 15px;">
+                            <spane id="page_num"></spane> of <span id="page_count"></span>
                         </div>
-                    </h1>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template id='videoview' name="Video Viewer">
+            <div class="row">
+                <div class="panel panel-default" style="border-radius: 0px;">
+                    <div class="panel-body" style="padding: 0px;">
+                        <img t-if="famous.youtube_id" t-att-src="famous.image" style="width: 100%;" class="img-responsive"/>
+                    </div>
+                    <div class="panel-footer" style="position: relative;">
+                        <div class="text-center">
+                            Click to Play, Powred by YouTube.
+                        </div>
+                    </div>
                 </div>
             </div>
         </template>
 
         <!-- entry page of the slide application -->
         <template id='home' name="Odoo Slides">
-            <t t-set="head"><t t-call="website_slides.head"/></t>
+            <t t-set="head">
+                <t t-call="website_slides.head"/>
+                <script type="text/javascript" src="/website_slides/static/lib/pdfjs/build/pdf.js"></script>
+                <script type="text/javascript" src="/website_slides/static/src/js/pdfviewer.js"></script>
+            </t>
             <t t-call="website.layout">
-                <t t-if="channel">
-                    <div t-field="channel.website_description"></div>
-                </t>
-                <t t-if="not channel">
-                    <div class="oe_structure"></div>
-                </t>
+                <div t-if="famous" class="wrap" style="background-color: #f8f8f8;color: #1c1c1c;border-bottom: 1px solid #CCCCCC;">
+                    <section>
+                        <div class="container">
+                          <div class="row" style="padding-left: 15px;padding-right: 15px;">
+                            <div class="col-md-5 mt16" t-if="famous.youtube_id" >
+                                <a t-attf-href="/channel/#{slug(channel)}/view/#{slug(famous)}">
+                                    <t t-call="website_slides.videoview"/>
+                                </a>
+                            </div>
 
-                <div class="container">
-                    <t t-call="website_slides.header"></t>
-                    <div class="row">
-                        <t t-call="website_slides.gridview"/>
+                            <div class="col-md-5 mt16" t-if="not famous.youtube_id" >
+                                <a t-attf-href="/channel/#{slug(channel)}/view/#{slug(famous)}">
+                                    <t t-if="not famous.youtube_id and not famous.url" t-call="website_slides.pdfview"/>
+                                </a>
+                            </div>
+
+                                    
+                            <div class="col-md-7">
+                                <h1 style="margin-top: 15px;"><t t-esc="channel.name"/></h1>
+                                <p><t t-esc="channel.description"/></p>
+                                <div>
+                                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2" style="padding: 0px;">
+                                        <a t-attf-href="/channel/#{slug(channel)}">
+                                            <img src="/website_slides/static/description/odoo-logo.jpg" class="img-responsive" style="border: 1px solid #CCC;"/>
+                                        </a>
+                                    </div>
+                                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-11">
+                                        <a t-attf-href="/channel/#{slug(channel)}">
+                                            <p t-field="channel.name" class="mb0"/>
+                                        </a>
+                                        <div class="col-md-8" style="padding-left:0">
+                                            <t t-call="website_mail.follow">
+                                                <t t-set="email" t-value="user.email"/>
+                                                <t t-set="object" t-value="channel"/>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
+                                    <h3 class="oe-slides-text-truncation">
+                                        <a t-attf-href="/channel/#{slug(channel)}/view/#{slug(famous)}">
+                                            <t t-esc="famous.name"/>
+                                        </a>
+                                    </h3>
+                                    <div class="label label-success mb16 col-md-16" href="#">Most Viewed</div>
+                                    
+                                    <p t-if="famous.description"><t t-raw="famous.trim_lines(famous.description)"/></p>
+                                    
+                                    <div class="mt8 mb16 col-md-16" t-if="famous.tag_ids" style="padding-left: 0px;">
+                                        <i class="fa fa-tags"></i>
+                                        <t t-foreach="famous.tag_ids" t-as="att_tag">
+                                            <a t-attf-href="/channel/#{slug(channel)}?tags=#{att_tag.name}">
+                                                <span t-attf-class="badge slide-badge #{tags and tags == att_tag.name and 'badge-active' ''}" t-field="att_tag.name"/>
+                                            </a>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
+                      </div>
+                  </div>
+              </section>
+          </div>
+
+          <div class="container">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mt16">
+                    <div style="border-bottom: 1px solid #CCC;padding-bottom: 5px;">
+                        <span>
+                            <a class="label label-success" href="#">Presentations</a>
+                            <a href="#">Videos</a>
+                            <a href="#">Documents</a>
+                        </span>
+
+                        <span class="pull-right">
+                            <a class="label label-danger" href="#">Latest</a>
+                            <a href="#">Most Viewed</a>
+                        </span>
                     </div>
 
-                    <div class="row text-center">
-                        <t t-call="website.pager"/>
-                    </div>
+                </div>
+                <t t-call="website_slides.gridview"/>
+                </div>
+
+                <div class="row text-center">
+                    <t t-call="website.pager"/>
+                </div>
                 </div>
             </t>
         </template>
@@ -197,8 +238,8 @@
             <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="margin-top: 15px;margin-bottom: 15px;"  t-foreach="attachment_ids" t-as="attachment">
                 <div class="oe-slides-grid-thumbnail">
                     <a t-attf-href="/channel/#{slug(channel)}/view/#{slug(attachment)}#{url_for('') + '?' + keep_query( 'search', 'filters', 'sorting', 'tags')}">
-                        <img t-if="not attachment.youtube_id" t-attf-src="/slides/thumb/#{attachment.id}" class="img-responsive"/>
-                        <img t-if="attachment.youtube_id" t-att-src="attachment.image" class="img-responsive"/>
+                        <img t-if="not attachment.youtube_id" t-attf-src="/slides/thumb/#{attachment.id}" style="width: 100%;" class="img-responsive"/>
+                        <img t-if="attachment.youtube_id" t-att-src="attachment.image" style="width: 100%;" class="img-responsive"/>
                     </a>
 
                     <span class="like-box" t-if="attachment.website_published">
@@ -302,7 +343,7 @@
                         <li><a href="#about" role="tab" data-toggle="tab">About</a></li>
                         <li><a href="#share" role="tab" data-toggle="tab">Share</a></li>
                         <li class="active"><a href="#discuss" role="tab" data-toggle="tab">Discuss</a></li>
-                        <li><a href="#transscript" role="tab" data-toggle="tab">Transscript</a></li>
+                        <li><a href="#transcript" role="tab" data-toggle="tab">Transcript</a></li>
                     </ul>
                     <div class="tab-content" style="padding: 20px 5px 5px 5px;">
                         <div class="tab-pane fade" id="about">
@@ -363,7 +404,7 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="tab-pane fade" id="transscript">
+                        <div class="tab-pane fade" id="transcript">
                             <p t-field="slideview.index_content"></p>
                         </div>
                     </div>

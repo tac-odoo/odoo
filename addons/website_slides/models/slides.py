@@ -104,6 +104,9 @@ class ir_attachment(osv.osv):
         cr.execute("""UPDATE ir_attachment SET slide_views = slide_views+1 WHERE id IN %s""", (tuple(ids),))
         return True
 
+    def trim_lines(self, cr, uid, description, *args):
+        return '<br/>'.join(description.split('\n')[0:3])
+         
     def create(self, cr, uid, values, context=None):
         if values.get('is_slide'):
             if values.get('datas_fname'):

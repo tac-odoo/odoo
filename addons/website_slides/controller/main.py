@@ -79,7 +79,7 @@ class main(http.Controller):
             return request.redirect("/channel/%s" % ids[0])
 
         channels = directory.browse(cr, uid, ids, context)
-        return request.website.render('website_slides.channels',{'channels': channels, 'user': user})
+        return request.website.render('website_slides.channels', {'channels': channels, 'user': user})
 
 
     @http.route(['/channel/<model("document.directory"):channel>',
@@ -87,6 +87,9 @@ class main(http.Controller):
                  ], type='http', auth="public", website=True)
     def slides(self, channel=0, page=1, filters='all', sorting='creation', search='', tags=''):
         cr, uid, context = request.cr, SUPERUSER_ID, request.context
+        
+        user = request.registry['res.users'].browse(cr, uid, request.uid, context)
+
         attachment = request.registry['ir.attachment']
         domain = [("is_slide","=","True")]
 
@@ -137,8 +140,11 @@ class main(http.Controller):
         obj_ids = attachment.search(cr, uid, domain, limit=self._slides_per_page, offset=pager['offset'], order=order, context=context)
         attachment_ids = attachment.browse(cr, uid, obj_ids, context=context)
 
-        values = {}
-        values.update({
+        domain += [('website_published', '=', True)]
+        famous_id = attachment._search(cr, uid, domain, limit=1, offset=0, order="slide_views desc", context=context)
+        famous = attachment.browse(cr, uid, famous_id, context=context)
+
+        values = {
             'attachment_ids': attachment_ids,
             'attachment_count': attachment_count,
             'pager': pager,
@@ -146,8 +152,10 @@ class main(http.Controller):
             'sorting': sorting,
             'search': search,
             'tags':tags,
-            'channel': channel
-        })
+            'channel': channel,
+            'user': user,
+            'famous':famous
+        }
         return request.website.render('website_slides.home', values)
 
 

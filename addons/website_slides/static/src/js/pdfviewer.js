@@ -5,7 +5,7 @@ jQuery(document).ready(function() {
 // security restrictions, we have to use a file server with special headers
 // (CORS) - most servers don't support cross-origin browser requests.
 //
-var url = '/website_slides/compressed.tracemonkey-pldi-09.pdf';
+var url = '/website_slides/odoo-india-working-in-support.pdf';
 
 //
 // Disable workers to avoid yet another cross-origin issue (workers need the URL of
