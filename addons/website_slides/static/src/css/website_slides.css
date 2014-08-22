@@ -64,13 +64,19 @@
   background-color: #428bca;
 }
 
+.slide-like{
+  cursor: pointer;
+}
+.slide-unlike{
+  cursor: pointer;
+}
 .like-box {
   position: absolute;
   right: 20px;
   top: 7px;
   font-weight: bold;
-  width: 54px;
-  height: 64px;
+  width: 45px;
+  height: 58px;
   background-color: rgba(0,0,0,0.7);
   border-radius: 3px;
   display: block;
