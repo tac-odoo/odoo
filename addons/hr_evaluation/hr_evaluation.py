@@ -27,7 +27,7 @@ import urlparse
 from openerp import fields, api, tools, models
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
-from openerp.exceptions import except_orm
+from openerp.exceptions import except_orm, Warning
 
 class calendar_event(models.Model):
     """ Model for Calendar Event """
@@ -173,7 +173,7 @@ class hr_evaluation(models.Model):
         user_ids = [emp.user_id.id for rec in val for emp in rec if emp.user_id]
         if self.employee_id.user_id:
             user_ids.append(self.employee_id.user_id.id)
-        if self.employee_id.department_id.manager_id:
+        if self.employee_id.department_id.manager_id.user_id:
             user_ids.append(self.employee_id.department_id.manager_id.user_id.id)
         if self.employee_id.parent_id.user_id:
             user_ids.append(self.employee_id.parent_id.user_id.id)
@@ -219,7 +219,7 @@ class hr_evaluation(models.Model):
             for emp in rec[1]:
                 if emp.work_email:
                     email = tools.email_split(emp.work_email)[0]
-                    partner_id = mail_obj._find_partner_from_emails(email) or None
+                    partner_id = mail_obj._find_partner_from_emails(email) or self.employee_id.user_id.partner_id or None
                     token = self.create_token(email, rec[0], partner_id)[0]
                     self.update_appraisal_url(rec[0].public_url, email, token)
                     self.mail_template.send_mail(self.id, force_send=True)
@@ -269,7 +269,7 @@ class hr_evaluation(models.Model):
             if self.employee_id.user_id:
                 partner_ids.append((4,self.employee_id.user_id.partner_id.id))
             create_meeting_id = self.env['calendar.event'].create({
-                'name': 'Appraisal For '+ self.employee_id.name_related,
+                'name': _('Appraisal Meeting For ') + self.employee_id.name_related,
                 'start': vals['interview_deadline'],
                 'stop': vals['interview_deadline'],
                 'allday': True,
@@ -293,6 +293,13 @@ class hr_evaluation(models.Model):
                 if follower_id.user_id:
                     self.message_subscribe_users(user_ids=[follower_id.user_id.id])
         return super(hr_evaluation, self).write(vals)
+
+    @api.multi
+    def unlink(self):
+        for appraisal in self:
+            if appraisal.state != 'new':
+                raise Warning(_("You cannot delete an appraisal which is not 'To Start' sate."))
+        return super(hr_evaluation, self).unlink()
 
     @api.cr_uid_ids_context
     def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False, lazy=True):

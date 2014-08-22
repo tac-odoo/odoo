@@ -98,7 +98,6 @@
                     <field name="employee_id"/>
                     <group expand='0' string='Group by...'>
                         <filter string='Employee' icon="terp-personal" domain="[]" context="{'group_by' : 'employee_id'}"/>
-                        <filter string='Status' icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by' : 'stage_id'}" />
                    </group>
                </search>
             </field>
@@ -182,7 +181,7 @@
         </record>
 
         <menuitem name="Appraisals" parent="menu_eval_hr" id="menu_open_view_hr_evaluation_tree"
-            action="open_view_hr_evaluation_tree" groups="base.group_survey_manager"/>
+            action="open_view_hr_evaluation_tree" groups="base.group_user"/>
 
         <record model="ir.actions.act_window" id="open_view_hr_evaluation_tree2">
             <field name="name">Appraisal</field>
