@@ -219,7 +219,7 @@ class hr_evaluation(models.Model):
             for emp in rec[1]:
                 if emp.work_email:
                     email = tools.email_split(emp.work_email)[0]
-                    partner_id = mail_obj._find_partner_from_emails(email) or self.employee_id.user_id.partner_id or None
+                    partner_id = mail_obj._find_partner_from_emails(email) or emp.user_id.partner_id or None
                     token = self.create_token(email, rec[0], partner_id)[0]
                     self.update_appraisal_url(rec[0].public_url, email, token)
                     self.mail_template.send_mail(self.id, force_send=True)
