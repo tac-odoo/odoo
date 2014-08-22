@@ -170,9 +170,11 @@ class website(osv.osv):
             })
     }
 
-    # _defaults = {
-    #     'company_id': lambda self,cr,uid,c: self.pool['ir.model.data'].xmlid_to_res_id(cr, openerp.SUPERUSER_ID, 'base.public_user'),
-    # }
+    _defaults = {
+        'user_id': lambda self,cr,uid,c: self.pool['ir.model.data'].xmlid_to_res_id(cr, openerp.SUPERUSER_ID, 'base.public_user'),
+        'company_id': lambda self,cr,uid,c: self.pool['ir.model.data'].xmlid_to_res_id(cr, openerp.SUPERUSER_ID,'base.main_company'),
+
+    }
 
     # cf. Wizard hack in website_views.xml
     def noop(self, *args, **kwargs):
