@@ -263,8 +263,7 @@ class main(http.Controller):
         res = []
         for channel in channels:
             res.append({'id': channel[0],
-                        'name': channel[1],
-                        'default': channel[0] == default_channel[0]
+                        'name': channel[1]
                         })
         return res
 
@@ -291,5 +290,4 @@ class main(http.Controller):
             post['slide_type'] = 'ppt'
 
         slide_id = slide_obj.create(cr, uid, post, context=context)
-        slide = slide_obj.browse(cr, uid, slide_id, context=context)
-        return request.redirect("view/%s" % slug(slide))
+        return request.redirect("/channel/%s/view/%s" % (post.get('parent_id'), slide_id))
