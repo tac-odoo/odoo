@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
+
+
+    	<record model="website" id="default_website_extend"> 
+            <field name="inherit_id" ref="website.default_website"/>
+            <field name="snapshot_id" ref="Snapshot_localhost"/>
+        </record>
+
+        <record id="Default_2" model="website_version.snapshot">
+            <field name="name">Default_1</field>
+            <field name="website_id" ref="default_website_extend"/>
+        </record>
+
     	<record id="second_website" model="website">
             <field name="name">0.0.0.0</field>
             <field name="snapshot_id" ref="Snapshot_0_0_0_0"/>
@@ -65,7 +77,6 @@
             </field>
         </record>
 
-
         <record id="homepage" model="ir.ui.view">
             <field name="name">Homepage</field>
             <field name="type">Qweb</field>
@@ -110,14 +121,51 @@
             </field>
         </record>
 
-        
-
-        <template id="homepage" name="Homepage" page="True" priority="29">
-    		<t t-call="website.layout">
-      			<div id="wrap" class="oe_structure oe_empty"></div>
-    		</t>
-		</template>
-
+        <record id="homepage" model="ir.ui.view">
+            <field name="name">Homepage</field>
+            <field name="type">Qweb</field>
+            <field name="master_id" ref="website.homepage"/>
+            <field name="snapshot_id" ref="Default_2"/>
+            <field name="priority">29</field>
+            <field name="application">Always applied</field>
+            <field name="arch">
+            	<t name="Homepage" priority="29" t-name="website.homepage">
+				  <t t-call="website.layout">
+				    <div id="wrap" class="oe_structure oe_empty">
+				      <div class="carousel slide mb32" id="myCarousel0" style="height: 320px;">
+				        <ol class="carousel-indicators hidden">
+				          <li class="active" data-slide-to="0" data-target="#myCarousel0"/>
+				        </ol>
+				        <div class="carousel-inner">
+				          <div class="item image_text oe_img_bg active" style="background-image: url(http://localhost:8069/website/static/src/img/parallax/parallax_bg.jpg);">
+				            <div class="container">
+				              <div class="row content">
+				                <div class="carousel-content col-md-6 col-sm-12">
+				                  <h2>Master</h2>
+				                  <h3>Click to customize this text</h3>
+				                  <p>
+				                    <a class="btn btn-success btn-large" href="/page/website.contactus">Contact us</a>
+				                  </p>
+				                </div>
+				                <span class="carousel-img col-md-6 hidden-sm hidden-xs">
+				                  <img alt="Banner Odoo Image" class="carousel-image img-responsive" src="/website/static/src/img/banner/banner_picture.png"/>
+				                </span>
+				              </div>
+				            </div>
+				          </div>
+				        </div>
+				        <div class="carousel-control left hidden" data-slide="prev" data-target="#myCarousel0" href="#myCarousel0" style="width: 10%">
+				          <i class="fa fa-chevron-left"/>
+				        </div>
+				        <div class="carousel-control right hidden" data-slide="next" data-target="#myCarousel0" href="#myCarousel0" style="width: 10%">
+				          <i class="fa fa-chevron-right"/>
+				        </div>
+				      </div>
+				    </div>
+				  </t>
+				</t>	
+            </field>
+        </record>
 
     </data>
 </openerp>
