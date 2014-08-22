@@ -99,7 +99,12 @@
 
                                     
                             <div class="col-md-7">
-                                <h1 style="margin-top: 15px;"><t t-esc="channel.name"/></h1>
+                                <h1 style="margin-top: 15px;">
+                                    <a t-attf-href="/channel">
+                                        <i class="fa fa-reply"></i>
+                                    </a>
+                                    <t t-esc="channel.name"/>
+                                </h1>
                                 <p><t t-esc="channel.description"/></p>
                                 <div>
                                     <div class="col-lg-11 col-md-11 col-sm-11 col-xs-11" style="padding-left: 0px;">
@@ -293,6 +298,9 @@
                 </div>
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
                     <h3 class="oe-slides-text-truncation">
+                        <a t-attf-href="/channel/#{slug(channel)}">
+                            <i class="fa fa-reply"></i>
+                        </a>
                         <t t-esc="slideview.name"/>
                     </h3>
 
