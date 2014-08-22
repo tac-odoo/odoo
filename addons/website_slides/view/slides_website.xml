@@ -178,39 +178,47 @@
         <template id='channels' name="Channels">
             <t t-set="head"><t t-call="website_slides.head"/></t>
             <t t-call="website.layout">
-                <div class="container">
-                    <h1 class="mb32">Channles</h1>
+                <div class="oe_structure"/>
+                <div class="container mt16">
                     <div class="row">
                         <div t-foreach="channels" t-as="channel" class="col-sm-4 mb32">
-                            <div class="well well-sm">
-                                <div>
-                                    <a class="thumbnail pull-left channel-img" t-attf-href="/channel/#{slug(channel)}">
-                                        <div class="fa fa-5x fa-comment"/>
+                            <t t-set="famous" t-value="channel.get_mostviewed(channel)"/> 
+                            <div class="oe-channel-grid-thumbnail">
+                                <a t-attf-href="/channel/#{slug(channel)}">
+                                    <img t-if="not famous.youtube_id" t-attf-src="/slides/thumb/#{famous.id}" style="width: 100%;" class="img-responsive"/>
+                                    <img t-if="famous.youtube_id" t-att-src="famous.image" style="width: 100%;" class="img-responsive"/>
+                                </a>
+
+                                <div style="padding: 5px;">
+                                    <a t-attf-href="/channel/#{slug(channel)}">
+                                        <h4 class="oe-slides-text-truncation">
+                                            <t t-esc="channel.name"/>
+                                        </h4>
                                     </a>
-                                    <div>
-                                        <h2 class="media-heading"><div t-field="channel.name"/></h2>
+                                    <p t-field="channel.description"/>
+
+                                    <t groups="base.group_public">
+                                        <t t-set="public_user" t-value="True"/>
+                                    </t>
+                                    <t t-if="not public_user">
+                                        <t t-call="website_mail.follow">
+                                            <t t-set="email" t-value="user.email"/>
+                                            <t t-set="object" t-value="channel"/>
+                                        </t>
+                                    </t>
+                                    <t t-if="public_user">
+                                        <t t-call="website_mail.follow">
+                                            <t t-set="email" t-value="user.email"/>
+                                            <t t-set="object" t-value="channel"/>
+                                        </t>
+                                    </t>
+                                    <div class="mt8">
                                         <t t-call="website.publish_management">
                                             <t t-set="object" t-value="channel"/>
                                             <t t-set="publish_edit" t-value="True"/>
                                         </t>
-                                        <t groups="base.group_public">
-                                            <t t-set="public_user" t-value="True"/>
-                                        </t>
-                                        <t t-if="not public_user">
-                                            <t t-call="website_mail.follow">
-                                                <t t-set="email" t-value="user.email"/>
-                                                <t t-set="object" t-value="channel"/>
-                                            </t>
-                                        </t>
                                     </div>
                                 </div>
-                                <t t-if="public_user">
-                                    <t t-call="website_mail.follow">
-                                        <t t-set="email" t-value="user.email"/>
-                                        <t t-set="object" t-value="channel"/>
-                                    </t>
-                                </t>
-                                <div class="channel-description"  t-field="channel.description"/>
                             </div>
                         </div>
                     </div>

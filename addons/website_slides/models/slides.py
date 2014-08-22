@@ -41,6 +41,14 @@ class document_directory(osv.osv):
         'website_description': fields.html('Website Description', tranalate=True)
     }
 
+    def get_mostviewed(self, cr, uid, channel, context):
+        attachment = self.pool.get('ir.attachment')
+
+        domain = [('website_published', '=', True), ('parent_id','=',channel.id)]
+        famous_id = attachment._search(cr, uid, domain, limit=1, offset=0, order="slide_views desc", context=context)
+        famous = attachment.browse(cr, uid, famous_id, context=context)
+
+        return famous
 
 class MailMessage(osv.Model):
     _inherit = 'mail.message'
@@ -100,7 +108,6 @@ class ir_attachment(osv.osv):
         'slide_views':_get_slide_views,
         'likes': 0,
         'dislikes':0
-
     }
 
     def set_viewed(self, cr, uid, ids, context=None):

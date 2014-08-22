@@ -29,6 +29,12 @@
   border: 1px solid #ccc;
 }
 
+.oe-channel-grid-thumbnail {
+  background-color: #fcfcfc !important;
+  min-height: 450px;
+  border: 1px solid #ccc;
+}
+
 .oe-slides-text-truncation {
   white-space: nowrap;
   width: 100%;
