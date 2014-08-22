@@ -66,7 +66,11 @@
                     </div>
                     <div class="panel-footer" style="position: relative;">
                         <div class="text-center">
-                            Click to Play, Powred by YouTube.s
+                            <div class="text-center">
+                                <a t-attf-href="/channel/#{slug(channel)}/view/#{slug(famous)}" role="button">
+                                    <i class="fa fa-chevron-circle-right fa-2x"></i> 
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -131,7 +135,6 @@
                                     <p t-if="famous.description"><t t-raw="famous.trim_lines(famous.description)"/></p>
                                     
                                     <div class="mt8 mb16 col-md-16" t-if="famous.tag_ids" style="padding-left: 0px;">
-                                        <i class="fa fa-tags"></i>
                                         <t t-foreach="famous.tag_ids" t-as="att_tag">
                                             <a t-attf-href="/channel/#{slug(channel)}?tags=#{att_tag.name}">
                                                 <span t-attf-class="badge slide-badge #{tags and tags == att_tag.name and 'badge-active' ''}" t-field="att_tag.name"/>
@@ -305,7 +308,6 @@
                     </h3>
 
                     <div class="pull-left mb16 col-md-6" t-if="slideview.tag_ids" style="padding-left: 0px;">
-                        <i class="fa fa-tags"></i>
                         <t t-foreach="slideview.tag_ids" t-as="att_tag">
                             <a t-att-href="url_for('/channel/#{slug(channel)}/view/#{slug(attachment)}') + '?' + keep_query( 'search', 'filters', 'sorting' ,tags=att_tag.name)">
                                 <span t-attf-class="badge slide-badge #{tags and tags == att_tag.name and 'badge-active' ''}" t-field="att_tag.name"/>
