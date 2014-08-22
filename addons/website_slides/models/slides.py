@@ -97,7 +97,10 @@ class ir_attachment(osv.osv):
     _defaults = {
         'is_slide': _get_slide_setting,
         'slide_type':_get_slide_type,
-        'slide_views':_get_slide_views
+        'slide_views':_get_slide_views,
+        'likes': 0,
+        'dislikes':0
+
     }
 
     def set_viewed(self, cr, uid, ids, context=None):

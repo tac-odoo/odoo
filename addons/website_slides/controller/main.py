@@ -234,7 +234,24 @@ class main(http.Controller):
         tags = request.registry['ir.attachment.tag'].search_read(request.cr, request.uid, [], ['name'], context=request.context)
         data = [tag['name'] for tag in tags]
         return simplejson.dumps(data)
+    
+    @http.route('/channel/<model("document.directory"):channel>/view/<model("ir.attachment"):slideview>/like', type='json', auth="public", website=True)
+    def slide_like(self, channel, slideview, **post):
+        cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
+        slide_obj = pool['ir.attachment']
+        likes = slideview.likes + 1
+        if slide_obj.write(cr, uid, slideview.id, {'likes':likes}, context):
+            return likes
+        return {'error': 'Error on wirte Data'}
 
+    @http.route('/channel/<model("document.directory"):channel>/view/<model("ir.attachment"):slideview>/dislike', type='json', auth="public", website=True)
+    def slide_dislike(self, channel, slideview, **post):
+        cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
+        slide_obj = pool['ir.attachment']
+        dislikes = slideview.dislikes + 1
+        if slide_obj.write(cr, uid, slideview.id, {'dislikes':dislikes}, context):
+            return dislikes
+        return {'error': 'Error on wirte Data'}
 
     @http.route('/slides/get_channel', type='json', auth="public", website=True)
     def get_channel(self, **post):

@@ -3,6 +3,16 @@ jQuery(document).ready(function() {
     $('.slide-container').click(function(ev){
         window.location = $(this).find("a").attr("href");
     });
+    
+    $('.slide-like, .slide-unlike').on('click' ,function(ev){
+        ev.preventDefault();
+        var $link = $(ev.currentTarget);
+        openerp.jsonRpc($link.data('href'), 'call', {}).then(function(data){
+                $($link.data('count-el')).text(data);
+
+                $link.attr("disabled", true)
+        });
+    });
 
     /*modify embed code based on options*/
     jQuery.modifyembedcode = function(currentVal) {
