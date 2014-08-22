@@ -42,7 +42,10 @@ class TableExporter(http.Controller):
         if snapshot_id:
             name = snap.browse(cr,uid,[snapshot_id],context=context).name
             snap.unlink(cr, uid, [snapshot_id], context=context)
-            request.session['snapshot_id'] = 0
+            if snapshot_id==id_master:
+                request.session['snapshot_id'] = 0
+            else:
+                request.session['snapshot_id'] = id_master
         else:
             name = "nothing to do"
         return name
