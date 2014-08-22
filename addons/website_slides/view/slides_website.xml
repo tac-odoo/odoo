@@ -242,9 +242,11 @@
         <!-- slide detail view -->
         <template id='detailview' name="Slide Detail">
             <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
-                <div class="embed-responsive embed-responsive-4by3 embed-responsive-item">
-                    <iframe t-if="slideview.datas" t-attf-src="/website_slides/static/lib/pdfjs/web/viewer.html?file=#{slideview.url}"></iframe>
-                    <iframe t-if="slideview.youtube_id" t-attf-src="//www.youtube.com/embed/#{slideview.youtube_id}?theme=light"></iframe>
+                <div t-if="slideview.datas" class="embed-responsive embed-responsive-4by3 embed-responsive-item">
+                    <iframe t-attf-src="/website_slides/static/lib/pdfjs/web/viewer.html?file=#{slideview.url}"></iframe>
+                </div>
+                <div t-if="slideview.youtube_id" class="embed-responsive embed-responsive-16by9 embed-responsive-item">
+                    <iframe t-attf-src="//www.youtube.com/embed/#{slideview.youtube_id}?theme=light"></iframe>
                 </div>
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
                     <h3 class="oe-slides-text-truncation">
@@ -254,7 +256,7 @@
                     <div class="pull-left mb16 col-md-6" t-if="slideview.tag_ids" style="padding-left: 0px;">
                         <i class="fa fa-tags"></i>
                         <t t-foreach="slideview.tag_ids" t-as="att_tag">
-                            <a t-att-href="url_for('/slides') + '?' + keep_query( 'search', 'filters', 'sorting' ,tags=att_tag.name)">
+                            <a t-att-href="url_for('/channel/#{slug(channel)}/view/#{slug(attachment)}') + '?' + keep_query( 'search', 'filters', 'sorting' ,tags=att_tag.name)">
                                 <span t-attf-class="badge slide-badge #{tags and tags == att_tag.name and 'badge-active' ''}" t-field="att_tag.name"/>
                             </a>
                         </t>
