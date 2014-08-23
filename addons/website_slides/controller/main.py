@@ -91,7 +91,7 @@ class main(http.Controller):
         user = request.registry['res.users'].browse(cr, uid, request.uid, context)
 
         attachment = request.registry['ir.attachment']
-        domain = [("is_slide","=","True")]
+        domain = [('is_slide','=','True')]
 
         if channel:
             domain += [('parent_id','=',channel.id)]
