@@ -38,15 +38,29 @@ class document_directory(osv.osv):
     _columns = {
         'website_published': fields.boolean('Publish', help="Publish on the website", copy=False),
         'description': fields.text('Website Description', tranalate=True),
-        'website_description': fields.html('Website Description', tranalate=True)
+        'website_description': fields.html('Website Description', tranalate=True),
+        'slide_id': fields.many2one('ir.attachment', 'Custom Slide'),
+        'promote': fields.selection([('donot','Do not Promote'), ('latest','Latest Published'), ('mostview','Most Viewed'), ('custom','User Defined')], string="Method")
+    }
+
+    _defaults = {
+        'promote': 'donot'
     }
 
     def get_mostviewed(self, cr, uid, channel, context):
         attachment = self.pool.get('ir.attachment')
-
-        domain = [('website_published', '=', True), ('parent_id','=',channel.id)]
-        famous_id = attachment._search(cr, uid, domain, limit=1, offset=0, order="slide_views desc", context=context)
-        famous = attachment.browse(cr, uid, famous_id, context=context)
+        
+        famous = None
+        if channel.promote == 'mostview':
+            domain = [('website_published', '=', True), ('parent_id','=',channel.id)]
+            famous_id = attachment._search(cr, uid, domain, limit=1, offset=0, order="slide_views desc", context=context)
+            famous = attachment.browse(cr, uid, famous_id, context=context)
+        elif channel.promote == 'latest':
+            domain = [('website_published', '=', True), ('parent_id','=',channel.id)]
+            famous_id = attachment._search(cr, uid, domain, limit=1, offset=0, order="write_date desc", context=context)
+            famous = attachment.browse(cr, uid, famous_id, context=context)
+        elif channel.promote == 'custom':
+                famous = channel.slide_id
 
         return famous
 

@@ -62,22 +62,19 @@
             <div class="row">
                 <div class="panel panel-default" style="border-radius: 0px;">
                     <div class="panel-body" style="padding: 0px;">
-
-                        <div class="embed-responsive embed-responsive-4by3 embed-responsive-item">
-                            <iframe t-attf-src="//www.youtube.com/embed/#{famous.youtube_id}?theme=light"></iframe>
-                        </div>
-
-                        <!--img t-if="famous.youtube_id" t-att-src="famous.image" style="width: 100%;" class="img-responsive"/-->
+                        <div class="embed-responsive embed-responsive-16by9 embed-responsive-item">
+                             <iframe t-attf-src="//www.youtube.com/embed/#{famous.youtube_id}?theme=light"></iframe>
+                         </div>
                     </div>
-                    <!--div class="panel-footer" style="position: relative;">
-                        <div class="text-center">
-                            <div class="text-center">
+                    <div class="panel-footer" style="position: relative;">
+                        <div class="text-right">
+                            <div class="text-right">
                                 <a t-attf-href="/channel/#{slug(channel)}/view/#{slug(famous)}" role="button">
-                                    <i class="fa fa-chevron-circle-right fa-2x"></i> 
+                                    <p class="label label-success">Most Viewed</p>
                                 </a>
                             </div>
                         </div>
-                    </div-->
+                    </div>
                 </div>
             </div>
         </template>
@@ -90,6 +87,25 @@
                 <script type="text/javascript" src="/website_slides/static/src/js/pdfviewer.js"></script>
             </t>
             <t t-call="website.layout">
+                <div t-if="not famous and not is_public_user" class="wrap mt16 mb0">
+                    <section>
+                        <div class="container">
+                            <div class="alert alert-danger alert-dismissable">
+                                <button type="button" class="close">
+                                    <span aria-hidden="true"></span>
+                                    <span class="sr-only">Close</span>
+                                </button>
+                                <p>
+                                    Review your channel settings to promote your most viewed or recent published presentation
+                                </p>
+                                <a t-attf-href="/web#id=#{channel.id}" class="fa fa-arrow-right mt8">
+                                    Channel Setting
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
                 <div t-if="famous" class="wrap" style="background-color: #f8f8f8;color: #1c1c1c;border-bottom: 1px solid #CCCCCC;">
                     <section>
                         <div class="container">
@@ -138,7 +154,7 @@
                                     <div class="mt8 mb16 col-md-16" t-if="famous.tag_ids" style="padding-left: 0px;">
                                         <t t-foreach="famous.tag_ids" t-as="att_tag">
                                             <a t-attf-href="/channel/#{slug(channel)}?tags=#{att_tag.name}">
-                                                <span t-attf-class="badge slide-badge #{tags and tags == att_tag.name and 'badge-active' ''}" t-field="att_tag.name"/>
+                                                <span t-attf-class="label label-default #{tags and tags == att_tag.name and 'label-primary' ''}" t-field="att_tag.name"/>
                                             </a>
                                         </t>
                                     </div>
@@ -157,7 +173,7 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mt16">
                     <div style="border-bottom: 1px solid #CCC;padding-bottom: 5px;">
                         <span>
-                            <a class="label label-success" href="#">Presentations</a>
+                            <a class="label label-success" href="#"><t t-esc="attachment_count"/> Presentations</a>
                             <a href="#">Videos</a>
                             <a href="#">Documents</a>
                         </span>
@@ -189,9 +205,13 @@
                         <div t-foreach="channels" t-as="channel" class="col-sm-4 mb32">
                             <t t-set="famous" t-value="channel.get_mostviewed(channel)"/> 
                             <div class="oe-channel-grid-thumbnail">
-                                <a t-attf-href="/channel/#{slug(channel)}">
+                                <a t-attf-href="/channel/#{slug(channel)}" t-if="famous">
                                     <img t-if="not famous.youtube_id" t-attf-src="/slides/thumb/#{famous.id}" style="width: 100%;" class="img-responsive"/>
                                     <img t-if="famous.youtube_id" t-att-src="famous.image" style="width: 100%;" class="img-responsive"/>
+                                </a>
+
+                                <a t-attf-href="/channel/#{slug(channel)}" t-if="not famous">
+                                    <img src="/website_slides/static/description/channel-default.jpg" class="img-responsive" style="width: 100%;opacity: .5;"/>
                                 </a>
 
                                 <div style="padding: 5px;">
@@ -284,7 +304,7 @@
                             <!--i class="fa fa-tags"></i-->
                             <t t-foreach="attachment.tag_ids" t-as="att_tag">
                                 <a t-attf-href="/channel/#{slug(channel)}/?tags=#{att_tag.name}">
-                                    <span t-attf-class="badge slide-badge #{tags and tags == att_tag.name and 'badge-active' ''}" t-field="att_tag.name"/>
+                                    <span t-attf-class="label label-default #{tags and tags == att_tag.name and 'label-primary' ''}" t-field="att_tag.name"/>
                                 </a>
                             </t>
                         </p>
@@ -313,7 +333,7 @@
                     <div class="pull-left mb16 col-md-6" t-if="slideview.tag_ids" style="padding-left: 0px;">
                         <t t-foreach="slideview.tag_ids" t-as="att_tag">
                             <a t-att-href="url_for('/channel/#{slug(channel)}/view/#{slug(attachment)}') + '?' + keep_query( 'search', 'filters', 'sorting' ,tags=att_tag.name)">
-                                <span t-attf-class="badge slide-badge #{tags and tags == att_tag.name and 'badge-active' ''}" t-field="att_tag.name"/>
+                                <span t-attf-class="label label-default #{tags and tags == att_tag.name and 'label-primary' ''}" t-field="att_tag.name"/>
                             </a>
                         </t>
                     </div>

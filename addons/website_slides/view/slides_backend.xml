@@ -217,6 +217,16 @@
                                 <label colspan="4" string="These groups, however, do NOT apply to children directories, which must define their own groups." />
                                 <field name="group_ids" colspan="4" nolabel="1"/>
                             </page>
+                            <page string="Promote">
+                                <group>
+                                    <group>
+                                        <field name="promote"/>
+                                    </group>
+                                    <group>
+                                        <field name="slide_id" domain="[('parent_id','=',id), ('website_published','=',True)]"/>
+                                    </group>
+                                </group>
+                            </page>
                         </notebook>
                     </sheet>
                     <div class="oe_chatter">
