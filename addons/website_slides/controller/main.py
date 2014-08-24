@@ -76,7 +76,7 @@ class main(http.Controller):
         ids = directory.search(cr, uid, [('website_published','=', True)], context=context)
         
         if len(ids) <= 1:
-            return request.redirect("/channel/%s" % ids[0])
+            return request.redirect("/channel/%s?filters=ppt&amp;sorting=date" % ids[0])
 
         channels = directory.browse(cr, uid, ids, context)
         return request.website.render('website_slides.channels', {'channels': channels, 'user': user, 'is_public_user': user.id == request.website.user_id.id,})
@@ -87,7 +87,7 @@ class main(http.Controller):
                  ], type='http', auth="public", website=True)
     def slides(self, channel=0, page=1, filters='all', sorting='creation', search='', tags=''):
         cr, uid, context = request.cr, SUPERUSER_ID, request.context
-        
+
         user = request.registry['res.users'].browse(cr, uid, request.uid, context)
         attachment = request.registry['ir.attachment']
         domain = [('is_slide','=','True'), ('parent_id','=',channel.id)]
