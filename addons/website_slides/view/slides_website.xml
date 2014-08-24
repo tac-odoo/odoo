@@ -142,7 +142,6 @@
                                         <p style="padding-left: 0px;" class="col-md-8 mt8 small">You will receive an email when new presentation will be publised.</p>
                                     </div>
                                 </div>
-                                <!--div class="label label-success col-md-16" href="#">Most Viewed</div-->
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
                                     <h3 class="oe-slides-text-truncation mt0">
@@ -173,14 +172,16 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mt16">
                     <div style="border-bottom: 1px solid #CCC;padding-bottom: 5px;">
                         <span>
-                            <a class="label label-success" href="#"><t t-esc="attachment_count"/> Presentations</a>
-                            <a class="label label-default" href="#">Videos</a>
-                            <a class="label label-default" href="#">Documents</a>
+                            <a t-attf-class="label label-success" t-attf-href="/channel/#{slug(channel)}"><span t-esc="all_count"/> All</a>
+
+                            <a t-attf-class="label label-default #{filters and filters == 'ppt' and 'label-success' ''}" href="?filters=ppt"><span t-if="filters == 'ppt'"><span t-esc="attachment_count"/></span> Presentations</a>
+                            <a t-attf-class="label label-default #{filters and filters == 'video' and 'label-success' ''}" href="?filters=video"><span t-if="filters == 'video'"><span t-esc="attachment_count"/></span> Videos</a>
+                            <a t-attf-class="label label-default #{filters and filters == 'doc' and 'label-success' ''}" href="?filters=doc"><span t-if="filters == 'doc'"><span t-esc="attachment_count"/></span> Documents</a>
                         </span>
 
                         <span class="pull-right">
-                            <a class="label label-danger" href="#">Latest</a>
-                            <a class="label label-default" href="#">Most Viewed</a>
+                            <a t-attf-class="label label-default #{sorting and sorting == 'date' and 'label-danger' ''}" href="?sorting=date">Latest</a>
+                            <a t-attf-class="label label-default #{sorting and sorting == 'view' and 'label-danger' ''}" href="?sorting=view">Most Viewed</a>
                         </span>
                     </div>
 
@@ -223,9 +224,9 @@
                                     <p t-field="channel.description"/>
                                     <div class="mt8">
                                         <span>
-                                            <a class="label label-success" href="#"><t t-esc="attachment_count"/> Presentations</a>
-                                            <a class="label label-warning" href="#">Videos</a>
-                                            <a class="label label-info" href="#">Documents</a>
+                                            <p class="label label-success">Presentations</p>
+                                            <p class="label label-warning">Videos</p>
+                                            <p class="label label-info">Documents</p>
                                         </span>
                                     </div>
                                     <div class="mt8">

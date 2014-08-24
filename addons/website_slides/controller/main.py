@@ -93,13 +93,14 @@ class main(http.Controller):
         attachment = request.registry['ir.attachment']
         domain = [('is_slide','=','True')]
 
+        if request.uid == 3:
+            domain += [('website_published', '=', True)]
+        all_count = attachment.search(cr, uid, domain, count=True, context=context)
+
         if channel:
             domain += [('parent_id','=',channel.id)]
         if search:
             domain += [('name', 'ilike', search)]
-
-        if request.uid == 3:
-            domain += [('website_published', '=', True)]
 
         if tags:
             domain += [('tag_ids.name', '=', tags)]
@@ -144,6 +145,7 @@ class main(http.Controller):
         
         values = {
             'attachment_ids': attachment_ids,
+            'all_count':all_count,
             'attachment_count': attachment_count,
             'pager': pager,
             'filters': filters,
@@ -155,6 +157,7 @@ class main(http.Controller):
             'famous':famous,
             'is_public_user': user.id == request.website.user_id.id,
         }
+
         return request.website.render('website_slides.home', values)
 
 
