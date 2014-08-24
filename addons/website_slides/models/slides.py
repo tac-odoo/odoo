@@ -18,10 +18,15 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import json
+
+import urllib2
+
+from openerp.tools.translate import _
+
 from openerp.osv import fields, osv
 from urlparse import urlparse,parse_qs
-import urllib2
-import json
+from openerp.addons.website.models.website import slug
 
 
 class ir_attachment_tags(osv.osv):
@@ -121,7 +126,8 @@ class ir_attachment(osv.osv):
         'slide_type':_get_slide_type,
         'slide_views':_get_slide_views,
         'likes': 0,
-        'dislikes':0
+        'dislikes':0,
+        'website_published':False
     }
 
     def set_viewed(self, cr, uid, ids, context=None):
@@ -130,7 +136,30 @@ class ir_attachment(osv.osv):
 
     def trim_lines(self, cr, uid, description, *args):
         return '<br/>'.join(description.split('\n')[0:3])
-         
+
+    def notify_published(self, cr, uid, slide_id, context):
+        base_url = self.pool['ir.config_parameter'].get_param(cr, uid, 'web.base.url')
+        slide = self.browse(cr, uid, slide_id, context)
+
+        if not slide.website_published:
+            return False
+
+        body = _(
+            '<p>A new presentation <i>%s</i> has been published under %s channel. <a href="%s/channel/%s/view/%s">Click here to access the question.</a></p>' %
+            (slide.name, slide.parent_id.name, base_url, slug(slide.parent_id), slug(slide))
+        )
+        partner_ids = []
+        for partner in slide.parent_id.message_follower_ids:
+            partner_ids.append(partner.id)
+
+        self.pool.get('document.directory').message_post(cr, uid, [slide.parent_id.id], subject=slide.name, body=body, subtype='website_slide.new_slides', partner_ids=partner_ids, context=context)
+
+    def write(self, cr, uid, ids, values, context=None):
+        success = super(ir_attachment, self).write(cr, uid, ids, values, context)
+        for slide_id in ids:
+            self.notify_published(cr, uid, slide_id, context)
+        return success
+
     def create(self, cr, uid, values, context=None):
         if values.get('is_slide'):
             if values.get('datas_fname'):
@@ -143,7 +172,10 @@ class ir_attachment(osv.osv):
                         values['image'] = statistics['items'][0]['snippet']['thumbnails']['medium']['url']
                     if statistics['items'][0].get('statistics'):
                         values['slide_views'] = statistics['items'][0]['statistics']['viewCount']
-        return super(ir_attachment, self).create(cr, uid, values, context)
+
+        slide_id = super(ir_attachment, self).create(cr, uid, values, context)
+        self.notify_published(cr, uid, slide_id, context)
+        return slide_id
 
     def search(self, cr, uid, args, offset=0, limit=None, order=None, context=None, count=False):
         ids = super(ir_attachment, self)._search(cr, uid, args, offset=offset, limit=limit, order=order, context=context, count=False)

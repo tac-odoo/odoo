@@ -26,5 +26,13 @@
             <field name="description">Employee channel use to publish internal slides of company.</field>
         </record>
 
+        <!-- Channel subtypes -->
+        <record id="new_slides" model="mail.message.subtype">
+            <field name="name">Slide Published</field>
+            <field name="res_model">document.directory</field>
+            <field name="default" eval="True"/>
+            <field name="description">Slide Published</field>
+        </record>
+
     </data>
 </openerp>
