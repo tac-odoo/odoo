@@ -217,12 +217,12 @@
 
                                 <div style="padding: 5px;">
                                     <a t-attf-href="/channel/#{slug(channel)}">
-                                        <h4 class="oe-slides-text-truncation">
+                                        <p class="oe-slides-text-truncation mt4 mb4 lead">
                                             <t t-esc="channel.name"/>
-                                        </h4>
+                                        </p>
                                     </a>
                                     <p t-field="channel.description"/>
-                                    <div class="mt8">
+                                    <div class="mt4">
                                         <span>
                                             <p class="label label-success">Presentations</p>
                                             <p class="label label-warning">Videos</p>
@@ -246,7 +246,7 @@
                                             </t>
                                         </t>
                                     </div>
-                                    <div class="mt8">
+                                    <div class="mt4">
                                         <t t-call="website.publish_management">
                                             <t t-set="object" t-value="channel"/>
                                             <t t-set="publish_edit" t-value="True"/>
