@@ -89,9 +89,8 @@ class main(http.Controller):
         cr, uid, context = request.cr, SUPERUSER_ID, request.context
         
         user = request.registry['res.users'].browse(cr, uid, request.uid, context)
-
         attachment = request.registry['ir.attachment']
-        domain = [('is_slide','=','True')]
+        domain = [('is_slide','=','True'), ('parent_id','=',channel.id)]
 
         if request.uid == 3:
             domain += [('website_published', '=', True)]
@@ -134,6 +133,7 @@ class main(http.Controller):
             url_args['sorting'] = sorting
         if tags:
             url_args['tags'] = tags
+
         pager = request.website.pager(url=url, total=attachment_count, page=page,
                                       step=self._slides_per_page, scope=self._slides_per_page,
                                       url_args=url_args)
