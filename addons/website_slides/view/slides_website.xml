@@ -174,13 +174,13 @@
                     <div style="border-bottom: 1px solid #CCC;padding-bottom: 5px;">
                         <span>
                             <a class="label label-success" href="#"><t t-esc="attachment_count"/> Presentations</a>
-                            <a href="#">Videos</a>
-                            <a href="#">Documents</a>
+                            <a class="label label-default" href="#">Videos</a>
+                            <a class="label label-default" href="#">Documents</a>
                         </span>
 
                         <span class="pull-right">
                             <a class="label label-danger" href="#">Latest</a>
-                            <a href="#">Most Viewed</a>
+                            <a class="label label-default" href="#">Most Viewed</a>
                         </span>
                     </div>
 
@@ -221,22 +221,30 @@
                                         </h4>
                                     </a>
                                     <p t-field="channel.description"/>
-
-                                    <t groups="base.group_public">
-                                        <t t-set="public_user" t-value="True"/>
-                                    </t>
-                                    <t t-if="not public_user">
-                                        <t t-call="website_mail.follow">
-                                            <t t-set="email" t-value="user.email"/>
-                                            <t t-set="object" t-value="channel"/>
+                                    <div class="mt8">
+                                        <span>
+                                            <a class="label label-success" href="#"><t t-esc="attachment_count"/> Presentations</a>
+                                            <a class="label label-warning" href="#">Videos</a>
+                                            <a class="label label-info" href="#">Documents</a>
+                                        </span>
+                                    </div>
+                                    <div class="mt8">
+                                        <t groups="base.group_public">
+                                            <t t-set="public_user" t-value="True"/>
                                         </t>
-                                    </t>
-                                    <t t-if="public_user">
-                                        <t t-call="website_mail.follow">
-                                            <t t-set="email" t-value="user.email"/>
-                                            <t t-set="object" t-value="channel"/>
+                                        <t t-if="not public_user">
+                                            <t t-call="website_mail.follow">
+                                                <t t-set="email" t-value="user.email"/>
+                                                <t t-set="object" t-value="channel"/>
+                                            </t>
                                         </t>
-                                    </t>
+                                        <t t-if="public_user">
+                                            <t t-call="website_mail.follow">
+                                                <t t-set="email" t-value="user.email"/>
+                                                <t t-set="object" t-value="channel"/>
+                                            </t>
+                                        </t>
+                                    </div>
                                     <div class="mt8">
                                         <t t-call="website.publish_management">
                                             <t t-set="object" t-value="channel"/>
