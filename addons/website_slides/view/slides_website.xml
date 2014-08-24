@@ -145,7 +145,7 @@
                                 <!--div class="label label-success col-md-16" href="#">Most Viewed</div-->
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
-                                    <h3 class="oe-slides-text-truncation">
+                                    <h3 class="oe-slides-text-truncation mt0">
                                         <a t-attf-href="/channel/#{slug(channel)}/view/#{slug(famous)}">
                                             <t t-esc="famous.name"/>
                                         </a>
