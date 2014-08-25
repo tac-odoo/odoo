@@ -292,7 +292,7 @@ class main(http.Controller):
         if post.get('url') and not post.get('datas', False):
             post['slide_type'] = 'video'
         elif post.get('datas') and not post.get('url', False):
-            post['slide_type'] = 'ppt'
+            post['slide_type'] = 'presentation'
 
         slide_id = slide_obj.create(cr, uid, post, context=context)
-        return request.redirect("/channel/%s/view/%s" % (post.get('parent_id'), slide_id))
+        return request.redirect("/channel/%s/%s/view/%s" % (post.get('parent_id'), post['slide_type'], slide_id))
