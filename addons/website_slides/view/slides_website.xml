@@ -304,7 +304,7 @@
                     <span t-if="not attachment.website_published" class="label label-danger" style="position: absolute;right: 20px;top: 7px;">Not Published</span>
 
                     <div style="padding: 5px;">
-                        <a t-attf-href="/channel/#{slug(channel)}/view/#{slug(attachment)}">
+                        <a t-attf-href="/channel/#{slug(channel)}/#{types}/view/#{slug(attachment)}">
                             <h4 class="oe-slides-text-truncation">
                                 <t t-esc="attachment.name"/>
                             </h4>
