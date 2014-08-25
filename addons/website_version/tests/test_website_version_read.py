@@ -1,8 +1,5 @@
 from openerp.addons.website_version.tests.test_website_version_base import TestWebsiteVersionBase
 
-
-
-
 class TestWebsiteVersiontRead(TestProjectBase):
 
     def test_read_with_right_context(self):
