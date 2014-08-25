@@ -111,7 +111,7 @@ class ir_attachment(osv.osv):
         return context.get('is_slide', False)
 
     def _get_slide_type(self, cr, uid, context):
-        return context.get('slide_type', 'ppt')
+        return context.get('slide_type', 'presentation')
 
     def _get_slide_views(self, cr, uid, context):
         return context.get('slide_views', 0)
