@@ -68,12 +68,6 @@ class hr_evaluation(models.Model):
         ('done', 'Done')
     ]
 
-    _track = {
-        'state': {
-            'hr_evaluation.mt_apprasial_stage': lambda self, cr, uid, obj, ctx=None: True,
-        },
-    }
-
     @api.one
     def _set_default_template(self):
         model, template_id = self.env['ir.model.data'].get_object_reference('hr_evaluation', 'email_template_appraisal')
@@ -281,10 +275,20 @@ class hr_evaluation(models.Model):
         return self.log_meeting(self.meeting_id.name, self.meeting_id.start, self.meeting_id.duration)
 
     @api.multi
+    @api.depends('employee_id')
+    def name_get(self):
+        result = []
+        for hr_evaluation in self:
+            result.append((hr_evaluation.id, '%s' % (hr_evaluation.employee_id.name_related)))
+        return result
+
+    @api.multi
     def write(self, vals):
         if vals.get('state') == 'pending' and not self.env.context.get('send_mail_status'): #avoid recursive process
             self.button_sent_appraisal()
         if vals.get('interview_deadline') and not vals.get('meeting_id'):
+            if datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT) > vals.get('interview_deadline'):
+                raise Warning(_("The interview date can not be in the past"))
             self.create_update_meeting(vals) #creating employee meeting and interview date
         if vals.get('apprasial_manager_ids'):
             emp_obj = self.env['hr.employee']
@@ -298,7 +302,8 @@ class hr_evaluation(models.Model):
     def unlink(self):
         for appraisal in self:
             if appraisal.state != 'new':
-                raise Warning(_("You cannot delete an appraisal which is not 'To Start' sate."))
+                eva_state = dict(self.EVALUATION_STATE)
+                raise Warning(_("You cannot delete appraisal which is in '%s' state") % (eva_state[appraisal.state]))
         return super(hr_evaluation, self).unlink()
 
     @api.cr_uid_ids_context

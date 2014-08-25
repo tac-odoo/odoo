@@ -48,13 +48,5 @@
                 ]]>
             </field>
         </record>
-
-        <!-- Apprasia-related subtypes for messaging / Chatter -->
-        <record id="mt_apprasial_stage" model="mail.message.subtype">
-            <field name="name">Stage Changed</field>
-            <field name="res_model">hr_evaluation.evaluation</field>
-            <field name="default" eval="False"/>
-            <field name="description">Stage changed</field>
-        </record>
     </data>
 </openerp>
