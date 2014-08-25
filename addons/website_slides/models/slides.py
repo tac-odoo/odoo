@@ -145,8 +145,8 @@ class ir_attachment(osv.osv):
             return False
 
         body = _(
-            '<p>A new presentation <i>%s</i> has been published under %s channel. <a href="%s/channel/%s/view/%s">Click here to access the question.</a></p>' %
-            (slide.name, slide.parent_id.name, base_url, slug(slide.parent_id), slug(slide))
+            '<p>A new presentation <i>%s</i> has been published under %s channel. <a href="%s/channel/%s/%s/view/%s">Click here to access the question.</a></p>' %
+            (slide.name, slide.parent_id.name, base_url, slug(slide.parent_id), slide.slide_type, slug(slide))
         )
         partner_ids = []
         for partner in slide.parent_id.message_follower_ids:
