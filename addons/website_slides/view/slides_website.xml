@@ -338,7 +338,7 @@
                         <t t-set="pdf_file" t-value="slideview.url"/>
                     </t>
                 </t>
-                <div t-if="slideview.youtube_id" class="embed-responsive embed-responsive-16by9 embed-responsive-item">
+                <div t-if="slideview.youtube_id" class="embed-responsive embed-responsive-16by9 embed-responsive-item mb4">
                     <iframe t-attf-src="//www.youtube.com/embed/#{slideview.youtube_id}?theme=light"></iframe>
                 </div>
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
