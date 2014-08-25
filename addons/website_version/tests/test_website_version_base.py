@@ -2,8 +2,8 @@ from openerp.tests import common
 
 class TestWebsiteVersionBase(common.TransactionCase):
 
-	def setUp(self):
-		super(TestWebsiteVersionBase, self).setUp()
+    def setUp(self):
+        super(TestWebsiteVersionBase, self).setUp()
         cr, uid = self.cr, self.uid
 
         # Usefull models
@@ -20,7 +20,7 @@ class TestWebsiteVersionBase(common.TransactionCase):
         website_ref = self.registry('ir.model.data').get_object_reference(cr, uid, 'website_version', 'second_website')
         self.website_id = website_ref and website_ref[1] or False
         view_0_0_0_0_ref = self.registry('ir.model.data').get_object_reference(cr, uid, 'website_version', 'homepage_0_0_0_0')
-        self.view_0_0_0_0_id = result_0_0_0_0_ref and result_0_0_0_0_ref[1] or False
+        self.view_0_0_0_0_id = view_0_0_0_0_ref and view_0_0_0_0_ref[1] or False
         self.arch_0_0_0_0 = self.ir_ui_view.browse(cr, uid, [self.view_0_0_0_0_id], context=None)[0].arch
         self.vals = {'arch':
                 """<t name="Homepage" priority="29" t-name="website.homepage">

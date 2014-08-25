@@ -26,7 +26,7 @@ class ViewVersion(osv.Model):
 
         if snapshot_id and not context.get('mykey'):
             ctx = dict(context, mykey=True)
-            snap = request.registry['website_version.snapshot']
+            snap = self.pool['website_version.snapshot']
             snapshot=snap.browse(cr, uid, [snapshot_id], context=ctx)[0]
             snapshot_date=snapshot.create_date
             snap_ids=[]
@@ -68,7 +68,7 @@ class ViewVersion(osv.Model):
         if snapshot_id and not context.get('mykey'):
             #from pudb import set_trace; set_trace()
             ctx = dict(context, mykey=True)
-            snap = request.registry['website_version.snapshot']
+            snap = self.pool['website_version.snapshot']
             snapshot=snap.browse(cr, uid, [snapshot_id], context=ctx)[0]
             snap_ids=[]
             snap_trad={}
