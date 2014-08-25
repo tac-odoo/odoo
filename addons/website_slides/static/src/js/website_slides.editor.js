@@ -7,21 +7,12 @@
 
     website.EditorBarContent.include({
         new_slide: function() {
-            var dialog = new website.editor.AddSlideDialog(this);
-            dialog.fetch_channel().then(function(channels){
-                dialog.channels = channels;
-                dialog.appendTo(document.body);
-            }).fail(function (err, data) {
-                var $error = $(openerp.qweb.render('website.addslide.error'));
-                $error.appendTo("body");
-                $error.modal('show');
-            });
-
+            new website.editor.AddSlideDialog(this).appendTo(document.body);
         },
 
     });
     website.editor.AddSlideDialog = website.editor.Dialog.extend({
-        template: 'website.addslide.dialog',
+        template: 'website.addslide.loading',
         events: _.extend({}, website.editor.Dialog.prototype.events, {
             'change .slide-upload': 'slide_upload',
             'click .list-group-item': function(ev) {
@@ -30,6 +21,7 @@
             }
         }),
         init: function(){
+            var self = this;
             this._super.apply(this, arguments);
             this.file = {};
         },
@@ -39,10 +31,22 @@
         },
 
         start: function (){
+            var self = this;
             this.$('.save').text('Create');
+            this.$('.modal-footer').hide();
             var r = this._super.apply(this, arguments);
-            this.set_tags();
+            this.fetch_channel().then(function(channels){
+                self.channels = channels; 
+                self.load_form();
+                self.set_tags();
+            }).fail(function(){
+                self.$('.modal-body').html("<h4>Error occured on fetching data.</h4>");
+            });
             return r;
+        },
+        load_form: function(){
+            this.$('.modal-body').html(openerp.qweb.render('website.addslide.dialog', {widget: this}));
+            this.$('.modal-footer').show();
         },
         slide_upload: function(ev){
             var self = this;

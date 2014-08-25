@@ -1,7 +1,5 @@
 <templates id="template" xml:space="preserve">
     <t t-name="website.addslide.dialog">
-        <t t-call="website.editor.dialog">
-            <t t-set="title">Add Presentation</t>
             <form class="clearfix form-horizontal">
 
                 <div class="control-group">
@@ -64,28 +62,16 @@
                 </div>
                 <canvas id="the-canvas" style="display: none;"></canvas>
             </form>
+    </t>
+
+    <t t-name="website.addslide.loading">
+        <t t-call="website.editor.dialog">
+            <t t-set="title">Add Presentation</t>
+            <h4>
+                <i class="fa fa-spinner fa-spin"></i>
+                Loading... 
+            </h4>
         </t>
     </t>
 
-    <t t-name="website.addslide.error">
-        <div class="modal fade" tabindex="-1" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button title="Close" type="button" class="close" data-dismiss="modal">×</button>
-                        <div class="h2">Error</div>
-                    </div>
-                    <div class="modal-body">
-                        <h4>
-                            <p>Error occurred on fetching the data.</p>
-                            <p>make sure server is operating correctly</p>
-                        </h4>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-dismiss="modal" class="btn btn-primary">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-     </t>
 </templates>
