@@ -86,7 +86,7 @@ class ir_attachment(osv.osv):
     _order = "id desc"
     _columns = {
         'is_slide': fields.boolean('Is Slide'),
-        'slide_type': fields.selection([('ppt', 'Presentation'), ('doc', 'Document'), ('video', 'Video')], 'Type'),
+        'slide_type': fields.selection([('presentation', 'Presentation'), ('document', 'Document'), ('video', 'Video')], 'Type'),
         'tag_ids': fields.many2many('ir.attachment.tag', 'rel_attachments_tags', 'attachment_id', 'tag_id', 'Tags'),
         'image': fields.binary('Thumb'),
         'slide_views': fields.integer('Number of Views'),
