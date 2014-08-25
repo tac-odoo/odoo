@@ -76,7 +76,7 @@ class main(http.Controller):
         ids = directory.search(cr, uid, [('website_published','=', True)], context=context)
         
         if len(ids) <= 1:
-            return request.redirect("/channel/%s?filters=ppt&amp;sorting=date" % ids[0])
+            return request.redirect("/channel/%s?filters=ppt&sorting=date" % ids[0])
 
         channels = directory.browse(cr, uid, ids, context)
         return request.website.render('website_slides.channels', {'channels': channels, 'user': user, 'is_public_user': user.id == request.website.user_id.id,})
@@ -242,7 +242,7 @@ class main(http.Controller):
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
         slide_obj = pool['ir.attachment']
         likes = slideview.likes + 1
-        if slide_obj.write(cr, uid, slideview.id, {'likes':likes}, context):
+        if slide_obj.write(cr, uid, [slideview.id], {'likes':likes}, context):
             return likes
         return {'error': 'Error on wirte Data'}
 
@@ -251,7 +251,7 @@ class main(http.Controller):
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
         slide_obj = pool['ir.attachment']
         dislikes = slideview.dislikes + 1
-        if slide_obj.write(cr, uid, slideview.id, {'dislikes':dislikes}, context):
+        if slide_obj.write(cr, uid, [slideview.id], {'dislikes':dislikes}, context):
             return dislikes
         return {'error': 'Error on wirte Data'}
 
