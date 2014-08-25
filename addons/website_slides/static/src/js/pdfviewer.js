@@ -5,7 +5,7 @@ jQuery(document).ready(function() {
 // security restrictions, we have to use a file server with special headers
 // (CORS) - most servers don't support cross-origin browser requests.
 //
-var url = '/website_slides/odoo-india-working-in-support.pdf';
+var url = document.getElementById('pdf_file').value;
 
 //
 // Disable workers to avoid yet another cross-origin issue (workers need the URL of
@@ -17,7 +17,7 @@ var pdfDoc = null,
     pageNum = 1,
     pageRendering = false,
     pageNumPending = null,
-    scale = 1,
+    scale = 3,
     canvas = document.createElement('canvas'),
     ctx = canvas.getContext('2d'),
     pdfimage = document.getElementById('pdfimage');
@@ -39,7 +39,7 @@ function renderPage(num) {
       canvasContext: ctx,
       viewport: viewport
     };
-    var renderTask = page.render(renderContext);	
+    var renderTask = page.render(renderContext);  
     
     // Wait for rendering to finish
     renderTask.promise.then(function () {
@@ -95,6 +95,24 @@ function onNextPage() {
 document.getElementById('next').addEventListener('click', onNextPage);
 
 /**
+ * Displays last page.
+ */
+function onLastPage() {  
+  pageNum = pdfDoc.numPages;
+  queueRenderPage(pdfDoc.numPages);
+}
+document.getElementById('lastpage').addEventListener('click', onLastPage);
+
+/**
+ * Displays first page.
+ */
+function onFirstPage() {  
+  pageNum = 1;
+  queueRenderPage(1);
+}
+document.getElementById('firstpage').addEventListener('click', onFirstPage);
+
+/**
  * Asynchronously downloads PDF.
  */
 PDFJS.getDocument(url).then(function (pdfDoc_) {
@@ -104,5 +122,75 @@ PDFJS.getDocument(url).then(function (pdfDoc_) {
   // Initial/first page rendering
   renderPage(pageNum);
 });
+
+
+(function() {
+    var
+        fullScreenApi = {
+            supportsFullScreen: false,
+            isFullScreen: function() { return false; },
+            requestFullScreen: function() {},
+            cancelFullScreen: function() {},
+            fullScreenEventName: '',
+            prefix: ''
+        },
+        browserPrefixes = 'webkit moz o ms khtml'.split(' ');
+ 
+    // check for native support
+    if (typeof document.cancelFullScreen != 'undefined') {
+        fullScreenApi.supportsFullScreen = true;
+    } else {
+        // check for fullscreen support by vendor prefix
+        for (var i = 0, il = browserPrefixes.length; i < il; i++ ) {
+            fullScreenApi.prefix = browserPrefixes[i];
+ 
+            if (typeof document[fullScreenApi.prefix + 'CancelFullScreen' ] != 'undefined' ) {
+                fullScreenApi.supportsFullScreen = true;
+ 
+                break;
+            }
+        }
+    }
+ 
+    // update methods to do something useful
+    if (fullScreenApi.supportsFullScreen) {
+        fullScreenApi.fullScreenEventName = fullScreenApi.prefix + 'fullscreenchange';
+ 
+        fullScreenApi.isFullScreen = function() {
+            switch (this.prefix) {
+                case '':
+                    return document.fullScreen;
+                case 'webkit':
+                    return document.webkitIsFullScreen;
+                default:
+                    return document[this.prefix + 'FullScreen'];
+            }
+        }
+        fullScreenApi.requestFullScreen = function(el) {
+            return (this.prefix === '') ? el.requestFullScreen() : el[this.prefix + 'RequestFullScreen']();
+        }
+        fullScreenApi.cancelFullScreen = function(el) {
+            return (this.prefix === '') ? document.cancelFullScreen() : document[this.prefix + 'CancelFullScreen']();
+        }
+    }
+ 
+    // jQuery plugin
+    if (typeof jQuery != 'undefined') {
+        jQuery.fn.requestFullScreen = function() {
+ 
+            return this.each(function() {
+                if (fullScreenApi.supportsFullScreen) {
+                    fullScreenApi.requestFullScreen(this);
+                }
+            });
+        };
+    }
+ 
+    // export api
+    window.fullScreenApi = fullScreenApi;
+})();
+document.getElementById('fullscreen').addEventListener('click', function() {
+  fullScreenApi.requestFullScreen(pdfimage);
+}, true);
 
 }); //end document.ready 

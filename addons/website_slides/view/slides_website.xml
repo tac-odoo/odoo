@@ -18,7 +18,7 @@
         <!-- header template to add scripts to all pages -->
         <template id="head" name="slides">
             <link href="/website_slides/static/src/css/website_slides.css" rel="stylesheet"/>
-            <script type="text/javascript" src="/website_slides/static/src/js/slides.js"></script>			
+            <script type="text/javascript" src="/website_slides/static/src/js/slides.js"></script>          
         </template>
 
         <!-- search box -->
@@ -35,27 +35,31 @@
             </form>
         </template>
 
-        <template id='pdfview' name="Slide Viewer">
-            <div class="row">
-                <div class="panel panel-default" style="border-radius: 0px;">
-                    <div class="panel-body" style="padding: 0px;">
-                        <img id="pdfimage" class="img-responsive" src="" />
-                    </div>
-                    <div class="panel-footer" style="position: relative;">
-                        <div class="text-center">
-                            <a id="prev" href="#carousel-example-generic" role="button" data-slide="prev">
-                                <i class="fa fa-chevron-circle-left fa-2x"></i>
-                            </a>
-                            <a id="next" href="#carousel-example-generic" role="button" data-slide="next">
-                                <i class="fa fa-chevron-circle-right fa-2x"></i> 
-                            </a>
+        <template id='pdfview' name="pdfview">
+            <div class="panel panel-default">
+                <div class="panel-body" style="padding:0px">
+                    <img id="pdfimage" class="img-responsive" src="" style="width:100%;"/>
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3 text-left">
+                            <span class="lead"><span id="page_num"></span> / <span id="page_count"></span></span>
                         </div>
-                        <div class="text-muted" style="position: absolute;top: 15px;right: 15px;">
-                            <spane id="page_num"></spane> of <span id="page_count"></span>
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6 text-center">
+                            <a id="firstpage" href="javascript:void(0);"><i class="fa fa-step-backward fa-2x"></i></a>
+                            <a id="prev" href="javascript:void(0);"><i class="fa fa-chevron-left fa-2x"></i></a>
+                            <a id="next" href="javascript:void(0);"><i class="fa fa-chevron-right fa-2x"></i></a>
+                            <a id="lastpage" href="javascript:void(0);"><i class="fa fa-step-forward fa-2x"></i></a>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3 text-right">
+                            <a id="fullscreen" href="javascript:void(0);"><i class="fa fa-arrows-alt fa-2x"></i></a>
                         </div>
                     </div>
                 </div>
             </div>
+            <input id="pdf_file" name="pdf_file" type="hidden" t-att-value="pdf_file"/>
+            <!-- <script type="text/javascript" src="/website_slides/static/lib/pdfjs/build/pdf.js"></script>
+            <script type="text/javascript" src="/website_slides/static/src/js/pdfviewer.js"></script> -->
         </template>
 
         <template id='videoview' name="Video Viewer">
@@ -81,11 +85,7 @@
 
         <!-- entry page of the slide application -->
         <template id='home' name="Odoo Slides">
-            <t t-set="head">
-                <t t-call="website_slides.head"/>
-                <script type="text/javascript" src="/website_slides/static/lib/pdfjs/build/pdf.js"></script>
-                <script type="text/javascript" src="/website_slides/static/src/js/pdfviewer.js"></script>
-            </t>
+            <t t-set="head"><t t-call="website_slides.head"/></t>
             <t t-call="website.layout">
                 <div t-if="not famous and not is_public_user" class="wrap mt16 mb0">
                     <section>
@@ -264,6 +264,8 @@
         <template id='slide_view' name="Odoo Slide">
             <t t-set="head">
                 <t t-call="website_slides.head"/>
+                <script type="text/javascript" src="/website_slides/static/lib/pdfjs/build/pdf.js"></script>
+                <script type="text/javascript" src="/website_slides/static/src/js/pdfviewer.js"></script>
             </t>
             <t t-call="website.layout">
                 <br/>
@@ -325,9 +327,14 @@
         <!-- slide detail view -->
         <template id='detailview' name="Slide Detail">
             <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
-                <div t-if="slideview.datas" class="embed-responsive embed-responsive-4by3 embed-responsive-item">
+                <!-- <div t-if="slideview.datas" class="embed-responsive embed-responsive-4by3 embed-responsive-item">
                     <iframe t-attf-src="/website_slides/static/lib/pdfjs/web/viewer.html?file=#{slideview.url}"></iframe>
-                </div>
+                </div> -->
+                <t t-if="slideview.datas">
+                    <t t-call="website_slides.pdfview">
+                        <t t-set="pdf_file" t-value="slideview.url"/>
+                    </t>
+                </t>
                 <div t-if="slideview.youtube_id" class="embed-responsive embed-responsive-16by9 embed-responsive-item">
                     <iframe t-attf-src="//www.youtube.com/embed/#{slideview.youtube_id}?theme=light"></iframe>
                 </div>
@@ -408,14 +415,14 @@
                                 <a target="_Blank" class="oe_share_twitter" href="https://twitter.com/intent/tweet?text={title}&amp;url={url}"><i class="fa fa-twitter fa-2x"></i></a>
                                 <a target="_Blank" class="oe_share_linkedin" href="http://www.linkedin.com/shareArticle?mini=true&amp;url={url}&amp;title={title}&amp;"><i class="fa fa-linkedin fa-2x"></i></a>
                                 <a target="_Blank" class="oe_share_google" href="https://plus.google.com/share?url={url}"><i class="fa fa-google-plus-square fa-2x"></i></a>
-                                <a href="mailto:?body={url}&amp;subject={title}"><i class="fa fa-envelope-o fa-2x"></i></a>					            
+                                <a href="mailto:?body={url}&amp;subject={title}"><i class="fa fa-envelope-o fa-2x"></i></a>                             
                             </p>
                             <input type="text" class="form-control" t-att-value="shareurl" readonly="readonly" onClick="this.select();"/>
                             <span class="help-block"> -- copy above link to share</span>
                             <span class="lead">Embed:</span>
                             <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="embedcode"/></textarea>
                             <span class="help-block"> -- copy above embed code to share</span>
-                            <t t-if="slideview.datas">														
+                            <t t-if="slideview.datas">                                                      
                                 <div class="input-group col-lg-2 col-md-2 col-sm-12 col-xs-12">
                                     <span class="input-group-btn">
                                         <button class="btn btn-default" type="button" id="btnminus" field="page"><span class="glyphicon glyphicon-minus-sign"/></button>
@@ -428,7 +435,7 @@
                                 <span class="help-block"> -- Enter start page</span>
                             </t>
                         </div>
-                        <div class="tab-pane fade in active" id="discuss">                       	
+                        <div class="tab-pane fade in active" id="discuss">                          
                             <form id="comment" t-attf-action="/slides/comment/#{slideview.id}" method="POST">
                                 <div class="media">
                                     <span class="pull-left">
