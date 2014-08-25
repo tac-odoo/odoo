@@ -333,9 +333,6 @@
         <!-- slide detail view -->
         <template id='detailview' name="Slide Detail">
             <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
-                <!-- <div t-if="slideview.datas" class="embed-responsive embed-responsive-4by3 embed-responsive-item">
-                    <iframe t-attf-src="/website_slides/static/lib/pdfjs/web/viewer.html?file=#{slideview.url}"></iframe>
-                </div> -->
                 <t t-if="slideview.datas">
                     <t t-call="website_slides.pdfview">
                         <t t-set="pdf_file" t-value="slideview.url"/>
@@ -345,7 +342,7 @@
                     <iframe t-attf-src="//www.youtube.com/embed/#{slideview.youtube_id}?theme=light"></iframe>
                 </div>
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
-                    <h3 class="oe-slides-text-truncation">
+                    <h3 class="oe-slides-text-truncation mt0">
                         <a t-attf-href="/channel/#{slug(channel)}/#{types}">
                             <i class="fa fa-reply"></i>
                         </a>
