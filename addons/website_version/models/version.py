@@ -100,7 +100,7 @@ class ViewVersion(osv.Model):
         if context is None:
             context = {}
         ctx = dict(context, mykey=True)
-        snap = request.registry['website_version.snapshot']
+        snap = self.pool['website_version.snapshot']
         snapshot=snap.browse(cr, uid, [snapshot_id],ctx)[0]
         for view in snapshot.view_ids:
             master_id=view.master_id.id
