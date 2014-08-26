@@ -21,6 +21,7 @@
 import json
 
 import urllib2
+import requests
 
 from openerp.tools.translate import _
 
@@ -168,8 +169,14 @@ class ir_attachment(osv.osv):
                 values["youtube_id"] = self.extract_youtube_id(values['url'].strip())
                 statistics = self.youtube_statistics(values["youtube_id"])
                 if statistics:
-                    if statistics['items'][0].get('snippet').get('thumbnails') and statistics['items'][0]['snippet'].get('thumbnails'):
-                        values['image'] = statistics['items'][0]['snippet']['thumbnails']['medium']['url']
+                    if statistics['items'][0].get('snippet') :
+                        if statistics['items'][0]['snippet'].get('thumbnails'):
+                            image_url = statistics['items'][0]['snippet']['thumbnails']['medium']['url']
+                            response = requests.get(image_url)
+                            if response:
+                                values['image'] = response.content.encode('base64')
+                        if statistics['items'][0]['snippet'].get('description'):
+                                values['description'] = statistics['items'][0]['snippet'].get('description')
                     if statistics['items'][0].get('statistics'):
                         values['slide_views'] = statistics['items'][0]['statistics']['viewCount']
 

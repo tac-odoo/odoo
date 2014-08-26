@@ -209,8 +209,7 @@
                             <t t-set="famous" t-value="channel.get_mostviewed(channel)"/> 
                             <div class="oe-channel-grid-thumbnail">
                                 <a t-attf-href="/channel/#{slug(channel)}/presentation" t-if="famous">
-                                    <img t-if="not famous.youtube_id" t-attf-src="/slides/thumb/#{famous.id}" style="width: 100%;" class="img-responsive"/>
-                                    <img t-if="famous.youtube_id" t-att-src="famous.image" style="width: 100%;" class="img-responsive"/>
+                                    <img t-attf-src="/slides/thumb/#{famous.id}" style="width: 100%;" class="img-responsive"/>
                                 </a>
 
                                 <a t-attf-href="/channel/#{slug(channel)}/presentation" t-if="not famous">
@@ -285,10 +284,8 @@
             <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="margin-top: 15px;margin-bottom: 15px;"  t-foreach="attachment_ids" t-as="attachment">
                 <div class="oe-slides-grid-thumbnail">
                     <a t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/#{slug(attachment)}">
-                        <img t-if="not attachment.youtube_id" t-attf-src="/slides/thumb/#{attachment.id}" style="width: 100%;" class="img-responsive"/>
-                        <img t-if="attachment.youtube_id" t-att-src="attachment.image" style="width: 100%;" class="img-responsive"/>
+                        <img t-attf-src="/slides/thumb/#{attachment.id}" style="width: 100%;" class="img-responsive"/>
                     </a>
-
                     <!--span class="like-box" t-if="attachment.website_published">
                         <a href="#">
                             <div class="text-center">
@@ -496,12 +493,7 @@
         <template id="slide-box" name="Slide Box">
             <li class="media slide-container">
                 <a class="pull-left" t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/#{slug(attachment)}">
-                    <t t-if="not attachment.youtube_id">
-                        <img class="media-object image-box" t-attf-src="/slides/thumb/#{attachment.id}"/>
-                    </t>
-                    <t t-if="attachment.youtube_id">
-                        <img class="media-objecti image-box" t-att-src="attachment.image"/>
-                    </t>
+                    <img class="media-object image-box" t-attf-src="/slides/thumb/#{attachment.id}"/>
                 </a>
                 <div class="media-heading">
                     <div class="text-truncation" t-att-title="attachment.name">
