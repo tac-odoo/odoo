@@ -33,13 +33,13 @@
             <field name="arch" type="xml">
 
                  <field name="name" position="after">
-                    <field name="snapshot_id" attrs="{'invisible': [('master_id', '!=', 'True')]}"/>
+                    <field name="snapshot_id" attrs="{'invisible': [('master_id', '!=', True)]}"/>
                 </field>
 
                 <group position="before">
                     <field name="master_id" invisible="True"/>
-                    <button icon="gtk-ok" name="action_test" string="Publish in master" type="object" class="oe_highlight"  
-                        context="{'active_id': active_id}" attrs="{'invisible': ['|',('type', '!=', 'qweb'),('master_id', '=', 'True')]}" />
+                    <button icon="gtk-ok" name="action_publish" string="Publish" type="object" class="oe_highlight"  
+                        context="{'active_id': active_id}" attrs="{'invisible': ['|',('type', '!=', 'qweb'),('master_id', '!=', False)]}" />
                 </group>
 
             </field>

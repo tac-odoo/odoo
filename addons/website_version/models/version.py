@@ -109,7 +109,7 @@ class ViewVersion(osv.Model):
             super(ViewVersion, self).write(cr, uid,[master_id], {'version_ids': [(4, copy_id)]}, context=ctx)
             snap.write(cr, uid,[new_snapshot_id], {'view_ids': [(4, copy_id)]}, context=ctx)
 
-    def action_test(self,cr,uid,ids,context=None):
+    def action_publish(self,cr,uid,ids,context=None):
         if context is None:
             context = {}
         snap = self.pool['website_version.snapshot']
