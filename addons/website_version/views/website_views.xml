@@ -28,13 +28,22 @@
 
         <record model="ir.ui.view" id="view_view_form_extend"> 
             <field name="model">ir.ui.view</field>
+
             <field name="inherit_id" ref="base.view_view_form"/>
             <field name="arch" type="xml">
-                <field name="name" position="after">
-                    <field name="snapshot_id"/>
+
+                 <field name="name" position="after">
+                    <field name="snapshot_id" attrs="{'invisible': [('master_id', '!=', 'True')]}"/>
                 </field>
+
+                <group position="before">
+                    <field name="master_id" invisible="True"/>
+                    <button icon="gtk-ok" name="action_test" string="Publish in master" type="object" class="oe_highlight"  
+                        context="{'active_id': active_id}" attrs="{'invisible': ['|',('type', '!=', 'qweb'),('master_id', '=', 'True')]}" />
+                </group>
+
             </field>
-        </record> 
+        </record>
 
 
     </data>

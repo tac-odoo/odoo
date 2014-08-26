@@ -108,4 +108,17 @@ class ViewVersion(osv.Model):
             super(ViewVersion, self).write(cr, uid, [copy_id], {'master_id':master_id,'snapshot_id':new_snapshot_id}, context=ctx)
             super(ViewVersion, self).write(cr, uid,[master_id], {'version_ids': [(4, copy_id)]}, context=ctx)
             snap.write(cr, uid,[new_snapshot_id], {'view_ids': [(4, copy_id)]}, context=ctx)
+
+    def action_test(self,cr,uid,ids,context=None):
+        if context is None:
+            context = {}
+        snap = self.pool['website_version.snapshot']
+        master_id = context.get('active_id')
+        all_snapshot_ids = snap.search(cr, uid, [],context=context)
+        all_snapshots = snap.browse(cr, uid, all_snapshot_ids, context=context)
+        for snapshot in all_snapshots:
+            for view in snapshot.view_ids:
+                if view.master_id.id == master_id:
+                    self.unlink(cr, uid, [view.id], context=context)
+        
                 
