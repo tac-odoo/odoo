@@ -39,7 +39,7 @@
                 <group position="before">
                     <field name="master_id" invisible="True"/>
                     <button icon="gtk-ok" name="action_publish" string="Publish" type="object" class="oe_highlight"  
-                        context="{'active_id': active_id}" attrs="{'invisible': ['|',('type', '!=', 'qweb'),('master_id', '=', False)]}" />
+                        context="{'active_id': active_id}" attrs="{'invisible': [('type', '!=', 'qweb')]}" />
                 </group>
 
             </field>
