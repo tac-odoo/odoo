@@ -109,7 +109,7 @@
                     </section>
                 </div>
 
-                <div t-if="famous and not tags" class="wrap">
+                <div class="wrap">
                     <section style="background-color: #f8f8f8;color: #1c1c1c;border-bottom: 1px solid #CCCCCC;">
                         <div class="container">
                             <div class="row mt16 mb16">
@@ -135,6 +135,29 @@
                     </section>
 
                     <section>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mt16">
+                                    <div style="padding-bottom: 5px;">
+                                        <span>
+                                            <a t-attf-class="label label-default #{types and not types and 'label-success' ''}" t-attf-href="/channel/#{slug(channel)}"><span t-if="types == ''"><span t-esc="attachment_count"/></span>Home</a>
+                                            <a t-attf-class="label label-default #{types and types == 'presentation' and 'label-success' ''}" t-attf-href="/channel/#{slug(channel)}/presentation"><span t-if="types == 'presentation'"><span t-esc="attachment_count"/></span> Presentations</a>
+                                            <a t-attf-class="label label-default #{types and types == 'video' and 'label-success' ''}" t-attf-href="/channel/#{slug(channel)}/video"><span t-if="types == 'video'"><span t-esc="attachment_count"/></span> Videos</a>
+                                            <a t-attf-class="label label-default #{types and types == 'document' and 'label-success' ''}" t-attf-href="/channel/#{slug(channel)}/document"><span t-if="types == 'document'"><span t-esc="attachment_count"/></span> Documents</a>
+                                        </span>
+                                        <span class="pull-right">
+                                            Sort By 
+                                            <a t-attf-class="label label-default #{sorting and sorting == 'date' and 'label-danger' ''}" href="?sorting=date">Latest</a>
+                                            <a t-attf-class="label label-default #{sorting and sorting == 'view' and 'label-danger' ''}" href="?sorting=view">Most Viewed</a>
+                                            <a t-attf-class="label label-default #{sorting and sorting == 'view' and 'label-danger' ''}" href="?sorting=view">Most Voted</a>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section t-if="famous and not tags and not types">
                         <div class="container">
                           <div class="row" style="padding-left: 15px;padding-right: 15px;">
                             <div class="col-md-5 mt16" t-if="famous.youtube_id" >
@@ -186,30 +209,6 @@
 
           <div class="container">
             <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mt16">
-                    <div style="border-bottom: 1px solid #CCC;padding-bottom: 5px;">
-                        <span>
-                            <a t-attf-class="label label-default #{types and not types and 'label-success' ''}" t-attf-href="/channel/#{slug(channel)}"><span t-if="types == ''"><span t-esc="attachment_count"/></span> All</a>
-
-
-                            <a t-attf-class="label label-default #{types and types == 'presentation' and 'label-success' ''}" t-attf-href="/channel/#{slug(channel)}/presentation"><span t-if="types == 'presentation'"><span t-esc="attachment_count"/></span> Presentations</a>
-
-                            <a t-attf-class="label label-default #{types and types == 'video' and 'label-success' ''}" t-attf-href="/channel/#{slug(channel)}/video"><span t-if="types == 'video'"><span t-esc="attachment_count"/></span> Videos</a>
-
-                            <a t-attf-class="label label-default #{types and types == 'document' and 'label-success' ''}" t-attf-href="/channel/#{slug(channel)}/document"><span t-if="types == 'document'"><span t-esc="attachment_count"/></span> Documents</a>
-                        </span>
-
-                        <span class="pull-right">
-                            Sort By 
-                            <a t-attf-class="label label-default #{sorting and sorting == 'date' and 'label-danger' ''}" href="?sorting=date">Latest</a>
-
-                            <a t-attf-class="label label-default #{sorting and sorting == 'view' and 'label-danger' ''}" href="?sorting=view">Most Viewed</a>
-
-                            <a t-attf-class="label label-default #{sorting and sorting == 'view' and 'label-danger' ''}" href="?sorting=view">Most Voted</a>
-                        </span>
-                    </div>
-
-                </div>
                 <t t-call="website_slides.gridview"/>
                 </div>
 
@@ -311,13 +310,13 @@
                         <img t-if="attachment.youtube_id" t-att-src="attachment.image" style="width: 100%;" class="img-responsive"/>
                     </a>
 
-                    <span class="like-box" t-if="attachment.website_published">
+                    <!--span class="like-box" t-if="attachment.website_published">
                         <a href="#">
                             <div class="text-center">
 +                               <i class="fa fa-thumbs-up fa-2x" style="margin-top: 8px;color: white;"></i>Like
                             </div>
                         </a>
-                    </span>
+                    </span-->
 
                     <span t-if="not attachment.website_published" class="label label-danger" style="position: absolute;right: 20px;top: 7px;">Not Published</span>
 
