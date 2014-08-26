@@ -79,7 +79,12 @@ class main(http.Controller):
             return request.redirect("/channel/%s/presentation" % ids[0])
 
         channels = directory.browse(cr, uid, ids, context)
-        return request.website.render('website_slides.channels', {'channels': channels, 'user': user, 'is_public_user': user.id == request.website.user_id.id,})
+        vals = {
+            'channels': channels, 
+            'user': user, 
+            'is_public_user': user.id == request.website.user_id.id
+        }
+        return request.website.render('website_slides.channels', vals)
 
 
     @http.route(['/channel/<model("document.directory"):channel>',
@@ -89,7 +94,7 @@ class main(http.Controller):
                 '/channel/<model("document.directory"):channel>/<types>/page/<int:page>',
                 '/channel/<model("document.directory"):channel>/<types>/tag/<tags>/page/<int:page>',
                    ], type='http', auth="public", website=True)
-    def slides(self, channel=0, page=1, types='presentation', tags='', sorting='creation', search=''):
+    def slides(self, channel=0, page=1, types='', tags='', sorting='creation', search=''):
         cr, uid, context = request.cr, SUPERUSER_ID, request.context
 
         user = request.registry['res.users'].browse(cr, uid, request.uid, context)
@@ -159,8 +164,8 @@ class main(http.Controller):
         return request.website.render('website_slides.home', values)
 
     @http.route([
-                '/channel/<model("document.directory"):channel>/<types>/view/<model("ir.attachment"):slideview>',
-                '/channel/<model("document.directory"):channel>/<types>/tag/<tags>/view/<model("ir.attachment"):slideview>'
+                '/channel/<model("document.directory"):channel>/<types>/<model("ir.attachment"):slideview>',
+                '/channel/<model("document.directory"):channel>/<types>/tag/<tags>/<model("ir.attachment"):slideview>'
                 ], type='http', auth="public", website=True)
     def slide_view(self, channel, slideview, types='', sorting='', search='', tags=''):
         cr, uid, context = request.cr, SUPERUSER_ID, request.context
