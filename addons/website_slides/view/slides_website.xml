@@ -357,7 +357,7 @@
 
                     <div class="pull-left mb16 col-md-6" t-if="slideview.tag_ids" style="padding-left: 0px;">
                         <t t-foreach="slideview.tag_ids" t-as="att_tag">
-                            <a t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/tag/#{att_tag.name}">
+                            <a t-attf-href="/channel/#{slug(channel)}/#{slideview.slide_type}/tag/#{att_tag.name}">
                                 <span t-attf-class="label label-default #{tags and tags == att_tag.name and 'label-primary' ''}" t-field="att_tag.name"/>
                             </a>
                         </t>
