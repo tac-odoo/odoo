@@ -2214,18 +2214,9 @@
   position: relative;
 }
 .openerp .oe_hidden_input_file input.oe_form_binary_file {
-  z-index: 0;
-  line-height: 0;
-  font-size: 12px;
+  width: 0;
   position: absolute;
-  top: 1px;
-  left: 0;
-  right: 0;
-  opacity: 0;
-  filter: alpha(opacity=0);
-  -ms-filter: "alpha(opacity=0)";
-  margin: 0;
-  padding: 0;
+  display: none;
 }
 .openerp .oe_form .oe_form_field_binary {
   display: inline-block;
