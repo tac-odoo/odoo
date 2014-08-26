@@ -36,7 +36,7 @@
         </template>
 
         <template id='pdfview' name="pdfview">
-            <div class="panel panel-default">
+            <div class="panel panel-default" style="border-radius: 0px;">
                 <div class="panel-body" style="padding:0px">
                     <canvas id="pdfcanvas" style="width:100%;"></canvas>
                 </div>
@@ -65,7 +65,7 @@
             <div class="row">
                 <div class="panel panel-default" style="border-radius: 0px;">
                     <div class="panel-body" style="padding: 0px;">
-                        <div class="embed-responsive embed-responsive-16by9 embed-responsive-item">
+                        <div class="embed-responsive embed-responsive-4by3 embed-responsive-item">
                              <iframe t-attf-src="//www.youtube.com/embed/#{famous.youtube_id}?theme=light"></iframe>
                          </div>
                     </div>
@@ -92,32 +92,22 @@
             <t t-call="website.layout">
 
                 <div class="wrap">
-                    <section style="background-color: #f8f8f8;color: #1c1c1c;border-bottom: 1px solid #CCCCCC;box-shadow: 0 0 5px #CCC;">
+                    <section style="background-color: #f8f8f8;color: #1c1c1c;border-bottom: 1px solid #CCCCCC;">
                         <div class="container">
                             <div class="row mt16 mb16">
                                 <div class="pull-left col-md-8 col-sm-8 col-xs-8">
                                     <h4 t-esc="channel.name"/>
                                 </div>
                                 
-                                <div class="pull-right col-md-4 col-sm-4 col-xs-4" t-if="is_public_user">
-                                    <t t-call="website_mail.follow">
-                                        <t t-set="email" t-value="user.email"/>
-                                        <t t-set="object" t-value="channel"/>
-                                    </t>
-                                </div>
-
-                                <div class="pull-right col-md-1 col-sm-1 col-xs-1" t-if="not is_public_user">
-                                    <t t-call="website_mail.follow">
-                                        <t t-set="email" t-value="user.email"/>
-                                        <t t-set="object" t-value="channel"/>
-                                    </t>
+                                <div class="pull-right col-md-4 col-sm-4 col-xs-4">
+                                    <t t-call="website_slides.search"/>
                                 </div>
                             </div>
                         </div>
 
                         <div class="container mb16" t-if="famous and not tags and not types" style="padding-left: 30px;padding-right: 30px;">
-                            <div class="row" style="padding-left: 15px;padding-right: 15px;box-shadow: 0 0 5px #CCC;background-color: #FFFFFF;">
-                                <div class="col-md-5 mt16" t-if="famous.youtube_id" >
+                            <div class="row" style="box-shadow: 0 0 5px #CCC;background-color: #FFFFFF;">
+                                <div class="col-md-5 mt16" t-if="famous.youtube_id" style="padding-left: 30px;">
                                     <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
                                         <t t-call="website_slides.videoview"/>
                                     </a>
