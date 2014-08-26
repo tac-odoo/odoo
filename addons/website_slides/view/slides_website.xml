@@ -185,16 +185,6 @@
                             </div>
                         </div>
                     </section>
-
-                    <section>
-                        <div class="container">
-                            <div class="row">
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mt16">
-                                    
-                                </div>
-                            </div>
-                        </div>
-                    </section>
                 </div-->
 
                 <div class="wrap">
@@ -208,7 +198,7 @@
                                         </a>
                                     </div>
 
-                                    <div class="col-md-5 mt16" t-if="not famous.youtube_id" >
+                                    <div class="col-md-6 mt16" t-if="not famous.youtube_id" >
                                         <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
                                             <t t-if="not famous.youtube_id and famous.url" t-call="website_slides.pdfview">
                                                 <t t-set="pdf_file" t-value="famous.url"/>
@@ -216,7 +206,7 @@
                                         </a>
                                     </div>
 
-                                    <div class="col-md-7 mt16">
+                                    <div class="col-md-6 mt16">
                                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 0px;">
                                             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                                 <p class="oe-slides-text-truncation lead mb0">
