@@ -23,7 +23,7 @@
 
         <!-- search box -->
         <template id="search" name="search">
-            <form action="/slides" role="search" method="get">
+            <form t-attf-action="/channel/#{slug(channel)}" role="search" method="get">
                 <div class="input-group">
                     <input type="text" class="form-control" name="search" placeholder="Search Slides..." t-att-value="search"/>
                     <span class="input-group-btn">
@@ -92,7 +92,7 @@
             <t t-call="website.layout">
 
                 <div class="wrap">
-                    <section style="background-color: #f8f8f8;color: #1c1c1c;border-bottom: 1px solid #CCCCCC;">
+                    <section>
                         <div class="container">
                             <div class="row mt16 mb16">
                                 <div class="pull-left col-md-8 col-sm-8 col-xs-8">
