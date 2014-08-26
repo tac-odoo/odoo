@@ -167,18 +167,28 @@
                             <div class="row">
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mt16">
                                     <div style="padding-bottom: 5px;">
-                                        <span>
-                                            <a t-attf-class="label label-default #{types and not types and 'label-success' ''}" t-attf-href="/channel/#{slug(channel)}"><span>All <span t-esc="attachment_count"/></span></a>
-                                            <a t-attf-class="label label-default #{types and types == 'presentation' and 'label-success' ''}" t-attf-href="/channel/#{slug(channel)}/presentation"><span t-if="types == 'presentation'"><span t-esc="attachment_count"/></span> Presentations</a>
-                                            <a t-attf-class="label label-default #{types and types == 'video' and 'label-success' ''}" t-attf-href="/channel/#{slug(channel)}/video"><span t-if="types == 'video'"><span t-esc="attachment_count"/></span> Videos</a>
-                                            <a t-attf-class="label label-default #{types and types == 'document' and 'label-success' ''}" t-attf-href="/channel/#{slug(channel)}/document"><span t-if="types == 'document'"><span t-esc="attachment_count"/></span> Documents</a>
-                                        </span>
+                                        <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm">
+                                            <li t-attf-class="slide-tabs-li #{not types and 'active' ''}">
+                                                <a  t-attf-href="/channel/#{slug(channel)}" class="slide-tabs" data-toggle="tab">Home <span class="label label-success"><t t-esc="attachment_count"/></span></a>
+                                            </li>
+
+                                            <li t-attf-class="slide-tabs-li #{types == 'presentation' and 'active' ''}">
+                                                <a t-attf-href="/channel/#{slug(channel)}/presentation" class="slide-tabs" data-toggle="tab">Presentations <span class="label label-success"><t t-esc="attachment_count"/></span></a>
+                                            </li>
+                                            <li t-attf-class="slide-tabs-li #{types == 'video' and 'active' ''}">
+                                                <a t-attf-href="/channel/#{slug(channel)}/video" class="slide-tabs" data-toggle="tab">Video <span class="label label-success"><t t-esc="attachment_count"/></span></a>
+                                            </li>
+                                            <li t-attf-class="slide-tabs-li #{types == 'document' and 'active' ''}">
+                                                <a t-attf-href="/channel/#{slug(channel)}/document" class="slide-tabs" data-toggle="tab">Documents <span class="label label-success"><t t-esc="attachment_count"/></span></a>
+                                            </li>
+
                                         <span class="pull-right">
                                             Sort By 
                                             <a t-attf-class="label label-default #{sorting and sorting == 'date' and 'label-danger' ''}" href="?sorting=date">Latest</a>
                                             <a t-attf-class="label label-default #{sorting and sorting == 'view' and 'label-danger' ''}" href="?sorting=view">Most Viewed</a>
                                             <a t-attf-class="label label-default #{sorting and sorting == 'view' and 'label-danger' ''}" href="?sorting=view">Most Voted</a>
                                         </span>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
