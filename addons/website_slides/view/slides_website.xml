@@ -25,9 +25,9 @@
         <template id="search" name="search">
             <form t-attf-action="/channel/#{slug(channel)}" role="search" method="get">
                 <div class="input-group">
-                    <input type="text" class="form-control" name="search" placeholder="Search Slides..." t-att-value="search"/>
+                    <input type="text" class="form-control" name="search" placeholder="Search Slides..." t-att-value="search" style="border-radius: 0px;"/>
                     <span class="input-group-btn">
-                        <button class="btn btn-primary" type="submit">
+                        <button class="btn btn-primary" type="submit" style="border-radius: 0px;">
                             <span class="glyphicon glyphicon-search"></span>
                         </button>
                     </span>
