@@ -157,7 +157,7 @@ class ir_attachment(osv.osv):
 
     def write(self, cr, uid, ids, values, context=None):
         if values.get('url'):
-            values = self.update_youtube(cr, uid, values, conetxt)
+            values = self.update_youtube(cr, uid, values, context)
 
         success = super(ir_attachment, self).write(cr, uid, ids, values, context)
         
