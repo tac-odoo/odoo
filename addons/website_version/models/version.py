@@ -112,13 +112,17 @@ class ViewVersion(osv.Model):
     def action_publish(self,cr,uid,ids,context=None):
         if context is None:
             context = {}
+        ctx = dict(context, mykey=True)
         snap = self.pool['website_version.snapshot']
-        master_id = context.get('active_id')
+        view_id = context.get('active_id')
+        view = self.browse(cr, uid, [view_id],ctx)[0]
+        master_id = view.master_id.id
+        super(ViewVersion, self).write(cr, uid,[master_id], {'arch': view.arch}, context=ctx)
         all_snapshot_ids = snap.search(cr, uid, [],context=context)
         all_snapshots = snap.browse(cr, uid, all_snapshot_ids, context=context)
         for snapshot in all_snapshots:
-            for view in snapshot.view_ids:
-                if view.master_id.id == master_id:
-                    self.unlink(cr, uid, [view.id], context=context)
+            for view_s in snapshot.view_ids:
+                if view_s.master_id.id == master_id and not view_s.id==view.id :
+                    self.unlink(cr, uid, [view_s.id], context=context)
         
                 
