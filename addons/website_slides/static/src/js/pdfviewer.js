@@ -17,10 +17,10 @@ var pdfDoc = null,
     pageNum = 1,
     pageRendering = false,
     pageNumPending = null,
-    scale = 3,
-    canvas = document.createElement('canvas'),
-    ctx = canvas.getContext('2d'),
-    pdfimage = document.getElementById('pdfimage');
+    scale = 1,
+    canvas = document.getElementById('pdfcanvas'),
+    ctx = canvas.getContext('2d');
+    
 
 /**
  * Get page info from document, resize canvas accordingly, and render page.
@@ -49,8 +49,6 @@ function renderPage(num) {
         renderPage(pageNumPending);
         pageNumPending = null;
       }
-      //render page as image       
-      pdfimage.src = canvas.toDataURL();
     });
   });
 
@@ -190,7 +188,7 @@ PDFJS.getDocument(url).then(function (pdfDoc_) {
     window.fullScreenApi = fullScreenApi;
 })();
 document.getElementById('fullscreen').addEventListener('click', function() {
-  fullScreenApi.requestFullScreen(pdfimage);
+  fullScreenApi.requestFullScreen(pdfcanvas);
 }, true);
 
 }); //end document.ready 

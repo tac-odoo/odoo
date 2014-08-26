@@ -38,7 +38,7 @@
         <template id='pdfview' name="pdfview">
             <div class="panel panel-default">
                 <div class="panel-body" style="padding:0px">
-                    <img id="pdfimage" class="img-responsive" src="" style="width:100%;"/>
+                    <canvas id="pdfcanvas" style="width:100%;"></canvas>
                 </div>
                 <div class="panel-footer">
                     <div class="row">
