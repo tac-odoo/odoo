@@ -156,29 +156,38 @@ class ir_attachment(osv.osv):
         self.pool.get('document.directory').message_post(cr, uid, [slide.parent_id.id], subject=slide.name, body=body, subtype='website_slide.new_slides', partner_ids=partner_ids, context=context)
 
     def write(self, cr, uid, ids, values, context=None):
+        if values.get('url'):
+            values = self.update_youtube(cr, uid, values, conetxt)
+
         success = super(ir_attachment, self).write(cr, uid, ids, values, context)
+        
         for slide_id in ids:
             self.notify_published(cr, uid, slide_id, context)
         return success
+
+    def update_youtube(self, cr, uid, values, context):
+        values["youtube_id"] = self.extract_youtube_id(values['url'].strip())
+        statistics = self.youtube_statistics(values["youtube_id"])
+        if statistics:
+            if statistics['items'][0].get('snippet') :
+                if statistics['items'][0]['snippet'].get('thumbnails'):
+                    image_url = statistics['items'][0]['snippet']['thumbnails']['medium']['url']
+                    response = requests.get(image_url)
+                    if response:
+                        values['image'] = response.content.encode('base64')
+                if statistics['items'][0]['snippet'].get('description'):
+                        values['description'] = statistics['items'][0]['snippet'].get('description')
+            if statistics['items'][0].get('statistics'):
+                values['slide_views'] = statistics['items'][0]['statistics']['viewCount']
+        
+        return values
 
     def create(self, cr, uid, values, context=None):
         if values.get('is_slide'):
             if values.get('datas_fname'):
                 values['url'] = "/website_slides/" + values['datas_fname']
             elif values.get('url'):
-                values["youtube_id"] = self.extract_youtube_id(values['url'].strip())
-                statistics = self.youtube_statistics(values["youtube_id"])
-                if statistics:
-                    if statistics['items'][0].get('snippet') :
-                        if statistics['items'][0]['snippet'].get('thumbnails'):
-                            image_url = statistics['items'][0]['snippet']['thumbnails']['medium']['url']
-                            response = requests.get(image_url)
-                            if response:
-                                values['image'] = response.content.encode('base64')
-                        if statistics['items'][0]['snippet'].get('description'):
-                                values['description'] = statistics['items'][0]['snippet'].get('description')
-                    if statistics['items'][0].get('statistics'):
-                        values['slide_views'] = statistics['items'][0]['statistics']['viewCount']
+                values = self.update_youtube(cr, uid, values, conetxt)
 
         slide_id = super(ir_attachment, self).create(cr, uid, values, context)
         self.notify_published(cr, uid, slide_id, context)
