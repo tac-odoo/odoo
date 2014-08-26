@@ -161,13 +161,13 @@
                         <div class="container">
                           <div class="row" style="padding-left: 15px;padding-right: 15px;">
                             <div class="col-md-5 mt16" t-if="famous.youtube_id" >
-                                <a t-attf-href="/channel/#{slug(channel)}/#{types}/#{slug(famous)}">
+                                <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
                                     <t t-call="website_slides.videoview"/>
                                 </a>
                             </div>
 
                             <div class="col-md-5 mt16" t-if="not famous.youtube_id" >
-                                <a t-attf-href="/channel/#{slug(channel)}/#{types}/#{slug(famous)}">
+                                <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
                                     <t t-if="not famous.youtube_id and famous.url" t-call="website_slides.pdfview">
                                         <t t-set="pdf_file" t-value="famous.url"/>
                                     </t>
@@ -175,25 +175,17 @@
                             </div>
 
                             <div class="col-md-7">
-                                <!--h1 style="margin-top: 15px;">
-                                    <a t-attf-href="/channel">
-                                        <i class="fa fa-reply"></i>
-                                    </a>
-                                    <t t-esc="channel.name"/>
-                                </h1>
-                                <p><t t-esc="channel.description"/></p-->
-                                
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 0px;">
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                     <h3 class="oe-slides-text-truncation">
-                                        <a t-attf-href="/channel/#{slug(channel)}/#{types}/#{slug(famous)}">
+                                        <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
                                             <t t-esc="famous.name"/>
                                         </a>
                                     </h3>
                                     
                                     <div class="mt8 mb16 col-md-16" t-if="famous.tag_ids" style="padding-left: 0px;">
                                         <t t-foreach="famous.tag_ids" t-as="att_tag">
-                                            <a t-attf-href="/channel/#{slug(channel)}/#{types}/tag/#{att_tag.name}">
+                                            <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/tag/#{att_tag.name}">
                                                 <span t-attf-class="label label-default #{tags and tags == att_tag.name and 'label-primary' ''}" t-field="att_tag.name"/>
                                             </a>
                                         </t>
@@ -204,17 +196,17 @@
                           </div>
                       </div>
                   </div>
-              </section>
-          </div>
-
-          <div class="container">
-            <div class="row">
-                <t t-call="website_slides.gridview"/>
+                </section>
                 </div>
 
-                <div class="row text-center">
-                    <t t-call="website.pager"/>
-                </div>
+                <div class="container">
+                    <div class="row">
+                        <t t-call="website_slides.gridview"/>
+                    </div>
+
+                    <div class="row text-center">
+                        <t t-call="website.pager"/>
+                    </div>
                 </div>
             </t>
         </template>
@@ -305,7 +297,7 @@
         <template id='gridview' name="Slides">
             <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="margin-top: 15px;margin-bottom: 15px;"  t-foreach="attachment_ids" t-as="attachment">
                 <div class="oe-slides-grid-thumbnail">
-                    <a t-attf-href="/channel/#{slug(channel)}/#{types}/#{slug(attachment)}">
+                    <a t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/#{slug(attachment)}">
                         <img t-if="not attachment.youtube_id" t-attf-src="/slides/thumb/#{attachment.id}" style="width: 100%;" class="img-responsive"/>
                         <img t-if="attachment.youtube_id" t-att-src="attachment.image" style="width: 100%;" class="img-responsive"/>
                     </a>
@@ -321,7 +313,7 @@
                     <span t-if="not attachment.website_published" class="label label-danger" style="position: absolute;right: 20px;top: 7px;">Not Published</span>
 
                     <div style="padding: 5px;">
-                        <a t-attf-href="/channel/#{slug(channel)}/#{types}/#{slug(attachment)}">
+                        <a t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/#{slug(attachment)}">
                             <h4 class="oe-slides-text-truncation">
                                 <t t-esc="attachment.name"/>
                             </h4>
@@ -337,7 +329,7 @@
                         </div>
                         <p t-if="attachment.tag_ids" class="oe-slides-text-truncation" style="padding-top: 5px;">
                             <t t-foreach="attachment.tag_ids" t-as="att_tag">
-                                <a t-attf-href="/channel/#{slug(channel)}/#{types}/tag/#{att_tag.name}">
+                                <a t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/tag/#{att_tag.name}">
                                     <span t-attf-class="label label-default #{tags and tags == att_tag.name and 'label-primary' ''}" t-field="att_tag.name"/>
                                 </a>
                             </t>
@@ -365,7 +357,7 @@
 
                     <div class="pull-left mb16 col-md-6" t-if="slideview.tag_ids" style="padding-left: 0px;">
                         <t t-foreach="slideview.tag_ids" t-as="att_tag">
-                            <a t-attf-href="/channel/#{slug(channel)}/#{types}/tag/#{att_tag.name}">
+                            <a t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/tag/#{att_tag.name}">
                                 <span t-attf-class="label label-default #{tags and tags == att_tag.name and 'label-primary' ''}" t-field="att_tag.name"/>
                             </a>
                         </t>
@@ -516,7 +508,7 @@
 
         <template id="slide-box" name="Slide Box">
             <li class="media slide-container">
-                <a class="pull-left" t-attf-href="/channel/#{slug(channel)}/#{types}/#{slug(attachment)}">
+                <a class="pull-left" t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/#{slug(attachment)}">
                     <t t-if="not attachment.youtube_id">
                         <img class="media-object image-box" t-attf-src="/slides/thumb/#{attachment.id}"/>
                     </t>

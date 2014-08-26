@@ -126,7 +126,9 @@ class main(http.Controller):
             order = 'create_date desc'
 
         attachment_count = attachment.search(cr, uid, domain, count=True, context=context)
-        url = request.httprequest.base_url
+        url = "/channel"
+        if types:
+            url = "/channel/%s" % (types)
 
         url_args = {}
         if search:
