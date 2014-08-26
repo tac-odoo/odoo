@@ -165,7 +165,7 @@ class ir_attachment(osv.osv):
             self.notify_published(cr, uid, slide_id, context)
         return success
 
-    def update_youtube(self, cr, uid, values, context):
+    def update_youtube(self, cr, uid, values, context=None):
         values["youtube_id"] = self.extract_youtube_id(values['url'].strip())
         statistics = self.youtube_statistics(values["youtube_id"])
         if statistics:
@@ -187,7 +187,7 @@ class ir_attachment(osv.osv):
             if values.get('datas_fname'):
                 values['url'] = "/website_slides/" + values['datas_fname']
             elif values.get('url'):
-                values = self.update_youtube(cr, uid, values, conetxt)
+                values = self.update_youtube(cr, uid, values, context)
 
         slide_id = super(ir_attachment, self).create(cr, uid, values, context)
         self.notify_published(cr, uid, slide_id, context)
