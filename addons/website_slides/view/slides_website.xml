@@ -92,7 +92,7 @@
             <t t-call="website.layout">
 
                 <div class="wrap">
-                    <section style="background-color: #f8f8f8;color: #1c1c1c;border-bottom: 1px solid #CCCCCC;">
+                    <section style="background-color: #f8f8f8;color: #1c1c1c;border-bottom: 1px solid #CCCCCC;box-shadow: 0 0 5px #CCC;">
                         <div class="container">
                             <div class="row mt16 mb16">
                                 <div class="pull-left col-md-8 col-sm-8 col-xs-8">
@@ -115,8 +115,8 @@
                             </div>
                         </div>
 
-                        <div class="container" t-if="famous and not tags and not types">
-                            <div class="row" style="padding-left: 15px;padding-right: 15px;">
+                        <div class="container mb16" t-if="famous and not tags and not types" style="padding-left: 30px;padding-right: 30px;">
+                            <div class="row" style="padding-left: 15px;padding-right: 15px;box-shadow: 0 0 5px #CCC;background-color: #FFFFFF;">
                                 <div class="col-md-5 mt16" t-if="famous.youtube_id" >
                                     <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
                                         <t t-call="website_slides.videoview"/>
@@ -131,14 +131,14 @@
                                     </a>
                                 </div>
 
-                                <div class="col-md-7">
+                                <div class="col-md-7 mt16">
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 0px;">
                                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                            <h3 class="oe-slides-text-truncation">
+                                            <p class="oe-slides-text-truncation lead mb0">
                                                 <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
                                                     <t t-esc="famous.name"/>
                                                 </a>
-                                            </h3>
+                                            </p>
 
                                             <div class="mt8 mb16 col-md-16" t-if="famous.tag_ids" style="padding-left: 0px;">
                                                 <t t-foreach="famous.tag_ids" t-as="att_tag">
