@@ -12,6 +12,7 @@ from openerp.addons.web.controllers.main import login_redirect
 from openerp.addons.web.http import request
 from openerp.addons.website.controllers.main import Website as controllers
 from openerp.addons.website.models.website import slug
+from openerp.tools import image_resize_image
 
 controllers = controllers()
 
@@ -45,6 +46,19 @@ class WebsiteForum(http.Controller):
             values['forum'] = request.registry['forum.forum'].browse(request.cr, request.uid, kwargs.pop('forum_id'), context=request.context)
         values.update(kwargs)
         return values
+
+    # Logo
+    # -------------------------------------------------
+    @http.route(['/forum/logo'], type='http', auth='public', website=True)
+    def logo(self, **kwargs):
+        cr, uid, context = request.cr, request.uid, request.context
+        logo = request.registry['res.users'].browse(cr, uid, uid, context=context).company_id.logo
+        logo = image_resize_image(logo, (158, 158)).decode('base64')
+        headers = [
+            ('Content-type', 'image/png'),
+            ('Content-Length', len(logo)),
+        ]
+        return request.make_response(logo, headers)
 
     # Forum
     # --------------------------------------------------
@@ -168,7 +182,7 @@ class WebsiteForum(http.Controller):
         values = self._prepare_forum_values(forum=forum, searches={},  header={'ask_hide': True})
         return request.website.render("website_forum.ask_question", values)
 
-    @http.route('/forum/<model("forum.forum"):forum>/question/new', type='http', auth="user", methods=['POST'], website=True)
+    @http.route('/forum/<model("forum.forum"):forum>/question/new', type='json', auth="user", methods=['POST'], website=True)
     def question_create(self, forum, **post):
         cr, uid, context = request.cr, request.uid, request.context
         Tag = request.registry['forum.tag']
@@ -182,6 +196,7 @@ class WebsiteForum(http.Controller):
                 else:
                     question_tag_ids.append((0, 0, {'name': tag, 'forum_id': forum.id}))
 
+        stat_data = request.registry['forum.forum'].statistical_data(cr, uid, [forum.id], context=context)
         new_question_id = request.registry['forum.post'].create(
             request.cr, request.uid, {
                 'forum_id': forum.id,
@@ -189,7 +204,23 @@ class WebsiteForum(http.Controller):
                 'content': post.get('content'),
                 'tag_ids': question_tag_ids,
             }, context=context)
-        return werkzeug.utils.redirect("/forum/%s/question/%s" % (slug(forum), new_question_id))
+        url = "%sforum/%d/question/%d" % (request.httprequest.host_url, forum.id, new_question_id)
+        shorten_url = request.registry["website.alias"].create_shorten_url(cr, uid, url)
+        res = {
+            'forum_id'    : forum.id,
+            'question_id' : new_question_id,
+            'stat_data'   : stat_data,
+            'shorten_url' : shorten_url,
+        }
+        return res
+
+    @http.route(['''/forum/<model("forum.forum"):forum>/question/<model("forum.post", "[('forum_id','=',forum[0]),('parent_id','=',False)]"):question>/answer'''], type='http', auth="public", website=True)
+    def answer(self, forum, question, **post):
+        cr, uid, context = request.cr, request.uid, request.context
+        values = {
+            'question': question,
+        }
+        return request.website.render("website_forum.answer_share", values)
 
     @http.route(['''/forum/<model("forum.forum"):forum>/question/<model("forum.post", "[('forum_id','=',forum[0]),('parent_id','=',False)]"):question>'''], type='http', auth="public", website=True)
     def question(self, forum, question, **post):
@@ -272,17 +303,26 @@ class WebsiteForum(http.Controller):
     # Post
     # --------------------------------------------------
 
-    @http.route('/forum/<model("forum.forum"):forum>/post/<model("forum.post"):post>/new', type='http', auth="public", methods=['POST'], website=True)
+    @http.route('/forum/<model("forum.forum"):forum>/post/<model("forum.post"):post>/new', type='json', auth="public", methods=['POST'], website=True)
     def post_new(self, forum, post, **kwargs):
         if not request.session.uid:
             return login_redirect()
-        request.registry['forum.post'].create(
+        new_answer_id = request.registry['forum.post'].create(
             request.cr, request.uid, {
                 'forum_id': forum.id,
                 'parent_id': post.id,
                 'content': kwargs.get('content'),
             }, context=request.context)
-        return werkzeug.utils.redirect("/forum/%s/question/%s" % (slug(forum), slug(post)))
+        url = "%sforum/%d/question/%d/answer" % (request.httprequest.host_url, forum.id, post.id)
+        shorten_url = request.registry['website.alias'].create_shorten_url(request.cr, request.uid, url)
+        res = {
+            'forum_id'    : forum.id,
+            'question_id' : post.id,
+            'answer_id'   : new_answer_id,
+            'karma'       : forum.karma_gen_answer_accepted,
+            'shorten_url' : shorten_url,
+        }
+        return res
 
     @http.route('/forum/<model("forum.forum"):forum>/post/<model("forum.post"):post>/comment', type='http', auth="public", methods=['POST'], website=True)
     def post_comment(self, forum, post, **kwargs):

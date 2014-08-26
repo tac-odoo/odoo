@@ -32,7 +32,8 @@ Ask questions, get answers, no distractions
         'auth_signup',
         'gamification',
         'website_mail',
-        'website_partner'
+        'website_partner',
+        'website_url',
     ],
     'data': [
         'data/forum_data.xml',

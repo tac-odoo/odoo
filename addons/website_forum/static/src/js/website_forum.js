@@ -1,4 +1,100 @@
+function open_share_dialog(social_network) {
+    var sharing_url, text_to_share, $share_dialog = $("#share_dialog_box"), url = $share_dialog.data('url');
+    if ($("#question_name_ask").length === 0) {
+        text_to_share = openerp._t("Just answered #odoo question " + url + " " + $("#question_name").text());
+    } else {
+        text_to_share = openerp._t($("#question_name_ask").val() + " #odoo #help " + url);
+    }
+    if ((social_network === 'twitter') && ($share_dialog.data('twitter') === false)) {
+        sharing_url = 'https://twitter.com/intent/tweet?original_referer=' + encodeURIComponent(url) + '&amp;text=' + encodeURIComponent(text_to_share);
+        $share_dialog.data("twitter", true);
+        $(".twitter").hover( function() {
+            $(this).removeClass("fa-twitter").addClass("fa-check");
+        }, function() {
+            $(this).removeClass("fa-check").addClass("fa-twitter");
+        });
+    } else if ((social_network === 'linked-in') && ($share_dialog.data('linked_in') === false)) {
+        sharing_url = 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(text_to_share) + '&summary=Odoo Forum&source=Odoo forum';
+        $share_dialog.data("linked_in", true);
+        $(".linkedin").hover( function() {
+            $(this).removeClass("fa-linkedin").addClass("fa-check");
+        }, function () {
+            $(this).removeClass("fa-check").addClass("fa-linkedin");
+        });
+    } else if ((social_network === 'facebook') && ($share_dialog.data('facebook') === false)) {
+        sharing_url = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+        $share_dialog.data("facebook", true);
+        $(".facebook").hover( function() {
+            $(this).removeClass("fa-facebook").addClass("fa-check");
+        }, function() {
+            $(this).removeClass("fa-check").addClass("fa-facebook");
+        });
+    } else {
+        return false;
+    }
+    window.open(sharing_url, '', 'menubar=no, toolbar=no, resizable=yes, scrollbar=yes, height=600,width=600');
+    return false;
+}
+
+function decode_like_post(values_serialize) {
+    var i, decode_values = {};
+    for (i = 0; i < values_serialize.length; i++) {
+        decode_values[values_serialize[i].name] = values_serialize[i].value;
+    }
+    return decode_values;
+}
+
+function redirect_user($form, isQuestion) {
+    var path = $form.data("target"), title, body, redirect_url, vals, Post = openerp.website.session.model('forum.post');
+    openerp.jsonRpc(path,  "call", decode_like_post($form.serializeArray()))
+        .then(function (result) {
+            var forum_id = result.forum_id;
+            if (isQuestion) {
+                title = openerp._t("Thanks for posting your Question !");
+                body = openerp._t("On average " + result.stat_data[forum_id].percentage + "% of the questions shared on social networks get an answer within " + result.stat_data[forum_id].average + " hours and questions shared on two social networks have " + result.stat_data[forum_id].probability + "% more chance to get an answer than not shared questions");
+            } else {
+                title = openerp._t('Thanks for posting your Answer !');
+                body = openerp._t("By Sharing your answer, you will get " + result.karma + " additional karma points if your answer is selected as the right one.<a href='/forum/" + forum_id + "/faq'>See what you can do with karma.</a>");
+            }
+            redirect_url = "/forum/" + result.forum_id + "/question/" + result.question_id;
+            $(".modal-title").text(title);
+            $(".modal-body").prepend(body);
+            $("#share_dialog_box").data({
+                "twitter" : false,
+                "facebook" : false,
+                "linked_in" : false,
+                "url" : result.shorten_url,
+            }).on('hidden.bs.modal', function () {
+                if (result.answer_id) {
+                    vals = [result.answer_id]
+                } else {
+                    vals = [result.question_id];
+                }
+                vals.push({
+                    'on_twitter' : $(this).data("twitter"),
+                    'on_facebook' : $(this).data("facebook"),
+                    'on_linked_in' : $(this).data("linked_in"),
+                });
+                Post.call('write', vals).then(function (data) {
+                    window.location = redirect_url;
+                });
+            }).modal("show");
+        });
+}
+
 $(document).ready(function () {
+
+    $(".tag_text").submit(function(event) {
+        event.preventDefault();
+        CKEDITOR.instances['content'].destroy();
+        redirect_user($(this), true);
+    });
+
+    $("#forum_post_answer").submit(function(event) {
+        event.preventDefault();
+        CKEDITOR.instances['content'].destroy();
+        redirect_user($(this), false);
+    });
 
     $('.karma_required').on('click', function (ev) {
         var karma = $(ev.currentTarget).data('karma');
