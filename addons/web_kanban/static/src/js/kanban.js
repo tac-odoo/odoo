@@ -645,6 +645,7 @@ instance.web_kanban.KanbanGroup = instance.web.Widget.extend({
                 .on('added', self, self.proxy('quick_created'))
                 .on('close', self, function() {
                     self.view.$el.find('.oe_view_nocontent').show();
+                    self.view.$el.addClass('oe_close_quick_box');
                     this.quick.destroy();
                     delete self.view.quick;
                     delete this.quick;
