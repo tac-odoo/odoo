@@ -161,26 +161,22 @@ class Website(openerp.addons.web.controllers.main.Home):
 
     @http.route('/website/theme_change', type='http', auth="user", website=True)
     def theme_change(self, theme_id=False, **kwargs):
+        cr, uid, context = request.cr, request.uid, request.context
         imd = request.registry['ir.model.data']
         Views = request.registry['ir.ui.view']
 
-        _, theme_template_id = imd.get_object_reference(
-            request.cr, request.uid, 'website', 'theme')
-        views = Views.search(request.cr, request.uid, [
+        _, theme_template_id = imd.get_object_reference(cr, uid, 'website', 'theme')
+        views = Views.search(cr, uid, [
             ('inherit_id', '=', theme_template_id),
             ('application', '=', 'enabled'),
-        ], context=request.context)
-        Views.write(request.cr, request.uid, views, {
-            'application': 'disabled',
-        }, context=request.context)
+        ], context=context)
 
         if theme_id:
             module, xml_id = theme_id.split('.')
-            _, view_id = imd.get_object_reference(
-                request.cr, request.uid, module, xml_id)
-            Views.write(request.cr, request.uid, [view_id], {
-                'application': 'enabled'
-            }, context=request.context)
+            _, view_id = imd.get_object_reference(cr, uid, module, xml_id)
+            views.append(view_id)
+
+        Views.toggle(cr, uid, views, context=context)
 
         return request.render('website.themes', {'theme_changed': True})
 

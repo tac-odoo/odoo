@@ -211,6 +211,4 @@ class view(osv.osv):
             'arch': self._pretty_arch(arch)
         }, context=context)
 
-        view = self.browse(cr, SUPERUSER_ID, res_id, context=context)
-        if view.model_data_id:
-            view.model_data_id.write({'noupdate': True})
+        self.mark_as_noupdate(cr, SUPERUSER_ID, res_id, context=context)

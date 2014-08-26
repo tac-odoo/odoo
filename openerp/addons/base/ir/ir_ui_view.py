@@ -301,6 +301,14 @@ class view(osv.osv):
                     view.id,
                     view.application,
                 ))
+            view.mark_as_noupdate()
+
+    def mark_as_noupdate(self, cr, uid, ids, context=None):
+        """ Mark views as noupdate
+        """
+        for view in self.browse(cr, uid, ids, context=context):
+            if view.model_data_id:
+                view.model_data_id.write({'noupdate': True})
 
     # default view selection
     def default_view(self, cr, uid, model, view_type, context=None):
