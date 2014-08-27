@@ -116,7 +116,7 @@ class main(http.Controller):
 
         if types:
             domain += [('slide_type', '=', types)]
-  
+
         if sorting == 'date':
             order = 'write_date desc'
         elif sorting == 'view':
@@ -302,4 +302,4 @@ class main(http.Controller):
             post['slide_type'] = 'presentation'
 
         slide_id = slide_obj.create(cr, uid, post, context=context)
-        return request.redirect("/channel/%s/%s/view/%s" % (post.get('parent_id'), post['slide_type'], slide_id))
+        return request.redirect("/channel/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id))

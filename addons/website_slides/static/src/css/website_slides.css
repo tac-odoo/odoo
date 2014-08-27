@@ -83,6 +83,10 @@
   overflow: auto;
 }
 
+.nav-tabs > li > a {
+  border-radius: 0px 0px 0 0;
+}
+
 .nav-tabs > li.slide-tabs-li {
     margin-bottom: 0px;
     padding-right: 15px; 
@@ -90,15 +94,16 @@
 .nav-tabs li > a.slide-tabs {
     border:none;
     padding: 5px 0px;
+    color: #8f8f8f ;
 }
 .nav-tabs li > a.slide-tabs:hover {
-  border-bottom: 4px solid #1a7ab9;
+  border-bottom: 4px solid #a24689;
   background-color: transparent;
 }
 .nav-tabs li.active>a.slide-tabs, nav-tabs li.active>a.slide-tabs:focus {
   border: none;
 }
 .nav-tabs li.active>a.slide-tabs{
-  border-bottom: 4px solid #1a7ab9;
+  border-bottom: 4px solid #a24689;
   font-weight: bold;
 } 

@@ -136,7 +136,7 @@ class ir_attachment(osv.osv):
         return True
 
     def trim_lines(self, cr, uid, description, *args):
-        return '<br/>'.join(description.split('\n')[0:9])
+        return '<br/>'.join(description.split('\n')[0:14])
 
     def notify_published(self, cr, uid, slide_id, context):
         base_url = self.pool['ir.config_parameter'].get_param(cr, uid, 'web.base.url')
