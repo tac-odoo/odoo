@@ -110,6 +110,15 @@ function onFirstPage() {
 }
 document.getElementById('firstpage').addEventListener('click', onFirstPage);
 
+document.addEventListener('keydown', function(e) {
+  if(e.keyCode==37){
+    onPrevPage();
+  }
+  if(e.keyCode==39){
+    onNextPage();
+  }
+});
+
 /**
  * Asynchronously downloads PDF.
  */
@@ -122,73 +131,24 @@ PDFJS.getDocument(url).then(function (pdfDoc_) {
 });
 
 
-(function() {
-    var
-        fullScreenApi = {
-            supportsFullScreen: false,
-            isFullScreen: function() { return false; },
-            requestFullScreen: function() {},
-            cancelFullScreen: function() {},
-            fullScreenEventName: '',
-            prefix: ''
-        },
-        browserPrefixes = 'webkit moz o ms khtml'.split(' ');
- 
-    // check for native support
-    if (typeof document.cancelFullScreen != 'undefined') {
-        fullScreenApi.supportsFullScreen = true;
-    } else {
-        // check for fullscreen support by vendor prefix
-        for (var i = 0, il = browserPrefixes.length; i < il; i++ ) {
-            fullScreenApi.prefix = browserPrefixes[i];
- 
-            if (typeof document[fullScreenApi.prefix + 'CancelFullScreen' ] != 'undefined' ) {
-                fullScreenApi.supportsFullScreen = true;
- 
-                break;
-            }
-        }
-    }
- 
-    // update methods to do something useful
-    if (fullScreenApi.supportsFullScreen) {
-        fullScreenApi.fullScreenEventName = fullScreenApi.prefix + 'fullscreenchange';
- 
-        fullScreenApi.isFullScreen = function() {
-            switch (this.prefix) {
-                case '':
-                    return document.fullScreen;
-                case 'webkit':
-                    return document.webkitIsFullScreen;
-                default:
-                    return document[this.prefix + 'FullScreen'];
-            }
-        }
-        fullScreenApi.requestFullScreen = function(el) {
-            return (this.prefix === '') ? el.requestFullScreen() : el[this.prefix + 'RequestFullScreen']();
-        }
-        fullScreenApi.cancelFullScreen = function(el) {
-            return (this.prefix === '') ? document.cancelFullScreen() : document[this.prefix + 'CancelFullScreen']();
-        }
-    }
- 
-    // jQuery plugin
-    if (typeof jQuery != 'undefined') {
-        jQuery.fn.requestFullScreen = function() {
- 
-            return this.each(function() {
-                if (fullScreenApi.supportsFullScreen) {
-                    fullScreenApi.requestFullScreen(this);
-                }
-            });
-        };
-    }
- 
-    // export api
-    window.fullScreenApi = fullScreenApi;
-})();
-document.getElementById('fullscreen').addEventListener('click', function() {
-  fullScreenApi.requestFullScreen(pdfcanvas);
-}, true);
+function goFullscreen() {
+  // Get the element that we want to take into fullscreen mode
+  var element = document.getElementById('pdfcanvas');
+  
+  // These function will not exist in the browsers that don't support fullscreen mode yet, 
+  // so we'll have to check to see if they're available before calling them.
+  
+  if (element.mozRequestFullScreen) {
+    // This is how to go into fullscren mode in Firefox
+    // Note the "moz" prefix, which is short for Mozilla.
+    element.mozRequestFullScreen();
+  } else if (element.webkitRequestFullScreen) {
+    // This is how to go into fullscreen mode in Chrome and Safari
+    // Both of those browsers are based on the Webkit project, hence the same prefix.
+    element.webkitRequestFullScreen();
+  }
+ // Hooray, now we're in fullscreen mode!
+}
+document.getElementById('fullscreen').addEventListener('click', goFullscreen);
 
 }); //end document.ready 
