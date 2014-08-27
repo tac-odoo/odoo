@@ -139,7 +139,7 @@
                         </div>
                     </section>
 
-                    <section style="background-color: #EEE;border: 1px solid #CCC;" t-if="famous and not tags and not types and not search">
+                    <section style="background-color: #f1f1f1;border: 1px solid #ccc;" t-if="famous and not tags and not types and not search">
                         <div class="container">
                             <div class="row">
                                 <div>
