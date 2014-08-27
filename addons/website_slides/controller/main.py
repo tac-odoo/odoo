@@ -111,7 +111,7 @@ class main(http.Controller):
 
         if channel: domain += [('parent_id','=',channel.id)]
 
-        if search: domain += [('name', 'ilike', search)]
+        if search: domain += ['|', ('name', 'ilike', search), ('index_content', 'ilike', search)]
 
         if tags: domain += [('tag_ids.name', '=', tags)]
 
