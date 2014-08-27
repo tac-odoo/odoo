@@ -76,7 +76,7 @@ class main(http.Controller):
         ids = directory.search(cr, uid, [('website_published','=', True)], context=context)
         
         if len(ids) <= 1:
-            return request.redirect("/channel/%s/presentation" % ids[0])
+            return request.redirect("/channel/%s" % ids[0])
 
         channels = directory.browse(cr, uid, ids, context)
         vals = {
