@@ -122,12 +122,6 @@
 
                                     </ul>
                                 </div>
-                                <!--div class="col-md-5 col-sm-5 col-xs-5">
-                                    <span class="pull-right">
-                                        Sort By 
-                                        
-                                    </span>
-                                </div-->
                             </div>
                         </div>
                     </section>
@@ -136,7 +130,7 @@
                 <div class="wrap">
                     <section t-if="not famous and not tags and not types and not search and not is_public_user" class="wrap mt16 mb0">
                         <div class="container">
-                            <div class="alert alert-danger alert-dismissable mb0">
+                            <div class="alert alert-danger alert-dismissable mb0" style="border-radius: 0px;">
                                 <p>
                                     Review your channel settings to promote your most viewed or recent published presentation
                                 </p>
@@ -199,8 +193,8 @@
                                             <a t-attf-href="/channel/#{slug(channel)}/presentation" class="h3 mt0 mb0">Presentations</a>
                                         </div>
 
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
-                                            <a t-attf-href="/channel/#{slug(channel)}/presentation" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View 100 more</a>
+                                        <div t-if="count_presentation" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/presentation" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="count_presentation"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview" style="border-top: 1px solid #CCC">
@@ -212,8 +206,8 @@
                                             <a t-attf-href="/channel/#{slug(channel)}/video" class="h3 mt0 mb0">Videos</a>
                                         </div>
 
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
-                                            <a t-attf-href="/channel/#{slug(channel)}/video" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View 100 more</a>
+                                        <div t-if="count_video" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/video" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="count_video"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
@@ -225,8 +219,8 @@
                                             <a t-attf-href="/channel/#{slug(channel)}/video" class="h3 mt0 mb0">Documents</a>
                                         </div>
 
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
-                                            <a t-attf-href="/channel/#{slug(channel)}/document" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View 100 more</a>
+                                        <div t-if="count_document" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/document" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="count_document"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
@@ -321,7 +315,7 @@
         <!-- slide grid view -->
         <template id='gridview' name="Slides">
             <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="margin-top: 15px;margin-bottom: 15px;"  t-foreach="attachment_ids" t-as="attachment">
-                <div class="oe-slides-grid-thumbnail">
+                <div t-attf-class="oe-#{attachment.slide_type}-grid-thumbnail">
                     <a t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/#{slug(attachment)}">
                         <img t-attf-src="/slides/thumb/#{attachment.id}" style="width: 100%;" class="img-responsive"/>
                     </a>

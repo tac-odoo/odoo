@@ -23,7 +23,19 @@
   text-overflow: ellipsis;
 }
 
-.oe-slides-grid-thumbnail {
+.oe-presentation-grid-thumbnail {
+  background-color: #fcfcfc !important;
+  min-height: 300px;
+  border: 1px solid #ccc;
+}
+
+.oe-document-grid-thumbnail {
+  background-color: #fcfcfc !important;
+  min-height: 425px;
+  border: 1px solid #ccc;
+}
+
+.oe-video-grid-thumbnail {
   background-color: #fcfcfc !important;
   min-height: 250px;
   border: 1px solid #ccc;

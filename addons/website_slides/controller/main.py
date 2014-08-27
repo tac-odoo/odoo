@@ -167,19 +167,22 @@ class main(http.Controller):
             if count_domain:
                 videos = attachment.browse(cr, uid, count_ids)
 
+            lens = {
+                'video': len(count_ids)
+            }
             count_domain = domain + [('slide_type', '=', 'presentation')]
             count_ids = attachment.search(cr, uid, count_domain, limit=4, offset=0, order='create_date desc', context=context)
             if count_domain:
                 slides = attachment.browse(cr, uid, count_ids)
+            lens.update({'presentation':len(count_ids)})
 
             count_domain = domain + [('slide_type', '=', 'document')]
             count_ids = attachment.search(cr, uid, count_domain, limit=4, offset=0, order='create_date desc', context=context)
             if count_domain:
                 documents = attachment.browse(cr, uid, count_ids)
+            lens.update({'document':len(count_ids)})
 
-            counts = attachment.read_group(cr, uid, domain, ['slide_type'], groupby='slide_type')
             famous = request.registry.get('document.directory').get_mostviewed(cr, uid, channel, context)
-
             values.update({
                 'videos':videos,
                 'slides':slides,
@@ -187,7 +190,13 @@ class main(http.Controller):
                 'famous':famous
             })
 
-        print 'XXXXXXXXX : ', values
+            counts = attachment.read_group(cr, uid, domain, ['slide_type'], groupby='slide_type')
+            countvals = {}
+            for count in counts:
+                countvals['count_'+count.get('slide_type')] = count.get('slide_type_count') - lens.get(count.get('slide_type'))
+
+            values.update(countvals)
+
         return request.website.render('website_slides.home', values)
 
     @http.route([
