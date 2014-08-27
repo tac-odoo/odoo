@@ -155,7 +155,7 @@ class main(http.Controller):
             
             values.update({
                 'attachment_ids': attachment_ids,
-                'all_count':all_count,
+                'all_count': len(attachment_ids),
                 'pager': pager,
                 'types': types,
                 'sorting': sorting,

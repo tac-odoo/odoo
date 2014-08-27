@@ -112,7 +112,7 @@
                                 <div class="pull-right col-md-6 col-sm-12 col-xs-12" t-if="types">
                                     <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm pull-right" style="border-bottom: 0px solid #ddd;">
                                         <li class="slide-tabs-li active dropdown" style="padding-right: 0px;">
-                                            <a  href="#" class="slide-tabs dropdown-toggle" data-toggle="tab">Sort by Recently Published <span class="caret"></span></a>
+                                            <a  href="#" class="slide-tabs dropdown-toggle" data-toggle="tab"><t t-esc="all_count"/> <t t-esc="types"/> sorted by Recently Published <span class="caret"></span></a>
                                             <ul class="dropdown-menu" role="menu">
                                                 <li><a href="?sorting=date">Recently Published</a></li>
                                                 <li><a href="?sorting=view">Most Viewed</a></li>
