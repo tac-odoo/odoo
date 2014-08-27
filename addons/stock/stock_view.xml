@@ -640,6 +640,8 @@
                     <button name="action_cancel" states="assigned,confirmed,partially_available,draft" string="Cancel Transfer" groups="base.group_user" type="object"/>
                     <button name="do_unreserve" string="Unreserve" groups="base.group_user" type="object" attrs="{'invisible': [('quant_reserved_exist', '=', False)]}"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,partially_available,assigned,done" statusbar_colors='{"shipping_except":"red","invoice_except":"red","waiting_date":"blue"}'/>
+                    <!--<button name="do_prepare_partial" type="object" string="preparepartial"/>-->
+                    <button name="rereserve_pick" type="object" string="Rereserve keeping operations"/>
                 </header>
                 <sheet>
                     <div class="oe_right oe_button_box">
@@ -673,7 +675,7 @@
                             <field name="pack_operation_exist" invisible="1"/>
                             <field name="note" placeholder="Add an internal note..." class="oe_inline"/>
                         </page>
-                        <page string="Operations" attrs="{'invisible': ['|', ('state','!=','done'), ('pack_operation_ids','=',[])]}">
+                        <page string="Operations">
                             <field name="pack_operation_ids">
                                 <tree editable="top">
                                     <field name="package_id" groups="stock.group_tracking_lot"/>
