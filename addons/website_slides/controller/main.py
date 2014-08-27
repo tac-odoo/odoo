@@ -101,68 +101,93 @@ class main(http.Controller):
         attachment = request.registry['ir.attachment']
         domain = [('is_slide','=','True'), ('parent_id','=',channel.id)]
 
-        if request.uid == 3:
-            domain += [('website_published', '=', True)]
+        count_all = count_slide = count_video = count_document = 0
+        attachment_ids = videos = slides = documents = []
+        famous = None
+
+        if request.uid == 3: domain += [('website_published', '=', True)]
+        
         all_count = attachment.search(cr, uid, domain, count=True, context=context)
 
-        if channel:
-              domain += [('parent_id','=',channel.id)]
+        if channel: domain += [('parent_id','=',channel.id)]
 
-        if search:
-            domain += [('name', 'ilike', search)]
+        if search: domain += [('name', 'ilike', search)]
 
-        if tags:
-            domain += [('tag_ids.name', '=', tags)]
+        if tags: domain += [('tag_ids.name', '=', tags)]
+
+        values = {
+            'tags':tags,
+            'channel': channel,
+            'user': user,
+            'is_public_user': user.id == request.website.user_id.id
+        }
 
         if types:
             domain += [('slide_type', '=', types)]
 
-        if sorting == 'date':
-            order = 'write_date desc'
-        elif sorting == 'view':
-            order = 'slide_views desc'
+            if sorting == 'date':
+                order = 'write_date desc'
+            elif sorting == 'view':
+                order = 'slide_views desc'
+            else:
+                sorting = 'creation'
+                order = 'create_date desc'
+
+            url = "/channel/%s" % (channel.id)
+            if types:
+                url = "/channel/%s/%s" % (channel.id, types)
+            elif types and tags:
+                url = "/channel/%s/%s/%s" % (channel.id, types, tags)
+
+            url_args = {}
+            if search:
+                url_args['search'] = search
+            if sorting:
+                url_args['sorting'] = sorting
+
+            pager_count = attachment.search(cr, uid, domain, count=True, context=context)
+            pager = request.website.pager(url=url, total=pager_count, page=page,
+                                          step=self._slides_per_page, scope=self._slides_per_page,
+                                          url_args=url_args)
+            
+            obj_ids = attachment.search(cr, uid, domain, limit=self._slides_per_page, offset=pager['offset'], order=order, context=context)
+            attachment_ids = attachment.browse(cr, uid, obj_ids, context=context)
+            
+            values.update({
+                'attachment_ids': attachment_ids,
+                'all_count':all_count,
+                'pager': pager,
+                'types': types,
+                'sorting': sorting,
+                'search': search
+            })
         else:
-            sorting = 'creation'
-            order = 'create_date desc'
+            count_domain = domain + [('slide_type', '=', 'video')]
+            count_ids = attachment.search(cr, uid, count_domain, limit=4, offset=0, order='create_date desc', context=context)
+            if count_domain:
+                videos = attachment.browse(cr, uid, count_ids)
 
-        attachment_count = attachment.search(cr, uid, domain, count=True, context=context)
-        url = "/channel/%s" % (channel.id)
-        if types:
-            url = "/channel/%s/%s" % (channel.id, types)
+            count_domain = domain + [('slide_type', '=', 'presentation')]
+            count_ids = attachment.search(cr, uid, count_domain, limit=4, offset=0, order='create_date desc', context=context)
+            if count_domain:
+                slides = attachment.browse(cr, uid, count_ids)
 
-        url_args = {}
-        if search:
-            url_args['search'] = search
-        if types:
-            url_args['types'] = types
-        if sorting:
-            url_args['sorting'] = sorting
-        if tags:
-            url_args['tags'] = tags
+            count_domain = domain + [('slide_type', '=', 'document')]
+            count_ids = attachment.search(cr, uid, count_domain, limit=4, offset=0, order='create_date desc', context=context)
+            if count_domain:
+                documents = attachment.browse(cr, uid, count_ids)
 
-        pager = request.website.pager(url=url, total=attachment_count, page=page,
-                                      step=self._slides_per_page, scope=self._slides_per_page,
-                                      url_args=url_args)
+            counts = attachment.read_group(cr, uid, domain, ['slide_type'], groupby='slide_type')
+            famous = request.registry.get('document.directory').get_mostviewed(cr, uid, channel, context)
 
-        obj_ids = attachment.search(cr, uid, domain, limit=self._slides_per_page, offset=pager['offset'], order=order, context=context)
-        attachment_ids = attachment.browse(cr, uid, obj_ids, context=context)
+            values.update({
+                'videos':videos,
+                'slides':slides,
+                'documents':documents,
+                'famous':famous
+            })
 
-        famous = request.registry.get('document.directory').get_mostviewed(cr, uid, channel, context)
-        
-        values = {
-            'attachment_ids': attachment_ids,
-            'all_count':all_count,
-            'attachment_count': attachment_count,
-            'pager': pager,
-            'types': types,
-            'sorting': sorting,
-            'search': search,
-            'tags':tags,
-            'channel': channel,
-            'user': user,
-            'famous':famous,
-            'is_public_user': user.id == request.website.user_id.id
-        }
+        print 'XXXXXXXXX : ', values
         return request.website.render('website_slides.home', values)
 
     @http.route([
@@ -299,7 +324,16 @@ class main(http.Controller):
         if post.get('url') and not post.get('datas', False):
             post['slide_type'] = 'video'
         elif post.get('datas') and not post.get('url', False):
-            post['slide_type'] = 'presentation'
+            height = post.get('height', 0)
+            del post['height']
+
+            width = post.get('width', 0)
+            del post['width']
+
+            if height > width:
+                post['slide_type'] = 'document'
+            else:
+                post['slide_type'] = 'presentation'
 
         slide_id = slide_obj.create(cr, uid, post, context=context)
         return request.redirect("/channel/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id))

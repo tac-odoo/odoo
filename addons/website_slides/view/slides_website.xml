@@ -68,15 +68,6 @@
                              <iframe t-attf-src="//www.youtube.com/embed/#{famous.youtube_id}?theme=light"></iframe>
                          </div>
                     </div>
-                    <!--div class="panel-footer" style="position: relative;">
-                        <div class="text-right">
-                            <div class="text-right">
-                                <a t-attf-href="/channel/#{slug(channel)}/#{slug(famous)}" role="button">
-                                    <p class="label label-success">Most Viewed</p>
-                                </a>
-                            </div>
-                        </div>
-                    </div-->
                 </div>
             </div>
         </template>
@@ -131,10 +122,6 @@
                     </section>
                 </div>
 
-                <!--div class="wrap">
-                    
-                </div-->
-
                 <div class="wrap">
                     <section t-if="not famous and not tags and not types and not search and not is_public_user" class="wrap mt16 mb0">
                         <div class="container">
@@ -158,7 +145,6 @@
                                             <t t-call="website_slides.videoview"/>
                                         </a>
                                     </div>
-
                                     <div class="col-md-6 mt16" t-if="not famous.youtube_id" >
                                         <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
                                             <t t-if="not famous.youtube_id and famous.url" t-call="website_slides.pdfview">
@@ -166,7 +152,6 @@
                                             </t>
                                         </a>
                                     </div>
-
                                     <div class="col-md-6 mt16">
                                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 0px;">
                                             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -187,13 +172,53 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16" style="padding-left: 0px;padding-right: 0px;">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16" style="padding-left: 0px;padding-right: 0px;" t-if="types">
                                     <t t-call="website_slides.gridview"/>
+                                    <div class="row text-center">
+                                        <t t-call="website.pager"/>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="row text-center">
-                                <t t-call="website.pager"/>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16" style="padding-left: 0px;padding-right: 0px;" t-if="not types">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="padding-left: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/presentation" class="h2 mt0 mb0">Presentations</a>
+                                        </div>
+
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/presentation" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View 100 more</a>
+                                        </div>
+                                    </div>
+                                    <t t-call="website_slides.gridview" style="border-top: 1px solid #CCC">
+                                        <t t-set="attachment_ids" t-value="slides"/>
+                                    </t>
+
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="padding-left: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/video" class="h2 mt0 mb0">Videos</a>
+                                        </div>
+
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/video" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View 100 more</a>
+                                        </div>
+                                    </div>
+                                    <t t-call="website_slides.gridview">
+                                        <t t-set="attachment_ids" t-value="videos"/>
+                                    </t>
+
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="padding-left: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/video" class="h2 mt0 mb0">Documents</a>
+                                        </div>
+
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/document" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View 100 more</a>
+                                        </div>
+                                    </div>
+                                    <t t-call="website_slides.gridview">
+                                        <t t-set="attachment_ids" t-value="documents"/>
+                                    </t>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -211,22 +236,20 @@
                         <div t-foreach="channels" t-as="channel" class="col-sm-4 mb32">
                             <t t-set="famous" t-value="channel.get_mostviewed(channel)"/> 
                             <div class="oe-channel-grid-thumbnail">
-                                <a t-attf-href="/channel/#{slug(channel)}/presentation" t-if="famous">
+                                <a t-attf-href="/channel/#{slug(channel)}" t-if="famous">
                                     <img t-attf-src="/slides/thumb/#{famous.id}" style="width: 100%;" class="img-responsive"/>
                                 </a>
-
-                                <a t-attf-href="/channel/#{slug(channel)}/presentation" t-if="not famous">
+                                <a t-attf-href="/channel/#{slug(channel)}" t-if="not famous">
                                     <img src="/website_slides/static/description/channel-default.jpg" class="img-responsive" style="width: 100%;opacity: .5;"/>
                                 </a>
-
                                 <div style="padding: 5px;">
-                                    <a t-attf-href="/channel/#{slug(channel)}/presentation">
+                                    <a t-attf-href="/channel/#{slug(channel)}">
                                         <p class="oe-slides-text-truncation mt4 mb4 lead">
                                             <t t-esc="channel.name"/>
                                         </p>
                                     </a>
                                     <p t-field="channel.description"/>
-                                    <div class="mt4">
+                                    <!--div class="mt4">
                                         <span>
                                             <p class="label label-success">Presentations</p>
                                             <p class="label label-warning">Videos</p>
@@ -249,7 +272,7 @@
                                                 <t t-set="object" t-value="channel"/>
                                             </t>
                                         </t>
-                                    </div>
+                                    </div-->
                                     <div class="mt4">
                                         <t t-call="website.publish_management">
                                             <t t-set="object" t-value="channel"/>
