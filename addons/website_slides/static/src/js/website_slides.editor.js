@@ -32,7 +32,7 @@
 
         start: function (){
             var self = this;
-            this.$('.save').text('Create');
+            this.$('.save').attr('data-loading-text','Loading...').text('Create');
             this.$('.modal-footer').hide();
             var r = this._super.apply(this, arguments);
             this.fetch_channel().then(function(channels){
@@ -50,6 +50,7 @@
         },
         slide_upload: function(ev){
             var self = this;
+            this.$('.save').button('loading');
             var file = ev.target.files[0];
             var ArrayReader = new FileReader();
             var BinaryReader = new FileReader();
@@ -83,7 +84,9 @@
                         //
                         // Render PDF page into canvas context
                         //
-                        page.render({canvasContext: context, viewport: viewport});
+                        page.render({canvasContext: context, viewport: viewport}).then(function(){
+                            self.$('.save').button('reset');
+                        });
                     });
                 });
             };
@@ -119,12 +122,15 @@
                 'is_slide': true,
                 'website_published': false,
             };
+            var canvas = this.$('#the-canvas')[0];
             var values = {
                 'name' : this.$('#name').val(),
                 'tag_ids' : this.$('.slide-tags').textext()[0].tags()._formData,
                 'datas': self.file.data || '',
                 'datas_fname': self.file.name || '',
-                'image': this.$('#the-canvas')[0].toDataURL().split(',')[1],
+                'image': canvas.toDataURL().split(',')[1],
+                'width': canvas.width,
+                'height':canvas.height,
                 'url': this.$('#url').val(),
                 'parent_id': this.$('#channel').val()
             };
