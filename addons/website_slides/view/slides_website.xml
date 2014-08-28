@@ -120,15 +120,13 @@
                             <div class="row">
                                 <div class="col-md-12 col-sm-12 col-xs-12">
                                     <div class="pull-left col-md-8 col-sm-8 col-xs-8 mt16 mb8" style="padding-left: 0px;">
-                                        <h4 t-esc="channel.name"/>
+                                        <h4 t-esc="channel.name" class="mt4"/>
                                     </div>
-
-                                    <div class="pull-right col-md-4 col-sm-4 col-xs-4 mt16 mb8" style="padding-right: 0px;">
+                                    <div class="col-md-4 col-sm-12 col-xs-12 pul-right mt16 mb8" style="padding-right: 0px;">
                                         <t t-call="website_slides.search"/>
                                     </div>
                                 </div>
-
-                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                <div class="col-md-6 col-sm-12 col-xs-12">
                                     <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm" style="border-bottom: 0px solid #ddd;">
                                         <li t-attf-class="slide-tabs-li #{not types and 'active' ''}">
                                             <a  t-attf-href="/channel/#{slug(channel)}" class="slide-tabs" data-toggle="tab">Home</a>
@@ -138,28 +136,33 @@
                                             <a t-attf-href="/channel/#{slug(channel)}/presentation" class="slide-tabs" data-toggle="tab">Presentations</a>
                                         </li>
                                         <li t-attf-class="slide-tabs-li #{types == 'video' and 'active' ''}">
-                                            <a t-attf-href="/channel/#{slug(channel)}/video" class="slide-tabs" data-toggle="tab">Video</a>
+                                            <a t-attf-href="/channel/#{slug(channel)}/video" class="slide-tabs" data-toggle="tab">Videos</a>
                                         </li>
                                         <li t-attf-class="slide-tabs-li #{types == 'document' and 'active' ''}">
                                             <a t-attf-href="/channel/#{slug(channel)}/document" class="slide-tabs" data-toggle="tab">Documents</a>
                                         </li>
                                     </ul>
-                                    <!--span class="pull-right">
-                                        Sort By 
-                                        <a t-attf-class="label label-default #{sorting and sorting == 'date' and 'label-danger' ''}" href="?sorting=date">Latest</a>
-                                        <a t-attf-class="label label-default #{sorting and sorting == 'view' and 'label-danger' ''}" href="?sorting=view">Most Viewed</a>
-                                        <a t-attf-class="label label-default #{sorting and sorting == 'view' and 'label-danger' ''}" href="?sorting=view">Most Voted</a>
-                                    </span-->
+                                </div>
+                                <div class="pull-right col-md-6 col-sm-12 col-xs-12" t-if="types">
+                                    <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm pull-right" style="border-bottom: 0px solid #ddd;">
+                                        <li class="slide-tabs-li active dropdown" style="padding-right: 0px;">
+                                            <a  href="#" class="slide-tabs dropdown-toggle" data-toggle="tab"><t t-esc="all_count"/> <t t-esc="types"/> sorted by Recently Published <span class="caret"></span></a>
+                                            <ul class="dropdown-menu" role="menu">
+                                                <li><a href="?sorting=date">Recently Published</a></li>
+                                                <li><a href="?sorting=view">Most Viewed</a></li>
+                                                <li><a href="?sorting=view">Most Voted</a></li>
+                                            </ul>
+                                        </li>
+
+                                    </ul>
                                 </div>
                             </div>
                         </div>
                     </section>
-                </div>
 
-                <div class="wrap">
                     <section t-if="not famous and not tags and not types and not search and not is_public_user" class="wrap mt16 mb0">
                         <div class="container">
-                            <div class="alert alert-danger alert-dismissable mb0">
+                            <div class="alert alert-danger alert-dismissable mb0" style="border-radius: 0px;">
                                 <p>
                                     Review your channel settings to promote your most viewed or recent published presentation
                                 </p>
@@ -170,11 +173,11 @@
                         </div>
                     </section>
 
-                    <section>
-                        <div class="container mt16">
+                    <section style="background-color: #f1f1f1;border: 1px solid #ccc;" t-if="famous and not tags and not types and not search">
+                        <div class="container">
                             <div class="row">
-                                <div t-if="famous and not tags and not types and not search">
-                                    <div class="col-md-6 mt16" t-if="famous.youtube_id" style="padding-left: 30px;">
+                                <div>
+                                    <div class="col-md-6 mt16" t-if="famous.youtube_id" style="padding-left: 30px;padding-right: 30px;">
                                         <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
                                             <t t-call="website_slides.videoview"/>
                                         </a>
@@ -188,8 +191,8 @@
                                     </div>
                                     <div class="col-md-6 mt16">
                                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 0px;">
-                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                <p class="oe-slides-text-truncation lead mb0">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 0px;">
+                                                <p class="oe-slides-text-truncation lead mb0" style="padding-left: 0px;">
                                                     <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
                                                         <t t-esc="famous.name"/>
                                                     </a>
@@ -206,47 +209,90 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="container mt16">
+                            <div class="row">
+                                <!--div t-if="famous and not tags and not types and not search">
+                                    <div class="col-md-6 mt16" t-if="famous.youtube_id" style="padding-left: 30px;padding-right: 30px;">
+                                        <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
+                                            <t t-call="website_slides.videoview"/>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-6 mt16" t-if="not famous.youtube_id" >
+                                        <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
+                                            <t t-if="not famous.youtube_id and famous.url" t-call="website_slides.pdfview">
+                                                <t t-set="pdf_file" t-value="famous.url"/>
+                                            </t>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-6 mt16">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 0px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 0px;">
+                                                <p class="oe-slides-text-truncation lead mb0" style="padding-left: 0px;">
+                                                    <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
+                                                        <t t-esc="famous.name"/>
+                                                    </a>
+                                                </p>
+                                                <div class="mt8 mb8 col-md-16" t-if="famous.tag_ids" style="padding-left: 0px;">
+                                                    <t t-foreach="famous.tag_ids" t-as="att_tag">
+                                                        <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/tag/#{att_tag.name}">
+                                                            <span t-attf-class="label label-default #{tags and tags == att_tag.name and 'label-primary' ''}" t-field="att_tag.name"/>
+                                                        </a>
+                                                    </t>
+                                                </div>
+                                                <p t-if="famous.description"><t t-raw="famous.trim_lines(famous.description)"/></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div-->
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16" style="padding-left: 0px;padding-right: 0px;" t-if="types">
                                     <t t-call="website_slides.gridview"/>
+                                </div>
+
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16" style="padding-left: 0px;padding-right: 0px;" t-if="types">
                                     <div class="row text-center">
                                         <t t-call="website.pager"/>
                                     </div>
                                 </div>
 
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16" style="padding-left: 0px;padding-right: 0px;" t-if="not types">
-                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="padding-left: 0px;">
-                                            <a t-attf-href="/channel/#{slug(channel)}/presentation" class="h2 mt0 mb0">Presentations</a>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" t-if="slides">
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left" style="padding-left: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/presentation" class="h3 mt0 mb0">Presentations</a>
                                         </div>
 
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
-                                            <a t-attf-href="/channel/#{slug(channel)}/presentation" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View 100 more</a>
+                                        <div t-if="count_presentation" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/presentation" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="count_presentation"/> more</a>
                                         </div>
                                     </div>
-                                    <t t-call="website_slides.gridview" style="border-top: 1px solid #CCC">
+                                    <t t-call="website_slides.gridview">
                                         <t t-set="attachment_ids" t-value="slides"/>
                                     </t>
 
-                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="padding-left: 0px;">
-                                            <a t-attf-href="/channel/#{slug(channel)}/video" class="h2 mt0 mb0">Videos</a>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" t-if="videos">
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left" style="padding-left: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/video" class="h3 mt0 mb0">Videos</a>
                                         </div>
 
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
-                                            <a t-attf-href="/channel/#{slug(channel)}/video" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View 100 more</a>
+                                        <div t-if="count_video" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/video" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="count_video"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
                                         <t t-set="attachment_ids" t-value="videos"/>
                                     </t>
 
-                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="padding-left: 0px;">
-                                            <a t-attf-href="/channel/#{slug(channel)}/video" class="h2 mt0 mb0">Documents</a>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" t-if="documents">
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left" style="padding-left: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/video" class="h3 mt0 mb0">Documents</a>
                                         </div>
 
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
-                                            <a t-attf-href="/channel/#{slug(channel)}/document" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View 100 more</a>
+                                        <div t-if="count_document" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
+                                            <a t-attf-href="/channel/#{slug(channel)}/document" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="count_document"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
@@ -341,9 +387,11 @@
         <!-- slide grid view -->
         <template id='gridview' name="Slides">
             <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="margin-top: 15px;margin-bottom: 15px;"  t-foreach="attachment_ids" t-as="attachment">
-                <div class="oe-slides-grid-thumbnail">
+                <div t-attf-class="oe-#{attachment.slide_type}-grid-thumbnail">
                     <a t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/#{slug(attachment)}">
-                        <img t-attf-src="/slides/thumb/#{attachment.id}" style="width: 100%;" class="img-responsive"/>
+                        <span t-attf-class="oe-#{attachment.slide_type}-image-thumbnail">
+                            <img t-attf-src="/slides/thumb/#{attachment.id}" style="width: 100%;" class="img-responsive"/>
+                        </span>
                     </a>
                     <span t-if="not attachment.website_published" class="label label-danger" style="position: absolute;right: 20px;top: 7px;">Not Published</span>
 
@@ -376,7 +424,7 @@
 
         <!-- slide detail view -->
         <template id='detailview' name="Slide Detail">
-            <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12" style="padding-right: 5px;">
+            <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
                 <t t-if="slideview.datas">
                     <t t-call="website_slides.pdfview">
                         <t t-set="pdf_file" t-value="slideview.url"/>

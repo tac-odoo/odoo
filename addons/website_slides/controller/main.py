@@ -76,7 +76,7 @@ class main(http.Controller):
         ids = directory.search(cr, uid, [('website_published','=', True)], context=context)
         
         if len(ids) <= 1:
-            return request.redirect("/channel/%s/presentation" % ids[0])
+            return request.redirect("/channel/%s" % ids[0])
 
         channels = directory.browse(cr, uid, ids, context)
         vals = {
@@ -111,7 +111,7 @@ class main(http.Controller):
 
         if channel: domain += [('parent_id','=',channel.id)]
 
-        if search: domain += [('name', 'ilike', search)]
+        if search: domain += ['|', ('name', 'ilike', search), ('index_content', 'ilike', search)]
 
         if tags: domain += [('tag_ids.name', '=', tags)]
 
@@ -155,7 +155,7 @@ class main(http.Controller):
             
             values.update({
                 'attachment_ids': attachment_ids,
-                'all_count':all_count,
+                'all_count': len(attachment_ids),
                 'pager': pager,
                 'types': types,
                 'sorting': sorting,
@@ -167,19 +167,22 @@ class main(http.Controller):
             if count_domain:
                 videos = attachment.browse(cr, uid, count_ids)
 
+            lens = {
+                'video': len(count_ids)
+            }
             count_domain = domain + [('slide_type', '=', 'presentation')]
             count_ids = attachment.search(cr, uid, count_domain, limit=4, offset=0, order='create_date desc', context=context)
             if count_domain:
                 slides = attachment.browse(cr, uid, count_ids)
+            lens.update({'presentation':len(count_ids)})
 
             count_domain = domain + [('slide_type', '=', 'document')]
             count_ids = attachment.search(cr, uid, count_domain, limit=4, offset=0, order='create_date desc', context=context)
             if count_domain:
                 documents = attachment.browse(cr, uid, count_ids)
+            lens.update({'document':len(count_ids)})
 
-            counts = attachment.read_group(cr, uid, domain, ['slide_type'], groupby='slide_type')
             famous = request.registry.get('document.directory').get_mostviewed(cr, uid, channel, context)
-
             values.update({
                 'videos':videos,
                 'slides':slides,
@@ -187,7 +190,13 @@ class main(http.Controller):
                 'famous':famous
             })
 
-        print 'XXXXXXXXX : ', values
+            counts = attachment.read_group(cr, uid, domain, ['slide_type'], groupby='slide_type')
+            countvals = {}
+            for count in counts:
+                countvals['count_'+count.get('slide_type')] = count.get('slide_type_count') - lens.get(count.get('slide_type'))
+
+            values.update(countvals)
+
         return request.website.render('website_slides.home', values)
 
     @http.route([
@@ -263,7 +272,7 @@ class main(http.Controller):
         Files = request.registry['ir.attachment']
         Website = request.registry['website']
         user = Files.browse(cr, uid, document_id, context=context)
-        return Website._image(cr, uid, 'ir.attachment', user.id, 'image', response, max_height=225)
+        return Website._image(cr, uid, 'ir.attachment', user.id, 'image', response)
 
 
     @http.route('/slides/get_tags', type='http', auth="public", methods=['GET'], website=True)

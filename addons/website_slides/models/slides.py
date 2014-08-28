@@ -29,7 +29,6 @@ from openerp.osv import fields, osv
 from urlparse import urlparse,parse_qs
 from openerp.addons.website.models.website import slug
 
-
 class ir_attachment_tags(osv.osv):
     _name = 'ir.attachment.tag'
     _columns = {
