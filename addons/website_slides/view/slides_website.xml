@@ -355,7 +355,9 @@
             <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="margin-top: 15px;margin-bottom: 15px;"  t-foreach="attachment_ids" t-as="attachment">
                 <div t-attf-class="oe-#{attachment.slide_type}-grid-thumbnail">
                     <a t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/#{slug(attachment)}">
-                        <img t-attf-src="/slides/thumb/#{attachment.id}" style="width: 100%;" class="img-responsive"/>
+                        <span t-attf-class="oe-#{attachment.slide_type}-image-thumbnail">
+                            <img t-attf-src="/slides/thumb/#{attachment.id}" style="width: 100%;" class="img-responsive"/>
+                        </span>
                     </a>
                     <span t-if="not attachment.website_published" class="label label-danger" style="position: absolute;right: 20px;top: 7px;">Not Published</span>
 

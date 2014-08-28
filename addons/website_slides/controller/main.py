@@ -272,7 +272,7 @@ class main(http.Controller):
         Files = request.registry['ir.attachment']
         Website = request.registry['website']
         user = Files.browse(cr, uid, document_id, context=context)
-        return Website._image(cr, uid, 'ir.attachment', user.id, 'image', response, max_height=225)
+        return Website._image(cr, uid, 'ir.attachment', user.id, 'image', response)
 
 
     @http.route('/slides/get_tags', type='http', auth="public", methods=['GET'], website=True)

@@ -23,6 +23,24 @@
   text-overflow: ellipsis;
 }
 
+.oe-presentation-image-thumbnail {
+  max-height: 200px;
+  overflow: hidden;
+  display: block;
+}
+
+.oe-video-image-thumbnail {
+  max-height: 147px;
+  overflow: hidden;
+  display: block;
+}
+
+.oe-document-image-thumbnail {
+  max-height: 325px;
+  overflow: hidden;
+  display: block;
+}
+
 .oe-presentation-grid-thumbnail {
   background-color: #fcfcfc !important;
   min-height: 300px;
