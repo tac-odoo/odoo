@@ -317,10 +317,14 @@
                             <t t-set="famous" t-value="channel.get_mostviewed(channel)"/> 
                             <div class="oe-channel-grid-thumbnail">
                                 <a t-attf-href="/channel/#{slug(channel)}" t-if="famous">
-                                    <img t-attf-src="/slides/thumb/#{famous.id}" style="width: 100%;" class="img-responsive"/>
+                                    <span class="channel-box">
+                                        <img t-attf-src="/slides/thumb/#{famous.id}" style="width: 100%;" class="img-responsive"/>
+                                    </span>
                                 </a>
                                 <a t-attf-href="/channel/#{slug(channel)}" t-if="not famous">
-                                    <img src="/website_slides/static/description/channel-default.jpg" class="img-responsive" style="width: 100%;opacity: .5;"/>
+                                    <span class="channel-box">
+                                        <img src="/website_slides/static/description/channel-default.jpg" class="img-responsive" style="width: 100%;opacity: .5;"/>
+                                    </span>
                                 </a>
                                 <div style="padding: 5px;">
                                     <a t-attf-href="/channel/#{slug(channel)}">
@@ -594,7 +598,9 @@
         <template id="slide-box" name="Slide Box">
             <li class="media slide-container">
                 <a class="pull-left" t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/#{slug(attachment)}">
-                    <img class="media-object image-box" t-attf-src="/slides/thumb/#{attachment.id}"/>
+                    <span t-attf-class="image-box">
+                        <img class="media-object img-responsive" t-attf-src="/slides/thumb/#{attachment.id}"/>
+                    </span>
                 </a>
                 <div class="media-heading">
                     <div class="text-truncation" t-att-title="attachment.name">
