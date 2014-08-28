@@ -17,10 +17,16 @@
 
 .slide-box .image-box {
   border: 1px solid #dddddd;
-  
   max-height: 60px;
   overflow: hidden;
   display: block;
+}
+
+.slide-small-box {
+  max-height: 60px;
+  display: block;
+  overflow: hidden;
+  width: 100px;
 }
 
 .oe-channel-grid-thumbnail {
@@ -125,16 +131,17 @@
 .nav-tabs li.active>a.slide-tabs{
   border-bottom: 4px solid #a24689;
   font-weight: bold;
-}
-.slide-option-toggle{
+} 
+
+.slide-option-toggle {
   position: absolute;
   padding: 30px;
   top: 0px;
   left: 0px;
   right: 0px;
   bottom: 0px;
-  background-color: #ddd;
-  opacity: 0.9;
-  display: none;
+  background-color: #eee;
+  opacity: 1;
+  display:none;
   overflow-y: auto;
 }

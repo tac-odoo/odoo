@@ -33,18 +33,6 @@ class main(http.Controller):
     _slides_per_page = 12
     _slides_per_list = 20
 
-    def _slides_urldata(self):
-        urldata = urlparse(request.httprequest.url)
-        values = {}
-        values.update({
-            'urlscheme':urldata.scheme + '://',
-            'urlhost':urldata.netloc,
-            'urlpath':urldata.path,
-            'urlquery':urldata.query,
-        })
-        return values
-
-
     def _slides_message(self, user, attachment_id=0, **post):
         cr, uid, context = request.cr, request.uid, request.context
         attachment = request.registry['ir.attachment']
@@ -228,30 +216,15 @@ class main(http.Controller):
         # get comments
         comments = slideview.website_message_ids
 
-        # get share url
-        urldata = self._slides_urldata()
-        shareurl = urldata['urlscheme'] + urldata['urlhost'] + urldata['urlpath']
-
-        # create slide embed code
-        embedcode = ""
-
-        if slideview.datas:
-            embedcode = '<iframe  src="' + urldata['urlscheme'] + urldata['urlhost'] + '/website_slides/static/lib/pdfjs/web/viewer.html?file=' + slideview.url + '#page="></iframe>'
-        if slideview.youtube_id:
-            embedcode = '<iframe src="//www.youtube.com/embed/' + slideview.youtube_id + '?theme=light"></iframe>'
-
-        values = {}
-        values.update({
+        values= {
             'slideview':slideview,
             'most_viewed_ids':most_viewed_ids,
             'related_ids': related_ids,
             'comments': comments,
-            'shareurl':shareurl,
-            'embedcode':embedcode,
             'channel': slideview.parent_id,
             'user':user,
             'types':types
-        })
+        }
         return request.website.render('website_slides.slide_view', values)
 
 

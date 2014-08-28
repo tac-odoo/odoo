@@ -107,6 +107,22 @@ class ir_attachment(osv.osv):
         'dislikes': fields.integer('Dislikes'),
     }
 
+    def _get_share_url(self, cr, uid, slide, context):
+        base_url = self.pool['ir.config_parameter'].get_param(cr, uid, 'web.base.url')
+        shareurl = "%s/%s/%s/%s" % (base_url, slug(slide.parent_id), slide.slide_type, slug(slide))
+        return shareurl
+
+    def _get_embade_code(self, cr, uid, slide, context):
+        base_url = self.pool['ir.config_parameter'].get_param(cr, uid, 'web.base.url')
+
+        embedcode = False
+        if slide.datas and not slide.youtube_id:
+            embedcode = '<iframe  src="%s/website_slides/static/lib/pdfjs/web/viewer.html?file=%s#page="></iframe>' % (base_url, slide.url)
+        if slide.youtube_id:
+            embedcode = '<iframe src="//www.youtube.com/embed/%s?theme=light"></iframe>' % (slide.youtube_id)
+
+        return embedcode
+
     def _get_slide_setting(self, cr, uid, context):
         return context.get('is_slide', False)
 

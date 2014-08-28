@@ -75,10 +75,10 @@
                 <a target="_Blank" class="oe_share_google" href="https://plus.google.com/share?url={url}"><i class="fa fa-google-plus-square fa-2x"></i></a>
                 <a href="mailto:?body={url}&amp;subject={title}"><i class="fa fa-envelope-o fa-2x"></i></a>
             </p>
-            <input type="text" class="form-control" t-att-value="shareurl" readonly="readonly" onClick="this.select();"/>
+            <input type="text" class="form-control" t-att-value="slide._get_share_url(slide)" readonly="readonly" onClick="this.select();"/>
             <span class="help-block">  copy above link to share</span>
             <span class="lead">Embed:</span>
-            <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="embedcode"/></textarea>
+            <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="slide._get_embade_code(slide)"/></textarea>
             <span class="help-block">  copy above embed code to share</span>
             <div class="input-group col-lg-2 col-md-2 col-sm-12 col-xs-12">
                 <span class="input-group-btn">
@@ -197,6 +197,7 @@
                                         <a t-attf-href="/channel/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
                                             <t t-if="not famous.youtube_id and famous.url" t-call="website_slides.pdfview">
                                                 <t t-set="pdf_file" t-value="famous.url"/>
+                                                <t t-set="slide" t-value="famous"/>
                                             </t>
                                         </a>
                                     </div>
@@ -329,7 +330,7 @@
                             <div class="oe-channel-grid-thumbnail">
                                 <a t-attf-href="/channel/#{slug(channel)}" t-if="famous">
                                     <span class="channel-box">
-                                        <img t-attf-src="/slides/thumb/#{famous.id}" style="width: 100%;" class="img-responsive"/>
+                                        <img t-attf-src="/slides/thumb/#{famous.id}" class="img-responsive"/>
                                     </span>
                                 </a>
                                 <a t-attf-href="/channel/#{slug(channel)}" t-if="not famous">
@@ -443,6 +444,7 @@
                 <t t-if="slideview.datas">
                     <t t-call="website_slides.pdfview">
                         <t t-set="pdf_file" t-value="slideview.url"/>
+                        <t t-set="slide" t-value="slideview"/>
                     </t>
                 </t>
                 <div t-if="slideview.youtube_id" class="embed-responsive embed-responsive-16by9 embed-responsive-item mb8">
@@ -518,30 +520,8 @@
                             <div t-if="not slideview.description" t-field="slideview.website_description"/>
                         </div>
                         <div class="tab-pane fade" id="share">
-                            <span class="lead">Share:</span>
-                            <p class="oe_share">
-                                <a target="_Blank" class="oe_share_facebook" href="https://www.facebook.com/sharer/sharer.php?u={url}"><i class="fa fa-facebook-square fa-2x"></i></a>
-                                <a target="_Blank" class="oe_share_twitter" href="https://twitter.com/intent/tweet?text={title}&amp;url={url}"><i class="fa fa-twitter fa-2x"></i></a>
-                                <a target="_Blank" class="oe_share_linkedin" href="http://www.linkedin.com/shareArticle?mini=true&amp;url={url}&amp;title={title}&amp;"><i class="fa fa-linkedin fa-2x"></i></a>
-                                <a target="_Blank" class="oe_share_google" href="https://plus.google.com/share?url={url}"><i class="fa fa-google-plus-square fa-2x"></i></a>
-                                <a href="mailto:?body={url}&amp;subject={title}"><i class="fa fa-envelope-o fa-2x"></i></a>
-                            </p>
-                            <input type="text" class="form-control" t-att-value="shareurl" readonly="readonly" onClick="this.select();"/>
-                            <span class="help-block">  copy above link to share</span>
-                            <span class="lead">Embed:</span>
-                            <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="embedcode"/></textarea>
-                            <span class="help-block">  copy above embed code to share</span>
-                            <t t-if="slideview.datas">
-                                <div class="input-group col-lg-2 col-md-2 col-sm-12 col-xs-12">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-default" type="button" id="btnminus" field="page"><span class="glyphicon glyphicon-minus-sign"/></button>
-                                    </span>
-                                    <input type="text" class="form-control text-center" value="0" name="page" readonly="readonly"/>
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-default" type="button" id="btnplus" field="page"><span class="glyphicon glyphicon-plus-sign"/></button>
-                                    </span>
-                                </div>
-                                <span class="help-block"> Enter start page</span>
+                            <t t-call="website_slides.slide_share">
+                                <t t-set="slide" t-value="slideview"/>
                             </t>
                         </div>
                         <div class="tab-pane fade in active" id="discuss">
@@ -609,7 +589,7 @@
         <template id="slide-box" name="Slide Box">
             <li class="media slide-container">
                 <a class="pull-left" t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/#{slug(attachment)}">
-                    <span t-attf-class="image-box">
+                    <span class="slide-small-box">
                         <img class="media-object img-responsive" t-attf-src="/slides/thumb/#{attachment.id}"/>
                     </span>
                 </a>
