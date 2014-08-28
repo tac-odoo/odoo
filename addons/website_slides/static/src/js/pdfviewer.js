@@ -151,4 +151,14 @@ function goFullscreen() {
 }
 document.getElementById('fullscreen').addEventListener('click', goFullscreen);
 
+
+
+$('.toggleSlideOption').click(function () {
+  //$('.slide-option-toggle').hide();
+  var toggleDiv = $(this).data('slide-option-toggle-id');
+  $(toggleDiv).slideToggle();
+});
+
+
+
 }); //end document.ready 

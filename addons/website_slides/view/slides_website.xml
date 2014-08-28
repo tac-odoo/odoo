@@ -37,27 +37,61 @@
 
         <template id='pdfview' name="pdfview">
             <div class="panel panel-default" style="border-radius: 0px;">
-                <div class="panel-body" style="padding:0px">
+                <div class="panel-heading">
+                    <a class="toggleSlideOption" href="javascript:void(0);" data-slide-option-toggle-id="#slide_share"><span class="glyphicon glyphicon-share-alt"></span> Share</a>
+                </div>
+                <div class="panel-body" style="position: relative;padding:0px;">
+                    <div id="slide_share" class="slide-option-toggle">
+                        <t t-call="website_slides.slide_share"/>
+                    </div>
                     <canvas id="pdfcanvas" style="width:100%;"></canvas>
                 </div>
                 <div class="panel-footer">
                     <div class="row">
                         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3 text-left">
-                            <span class="lead"><span id="page_num"></span> / <span id="page_count"></span></span>
+                            <span><span id="page_num"></span> / <span id="page_count"></span></span>
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6 text-center">
-                            <a id="firstpage" href="javascript:void(0);" role="button"><i class="fa fa-step-backward fa-2x"></i></a>
-                            <a id="prev" href="javascript:void(0);" role="button"><i class="fa fa-arrow-circle-o-left fa-2x"></i></a>
-                            <a id="next" href="javascript:void(0);" role="button"><i class="fa fa-arrow-circle-o-right fa-2x"></i></a>
-                            <a id="lastpage" href="javascript:void(0);" role="button"><i class="fa fa-step-forward fa-2x"></i></a>
+                            <a id="firstpage" href="javascript:void(0);" role="button"><span class="glyphicon glyphicon-step-backward"></span></a>
+                            <a id="prev" href="javascript:void(0);" role="button"><span class="glyphicon glyphicon-chevron-left"></span></a>
+                            <a id="next" href="javascript:void(0);" role="button"><span class="glyphicon glyphicon-chevron-right"></span></a>
+                            <a id="lastpage" href="javascript:void(0);" role="button"><span class="glyphicon glyphicon-step-forward"></span></a>
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3 text-right">
-                            <a id="fullscreen" href="javascript:void(0);"><i class="fa fa-arrows-alt fa-2x"></i></a>
+                            <a id="fullscreen" href="javascript:void(0);"><span class="glyphicon glyphicon-fullscreen"></span></a>
                         </div>
                     </div>
                 </div>
             </div>
             <input id="pdf_file" name="pdf_file" type="hidden" t-att-value="pdf_file"/>
+        </template>
+
+        <template id='slide_share' name="slide_share">
+            <span class="lead">Share:</span>
+            <p class="oe_share">
+                <a target="_Blank" class="oe_share_facebook" href="https://www.facebook.com/sharer/sharer.php?u={url}"><i class="fa fa-facebook-square fa-2x"></i></a>
+                <a target="_Blank" class="oe_share_twitter" href="https://twitter.com/intent/tweet?text={title}&amp;url={url}"><i class="fa fa-twitter fa-2x"></i></a>
+                <a target="_Blank" class="oe_share_linkedin" href="http://www.linkedin.com/shareArticle?mini=true&amp;url={url}&amp;title={title}&amp;"><i class="fa fa-linkedin fa-2x"></i></a>
+                <a target="_Blank" class="oe_share_google" href="https://plus.google.com/share?url={url}"><i class="fa fa-google-plus-square fa-2x"></i></a>
+                <a href="mailto:?body={url}&amp;subject={title}"><i class="fa fa-envelope-o fa-2x"></i></a>
+            </p>
+            <input type="text" class="form-control" t-att-value="shareurl" readonly="readonly" onClick="this.select();"/>
+            <span class="help-block">  copy above link to share</span>
+            <span class="lead">Embed:</span>
+            <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="embedcode"/></textarea>
+            <span class="help-block">  copy above embed code to share</span>
+            <t t-if="slideview.datas">                                                      
+                <div class="input-group col-lg-2 col-md-2 col-sm-12 col-xs-12">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" id="btnminus" field="page"><span class="glyphicon glyphicon-minus-sign"/></button>
+                    </span>
+                    <input type="text" class="form-control text-center" value="0" name="page" readonly="readonly"/>
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" id="btnplus" field="page"><span class="glyphicon glyphicon-plus-sign"/></button>
+                    </span>
+                </div>
+                <span class="help-block"> Enter start page</span>
+            </t>
         </template>
 
         <template id='videoview' name="Video Viewer">
