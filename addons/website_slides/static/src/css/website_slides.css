@@ -146,5 +146,6 @@
   bottom: 0px;
   background-color: #ddd;
   opacity: 0.9;
-  display:none;
+  display: none;
+  overflow-y: auto;
 }

@@ -17,7 +17,7 @@ var pdfDoc = null,
     pageNum = 1,
     pageRendering = false,
     pageNumPending = null,
-    scale = 1,
+    scale = 1.5,
     canvas = document.getElementById('pdfcanvas'),
     ctx = canvas.getContext('2d');
     
@@ -130,26 +130,35 @@ PDFJS.getDocument(url).then(function (pdfDoc_) {
   renderPage(pageNum);
 });
 
-
-function goFullscreen() {
-  // Get the element that we want to take into fullscreen mode
-  var element = document.getElementById('pdfcanvas');
-  
-  // These function will not exist in the browsers that don't support fullscreen mode yet, 
-  // so we'll have to check to see if they're available before calling them.
-  
-  if (element.mozRequestFullScreen) {
-    // This is how to go into fullscren mode in Firefox
-    // Note the "moz" prefix, which is short for Mozilla.
-    element.mozRequestFullScreen();
-  } else if (element.webkitRequestFullScreen) {
-    // This is how to go into fullscreen mode in Chrome and Safari
-    // Both of those browsers are based on the Webkit project, hence the same prefix.
-    element.webkitRequestFullScreen();
+/**
+ * For full screen mode 
+ */
+function toggleFullScreen() {
+  var elem = document.getElementById("pdfcanvas");
+  if (!elem.fullscreenElement &&    // alternative standard method
+      !elem.mozFullScreenElement && !elem.webkitFullscreenElement && !elem.msFullscreenElement ) {  // current working methods
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.msRequestFullscreen) {
+      elem.msRequestFullscreen();
+    } else if (elem.mozRequestFullScreen) {
+      elem.mozRequestFullScreen();
+    } else if (elem.webkitRequestFullscreen) {
+      elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+  } else {
+    if (elem.exitFullscreen) {
+      elem.exitFullscreen();
+    } else if (elem.msExitFullscreen) {
+      elem.msExitFullscreen();
+    } else if (elem.mozCancelFullScreen) {
+      elem.mozCancelFullScreen();
+    } else if (elem.webkitExitFullscreen) {
+      elem.webkitExitFullscreen();
+    }
   }
- // Hooray, now we're in fullscreen mode!
 }
-document.getElementById('fullscreen').addEventListener('click', goFullscreen);
+document.getElementById('fullscreen').addEventListener('click', toggleFullScreen);
 
 
 
