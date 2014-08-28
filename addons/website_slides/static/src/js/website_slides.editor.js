@@ -1,48 +1,51 @@
 (function(){
     "use strict";
-
     var website = openerp.website;
     var _t = openerp._t;
     website.add_template_file('/website_slides/static/src/xml/website_slides.xml');
 
-    website.EditorBarContent.include({
-        new_slide: function() {
-            new website.editor.AddSlideDialog(this).appendTo(document.body);
-        },
+    if (website.EditorBarContent){
+        website.EditorBarContent.include({
+            new_slide: function() {
+                new website.slide.Dialog(this).appendTo(document.body);
+            },
 
-    });
-    website.editor.AddSlideDialog = website.editor.Dialog.extend({
-        template: 'website.addslide.loading',
-        events: _.extend({}, website.editor.Dialog.prototype.events, {
+        });
+    }
+    website.slide = {};
+    website.slide.Dialog = openerp.Widget.extend({
+        template: 'website.slide.dialog',
+        events: {
+            'hidden.bs.modal': 'destroy',
+            'click button.save': 'save',
+            'click button[data-dismiss="modal"]': 'cancel',
             'change .slide-upload': 'slide_upload',
             'click .list-group-item': function(ev) {
                 this.$('.list-group-item').removeClass('active');
                 $(ev.target).closest('li').addClass('active');
             }
-        }),
-        init: function(){
-            var self = this;
-            this._super.apply(this, arguments);
+
+        },
+        init: function () {
+            this._super();
             this.file = {};
         },
-
-        fetch_channel: function(){
-            return openerp.jsonRpc('/slides/get_channel', 'call', {});
-        },
-
-        start: function (){
+        start: function () {
             var self = this;
-            this.$('.save').attr('data-loading-text','Loading...').text('Create');
+            this.$el.modal({backdrop: 'static'});
+            //this.$('input:first').focus();
             this.$('.modal-footer').hide();
-            var r = this._super.apply(this, arguments);
             this.fetch_channel().then(function(channels){
-                self.channels = channels; 
+                self.channels = channels;
                 self.load_form();
                 self.set_tags();
             }).fail(function(){
                 self.$('.modal-body').html("<h4>Error occured on fetching data.</h4>");
             });
-            return r;
+
+        },
+        fetch_channel: function(){
+            return openerp.jsonRpc('/slides/get_channel', 'call', {});
         },
         load_form: function(){
             this.$('.modal-body').html(openerp.qweb.render('website.addslide.dialog', {widget: this}));
@@ -91,7 +94,6 @@
                 });
             };
         },
-
         set_tags: function(){
             var self = this;
             this.$("input.slide-tags").textext({
@@ -115,7 +117,7 @@
                 }
             });
 
-            },
+        },
         get_value: function(){
             var self = this;
             var default_val = {
@@ -151,11 +153,15 @@
         save: function () {
             if(this.validate()){
                 var values = this.get_value();
+                this.$('.modal-body').html("<h4><i class='fa fa-spinner fa-spin'></i> Redirecting to new presenation...  </h4>");
+                this.$('.modal-footer').hide();
                 website.form('/slides/add_slide', 'POST', values);
             }
+
         },
-
-
-    });
+        cancel: function () {
+            this.trigger("cancel");
+        },
+     });
 
 })();

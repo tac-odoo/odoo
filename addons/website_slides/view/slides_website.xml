@@ -18,7 +18,7 @@
         <!-- header template to add scripts to all pages -->
         <template id="head" name="slides">
             <link href="/website_slides/static/src/css/website_slides.css" rel="stylesheet"/>
-            <script type="text/javascript" src="/website_slides/static/src/js/slides.js"></script>          
+            <script type="text/javascript" src="/website_slides/static/src/js/slides.js"></script>
         </template>
 
         <!-- search box -->
@@ -80,18 +80,16 @@
             <span class="lead">Embed:</span>
             <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="embedcode"/></textarea>
             <span class="help-block">  copy above embed code to share</span>
-            <t t-if="slideview.datas">                                                      
-                <div class="input-group col-lg-2 col-md-2 col-sm-12 col-xs-12">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" id="btnminus" field="page"><span class="glyphicon glyphicon-minus-sign"/></button>
-                    </span>
-                    <input type="text" class="form-control text-center" value="0" name="page" readonly="readonly"/>
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" id="btnplus" field="page"><span class="glyphicon glyphicon-plus-sign"/></button>
-                    </span>
-                </div>
-                <span class="help-block"> Enter start page</span>
-            </t>
+            <div class="input-group col-lg-2 col-md-2 col-sm-12 col-xs-12">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button" id="btnminus" field="page"><span class="glyphicon glyphicon-minus-sign"/></button>
+                </span>
+                <input type="text" class="form-control text-center" value="0" name="page" readonly="readonly"/>
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button" id="btnplus" field="page"><span class="glyphicon glyphicon-plus-sign"/></button>
+                </span>
+            </div>
+            <span class="help-block"> Enter start page</span>
         </template>
 
         <template id='videoview' name="Video Viewer">
@@ -110,6 +108,12 @@
         <template id='home' name="Odoo Slides">
             <t t-set="head">
                 <t t-call="website_slides.head"/>
+                <t t-if="not publisher">
+                    <script type="text/javascript" src="/web/static/lib/jquery.textext/jquery.textext.js"/>
+                    <script type="text/javascript" src="/website_slides/static/src/js/website_slides.editor.js"></script>
+                    <link rel='stylesheet' href="/web/static/lib/jquery.textext/jquery.textext.css"/>
+
+                </t>
                 <script type="text/javascript" src="/website_slides/static/lib/pdfjs/build/pdf.js"></script>
                 <script type="text/javascript" src="/website_slides/static/src/js/pdfviewer.js"></script>
             </t>
@@ -120,7 +124,14 @@
                             <div class="row">
                                 <div class="col-md-12 col-sm-12 col-xs-12">
                                     <div class="pull-left col-md-8 col-sm-8 col-xs-8 mt16 mb8" style="padding-left: 0px;">
-                                        <h4 t-esc="channel.name" class="mt4"/>
+                                        <h3 t-esc="channel.name" class="mt4"/>
+                                        <t t-if="is_public_user">
+
+                                        <a t-attf-href="/web?redirect=#{ request.httprequest.url }" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-upload"></span> Upload </a>
+                                        </t> 
+                                        <t t-if="not is_public_user">
+                                        <a class="btn btn-default btn-xs upload"><span class="glyphicon glyphicon-upload"></span> Upload </a>
+                                        </t>
                                     </div>
                                     <div class="col-md-4 col-sm-12 col-xs-12 pul-right mt16 mb8" style="padding-right: 0px;">
                                         <t t-call="website_slides.search"/>
@@ -146,7 +157,7 @@
                                 <div class="pull-right col-md-6 col-sm-12 col-xs-12" t-if="types">
                                     <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm pull-right" style="border-bottom: 0px solid #ddd;">
                                         <li class="slide-tabs-li active dropdown" style="padding-right: 0px;">
-                                            <a  href="#" class="slide-tabs dropdown-toggle" data-toggle="tab"><t t-esc="all_count"/> <t t-esc="types"/> sorted by Recently Published <span class="caret"></span></a>
+                                            <a  href="#" class="slide-tabs dropdown-toggle" data-toggle="tab"><t t-esc="all_count"/> <t t-esc="types"/> sorted by<span class="caret"></span></a>
                                             <ul class="dropdown-menu" role="menu">
                                                 <li><a href="?sorting=date">Recently Published</a></li>
                                                 <li><a href="?sorting=view">Most Viewed</a></li>
@@ -314,7 +325,7 @@
                 <div class="container mt16">
                     <div class="row">
                         <div t-foreach="channels" t-as="channel" class="col-sm-4 mb32">
-                            <t t-set="famous" t-value="channel.get_mostviewed(channel)"/> 
+                            <t t-set="famous" t-value="channel.get_mostviewed(channel)"/>
                             <div class="oe-channel-grid-thumbnail">
                                 <a t-attf-href="/channel/#{slug(channel)}" t-if="famous">
                                     <span class="channel-box">
@@ -513,14 +524,14 @@
                                 <a target="_Blank" class="oe_share_twitter" href="https://twitter.com/intent/tweet?text={title}&amp;url={url}"><i class="fa fa-twitter fa-2x"></i></a>
                                 <a target="_Blank" class="oe_share_linkedin" href="http://www.linkedin.com/shareArticle?mini=true&amp;url={url}&amp;title={title}&amp;"><i class="fa fa-linkedin fa-2x"></i></a>
                                 <a target="_Blank" class="oe_share_google" href="https://plus.google.com/share?url={url}"><i class="fa fa-google-plus-square fa-2x"></i></a>
-                                <a href="mailto:?body={url}&amp;subject={title}"><i class="fa fa-envelope-o fa-2x"></i></a>                             
+                                <a href="mailto:?body={url}&amp;subject={title}"><i class="fa fa-envelope-o fa-2x"></i></a>
                             </p>
                             <input type="text" class="form-control" t-att-value="shareurl" readonly="readonly" onClick="this.select();"/>
                             <span class="help-block">  copy above link to share</span>
                             <span class="lead">Embed:</span>
                             <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="embedcode"/></textarea>
                             <span class="help-block">  copy above embed code to share</span>
-                            <t t-if="slideview.datas">                                                      
+                            <t t-if="slideview.datas">
                                 <div class="input-group col-lg-2 col-md-2 col-sm-12 col-xs-12">
                                     <span class="input-group-btn">
                                         <button class="btn btn-default" type="button" id="btnminus" field="page"><span class="glyphicon glyphicon-minus-sign"/></button>
@@ -533,7 +544,7 @@
                                 <span class="help-block"> Enter start page</span>
                             </t>
                         </div>
-                        <div class="tab-pane fade in active" id="discuss">                          
+                        <div class="tab-pane fade in active" id="discuss">
                             <form id="comment" t-attf-action="/slides/comment/#{slideview.id}" method="POST">
                                 <div class="media">
                                     <span class="pull-left">
@@ -619,7 +630,6 @@
                 <li><a id="create-new-slide" href="#" data-action="new_slide">New Slide</a></li>
             </xpath>
         </template>
-
         <template id="assets_editor_slides" inherit_id="website.assets_editor" name="Add Slides">
             <xpath expr="." position="inside">
                 <script type="text/javascript" src="/website_slides/static/lib/pdfjs/build/pdf.js"/>
