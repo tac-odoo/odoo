@@ -90,8 +90,8 @@ class main(http.Controller):
         attachment = request.registry['ir.attachment']
         domain = [('is_slide','=','True'), ('parent_id','=',channel.id)]
 
-        count_all = count_slide = count_video = count_document = 0
-        attachment_ids = videos = slides = documents = []
+        count_all = count_slide = count_video = count_document = count_infographic = 0
+        attachment_ids = videos = slides = documents = infographics = []
         famous = None
 
         if request.uid == 3: domain += [('website_published', '=', True)]
@@ -172,11 +172,18 @@ class main(http.Controller):
                 documents = attachment.browse(cr, uid, count_ids)
             lens.update({'document':len(count_ids)})
 
+            count_domain = domain + [('slide_type', '=', 'infographic')]
+            count_ids = attachment.search(cr, uid, count_domain, limit=4, offset=0, order='create_date desc', context=context)
+            if count_domain:
+                infographics = attachment.browse(cr, uid, count_ids)
+            lens.update({'infographic':len(count_ids)})
+
             famous = request.registry.get('document.directory').get_mostviewed(cr, uid, channel, context)
             values.update({
                 'videos':videos,
                 'slides':slides,
                 'documents':documents,
+                'infographics': infographics,
                 'famous':famous
             })
 
@@ -288,7 +295,6 @@ class main(http.Controller):
                         })
         return res
 
-
     @http.route(['/slides/add_slide'], type='http', auth="user", methods=['POST'], website=True)
     def create_slide(self, *args, **post):
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
@@ -305,13 +311,16 @@ class main(http.Controller):
         post['tag_ids'] = tag_ids
         slide_obj = pool.get('ir.attachment')
 
+        _file_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif']
+
+        if post.get('mimetype') in _file_types:
+            post['slide_type'] = 'infographic'
         if post.get('url') and not post.get('datas', False):
             post['slide_type'] = 'video'
         elif post.get('datas') and not post.get('url', False):
             height = post.get('height', 0)
-            del post['height']
-
             width = post.get('width', 0)
+            del post['height']
             del post['width']
 
             if height > width:

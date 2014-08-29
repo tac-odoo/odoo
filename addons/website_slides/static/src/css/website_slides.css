@@ -66,9 +66,21 @@
   display: block;
 }
 
+.oe-infographic-image-thumbnail {
+  max-height: 325px;
+  overflow: hidden;
+  display: block;
+}
+
 .oe-presentation-grid-thumbnail {
   background-color: #fcfcfc !important;
   min-height: 300px;
+  border: 1px solid #ccc;
+}
+
+.oe-infographic-grid-thumbnail {
+  background-color: #fcfcfc !important;
+  min-height: 425px;
   border: 1px solid #ccc;
 }
 

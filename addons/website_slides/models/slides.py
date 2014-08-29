@@ -86,7 +86,7 @@ class ir_attachment(osv.osv):
     _order = "id desc"
     _columns = {
         'is_slide': fields.boolean('Is Slide'),
-        'slide_type': fields.selection([('presentation', 'Presentation'), ('document', 'Document'), ('video', 'Video')], 'Type'),
+        'slide_type': fields.selection([('infographic','Infographic'), ('presentation', 'Presentation'), ('document', 'Document'), ('video', 'Video')], 'Type'),
         'tag_ids': fields.many2many('ir.attachment.tag', 'rel_attachments_tags', 'attachment_id', 'tag_id', 'Tags'),
         'image': fields.binary('Thumb'),
         'slide_views': fields.integer('Number of Views'),
@@ -204,6 +204,7 @@ class ir_attachment(osv.osv):
             elif values.get('url'):
                 values = self.update_youtube(cr, uid, values, context)
 
+        values['website_published'] = False
         slide_id = super(ir_attachment, self).create(cr, uid, values, context)
         self.notify_published(cr, uid, slide_id, context)
         return slide_id
