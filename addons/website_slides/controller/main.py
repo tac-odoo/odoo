@@ -315,9 +315,11 @@ class main(http.Controller):
 
         if post.get('mimetype') in _file_types:
             post['slide_type'] = 'infographic'
+            post['image'] = post.get('datas')
+        print 'EEE',post.get('datas')
         if post.get('url') and not post.get('datas', False):
             post['slide_type'] = 'video'
-        elif post.get('datas') and not post.get('url', False):
+        elif post.get('mimetype') == 'application/pdf':
             height = post.get('height', 0)
             width = post.get('width', 0)
 
@@ -326,8 +328,8 @@ class main(http.Controller):
             else:
                 post['slide_type'] = 'presentation'
 
-        del post['height']
-        del post['width']
+            del post['height']
+            del post['width']
 
         slide_id = slide_obj.create(cr, uid, post, context=context)
         return request.redirect("/channel/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id))

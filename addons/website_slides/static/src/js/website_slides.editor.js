@@ -53,7 +53,6 @@
         },
         slide_upload: function(ev){
             var self = this;
-            this.$('.save').button('loading');
             var file = ev.target.files[0];
             var ArrayReader = new FileReader();
             var BinaryReader = new FileReader();
@@ -64,35 +63,40 @@
                 buffer = buffer.split(',')[1];
                 self.file.data = buffer;
                 self.file.name = file.name;
+                self.file.type = file.type;
             };
-            // file read as ArrayBuffer for PDFJS get_Document API
-            ArrayReader.readAsArrayBuffer(file);
-            ArrayReader.onload = function(evt) {
-                var buffer = evt.target.result;
-                // PDFJS can't eval path because of bundle assest
-                // https://github.com/mozilla/pdf.js/blob/master/src/pdf.js#L41
-                var path = '';
-                var pathArray = window.location.pathname.split( '/' );
-                pathArray.forEach(function(){path +='../';});
-                PDFJS.workerSrc = path + 'website_slides/static/lib/pdfjs/build/pdf.worker.js';
 
-                PDFJS.getDocument(buffer).then(function getPdf(pdf) {
-                    pdf.getPage(1).then(function getFirstPage(page) {
-                        var scale = 1;
-                        var viewport = page.getViewport(scale);
-                        var canvas = document.getElementById('the-canvas');
-                        var context = canvas.getContext('2d');
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
-                        //
-                        // Render PDF page into canvas context
-                        //
-                        page.render({canvasContext: context, viewport: viewport}).then(function(){
-                            self.$('.save').button('reset');
+            if (file.type === 'application/pdf'){
+                // file read as ArrayBuffer for PDFJS get_Document API
+                this.$('.save').button('loading');
+                ArrayReader.readAsArrayBuffer(file);
+                ArrayReader.onload = function(evt) {
+                    var buffer = evt.target.result;
+                    // PDFJS can't eval path because of bundle assest
+                    // https://github.com/mozilla/pdf.js/blob/master/src/pdf.js#L41
+                    var path = '';
+                    var pathArray = window.location.pathname.split( '/' );
+                    pathArray.forEach(function(){path +='../';});
+                    PDFJS.workerSrc = path + 'website_slides/static/lib/pdfjs/build/pdf.worker.js';
+
+                    PDFJS.getDocument(buffer).then(function getPdf(pdf) {
+                        pdf.getPage(1).then(function getFirstPage(page) {
+                            var scale = 1;
+                            var viewport = page.getViewport(scale);
+                            var canvas = document.getElementById('the-canvas');
+                            var context = canvas.getContext('2d');
+                            canvas.height = viewport.height;
+                            canvas.width = viewport.width;
+                            //
+                            // Render PDF page into canvas context
+                            //
+                            page.render({canvasContext: context, viewport: viewport}).then(function(){
+                                self.$('.save').button('reset');
+                            });
                         });
                     });
-                });
-            };
+                };
+            }
         },
         set_tags: function(){
             var self = this;
@@ -124,18 +128,24 @@
                 'is_slide': true,
                 'website_published': false,
             };
+            var values= {};
             var canvas = this.$('#the-canvas')[0];
-            var values = {
+            if (self.file.type === 'application/pdf'){
+                _.extend(values, {
+                    'image': canvas.toDataURL().split(',')[1],
+                    'width': canvas.width,
+                    'height':canvas.height
+                });
+            }
+            _.extend(values, {
                 'name' : this.$('#name').val(),
                 'tag_ids' : this.$('.slide-tags').textext()[0].tags()._formData,
                 'datas': self.file.data || '',
                 'datas_fname': self.file.name || '',
-                'image': canvas.toDataURL().split(',')[1],
-                'width': canvas.width,
-                'height':canvas.height,
+                'mimetype':self.file.type,
                 'url': this.$('#url').val(),
                 'parent_id': this.$('#channel').val()
-            };
+            });
             return _.extend(values, default_val);
         },
         validate: function(){
