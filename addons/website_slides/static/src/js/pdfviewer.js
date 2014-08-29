@@ -1,4 +1,5 @@
 jQuery(document).ready(function() {
+if( document.getElementById('pdfcanvas') ){
 //
 // NOTE: 
 // Modifying the URL below to another server will likely *NOT* work. Because of browser
@@ -41,6 +42,8 @@ function renderPage(num) {
     };
     var renderTask = page.render(renderContext);  
     
+    $.blockUI.defaults.css = {};
+    $('div#pdf_container').block({ message: $('#pdf_loader_status') });
     // Wait for rendering to finish
     renderTask.promise.then(function () {
       pageRendering = false;
@@ -49,6 +52,7 @@ function renderPage(num) {
         renderPage(pageNumPending);
         pageNumPending = null;
       }
+      $('div#pdf_container').unblock();
     });
   });
 
@@ -161,6 +165,7 @@ function toggleFullScreen() {
 }
 document.getElementById('fullscreen').addEventListener('click', toggleFullScreen);
 
+} //end of canvas condition
 
 
 $('.toggleSlideOption').click(function () {

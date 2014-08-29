@@ -40,7 +40,7 @@
                 <div class="panel-heading">
                     <a class="toggleSlideOption" href="javascript:void(0);" data-slide-option-toggle-id="#slide_share"><span class="glyphicon glyphicon-share-alt"></span> Share</a>
                 </div>
-                <div class="panel-body" style="position: relative;padding:0px;">
+                <div id="pdf_container" class="panel-body" style="position: relative;padding:0px;">
                     <div id="slide_share" class="slide-option-toggle">
                         <t t-call="website_slides.slide_share"/>
                     </div>
@@ -49,6 +49,9 @@
                     </t>
                     <t t-if="slide.slide_type in ('presentation', 'document')">
                         <canvas id="pdfcanvas" class="img-responsive" style="width:100%;"></canvas>
+                        <div id="pdf_loader_status" style="display:none;">
+                            <i class="fa fa-spinner fa-spin fa-3x"></i>
+                        </div>
                     </t>
                 </div>
                 <div class="panel-footer" t-if="slide.slide_type != 'infographic'">
@@ -84,6 +87,7 @@
                 <label>Link</label>
                 <input type="text" class="form-control" t-att-value="slide._get_share_url(slide)" readonly="readonly" onClick="this.select();"/>
             </div>
+            <t t-if="slide.slide_type in ('presentation', 'document')">
             <div class="form-group">
                 <label>Embed</label>
                 <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="slide._get_embade_code(slide)"/></textarea>
@@ -101,6 +105,7 @@
                 <input type="hidden" id="pdf_page_count" value=""/>
                 <span class="help-block"> Enter start page</span>
             </div>
+            </t>
         </template>
 
         <template id='videoview' name="Video Viewer">
