@@ -28,10 +28,18 @@
 
         <!-- Channel subtypes -->
         <record id="new_slides" model="mail.message.subtype">
-            <field name="name">Slide Published</field>
+            <field name="name">Presentation Published</field>
             <field name="res_model">document.directory</field>
             <field name="default" eval="True"/>
-            <field name="description">Slide Published</field>
+            <field name="description">Presentation Published</field>
+        </record>
+
+        <!-- Channel subtypes -->
+        <record id="new_slides_validation" model="mail.message.subtype">
+            <field name="name">Presentation Validations</field>
+            <field name="res_model">document.directory</field>
+            <field name="default" eval="False"/>
+            <field name="description">Presentation Validations</field>
         </record>
 
     </data>

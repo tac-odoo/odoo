@@ -320,13 +320,14 @@ class main(http.Controller):
         elif post.get('datas') and not post.get('url', False):
             height = post.get('height', 0)
             width = post.get('width', 0)
-            del post['height']
-            del post['width']
 
             if height > width:
                 post['slide_type'] = 'document'
             else:
                 post['slide_type'] = 'presentation'
+
+        del post['height']
+        del post['width']
 
         slide_id = slide_obj.create(cr, uid, post, context=context)
         return request.redirect("/channel/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id))

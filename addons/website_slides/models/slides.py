@@ -161,14 +161,27 @@ class ir_attachment(osv.osv):
             return False
 
         body = _(
-            '<p>A new presentation <i>%s</i> has been published under %s channel. <a href="%s/channel/%s/%s/view/%s">Click here to access the question.</a></p>' %
+            '<p>A new presentation <i>%s</i> has been published under %s channel. <a href="%s/channel/%s/%s/view/%s">Click here to access the presentation.</a></p>' %
             (slide.name, slide.parent_id.name, base_url, slug(slide.parent_id), slide.slide_type, slug(slide))
         )
         partner_ids = []
         for partner in slide.parent_id.message_follower_ids:
             partner_ids.append(partner.id)
-
         self.pool.get('document.directory').message_post(cr, uid, [slide.parent_id.id], subject=slide.name, body=body, subtype='website_slide.new_slides', partner_ids=partner_ids, context=context)
+
+    def notify_request_to_approve(self, cr, uid, slide_id, context):
+        base_url = self.pool['ir.config_parameter'].get_param(cr, uid, 'web.base.url')
+        slide = self.browse(cr, uid, slide_id, context)
+
+        body = _(
+            '<p>A new presentation <i>%s</i> has been uplodated under %s channel andwaiting for your review. <a href="%s/channel/%s/%s/view/%s">Click here to review the presentation.</a></p>' %
+            (slide.name, slide.parent_id.name, base_url, slug(slide.parent_id), slide.slide_type, slug(slide))
+        )
+        partner_ids = []
+        for partner in slide.parent_id.message_follower_ids:
+            partner_ids.append(partner.id)
+        self.pool.get('document.directory').message_post(cr, uid, [slide.parent_id.id], subject=slide.name, body=body, subtype='website_slide.new_slides_validation', partner_ids=partner_ids, context=context)
+
 
     def write(self, cr, uid, ids, values, context=None):
         if values.get('url'):
@@ -206,6 +219,7 @@ class ir_attachment(osv.osv):
 
         values['website_published'] = False
         slide_id = super(ir_attachment, self).create(cr, uid, values, context)
+        self.notify_request_to_approve(cr, uid, slide_id, context)
         self.notify_published(cr, uid, slide_id, context)
         return slide_id
 
