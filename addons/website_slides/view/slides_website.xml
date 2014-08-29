@@ -171,7 +171,7 @@
                                         <a t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger upload pull-right" style="border-radius: 0px;"><span class="glyphicon glyphicon-upload"></span> Upload </a>
                                     </t> 
                                     <t t-if="not is_public_user">
-                                        <a class="btn btn-danger upload pull-right" style="border-radius: 0px;"><span class="glyphicon glyphicon-upload"></span> Upload </a>
+                                        <a class="btn btn-danger upload pull-right" t-attf-channel_id="#{channel.id}" style="border-radius: 0px;"><span class="glyphicon glyphicon-upload"></span> Upload </a>
                                     </t>
                                     <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm pull-right" style="border-bottom: 0px solid #ddd;padding-right: 5px;"  t-if="types">
                                         <li class="slide-tabs-li active dropdown" style="padding-right: 0px;">

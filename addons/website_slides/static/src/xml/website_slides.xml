@@ -1,79 +1,4 @@
 <templates id="template" xml:space="preserve">
-    <t t-name="website.addslide.dialog">
-            <form class="clearfix form-horizontal">
-
-                <div class="control-group">
-                    <label for="slide-name" class="control-label col-sm-3">
-                        Name:
-                    </label>
-                    <div class="col-sm-9">
-                        <input name="slide-name" placeholder="Name" class="form-control" required="required" id="name"/>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label for="slide-tag" style="margin-top: 13px;" class="control-label col-sm-3">
-                        Tags:
-                    </label>
-                    <div class="controls col-sm-9">
-                        <br/>
-                        <input type="text" name="slide-tags" style="width: 200px" placeholder="Tags" class="form-control slide-tags"/>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label col-sm-3" for="slide-file">Content:</label>
-                    <div class="controls col-sm-9 input-group-sm h5">
-                        <ul class="list-group">
-                            <li class="list-group-item active">
-                                <h5 class="list-group-item-heading">
-                                    <label for="file" class="control-label">
-                                        File
-                                    </label>
-                                </h5>
-                                <input id="slide-file" name="file" accept="image/*,application/pdf" class="slide-upload" type="file"/>
-                            </li>
-                            <li class="list-group-item">
-                                <h5 class="list-group-item-heading">
-                                    <label for="slide-url" class="control-label">
-                                        URL
-                                    </label>
-                                </h5>
-
-                                <input name="slide-url" class="form-control h5" placeholder="Video URL" id="url"/>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label for="slide-channel" class="col-sm-3 control-label">
-                        Channel:
-                    </label>
-                    <div class="col-sm-9">
-                        <select name="slide-channel" id="channel" class="form-control">
-                            <t t-foreach="widget.channels" t-as="channel">
-                                <option t-att-value="channel.id"
-                                    t-att="{'selected': channel.default ? 'selected' : null}">
-                                    <t t-esc="channel.name"/>
-                                </option>
-                            </t>
-                        </select>
-                    </div>
-                </div>
-                <canvas id="the-canvas" style="display: none;"></canvas>
-            </form>
-    </t>
-
-    <t t-name="website.addslide.loading">
-        <t t-call="website.editor.dialog">
-            <t t-set="title">Add Presentation</t>
-            <h4>
-                <i class="fa fa-spinner fa-spin"></i>
-                Loading... 
-            </h4>
-        </t>
-    </t>
-
     <t t-name="website.slide.dialog">
         <div class="modal" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog">
@@ -83,10 +8,53 @@
                         <h3 class="modal-title">Add Presentation</h3>
                     </div>
                     <div class="modal-body">
-                        <h4>
-                            <i class="fa fa-spinner fa-spin"></i>
-                            Loading... 
-                        </h4>
+                        <form class="clearfix form-horizontal">
+
+                            <div class="control-group">
+                                <label for="slide-name" class="control-label col-sm-3">
+                                    Name:
+                                </label>
+                                <div class="col-sm-9">
+                                    <input name="slide-name" placeholder="Name" class="form-control" required="required" id="name"/>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label for="slide-tag" style="margin-top: 13px;" class="control-label col-sm-3">
+                                    Tags:
+                                </label>
+                                <div class="controls col-sm-9">
+                                    <br/>
+                                    <input type="text" name="slide-tags" style="width: 200px" placeholder="Tags" class="form-control slide-tags"/>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label col-sm-3" for="slide-file">Content:</label>
+                                <div class="controls col-sm-9 input-group-sm h5">
+                                    <ul class="list-group">
+                                        <li class="list-group-item active">
+                                            <h5 class="list-group-item-heading">
+                                                <label for="file" class="control-label">
+                                                    File
+                                                </label>
+                                            </h5>
+                                            <input id="slide-file" name="file" accept="image/*,application/pdf" class="slide-upload" type="file"/>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <h5 class="list-group-item-heading">
+                                                <label for="slide-url" class="control-label">
+                                                    URL
+                                                </label>
+                                            </h5>
+
+                                            <input name="slide-url" class="form-control h5" placeholder="Video URL" id="url"/>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <canvas id="the-canvas" style="display: none;"></canvas>
+                        </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-loading-text="Loading..." class="btn btn-primary save">Create</button>
