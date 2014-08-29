@@ -67,7 +67,6 @@
 }
 .openerp .oe_mail .oe_msg .oe_msg_content{
     display: block;
-    overflow: hidden;
     padding: 4px;
     padding-bottom:1px;
 }
@@ -197,7 +196,6 @@
     margin: 0px;
     padding: 0px;
     resize: vertical;
-    
     padding: 4px;
 }
 .openerp .oe_mail .oe_msg.oe_msg_composer_compact, .openerp .oe_mail .oe_msg.oe_msg_expandable{

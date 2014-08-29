@@ -486,13 +486,96 @@ openerp.mail = function (session) {
 
             // auto close
             this.$('textarea').on('blur', self.on_toggle_quick_composer);
+            this.enable_prefill_customer();
+            this.jquery_add();
 
             // event: delete child attachments off the oe_msg_attachment_list box
             this.$(".oe_msg_attachment_list").on('click', '.oe_delete', this.on_attachment_delete);
 
             this.$(".oe_recipients").on('change', 'input', this.on_checked_recipient);
         },
-
+        get_suggestions: function(_this){
+            var self = this;
+            var dataset = new openerp.web.DataSet(this, 'res.partner', {});
+            dataset.name_search(self.search_name, [],'ilike', {}).done(function(res){
+                    console.log("ressssss",self.search_name,res);
+                    if(res.length === 0){
+                        self.search_name = "";
+                        self.enable_finding = false;
+                    }
+                    $(_this).trigger('setSuggestions', {result : res});
+                });
+        },
+        jquery_add: function(){
+            $.fn.getCursorPosition = function() {
+                var el = $(this).get(0);
+                var pos = 0;
+                if('selectionStart' in el){
+                    pos = el.selectionStart;
+                } else if('selection' in document) {
+                    el.focus();
+                    var Sel = document.selection.createRange();
+                    var SelLength = document.selection.createRange().text.length;
+                    Sel.moveStart('character', -el.value.length);
+                    pos = Sel.text.length - SelLength;
+                }
+                return pos;
+            };
+        },
+        enable_prefill_customer: function(){
+            var self = this;
+            var $text_area = this.$('textarea');
+            this.enable_finding = false;
+            this.search_name = '';
+            var start_index = 0;
+            if($text_area){
+                $text_area.textext({
+                    plugins : 'autocomplete',
+                    keys : {
+                        
+                    },
+                    ext: {
+                        autocomplete: {
+                            selectFromDropdown: function() {
+                                this.trigger('hideDropdown');
+                                var label = this.selectedSuggestionElement().find(".text-label").html().trim();
+                                var new_index = $text_area.getCursorPosition();
+                                var value = $text_area.val();
+                                $text_area.val(value.replace($text_area.val().substring(start_index, new_index), label));
+                                self.enable_finding = false;
+                                self.search_name = '';
+                                start_index = 0;
+                            }
+                        },
+                        itemManager: {
+                            itemToString: function(item) {
+                                return item[1];
+                            },
+                        },
+                    }
+                }).bind('anyKeyUp', function(e, keyCode){
+                    if(keyCode == 13){
+                        var e = jQuery.Event("keydown");
+                        e.which = 13;
+                        $text_area.trigger(e);
+                    }
+3                }).bind('getSuggestions', function(e, data) {
+                    var index = $text_area.getCursorPosition();
+                    var value = $text_area.val();
+                    var _this = this;
+                    if (self.enable_finding){
+                        self.search_name = self.search_name + value.charAt(index-1);  
+                        self.get_suggestions(_this);
+                    }
+                    if(value.charAt(index-1) == "@"){
+                        start_index = index - 1;
+                        self.enable_finding = true;
+                    }
+                    
+                });
+                var tags = $text_area.textext();
+            }
+        },
         on_compose_fullmail: function (default_composition_mode) {
             var self = this;
             if(!this.do_check_attachment_upload()) {

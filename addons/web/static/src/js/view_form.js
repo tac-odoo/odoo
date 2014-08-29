@@ -4536,6 +4536,7 @@ instance.web.form.FieldMany2ManyTags = instance.web.form.AbstractField.extend(in
                         this.trigger('hideDropdown');
                         var index = Number(this.selectedSuggestionElement().children().children().data('index'));
                         var data = self.search_result[index];
+                        console.log("salve",data.action, self.search_result);
                         if (data.id) {
                             self.add_id(data.id);
                         } else {
@@ -4555,6 +4556,8 @@ instance.web.form.FieldMany2ManyTags = instance.web.form.AbstractField.extend(in
                         self.set({"value": _.without(self.get("value"), id)});
                     },
                     renderTag: function(stuff) {
+                        console.trace();
+                        console.log("stufffffffff",stuff)
                         return $.fn.textext.TextExtTags.prototype.renderTag.
                             call(this, stuff).data("id", stuff.id);
                     },
@@ -4595,6 +4598,7 @@ instance.web.form.FieldMany2ManyTags = instance.web.form.AbstractField.extend(in
         }).bind('showDropdown', function() {
             self._drop_shown = true;
         });
+        console.log("dddddddddddd",self.$text.textext()[0]);
         self.tags = self.$text.textext()[0].tags();
         self.$text
             .focusin(function () {
@@ -5006,7 +5010,7 @@ if (instance.web.form.Many2ManyKanbanView)
 instance.web.form.Many2ManyKanbanView = instance.web_kanban.KanbanView.extend({
     quick_create_class: 'instance.web.form.Many2ManyQuickCreate',
     _is_quick_create_enabled: function() {
-        return this._super() && ! this.group_by;
+        return true;
     },
 });
 instance.web.form.Many2ManyQuickCreate = instance.web.Widget.extend({
@@ -5026,11 +5030,14 @@ instance.web.form.Many2ManyQuickCreate = instance.web.Widget.extend({
     },
     start: function () {
         var self = this;
+        console.log("start",this.m2m.$el, this.m2m.quick_create.$text);
+        $(this.m2m.$el).append(this.$el);
         self.$text = this.$el.find('input').css("width", "200px");
         self.$text.textext({
             plugins : 'arrow autocomplete',
             autocomplete: {
                 render: function(suggestion) {
+                    console.log("suggestion",suggestion);
                     return $('<span class="text-label"/>').
                              data('index', suggestion['index']).html(suggestion['label']);
                 }

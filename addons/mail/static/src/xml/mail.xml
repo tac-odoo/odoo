@@ -25,7 +25,7 @@
                 <img class="oe_msg_icon" alt="User img" t-attf-src="#{widget.avatar}"/>
             </div>
             <div class="oe_msg_center">
-                <div class="oe_msg_content">
+                <div class="oe_msg_content oe_tags">
                     <button class="oe_full" title="Open the full mail composer"><span class='oe_e'>&amp;ograve</span></button>
                     <t t-call="mail.thread.list_recipients"/>
                     <textarea class="field_text"></textarea>
