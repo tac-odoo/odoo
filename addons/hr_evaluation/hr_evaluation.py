@@ -212,11 +212,12 @@ class hr_evaluation(models.Model):
         for rec in apprasial:
             for emp in rec[1]:
                 if emp.work_email:
-                    email = tools.email_split(emp.work_email)[0]
-                    partner_id = mail_obj._find_partner_from_emails(email) or emp.user_id.partner_id or None
-                    token = self.create_token(email, rec[0], partner_id)[0]
-                    self.update_appraisal_url(rec[0].public_url, email, token)
-                    self.mail_template.send_mail(self.id, force_send=True)
+                    email = tools.email_split(emp.work_email)
+                    if email:
+                        partner_id = mail_obj._find_partner_from_emails(email[0]) or emp.user_id.partner_id or None
+                        token = self.create_token(email[0], rec[0], partner_id)[0]
+                        self.update_appraisal_url(rec[0].public_url, email[0], token)
+                        self.mail_template.send_mail(self.id, force_send=True)
         return True
 
     @api.one
@@ -284,18 +285,19 @@ class hr_evaluation(models.Model):
 
     @api.multi
     def write(self, vals):
-        if vals.get('state') == 'pending' and not self.env.context.get('send_mail_status'): #avoid recursive process
-            self.button_sent_appraisal()
-        if vals.get('interview_deadline') and not vals.get('meeting_id'):
-            if datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT) > vals.get('interview_deadline'):
-                raise Warning(_("The interview date can not be in the past"))
-            self.create_update_meeting(vals) #creating employee meeting and interview date
-        if vals.get('apprasial_manager_ids'):
-            emp_obj = self.env['hr.employee']
-            # add followers
-            for follower_id in emp_obj.browse(vals['apprasial_manager_ids'][0][2]):
-                if follower_id.user_id:
-                    self.message_subscribe_users(user_ids=[follower_id.user_id.id])
+        emp_obj = self.env['hr.employee']
+        for evl_rec in self:
+            if vals.get('state') == 'pending' and not evl_rec._context.get('send_mail_status'): #avoid recursive process
+                evl_rec.button_sent_appraisal()
+            if vals.get('interview_deadline') and not vals.get('meeting_id'):
+                if datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT) > vals.get('interview_deadline'):
+                    raise Warning(_("The interview date can not be in the past"))
+                evl_rec.create_update_meeting(vals) #creating employee meeting and interview date
+            if vals.get('apprasial_manager_ids'):
+                # add followers
+                for follower_id in emp_obj.browse(vals['apprasial_manager_ids'][0][2]):
+                    if follower_id.user_id:
+                        evl_rec.message_subscribe_users(user_ids=[follower_id.user_id.id])
         return super(hr_evaluation, self).write(vals)
 
     @api.multi
