@@ -189,8 +189,10 @@ class main(http.Controller):
             countvals = {}
             for count in counts:
                 countvals['count_'+count.get('slide_type')] = count.get('slide_type_count') - lens.get(count.get('slide_type'))
+                count_all += count.get('slide_type_count')
 
             values.update(countvals)
+            values.update({'count_all':count_all})
 
         return request.website.render('website_slides.home', values)
 
