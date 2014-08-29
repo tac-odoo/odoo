@@ -259,7 +259,7 @@ instance.web_calendar.CalendarView = instance.web_calendar.CalendarView.extend({
                 parts.id_without_recurrent = _virtparts.slice(0, 2).join('-');
                 parts.id_virtual = _virtparts.slice(1).join('-');
             }
-            if (typeof(parts.id_virtual) === 'string' && parts.id_virtual.match(/[0-9]/)) {
+            if (typeof(parts.id_virtual) === 'string' && parts.id_virtual.match(/^[0-9]+$/)) {
                 parts.id_virtual = parseInt(parts.id_virtual);
             }
             if (_virtparts.length >= 3) {
@@ -352,11 +352,7 @@ instance.web_calendar.CalendarView = instance.web_calendar.CalendarView.extend({
                     readonly: !event_obj.access.edit
                 });
                 pop.on('write_completed', self, function(){
-                    if (edit_mode == EDIT_ALL) {
-                        self.refresh_scheduler(); // force full reload
-                    } else {
-                        self.refresh_event(id_from_dataset);
-                    }
+                    self.$calendar.fullCalendar('refetchEvents');
                 });
 
             });
@@ -390,9 +386,9 @@ instance.web_calendar.CalendarView = instance.web_calendar.CalendarView.extend({
                 }).done(function(choosen_mode) {
                     if (choosen_mode.value == DELETE_ALL) {
                         self.dataset.unlink(id_parts.id_without_recurrent)
-                            .done(function(){ self.refresh_scheduler(); });
+                            .done(function(){ self.$calendar.fullCalendar('refetchEvents'); });
                     } else {
-                        this.dataset.unlink([this.dataset.ids[index]]).done(function() {
+                        self.dataset.unlink([self.dataset.ids[index]]).done(function() {
                             self.$calendar.fullCalendar('removeEvents', [event_id]);
                         });
                     }
