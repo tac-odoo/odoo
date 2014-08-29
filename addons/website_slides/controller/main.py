@@ -316,7 +316,6 @@ class main(http.Controller):
         if post.get('mimetype') in _file_types:
             post['slide_type'] = 'infographic'
             post['image'] = post.get('datas')
-        print 'EEE',post.get('datas')
         if post.get('url') and not post.get('datas', False):
             post['slide_type'] = 'video'
         elif post.get('mimetype') == 'application/pdf':

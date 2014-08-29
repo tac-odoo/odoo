@@ -309,7 +309,7 @@
         </template>
 
         <!-- channel list, will be display if more then one channel available -->
-        <template id='channels' name="Channels">
+        <template id="channels" name="Channels">
             <t t-set="head"><t t-call="website_slides.head"/></t>
             <t t-call="website.layout">
                 <div class="oe_structure"/>
@@ -320,7 +320,7 @@
                             <div class="oe-channel-grid-thumbnail">
                                 <a t-attf-href="/channel/#{slug(channel)}" t-if="famous">
                                     <span class="channel-box">
-                                        <img t-attf-src="/slides/thumb/#{famous.id}" class="img-responsive"/>
+                                        <img t-attf-src="/slides/thumb/#{famous.id}" class="img-responsive" style="width: 100%;opacity: .5;"/>
                                     </span>
                                 </a>
                                 <a t-attf-href="/channel/#{slug(channel)}" t-if="not famous">
