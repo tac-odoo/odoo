@@ -32,11 +32,16 @@ jQuery(document).ready(function() {
         fieldName = jQuery(this).attr('field');
         var currentVal = parseInt(jQuery('input[name='+fieldName+']').val());
         if (!isNaN(currentVal)) {
-            jQuery('input[name='+fieldName+']').val(currentVal + 1);
-            jQuery.modifyembedcode(currentVal + 1)
+            if(currentVal < jQuery('#pdf_page_count').val()){
+                jQuery('input[name='+fieldName+']').val(currentVal + 1);
+                jQuery.modifyembedcode(currentVal + 1)
+            }else{
+                jQuery('input[name='+fieldName+']').val(currentVal);
+                jQuery.modifyembedcode(currentVal)
+            }
         } else {
-            jQuery('input[name='+fieldName+']').val(0);
-            jQuery.modifyembedcode(0)
+            jQuery('input[name='+fieldName+']').val(1);
+            jQuery.modifyembedcode(1)
         }
     });
     // This button will decrement the value till 0
@@ -44,12 +49,12 @@ jQuery(document).ready(function() {
         e.preventDefault();
         fieldName = jQuery(this).attr('field');
         var currentVal = parseInt(jQuery('input[name='+fieldName+']').val());
-        if (!isNaN(currentVal) && currentVal > 0) {
+        if (!isNaN(currentVal) && currentVal > 1) {
             jQuery('input[name='+fieldName+']').val(currentVal - 1);
             jQuery.modifyembedcode(currentVal - 1)
         } else {
-            jQuery('input[name='+fieldName+']').val(0);
-            jQuery.modifyembedcode(0)
+            jQuery('input[name='+fieldName+']').val(1);
+            jQuery.modifyembedcode(1)
         }
     });
 

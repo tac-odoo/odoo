@@ -125,6 +125,7 @@ document.addEventListener('keydown', function(e) {
 PDFJS.getDocument(url).then(function (pdfDoc_) {
   pdfDoc = pdfDoc_;
   document.getElementById('page_count').textContent = pdfDoc.numPages;
+  document.getElementById('pdf_page_count').value = pdfDoc.numPages;
 
   // Initial/first page rendering
   renderPage(pageNum);
