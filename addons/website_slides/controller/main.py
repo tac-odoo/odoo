@@ -86,7 +86,6 @@ class main(http.Controller):
         cr, uid, context = request.cr, SUPERUSER_ID, request.context
 
         user = request.registry['res.users'].browse(cr, uid, request.uid, context)
-        publisher = request.registry['res.users'].has_group(cr, request.uid, 'base.group_website_publisher')
         attachment = request.registry['ir.attachment']
         domain = [('is_slide','=','True'), ('parent_id','=',channel.id)]
 
@@ -109,7 +108,6 @@ class main(http.Controller):
             'channel': channel,
             'user': user,
             'is_public_user': user.id == request.website.user_id.id,
-            'publisher': publisher
         }
 
         if types:

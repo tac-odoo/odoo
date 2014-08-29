@@ -124,12 +124,10 @@
         <template id='home' name="Odoo Slides">
             <t t-set="head">
                 <t t-call="website_slides.head"/>
-                <t t-if="not publisher">
-                    <script type="text/javascript" src="/web/static/lib/jquery.textext/jquery.textext.js"/>
-                    <script type="text/javascript" src="/website_slides/static/src/js/website_slides.editor.js"></script>
-                    <link rel='stylesheet' href="/web/static/lib/jquery.textext/jquery.textext.css"/>
+                <script type="text/javascript" src="/web/static/lib/jquery.textext/jquery.textext.js"/>
+                <script type="text/javascript" src="/website_slides/static/src/js/website_slides.editor.js"></script>
+                <link rel='stylesheet' href="/web/static/lib/jquery.textext/jquery.textext.css"/>
 
-                </t>
                 <script type="text/javascript" src="/website_slides/static/lib/pdfjs/build/pdf.js"></script>
                 <script type="text/javascript" src="/website_slides/static/src/js/pdfviewer.js"></script>
             </t>
@@ -576,19 +574,5 @@
             </li>
         </template>
 
-        <template id="content_new_slide" inherit_id="website.user_navbar">
-            <xpath expr="//ul[@id='oe_systray']/li/ul[@class='dropdown-menu oe_content_menu']" position="inside">
-                <li><a id="create-new-slide" href="#" data-action="new_slide">New Slide</a></li>
-            </xpath>
-        </template>
-        <template id="assets_editor_slides" inherit_id="website.assets_editor" name="Add Slides">
-            <xpath expr="." position="inside">
-                <script type="text/javascript" src="/website_slides/static/lib/pdfjs/build/pdf.js"/>
-                <script type="text/javascript" src="/web/static/lib/jquery.textext/jquery.textext.js"/>
-                <script type="text/javascript" src="/website_slides/static/src/js/website_slides.editor.js"></script>
-                <link rel='stylesheet' href="/web/static/lib/jquery.textext/jquery.textext.css"/>
-            </xpath>
-        </template>
-
-    </data>
+     </data>
 </openerp>
