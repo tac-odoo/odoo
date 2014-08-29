@@ -26,30 +26,16 @@
             }
 
         },
-        init: function () {
+        init: function (el, channel_id) {
             this._super();
+            this.channel_id = channel_id;
             this.file = {};
         },
         start: function () {
             var self = this;
             this.$el.modal({backdrop: 'static'});
             //this.$('input:first').focus();
-            this.$('.modal-footer').hide();
-            this.fetch_channel().then(function(channels){
-                self.channels = channels;
-                self.load_form();
-                self.set_tags();
-            }).fail(function(){
-                self.$('.modal-body').html("<h4>Error occured on fetching data.</h4>");
-            });
-
-        },
-        fetch_channel: function(){
-            return openerp.jsonRpc('/slides/get_channel', 'call', {});
-        },
-        load_form: function(){
-            this.$('.modal-body').html(openerp.qweb.render('website.addslide.dialog', {widget: this}));
-            this.$('.modal-footer').show();
+           self.set_tags();
         },
         slide_upload: function(ev){
             var self = this;
@@ -144,7 +130,7 @@
                 'datas_fname': self.file.name || '',
                 'mimetype':self.file.type,
                 'url': this.$('#url').val(),
-                'parent_id': this.$('#channel').val()
+                'parent_id': self.channel_id || ''
             });
             return _.extend(values, default_val);
         },
@@ -161,6 +147,7 @@
             return true;
         },
         save: function () {
+            debugger;
             if(this.validate()){
                 var values = this.get_value();
                 this.$('.modal-body').html("<h4><i class='fa fa-spinner fa-spin'></i> Redirecting to new presenation...  </h4>");

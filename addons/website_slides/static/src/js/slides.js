@@ -18,7 +18,8 @@ jQuery(document).ready(function() {
         });
     });
     $('.upload').on('click' ,function(ev){
-        new website.slide.Dialog(this).appendTo(document.body);
+        var channel_id = $(this).attr('channel_id');
+        new website.slide.Dialog(this, channel_id).appendTo(document.body);
     });
     /*modify embed code based on options*/
     jQuery.modifyembedcode = function(currentVal) {
