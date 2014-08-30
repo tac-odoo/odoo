@@ -20,17 +20,19 @@
 ##############################################################################
 
 {
-    'name': 'Odoo Slides',
+    'name': 'Odoo Presentation',
     'version': '1.0',
-    'summary': 'Publish Slides and Documents Online',
+    'summary': 'Publish Presentations, Videos, Documents and Infographic',
     'category': 'website',
     'description': """
-Publish Documents as a Slides online
-==============================================
-You can link and publish documents and slides to the event and talks also you can publish documents and slides on slides. You can publish following all the file formats
+Publish Presentations, Videos, Documents and Infographic Online
+================================================================
+You can upload presentations, videos, documents and infographic and moderate and publish on different channels.
 
-* Publish Slides (odp, pdf)
-* Publish Documents (pdf)
+* Channel Management
+* Filters and Tagging
+* Moderations of Channels and contents
+* Document Type Supported (pdf and all image type)
 """,
     'author': 'OpenERP SA',
     'website': 'http://www.openerp.com',

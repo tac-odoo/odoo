@@ -137,10 +137,10 @@
                         <div class="container">
                             <div class="row">
                                 <div class="col-md-12 col-sm-12 col-xs-12">
-                                    <div class="pull-left col-md-8 col-sm-8 col-xs-8 mt16 mb8" style="padding-left: 0px;">
+                                    <div class="pull-left col-md-8 col-sm-12 col-xs-12 mt16 mb8" style="padding-left: 0px;padding-right: 0px;">
                                         <h3 t-esc="channel.name" class="mt4"/>
                                     </div>
-                                    <div class="col-md-4 col-sm-12 col-xs-12 pul-right mt16 mb8" style="padding-right: 0px;">
+                                    <div class="col-md-4 col-sm-12 col-xs-12 pul-right mt16 mb8" style="padding-left: 0px;padding-right: 0px;">
                                         <t t-call="website_slides.search"/>
                                     </div>
                                 </div>
