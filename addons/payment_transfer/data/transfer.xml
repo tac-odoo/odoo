@@ -2,9 +2,12 @@
 <openerp>
     <data noupdate="1">
 
+        <record id="payment_acquirer_transfer_provider" model="payment.acquirer.provider">
+            <field name="name">transfer</field>
+        </record>
         <record id="payment_acquirer_transfer" model="payment.acquirer">
             <field name="name">Wire Transfer</field>
-            <field name="provider">transfer</field>
+            <field name="provider_id" ref="payment_acquirer_transfer_provider"/>
             <field name="company_id" ref="base.main_company"/>
             <field name="view_template_id" ref="transfer_acquirer_button"/>
             <field name="validation">manual</field>

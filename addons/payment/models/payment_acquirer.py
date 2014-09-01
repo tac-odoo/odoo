@@ -1,6 +1,10 @@
 # -*- coding: utf-'8' "-*-"
-
+from hashlib import sha1
+import time
+import hmac
+import hashlib
 import logging
+import urlparse
 
 from openerp.osv import osv, fields
 from openerp.tools import float_round, float_repr
@@ -52,15 +56,9 @@ class PaymentAcquirer(osv.Model):
     _name = 'payment.acquirer'
     _description = 'Payment Acquirer'
 
-    def _get_providers(self, cr, uid, context=None):
-        return []
-
-    # indirection to ease inheritance
-    _provider_selection = lambda self, *args, **kwargs: self._get_providers(*args, **kwargs)
-
     _columns = {
         'name': fields.char('Name', required=True),
-        'provider': fields.selection(_provider_selection, string='Provider', required=True),
+        'provider_id': fields.many2one('payment.acquirer.provider', string='Provider'),
         'company_id': fields.many2one('res.company', 'Company', required=True),
         'pre_msg': fields.html('Message', help='Message displayed to explain and help the payment process.'),
         'post_msg': fields.html('Thanks Message', help='Message displayed after having done the payment process.'),
@@ -75,12 +73,6 @@ class PaymentAcquirer(osv.Model):
         'website_published': fields.boolean(
             'Visible in Portal / Website', copy=False,
             help="Make this payment acquirer available (Customer invoices, etc.)"),
-        # Fees
-        'fees_active': fields.boolean('Compute fees'),
-        'fees_dom_fixed': fields.float('Fixed domestic fees'),
-        'fees_dom_var': fields.float('Variable domestic fees (in percents)'),
-        'fees_int_fixed': fields.float('Fixed international fees'),
-        'fees_int_var': fields.float('Variable international fees (in percents)'),
     }
 
     _defaults = {
@@ -105,8 +97,10 @@ class PaymentAcquirer(osv.Model):
     def get_form_action_url(self, cr, uid, id, context=None):
         """ Returns the form action URL, for form-based acquirer implementations. """
         acquirer = self.browse(cr, uid, id, context=context)
-        if hasattr(self, '%s_get_form_action_url' % acquirer.provider):
-            return getattr(self, '%s_get_form_action_url' % acquirer.provider)(cr, uid, id, context=context)
+        if acquirer.environment == 'prod':
+            return acquirer.provider_id.production_url
+        else:
+            return acquirer.provider_id.test_url
         return False
 
     def form_preprocess_values(self, cr, uid, id, reference, amount, currency_id, tx_id, partner_id, partner_values, tx_values, context=None):
@@ -187,11 +181,18 @@ class PaymentAcquirer(osv.Model):
         })
 
         # compute fees
-        fees_method_name = '%s_compute_fees' % acquirer.provider
-        if hasattr(self, fees_method_name):
-            fees = getattr(self, fees_method_name)(
-                cr, uid, id, tx_data['amount'], tx_data['currency_id'], partner_data['country_id'], context=None)
-            tx_data['fees'] = float_round(fees, 2)
+        if acquirer.provider_id.fees_active:
+            country = self.pool['res.country'].browse(cr, uid, partner_data['country_id'], context=context)
+            if country and acquirer.company_id.country_id.id == country.id:
+                percentage = acquirer.provider_id.fees_dom_var
+                fixed = acquirer.provider_id.fees_dom_fixed
+            else:
+                percentage = acquirer.provider_id.fees_int_var
+                fixed = acquirer.provider_id.fees_int_fixed
+            fees = (percentage / 100.0 * tx_data['amount'] + fixed ) / (1 - percentage / 100.0)
+        else:
+            fees = 0.0
+        tx_data['fees'] = float_round(fees, 2)
 
         return (partner_data, tx_data)
 
@@ -245,11 +246,30 @@ class PaymentAcquirer(osv.Model):
             cr, uid, id, reference, amount, currency_id, tx_id, partner_id,
             partner_values, tx_values, context=context)
 
-        # call <name>_form_generate_values to update the tx dict with acqurier specific values
-        cust_method_name = '%s_form_generate_values' % (acquirer.provider)
-        if hasattr(self, cust_method_name):
-            method = getattr(self, cust_method_name)
-            partner_values, tx_values = method(cr, uid, id, partner_values, tx_values, context=context)
+        # call Maping
+        base_url = self.pool['ir.config_parameter'].get_param(cr, uid, 'web.base.url')
+        payment_tx_values = dict(tx_values)
+        for maping in acquirer.provider_id.provider_mapping_ids:
+            payment_tx_values.update({
+                maping.provider_key : eval(maping.odoo_key),
+            })
+
+        # call signature
+        for maping in acquirer.provider_id.provider_mapping_ids:
+            if eval(maping.odoo_key) == 'signature' and acquirer.provider_id.server_action_id:
+                action_context = dict(context,
+                                      inout='in',
+                                      acquirer=acquirer,
+                                      sha1=sha1,
+                                      hmac=hmac,
+                                      hashlib=hashlib,
+                                      values=payment_tx_values)
+                signature = self.pool.get('ir.actions.server').run(cr, uid, [acquirer.provider_id.server_action_id.id], context=action_context)
+                payment_tx_values.update({
+                    maping.provider_key : signature,
+                })
+
+        tx_values = payment_tx_values
 
         qweb_context = {
             'tx_url': context.get('tx_url', self.get_form_action_url(cr, uid, id, context=context)),
@@ -368,6 +388,8 @@ class PaymentTransaction(osv.Model):
         'partner_phone': fields.char('Phone'),
         'partner_reference': fields.char('Partner Reference',
                                          help='Reference of the customer in the acquirer database'),
+        'transaction_id': fields.char('Transaction ID'),
+        'transaction_type': fields.char('Transaction Type'),
     }
 
     _sql_constraints = [
@@ -392,16 +414,23 @@ class PaymentTransaction(osv.Model):
             acquirer = self.pool['payment.acquirer'].browse(cr, uid, values.get('acquirer_id'), context=context)
 
             # compute fees
-            custom_method_name = '%s_compute_fees' % acquirer.provider
-            if hasattr(Acquirer, custom_method_name):
-                fees = getattr(Acquirer, custom_method_name)(
-                    cr, uid, acquirer.id, values.get('amount', 0.0), values.get('currency_id'), values.get('country_id'), context=None)
-                values['fees'] = float_round(fees, 2)
+            if acquirer.provider_id.fees_active:
+                country = self.pool['res.country'].browse(cr, uid, values.get('country_id'), context=context)
+                if country and acquirer.company_id.country_id.id == country.id:
+                    percentage = acquirer.provider_id.fees_dom_var
+                    fixed = acquirer.provider_id.fees_dom_fixed
+                else:
+                    percentage = acquirer.provider_id.fees_int_var
+                    fixed = acquirer.provider_id.fees_int_fixed
+                fees = (percentage / 100.0 * values.get('amount', 0.0) + fixed ) / (1 - percentage / 100.0)
+            else:
+                fees = 0.0
+            values['fees'] = float_round(fees, 2)
 
             # custom create
-            custom_method_name = '%s_create' % acquirer.provider
-            if hasattr(self, custom_method_name):
-                values.update(getattr(self, custom_method_name)(cr, uid, values, context=context))
+#            custom_method_name = '%s_create' % acquirer.provider
+#            if hasattr(self, custom_method_name):
+#                values.update(getattr(self, custom_method_name)(cr, uid, values, context=context))
 
         return super(PaymentTransaction, self).create(cr, uid, values, context=context)
 
@@ -424,27 +453,82 @@ class PaymentTransaction(osv.Model):
     # FORM RELATED METHODS
     # --------------------------------------------------
 
-    def form_feedback(self, cr, uid, data, acquirer_name, context=None):
-        invalid_parameters, tx = None, None
+    def form_feedback(self, cr, uid, provider, data, context=None):
+        invalid_parameters, tx = [], None
+        provider_obj = self.pool.get('payment.acquirer.provider')
+        provider_id = provider_obj.search(cr, uid, [('name', '=', provider)], context=context)[0]
+        if provider_id:
+            provider = provider_obj.browse(cr, uid, provider_id, context=context)
+            for mapping in provider.transaction_value_mapping_ids:
+                # if not value reaise Error
+                if not eval(mapping.odoo_key):
+                    error_msg = '%s: received data with missing %s (%s).' % (provider.name, mapping.provider_key, eval(mapping.odoo_key))
+                    _logger.error(error_msg)
+                    raise ValidationError(error_msg)
 
-        tx_find_method_name = '_%s_form_get_tx_from_data' % acquirer_name
-        if hasattr(self, tx_find_method_name):
-            tx = getattr(self, tx_find_method_name)(cr, uid, data, context=context)
+                # check for order
+                if mapping.provider_key == 'reference':
+                    tx_ids = self.search(cr, uid, [('reference', '=', eval(mapping.odoo_key))], context=context)
+                    if not tx_ids or len(tx_ids) > 1:
+                        error_msg = '%s: received data for %s %s' % (provider.name, mapping.provider_key, eval(mapping.odoo_key))
+                        if not tx_ids:
+                            error_msg += '; no order found'
+                        else:
+                            error_msg += '; multiple order found'
+                        _logger.error(error_msg)
+                        raise ValidationError(error_msg)
+                    tx = self.pool['payment.transaction'].browse(cr, uid, tx_ids[0], context=context)
 
-        invalid_param_method_name = '_%s_form_get_invalid_parameters' % acquirer_name
-        if hasattr(self, invalid_param_method_name):
-            invalid_parameters = getattr(self, invalid_param_method_name)(cr, uid, tx, data, context=context)
+                # Verify Sign
+                if mapping.provider_key == 'signature' and tx.acquirer_id.provider_id.server_action_id:
+                    signature = eval(mapping.odoo_key)
+                    action_context = dict(context,
+                                          inout='out',
+                                          acquirer=tx.acquirer_id,
+                                          sort = sorted,
+                                          sha1=sha1,
+                                          values=data)
+                    signature_check = self.pool.get('ir.actions.server').run(cr, uid, [tx.acquirer_id.provider_id.server_action_id.id], context=action_context)
+                    if signature_check.upper() != signature.upper():
+                        error_msg = '%s: invalid shasign, received %s, computed %s, for data %s' % (provider.name, eval(mapping.odoo_key).upper(), signature, data)
+                        _logger.error(error_msg)
+                        raise ValidationError(error_msg)
 
-        if invalid_parameters:
-            _error_message = '%s: incorrect tx data:\n' % (acquirer_name)
-            for item in invalid_parameters:
-                _error_message += '\t%s: received %s instead of %s\n' % (item[0], item[1], item[2])
-            _logger.error(_error_message)
-            return False
+            # check valid parameter
+            for mapping in provider.transaction_check_mapping_ids:
+                if eval(mapping.provider_key) and eval(mapping.provider_key) != eval(mapping.odoo_key):
+                    invalid_parameters.append((eval(mapping.provider_key), eval(mapping.odoo_key), eval(mapping.provider_key)))
 
-        feedback_method_name = '_%s_form_validate' % acquirer_name
-        if hasattr(self, feedback_method_name):
-            return getattr(self, feedback_method_name)(cr, uid, tx, data, context=context)
+            if invalid_parameters:
+                _error_message = '%s: incorrect tx data:\n' % (provider.name)
+                for item in invalid_parameters:
+                    _error_message += '\t%s: received %s instead of %s\n' % (item[0], item[1], item[2])
+                _logger.error(_error_message)
+                return False
+
+            write_values = {}
+            for write_mapping in provider.transaction_write_value_mapping_ids:
+                write_values.update({write_mapping.provider_key: eval(write_mapping.odoo_key)})
+            error_code = None
+            for status_maping in provider.transaction_code_mapping_ids:
+                status = write_values.get('state')
+                if status and isinstance(eval(status_maping.odoo_key), (list, tuple)) and status in eval(status_maping.odoo_key):
+                    error_code = status_maping.provider_key
+            if error_code:
+                write_values.update({'state': error_code})
+            else:
+                write_values.update({
+                    'state': 'error',
+                    'state_message': '%s: feedback error' % (provider.name)
+                    })
+            if not write_values:
+                return False
+            tx.write(write_values)
+            return True
+
+#        feedback_method_name = '_%s_form_validate' % acquirer_name
+#        if hasattr(self, feedback_method_name):
+#            return getattr(self, feedback_method_name)(cr, uid, tx, data, context=context)
 
         return True
 
@@ -517,3 +601,70 @@ class PaymentTransaction(osv.Model):
             return getattr(self, invalid_param_method_name)(cr, uid, tx, context=context)
 
         return True
+
+
+class PaymentAcquirerProvider(osv.Model):
+
+    _name = 'payment.acquirer.provider'
+    _description = 'Payment Acquirer Provider'
+
+    def _get_return_url(self, cr, uid, ids, fields, args, context=None):
+        base_url = self.pool['ir.config_parameter'].get_param(cr, uid, 'web.base.url')
+        res = {}
+        for provider in self.browse(cr, uid, ids, context=context):
+            res[provider.id] = {}
+            path = '/payment/' + provider.name + '/return'
+            return_url = urlparse.urljoin(base_url, path)
+            res[provider.id] = return_url
+        return res
+
+    _columns = {
+        'name': fields.char('Name', required=True),
+        'production_url': fields.char('Production URL'),
+        'test_url': fields.char('Test URL'),
+        'account': fields.char('Account'),
+        'login': fields.char('Login'),
+        'transaction_key': fields.char('transaction_key'),
+        'return_url': fields.function(_get_return_url, string="Return URL", type="char", store=True),
+        'provider_mapping_ids': fields.one2many('payment.acquirer.provider.mapping', 'provider_id', string="Mapping IDs"),
+        'server_action_id': fields.many2one('ir.actions.server', string='Action'),
+        'provider_logo': fields.binary('Provider Logo'),
+        'paypal_use_ipn': fields.boolean('Use IPN', help='Paypal Instant Payment Notification'),
+        'transaction_check_mapping_ids': fields.one2many('payment.transaction.mapping', 'provider_id', domain=[('type', '=', 'check_field')], string="Envalid Parameter Mapping"),
+        'transaction_code_mapping_ids': fields.one2many('payment.transaction.mapping', 'provider_id', domain=[('type', '=', 'error_code')], string="Error Code Mapping"),
+        'transaction_value_mapping_ids': fields.one2many('payment.transaction.mapping', 'provider_id', domain=[('type', '=', 'value')], string="Value Mapping"),
+        'transaction_write_value_mapping_ids': fields.one2many('payment.transaction.mapping', 'provider_id', domain=[('type', '=', 'write_field')], string="Write Field Mapping"),
+        # Fees
+        'fees_active': fields.boolean('Compute fees'),
+        'fees_dom_fixed': fields.float('Fixed domestic fees'),
+        'fees_dom_var': fields.float('Variable domestic fees (in percents)'),
+        'fees_int_fixed': fields.float('Fixed international fees'),
+        'fees_int_var': fields.float('Variable international fees (in percents)'),
+    }
+
+    _sql_constraints = [
+            ('name_uniq', 'UNIQUE(name)', 'The payment Provider name must be unique!'),
+        ]
+
+class PaymentAcquirerProviderMapping(osv.Model):
+
+    _name = 'payment.acquirer.provider.mapping'
+    _description = 'Payment Acquirer Provider Mapping'
+
+    _columns = {
+        'provider_id': fields.many2one('payment.acquirer.provider', 'Provider ID'),
+        'provider_key': fields.char('Provider Key', required=True),
+        'odoo_key': fields.char('Odoo Key', required=True)
+    }
+
+class PaymentTransactionMapping(osv.Model):
+    _name = 'payment.transaction.mapping'
+    _description = 'Payment Transaction Mapping'
+
+    _columns = {
+        'provider_id': fields.many2one('payment.acquirer.provider', 'Provider ID'),
+        'provider_key': fields.char('Provider Key', required=True),
+        'odoo_key': fields.char('Odoo Key', required=True),
+        'type': fields.selection([('check_field', 'Check Invalid Parameter'), ('write_field', 'Write Parameter'), ('value', 'value'), ('error_code', 'Error Code')], select=True, string='Mapping Type')
+    }
+
