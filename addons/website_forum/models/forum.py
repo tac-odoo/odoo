@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
+from datetime import timedelta
 
 import openerp
 from openerp import tools
@@ -107,6 +108,24 @@ class Forum(osv.Model):
         create_context = dict(context, mail_create_nolog=True)
         return super(Forum, self).create(cr, uid, values, context=create_context)
 
+    def statistical_data(self, cr, uid, ids, context=None):
+        cr.execute("""
+            SELECT
+                COALESCE(ROUND(COUNT(CASE WHEN (on_twitter IS TRUE OR on_facebook IS TRUE OR on_linked_in IS TRUE) AND (parent_id IS NULL) THEN 1 END)::float/
+                NULLIF(COUNT(CASE WHEN parent_id IS NULL THEN 1 END)::float, 0) * 100), 0) AS percentage,
+                COALESCE(ROUND((COUNT(CASE WHEN (((on_twitter IS TRUE AND on_facebook IS TRUE) OR (on_facebook IS TRUE AND on_linked_in IS TRUE) OR (on_linked_in IS TRUE AND on_twitter IS TRUE)) AND (child_count <> 0)) THEN 1 END):: float /
+                NULLIF(COUNT(CASE WHEN (on_twitter IS TRUE OR on_facebook IS TRUE OR on_linked_in IS TRUE) AND (child_count <> 0) THEN 1 END), 0)::float) * 100), 0) AS probability,
+                COALESCE(ROUND(AVG(
+                    CASE WHEN (on_twitter IS TRUE OR on_facebook IS TRUE OR on_linked_in IS TRUE) AND (child_count <> 0) THEN
+                        (SELECT DATE_PART('epoch',
+                            ((SELECT MIN(create_date) FROM forum_post AS f WHERE f.parent_id = fp.id) - (fp.create_date))::interval))/3600
+                    END)), 0) As average,
+                forum_id
+            FROM
+                forum_post as fp  WHERE forum_id IN %s GROUP BY forum_id""", (tuple(ids), ))
+        results = cr.dictfetchall()
+        res = dict((result['forum_id'], dict(average=result['average'], percentage=result['percentage'], probability=result['probability'])) for result in results)
+        return res
 
 class Post(osv.Model):
     _name = 'forum.post'
@@ -272,6 +291,10 @@ class Post(osv.Model):
                 'forum.post': (_get_post_from_hierarchy, ['parent_id', 'child_ids', 'is_correct'], 10),
             }
         ),
+        # share
+        'on_twitter' : fields.boolean("Shared on Twiiter"),
+        'on_facebook' : fields.boolean("Shared on Facebook"),
+        'on_linked_in' : fields.boolean("Shared on Linked-in"),
         # closing
         'closed_reason_id': fields.many2one('forum.post.reason', 'Reason'),
         'closed_uid': fields.many2one('res.users', 'Closed by', select=1),
