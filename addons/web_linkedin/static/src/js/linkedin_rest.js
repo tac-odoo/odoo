@@ -74,7 +74,7 @@ openerp.web_linkedin = function(instance) {
                     pop.on("selected", self, function(entity) {
                         self.selected_entity(entity);
                     });
-                    pop.do_search();
+                    pop.do_search(text);
                 });
             }
         },
