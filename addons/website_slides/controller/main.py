@@ -82,7 +82,7 @@ class main(http.Controller):
                 '/channel/<model("document.directory"):channel>/<types>/page/<int:page>',
                 '/channel/<model("document.directory"):channel>/<types>/tag/<tags>/page/<int:page>',
                    ], type='http', auth="public", website=True)
-    def slides(self, channel=0, page=1, types='', tags='', sorting='creation', search=''):
+    def slides(self, channel=0, page=1, types='', tags='', sorting='date', search=''):
         cr, uid, context = request.cr, SUPERUSER_ID, request.context
 
         user = request.registry['res.users'].browse(cr, uid, request.uid, context)
@@ -117,6 +117,8 @@ class main(http.Controller):
                 order = 'write_date desc'
             elif sorting == 'view':
                 order = 'slide_views desc'
+            elif sorting == 'vote':
+                order = 'likes desc'
             else:
                 sorting = 'creation'
                 order = 'create_date desc'

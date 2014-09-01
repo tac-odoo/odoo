@@ -173,11 +173,18 @@
                                     </t>
                                     <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm pull-right" style="border-bottom: 0px solid #ddd;padding-right: 5px;"  t-if="types">
                                         <li class="slide-tabs-li active dropdown" style="padding-right: 0px;">
-                                            <a  href="#" class="slide-tabs dropdown-toggle" data-toggle="tab"><t t-esc="all_count"/> <t t-esc="types"/> Sorted by Recently Published<span class="caret"></span></a>
+                                            <a  href="javascript:void(0);" class="slide-tabs dropdown-toggle" data-toggle="tab">
+                                                <t t-esc="all_count"/>
+                                                <span class="text-capitalize"><t t-esc="types"/></span>
+                                                <t t-if="sorting == 'date'"> by Recently Published</t>
+                                                <t t-if="sorting == 'view'"> by Most Viewed</t>
+                                                <t t-if="sorting == 'vote'"> by Most Voted</t>
+                                                <span class="caret"></span>
+                                            </a>
                                             <ul class="dropdown-menu" role="menu">
                                                 <li><a href="?sorting=date">Recently Published</a></li>
                                                 <li><a href="?sorting=view">Most Viewed</a></li>
-                                                <li><a href="?sorting=view">Most Voted</a></li>
+                                                <li><a href="?sorting=vote">Most Voted</a></li>
                                             </ul>
                                         </li>
                                     </ul>
