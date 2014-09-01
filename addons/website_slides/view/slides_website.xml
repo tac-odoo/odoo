@@ -43,12 +43,13 @@
                 <div id="pdf_container" class="panel-body" style="position: relative;padding:0px;">
                     <div id="slide_share" class="slide-option-toggle">
                         <t t-call="website_slides.slide_share"/>
+                        <t t-call="website_slides.slide_embed"/>
                     </div>
                     <t t-if="slide.slide_type == 'infographic'">
                         <img t-attf-src="/slides/thumb/#{slide.id}" class="img-responsive"/>
                     </t>
                     <t t-if="slide.slide_type in ('presentation', 'document')">
-                        <canvas id="pdfcanvas" class="img-responsive" style="width:100%;"></canvas>
+                        <canvas id="pdfcanvas" class="img-responsive"></canvas>
                         <div id="pdf_loader_status" style="display:none;">
                             <i class="fa fa-spinner fa-spin fa-3x"></i>
                         </div>
@@ -87,6 +88,9 @@
                 <label>Link</label>
                 <input type="text" class="form-control" t-att-value="slide._get_share_url(slide)" readonly="readonly" onClick="this.select();"/>
             </div>
+        </template>
+
+        <template id='slide_embed' name="slide_embed">
             <t t-if="slide.slide_type in ('presentation', 'document')">
             <div class="form-group">
                 <label>Embed</label>
