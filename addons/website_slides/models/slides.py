@@ -150,6 +150,14 @@ class ir_attachment(osv.osv):
         cr.execute("""UPDATE ir_attachment SET slide_views = slide_views+1 WHERE id IN %s""", (tuple(ids),))
         return True
 
+    def set_like(self, cr, uid, ids, context=None):
+        cr.execute("""UPDATE ir_attachment SET likes = likes+1 WHERE id IN %s""", (tuple(ids),))
+        return True
+
+    def set_dislike(self, cr, uid, ids, context=None):
+        cr.execute("""UPDATE ir_attachment SET dislikes = dislikes+1 WHERE id IN %s""", (tuple(ids),))
+        return True
+
     def trim_lines(self, cr, uid, description, *args):
         return '<br/>'.join(description.split('\n')[0:14])
 
