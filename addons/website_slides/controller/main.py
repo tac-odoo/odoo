@@ -251,10 +251,8 @@ class main(http.Controller):
     def slide_thumb(self, document_id=0, **post):
         cr, uid, context = request.cr, SUPERUSER_ID, request.context
         response = werkzeug.wrappers.Response()
-        Files = request.registry['ir.attachment']
         Website = request.registry['website']
-        user = Files.browse(cr, uid, document_id, context=context)
-        return Website._image(cr, uid, 'ir.attachment', user.id, 'image', response)
+        return Website._image(cr, uid, 'ir.attachment', document_id, 'image', response)
 
 
     @http.route('/slides/get_tags', type='http', auth="public", methods=['GET'], website=True)
