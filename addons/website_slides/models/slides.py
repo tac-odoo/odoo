@@ -202,11 +202,9 @@ class ir_attachment(osv.osv):
         return success
 
     def update_youtube(self, cr, uid, values, context=None):
-        print 'XXXXXXXX : values', values
         values["youtube_id"] = self.extract_youtube_id(values['url'].strip())
         statistics = self.youtube_statistics(values["youtube_id"])
         if statistics:
-            print 'XXXXXXXXXXX : statistics ', statistics
             if statistics['items'][0].get('snippet') :
                 if statistics['items'][0]['snippet'].get('thumbnails'):
                     image_url = statistics['items'][0]['snippet']['thumbnails']['medium']['url']

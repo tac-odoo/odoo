@@ -49,30 +49,12 @@
                         <img t-attf-src="/slides/thumb/#{slide.id}" class="img-responsive"/>
                     </t>
                     <t t-if="slide.slide_type in ('presentation', 'document')">
-                        <canvas id="pdfcanvas" class="img-responsive"></canvas>
-                        <div id="pdf_loader_status" style="display:none;">
-                            <i class="fa fa-spinner fa-spin fa-3x"></i>
-                        </div>
+                        <!--PDFViewer will replace by js Widget-->
+                        <div id="PDFViewer" t-att-file="pdf_file"/>
                     </t>
                 </div>
-                <div class="panel-footer" t-if="slide.slide_type != 'infographic'">
-                    <div class="row">
-                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3 text-left">
-                            <span><span id="page_num"></span> / <span id="page_count"></span></span>
-                        </div>
-                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6 text-center">
-                            <a id="firstpage" href="javascript:void(0);" role="button"><span class="glyphicon glyphicon-step-backward"></span></a>
-                            <a id="prev" href="javascript:void(0);" role="button"><span class="glyphicon glyphicon-chevron-left"></span></a>
-                            <a id="next" href="javascript:void(0);" role="button"><span class="glyphicon glyphicon-chevron-right"></span></a>
-                            <a id="lastpage" href="javascript:void(0);" role="button"><span class="glyphicon glyphicon-step-forward"></span></a>
-                        </div>
-                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3 text-right">
-                            <a id="fullscreen" href="javascript:void(0);"><span class="glyphicon glyphicon-fullscreen"></span></a>
-                        </div>
-                    </div>
-                </div>
             </div>
-            <input id="pdf_file" name="pdf_file" type="hidden" t-att-value="pdf_file"/>
+            <!--<input id="pdf_file" name="pdf_file" type="hidden" t-att-value="pdf_file"/>-->
         </template>
 
         <template id='slide_share' name="slide_share">
@@ -129,7 +111,6 @@
             <t t-set="head">
                 <t t-call="website_slides.head"/>
                 <script type="text/javascript" src="/web/static/lib/jquery.textext/jquery.textext.js"/>
-                <script type="text/javascript" src="/website_slides/static/src/js/website_slides.editor.js"></script>
                 <link rel='stylesheet' href="/web/static/lib/jquery.textext/jquery.textext.css"/>
 
                 <script type="text/javascript" src="/website_slides/static/lib/pdfjs/build/pdf.js"></script>
@@ -325,6 +306,7 @@
                                     </t>
 
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" t-if="infographics">
+
                                         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left" style="padding-left: 0px;">
                                             <a t-attf-href="/channel/#{slug(channel)}/infographic" class="h3 mt0 mb0">Infographic</a>
                                         </div>
