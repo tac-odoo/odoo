@@ -37,60 +37,64 @@
 
         <template id='pdfview' name="pdfview">
             <div class="panel panel-default" style="border-radius: 0px;">
-                <div class="panel-heading">
-                    <a class="share-toggle-option" data-slide-share="#slide_share"><i class="fa fa-share"> Share</i></a>
-                </div>
                 <div class="panel-body" style="position: relative;padding:0px;">
-                    <div id="slide_share" class="slide-option-toggle">
-                        <t t-call="website_slides.slide_share"/>
-                        <t t-call="website_slides.slide_embed"/>
-                    </div>
                     <t t-if="slide.slide_type == 'infographic'">
                         <img t-attf-src="/slides/thumb/#{slide.id}" class="img-responsive"/>
                     </t>
                     <t t-if="slide.slide_type in ('presentation', 'document')">
-                        <!--PDFViewer will replace by js Widget-->
                         <div id="PDFViewer" t-att-file="pdf_file"/>
                     </t>
                 </div>
             </div>
-            <!--<input id="pdf_file" name="pdf_file" type="hidden" t-att-value="pdf_file"/>-->
         </template>
 
         <template id='slide_share' name="slide_share">
-            <h3>Share Slide</h3>
+            <h4 class="mt0">Share</h4>
             <div class="form-group oe_share">
                 <a target="_Blank" class="oe_share_facebook" href="https://www.facebook.com/sharer/sharer.php?u={url}"><i class="fa fa-facebook-square fa-2x"></i></a>
                 <a target="_Blank" class="oe_share_twitter" href="https://twitter.com/intent/tweet?text={title}&amp;url={url}"><i class="fa fa-twitter-square fa-2x"></i></a>
                 <a target="_Blank" class="oe_share_linkedin" href="http://www.linkedin.com/shareArticle?mini=true&amp;url={url}&amp;title={title}&amp;"><i class="fa fa-linkedin-square fa-2x"></i></a>
                 <a target="_Blank" class="oe_share_google" href="https://plus.google.com/share?url={url}"><i class="fa fa-google-plus-square fa-2x"></i></a>
-                <a href="mailto:?body={url}&amp;subject={title}"><i class="fa fa-envelope-o fa-2x"></i></a>
+                <!--a href="mailto:?body={url}&amp;subject={title}"><i class="fa fa-envelope-o fa-2x"></i></a-->
             </div>
+
+            <h4 class="mt0">Share Link</h4>
             <div class="form-group">
-                <label>Link</label>
                 <input type="text" class="form-control" t-att-value="slide._get_share_url(slide)" readonly="readonly" onClick="this.select();"/>
+                <span class="help-block">Copy parmanent link to share in social media</span>
             </div>
+
+            <h4 class="mt0">Email</h4>
+            <form class="form-inline" role="form">
+                <div class="input-group col-md-6">
+                    <input type="text" class="form-control" placeholder="your-friend@domain.com"/>
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary form-control" type="submit"><i class="fa fa-envelope-o"></i> Send Email</button>
+                    </span>
+                </div>
+                <span class="help-block">Send presentation through email, with beautiful email</span>
+            </form>
         </template>
 
         <template id='slide_embed' name="slide_embed">
-            <t t-if="slide.slide_type in ('presentation', 'document')">
-            <div class="form-group">
-                <label>Embed</label>
-                <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="slide._get_embade_code(slide)"/></textarea>
-            </div>
-            <div class="form-group">
-                <div class="input-group col-lg-3 col-md-3 col-sm-6 col-xs-6">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" id="btnminus"><i class="fa fa-minus-circle"></i></button>
-                    </span>
-                    <input type="text" class="form-control text-center" value="1" id="page_embed" readonly="readonly"/>
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" id="btnplus"><i class="fa fa-plus-circle"></i></button>
-                    </span>
+            <t t-if="slide.slide_type != 'video'">
+                <h4 class="mt0">Embed Code</h4>
+                <div class="form-group">
+                    <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="slide._get_embade_code(slide)"/></textarea>
                 </div>
-                <input type="hidden" id="pdf_page_count" value=""/>
-                <span class="help-block"> Enter start page</span>
-            </div>
+                <div class="form-group" t-if="slide.slide_type in ('presentation', 'document')">
+                    <div class="input-group col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" id="btnminus"><i class="fa fa-minus-circle"></i></button>
+                        </span>
+                        <input type="text" class="form-control text-center" value="1" id="page_embed" readonly="readonly"/>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" id="btnplus"><i class="fa fa-plus-circle"></i></button>
+                        </span>
+                    </div>
+                    <input type="hidden" id="pdf_page_count" value=""/>
+                    <span class="help-block">Select page to start with</span>
+                </div>
             </t>
         </template>
 
@@ -191,8 +195,7 @@
                             </div>
                         </div>
                     </section>
-
-                    <section style="background-color: #f1f1f1;border: 1px solid #ccc;" t-if="famous and not tags and not types and not search">
+                    <section style="background-color: #f1f1f1;border-top: 1px solid #ccc;border-bottom: 1px solid #ccc;" t-if="famous and not tags and not types and not search">
                         <div class="container">
                             <div class="row">
                                 <div>
@@ -232,7 +235,6 @@
                             </div>
                         </div>
                     </section>
-
                     <section>
                         <div class="container mt16">
                             <div class="row">
@@ -267,7 +269,6 @@
                                         <t t-call="website.pager"/>
                                     </div>
                                 </div>
-
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16" style="padding-left: 0px;padding-right: 0px;" t-if="not types">
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" t-if="slides">
                                         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left" style="padding-left: 0px;">
@@ -306,13 +307,10 @@
                                     <t t-call="website_slides.gridview">
                                         <t t-set="attachment_ids" t-value="documents"/>
                                     </t>
-
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" t-if="infographics">
-
                                         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left" style="padding-left: 0px;">
                                             <a t-attf-href="/channel/#{slug(channel)}/infographic" class="h3 mt0 mb0">Infographic</a>
                                         </div>
-
                                         <div t-if="count_infographic" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
                                             <a t-attf-href="/channel/#{slug(channel)}/infographic" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="count_infographic"/> more</a>
                                         </div>
@@ -325,7 +323,6 @@
                         </div>
                     </section>
                 </div>
-                <div class="oe_clear"/>
             </t>
         </template>
 
@@ -461,8 +458,8 @@
                     </div>
                     <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10" style="padding-right:0px;padding-left: 10px;">
                         <div class="pull-right text-right col-md-4" style="padding-right:0px;">
-                            <div style="border-bottom: 1px solid #CCC; font-size:130%">
-                                <b><t t-esc="slideview.slide_views"/></b> Views
+                            <div style="border-bottom: 1px solid #77B5FE;font-size:130%">
+                                <b><t t-esc="slideview.slide_views"/></b> views
                             </div>
                             <div class="small text-muted mt4">
                                 <i class="count-likes fa fa-thumbs-up" style="padding-left: 10px;">
@@ -477,7 +474,6 @@
                                 <t t-set="publish_edit" t-value="True"/>
                             </t>
                         </div>
-
                         <div class="pull-left col-md-7" style="padding-left: 0;">
                             <a t-attf-href="/channel/#{slug(channel)}/#{types}">
                                 <p t-field="channel.name"/>
@@ -491,7 +487,6 @@
                         </div>
                     </div>
                 </div>
-
 
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 10px 0px 10px 0px;">
                     <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm" role="tablist">
@@ -507,6 +502,9 @@
                         </div>
                         <div class="tab-pane fade" id="share">
                             <t t-call="website_slides.slide_share">
+                                <t t-set="slide" t-value="slideview"/>
+                            </t>
+                            <t t-call="website_slides.slide_embed">
                                 <t t-set="slide" t-value="slideview"/>
                             </t>
                         </div>
