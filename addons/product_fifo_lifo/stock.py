@@ -309,13 +309,13 @@ class stock_move(osv.osv):
         
         Depending on the matches it will create the necessary moves
         """
+        if context is None:
+            context = {}
         ctx = context.copy()
         ctx['force_company'] = move.company_id.id
         valuation = self.pool.get("product.product").browse(cr, uid, move.product_id.id, context=ctx).valuation
         move_obj = self.pool.get('account.move')
         if valuation == 'real_time':
-            if context is None:
-                context = {}
             company_ctx = dict(context,force_company=move.company_id.id)
             journal_id, acc_src, acc_dest, acc_valuation = self._get_accounting_data_for_valuation(cr, uid, move, context=company_ctx)
             reference_amount, reference_currency_id = self._get_reference_accounting_values_for_valuation(cr, uid, move, context=company_ctx)
@@ -479,8 +479,10 @@ class stock_move(osv.osv):
                 for line in move.production_id.bom_id.bom_lines:
                     product_toconsume.update({line.product_id.id: line.product_qty})
                 for component in move.production_id.picking_id.move_lines:
-                    move_out_id = move.production_id.bom_id.routing_id and component.id or component.move_dest_id.id
-                    out_ids = match_obj.search(cr, uid, [ ('move_out_id', '=', move_out_id)],context=context)
+                    move_out_id = component.move_dest_id.id
+                    if move.production_id.bom_id and move.production_id.bom_id.routing_id.id and move.production_id.bom_id.routing_id.location_id.id:
+                        move_out_id = component.id 
+                    out_ids = match_obj.search(cr, uid, [('move_out_id', '=', move_out_id)], context=context)
                     components[component.product_id.id] = [ [out.qty, out.price_unit_out] for out in match_obj.browse(cr, uid, out_ids) ]
                     product_id.append(component.product_id.id)
 
