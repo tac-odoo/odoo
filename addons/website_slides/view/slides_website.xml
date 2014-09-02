@@ -38,7 +38,7 @@
         <template id='pdfview' name="pdfview">
             <div class="panel panel-default" style="border-radius: 0px;">
                 <div class="panel-heading">
-                    <a class="toggleSlideOption" href="javascript:void(0);" data-slide-option-toggle-id="#slide_share"><span class="glyphicon glyphicon-share-alt"></span> Share</a>
+                    <a class="share-toggle-option" data-slide-share="#slide_share"><i class="fa fa-share"> Share</i></a>
                 </div>
                 <div class="panel-body" style="position: relative;padding:0px;">
                     <div id="slide_share" class="slide-option-toggle">
@@ -81,11 +81,11 @@
             <div class="form-group">
                 <div class="input-group col-lg-3 col-md-3 col-sm-6 col-xs-6">
                     <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" id="btnminus" field="page"><span class="glyphicon glyphicon-minus-sign"/></button>
+                        <button class="btn btn-default" type="button" id="btnminus"><i class="fa fa-minus-circle"></i></button>
                     </span>
-                    <input type="text" class="form-control text-center" value="1" name="page" readonly="readonly"/>
+                    <input type="text" class="form-control text-center" value="1" id="page_embed" readonly="readonly"/>
                     <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" id="btnplus" field="page"><span class="glyphicon glyphicon-plus-sign"/></button>
+                        <button class="btn btn-default" type="button" id="btnplus"><i class="fa fa-plus-circle"></i></button>
                     </span>
                 </div>
                 <input type="hidden" id="pdf_page_count" value=""/>

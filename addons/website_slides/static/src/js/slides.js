@@ -317,7 +317,7 @@
 
 })();
 
-jQuery(document).ready(function() {
+$(document).ready(function() {
     var website = openerp.website;
     website.slide.PDFViewer_Launcher($('#PDFViewer'));
     $("timeago.timeago").timeago();
@@ -330,7 +330,7 @@ jQuery(document).ready(function() {
         window.location = $(this).attr('href');
     });
 
-    $('.slide-like, .slide-unlike').on('click' ,function(ev){
+    $('.slide-like, .slide-unlike').on('click', function(ev){
         ev.preventDefault();
         if(!localStorage['vote']){
             var $link = $(ev.currentTarget);
@@ -355,48 +355,36 @@ jQuery(document).ready(function() {
     });
 
     /*modify embed code based on options*/
-    jQuery.modifyembedcode = function(currentVal) {
-        var slide_embed_code = jQuery('#slide_embed_code').val();
-        var new_slide_embed_code = slide_embed_code.replace(/(page=).*?([^\d]+)/,'$1' + currentVal + '$2');
-        jQuery('#slide_embed_code').val(new_slide_embed_code);
+    website.slide.modifyembedcode = function(currentVal) {
+        var $embed_input = $('#slide_embed_code');
+        var slide_embed_code = $embed_input.val();
+        var tmp_embed_code = slide_embed_code.replace(/(page=).*?([^\d]+)/,'$1' + currentVal + '$2');
+        $embed_input.val(tmp_embed_code);
     };
     // This button will increment the value
 
-    jQuery('#btnplus').click(function(e){
+    $('#btnplus').on('click', function(e){
         e.preventDefault();
-        fieldName = jQuery(this).attr('field');
-        var currentVal = parseInt(jQuery('input[name='+fieldName+']').val());
-        if (!isNaN(currentVal)) {
-            if(currentVal < jQuery('#page_count').html()){
-                jQuery('input[name='+fieldName+']').val(currentVal + 1);
-                jQuery.modifyembedcode(currentVal + 1)
-            }else{
-                jQuery('input[name='+fieldName+']').val(currentVal);
-                jQuery.modifyembedcode(currentVal)
-            }
-        } else {
-            jQuery('input[name='+fieldName+']').val(1);
-            jQuery.modifyembedcode(1)
+        var currentVal = parseInt($('#page_embed').val());
+        var maxval = parseInt($('#page_count').text());
+        if(currentVal < maxval){
+            $('#page_embed').val(currentVal + 1);
+            website.slide.modifyembedcode(currentVal + 1);
         }
     });
-    // This button will decrement the value till 0
-    jQuery("#btnminus").click(function(e) {
+    $("#btnminus").on('click', function(e) {
         e.preventDefault();
-        fieldName = jQuery(this).attr('field');
-        var currentVal = parseInt(jQuery('input[name='+fieldName+']').val());
-        if (!isNaN(currentVal) && currentVal > 1) {
-            jQuery('input[name='+fieldName+']').val(currentVal - 1);
-            jQuery.modifyembedcode(currentVal - 1)
-        } else {
-            jQuery('input[name='+fieldName+']').val(1);
-            jQuery.modifyembedcode(1)
+        var currentVal = parseInt($('#page_embed').val());
+        if (currentVal > 1) {
+            $('#page_embed').val(currentVal - 1);
+            website.slide.modifyembedcode(currentVal - 1)
         }
     });
 
     // toggle option on pdfview 
-    $('.toggleSlideOption').click(function () {
-        //$('.slide-option-toggle').hide();
-        var toggleDiv = $(this).data('slide-option-toggle-id');
+    $('.share-toggle-option').on('click', function (ev) {        
+        ev.preventDefault();
+        var toggleDiv = $(this).data('slide-share');
         $(toggleDiv).slideToggle();
     });
 
