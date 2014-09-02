@@ -216,6 +216,30 @@
                 });
             }); 
         },
+        toggle_fullscreen: function() {
+            var elem = document.getElementById("PDFViewer");
+            if (!elem.fullscreenElement && !elem.mozFullScreenElement && !elem.webkitFullscreenElement && !elem.msFullscreenElement ) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                } else if (elem.mozRequestFullScreen) {
+                    elem.mozRequestFullScreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                }
+            } else {
+                if (elem.exitFullscreen) {
+                  elem.exitFullscreen();
+                } else if (elem.msExitFullscreen) {
+                  elem.msExitFullscreen();
+                } else if (elem.mozCancelFullScreen) {
+                  elem.mozCancelFullScreen();
+                } else if (elem.webkitExitFullscreen) {
+                  elem.webkitExitFullscreen();
+                }
+            }
+        },
 
         next: function(ev){
             ev.preventDefault();
@@ -247,7 +271,7 @@
         },
         fullscreen: function(ev){
             ev.preventDefault();
-            console.log('Fulll Screen');
+            this.toggle_fullscreen();
         },
         change_page_number: function(ev){
             var page_asked = parseInt(ev.target.value, 10);
