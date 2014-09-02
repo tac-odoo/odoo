@@ -73,6 +73,7 @@
         <div class="panel-footer">
             <div class="row">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3 text-left">
+                    <input type="number" style="width: 45px;border: 1px solid #ddd;text-align: center;" id="page_number"></input> / <span id="page_count"></span>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6 text-center">
                     <a id="first" role="button"><i class="fa fa-step-backward fa-2x"></i></a>
@@ -81,8 +82,6 @@
                     <a id="last" role="button"><i class="fa fa-step-forward fa-2x"></i></a>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3 text-right">
-                    <span style="padding-right: 10px;"><input type="number" style="width:50px" id="page_number"></input> / <span id="page_count"></span></span>
-
                     <a id="fullscreen"><i class="fa fa-arrows-alt fa-2x"></i></a>
                 </div>
             </div>
