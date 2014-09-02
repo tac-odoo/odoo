@@ -268,8 +268,10 @@ class crm_phonecall(osv.osv):
         """
         partner_ids = []
         phonecall = self.browse(cr, uid, ids[0], context)
+        responsible = self.pool.get('res.users').browse(cr,uid,uid,context=context)
         if phonecall.partner_id and phonecall.partner_id.email:
             partner_ids.append(phonecall.partner_id.id)
+            partner_ids.append(responsible.partner_id.id)
         res = self.pool.get('ir.actions.act_window').for_xml_id(cr, uid, 'calendar', 'action_calendar_event', context)
         res['context'] = {
             'default_phonecall_id': phonecall.id,
@@ -277,6 +279,7 @@ class crm_phonecall(osv.osv):
             'default_user_id': uid,
             'default_email_from': phonecall.email_from,
             'default_name': phonecall.name,
+            'default_opportunity_id': phonecall.opportunity_id.id,
         }
         return res
 

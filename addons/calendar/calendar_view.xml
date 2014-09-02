@@ -70,7 +70,7 @@
                                     <div>
                                         <field name="allday"  class="oe_inline" on_change="onchange_allday(start, stop, start_date, stop_date, start_datetime, stop_datetime, allday)"/>
                                     </div>
-                                    <field name="duration" widget="float_time" class="oe_inline" attrs="{ 'invisible': True }"/>
+                                    <field name="duration" widget="float_time" class="oe_inline" attrs="{ 'invisible': True }"/>                                    
                                 </group>
                                 <group>
                                     <field name="categ_ids" widget="many2many_tags" />
@@ -284,7 +284,7 @@
             opportunities.
           </p>
         </field>
-    </record>
+    </record>  
     <record model="ir.actions.act_window.view" id="action_view_calendar_event_calendar">
         <field name="act_window_id" ref="action_calendar_event"/>
         <field name="sequence" eval="1"/>

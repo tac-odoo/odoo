@@ -878,6 +878,7 @@ class crm_lead(format_address, osv.osv):
             'default_partner_ids': partner_ids,
             'default_section_id': lead.section_id and lead.section_id.id or False,
             'default_name': lead.name,
+            'search_default_opportunity_id': lead.type == 'opportunity' and lead.id or False,
         }
         return res
 

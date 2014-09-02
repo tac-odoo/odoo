@@ -54,6 +54,30 @@
         </field>
     </record>
 
+    <!-- crm_calendar_event_view -->
+    <record model="ir.ui.view" id="crm_calendar_event_view">
+        <field name="name">Calendar - Event Form</field>
+        <field name="model">calendar.event</field> 
+        <field name="inherit_id" ref="calendar.view_calendar_event_form" />       
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='location']" position="after">          
+                <field name="opportunity_id"/>
+            </xpath>            
+        </field>
+    </record>
+
+    <!-- crm_calendar_event_search_view -->
+    <record model="ir.ui.view" id="crm_calendar_event_search">
+        <field name="name">CRM - Meetings Search</field>
+        <field name="model">calendar.event</field> 
+        <field name="inherit_id" ref="calendar.view_calendar_event_search" />       
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_id']" position="after">          
+                <field name="opportunity_id"/>
+            </xpath>            
+        </field>
+    </record>
+
     <!-- Phonecalls Form View -->
     <record model="ir.ui.view" id="crm_case_phone_form_view">
         <field name="name">CRM - Phone Call Form</field>

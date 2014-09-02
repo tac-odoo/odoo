@@ -615,5 +615,6 @@
             <field eval="'ir.actions.server,%d'%action_mark_as_lost" name="value"/>
         </record>
 
+
     </data>
 </openerp>

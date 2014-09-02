@@ -918,6 +918,7 @@ openerp.web_calendar = function(instance) {
             this.dataset = dataset;
             this._buttons = buttons || false;
             this.options = options;
+            this.default_name = this.dataset.context.default_name;
 
             // Can hold data pre-set from where you clicked on agenda
             this.data_template = data_template || {};
@@ -942,6 +943,7 @@ openerp.web_calendar = function(instance) {
             }
 
             self.$input = this.$el.find('input');
+            self.$input.val(self.default_name)
             self.$input.keyup(function enterHandler (event) {
                 if(event.keyCode == 13){
                     self.$input.off('keyup', enterHandler);
