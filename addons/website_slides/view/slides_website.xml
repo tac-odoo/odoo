@@ -112,9 +112,7 @@
                 <t t-call="website_slides.head"/>
                 <script type="text/javascript" src="/web/static/lib/jquery.textext/jquery.textext.js"/>
                 <link rel='stylesheet' href="/web/static/lib/jquery.textext/jquery.textext.css"/>
-
                 <script type="text/javascript" src="/website_slides/static/lib/pdfjs/build/pdf.js"></script>
-                <script type="text/javascript" src="/website_slides/static/src/js/pdfviewer.js"></script>
             </t>
             <t t-call="website.layout">
                 <div class="wrap">
@@ -377,7 +375,6 @@
             <t t-set="head">
                 <t t-call="website_slides.head"/>
                 <script type="text/javascript" src="/website_slides/static/lib/pdfjs/build/pdf.js"></script>
-                <script type="text/javascript" src="/website_slides/static/src/js/pdfviewer.js"></script>
             </t>
             <t t-call="website.layout">
                 <t t-set="main_object" t-value="slideview"/>

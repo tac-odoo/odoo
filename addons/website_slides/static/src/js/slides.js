@@ -151,8 +151,8 @@
         },
      });
 
-    
-    
+
+
     website.slide.PDFViewer_Launcher = function($PDFViewer){
         website.slide.template.then(function(){
             var file = $PDFViewer.attr('file');
@@ -162,8 +162,8 @@
                 website.slide.PDFViewer_inst = PDFViewer;
             }
         });
-    
-    }; 
+
+    };
 
     website.slide.PDFViewer = openerp.Widget.extend({
         template: 'website.slide.PDFViewer',
@@ -176,7 +176,7 @@
             'change #page_number': 'change_page_number'
         },
         init: function(file){
-            this.file = file; 
+            this.file = file;
             this.file_content = null;
             this.scale = 1.5;
             this.page_number = 1;
@@ -191,14 +191,14 @@
             var self = this;
             PDFJS.getDocument(this.file).then(function (file_content) {
                 self.file_content = file_content;
-                self.page_count = file_content.numPages; 
+                self.page_count = file_content.numPages;
                 self.$('#page_count').text(self.page_count);
                 self.render_page();
             });
         },
-        render_page: function(){
+        render_page: function(page_number){
             var self = this;
-            var page_num = self.page_number;
+            var page_num = page_number || self.page_number;
             this.file_content.getPage(page_num).then(function(page){
                 var viewport = page.getViewport(self.scale);
                 self.canvas.width = viewport.width;
@@ -213,44 +213,26 @@
                     self.rendering = false;
                     self.$('#PDFLoader').hide();
                     self.$('#page_number').val(page_num);
+                    self.page_number = page_num;
                 });
-            }); 
+            });
         },
-        toggle_fullscreen: function() {
-            var elem = document.getElementById("PDFViewer");
-            if (!elem.fullscreenElement && !elem.mozFullScreenElement && !elem.webkitFullscreenElement && !elem.msFullscreenElement ) {
-                if (elem.requestFullscreen) {
-                    elem.requestFullscreen();
-                } else if (elem.msRequestFullscreen) {
-                    elem.msRequestFullscreen();
-                } else if (elem.mozRequestFullScreen) {
-                    elem.mozRequestFullScreen();
-                } else if (elem.webkitRequestFullscreen) {
-                    elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-                }
-            } else {
-                if (elem.exitFullscreen) {
-                  elem.exitFullscreen();
-                } else if (elem.msExitFullscreen) {
-                  elem.msExitFullscreen();
-                } else if (elem.mozCancelFullScreen) {
-                  elem.mozCancelFullScreen();
-                } else if (elem.webkitExitFullscreen) {
-                  elem.webkitExitFullscreen();
-                }
-            }
-        },
-
         next: function(ev){
             ev.preventDefault();
-            this.page_number = (this.page_number <= this.page_count) ? this.page_number+1 : this.page_count;
+            if (this.page_number >= this.page_count){
+                return;
+            }
+            this.page_number += 1;
             if(!this.rendering){
                 this.render_page();
             }
         },
         previous: function(ev){
             ev.preventDefault();
-            this.page_number = (this.page_number > 0) ? this.page_number-1 : 1;
+            if (this.page_number <= 1){
+                return;
+            }
+            this.page_number -= 1;
             if(!this.rendering){
                 this.render_page();
             }
@@ -271,7 +253,8 @@
         },
         fullscreen: function(ev){
             ev.preventDefault();
-            this.toggle_fullscreen();
+            //TODO: Display warning when broswer not support native fullscreen API
+            website.fullScreenAPI.requestFullScreen(this.canvas);
         },
         change_page_number: function(ev){
             var page_asked = parseInt(ev.target.value, 10);
@@ -283,17 +266,66 @@
 
      });
 
+    //Export fullscreen Browser Compatible API to website namespace
+    var fullScreenApi = {
+            supportsFullScreen: false,
+            isFullScreen: function() { return false; },
+            requestFullScreen: function() {},
+            cancelFullScreen: function() {},
+            fullScreenEventName: '',
+            prefix: ''
+        },
+        browserPrefixes = 'webkit moz o ms khtml'.split(' ');
+
+    // check for native support
+    if (typeof document.cancelFullScreen != 'undefined') {
+        fullScreenApi.supportsFullScreen = true;
+    } else {
+        // check for fullscreen support by vendor prefix
+        for (var i = 0, il = browserPrefixes.length; i < il; i++ ) {
+            fullScreenApi.prefix = browserPrefixes[i];
+
+            if (typeof document[fullScreenApi.prefix + 'CancelFullScreen' ] != 'undefined' ) {
+                fullScreenApi.supportsFullScreen = true;
+                break;
+            }
+        }
+    }
+
+    if (fullScreenApi.supportsFullScreen) {
+        fullScreenApi.fullScreenEventName = fullScreenApi.prefix + 'fullscreenchange';
+
+        fullScreenApi.isFullScreen = function() {
+            switch (this.prefix) {
+                case '':
+                    return document.fullScreen;
+                case 'webkit':
+                    return document.webkitIsFullScreen;
+                default:
+                    return document[this.prefix + 'FullScreen'];
+            }
+        };
+        fullScreenApi.requestFullScreen = function(el) {
+            return (this.prefix === '') ? el.requestFullScreen() : el[this.prefix + 'RequestFullScreen']();
+        };
+        fullScreenApi.cancelFullScreen = function(el) {
+            return (this.prefix === '') ? document.cancelFullScreen() : document[this.prefix + 'CancelFullScreen']();
+        };
+    }
+
+    website.fullScreenAPI = fullScreenApi;
 
 })();
 
 jQuery(document).ready(function() {
     var website = openerp.website;
-    website.slide.PDFViewer_Launcher($('#PDFViewer')); 
-	$("timeago.timeago").timeago();
-    $('.slide-container').click(function(ev){
+    website.slide.PDFViewer_Launcher($('#PDFViewer'));
+    $("timeago.timeago").timeago();
+
+    $('.slide-container').on('click', function(ev){
         window.location = $(this).find("a").attr("href");
     });
-    $('.slide-tabs').click(function(ev){
+    $('.slide-tabs').on('click', function(ev){
         ev.preventDefault();
         window.location = $(this).attr('href');
     });
@@ -312,23 +344,24 @@ jQuery(document).ready(function() {
         var channel_id = $(this).attr('channel_id');
         new website.slide.Dialog(this, channel_id).appendTo(document.body);
     });
-    
+
     $(document).keydown(function(ev){
-        if (ev.keyCode == 37 || ev.keyCode == 38) {
+        if (ev.keyCode == 37) {
             website.slide.PDFViewer_inst.previous(ev);
         }
-        if (ev.keyCode == 39 || ev.keyCode == 40) {
+        if (ev.keyCode == 39) {
             website.slide.PDFViewer_inst.next(ev);
         }
-     
     });
+
     /*modify embed code based on options*/
     jQuery.modifyembedcode = function(currentVal) {
         var slide_embed_code = jQuery('#slide_embed_code').val();
         var new_slide_embed_code = slide_embed_code.replace(/(page=).*?([^\d]+)/,'$1' + currentVal + '$2');
         jQuery('#slide_embed_code').val(new_slide_embed_code);
     };
-	// This button will increment the value
+    // This button will increment the value
+
     jQuery('#btnplus').click(function(e){
         e.preventDefault();
         fieldName = jQuery(this).attr('field');
