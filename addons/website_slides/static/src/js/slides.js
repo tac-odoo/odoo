@@ -300,10 +300,13 @@ jQuery(document).ready(function() {
 
     $('.slide-like, .slide-unlike').on('click' ,function(ev){
         ev.preventDefault();
-        var $link = $(ev.currentTarget);
-        openerp.jsonRpc($link.data('href'), 'call', {}).then(function(data){
-                $($link.data('count-el')).text(data);
-        });
+        if(!localStorage['vote']){
+            var $link = $(ev.currentTarget);
+            openerp.jsonRpc($link.data('href'), 'call', {}).then(function(data){
+                    $($link.data('count-el')).text(data);
+            });
+            localStorage['vote'] = true;
+        }
     });
     $('.upload').on('click' ,function(ev){
         var channel_id = $(this).attr('channel_id');
@@ -363,22 +366,6 @@ jQuery(document).ready(function() {
         var toggleDiv = $(this).data('slide-option-toggle-id');
         $(toggleDiv).slideToggle();
     });
-
-    //local storage for vote once 
-    /*if(localStorage['vote']){
-        jQuery(".slide-like").hide();
-        jQuery(".slide-unlike").hide();
-    }
-    jQuery(".slide-like").click(function(e) {
-        localStorage['vote'] = true
-        jQuery(".slide-like").hide();
-        jQuery(".slide-unlike").hide();
-    });
-    jQuery(".slide-unlike").click(function(e) {
-        localStorage['vote'] = true
-        jQuery(".slide-like").hide();
-        jQuery(".slide-unlike").hide();
-    });*/
 
 });
 
