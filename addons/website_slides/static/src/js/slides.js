@@ -196,9 +196,9 @@
                 self.render_page();
             });
         },
-        render_page: function(page_number){
+        render_page: function(){
             var self = this;
-            var page_num = page_number || self.page_number;
+            var page_num = self.page_number;
             this.file_content.getPage(page_num).then(function(page){
                 var viewport = page.getViewport(self.scale);
                 self.canvas.width = viewport.width;
@@ -219,25 +219,31 @@
 
         next: function(ev){
             ev.preventDefault();
-            this.page_number += 1;
+            this.page_number = (this.page_number <= this.page_count) ? this.page_number+1 : this.page_count;
             if(!this.rendering){
                 this.render_page();
             }
         },
         previous: function(ev){
             ev.preventDefault();
-            this.page_number -= 1;
+            this.page_number = (this.page_number > 0) ? this.page_number-1 : 1;
             if(!this.rendering){
                 this.render_page();
             }
         },
         first: function(ev){
             ev.preventDefault();
-            this.render_page(1);
+            this.page_number = 1;
+            if(!this.rendering){
+                this.render_page();
+            }
         },
         last: function(ev){
             ev.preventDefault();
-            this.render_page(this.page_count);
+            this.page_number = this.page_count;
+            if(!this.rendering){
+                this.render_page();
+            }
         },
         fullscreen: function(ev){
             ev.preventDefault();
@@ -245,8 +251,10 @@
         },
         change_page_number: function(ev){
             var page_asked = parseInt(ev.target.value, 10);
-            var page_num = page_asked <= this.page_count ? page_asked : this.page_count;
-            this.render_page(page_num);
+            this.page_number = (page_asked > 0 && page_asked <= this.page_count) ? page_asked : this.page_count;
+            if(!this.rendering){
+                this.render_page();
+            }
         }
 
      });
