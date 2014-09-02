@@ -17,7 +17,7 @@ class PaymentController(http.Controller):
 
     @http.route([
         '/payment/<provider>/return',
-    ], type='http', auth='none')
+    ], type='http', auth='public')
     def transfer_form_feedback(self, provider, **post):
         cr, uid, context = request.cr, SUPERUSER_ID, request.context
         _logger.info('Beginning form_feedback with post data %s', pprint.pformat(post))  # debug

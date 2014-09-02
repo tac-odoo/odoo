@@ -96,18 +96,20 @@
                 <form string="Payment Acquirer Provider">
                     <sheet>
                         <group>
+                            <field name="name"/>
+                            <field name="production_url"/>
+                            <field name="test_url"/>
+                            <field name="provider_logo"/>
+                            <field name="account"/>
+                            <field name="login"/>
+                            <field name="transaction_key"/>
+                            <field name="paypal_use_ipn"/>
+                            <field name="sign_in"/>
+                            <field name="sign_out"/>
+                        </group>
+                        <group>
                             <group>
-                                <field name="name"/>
-                                <field name="production_url"/>
-                                <field name="test_url"/>
-                                <field name="account"/>
-                                <field name="login"/>
-                                <field name="transaction_key"/>
-                                <field name="server_action_id"/>
-                                <field name="provider_logo"/>
-                                <field name="paypal_use_ipn"/>
-                            </group>
-                            <group>
+                                <separator string="Fees Structure" colspan="2"/>
                                 <field name="fees_active"/>
                                 <field name="fees_dom_fixed"
                                     attrs="{'invisible': [('fees_active', '=', False)]}"/>
@@ -117,6 +119,16 @@
                                     attrs="{'invisible': [('fees_active', '=', False)]}"/>
                                 <field name="fees_int_var"
                                     attrs="{'invisible': [('fees_active', '=', False)]}"/>
+                            </group>
+                            <group>
+                                <separator string="Check Signature" colspan="2"/>
+                                <field name="sign_active"/>
+                                <field name="server_action_id"
+                                    attrs="{'invisible': [('sign_active', '=', False)]}"/>
+                                <field name="sign_field"
+                                    attrs="{'invisible': [('sign_active', '=', False)]}"/>
+                                <field name="sign_return_check"
+                                    attrs="{'invisible': [('sign_active', '=', False)]}"/>
                             </group>
                         </group>
                         <notebook>

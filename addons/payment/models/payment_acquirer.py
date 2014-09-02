@@ -255,19 +255,19 @@ class PaymentAcquirer(osv.Model):
             })
 
         # call signature
-        for maping in acquirer.provider_id.provider_mapping_ids:
-            if eval(maping.odoo_key) == 'signature' and acquirer.provider_id.server_action_id:
-                action_context = dict(context,
-                                      inout='in',
-                                      acquirer=acquirer,
-                                      sha1=sha1,
-                                      hmac=hmac,
-                                      hashlib=hashlib,
-                                      values=payment_tx_values)
-                signature = self.pool.get('ir.actions.server').run(cr, uid, [acquirer.provider_id.server_action_id.id], context=action_context)
-                payment_tx_values.update({
-                    maping.provider_key : signature,
-                })
+        sign_field = acquirer.provider_id.sign_field
+        if acquirer.provider_id.sign_active and sign_field and acquirer.provider_id.server_action_id:
+            action_context = dict(context,
+                                  inout='in',
+                                  acquirer=acquirer,
+                                  sha1=sha1,
+                                  hmac=hmac,
+                                  hashlib=hashlib,
+                                  values=payment_tx_values)
+            signature = self.pool.get('ir.actions.server').run(cr, uid, [acquirer.provider_id.server_action_id.id], context=action_context)
+            payment_tx_values.update({
+                sign_field : signature,
+            })
 
         tx_values = payment_tx_values
 
@@ -479,22 +479,23 @@ class PaymentTransaction(osv.Model):
                         raise ValidationError(error_msg)
                     tx = self.pool['payment.transaction'].browse(cr, uid, tx_ids[0], context=context)
 
-                # Verify Sign
-                if mapping.provider_key == 'signature' and tx.acquirer_id.provider_id.server_action_id:
-                    signature = eval(mapping.odoo_key)
-                    action_context = dict(context,
-                                          inout='out',
-                                          acquirer=tx.acquirer_id,
-                                          sort = sorted,
-                                          sha1=sha1,
-                                          values=data)
-                    signature_check = self.pool.get('ir.actions.server').run(cr, uid, [tx.acquirer_id.provider_id.server_action_id.id], context=action_context)
-                    if signature_check.upper() != signature.upper():
-                        error_msg = '%s: invalid shasign, received %s, computed %s, for data %s' % (provider.name, eval(mapping.odoo_key).upper(), signature, data)
-                        _logger.error(error_msg)
-                        raise ValidationError(error_msg)
+            # Verify Sign
+            sign_field = tx.acquirer_id.provider_id.sign_field
+            if tx.acquirer_id.provider_id.sign_active and sign_field and tx.acquirer_id.provider_id.sign_return_check:
+                signature = data.get(str(sign_field).upper())
+                action_context = dict(context,
+                                      inout='out',
+                                      acquirer=tx.acquirer_id,
+                                      sort = sorted,
+                                      sha1=sha1,
+                                      values=data)
+                signature_check = self.pool.get('ir.actions.server').run(cr, uid, [tx.acquirer_id.provider_id.server_action_id.id], context=action_context)
+                if signature_check.upper() != signature.upper():
+                    error_msg = '%s: invalid shasign, received %s, computed %s, for data %s' % (provider.name, eval(mapping.odoo_key).upper(), signature, data)
+                    _logger.error(error_msg)
+                    raise ValidationError(error_msg)
 
-            # check valid parameter
+            # check Invalid parameter
             for mapping in provider.transaction_check_mapping_ids:
                 if eval(mapping.provider_key) and eval(mapping.provider_key) != eval(mapping.odoo_key):
                     invalid_parameters.append((eval(mapping.provider_key), eval(mapping.odoo_key), eval(mapping.provider_key)))
@@ -524,11 +525,6 @@ class PaymentTransaction(osv.Model):
             if not write_values:
                 return False
             tx.write(write_values)
-            return True
-
-#        feedback_method_name = '_%s_form_validate' % acquirer_name
-#        if hasattr(self, feedback_method_name):
-#            return getattr(self, feedback_method_name)(cr, uid, tx, data, context=context)
 
         return True
 
@@ -622,14 +618,16 @@ class PaymentAcquirerProvider(osv.Model):
         'name': fields.char('Name', required=True),
         'production_url': fields.char('Production URL'),
         'test_url': fields.char('Test URL'),
-        'account': fields.char('Account'),
-        'login': fields.char('Login'),
-        'transaction_key': fields.char('transaction_key'),
-        'return_url': fields.function(_get_return_url, string="Return URL", type="char", store=True),
+        'account': fields.char('Merchant/Account/PSPID'),
+        'login': fields.char('Skin Code/WebsiteKey/Email ID/API User ID'),
+        'transaction_key': fields.char('Skin HMAC Key/SecretKey/Seller ID/API User Password'),
+        'paypal_use_ipn': fields.boolean('Use IPN', help='Paypal Instant Payment Notification'),
+        'sign_in': fields.char('SHA Key IN/Signature Key IN'),
+        'sign_out': fields.char('SHA Key OUT/Signature Key OUT'),
+        'return_url': fields.function(_get_return_url, string="Return URL", type="char"),
         'provider_mapping_ids': fields.one2many('payment.acquirer.provider.mapping', 'provider_id', string="Mapping IDs"),
         'server_action_id': fields.many2one('ir.actions.server', string='Action'),
         'provider_logo': fields.binary('Provider Logo'),
-        'paypal_use_ipn': fields.boolean('Use IPN', help='Paypal Instant Payment Notification'),
         'transaction_check_mapping_ids': fields.one2many('payment.transaction.mapping', 'provider_id', domain=[('type', '=', 'check_field')], string="Envalid Parameter Mapping"),
         'transaction_code_mapping_ids': fields.one2many('payment.transaction.mapping', 'provider_id', domain=[('type', '=', 'error_code')], string="Error Code Mapping"),
         'transaction_value_mapping_ids': fields.one2many('payment.transaction.mapping', 'provider_id', domain=[('type', '=', 'value')], string="Value Mapping"),
@@ -640,6 +638,10 @@ class PaymentAcquirerProvider(osv.Model):
         'fees_dom_var': fields.float('Variable domestic fees (in percents)'),
         'fees_int_fixed': fields.float('Fixed international fees'),
         'fees_int_var': fields.float('Variable international fees (in percents)'),
+        # Signature
+        'sign_active': fields.boolean('Calculate Signature'),
+        'sign_field': fields.char('Signature Mapping Field'),
+        'sign_return_check': fields.boolean('Check Return Signature'),
     }
 
     _sql_constraints = [
