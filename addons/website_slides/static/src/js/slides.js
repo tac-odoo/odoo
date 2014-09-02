@@ -325,5 +325,21 @@ jQuery(document).ready(function() {
         }
     });
 
+    //local storage for vote once 
+    if(localStorage['vote']){
+        jQuery(".slide-like").hide();
+        jQuery(".slide-unlike").hide();
+    }
+    jQuery(".slide-like").click(function(e) {
+        localStorage['vote'] = true
+        jQuery(".slide-like").hide();
+        jQuery(".slide-unlike").hide();
+    });
+    jQuery(".slide-unlike").click(function(e) {
+        localStorage['vote'] = true
+        jQuery(".slide-like").hide();
+        jQuery(".slide-unlike").hide();
+    });
+
 });
 
