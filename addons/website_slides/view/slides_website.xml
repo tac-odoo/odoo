@@ -28,7 +28,7 @@
                     <input type="text" class="form-control" name="search" placeholder="Search Slides..." t-att-value="search" style="border-radius: 0px;"/>
                     <span class="input-group-btn">
                         <button class="btn btn-primary" type="submit" style="border-radius: 0px;">
-                            <span class="glyphicon glyphicon-search"></span>
+                            <i class="fa fa-search"></i>
                         </button>
                     </span>
                 </div>
@@ -151,10 +151,14 @@
                                 </div>
                                 <div class="pull-right col-md-6 col-sm-12 col-xs-12">
                                     <t t-if="is_public_user">
-                                        <a t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger upload pull-right" style="border-radius: 0px;"><span class="glyphicon glyphicon-upload"></span> Upload </a>
+                                        <a t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger upload pull-right" style="border-radius: 0px;">
+                                            <i class="fa fa-cloud-upload"></i> Upload 
+                                        </a>
                                     </t> 
                                     <t t-if="not is_public_user">
-                                        <a class="btn btn-danger upload pull-right" t-attf-channel_id="#{channel.id}" style="border-radius: 0px;"><span class="glyphicon glyphicon-upload"></span> Upload </a>
+                                        <a class="btn btn-danger upload pull-right" t-attf-channel_id="#{channel.id}" style="border-radius: 0px;">
+                                            <i class="fa fa-cloud-upload"></i> Upload 
+                                        </a>
                                     </t>
                                     <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm pull-right" style="border-bottom: 0px solid #ddd;padding-right: 5px;"  t-if="types">
                                         <li class="slide-tabs-li active dropdown" style="padding-right: 0px;">
@@ -239,9 +243,9 @@
                                         <h1>Empty Channel !</h1>
                                         <p><b><t t-esc="channel.name"/></b> is empty, click on Upload button to upload Presentations, Documents, Videos or Infographic !</p>
                                         <p>
-                                            <a t-if="is_public_user" t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger upload" style="border-radius: 0px;padding: 10px 20px;"><span class="glyphicon glyphicon-upload"></span> Upload </a>
+                                            <a t-if="is_public_user" t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger upload" style="border-radius: 0px;padding: 10px 20px;"><i class="fa fa-cloud-upload"></i> Upload </a>
 
-                                            <a t-if="not is_public_user" class="btn btn-danger upload" t-attf-channel_id="#{channel.id}" style="border-radius: 0px;padding: 10px 20px;"><span class="glyphicon glyphicon-upload"></span> Upload </a>
+                                            <a t-if="not is_public_user" class="btn btn-danger upload" t-attf-channel_id="#{channel.id}" style="border-radius: 0px;padding: 10px 20px;"><i class="fa fa-cloud-upload"></i> Upload </a>
                                         </p>
                                     </div>
                                 </div>
@@ -253,9 +257,9 @@
                                         <h1>Empty !</h1>
                                         <p>No <t t-esc="types"/> found in <b><t t-esc="channel.name"/></b>, click on Upload button to upload first <t t-esc="types"/> !</p>
                                         <p>
-                                            <a t-if="is_public_user" t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger upload" style="border-radius: 0px;padding: 10px 20px;"><span class="glyphicon glyphicon-upload"></span> Upload </a>
+                                            <a t-if="is_public_user" t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger upload" style="border-radius: 0px;padding: 10px 20px;"><i class="fa fa-cloud-upload"></i> Upload </a>
 
-                                            <a t-if="not is_public_user" class="btn btn-danger upload" t-attf-channel_id="#{channel.id}" style="border-radius: 0px;padding: 10px 20px;"><span class="glyphicon glyphicon-upload"></span> Upload </a>
+                                            <a t-if="not is_public_user" class="btn btn-danger upload" t-attf-channel_id="#{channel.id}" style="border-radius: 0px;padding: 10px 20px;"><i class="fa fa-cloud-upload"></i> Upload </a>
                                         </p>
                                     </div>
                                 </div>
@@ -448,8 +452,8 @@
                         </t>
                     </div>
                     <div class="pull-right mb16 col-md-6 text-right text-muted" style="padding-right: 0px">
-                        <a class="slide-like" data-count-el='.count-likes' t-attf-data-href="/channel/#{slug(channel)}/view/#{slug(slideview)}/like"><i class="fa fa-thumbs-up fa-2x"></i> Like</a>
-                        <a class="slide-unlike" data-count-el=".count-dislikes" t-attf-data-href="/channel/#{slug(channel)}/view/#{slug(slideview)}/dislike"><i class="fa fa-thumbs-down fa-2x"></i></a>
+                        <a class="slide-like text-muted" data-count-el='.count-likes' t-attf-data-href="/channel/#{slug(channel)}/view/#{slug(slideview)}/like"><i class="fa fa-thumbs-up fa-2x"></i> Like</a>
+                        <a class="slide-unlike text-muted" data-count-el=".count-dislikes" t-attf-data-href="/channel/#{slug(channel)}/view/#{slug(slideview)}/dislike"><i class="fa fa-thumbs-down fa-2x"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
@@ -553,7 +557,9 @@
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 slide-box">
                             <ul class="media-list">
                                 <t t-foreach="related_ids" t-as="attachment">
-                                    <t t-call="website_slides.slide-box"/>
+                                    <t t-call="website_slides.related_slides">
+                                        <t t-set="relatedslide" t-value="slideview"/>
+                                    </t>
                                 </t>
                             </ul>
                         </div>
@@ -562,7 +568,7 @@
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 slide-box">
                             <ul class="media-list">
                                 <t t-foreach="most_viewed_ids" t-as="attachment">
-                                    <t t-call="website_slides.slide-box"/>
+                                    <t t-call="website_slides.mostviewed_slides"/>
                                 </t>
                             </ul>
                         </div>
@@ -571,7 +577,26 @@
             </div>
         </template>
 
-        <template id="slide-box" name="Slide Box">
+        <template id="related_slides" name="Related Slide">
+            <li class="media slide-container" t-if="relatedslide and relatedslide.id != attachment.id">
+                <a class="pull-left" t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/#{slug(attachment)}">
+                    <span class="slide-small-box">
+                        <img class="media-object img-responsive" t-attf-src="/slides/thumb/#{attachment.id}"/>
+                    </span>
+                </a>
+                <div class="media-heading">
+                    <div class="text-truncation" t-att-title="attachment.name">
+                        <t t-esc="attachment.name"/>
+                    </div>
+                    <small class="text-muted">
+                        <div class="pull-left"><t t-esc="attachment.slide_views"/> Views</div><br/>
+                        <div class="pull-left"><timeago class="timeago" t-att-title="attachment.create_date"></timeago></div>
+                    </small>
+                </div>
+            </li>
+        </template>
+
+        <template id="mostviewed_slides" name="Mostviewed Slide">
             <li class="media slide-container">
                 <a class="pull-left" t-attf-href="/channel/#{slug(channel)}/#{attachment.slide_type}/#{slug(attachment)}">
                     <span class="slide-small-box">
