@@ -30,7 +30,7 @@
 
 					</div>
 					<div class="pull-righ" t-foreach="job.tag_ids" t-as="tag" style="padding-top: 5px;">
-						<span class="label label-default" t-esc="tag.name"></span>
+						<a class="label label-default" t-attf-href="/page/jobs/tag/#{tag.id}" t-esc="tag.name"/>
 					</div>
 				</div>
 			</div>

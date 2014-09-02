@@ -10,8 +10,11 @@ from openerp import SUPERUSER_ID
 class Jobs(http.Controller):
 	_project_per_page = 5
 
-	@http.route(['/page/jobs','/page/jobs/page/<int:page>'],type='http',auth='public', website=True)
-	def jobs(self,page=1):
+	@http.route([
+		'/page/jobs',
+		'/page/jobs/page/<int:page>',
+		'/page/jobs/tag/<model("project.tag"):tag>'],type='http',auth='public', website=True)
+	def jobs(self, page=1, tag=None):
 		superuser = False
 		if request.uid == 1:
 			superuser = True
@@ -20,11 +23,15 @@ class Jobs(http.Controller):
 		
 		job_obj = env['project.project']
 		
-		url = '/page/jobs'
-		pager = request.website.pager(url=url,total=len(job_obj.search(domain)),page=page,step=self._project_per_page,scope=self._project_per_page,url_args={})
-		
+		url = '/page/jobs'	
+
 		if not superuser:
 			domain.append(('website_published','=',True))
+
+		if tag:
+			domain.append(('tag_ids','=',tag.id))
+
+		pager = request.website.pager(url=url,total=len(job_obj.search(domain)),page=page,step=self._project_per_page,scope=self._project_per_page,url_args={})
 		jobs = job_obj.search(domain).sudo()
 		values = {'jobs':jobs,'job_count':len(job_obj.search(domain)),'pager':pager,"superuser":superuser}
 		return request.website.render("website_jobs.index",values)
@@ -53,8 +60,7 @@ class Jobs(http.Controller):
 			'website_description':kwargs['website_description']
 			}
 		job_id = job_obj.create(vals)
-		#return request.redirect("/page/jobs/%s" % (job_id))
-		return request.redirect("/page/jobs")
+		return request.redirect("/page/jobs/%s" % (job_id))
 
 	@http.route(['/page/jobs/<model("project.project"):job>'],type="http",auth="public",website=True)
 	def job_view(self,job):
