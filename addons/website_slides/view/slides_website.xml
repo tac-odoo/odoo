@@ -40,7 +40,7 @@
                 <div class="panel-heading">
                     <a class="toggleSlideOption" href="javascript:void(0);" data-slide-option-toggle-id="#slide_share"><span class="glyphicon glyphicon-share-alt"></span> Share</a>
                 </div>
-                <div id="pdf_container" class="panel-body" style="position: relative;padding:0px;">
+                <div class="panel-body" style="position: relative;padding:0px;">
                     <div id="slide_share" class="slide-option-toggle">
                         <t t-call="website_slides.slide_share"/>
                         <t t-call="website_slides.slide_embed"/>

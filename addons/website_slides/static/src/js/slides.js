@@ -331,7 +331,7 @@ jQuery(document).ready(function() {
         fieldName = jQuery(this).attr('field');
         var currentVal = parseInt(jQuery('input[name='+fieldName+']').val());
         if (!isNaN(currentVal)) {
-            if(currentVal < jQuery('#pdf_page_count').val()){
+            if(currentVal < jQuery('#page_count').html()){
                 jQuery('input[name='+fieldName+']').val(currentVal + 1);
                 jQuery.modifyembedcode(currentVal + 1)
             }else{
@@ -357,8 +357,15 @@ jQuery(document).ready(function() {
         }
     });
 
+    // toggle option on pdfview 
+    $('.toggleSlideOption').click(function () {
+        //$('.slide-option-toggle').hide();
+        var toggleDiv = $(this).data('slide-option-toggle-id');
+        $(toggleDiv).slideToggle();
+    });
+
     //local storage for vote once 
-    if(localStorage['vote']){
+    /*if(localStorage['vote']){
         jQuery(".slide-like").hide();
         jQuery(".slide-unlike").hide();
     }
@@ -371,7 +378,7 @@ jQuery(document).ready(function() {
         localStorage['vote'] = true
         jQuery(".slide-like").hide();
         jQuery(".slide-unlike").hide();
-    });
+    });*/
 
 });
 
