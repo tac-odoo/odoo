@@ -73,6 +73,12 @@ class PaymentAcquirer(osv.Model):
         'website_published': fields.boolean(
             'Visible in Portal / Website', copy=False,
             help="Make this payment acquirer available (Customer invoices, etc.)"),
+        'account': fields.char('Merchant Account/PSPID/Account'),
+        'login': fields.char('Skin Code/WebsiteKey/Email ID/API User ID/Login'),
+        'transaction_key': fields.char('Skin HMAC Key/SecretKey/Seller ID/API User Password'),
+        'use_ipn': fields.boolean('Use IPN', help='Instant Payment Notification'),
+        'sign_in': fields.char('SHA Key IN/Signature Key IN'),
+        'sign_out': fields.char('SHA Key OUT/Signature Key OUT'),
     }
 
     _defaults = {
@@ -258,7 +264,7 @@ class PaymentAcquirer(osv.Model):
         sign_field = acquirer.provider_id.sign_field
         if acquirer.provider_id.sign_active and sign_field and acquirer.provider_id.server_action_id:
             action_context = dict(context,
-                                  inout='in',
+                                  inout=acquirer.sign_in,
                                   acquirer=acquirer,
                                   sha1=sha1,
                                   hmac=hmac,
@@ -484,7 +490,7 @@ class PaymentTransaction(osv.Model):
             if tx.acquirer_id.provider_id.sign_active and sign_field and tx.acquirer_id.provider_id.sign_return_check:
                 signature = data.get(str(sign_field).upper())
                 action_context = dict(context,
-                                      inout='out',
+                                      inout= tx.acquirer_id.sign_out,
                                       acquirer=tx.acquirer_id,
                                       sort = sorted,
                                       sha1=sha1,
@@ -618,12 +624,6 @@ class PaymentAcquirerProvider(osv.Model):
         'name': fields.char('Name', required=True),
         'production_url': fields.char('Production URL'),
         'test_url': fields.char('Test URL'),
-        'account': fields.char('Merchant/Account/PSPID'),
-        'login': fields.char('Skin Code/WebsiteKey/Email ID/API User ID'),
-        'transaction_key': fields.char('Skin HMAC Key/SecretKey/Seller ID/API User Password'),
-        'paypal_use_ipn': fields.boolean('Use IPN', help='Paypal Instant Payment Notification'),
-        'sign_in': fields.char('SHA Key IN/Signature Key IN'),
-        'sign_out': fields.char('SHA Key OUT/Signature Key OUT'),
         'return_url': fields.function(_get_return_url, string="Return URL", type="char"),
         'provider_mapping_ids': fields.one2many('payment.acquirer.provider.mapping', 'provider_id', string="Mapping IDs"),
         'server_action_id': fields.many2one('ir.actions.server', string='Action'),

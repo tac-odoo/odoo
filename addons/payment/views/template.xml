@@ -3,7 +3,7 @@
     <data noupdate="1">
 
         <template id="buckaroo_acquirer_button">
-            <form t-if="acquirer.provider_id.login" t-att-action="tx_url" method="post" target="_self">
+            <form t-if="acquirer.login" t-att-action="tx_url" method="post" target="_self">
                 <input type="hidden" name="Brq_websitekey" t-att-value="tx_values['Brq_websitekey']"/>
                 <input type="hidden" name="Brq_amount" t-att-value="tx_values['Brq_amount'] or '0.0'"/>
                 <input type="hidden" name="Brq_currency" t-att-value="tx_values['Brq_currency']"/>
@@ -66,7 +66,7 @@
         </template>
 
         <template id="paypal_acquirer_button">
-            <form t-if="acquirer.provider_id.login" t-att-action="tx_url" method="post" target="_self">
+            <form t-if="acquirer.login" t-att-action="tx_url" method="post" target="_self">
                 <input type="hidden" name="cmd" t-att-value="tx_values['cmd']"/>
                 <input type="hidden" name="business" t-att-value="tx_values['business']"/>
                 <input type="hidden" name="item_name" t-att-value="tx_values['item_name']"/>
@@ -89,7 +89,7 @@
                 <!-- URLs -->
                 <input t-if="tx_values.get('return')" type='hidden' name='return'
                     t-att-value="tx_values.get('return')"/>
-                <input t-if="acquirer.provider_id.paypal_use_ipn" type='hidden' name='notify_url'
+                <input t-if="acquirer.use_ipn" type='hidden' name='notify_url'
                     t-att-value="tx_values.get('notify_url')"/>
                 <input t-if="tx_values.get('cancel_return')" type="hidden" name="cancel_return"
                     t-att-value="tx_values.get('cancel_return')"/>
