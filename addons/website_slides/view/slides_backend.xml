@@ -106,7 +106,7 @@
         <field name="view_mode">kanban,tree,form</field>
         <field name="view_id" eval="False"/>
         <field name="domain">[('is_slide','=',True)]</field>
-        <field name="context">{'is_slide':True, 'slide_type':'presentation'}</field>
+        <field name="context">{'default_is_slide':True, 'default_slide_type':'presentation'}</field>
         <field name="search_view_id" ref="base.view_attachment_search"/>
     </record>
     <record id="action_slides_attachment_tree_view1" model="ir.actions.act_window.view">

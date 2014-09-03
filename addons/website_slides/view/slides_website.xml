@@ -80,10 +80,10 @@
                 <a target="_Blank" class="oe_share_google" href="https://plus.google.com/share?url={url}"><i class="fa fa-google-plus-square fa-2x"></i></a>
                 <a href="mailto:?body={url}&amp;subject={title}"><i class="fa fa-envelope-o fa-2x"></i></a>
             </p>
-            <input type="text" class="form-control" t-att-value="slide._get_share_url(slide)" readonly="readonly" onClick="this.select();"/>
+            <input type="text" class="form-control" t-att-value="slide._get_share_url()" readonly="readonly" onClick="this.select();"/>
             <span class="help-block">  copy above link to share</span>
             <span class="lead">Embed:</span>
-            <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="slide._get_embade_code(slide)"/></textarea>
+            <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="slide._get_embade_code()"/></textarea>
             <span class="help-block">  copy above embed code to share</span>
             <div class="input-group col-lg-2 col-md-2 col-sm-12 col-xs-12">
                 <span class="input-group-btn">
@@ -221,7 +221,7 @@
                                                         </a>
                                                     </t>
                                                 </div>
-                                                <p t-if="famous.description"><t t-raw="famous.trim_lines(famous.description)"/></p>
+                                                <p t-if="famous.description"><t t-raw="'&lt;br/&gt;'.join(famous.description.split('\n')[0:14])"/></p>
                                             </div>
                                         </div>
                                     </div>
@@ -310,7 +310,7 @@
                 <div class="container mt16">
                     <div class="row">
                         <div t-foreach="channels" t-as="channel" class="col-sm-4 mb32">
-                            <t t-set="famous" t-value="channel.get_mostviewed(channel)"/>
+                            <t t-set="famous" t-value="channel.get_mostviewed()"/>
                             <div class="oe-channel-grid-thumbnail">
                                 <a t-attf-href="/channel/#{slug(channel)}" t-if="famous">
                                     <span class="channel-box">
