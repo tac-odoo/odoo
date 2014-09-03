@@ -57,22 +57,10 @@
                 <a target="_Blank" class="oe_share_linkedin" href="http://www.linkedin.com/shareArticle?mini=true&amp;url={url}&amp;title={title}&amp;"><i class="fa fa-linkedin-square fa-2x"></i></a>
                 <a target="_Blank" class="oe_share_google" href="https://plus.google.com/share?url={url}"><i class="fa fa-google-plus-square fa-2x"></i></a>
             </div>
+            <h4 class="mt0">Share Link</h4>
             <input type="text" class="form-control" t-att-value="slide._get_share_url()" readonly="readonly" onClick="this.select();"/>
-            <span class="help-block">  copy above link to share</span>
-            <span class="lead">Embed:</span>
-            <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="slide._get_embade_code()"/></textarea>
-            <span class="help-block">  copy above embed code to share</span>
-            <div class="input-group col-lg-2 col-md-2 col-sm-12 col-xs-12">
-                <span class="input-group-btn">
-                    <button class="btn btn-default" type="button" id="btnminus" field="page"><span class="glyphicon glyphicon-minus-sign"/></button>
-                </span>
-                <input type="text" class="form-control text-center" value="0" name="page" readonly="readonly"/>
-                <span class="input-group-btn">
-                    <button class="btn btn-default" type="button" id="btnplus" field="page"><span class="glyphicon glyphicon-plus-sign"/></button>
-                </span>
-            </div>
+            <span class="help-block">Use permanent link to share in social media</span>
         </template>
-
 
         <template id='sendemail' name="Email">
             <t t-esc="is_public_user"/>
@@ -93,7 +81,7 @@
         <template id="embed" name="Embed Code">
             <h4 class="mt0">Embed Code</h4>
             <div class="form-group">
-                <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="slide._get_embade_code(slide)"/></textarea>
+                <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="slide._get_embade_code()"/></textarea>
             </div>
             <div class="form-group" t-if="slide.slide_type in ('presentation', 'document')">
                 <div class="input-group col-lg-3 col-md-3 col-sm-6 col-xs-6">
