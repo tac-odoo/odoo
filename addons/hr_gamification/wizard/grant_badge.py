@@ -18,43 +18,38 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 ##############################################################################
-
-from openerp.osv import fields, osv
+from openerp import api, fields, models
+from openerp.exceptions import Warning
 from openerp.tools.translate import _
 
-class hr_grant_badge_wizard(osv.TransientModel):
+class hr_grant_badge_wizard(models.TransientModel):
     _name = 'gamification.badge.user.wizard'
     _inherit = ['gamification.badge.user.wizard']
 
-    _columns = {
-        'employee_id': fields.many2one("hr.employee", string='Employee', required=True),
-        'user_id': fields.related("employee_id", "user_id",
-                                  type="many2one", relation="res.users",
-                                  store=True, string='User')
-    }
+    employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
+    user_id = fields.Many2one('res.users', related='employee_id.user_id', store=True, string='User')
 
-    def action_grant_badge(self, cr, uid, ids, context=None):
+    @api.multi
+    def action_grant_badge(self):
         """Wizard action for sending a badge to a chosen employee"""
-        if context is None:
-            context = {}
 
-        badge_user_obj = self.pool.get('gamification.badge.user')
+        badge_user_obj = self.env['gamification.badge.user']
 
-        for wiz in self.browse(cr, uid, ids, context=context):
+        for wiz in self:
             if not wiz.user_id:
-                raise osv.except_osv(_('Warning!'), _('You can send badges only to employees linked to a user.'))
+                raise Warning(_('You can send badges only to employees linked to a user.'))
 
-            if uid == wiz.user_id.id:
-                raise osv.except_osv(_('Warning!'), _('You can not send a badge to yourself'))
+            if self._uid == wiz.user_id.id:
+                raise Warning(_('You can not send a badge to yourself'))
 
             values = {
                 'user_id': wiz.user_id.id,
-                'sender_id': uid,
+                'sender_id': self._uid,
                 'badge_id': wiz.badge_id.id,
                 'employee_id': wiz.employee_id.id,
                 'comment': wiz.comment,
             }
 
-            badge_user = badge_user_obj.create(cr, uid, values, context=context)
-            result = badge_user_obj._send_badge(cr, uid, [badge_user], context=context)
+            badge_user = badge_user_obj.create(values)
+            result = badge_user._send_badge()
         return result
