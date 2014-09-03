@@ -63,7 +63,6 @@
         </template>
 
         <template id='sendemail' name="Email">
-            <t t-esc="is_public_user"/>
             <t t-if="not is_public_user">
                 <h4 class="mt0">Email</h4>
                 <form class="form-inline" role="form">

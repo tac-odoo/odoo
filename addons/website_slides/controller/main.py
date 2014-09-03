@@ -1,22 +1,4 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
 
 import werkzeug
 from urlparse import urlparse
@@ -64,7 +46,7 @@ class main(http.Controller):
 
         vals = {
             'channels': channels, 
-            'user': user, 
+            'user': user,
             'is_public_user': user.id == request.website.user_id.id
         }
         return request.website.render('website_slides.channels', vals)
@@ -87,14 +69,18 @@ class main(http.Controller):
         attachment_ids = videos = slides = documents = infographics = []
         famous = None
 
-        if request.env.user.id == 3: domain += [('website_published', '=', True)]
+        if request.env.user.id == request.website.user_id.id: 
+            domain += [('website_published', '=', True)]
         
         all_count = attachment.search_count(domain)
-        if channel: domain += [('parent_id','=',channel.id)]
+        if channel: 
+            domain += [('parent_id','=',channel.id)]
 
-        if search: domain += ['|', ('name', 'ilike', search), ('index_content', 'ilike', search)]
+        if search: 
+            domain += ['|', ('name', 'ilike', search), ('index_content', 'ilike', search)]
 
-        if tags: domain += [('tag_ids.name', '=', tags)]
+        if tags: 
+            domain += [('tag_ids.name', '=', tags)]
 
         values = {
             'tags':tags,
@@ -188,19 +174,15 @@ class main(http.Controller):
         user = request.env.user
 
         domain = [('is_slide','=',True), ('website_published', '=', True)]
-        # increment view counter
         slideview.sudo().set_viewed()
 
-        # most viewed slides
         most_viewed_ids = attachment.search(domain, limit=self._slides_per_list, offset=0, order='slide_views desc')
 
-        # related slides
         tags = slideview.tag_ids.ids
         if tags:
             domain += [('tag_ids', 'in', tags)]
         related_ids = attachment.search(domain, limit=self._slides_per_list, offset=0)
 
-        # get comments
         comments = slideview.website_message_ids
 
         values= {
@@ -239,20 +221,16 @@ class main(http.Controller):
     
     @http.route('/channel/<model("document.directory"):channel>/view/<model("ir.attachment"):slideview>/like', type='json', auth="public", website=True)
     def slide_like(self, channel, slideview, **post):
-        cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
-
-        slide_obj = request.env['ir.attachment']
-        if slide_obj.set_like():
+        if slideview.sudo().set_like():
             return slideview.likes
 
         return {'error': 'Error on wirte Data'}
 
     @http.route('/channel/<model("document.directory"):channel>/view/<model("ir.attachment"):slideview>/dislike', type='json', auth="public", website=True)
     def slide_dislike(self, channel, slideview, **post):
-        cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
-        slide_obj = pool['ir.attachment']
-        if slide_obj.set_dislike(cr, uid, [slideview.id], context=context):
+        if slideview.sudo().set_dislike():
             return slideview.dislikes
+
         return {'error': 'Error on wirte Data'}
 
     @http.route('/slides/get_channel', type='json', auth="public", website=True)
@@ -260,7 +238,6 @@ class main(http.Controller):
         directory = request.env['document.directory']
         attachment = request.env['ir.attachment']
         channels = directory.name_search(name='', args=[('website_published','=', True)], operator='ilike', limit=100)
-        #default_channel = attachment.get_default_channel()
         res = []
         for channel in channels:
             res.append({'id': channel[0],
