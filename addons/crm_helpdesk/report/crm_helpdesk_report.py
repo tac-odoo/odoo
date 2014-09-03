@@ -19,7 +19,7 @@
 #
 ##############################################################################
 
-from openerp.osv import fields,osv
+from openerp import api, fields, models
 from openerp import tools
 
 
@@ -31,35 +31,33 @@ AVAILABLE_STATES = [
     ('pending','Pending')
 ]
 
-class crm_helpdesk_report(osv.osv):
+class crm_helpdesk_report(models.Model):
     """ Helpdesk report after Sales Services """
 
     _name = "crm.helpdesk.report"
     _description = "Helpdesk report after Sales Services"
     _auto = False
 
-    _columns = {
-        'date': fields.datetime('Date', readonly=True),
-        'user_id':fields.many2one('res.users', 'User', readonly=True),
-        'section_id':fields.many2one('crm.case.section', 'Section', readonly=True),
-        'nbr': fields.integer('# of Cases', readonly=True),
-        'state': fields.selection(AVAILABLE_STATES, 'Status', readonly=True),
-        'delay_close': fields.float('Delay to Close',digits=(16,2),readonly=True, group_operator="avg"),
-        'partner_id': fields.many2one('res.partner', 'Partner' , readonly=True),
-        'company_id': fields.many2one('res.company', 'Company', readonly=True),
-        'date_deadline': fields.date('Deadline', select=True),
-        'priority': fields.selection([('5', 'Lowest'), ('4', 'Low'), \
-                    ('3', 'Normal'), ('2', 'High'), ('1', 'Highest')], 'Priority'),
-        'channel_id': fields.many2one('crm.tracking.medium', 'Channel'),
-        'categ_id': fields.many2one('crm.case.categ', 'Category', \
+    date = fields.Datetime('Date', readonly=True)
+    user_id = fields.Many2one('res.users', 'User', readonly=True)
+    section_id = fields.Many2one('crm.case.section', 'Section', readonly=True)
+    nbr = fields.Integer('# of Cases', readonly=True)
+    state = fields.Selection(AVAILABLE_STATES, 'Status', readonly=True)
+    delay_close = fields.Float('Delay to Close',digits=(16,2),readonly=True, group_operator="avg")
+    partner_id = fields.Many2one('res.partner', 'Partner' , readonly=True)
+    company_id = fields.Many2one('res.company', 'Company', readonly=True)
+    date_deadline = fields.Date('Deadline', select=True)
+    priority = fields.Selection([('5', 'Lowest'), ('4', 'Low'), \
+                    ('3', 'Normal'), ('2', 'High'), ('1', 'Highest')], 'Priority')
+    channel_id = fields.Many2one('crm.tracking.medium', 'Channel')
+    categ_id = fields.Many2one('crm.case.categ', 'Category', \
                             domain="[('section_id','=',section_id),\
-                            ('object_id.model', '=', 'crm.helpdesk')]"),
-        'planned_cost': fields.float('Planned Costs'),
-        'create_date': fields.date('Creation Date' , readonly=True, select=True),
-        'date_closed': fields.date('Close Date', readonly=True, select=True),
-        'delay_expected': fields.float('Overpassed Deadline',digits=(16,2),readonly=True, group_operator="avg"),
-        'email': fields.integer('# Emails', size=128, readonly=True),
-    }
+                            ('object_id.model', '=', 'crm.helpdesk')]")
+    planned_cost = fields.Float('Planned Costs')
+    create_date = fields.Date('Creation Date' , readonly=True, select=True)
+    date_closed = fields.Date('Close Date', readonly=True, select=True)
+    delay_expected = fields.Float('Overpassed Deadline',digits=(16,2),readonly=True, group_operator="avg")
+    email = fields.Integer('# Emails', size=128, readonly=True)
 
     def init(self, cr):
 

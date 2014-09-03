@@ -20,14 +20,12 @@
 ##############################################################################
 
 import openerp
-from openerp.addons.crm import crm
-from openerp.osv import fields, osv
-from openerp import tools
-from openerp.tools.translate import _
+from openerp import _, api, fields, models
+from openerp.exceptions import Warning
 from openerp.tools import html2plaintext
 
 
-class crm_helpdesk(osv.osv):
+class crm_helpdesk(models.Model):
     """ Helpdesk Cases """
 
     _name = "crm.helpdesk"
@@ -35,94 +33,85 @@ class crm_helpdesk(osv.osv):
     _order = "id desc"
     _inherit = ['mail.thread']
 
-    _columns = {
-            'id': fields.integer('ID', readonly=True),
-            'name': fields.char('Name', required=True),
-            'active': fields.boolean('Active', required=False),
-            'date_action_last': fields.datetime('Last Action', readonly=1),
-            'date_action_next': fields.datetime('Next Action', readonly=1),
-            'description': fields.text('Description'),
-            'create_date': fields.datetime('Creation Date' , readonly=True),
-            'write_date': fields.datetime('Update Date' , readonly=True),
-            'date_deadline': fields.date('Deadline'),
-            'user_id': fields.many2one('res.users', 'Responsible'),
-            'section_id': fields.many2one('crm.case.section', 'Sales Team', \
-                            select=True, help='Responsible sales team. Define Responsible user and Email account for mail gateway.'),
-            'company_id': fields.many2one('res.company', 'Company'),
-            'date_closed': fields.datetime('Closed', readonly=True),
-            'partner_id': fields.many2one('res.partner', 'Partner'),
-            'email_cc': fields.text('Watchers Emails', size=252 , help="These email addresses will be added to the CC field of all inbound and outbound emails for this record before being sent. Separate multiple email addresses with a comma"),
-            'email_from': fields.char('Email', size=128, help="Destination email for email gateway"),
-            'date': fields.datetime('Date'),
-            'ref': fields.reference('Reference', selection=openerp.addons.base.res.res_request.referencable_models),
-            'ref2': fields.reference('Reference 2', selection=openerp.addons.base.res.res_request.referencable_models),
-            'channel_id': fields.many2one('crm.tracking.medium', 'Channel', help="Communication channel."),
-            'planned_revenue': fields.float('Planned Revenue'),
-            'planned_cost': fields.float('Planned Costs'),
-            'priority': fields.selection([('0','Low'), ('1','Normal'), ('2','High')], 'Priority'),
-            'probability': fields.float('Probability (%)'),
-            'categ_id': fields.many2one('crm.case.categ', 'Category', \
+    id = fields.Integer('ID', readonly=True)
+    name = fields.Char('Name', required=True)
+    active = fields.Boolean('Active', required=False, default=1)
+    date_action_last = fields.Datetime('Last Action', readonly=1)
+    date_action_next = fields.Datetime('Next Action', readonly=1)
+    description = fields.Text('Description')
+    create_date = fields.Datetime('Creation Date' , readonly=True)
+    write_date = fields.Datetime('Update Date' , readonly=True)
+    date_deadline = fields.Date('Deadline')
+    user_id = fields.Many2one('res.users', 'Responsible', default=lambda s : s._uid)
+    section_id = fields.Many2one('crm.case.section', 'Sales Team', select=True, help='Responsible sales team. Define Responsible user and Email account for mail gateway.')
+    company_id = fields.Many2one('res.company', 'Company', default=lambda s : s.env['res.company']._company_default_get('crm.helpdesk'))
+    date_closed = fields.Datetime('Closed', readonly=True)
+    partner_id = fields.Many2one('res.partner', 'Partner')
+    email_cc = fields.Text('Watchers Emails', help="These email addresses will be added to the CC field of all inbound and outbound emails for this record before being sent. Separate multiple email addresses with a comma")
+    email_from = fields.Char('Email', help="Destination email for email gateway")
+    date = fields.Datetime('Date', default=fields.Datetime.now())
+    ref = fields.Reference('reference_model', 'Reference')
+    ref2 = fields.Reference('reference_model', 'Reference 2')
+    channel_id = fields.Many2one('crm.tracking.medium', 'Channel', help="Communication channel.")
+    planned_revenue = fields.Float('Planned Revenue')
+    planned_cost = fields.Float('Planned Costs')
+    priority = fields.Selection([('0','Low'), ('1','Normal'), ('2','High')], 'Priority', default='1')
+    probability = fields.Float('Probability (%)')
+    categ_id = fields.Many2one('crm.case.categ', 'Category', \
                             domain="['|',('section_id','=',False),('section_id','=',section_id),\
-                            ('object_id.model', '=', 'crm.helpdesk')]"),
-            'duration': fields.float('Duration', states={'done': [('readonly', True)]}),
-            'state': fields.selection(
+                            ('object_id.model', '=', 'crm.helpdesk')]")
+    duration = fields.Float('Duration', states={'done': [('readonly', True)]})
+    state = fields.Selection(
                 [('draft', 'New'),
                  ('open', 'In Progress'),
                  ('pending', 'Pending'),
                  ('done', 'Closed'),
-                 ('cancel', 'Cancelled')], 'Status', readonly=True, track_visibility='onchange',
+                 ('cancel', 'Cancelled')], 'Status', readonly=True, track_visibility='onchange', default='draft',
                                   help='The status is set to \'Draft\', when a case is created.\
                                   \nIf the case is in progress the status is set to \'Open\'.\
                                   \nWhen the case is over, the status is set to \'Done\'.\
-                                  \nIf the case needs to be reviewed then the status is set to \'Pending\'.'),
-    }
+                                  \nIf the case needs to be reviewed then the status is set to \'Pending\'.')
 
-    _defaults = {
-        'active': lambda *a: 1,
-        'user_id': lambda s, cr, uid, c: uid,
-        'state': lambda *a: 'draft',
-        'date': fields.datetime.now,
-        'company_id': lambda s, cr, uid, c: s.pool.get('res.company')._company_default_get(cr, uid, 'crm.helpdesk', context=c),
-        'priority': '1',
-    }
+    @api.model
+    def reference_model(self):
+        res = self.env['res.request.link'].search([])
+        return [(r.object, r.name) for r in res]
 
-    def on_change_partner_id(self, cr, uid, ids, partner_id, context=None):
-        values = {}
-        if partner_id:
-            partner = self.pool.get('res.partner').browse(cr, uid, partner_id, context=context)
-            values = {
-                'email_from': partner.email,
-            }
-        return {'value': values}
+    @api.onchange('partner_id')
+    def on_change_partner_id(self):
+        self.email_from = self.partner_id.email if self.partner_id else ''
 
-    def write(self, cr, uid, ids, values, context=None):
+    @api.multi
+    def write(self, values):
         """ Override to add case management: open/close dates """
         if values.get('state'):
             if values.get('state') in ['draft', 'open'] and not values.get('date_open'):
-                values['date_open'] = fields.datetime.now()
-            elif values.get('state') == 'close' and not values.get('date_closed'):
-                values['date_closed'] = fields.datetime.now()
-        return super(crm_helpdesk, self).write(cr, uid, ids, values, context=context)
+                # TODO/FIXME: date_open field is note there - will give warning
+                values['date_open'] = fields.Datetime.now()
+            elif values.get('state') == 'done' and not values.get('date_closed'):
+                values['date_closed'] = fields.Datetime.now()
+        return super(crm_helpdesk, self).write(values)
 
-    def case_escalate(self, cr, uid, ids, context=None):
+    @api.multi
+    def case_escalate(self):
         """ Escalates case to parent level """
         data = {'active': True}
-        for case in self.browse(cr, uid, ids, context=context):
-            if case.section_id and case.section_id.parent_id:
-                parent_id = case.section_id.parent_id
-                data['section_id'] = parent_id.id
-                if parent_id.change_responsible and parent_id.user_id:
-                    data['user_id'] = parent_id.user_id.id
-            else:
-                raise osv.except_osv(_('Error!'), _('You can not escalate, you are already at the top level regarding your sales-team category.'))
-            self.write(cr, uid, [case.id], data, context=context)
+        if self.section_id and self.section_id.parent_id:
+            parent_id = self.section_id.parent_id
+            data['section_id'] = parent_id.id
+            if parent_id.change_responsible and parent_id.user_id:
+                data['user_id'] = parent_id.user_id.id
+        else:
+            raise Warning (_('You can not escalate, you are already at the top level regarding your sales-team category.'))
+        self.write(data)
         return True
 
     # -------------------------------------------------------
     # Mail gateway
     # -------------------------------------------------------
 
-    def message_new(self, cr, uid, msg, custom_values=None, context=None):
+    @api.model
+    def message_new(self, msg, custom_values=None):
         """ Overrides mail_thread message_new that is called by the mailgateway
             through message_process.
             This override updates the document according to the email.
@@ -139,6 +128,6 @@ class crm_helpdesk(osv.osv):
             'partner_id': msg.get('author_id', False),
         }
         defaults.update(custom_values)
-        return super(crm_helpdesk, self).message_new(cr, uid, msg, custom_values=defaults, context=context)
+        return super(crm_helpdesk, self).message_new(msg, custom_values=defaults)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

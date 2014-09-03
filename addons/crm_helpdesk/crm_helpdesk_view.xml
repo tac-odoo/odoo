@@ -47,7 +47,7 @@
                             <group>
                                 <group string="Communication">
                                     <field name="partner_id"
-                                        on_change="on_change_partner_id(partner_id)"/>
+                                        on_change="1"/>
                                     <field name="email_from"/>
                                 </group>
                                 <group string="Categorization">
