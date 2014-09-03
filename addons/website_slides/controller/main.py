@@ -23,9 +23,10 @@ from urlparse import urlparse
 import simplejson
 
 from openerp import SUPERUSER_ID
+from openerp.http import request
 
 from openerp.addons.web import http
-from openerp.addons.web.http import request
+
 from openerp.addons.website.models.website import slug
 
 class main(http.Controller):
@@ -34,46 +35,39 @@ class main(http.Controller):
     _slides_per_list = 20
 
     def _slides_message(self, user, attachment_id=0, **post):
-        cr, uid, context = request.cr, request.uid, request.context
-        attachment = request.registry['ir.attachment']
-        partner_obj = request.registry['res.partner']
+        attachment = request.env['ir.attachment']
+        partner_obj = request.env['res.partner']
 
-        if uid != request.website.user_id.id:
+        if request.uid != request.website.user_id.id:
             partner_ids = [user.partner_id.id]
         else:
-            partner_ids = attachment._find_partner_from_emails(cr, SUPERUSER_ID, 0, [post.get('email')], context=context)
+            partner_ids = attachment.sudo()._find_partner_from_emails(0, [post.get('email')])
             if not partner_ids or not partner_ids[0]:
-                partner_ids = [partner_obj.create(cr, SUPERUSER_ID, {'name': post.get('name'), 'email': post.get('email')}, context=context)]
-
-        message_id = attachment.message_post(
-            cr, SUPERUSER_ID, int(attachment_id),
+                partner_ids = [partner_obj.sudo().create({'name': post.get('name'), 'email': post.get('email')})]
+        message_id = attachment.search([('id', '=', int(attachment_id))]).sudo().with_context(mail_create_nosubcribe=True).message_post(
             body=post.get('comment'),
             type='comment',
             subtype='mt_comment',
             author_id=partner_ids[0],
             path=post.get('path', False),
-            context=dict(context, mail_create_nosubcribe=True))
+            )
         return message_id
-
 
     @http.route('/channel', type='http', auth="public", website=True)
     def channels(self, *args, **post):
-        cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
-        directory = pool['document.directory']
-        user = pool['res.users'].browse(cr, uid, uid, context)
-        ids = directory.search(cr, uid, [('website_published','=', True)], context=context)
+        directory = request.env['document.directory']
+        user = request.env.user
+        channels = directory.search([('website_published','=', True)])
         
-        if len(ids) <= 1:
-            return request.redirect("/channel/%s" % ids[0])
+        if len(channels) <= 1:
+            return request.redirect("/channel/%s" % channels.id)
 
-        channels = directory.browse(cr, uid, ids, context)
         vals = {
             'channels': channels, 
             'user': user, 
             'is_public_user': user.id == request.website.user_id.id
         }
         return request.website.render('website_slides.channels', vals)
-
 
     @http.route(['/channel/<model("document.directory"):channel>',
                 '/channel/<model("document.directory"):channel>/<types>',
@@ -82,21 +76,20 @@ class main(http.Controller):
                 '/channel/<model("document.directory"):channel>/<types>/page/<int:page>',
                 '/channel/<model("document.directory"):channel>/<types>/tag/<tags>/page/<int:page>',
                    ], type='http', auth="public", website=True)
-    def slides(self, channel=0, page=1, types='', tags='', sorting='date', search=''):
-        cr, uid, context = request.cr, SUPERUSER_ID, request.context
+    def slides(self, channel=0, page=1, types='', tags='', sorting='creation', search=''):
+        user = request.env.user
+        publisher = request.registry['res.users'].has_group(request.cr, request.uid, 'base.group_website_publisher')
+        attachment = request.env['ir.attachment']
 
-        user = request.registry['res.users'].browse(cr, uid, request.uid, context)
-        attachment = request.registry['ir.attachment']
         domain = [('is_slide','=','True'), ('parent_id','=',channel.id)]
 
         count_all = count_slide = count_video = count_document = count_infographic = 0
         attachment_ids = videos = slides = documents = infographics = []
         famous = None
 
-        if request.uid == 3: domain += [('website_published', '=', True)]
+        if request.env.user.id == 3: domain += [('website_published', '=', True)]
         
-        all_count = attachment.search(cr, uid, domain, count=True, context=context)
-
+        all_count = attachment.search_count(domain)
         if channel: domain += [('parent_id','=',channel.id)]
 
         if search: domain += ['|', ('name', 'ilike', search), ('index_content', 'ilike', search)]
@@ -109,7 +102,7 @@ class main(http.Controller):
             'user': user,
             'is_public_user': user.id == request.website.user_id.id,
         }
-
+        
         if types:
             domain += [('slide_type', '=', types)]
 
@@ -135,13 +128,12 @@ class main(http.Controller):
             if sorting:
                 url_args['sorting'] = sorting
 
-            pager_count = attachment.search(cr, uid, domain, count=True, context=context)
+            pager_count = attachment.search_count(domain)
             pager = request.website.pager(url=url, total=pager_count, page=page,
                                           step=self._slides_per_page, scope=self._slides_per_page,
                                           url_args=url_args)
             
-            obj_ids = attachment.search(cr, uid, domain, limit=self._slides_per_page, offset=pager['offset'], order=order, context=context)
-            attachment_ids = attachment.browse(cr, uid, obj_ids, context=context)
+            attachment_ids = attachment.search(domain, limit=self._slides_per_page, offset=pager['offset'], order=order)
             
             values.update({
                 'attachment_ids': attachment_ids,
@@ -153,32 +145,22 @@ class main(http.Controller):
             })
         else:
             count_domain = domain + [('slide_type', '=', 'video')]
-            count_ids = attachment.search(cr, uid, count_domain, limit=4, offset=0, order='create_date desc', context=context)
-            if count_domain:
-                videos = attachment.browse(cr, uid, count_ids)
+            videos = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
+            lens = {'video': len(videos)}
 
-            lens = {
-                'video': len(count_ids)
-            }
             count_domain = domain + [('slide_type', '=', 'presentation')]
-            count_ids = attachment.search(cr, uid, count_domain, limit=4, offset=0, order='create_date desc', context=context)
-            if count_domain:
-                slides = attachment.browse(cr, uid, count_ids)
-            lens.update({'presentation':len(count_ids)})
+            slides = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
+            lens.update({'presentation':len(slides)})
 
             count_domain = domain + [('slide_type', '=', 'document')]
-            count_ids = attachment.search(cr, uid, count_domain, limit=4, offset=0, order='create_date desc', context=context)
-            if count_domain:
-                documents = attachment.browse(cr, uid, count_ids)
-            lens.update({'document':len(count_ids)})
+            documents = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
+            lens.update({'document':len(documents)})
 
             count_domain = domain + [('slide_type', '=', 'infographic')]
-            count_ids = attachment.search(cr, uid, count_domain, limit=4, offset=0, order='create_date desc', context=context)
-            if count_domain:
-                infographics = attachment.browse(cr, uid, count_ids)
-            lens.update({'infographic':len(count_ids)})
+            infographics = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
+            lens.update({'infographic':len(infographics)})
 
-            famous = request.registry.get('document.directory').get_mostviewed(cr, uid, channel, context)
+            famous = channel.get_mostviewed()
             values.update({
                 'videos':videos,
                 'slides':slides,
@@ -186,8 +168,7 @@ class main(http.Controller):
                 'infographics': infographics,
                 'famous':famous
             })
-
-            counts = attachment.read_group(cr, uid, domain, ['slide_type'], groupby='slide_type')
+            counts = attachment.read_group(domain, ['slide_type'], groupby='slide_type')
             countvals = {}
             for count in counts:
                 countvals['count_'+count.get('slide_type')] = count.get('slide_type_count') - lens.get(count.get('slide_type'))
@@ -203,24 +184,21 @@ class main(http.Controller):
                 '/channel/<model("document.directory"):channel>/<types>/tag/<tags>/<model("ir.attachment"):slideview>'
                 ], type='http', auth="public", website=True)
     def slide_view(self, channel, slideview, types='', sorting='', search='', tags=''):
-        cr, uid, context = request.cr, SUPERUSER_ID, request.context
-        attachment = request.registry['ir.attachment']
-        user = request.registry['res.users'].browse(cr, uid, uid, context=context)
+        attachment = request.env['ir.attachment']
+        user = request.env.user
 
-        domain = [('is_slide','=',True)]
+        domain = [('is_slide','=',True), ('website_published', '=', True)]
         # increment view counter
-        attachment.set_viewed(cr, uid, [slideview.id], context=context)
+        slideview.sudo().set_viewed()
 
         # most viewed slides
-        ids = attachment.search(cr, uid, domain, limit=self._slides_per_list, offset=0, order='slide_views desc', context=context)
-        most_viewed_ids = attachment.browse(cr, uid, ids, context=context)
+        most_viewed_ids = attachment.search(domain, limit=self._slides_per_list, offset=0, order='slide_views desc')
 
         # related slides
         tags = slideview.tag_ids.ids
         if tags:
             domain += [('tag_ids', 'in', tags)]
-        ids = attachment.search(cr, uid, domain, limit=self._slides_per_list, offset=0, context=context)
-        related_ids = attachment.browse(cr, uid, ids, context=context)
+        related_ids = attachment.search(domain, limit=self._slides_per_list, offset=0)
 
         # get comments
         comments = slideview.website_message_ids
@@ -236,39 +214,36 @@ class main(http.Controller):
         }
         return request.website.render('website_slides.slide_view', values)
 
-
     @http.route('/slides/comment/<model("ir.attachment"):slideview>', type='http', auth="public", methods=['POST'], website=True)
     def slides_comment(self, slideview, **post):
-        cr, uid, context = request.cr, request.uid, request.context
-        attachment = request.registry['ir.attachment']
+        attachment = request.env['ir.attachment']
         if post.get('comment'):
-            user = request.registry['res.users'].browse(cr, uid, uid, context=context)
-            attachment = request.registry['ir.attachment']
-            attachment.check_access_rights(cr, uid, 'read')
+            user = request.env.user
+            attachment = request.env['ir.attachment']
+            attachment.check_access_rights('read')
             self._slides_message(user, slideview.id, **post)
         return werkzeug.utils.redirect(request.httprequest.referrer + "#discuss")
 
-
     @http.route('/slides/thumb/<int:document_id>', type='http', auth="public", website=True)
     def slide_thumb(self, document_id=0, **post):
-        cr, uid, context = request.cr, SUPERUSER_ID, request.context
         response = werkzeug.wrappers.Response()
-        Website = request.registry['website']
-        return Website._image(cr, uid, 'ir.attachment', document_id, 'image', response)
-
+        Website = request.env['website']
+        return Website._image('ir.attachment', document_id, 'image', response)
 
     @http.route('/slides/get_tags', type='http', auth="public", methods=['GET'], website=True)
     def tag_read(self, **post):
-        tags = request.registry['ir.attachment.tag'].search_read(request.cr, request.uid, [], ['name'], context=request.context)
+        tags = request.env['ir.attachment.tag'].search_read([], ['name'])
         data = [tag['name'] for tag in tags]
         return simplejson.dumps(data)
     
     @http.route('/channel/<model("document.directory"):channel>/view/<model("ir.attachment"):slideview>/like', type='json', auth="public", website=True)
     def slide_like(self, channel, slideview, **post):
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
-        slide_obj = pool['ir.attachment']
-        if slide_obj.set_like(cr, uid, [slideview.id], context=context):
+
+        slide_obj = request.env['ir.attachment']
+        if slide_obj.set_like():
             return slideview.likes
+
         return {'error': 'Error on wirte Data'}
 
     @http.route('/channel/<model("document.directory"):channel>/view/<model("ir.attachment"):slideview>/dislike', type='json', auth="public", website=True)
@@ -281,11 +256,10 @@ class main(http.Controller):
 
     @http.route('/slides/get_channel', type='json', auth="public", website=True)
     def get_channel(self, **post):
-        cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
-        directory = pool['document.directory']
-        attachment = request.registry['ir.attachment']
-        channels = directory.name_search(cr, uid, name='', args=[('website_published','=', True)], operator='ilike', context=context, limit=100)
-        default_channel = attachment.get_default_channel(cr, uid, context)
+        directory = request.env['document.directory']
+        attachment = request.env['ir.attachment']
+        channels = directory.name_search(name='', args=[('website_published','=', True)], operator='ilike', limit=100)
+        #default_channel = attachment.get_default_channel()
         res = []
         for channel in channels:
             res.append({'id': channel[0],
@@ -295,25 +269,25 @@ class main(http.Controller):
 
     @http.route(['/slides/add_slide'], type='http', auth="user", methods=['POST'], website=True)
     def create_slide(self, *args, **post):
-        cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
-        Tag = pool['ir.attachment.tag']
+        Tag = request.env['ir.attachment.tag']
         tag_ids = []
         if post.get('tag_ids').strip('[]'):
             tags = post.get('tag_ids').strip('[]').replace('"', '').split(",")
             for tag in tags:
-                tag_id = Tag.search(cr, uid, [('name', '=', tag)], context=context)
+                tag_id = Tag.search([('name', '=', tag)])
                 if tag_id:
                     tag_ids.append((4, tag_id[0]))
                 else:
                     tag_ids.append((0, 0, {'name': tag}))
         post['tag_ids'] = tag_ids
-        slide_obj = pool.get('ir.attachment')
+        slide_obj = request.env['ir.attachment']
 
         _file_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif']
 
         if post.get('mimetype') in _file_types:
             post['slide_type'] = 'infographic'
             post['image'] = post.get('datas')
+
         if post.get('url') and not post.get('datas', False):
             post['slide_type'] = 'video'
         elif post.get('mimetype') == 'application/pdf':
@@ -328,5 +302,5 @@ class main(http.Controller):
             del post['height']
             del post['width']
 
-        slide_id = slide_obj.create(cr, uid, post, context=context)
-        return request.redirect("/channel/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id))
+        slide_id = slide_obj.create(post)
+        return request.redirect("/channel/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id.id))
