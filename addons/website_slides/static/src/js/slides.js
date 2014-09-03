@@ -11,6 +11,7 @@
             'click button.save': 'save',
             'click button[data-dismiss="modal"]': 'cancel',
             'change .slide-upload': 'slide_upload',
+            'change .slide-url': 'slide_url',
             'click .list-group-item': function(ev) {
                 this.$('.list-group-item').removeClass('active');
                 $(ev.target).closest('li').addClass('active');
@@ -28,33 +29,52 @@
             //this.$('input:first').focus();
            self.set_tags();
         },
+        slide_url: function(ev){
+            var self = this;
+            var url = $(ev.target).val();
+            this.$('.url-error').hide();
+            var video_id = this.url_parser(url);
+            if (!video_id && url){
+                this.$('.url-error').show();
+            }else{
+                var api_url = 'http://gdata.youtube.com/feeds/api/videos/'+video_id+'?v=2&alt=jsonc';
+                $.getJSON(api_url,function(data){
+                    var title = data.data.title;
+                    var image_src = data.data.thumbnail.hqDefault;
+                    self.$('#name').val(title);
+                    self.$("#slide-image").attr("src",image_src);
+                });
+            }
+        },
+        url_parser: function(url){
+           var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+           var match = url.match(regExp);
+           return (match && match[7].length==11) ? match[7] : false;
+        },
         slide_upload: function(ev){
             var self = this;
             var file = ev.target.files[0];
-            var ArrayReader = new FileReader();
+            this.file.name = file.name;
+            this.file.type = file.type;
             var BinaryReader = new FileReader();
             // file read as DataURL
             BinaryReader.readAsDataURL(file);
             BinaryReader.onloadend = function(upload) {
                 var buffer = upload.target.result;
+
+                self.$("#slide-image").attr("src",buffer);
                 buffer = buffer.split(',')[1];
                 self.file.data = buffer;
-                self.file.name = file.name;
-                self.file.type = file.type;
             };
 
             if (file.type === 'application/pdf'){
-                // file read as ArrayBuffer for PDFJS get_Document API
+                var ArrayReader = new FileReader();
                 this.$('.save').button('loading');
+                // file read as ArrayBuffer for PDFJS get_Document API
                 ArrayReader.readAsArrayBuffer(file);
                 ArrayReader.onload = function(evt) {
                     var buffer = evt.target.result;
-                    // PDFJS can't eval path because of bundle assest
-                    // https://github.com/mozilla/pdf.js/blob/master/src/pdf.js#L41
-                    var path = '';
-                    var pathArray = window.location.pathname.split( '/' );
-                    pathArray.forEach(function(){path +='../';});
-                    PDFJS.workerSrc = path + 'website_slides/static/lib/pdfjs/build/pdf.worker.js';
+                    PDFJS.workerSrc = '/website_slides/static/lib/pdfjs/build/pdf.worker.js';
 
                     PDFJS.getDocument(buffer).then(function getPdf(pdf) {
                         pdf.getPage(1).then(function getFirstPage(page) {
@@ -64,16 +84,19 @@
                             var context = canvas.getContext('2d');
                             canvas.height = viewport.height;
                             canvas.width = viewport.width;
-                            //
                             // Render PDF page into canvas context
-                            //
                             page.render({canvasContext: context, viewport: viewport}).then(function(){
+                                var image_data = self.$('#the-canvas')[0].toDataURL();
+                                self.$("#slide-image").attr("src", image_data);
                                 self.$('.save').button('reset');
                             });
                         });
                     });
                 };
             }
+
+            var input = file.name;
+            self.$('#name').val(input.substr(0, input.lastIndexOf('.')) || input);
         },
         set_tags: function(){
             var self = this;

@@ -9,29 +9,11 @@
                     </div>
                     <div class="modal-body">
                         <form class="clearfix form-horizontal">
-
                             <div class="control-group">
-                                <!--label for="slide-name" class="control-label col-sm-3">
-                                    Name:
-                                </label-->
-                                <div class="col-sm-9">
-                                    <input name="slide-name" placeholder="Name" class="form-control" required="required" id="name"/>
+                                <div class="controls col-sm-4 input-group-sm">
+                                    <img src="/website_slides/static/src/img/document.png"  id="slide-image" title="Content Preview" class="img-document"/>
                                 </div>
-                            </div>
-
-                            <div class="control-group">
-                                <!--label for="slide-tag" style="margin-top: 13px;" class="control-label col-sm-3">
-                                    Tags:
-                                </label-->
-                                <div class="controls col-sm-9">
-                                    <br/>
-                                    <input type="text" name="slide-tags" style="width: 200px" placeholder="Tags" class="form-control slide-tags"/>
-                                </div>
-                            </div>
-
-                            <div class="control-group">
-                                <!--label class="control-label col-sm-3" for="slide-file">Content:</label-->
-                                <div class="controls col-sm-9 input-group-sm h5">
+                                <div class="controls col-sm-8 input-group-sm">
                                     <ul class="list-group">
                                         <li class="list-group-item active">
                                             <h5 class="list-group-item-heading">
@@ -47,11 +29,33 @@
                                                     URL
                                                 </label>
                                             </h5>
-                                            <input name="slide-url" class="form-control h5" placeholder="Video URL" id="url"/>
+                                            <input class="form-control h5 slide-url" placeholder="Youtube Video URL" id="url"/>
+                                            <p class="url-error" style="display:none"> Wrong input. Please enter valid youtube URL</p>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
+                            <div class="control-group">
+                                <input name="slide-name" placeholder="Name" class="form-control" required="required" id="name"/>
+                                <!--<div class="col-sm-9">-->
+                                    <!--</div>-->
+                            </div>
+
+                            <div class="control-group">
+                                <br/>
+                                <input type="text" name="slide-tags" style="width: 200px" placeholder="Tags" class="form-control slide-tags"/>
+
+                                <!--<div class="controls col-sm-9">-->
+                                    <!--</div>-->
+                            </div>
+                            <div class="control-group">
+                                <br/>
+                                <textarea id="slide-description"  placeholder="Description" class="form-control"  maxlength="150"></textarea>
+
+                                <!--<div class="controls col-sm-9">-->
+                                    <!--</div>-->
+                            </div>
+
                             <canvas id="the-canvas" style="display: none;"></canvas>
                         </form>
                     </div>
@@ -66,7 +70,6 @@
         </div>
     </t>
 
-    
     <t t-name="website.slide.PDFViewer">
         <div>
         <div id="PDFLoader" class="img-responsive" style="width:100%;"><h3><i class='fa fa-spinner fa-spin'></i> Loading presenation...  </h3></div>
