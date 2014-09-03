@@ -356,14 +356,12 @@ $(document).ready(function() {
         }
     });
 
-    /*modify embed code based on options*/
     website.slide.modifyembedcode = function(currentVal) {
         var $embed_input = $('#slide_embed_code');
         var slide_embed_code = $embed_input.val();
         var tmp_embed_code = slide_embed_code.replace(/(page=).*?([^\d]+)/,'$1' + currentVal + '$2');
         $embed_input.val(tmp_embed_code);
     };
-    // This button will increment the value
 
     $('#btnplus').on('click', function(e){
         e.preventDefault();
@@ -374,17 +372,17 @@ $(document).ready(function() {
             website.slide.modifyembedcode(currentVal + 1);
         }
     });
+
     $("#btnminus").on('click', function(e) {
         e.preventDefault();
         var currentVal = parseInt($('#page_embed').val());
         if (currentVal > 1) {
             $('#page_embed').val(currentVal - 1);
-            website.slide.modifyembedcode(currentVal - 1)
+            website.slide.modifyembedcode(currentVal - 1);
         }
     });
 
-    // toggle option on pdfview 
-    $('.share-toggle-option').on('click', function (ev) {        
+    $('.share-toggle-option').on('click', function (ev) {
         ev.preventDefault();
         var toggleDiv = $(this).data('slide-share');
         $(toggleDiv).slideToggle();
