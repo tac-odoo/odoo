@@ -642,6 +642,8 @@ class PaymentAcquirerProvider(osv.Model):
         'sign_active': fields.boolean('Calculate Signature'),
         'sign_field': fields.char('Signature Mapping Field'),
         'sign_return_check': fields.boolean('Check Return Signature'),
+        #template
+        'render_template': fields.text('Template', help="somegateway (like authorize.net) is expecting a response to the POST sent by their server. This response is in the form of a URL that gateway will pass on to the client's browser to redirect them to the desired location need javascript"),
     }
 
     _sql_constraints = [

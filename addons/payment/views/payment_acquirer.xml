@@ -214,6 +214,10 @@
                                     </form>
                                 </field>
                             </page>
+                            <page string="Template">
+                                <separator string="JavaScrip in HTML To Render"/>
+                                <field name="render_template"/>
+                            </page>
                         </notebook>
                     </sheet>
                 </form>
