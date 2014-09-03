@@ -48,14 +48,14 @@
             </div>
         </template>
 
-        <template id='slide_share' name="slide_share">
+        <!-- all share components -->
+        <template id='socialshare' name="Social Media Share">
             <h4 class="mt0">Share</h4>
             <div class="form-group oe_share">
                 <a target="_Blank" class="oe_share_facebook" href="https://www.facebook.com/sharer/sharer.php?u={url}"><i class="fa fa-facebook-square fa-2x"></i></a>
                 <a target="_Blank" class="oe_share_twitter" href="https://twitter.com/intent/tweet?text={title}&amp;url={url}"><i class="fa fa-twitter-square fa-2x"></i></a>
                 <a target="_Blank" class="oe_share_linkedin" href="http://www.linkedin.com/shareArticle?mini=true&amp;url={url}&amp;title={title}&amp;"><i class="fa fa-linkedin-square fa-2x"></i></a>
                 <a target="_Blank" class="oe_share_google" href="https://plus.google.com/share?url={url}"><i class="fa fa-google-plus-square fa-2x"></i></a>
-                <a href="mailto:?body={url}&amp;subject={title}"><i class="fa fa-envelope-o fa-2x"></i></a>
             </div>
             <input type="text" class="form-control" t-att-value="slide._get_share_url()" readonly="readonly" onClick="this.select();"/>
             <span class="help-block">  copy above link to share</span>
@@ -71,39 +71,43 @@
                     <button class="btn btn-default" type="button" id="btnplus" field="page"><span class="glyphicon glyphicon-plus-sign"/></button>
                 </span>
             </div>
-
-            <h4 class="mt0">Email</h4>
-            <form class="form-inline" role="form">
-                <div class="input-group col-md-6">
-                    <input type="text" class="form-control" placeholder="your-friend@domain.com"/>
-                    <span class="input-group-btn">
-                        <button class="btn btn-primary form-control" type="submit"><i class="fa fa-envelope-o"></i> Send Email</button>
-                    </span>
-                </div>
-                <span class="help-block">Send presentation through email, with beautiful email</span>
-            </form>
         </template>
 
-        <template id='slide_embed' name="slide_embed">
-            <t t-if="slide.slide_type != 'video'">
-                <h4 class="mt0">Embed Code</h4>
-                <div class="form-group">
-                    <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="slide._get_embade_code()"/></textarea>
-                </div>
-                <div class="form-group" t-if="slide.slide_type in ('presentation', 'document')">
-                    <div class="input-group col-lg-3 col-md-3 col-sm-6 col-xs-6">
+
+        <template id='sendemail' name="Email">
+            <t t-esc="is_public_user"/>
+            <t t-if="not is_public_user">
+                <h4 class="mt0">Email</h4>
+                <form class="form-inline" role="form">
+                    <div class="input-group col-md-6">
+                        <input type="text" class="form-control" placeholder="your-friend@domain.com"/>
                         <span class="input-group-btn">
-                            <button class="btn btn-default" type="button" id="btnminus"><i class="fa fa-minus-circle"></i></button>
-                        </span>
-                        <input type="text" class="form-control text-center" value="1" id="page_embed" readonly="readonly"/>
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" type="button" id="btnplus"><i class="fa fa-plus-circle"></i></button>
+                            <button class="btn btn-primary form-control" type="submit"><i class="fa fa-envelope-o"></i> Send Email</button>
                         </span>
                     </div>
-                    <input type="hidden" id="pdf_page_count" value=""/>
-                    <span class="help-block">Select page to start with</span>
-                </div>
+                    <span class="help-block">Send presentation through email, with beautiful email</span>
+                </form>
             </t>
+        </template>
+
+        <template id="embed" name="Embed Code">
+            <h4 class="mt0">Embed Code</h4>
+            <div class="form-group">
+                <textarea id="slide_embed_code" class="form-control" readonly="readonly" onClick="this.select();"><t t-esc="slide._get_embade_code(slide)"/></textarea>
+            </div>
+            <div class="form-group" t-if="slide.slide_type in ('presentation', 'document')">
+                <div class="input-group col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" id="btnminus"><i class="fa fa-minus-circle"></i></button>
+                    </span>
+                    <input type="text" class="form-control text-center" value="1" id="page_embed" readonly="readonly"/>
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" id="btnplus"><i class="fa fa-plus-circle"></i></button>
+                    </span>
+                </div>
+                <input type="hidden" id="pdf_page_count" value=""/>
+                <span class="help-block">Select page to start with</span>
+            </div>
         </template>
 
         <template id='videoview' name="Video Viewer">
@@ -509,10 +513,13 @@
                             <div t-if="not slideview.description" t-field="slideview.website_description"/>
                         </div>
                         <div class="tab-pane fade" id="share">
-                            <t t-call="website_slides.slide_share">
+                            <t t-call="website_slides.socialshare">
                                 <t t-set="slide" t-value="slideview"/>
                             </t>
-                            <t t-call="website_slides.slide_embed">
+                            <t t-call="website_slides.sendemail">
+                                <t t-set="slide" t-value="slideview"/>
+                            </t>
+                            <t t-call="website_slides.embed">
                                 <t t-set="slide" t-value="slideview"/>
                             </t>
                         </div>

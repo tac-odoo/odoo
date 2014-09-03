@@ -134,6 +134,7 @@ class ir_attachment(models.Model):
             '<p>A new presentation <i>%s</i> has been uplodated under %s channel andwaiting for your review. <a href="%s/channel/%s/%s/view/%s">Click here to review the presentation.</a></p>' %
             (self.name, self.parent_id.name, base_url, slug(self.parent_id), self.slide_type, slug(self))
         )
+        #Todo: fix me, search only people subscribe for new_slides_validation
         partner_ids = []
         for partner in self.parent_id.message_follower_ids:
             partner_ids.append(partner.id)

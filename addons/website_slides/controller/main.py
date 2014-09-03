@@ -210,7 +210,8 @@ class main(http.Controller):
             'comments': comments,
             'channel': slideview.parent_id,
             'user':user,
-            'types':types
+            'types':types,
+            'is_public_user': user.id == request.website.user_id.id
         }
         return request.website.render('website_slides.slide_view', values)
 
