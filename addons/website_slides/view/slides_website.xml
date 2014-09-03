@@ -165,7 +165,7 @@
                                 </div>
                                 <div class="pull-right col-md-6 col-sm-12 col-xs-12">
                                     <t t-if="is_public_user">
-                                        <a t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger upload pull-right" style="border-radius: 0px;">
+                                        <a t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger pull-right" style="border-radius: 0px;">
                                             <i class="fa fa-cloud-upload"></i> Upload 
                                         </a>
                                     </t> 
@@ -458,8 +458,8 @@
                         </t>
                     </div>
                     <div class="pull-right mb16 col-md-6 text-right text-muted" style="padding-right: 0px">
-                        <a class="slide-like text-muted" data-count-el='.count-likes' t-attf-data-href="/channel/#{slug(channel)}/view/#{slug(slideview)}/like"><i class="fa fa-thumbs-up fa-2x"></i> Like</a>
-                        <a class="slide-unlike text-muted" data-count-el=".count-dislikes" t-attf-data-href="/channel/#{slug(channel)}/view/#{slug(slideview)}/dislike"><i class="fa fa-thumbs-down fa-2x"></i></a>
+                        <a id="like" t-att-attachment-id="slideview.id" class="slide-like text-muted" data-count-el='.count-likes' t-attf-data-href="/channel/#{slug(channel)}/view/#{slug(slideview)}/like"><i class="fa fa-thumbs-up fa-2x"></i> Like</a>
+                        <a id="unlike" t-att-attachment-id="slideview.id" class="slide-unlike text-muted" data-count-el=".count-dislikes" t-attf-data-href="/channel/#{slug(channel)}/view/#{slug(slideview)}/dislike"><i class="fa fa-thumbs-down fa-2x"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
