@@ -12,6 +12,10 @@ acquirer = context.get('acquirer')
 values = context.get('values')  
 sha1 = context.get('sha1')
 sorted = context.get('sort')
+def get_value(key):
+    if values.get(key):
+        return values[key]
+    return ''
 keys = "add_returndata Brq_amount Brq_culture Brq_currency Brq_invoicenumber Brq_return Brq_returncancel Brq_returnerror Brq_returnreject brq_test Brq_websitekey".split()
 if inout == 'out':
     if 'BRQ_SIGNATURE' in values:
@@ -19,9 +23,9 @@ if inout == 'out':
     items = sorted((k.upper(), v) for k, v in values.items())
     sign = ''.join('%s=%s' % (k, v) for k, v in items)
 else:
-    sign = ''.join('%s=%s' % (k,self.pool.get('payment.acquirer').get_value(k, values)) for k in keys)
+    sign = ''.join('%s=%s' % (k,get_value(k)) for k in keys)
 #Add the pre-shared secret key at the end of the signature
-sign = sign + acquirer.provider_id.transaction_key
+sign = sign + acquirer.transaction_key
 if isinstance(sign, str):
     sign = urlparse.parse_qsl(sign)
 action = sha1(sign).hexdigest()
@@ -34,15 +38,16 @@ action = sha1(sign).hexdigest()
             <field name="name">Buckaroo</field>
             <field name="production_url">https://checkout.buckaroo.nl/html/</field>
             <field name="test_url">https://testcheckout.buckaroo.nl/html/</field>
-            <field name="login">dummy</field>
-            <field name="transaction_key">dummy</field>
+            <field name="sign_active">True</field>
+            <field name="sign_field">Brq_signature</field>
+            <field name="sign_return_check">True</field>
             <field name="server_action_id" ref="action_buckaroo_provider"/>
         </record>
 
         <!--      Mapping Keys      -->
         <record id="payment_acquirer_provider_mapping_buckaroo1" model="payment.acquirer.provider.mapping">
             <field name="provider_key">Brq_websitekey</field>
-            <field name="odoo_key">acquirer.provider_id.login</field>
+            <field name="odoo_key">acquirer.login</field>
             <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
         </record>
         <record id="payment_acquirer_provider_mapping_buckaroo2" model="payment.acquirer.provider.mapping">
@@ -92,12 +97,7 @@ action = sha1(sign).hexdigest()
         </record>
         <record id="payment_acquirer_provider_mapping_buckaroo11" model="payment.acquirer.provider.mapping">
             <field name="provider_key">add_returndata</field>
-            <field name="odoo_key">''</field>
-            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
-        </record>
-        <record id="payment_acquirer_provider_mapping_buckaroo12" model="payment.acquirer.provider.mapping">
-            <field name="provider_key">Brq_signature</field>
-            <field name="odoo_key">'signature'</field>
+            <field name="odoo_key">{'return_url': '%s' % tx_values.pop('return_url')} if tx_values.get('return_url') else '' </field>
             <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
         </record>
 
@@ -120,14 +120,8 @@ action = sha1(sign).hexdigest()
             <field name="type">check_field</field>
             <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
         </record>
-        
+
         <!--     Error Code Mapping   -->
-        <record id="payment_acquirer_transaction_mapping_buckaroo1" model="payment.transaction.mapping">
-            <field name="provider_key">status</field>
-            <field name="odoo_key">int(data.get('BRQ_STATUSCODE','0'))</field>
-            <field name="type">error_code</field>
-            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
-        </record>
         <record id="payment_acquirer_transaction_mapping_buckaroo1" model="payment.transaction.mapping">
             <field name="provider_key">done</field>
             <field name="odoo_key">[190]</field>
@@ -146,13 +140,7 @@ action = sha1(sign).hexdigest()
             <field name="type">error_code</field>
             <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
         </record>
-        <record id="payment_acquirer_transaction_mapping_buckaroo1" model="payment.transaction.mapping">
-            <field name="provider_key">transaction_id</field>
-            <field name="odoo_key">data.get('BRQ_TRANSACTIONS')</field>
-            <field name="type">error_code</field>
-            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
-        </record>
-        
+
         <!--     Value Mapping   -->
         <record id="payment_acquirer_transaction_mapping_buckaroo1" model="payment.transaction.mapping">
             <field name="provider_key">reference</field>
@@ -170,6 +158,20 @@ action = sha1(sign).hexdigest()
             <field name="provider_key">signature</field>
             <field name="odoo_key">data.get('BRQ_SIGNATURE')</field>
             <field name="type">value</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+
+        <!--        Write Value         -->
+        <record id="payment_acquirer_transaction_mapping_buckaroo1" model="payment.transaction.mapping">
+            <field name="provider_key">state</field>
+            <field name="odoo_key">int(data.get('BRQ_STATUSCODE','0'))</field>
+            <field name="type">write_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_buckaroo1" model="payment.transaction.mapping">
+            <field name="provider_key">transaction_id</field>
+            <field name="odoo_key">data.get('BRQ_TRANSACTIONS')</field>
+            <field name="type">write_field</field>
             <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
         </record>
     </data>

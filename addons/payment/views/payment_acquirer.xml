@@ -236,7 +236,7 @@
             id='payment_acquirer_provider_menu'
             parent='root_payment_menu'
             sequence='11' />
-    
+
         <record id="transaction_form" model="ir.ui.view">
             <field name="name">payment.transaction.form</field>
             <field name="model">payment.transaction</field>

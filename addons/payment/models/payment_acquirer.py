@@ -88,18 +88,6 @@ class PaymentAcquirer(osv.Model):
         'website_published': True,
     }
 
-    def _check_required_if_provider(self, cr, uid, ids, context=None):
-        """ If the field has 'required_if_provider="<provider>"' attribute, then it
-        required if record.provider is <provider>. """
-        for acquirer in self.browse(cr, uid, ids, context=context):
-            if any(c for c, f in self._all_columns.items() if getattr(f.column, 'required_if_provider', None) == acquirer.provider and not acquirer[c]):
-                return False
-        return True
-
-    _constraints = [
-        (_check_required_if_provider, 'Required fields not filled', ['required for this provider']),
-    ]
-
     def get_form_action_url(self, cr, uid, id, context=None):
         """ Returns the form action URL, for form-based acquirer implementations. """
         acquirer = self.browse(cr, uid, id, context=context)
@@ -645,10 +633,6 @@ class PaymentAcquirerProvider(osv.Model):
         #template
         'render_template': fields.text('Template', help="somegateway (like authorize.net) is expecting a response to the POST sent by their server. This response is in the form of a URL that gateway will pass on to the client's browser to redirect them to the desired location need javascript"),
     }
-
-    _sql_constraints = [
-            ('name_uniq', 'UNIQUE(name)', 'The payment Provider name must be unique!'),
-        ]
 
 class PaymentAcquirerProviderMapping(osv.Model):
 
