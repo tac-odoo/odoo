@@ -332,12 +332,14 @@ $(document).ready(function() {
 
     $('.slide-like, .slide-unlike').on('click', function(ev){
         ev.preventDefault();
-        if(!localStorage['vote']){
+        var link_id = $(this).attr('id');
+        var attachment_id = $(this).attr('attachment-id');
+        if(!localStorage[link_id+'_'+attachment_id]){
             var $link = $(ev.currentTarget);
             openerp.jsonRpc($link.data('href'), 'call', {}).then(function(data){
                     $($link.data('count-el')).text(data);
             });
-            localStorage['vote'] = true;
+            localStorage[link_id+'_'+attachment_id] = true;
         }
     });
     $('.upload').on('click' ,function(ev){
