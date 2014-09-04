@@ -37,10 +37,10 @@
             if (!video_id && url){
                 this.$('.url-error').show();
             }else{
-                var api_url = 'http://gdata.youtube.com/feeds/api/videos/'+video_id+'?v=2&alt=jsonc';
+                var api_url = "https://www.googleapis.com/youtube/v3/videos?id="+ video_id +" &key=AIzaSyBKDzf7KjjZqwPWAME6JOeHzzBlq9nrpjk&part=snippet&fields=items(snippet/title, snippet/thumbnails/high/url)";
                 $.getJSON(api_url,function(data){
-                    var title = data.data.title;
-                    var image_src = data.data.thumbnail.hqDefault;
+                    var title = data.items[0].snippet.title;
+                    var image_src = data.items[0].snippet.thumbnails.high.url;
                     self.$('#name').val(title);
                     self.$("#slide-image").attr("src",image_src);
                 });

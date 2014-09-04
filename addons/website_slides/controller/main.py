@@ -255,7 +255,7 @@ class main(http.Controller):
             for tag in tags:
                 tag_id = Tag.search([('name', '=', tag)])
                 if tag_id:
-                    tag_ids.append((4, tag_id[0]))
+                    tag_ids.append((4, tag_id[0].id))
                 else:
                     tag_ids.append((0, 0, {'name': tag}))
         post['tag_ids'] = tag_ids
