@@ -93,7 +93,9 @@ class ir_http(osv.AbstractModel):
                     # let them bubble up
                     request.session.logout()
             getattr(self, "_auth_method_%s" % auth_method)()
-        except (openerp.exceptions.AccessDenied, openerp.http.SessionExpiredException):
+        except (openerp.exceptions.AccessDenied,
+                openerp.http.SessionExpiredException,
+                werkzeug.exceptions.HTTPException):
             raise
         except Exception:
             _logger.exception("Exception during request Authentication.")
