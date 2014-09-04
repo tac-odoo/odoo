@@ -20,7 +20,7 @@ class document_directory(models.Model):
     website_published = fields.Boolean(string='Publish', help="Publish on the website", copy=False)
     description = fields.Text(string='Website Description', tranalate=True)
     website_description = fields.Html('Website Description', tranalate=True)
-    slide_id = fields.Many2one('ir.attachment', string='Custom Slide')
+    slide_id = fields.Many2one('ir.attachment', string='Promoted Presentation')
     promote = fields.Selection([('donot','Do not Promote'), ('latest','Latest Published'), ('mostview','Most Viewed'), ('custom','User Defined')], string="Method", default='donot')
 
     def get_mostviewed(self):
@@ -55,7 +55,7 @@ class ir_attachment(models.Model):
     slide_views = fields.Integer(string='Number of Views', default=0)
     youtube_id = fields.Char(string="Youtube Video ID")
     website_published = fields.Boolean(
-        string='Publish', help="Publish on the website", copy=False,
+        string='Publish', help="Publish on the website", copy=False, default=False
     )
     website_message_ids = fields.One2many(
         'mail.message', 'res_id',
@@ -101,7 +101,7 @@ class ir_attachment(models.Model):
             return False
 
         body = _(
-            '<p>A new presentation <i>%s</i> has been published under %s channel. <a href="%s/channel/%s/%s/view/%s">Click here to access the presentation.</a></p>' %
+            '<p>A new presentation <i>%s</i> has been published under %s channel. <a href="%s/slides/%s/%s/%s">Click here to access the presentation.</a></p>' %
             (self.name, self.parent_id.name, base_url, slug(self.parent_id), self.slide_type, slug(self))
         )
         partner_ids = []
@@ -114,7 +114,7 @@ class ir_attachment(models.Model):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
 
         body = _(
-            '<p>A new presentation <i>%s</i> has been uplodated under %s channel andwaiting for your review. <a href="%s/channel/%s/%s/view/%s">Click here to review the presentation.</a></p>' %
+            '<p>A new presentation <i>%s</i> has been uplodated under %s channel andwaiting for your review. <a href="%s/slides/%s/%s/%s">Click here to review the presentation.</a></p>' %
             (self.name, self.parent_id.name, base_url, slug(self.parent_id), self.slide_type, slug(self))
         )
         #Todo: fix me, search only people subscribe for new_slides_validation
@@ -156,7 +156,6 @@ class ir_attachment(models.Model):
             elif values.get('url'):
                 values = self.update_youtube(values)
 
-        values['website_published'] = False
         slide_id = super(ir_attachment, self).create(values)
         slide_id.notify_request_to_approve()
         slide_id.notify_published()

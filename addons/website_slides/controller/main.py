@@ -35,14 +35,14 @@ class main(http.Controller):
             )
         return message_id
 
-    @http.route('/channel', type='http', auth="public", website=True)
+    @http.route('/slides', type='http', auth="public", website=True)
     def channels(self, *args, **post):
         directory = request.env['document.directory']
         user = request.env.user
         channels = directory.search([('website_published','=', True)])
         
         if len(channels) <= 1:
-            return request.redirect("/channel/%s" % channels.id)
+            return request.redirect("/slides/%s" % channels.id)
 
         vals = {
             'channels': channels, 
@@ -51,12 +51,12 @@ class main(http.Controller):
         }
         return request.website.render('website_slides.channels', vals)
 
-    @http.route(['/channel/<model("document.directory"):channel>',
-                '/channel/<model("document.directory"):channel>/<types>',
-                '/channel/<model("document.directory"):channel>/<types>/tag/<tags>',
-                '/channel/<model("document.directory"):channel>/page/<int:page>',
-                '/channel/<model("document.directory"):channel>/<types>/page/<int:page>',
-                '/channel/<model("document.directory"):channel>/<types>/tag/<tags>/page/<int:page>',
+    @http.route(['/slides/<model("document.directory"):channel>',
+                '/slides/<model("document.directory"):channel>/<types>',
+                '/slides/<model("document.directory"):channel>/<types>/tag/<tags>',
+                '/slides/<model("document.directory"):channel>/page/<int:page>',
+                '/slides/<model("document.directory"):channel>/<types>/page/<int:page>',
+                '/slides/<model("document.directory"):channel>/<types>/tag/<tags>/page/<int:page>',
                    ], type='http', auth="public", website=True)
     def slides(self, channel=0, page=1, types='', tags='', sorting='creation', search=''):
         user = request.env.user
@@ -101,11 +101,11 @@ class main(http.Controller):
                 sorting = 'creation'
                 order = 'create_date desc'
 
-            url = "/channel/%s" % (channel.id)
+            url = "/slides/%s" % (channel.id)
             if types:
-                url = "/channel/%s/%s" % (channel.id, types)
+                url = "/slides/%s/%s" % (channel.id, types)
             elif types and tags:
-                url = "/channel/%s/%s/%s" % (channel.id, types, tags)
+                url = "/slides/%s/%s/%s" % (channel.id, types, tags)
 
             url_args = {}
             if search:
@@ -165,8 +165,8 @@ class main(http.Controller):
         return request.website.render('website_slides.home', values)
 
     @http.route([
-                '/channel/<model("document.directory"):channel>/<types>/<model("ir.attachment"):slideview>',
-                '/channel/<model("document.directory"):channel>/<types>/tag/<tags>/<model("ir.attachment"):slideview>'
+                '/slides/<model("document.directory"):channel>/<types>/<model("ir.attachment"):slideview>',
+                '/slides/<model("document.directory"):channel>/<types>/tag/<tags>/<model("ir.attachment"):slideview>'
                 ], type='http', auth="public", website=True)
     def slide_view(self, channel, slideview, types='', sorting='', search='', tags=''):
         attachment = request.env['ir.attachment']
@@ -206,26 +206,20 @@ class main(http.Controller):
             self._slides_message(user, slideview.id, **post)
         return werkzeug.utils.redirect(request.httprequest.referrer + "#discuss")
 
-    @http.route('/slides/thumb/<int:document_id>', type='http', auth="public", website=True)
-    def slide_thumb(self, document_id=0, **post):
-        response = werkzeug.wrappers.Response()
-        Website = request.env['website']
-        return Website._image('ir.attachment', document_id, 'image', response)
-
     @http.route('/slides/get_tags', type='http', auth="public", methods=['GET'], website=True)
     def tag_read(self, **post):
         tags = request.env['ir.attachment.tag'].search_read([], ['name'])
         data = [tag['name'] for tag in tags]
         return simplejson.dumps(data)
     
-    @http.route('/channel/<model("document.directory"):channel>/view/<model("ir.attachment"):slideview>/like', type='json', auth="public", website=True)
+    @http.route('/slides/<model("document.directory"):channel>/view/<model("ir.attachment"):slideview>/like', type='json', auth="public", website=True)
     def slide_like(self, channel, slideview, **post):
         if slideview.sudo().set_like():
             return slideview.likes
 
         return {'error': 'Error on wirte Data'}
 
-    @http.route('/channel/<model("document.directory"):channel>/view/<model("ir.attachment"):slideview>/dislike', type='json', auth="public", website=True)
+    @http.route('/slides/<model("document.directory"):channel>/view/<model("ir.attachment"):slideview>/dislike', type='json', auth="public", website=True)
     def slide_dislike(self, channel, slideview, **post):
         if slideview.sudo().set_dislike():
             return slideview.dislikes
@@ -248,6 +242,13 @@ class main(http.Controller):
     def create_slide(self, *args, **post):
         Tag = request.env['ir.attachment.tag']
         tag_ids = []
+
+        #TODO: fix me properly
+        if post.get('website_published') == 'true':
+            post['website_published'] = True
+        else:
+            post['website_published'] = False
+
         if post.get('tag_ids').strip('[]'):
             tags = post.get('tag_ids').strip('[]').replace('"', '').split(",")
             for tag in tags:
@@ -280,4 +281,4 @@ class main(http.Controller):
             del post['width']
 
         slide_id = slide_obj.create(post)
-        return request.redirect("/channel/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id.id))
+        return request.redirect("/slides/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id.id))

@@ -20,7 +20,7 @@
                                         <li class="list-group-item active">
                                             <h5 class="list-group-item-heading">
                                                 <label for="file" class="control-label">
-                                                    File
+                                                    PDF or Image File
                                                 </label>
                                             </h5>
                                             <input id="slide-file" name="file" accept="image/*,application/pdf" class="slide-upload" type="file"/>
@@ -28,7 +28,7 @@
                                         <li class="list-group-item">
                                             <h5 class="list-group-item-heading">
                                                 <label for="slide-url" class="control-label">
-                                                    URL
+                                                    Youtube URL
                                                 </label>
                                             </h5>
                                             <input class="form-control h5 slide-url" placeholder="Youtube Video URL" id="url"/>
@@ -38,7 +38,7 @@
                                 </div>
                             </div>
                             <div class="control-group">
-                                <input name="slide-name" placeholder="Name" class="form-control" required="required" id="name"/>
+                                <input name="slide-name" placeholder="Title" class="form-control" required="required" id="name"/>
                                 <!--<div class="col-sm-9">-->
                                     <!--</div>-->
                             </div>
@@ -52,7 +52,7 @@
                             </div>
                             <div class="control-group">
                                 <br/>
-                                <textarea id="slide-description"  placeholder="Description" class="form-control"  maxlength="150"></textarea>
+                                <textarea id="description"  placeholder="Description" class="form-control"  maxlength="150"></textarea>
 
                                 <!--<div class="controls col-sm-9">-->
                                     <!--</div>-->
@@ -62,8 +62,8 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" data-loading-text="Loading..." class="btn btn-primary save">Create</button>
-                        <button type="button" class="btn hidden wait" disabled="disabled"/>
+                        <button type="button" data-loading-text="Loading..." class="btn btn-primary save">Save as Draft</button>
+                        <button type="button" data-loading-text="Loading..." data-published="true" class="btn btn-primary save">Save and Publish</button>
                         or
                         <a href="#" data-dismiss="modal" aria-hidden="true">Discard</a>
                     </div>

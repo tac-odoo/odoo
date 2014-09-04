@@ -126,7 +126,7 @@
             var self = this;
             var default_val = {
                 'is_slide': true,
-                'website_published': false,
+                'website_published': false
             };
             var values= {};
             var canvas = this.$('#the-canvas')[0];
@@ -144,7 +144,8 @@
                 'datas_fname': self.file.name || '',
                 'mimetype':self.file.type,
                 'url': this.$('#url').val(),
-                'parent_id': self.channel_id || ''
+                'parent_id': self.channel_id || '',
+                'description': this.$('#description').val()
             });
             return _.extend(values, default_val);
         },
@@ -160,9 +161,14 @@
             }
             return true;
         },
-        save: function () {
+        save: function (ev) {
             if(this.validate()){
                 var values = this.get_value();
+                if($(ev.target).data('published')){
+                    _.extend(values, {
+                        'website_published': 1
+                    });
+                }
                 this.$('.modal-body').html("<h4><i class='fa fa-spinner fa-spin'></i> Redirecting to new presenation...  </h4>");
                 this.$('.modal-footer').hide();
                 website.form('/slides/add_slide', 'POST', values);
