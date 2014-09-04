@@ -48,6 +48,12 @@
 								<t t-esc="job_count"/>
 								<span>Jobs</span>
 								<small class="dropdown">Recent Jobs</small>
+								<form action="/page/jobs" role="search" class="navbar-form navbar-right" method="get">
+		            				<div class="form-group">
+		              					<input placeholder="Search a jobs..." type="search" class="form-control" name="search"/>
+		              					<button type="submit" class="btn btn-primary">Search</button>
+		            				</div>
+		          				</form><br/><br/>
 							</h1>
 
 							<div t-foreach="jobs" t-as="job" class="mb16">
@@ -170,7 +176,7 @@
 							</div>
 							<div class="mt0" t-foreach="job.tag_ids" t-as="tag">
 								<span class="label label-default"><t t-esc="tag.name"/></span> 
-							</div>
+							</div><br/>
 							<div t-field="job.website_description"/>
 
 							<form id="comment" t-attf-action="/jobs/comment/#{job.id}" method="POST" style="margin-bottom: 10px;">

@@ -14,11 +14,17 @@ class Jobs(http.Controller):
 		'/page/jobs',
 		'/page/jobs/page/<int:page>',
 		'/page/jobs/tag/<model("project.tag"):tag>'],type='http',auth='public', website=True)
-	def jobs(self, page=1, tag=None):
+	def jobs(self, page=1, tag=None,**post):
+		#retrive search parameter
+		search = post.get('search')
+
 		superuser = False
+		#check for user if user is SUPERUSER
 		if request.uid == 1:
 			superuser = True
 		domain = []
+		if search:
+			domain.append(('name','ilike',search))
 		env = request.env()
 		
 		job_obj = env['project.project']
@@ -36,15 +42,18 @@ class Jobs(http.Controller):
 		values = {'jobs':jobs,'job_count':len(job_obj.search(domain)),'pager':pager,"superuser":superuser}
 		return request.website.render("website_jobs.index",values)
 
-	@http.route(['/page/jobs/new',],type='http',auth='user',website=True)
+	@http.route([
+		'/page/jobs/new',
+		],type='http',auth='user',website=True)
 	def new_job(self):
 		env = request.env()
 		job_tags = env['project.tag'].search([])
 
 		return request.website.render("website_jobs.new_job",{"tags":job_tags})
 
-	@http.route(['/page/jobs/post',],type="http", auth="user",website=True)
-	def new_job_post(self,**kwargs):
+	@http.route([
+		'/page/jobs/post',],type="http", auth="user",website=True)
+	def new_job_post(self, **kwargs):
 		env = request.env()
 		user = env['res.users'].browse(request.uid)
 		tags = env['project.tag'].search([])
@@ -62,9 +71,9 @@ class Jobs(http.Controller):
 		job_id = job_obj.create(vals)
 		return request.redirect("/page/jobs/%s" % (job_id))
 
-	@http.route(['/page/jobs/<model("project.project"):job>'],type="http",auth="public",website=True)
-	def job_view(self,job):
-		
-		job.update({'number_view':job.number_view + 1})
+	@http.route([
+		'/page/jobs/<model("project.project"):job>'],type="http",auth="public",website=True)
+	def job_view(self, job):
+		job.sudo().update({'number_view':job.number_view + 1})
 		values= {'job':job}
 		return request.website.render("website_jobs.jobview",values)

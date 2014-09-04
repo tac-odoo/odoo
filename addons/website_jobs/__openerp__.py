@@ -10,6 +10,7 @@ Website for Online Jobs and Consultants available worldwide
     'author': 'OpenERP SA',
     'depends': ['website', 'project', 'hr', 'project_timesheet'],
     'data': [
+        'security/ir.model.access.csv',
         'data/job_data.xml',
         'views/website_jobs.xml',
     ],
