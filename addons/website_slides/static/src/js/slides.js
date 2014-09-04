@@ -166,7 +166,7 @@
                 var values = this.get_value();
                 if($(ev.target).data('published')){
                     _.extend(values, {
-                        'website_published': 1
+                        'website_published': true
                     });
                 }
                 this.$('.modal-body').html("<h4><i class='fa fa-spinner fa-spin'></i> Redirecting to new presenation...  </h4>");

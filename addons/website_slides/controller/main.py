@@ -70,7 +70,7 @@ class main(http.Controller):
 
         if request.env.user.id == request.website.user_id.id: 
             domain += [('website_published', '=', True)]
-        
+
         all_count = attachment.search_count(domain)
         if channel: 
             domain += [('parent_id','=',channel.id)]
@@ -87,6 +87,15 @@ class main(http.Controller):
             'user': user,
             'is_public_user': user.id == request.website.user_id.id,
         }
+
+        counts = attachment.read_group(domain, ['slide_type'], groupby='slide_type')
+        countvals = {}
+        for count in counts:
+            countvals['count_'+count.get('slide_type')] = count.get('slide_type_count')
+            count_all += count.get('slide_type_count')
+
+        values.update(countvals)
+        values.update({'count_all':count_all})
         
         if types:
             domain += [('slide_type', '=', types)]
@@ -131,19 +140,19 @@ class main(http.Controller):
         else:
             count_domain = domain + [('slide_type', '=', 'video')]
             videos = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
-            lens = {'video': len(videos)}
+            values['more_count_video'] = values.get('count_video', 0) - len(videos)
 
             count_domain = domain + [('slide_type', '=', 'presentation')]
             slides = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
-            lens.update({'presentation':len(slides)})
+            values['more_count_presentation'] = values.get('count_presentation', 0) - len(slides)
 
             count_domain = domain + [('slide_type', '=', 'document')]
             documents = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
-            lens.update({'document':len(documents)})
+            values['more_count_document'] = values.get('count_document', 0) - len(documents)
 
             count_domain = domain + [('slide_type', '=', 'infographic')]
             infographics = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
-            lens.update({'infographic':len(infographics)})
+            values['more_count_infographic'] = values.get('count_infographic', 0) - len(infographics)
 
             famous = channel.get_mostviewed()
             values.update({
@@ -153,14 +162,6 @@ class main(http.Controller):
                 'infographics': infographics,
                 'famous':famous
             })
-            counts = attachment.read_group(domain, ['slide_type'], groupby='slide_type')
-            countvals = {}
-            for count in counts:
-                countvals['count_'+count.get('slide_type')] = count.get('slide_type_count') - lens.get(count.get('slide_type'))
-                count_all += count.get('slide_type_count')
-
-            values.update(countvals)
-            values.update({'count_all':count_all})
 
         return request.website.render('website_slides.home', values)
 

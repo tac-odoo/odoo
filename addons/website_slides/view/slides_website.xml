@@ -124,7 +124,7 @@
                             <div class="row">
                                 <div class="col-md-12 col-sm-12 col-xs-12">
                                     <div class="pull-left col-md-8 col-sm-12 col-xs-12 mt16 mb8" style="padding-left: 0px;padding-right: 0px;">
-                                        <h3 class="mt4">
+                                        <h3 class="mt0">
                                             <t t-esc="channel.name" />
                                             <t t-if="is_public_user">
                                                 <a t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger" style="border-radius: 0px;">
@@ -149,16 +149,16 @@
                                         </li>
 
                                         <li t-if="count_presentation" t-attf-class="slide-tabs-li #{types == 'presentation' and 'active' ''}">
-                                            <a t-attf-href="/slides/#{slug(channel)}/presentation" class="slide-tabs" data-toggle="tab">Presentations</a>
+                                            <a t-attf-href="/slides/#{slug(channel)}/presentation" class="slide-tabs" data-toggle="tab"> <t t-esc="count_presentation"/> Presentations</a>
                                         </li>
-                                        <li t-if="videos" t-attf-class="slide-tabs-li #{types == 'video' and 'active' ''}">
-                                            <a t-attf-href="/slides/#{slug(channel)}/video" class="slide-tabs" data-toggle="tab">Videos</a>
+                                        <li t-if="count_video" t-attf-class="slide-tabs-li #{types == 'video' and 'active' ''}">
+                                            <a t-attf-href="/slides/#{slug(channel)}/video" class="slide-tabs" data-toggle="tab"> <t t-esc="count_video"/> Videos</a>
                                         </li>
-                                        <li t-if="documents" t-attf-class="slide-tabs-li #{types == 'document' and 'active' ''}">
-                                            <a t-attf-href="/slides/#{slug(channel)}/document" class="slide-tabs" data-toggle="tab">Documents</a>
+                                        <li t-if="count_document" t-attf-class="slide-tabs-li #{types == 'document' and 'active' ''}">
+                                            <a t-attf-href="/slides/#{slug(channel)}/document" class="slide-tabs" data-toggle="tab"> <t t-esc="count_document"/> Documents</a>
                                         </li>
-                                        <li t-if="infographics" t-attf-class="slide-tabs-li #{types == 'infographic' and 'active' ''}">
-                                            <a t-attf-href="/slides/#{slug(channel)}/infographic" class="slide-tabs" data-toggle="tab">Infographics</a>
+                                        <li t-if="count_infographic" t-attf-class="slide-tabs-li #{types == 'infographic' and 'active' ''}">
+                                            <a t-attf-href="/slides/#{slug(channel)}/infographic" class="slide-tabs" data-toggle="tab"><t t-esc="count_infographic"/> Infographics</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -285,9 +285,8 @@
                                         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left" style="padding-left: 0px;">
                                             <a t-attf-href="/slides/#{slug(channel)}/presentation" class="h3 mt0 mb0">Presentations</a>
                                         </div>
-
-                                        <div t-if="count_presentation" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
-                                            <a t-attf-href="/slides/#{slug(channel)}/presentation" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="count_presentation"/> more</a>
+                                        <div t-if="more_count_presentation" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
+                                            <a t-attf-href="/slides/#{slug(channel)}/presentation" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="more_count_presentation"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
@@ -299,8 +298,8 @@
                                             <a t-attf-href="/slides/#{slug(channel)}/video" class="h3 mt0 mb0">Videos</a>
                                         </div>
 
-                                        <div t-if="count_video" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
-                                            <a t-attf-href="/slides/#{slug(channel)}/video" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="count_video"/> more</a>
+                                        <div t-if="more_count_video" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
+                                            <a t-attf-href="/slides/#{slug(channel)}/video" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="more_count_video"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
@@ -311,8 +310,8 @@
                                             <a t-attf-href="/slides/#{slug(channel)}/document" class="h3 mt0 mb0">Documents</a>
                                         </div>
 
-                                        <div t-if="count_document" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
-                                            <a t-attf-href="/slides/#{slug(channel)}/document" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="count_document"/> more</a>
+                                        <div t-if="more_count_document" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
+                                            <a t-attf-href="/slides/#{slug(channel)}/document" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="more_count_document"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
@@ -322,8 +321,8 @@
                                         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left" style="padding-left: 0px;">
                                             <a t-attf-href="/slides/#{slug(channel)}/infographic" class="h3 mt0 mb0">Infographic</a>
                                         </div>
-                                        <div t-if="count_infographic" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
-                                            <a t-attf-href="/slides/#{slug(channel)}/infographic" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="count_infographic"/> more</a>
+                                        <div t-if="more_count_infographic" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
+                                            <a t-attf-href="/slides/#{slug(channel)}/infographic" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="more_count_infographic"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
