@@ -134,84 +134,40 @@
                         <notebook>
                             <page string="Payment Acquirer Maping">
                                 <field name="provider_mapping_ids">
-                                    <tree>
-                                        <field name="provider_key"/>
+                                    <tree editable="bottom">
                                         <field name="odoo_key"/>
+                                        <field name="provider_key"/>
                                     </tree>
-                                    <form>
-                                        <sheet>
-                                            <group>
-                                                <field name="provider_key"/>
-                                                <field name="odoo_key"/>
-                                            </group>
-                                        </sheet>
-                                    </form>
                                 </field>
                             </page>
                             <page string="Tansaction Maping">
                                 <separator string="Invalid Parameter Mapping"/>
                                 <field name="transaction_check_mapping_ids" context="{'default_type':'check_field'}">
-                                    <tree>
-                                        <field name="provider_key"/>
+                                    <tree editable="bottom">
                                         <field name="odoo_key"/>
+                                        <field name="provider_key"/>
                                     </tree>
-                                    <form>
-                                        <sheet>
-                                            <group>
-                                                <field name="type" invisible="1"/>
-                                                <field name="provider_key"/>
-                                                <field name="odoo_key"/>
-                                            </group>
-                                        </sheet>
-                                    </form>
                                 </field>
                                 <separator string="Error Code Mapping"/>
                                 <field name="transaction_code_mapping_ids" context="{'default_type':'error_code'}">
-                                    <tree>
-                                        <field name="provider_key"/>
+                                    <tree editable="bottom">
                                         <field name="odoo_key"/>
+                                        <field name="provider_key"/>
                                     </tree>
-                                    <form>
-                                        <sheet>
-                                            <group>
-                                                <field name="type" invisible="1"/>
-                                                <field name="provider_key"/>
-                                                <field name="odoo_key"/>
-                                            </group>
-                                        </sheet>
-                                    </form>
                                 </field>
                                 <separator string="Required Value Mapping"/>
                                 <field name="transaction_value_mapping_ids" context="{'default_type':'value'}">
-                                    <tree>
-                                        <field name="provider_key"/>
+                                    <tree editable="bottom">
                                         <field name="odoo_key"/>
+                                        <field name="provider_key"/>
                                     </tree>
-                                    <form>
-                                        <sheet>
-                                            <group>
-                                                <field name="type" invisible="1"/>
-                                                <field name="provider_key"/>
-                                                <field name="odoo_key"/>
-                                            </group>
-                                        </sheet>
-                                    </form>
                                 </field>
                                 <separator string="Write Field Mapping"/>
                                 <field name="transaction_write_value_mapping_ids" context="{'default_type':'write_field'}">
-                                    <tree>
-                                        <field name="provider_key"/>
+                                    <tree editable="bottom">
                                         <field name="odoo_key"/>
+                                        <field name="provider_key"/>
                                     </tree>
-                                    <form>
-                                        <sheet>
-                                            <group>
-                                                <field name="type" invisible="1"/>
-                                                <field name="provider_key"/>
-                                                <field name="odoo_key"/>
-                                            </group>
-                                        </sheet>
-                                    </form>
                                 </field>
                             </page>
                             <page string="Template">

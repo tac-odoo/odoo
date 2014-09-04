@@ -455,16 +455,16 @@ class PaymentTransaction(osv.Model):
             provider = provider_obj.browse(cr, uid, provider_id, context=context)
             for mapping in provider.transaction_value_mapping_ids:
                 # if not value reaise Error
-                if not eval(mapping.odoo_key):
-                    error_msg = '%s: received data with missing %s (%s).' % (provider.name, mapping.provider_key, eval(mapping.odoo_key))
+                if not eval(mapping.provider_key):
+                    error_msg = '%s: received data with missing %s (%s).' % (provider.name, mapping.odoo_key, eval(mapping.provider_key))
                     _logger.error(error_msg)
                     raise ValidationError(error_msg)
 
                 # check for order
-                if mapping.provider_key == 'reference':
-                    tx_ids = self.search(cr, uid, [('reference', '=', eval(mapping.odoo_key))], context=context)
+                if mapping.odoo_key == 'reference':
+                    tx_ids = self.search(cr, uid, [('reference', '=', eval(mapping.provider_key))], context=context)
                     if not tx_ids or len(tx_ids) > 1:
-                        error_msg = '%s: received data for %s %s' % (provider.name, mapping.provider_key, eval(mapping.odoo_key))
+                        error_msg = '%s: received data for %s %s' % (provider.name, mapping.odoo_key, eval(mapping.odoo_key))
                         if not tx_ids:
                             error_msg += '; no order found'
                         else:
@@ -485,14 +485,14 @@ class PaymentTransaction(osv.Model):
                                       values=data)
                 signature_check = self.pool.get('ir.actions.server').run(cr, uid, [tx.acquirer_id.provider_id.server_action_id.id], context=action_context)
                 if signature_check.upper() != signature.upper():
-                    error_msg = '%s: invalid shasign, received %s, computed %s, for data %s' % (provider.name, eval(mapping.odoo_key).upper(), signature, data)
+                    error_msg = '%s: invalid shasign, received %s, computed %s, for data %s' % (provider.name, eval(mapping.provider_key).upper(), signature, data)
                     _logger.error(error_msg)
                     raise ValidationError(error_msg)
 
             # check Invalid parameter
             for mapping in provider.transaction_check_mapping_ids:
-                if eval(mapping.provider_key) and eval(mapping.provider_key) != eval(mapping.odoo_key):
-                    invalid_parameters.append((eval(mapping.provider_key), eval(mapping.odoo_key), eval(mapping.provider_key)))
+                if eval(mapping.odoo_key) and eval(mapping.odoo_key) != eval(mapping.provider_key):
+                    invalid_parameters.append((eval(mapping.odoo_key), eval(mapping.provider_key), eval(mapping.odoo_key)))
 
             if invalid_parameters:
                 _error_message = '%s: incorrect tx data:\n' % (provider.name)
@@ -503,12 +503,12 @@ class PaymentTransaction(osv.Model):
 
             write_values = {}
             for write_mapping in provider.transaction_write_value_mapping_ids:
-                write_values.update({write_mapping.provider_key: eval(write_mapping.odoo_key)})
+                write_values.update({write_mapping.odoo_key: eval(write_mapping.provider_key)})
             error_code = None
             for status_maping in provider.transaction_code_mapping_ids:
                 status = write_values.get('state')
-                if status and isinstance(eval(status_maping.odoo_key), (list, tuple)) and status in eval(status_maping.odoo_key):
-                    error_code = status_maping.provider_key
+                if status and isinstance(eval(status_maping.provider_key), (list, tuple)) and status in eval(status_maping.provider_key):
+                    error_code = status_maping.odoo_key
             if error_code:
                 write_values.update({'state': error_code})
             else:
@@ -641,7 +641,7 @@ class PaymentAcquirerProviderMapping(osv.Model):
 
     _columns = {
         'provider_id': fields.many2one('payment.acquirer.provider', 'Provider ID'),
-        'provider_key': fields.char('Provider Key', required=True),
+        'provider_key': fields.char('Provider Key'),
         'odoo_key': fields.char('Odoo Key', required=True)
     }
 
@@ -651,7 +651,7 @@ class PaymentTransactionMapping(osv.Model):
 
     _columns = {
         'provider_id': fields.many2one('payment.acquirer.provider', 'Provider ID'),
-        'provider_key': fields.char('Provider Key', required=True),
+        'provider_key': fields.char('Provider Key'),
         'odoo_key': fields.char('Odoo Key', required=True),
         'type': fields.selection([('check_field', 'Check Invalid Parameter'), ('write_field', 'Write Parameter'), ('value', 'value'), ('error_code', 'Error Code')], select=True, string='Mapping Type')
     }
