@@ -72,10 +72,18 @@
         </div>
     </t>
 
+
+    <t t-name="website.slide.overlay">
+        <div class="slide-overlay">
+        
+        </div>
+    </t>
     <t t-name="website.slide.PDFViewer">
         <div>
         <div id="PDFLoader" class="img-responsive" style="width:100%;"><h3><i class='fa fa-spinner fa-spin'></i> Loading presenation...  </h3></div>
-        <canvas id="PDFViewer" class="img-responsive"></canvas>
+        <div class="slide-wrapper">
+            <canvas id="PDFViewer" class="img-responsive"></canvas>
+        </div>
         <div class="panel-footer">
             <div class="row">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3 text-left">

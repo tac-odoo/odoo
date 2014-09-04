@@ -42,7 +42,7 @@
                         <img t-attf-src="/website/image/ir.attachment/#{slide.id}/image" class="img-responsive"/>
                     </t>
                     <t t-if="slide.slide_type in ('presentation', 'document')">
-                        <div id="PDFViewer" t-att-file="pdf_file"/>
+                        <div id="PDFViewer" t-attf-slide-id="#{slide.id}" t-att-file="pdf_file"/>
                     </t>
                 </div>
             </div>

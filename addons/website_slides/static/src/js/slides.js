@@ -184,9 +184,10 @@
 
     website.slide.PDFViewer_Launcher = function($PDFViewer){
         website.slide.template.then(function(){
-            var file = $PDFViewer.attr('file');
+            var file = $PDFViewer.attr('file'),
+                id = $PDFViewer.attr('slide-id');
             if (file){
-                var PDFViewer = new website.slide.PDFViewer(file);
+                var PDFViewer = new website.slide.PDFViewer(id, file);
                 PDFViewer.replace($PDFViewer);
                 website.slide.PDFViewer_inst = PDFViewer;
             }
@@ -204,7 +205,8 @@
             'click #fullscreen': 'fullscreen',
             'change #page_number': 'change_page_number'
         },
-        init: function(file){
+        init: function(id, file){
+            this.id = id;
             this.file = file;
             this.file_content = null;
             this.scale = 1.5;
@@ -248,6 +250,9 @@
         },
         next: function(ev){
             ev.preventDefault();
+            if (this.page_number === this.page_count){
+                this.fetch_next_slide();
+            }
             if (this.page_number >= this.page_count){
                 return;
             }
@@ -255,6 +260,22 @@
             if(!this.rendering){
                 this.render_page();
             }
+        },
+        fetch_next_slide: function(){
+            var self = this;
+            var context = website.get_context();
+            openerp.jsonRpc('/web/dataset/call_kw', 'call', {
+                model: 'ir.attachment',
+                method: 'get_next_slides',
+                args: [self.id],
+                kwargs: {
+                    //context: context
+                },
+            }).then(function(data){
+                console.log('data',data);
+            });
+            this.$( ".slide-overlay" ).remove();
+            $(openerp.qweb.render("website.slide.overlay")).appendTo(self.$(".slide-wrapper"));
         },
         previous: function(ev){
             ev.preventDefault();

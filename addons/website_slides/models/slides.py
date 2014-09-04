@@ -69,6 +69,10 @@ class ir_attachment(models.Model):
     likes = fields.Integer(string='Likes', default=0)
     dislikes = fields.Integer(string='Dislikes', default=0)
 
+    def get_next_slides(self, *args):
+        print '>>>>>>',self,args
+        return {'rga':'good'}
+
     def _get_share_url(self):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
         shareurl = "%s/%s/%s/%s" % (base_url, slug(self.parent_id), self.slide_type, slug(self))
