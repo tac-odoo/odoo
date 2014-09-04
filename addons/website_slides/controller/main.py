@@ -60,7 +60,6 @@ class main(http.Controller):
                    ], type='http', auth="public", website=True)
     def slides(self, channel=0, page=1, types='', tags='', sorting='creation', search=''):
         user = request.env.user
-        publisher = request.registry['res.users'].has_group(request.cr, request.uid, 'base.group_website_publisher')
         attachment = request.env['ir.attachment']
 
         domain = [('is_slide','=','True'), ('parent_id','=',channel.id)]

@@ -107,7 +107,8 @@ class ir_attachment(models.Model):
         partner_ids = []
         for partner in self.parent_id.message_follower_ids:
             partner_ids.append(partner.id)
-        self.parent_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides', partner_ids=partner_ids)
+        if self.parent_id:
+            self.parent_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides', partner_ids=partner_ids)
 
     def notify_request_to_approve(self):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
@@ -120,15 +121,15 @@ class ir_attachment(models.Model):
         partner_ids = []
         for partner in self.parent_id.message_follower_ids:
             partner_ids.append(partner.id)
-        self.parent_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides_validation', partner_ids=partner_ids)
+        if self.parent_id:
+            self.parent_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides_validation', partner_ids=partner_ids)
     
     @api.multi
     def write(self, values):
         if values.get('url'):
             values = self.update_youtube(values)
         success = super(ir_attachment, self).write(values)
-        for slide_id in self:
-            self.notify_published()
+        self.notify_published()
         return success
     
     def update_youtube(self, values):
