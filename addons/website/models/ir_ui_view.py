@@ -41,6 +41,14 @@ class view(osv.osv):
         # assume it's already a view object (WTF?)
         return view_id
 
+    def create(self, cr, uid, values, context=None):
+        # if not values.get('key'):
+        #     print 'PAS de key:{}'.format(values)
+        # if values.get('type') == 'qweb':
+        #     print 'Qweb:{}'.format(values)    
+        
+        return super(view, self).create(cr, uid, values, context=None)
+
     # Returns all views (called and inherited) related to a view
     # Used by translation mechanism, SEO and optional templates
     def _views_get(self, cr, uid, view_id, options=True, bundles=False, context=None, root=True):

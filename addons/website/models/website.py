@@ -256,7 +256,11 @@ class website(osv.osv):
             website_id=request.context.get('website_id')
             view_id=self.pool["ir.ui.view"].search(cr, uid, [('key', '=', key),'|',('website_id','=',website_id),('website_id','=',False)], order='website_id', limit=1, context=context)
             if not view_id:
-                raise NotFound
+                view_id = self.pool["ir.ui.view"].search(cr, uid, [('name', '=', xmlid)], limit=1,context=context)
+                if view_id:
+                    self.pool["ir.ui.view"].write(cr, 1, view_id,{'key':template},context=context)
+                else:
+                    raise NotFound
         return self.pool["ir.ui.view"].browse(cr, uid, view_id, context=context)
 
     def _render(self, cr, uid, ids, template, values=None, context=None):

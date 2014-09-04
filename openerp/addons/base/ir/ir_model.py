@@ -195,6 +195,7 @@ class ir_model(osv.osv):
             model = self.pool[vals['model']]
             model._prepare_setup_fields(cr, SUPERUSER_ID)
             model._setup_fields(cr, SUPERUSER_ID)
+
             ctx = dict(context,
                 field_name=vals['name'],
                 field_state='manual',

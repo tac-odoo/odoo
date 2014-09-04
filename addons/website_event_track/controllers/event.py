@@ -33,6 +33,7 @@ from openerp.addons.web.http import request
 class website_event(http.Controller):
     @http.route(['''/event/<model("event.event"):event>/track/<model("event.track", "[('event_id','=',event[0])]"):track>'''], type='http', auth="public", website=True)
     def event_track_view(self, event, track, **post):
+        #from pudb import set_trace; set_trace()
         track_obj = request.registry.get('event.track')
         track = track_obj.browse(request.cr, openerp.SUPERUSER_ID, track.id, context=request.context)
         values = { 'track': track, 'event': track.event_id, 'main_object': track }
@@ -77,6 +78,7 @@ class website_event(http.Controller):
     # TODO: not implemented
     @http.route(['''/event/<model("event.event", "[('show_tracks','=',1)]"):event>/agenda'''], type='http', auth="public", website=True)
     def event_agenda(self, event, tag=None, **post):
+        #from pudb import set_trace; set_trace()
         days_tracks = collections.defaultdict(lambda: [])
         for track in sorted(event.track_ids, key=lambda x: (x.date, bool(x.location_id))):
             if not track.date: continue
@@ -111,6 +113,7 @@ class website_event(http.Controller):
         '''/event/<model("event.event", "[('show_tracks','=',1)]"):event>/track/tag/<model("event.track.tag"):tag>'''
         ], type='http', auth="public", website=True)
     def event_tracks(self, event, tag=None, **post):
+        #from pudb import set_trace; set_trace()
         searches = {}
         if tag:
             searches.update(tag=tag.id)
@@ -136,11 +139,13 @@ class website_event(http.Controller):
 
     @http.route(['''/event/<model("event.event", "[('show_track_proposal','=',1)]"):event>/track_proposal'''], type='http', auth="public", website=True)
     def event_track_proposal(self, event, **post):
+        #from pudb import set_trace; set_trace()
         values = { 'event': event }
         return request.website.render("website_event_track.event_track_proposal", values)
 
     @http.route(['/event/<model("event.event"):event>/track_proposal/post'], type='http', auth="public", methods=['POST'], website=True)
     def event_track_proposal_post(self, event, **post):
+        #from pudb import set_trace; set_trace()
         cr, uid, context = request.cr, request.uid, request.context
 
         tobj = request.registry['event.track']
