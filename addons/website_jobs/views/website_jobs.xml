@@ -1,6 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 	<data>
+
+		<template id="display_employee_menu" name="Jobs Menu">
+			<div class="container mt16">
+		      	<div class="navbar navbar-default">
+		        	<div class="navbar-header">
+		        		
+		        	</div>
+		        	<div class="collapse navbar-collapse" id="oe-help-navbar-collapse">
+		        		<h1 class="nav navbar-nav mt0">
+								<t t-esc="employees_count"/>
+								<span>Employees</span>
+								<small class="dropdown">Recent Joinees</small>
+						</h1>
+						<div t-if="not emp_ser">
+		          		<form action="/page/employees" role="search" class="navbar-form navbar-right" method="get">
+		            		<div class="form-group">
+		              			<input placeholder="Search Employee..." type="search" class="form-control" name="search"/>
+		              			<button type="submit" class="btn btn-info">Search</button>
+		            		</div>
+		          		</form>
+		          		</div>
+		        	</div>
+		      	</div>
+		    </div>
+		</template>
+
+		<template id="display_job_menu" name="Jobs Menu">
+			<div class="container mt16">
+		      	<div class="navbar navbar-default">
+		        	<div class="navbar-header">
+		        		
+		        	</div>
+		        	<div class="collapse navbar-collapse" id="oe-help-navbar-collapse">
+		        		<h1 class="nav navbar-nav mt0">
+								<t t-esc="job_count"/>
+								<span>Jobs</span>
+								<small class="dropdown">Recent Jobs</small>
+						</h1>
+						<div t-if="not job_ser">
+		          		<form action="/page/jobs" role="search" class="navbar-form navbar-right" method="get">
+		            		<div class="form-group">
+		              			<input placeholder="Search Jobs..." type="search" class="form-control" name="search"/>
+		              			<button type="submit" class="btn btn-info">Search</button>
+		            		</div>
+		          		</form>
+		          		</div>
+		        	</div>
+		      	</div>
+		    </div>
+		</template>
+
 		<template id="display_jobs" name="Jobs">
 			<div class="question clearfix">
 				<div class="pull-left text-center">
@@ -40,11 +91,11 @@
 				<link rel='stylesheet' href='/website_jobs/static/src/css/website_forum.css' />
 			</t>
 			<t t-call="website.layout">
-				
+				<t t-call="website_jobs.display_job_menu"/>
 				<div id="wrap" class="container">
 					<div class="row">
 						<div class="col-sm-9">
-							<h1 class="page-header mt0">
+							<!--<h1 class="page-header mt0">
 								<t t-esc="job_count"/>
 								<span>Jobs</span>
 								<small class="dropdown">Recent Jobs</small>
@@ -54,7 +105,7 @@
 		              					<button type="submit" class="btn btn-primary">Search</button>
 		            				</div>
 		          				</form><br/><br/>
-							</h1>
+							</h1>-->
 
 							<div t-foreach="jobs" t-as="job" class="mb16">
 								<t t-call="website_jobs.display_jobs" />
@@ -230,6 +281,72 @@
 						</div>
 					</div>
 				</div>
+			</t>
+		</template>
+
+		<!-- Display an Employee -->
+		<template id="display_employees" name="Jobs">
+			<div class="col-md-4 text-center" style="min-height: 200px;">
+
+				<div class="pull-center">
+					<img t-attf-src="/page/employee/#{employee.id}/avatar"/>
+		            <!--div class="alert alert-success text-muted" style="padding: 0px;padding-left: 10px;padding-right: 10px;margin-bottom:10px;">
+		                <span style="font-size: 40px;"><b>0</b></span>
+		                <div class="subtitle">Jobs Done</div>
+		            </div-->
+		        </div>
+
+				<div class="text-center">
+					<a t-attf-href="/page/jobs/#{employee.id}" t-field="employee.name" class="lead"/>
+					<p>
+						Joined on <i t-field="employee.create_date"/>
+					</p>
+					<p>
+						<span class="label label-default">Web Modules</span> <span class="label label-default">Accounting</span>
+					</p>
+				</div>
+
+			</div>
+		</template>
+
+		<template id="employees" name="Employee List">
+			<!--<t t-set="head">
+				<link rel='stylesheet' href='/website_jobs/static/src/css/website_forum.css' />
+			</t>-->
+			<t t-call="website.layout">
+				<t t-call="website_jobs.display_employee_menu" />
+				<div id="wrap" class="container">
+					<div class="row">
+						<div class="col-sm-9">
+							<!--<h1 class="page-header mt0">
+								<t t-esc="employees_count"/>
+								<span>Employees</span>
+								<small class="dropdown">Recent Joinees</small>
+							</h1>-->
+
+							<div t-foreach="employees" t-as="employee" class="mb16">
+								<t t-call="website_jobs.display_employees" />
+							</div>
+						</div>
+						<div class="col-sm-3" id="right-column">
+							<a class="btn btn-success btn-lg btn-block mb16" t-attf-href="/forum/ask">
+								Join Odoo Jobs
+							</a>
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h3 class="panel-title">About Odoo Jobs</h3>
+								</div>
+								<div class="panel-body">
+									<p>Odoo Jobs is running on the Oldest Odoo Professionals by being a bridge between Community and Companies looking for customizations.</p>
+
+									<p><a class="fa fa-arrow-right" href="#"> Read Guidelines</a></p>
+									<p><a class="fa fa-arrow-right" href="#"> Back to </a></p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="oe_structure" />
 			</t>
 		</template>
 

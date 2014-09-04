@@ -17,6 +17,7 @@ class Jobs(http.Controller):
 	def jobs(self, page=1, tag=None,**post):
 		#retrive search parameter
 		search = post.get('search')
+		job_ser = False
 
 		superuser = False
 		#check for user if user is SUPERUSER
@@ -25,6 +26,7 @@ class Jobs(http.Controller):
 		domain = []
 		if search:
 			domain.append(('name','ilike',search))
+			job_ser = True
 		env = request.env()
 		
 		job_obj = env['project.project']
@@ -39,7 +41,7 @@ class Jobs(http.Controller):
 
 		pager = request.website.pager(url=url,total=len(job_obj.search(domain)),page=page,step=self._project_per_page,scope=self._project_per_page,url_args={})
 		jobs = job_obj.search(domain).sudo()
-		values = {'jobs':jobs,'job_count':len(job_obj.search(domain)),'pager':pager,"superuser":superuser}
+		values = {'jobs':jobs,'job_count':len(job_obj.search(domain)),'pager':pager,"superuser":superuser,"job_ser":job_ser}
 		return request.website.render("website_jobs.index",values)
 
 	@http.route([
@@ -77,3 +79,22 @@ class Jobs(http.Controller):
 		job.sudo().update({'number_view':job.number_view + 1})
 		values= {'job':job}
 		return request.website.render("website_jobs.jobview",values)
+
+	@http.route([
+		'/page/employees',], type='http',auth='public', website=True)
+	def employee(self, **post):
+		search = post.get('search')
+		emp_ser = False
+		domain = []
+		env = request.env()
+		emp_obj = env['hr.employee']
+		if search:
+			domain.append(('name','ilike',search))
+			emp_ser = True
+		employees = emp_obj.search(domain).sudo()
+		values = {
+			'employees':employees,
+			'employees_count': len(employees),
+			'emp_ser':emp_ser
+		}
+		return request.website.render('website_jobs.employees',values)		
