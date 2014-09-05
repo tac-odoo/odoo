@@ -21,6 +21,7 @@ class document_directory(models.Model):
     description = fields.Text(string='Website Description', tranalate=True)
     website_description = fields.Html('Website Description', tranalate=True)
     slide_id = fields.Many2one('ir.attachment', string='Promoted Presentation')
+    is_channel = fields.Boolean(string='Is Channel', default=False)
     promote = fields.Selection([('donot','Do not Promote'), ('latest','Latest Published'), ('mostview','Most Viewed'), ('custom','User Defined')], string="Method", default='donot')
 
     def get_mostviewed(self):
@@ -121,7 +122,7 @@ class ir_attachment(models.Model):
         for partner in self.parent_id.message_follower_ids:
             partner_ids.append(partner.id)
         if self.parent_id:
-            self.parent_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides', partner_ids=partner_ids)
+            self.parent_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides')
 
     def notify_request_to_approve(self):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
@@ -135,7 +136,7 @@ class ir_attachment(models.Model):
         for partner in self.parent_id.message_follower_ids:
             partner_ids.append(partner.id)
         if self.parent_id:
-            self.parent_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides_validation', partner_ids=partner_ids)
+            self.parent_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides_validation')
     
     @api.multi
     def write(self, values):
