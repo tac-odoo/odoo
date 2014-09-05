@@ -37,14 +37,32 @@
             if (!video_id && url){
                 this.$('.url-error').show();
             }else{
+                var constraint = this.check_constraint({'video_id': video_id});
                 var api_url = "https://www.googleapis.com/youtube/v3/videos?id="+ video_id +" &key=AIzaSyBKDzf7KjjZqwPWAME6JOeHzzBlq9nrpjk&part=snippet&fields=items(snippet/title, snippet/thumbnails/high/url)";
                 $.getJSON(api_url,function(data){
                     var title = data.items[0].snippet.title;
                     var image_src = data.items[0].snippet.thumbnails.high.url;
-                    self.$('#name').val(title);
+                    console.log('....',constraint);
+                    constraint.then(function(url){
+                        if (url){
+                            $('<div class="alert alert-danger" role="alert">This video already exists in this channel <a src='+ url +'>click here to view it </a></div>').insertBefore(self.$('.modal-body'));
+                        }else{
+                            self.$('#name').val(title);
+                        }
+                    });
                     self.$("#slide-image").attr("src",image_src);
                 });
             }
+        },
+        check_constraint: function(values){
+            var self = this;
+            _.extend(values, {'channel_id': self.channel_id});
+            return openerp.jsonRpc('/web/dataset/call_kw', 'call', {
+                model: 'ir.attachment',
+                method: 'check_constraint',
+                args: [false, values],
+                kwargs: {},
+            });
         },
         url_parser: function(url){
            var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;

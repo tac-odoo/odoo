@@ -73,6 +73,15 @@ class ir_attachment(models.Model):
     def get_next_slides(self):
         return {'rga':'good'}
 
+    @api.multi
+    def check_constraint(self, values):
+        if values.get('video_id'):
+            domain = [('youtube_id','=',values['video_id'])]
+            slide = self.search(domain)
+            if slide:
+                return "/slides/%s/%s/%s" % (slide.parent_id.id, slide.slide_type, slide.id)
+        return False
+
     def _get_share_url(self):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
         shareurl = "%s/%s/%s/%s" % (base_url, slug(self.parent_id), self.slide_type, slug(self))
