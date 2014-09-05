@@ -1,31 +1,33 @@
-
 import urlparse
+from openerp import api, models
 
-from openerp.osv import fields, osv
 
-class hr_config_settings(osv.osv_memory):
+class HrConfigSettings(models.TransientModel):
     _inherit = 'hr.config.settings'
 
-    def get_default_alias_material(self, cr, uid, ids, context=None):
+    @api.multi
+    def get_default_alias_material(self):
         alias_name = False
-        alias_id = self.pool['ir.model.data'].xmlid_to_res_id(cr, uid, 'hr_material.mail_alias_material')
+        alias_id = self.env.ref('hr_material.mail_alias_material')
         if alias_id:
-            alias_name = self.pool['mail.alias'].browse(cr, uid, alias_id, context=context).alias_name
+            alias_name = alias_id.alias_name
         return {'alias_prefix': alias_name}
 
-    def set_default_alias_material(self, cr, uid, ids, context=None):
-        for record in self.browse(cr, uid, ids, context=context):
-            default_alias_prefix = self.get_default_alias_material(cr, uid, ids, context=context)['alias_prefix']
+    @api.multi
+    def set_default_alias_material(self):
+        for record in self:
+            default_alias_prefix = record.get_default_alias_material()['alias_prefix']
             if record.alias_prefix != default_alias_prefix:
-                alias_id = self.pool['ir.model.data'].xmlid_to_res_id(cr, uid, 'hr_material.mail_alias_material')
+                alias_id = self.env.ref('hr_material.mail_alias_material')
                 if alias_id:
-                    self.pool.get('mail.alias').write(cr, uid, alias_id, {'alias_name': record.alias_prefix}, context=context)
+                    alias_id.write({'alias_name': record.alias_prefix})
         return True
 
-    def get_default_alias_domain(self, cr, uid, ids, context=None):
-        alias_domain = self.pool.get("ir.config_parameter").get_param(cr, uid, "mail.catchall.domain", context=context)
+    @api.multi
+    def get_default_alias_domain(self):
+        alias_domain = self.env['ir.config_parameter'].get_param("mail.catchall.domain")
         if not alias_domain:
-            domain = self.pool.get("ir.config_parameter").get_param(cr, uid, "web.base.url", context=context)
+            domain = self.env["ir.config_parameter"].get_param("web.base.url")
             try:
                 alias_domain = urlparse.urlsplit(domain).netloc.split(':')[0]
             except Exception:

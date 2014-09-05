@@ -27,7 +27,7 @@
         <field name="category_id" ref="hr_material_monitor"/>
         <field name="employee_id" ref="hr.employee_al"/>
         <field name="user_id" ref="base.user_root"/>
-        <field name="assign_date">10/1/2011</field>
+        <field name="assign_date" eval="time.strftime('%Y-%m-10')"/>
         <field name="serial_no">MT/122/11112222</field>
         <field name="model">NP300E5X</field>
     </record>
@@ -36,7 +36,7 @@
         <field name="category_id" ref="hr_material_monitor"/>
         <field name="employee_id" ref="hr.employee_stw"/>
         <field name="user_id" ref="base.user_root"/>
-        <field name="assign_date">1/3/2012</field>
+        <field name="assign_date" eval="time.strftime('%Y-01-01')"/>
         <field name="serial_no">MT/125/22778837</field>
         <field name="model">NP355E5X</field>
     </record>
@@ -45,7 +45,7 @@
         <field name="category_id" ref="hr_material_monitor"/>
         <field name="employee_id" ref="hr.employee_qdp"/>
         <field name="user_id" ref="base.user_demo"/>
-        <field name="assign_date">1/3/2012</field>
+        <field name="assign_date" eval="time.strftime('%Y-02-01')"/>
         <field name="serial_no">MT/127/18291018</field>
         <field name="model">NP355E5X</field>
         <field name="color">3</field>
@@ -55,7 +55,7 @@
         <field name="category_id" ref="hr_material_computer"/>
         <field name="employee_id" ref="hr.employee_jve"/>
         <field name="user_id" ref="base.user_root"/>
-        <field name="assign_date">1/8/2012</field>
+        <field name="assign_date" eval="time.strftime('%Y-03-08')"/>
         <field name="serial_no">LP/203/19281928</field>
         <field name="model">NE56R</field>
      </record>
@@ -64,7 +64,7 @@
         <field name="category_id" ref="hr_material_computer"/>
         <field name="employee_id" ref="hr.employee_jgo"/>
         <field name="user_id" ref="base.user_demo"/>
-        <field name="assign_date">1/8/2012</field>
+        <field name="assign_date" eval="time.strftime('%Y-04-08')"/>
         <field name="serial_no">LP/205/12928291</field>
         <field name="model">V5131</field>
      </record>
@@ -73,7 +73,7 @@
         <field name="category_id" ref="hr_material_computer"/>
         <field name="employee_id" ref="hr.employee_vad"/>
         <field name="user_id" ref="base.user_demo"/>
-        <field name="assign_date">1/11/2012</field>
+        <field name="assign_date" eval="time.strftime('%Y-%m-11')"/>
         <field name="serial_no">LP/303/28292090</field>
         <field name="model">17-j059nr</field>
      </record>
@@ -82,7 +82,7 @@
         <field name="category_id" ref="hr_material_computer"/>
         <field name="employee_id" ref="hr.employee_jth"/>
         <field name="user_id" ref="base.user_demo"/>
-        <field name="assign_date">1/11/2012</field>
+        <field name="assign_date" eval="time.strftime('%Y-05-01')"/>
         <field name="serial_no">LP/305/17281718</field>
      </record>
      <record id="hr_material_printer1" model="hr.material">
