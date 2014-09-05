@@ -114,7 +114,7 @@ class make_procurement(osv.osv_memory):
             if len(product_ids) == 1:
                 record_id = product_ids[0]
             else:
-                raise orm.except_orm(_('Warning'), _('Please use the Product Variant vue to request a procurement.'))
+                raise orm.except_orm(_('Warning'), _('Please use the Product Variant view to request a procurement.'))
 
         res = super(make_procurement, self).default_get(cr, uid, fields, context=context)
 
