@@ -32,5 +32,5 @@ class PaymentController(http.Controller):
         #This response is in the form of a URL that gateway will pass on to the
         #client's browser to redirect them to the desired location need javascript.
         if provider.render_template:
-            return eval(provider.render_template)
+            return "<html><head><script>window.location = '%s' + location.hash;</script></head></html>" % urlparse.urljoin(base_url, return_url)
         return werkzeug.utils.redirect(return_url)

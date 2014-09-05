@@ -10,7 +10,6 @@
     'depends': ['payment'],
     'data': [
         'views/buckaroo.xml',
-        'views/payment_acquirer.xml',
         'data/buckaroo.xml',
     ],
     'installable': True,
