@@ -165,15 +165,14 @@
             if(this.validate()){
                 var values = this.get_value();
                 if($(ev.target).data('published')){
-                    _.extend(values, {
-                        'website_published': true
-                    });
+                    _.extend(values, {'website_published': true});
                 }
                 this.$('.modal-body').html("<h4><i class='fa fa-spinner fa-spin'></i> Redirecting to new presenation...  </h4>");
                 this.$('.modal-footer').hide();
-                website.form('/slides/add_slide', 'POST', values);
+                openerp.jsonRpc("/slides/add_slide", 'call', values).then(function(url){
+                    window.location = url;
+                });
             }
-
         },
         cancel: function () {
             this.trigger("cancel");

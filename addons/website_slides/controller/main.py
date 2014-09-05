@@ -239,26 +239,18 @@ class main(http.Controller):
                         })
         return res
 
-    @http.route(['/slides/add_slide'], type='http', auth="user", methods=['POST'], website=True)
+    @http.route(['/slides/add_slide'], type='json', auth="user", methods=['POST'], website=True)
     def create_slide(self, *args, **post):
         Tag = request.env['ir.attachment.tag']
+        tags = post.get('tag_ids')
         tag_ids = []
-
-        #TODO: fix me properly
-        if post.get('website_published') == 'true':
-            post['website_published'] = True
-        else:
-            post['website_published'] = False
-
-        if post.get('tag_ids').strip('[]'):
-            tags = post.get('tag_ids').strip('[]').replace('"', '').split(",")
-            for tag in tags:
-                tag_id = Tag.search([('name', '=', tag)])
-                if tag_id:
-                    tag_ids.append((4, tag_id[0].id))
-                else:
-                    tag_ids.append((0, 0, {'name': tag}))
-        post['tag_ids'] = tag_ids
+        for tag in tags:
+            tag_id = Tag.search([('name', '=', tag)])
+            if tag_id:
+                tag_ids.append((4, tag_id[0].id))
+            else:
+                tag_ids.append((0, 0, {'name': tag}))
+            post['tag_ids'] = tag_ids
         slide_obj = request.env['ir.attachment']
 
         _file_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif']
@@ -282,4 +274,5 @@ class main(http.Controller):
             del post['width']
 
         slide_id = slide_obj.create(post)
-        return request.redirect("/slides/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id.id))
+        # TODO: return error message if server fail to create new presentation
+        return "/slides/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id.id)
