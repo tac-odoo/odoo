@@ -69,8 +69,8 @@ class ir_attachment(models.Model):
     likes = fields.Integer(string='Likes', default=0)
     dislikes = fields.Integer(string='Dislikes', default=0)
 
-    def get_next_slides(self, *args):
-        print '>>>>>>',self,args
+    @api.multi
+    def get_next_slides(self):
         return {'rga':'good'}
 
     def _get_share_url(self):

@@ -262,11 +262,12 @@
         },
         fetch_next_slide: function(){
             var self = this;
+            var id = parseInt(self.id, 10);
             var context = website.get_context();
             openerp.jsonRpc('/web/dataset/call_kw', 'call', {
                 model: 'ir.attachment',
                 method: 'get_next_slides',
-                args: [self.id],
+                args: [[id]],
                 kwargs: {
                     //context: context
                 },
