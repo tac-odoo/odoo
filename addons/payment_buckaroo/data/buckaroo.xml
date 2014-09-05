@@ -2,17 +2,191 @@
 <openerp>
     <data noupdate="1">
 
+        <record id="action_buckaroo_provider" model="ir.actions.server">
+                    <field name="name">Buckaroo Provider</field>
+                    <field name="condition">True</field>
+                    <field name="model_id" ref="payment.model_payment_acquirer_provider"/>
+                    <field name="code">
+inout = context.get('inout')
+acquirer = context.get('acquirer')
+values = context.get('values')
+sha1 = context.get('sha1')
+sorted = context.get('sort')
+def get_value(key):
+    if values.get(key):
+        return values[key]
+    return ''
+keys = "add_returndata Brq_amount Brq_culture Brq_currency Brq_invoicenumber Brq_return Brq_returncancel Brq_returnerror Brq_returnreject brq_test Brq_websitekey".split()
+if inout == 'out':
+    if 'BRQ_SIGNATURE' in values:
+        values.pop('BRQ_SIGNATURE', None)
+    items = sorted((k.upper(), v) for k, v in values.items())
+    sign = ''.join('%s=%s' % (k, v) for k, v in items)
+else:
+    sign = ''.join('%s=%s' % (k,get_value(k)) for k in keys)
+#Add the pre-shared secret key at the end of the signature
+sign = sign + acquirer.transaction_key
+if isinstance(sign, str):
+    sign = urlparse.parse_qsl(sign)
+action = sha1(sign).hexdigest()
+            </field>
+            <field name="state">code</field>
+            <field name="type">ir.actions.server</field>
+        </record>
+
+        <record id="payment_acquirer_provider_buckaroo" model="payment.acquirer.provider">
+            <field name="name">Buckaroo</field>
+            <field name="production_url">https://checkout.buckaroo.nl/html/</field>
+            <field name="test_url">https://testcheckout.buckaroo.nl/html/</field>
+            <field name="sign_active">True</field>
+            <field name="sign_field">Brq_signature</field>
+            <field name="sign_return_check">True</field>
+            <field name="server_action_id" ref="action_buckaroo_provider"/>
+        </record>
+
         <record id="payment_acquirer_buckaroo" model="payment.acquirer">
             <field name="name">Buckaroo</field>
-            <field name="provider">buckaroo</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
             <field name="company_id" ref="base.main_company"/>
             <field name="view_template_id" ref="buckaroo_acquirer_button"/>
             <field name="environment">test</field>
             <field name="pre_msg"><![CDATA[
 <p>You will be redirected to the Buckaroo website after cliking on the payment button.</p>]]></field>
-            <field name="brq_websitekey">dummy</field>
-            <field name="brq_secretkey">dummy</field>
+            <field name="login">dummy</field>
+            <field name="transaction_key">dummy</field>
+            <field name="sign_in">in</field>
+            <field name="sign_out">out</field>
         </record>
 
+        <!--      Mapping Keys      -->
+        <record id="payment_acquirer_provider_mapping_buckaroo1" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">Brq_websitekey</field>
+            <field name="odoo_key">acquirer.login</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_buckaroo2" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">Brq_amount</field>
+            <field name="odoo_key">tx_values['amount']</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_buckaroo3" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">Brq_currency</field>
+            <field name="odoo_key">tx_values['currency'] and tx_values['currency'].name or ''</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_buckaroo4" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">Brq_invoicenumber</field>
+            <field name="odoo_key">tx_values['reference']</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_buckaroo5" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">brq_test</field>
+            <field name="odoo_key">True</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_buckaroo6" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">Brq_return</field>
+            <field name="odoo_key">acquirer.provider_id.return_url</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+         <record id="payment_acquirer_provider_mapping_buckaroo7" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">Brq_returncancel</field>
+            <field name="odoo_key">acquirer.provider_id.return_url</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_buckaroo8" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">Brq_returnerror</field>
+            <field name="odoo_key">acquirer.provider_id.return_url</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_buckaroo9" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">Brq_returnreject</field>
+            <field name="odoo_key">acquirer.provider_id.return_url</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_buckaroo10" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">Brq_culture</field>
+            <field name="odoo_key">'en-US'</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_buckaroo11" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">add_returndata</field>
+            <field name="odoo_key">{'return_url': '%s' % tx_values.pop('return_url')} if tx_values.get('return_url') else '' </field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+
+        <!--     Invalid Parametr Mapping    -->
+        <record id="payment_acquirer_transaction_mapping_buckaroo1" model="payment.transaction.mapping">
+            <field name="odoo_key">tx.acquirer_reference</field>
+            <field name="provider_key">data.get('BRQ_TRANSACTIONS')</field>
+            <field name="type">check_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_buckaroo2" model="payment.transaction.mapping">
+            <field name="odoo_key">tx.amount</field>
+            <field name="provider_key">float(data.get('BRQ_AMOUNT', '0.0'))</field>
+            <field name="type">check_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_buckaroo3" model="payment.transaction.mapping">
+            <field name="odoo_key">tx.currency_id.name</field>
+            <field name="provider_key">data.get('BRQ_CURRENCY')</field>
+            <field name="type">check_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+
+        <!--     Error Code Mapping   -->
+        <record id="payment_acquirer_transaction_mapping_buckaroo4" model="payment.transaction.mapping">
+            <field name="odoo_key">done</field>
+            <field name="provider_key">[190]</field>
+            <field name="type">error_code</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_buckaroo5" model="payment.transaction.mapping">
+            <field name="odoo_key">pending</field>
+            <field name="provider_key">[790, 791, 792, 793]</field>
+            <field name="type">error_code</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_buckaroo6" model="payment.transaction.mapping">
+            <field name="odoo_key">cancel</field>
+            <field name="provider_key">[890, 891]</field>
+            <field name="type">error_code</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+
+        <!--     required Value Mapping   -->
+        <record id="payment_acquirer_transaction_mapping_buckaroo7" model="payment.transaction.mapping">
+            <field name="odoo_key">reference</field>
+            <field name="provider_key">data.get('BRQ_INVOICENUMBER')</field>
+            <field name="type">value</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_buckaroo8" model="payment.transaction.mapping">
+            <field name="odoo_key">amount</field>
+            <field name="provider_key">data.get('BRQ_PAYMENT')</field>
+            <field name="type">value</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_buckaroo9" model="payment.transaction.mapping">
+            <field name="odoo_key">signature</field>
+            <field name="provider_key">data.get('BRQ_SIGNATURE')</field>
+            <field name="type">value</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+
+        <!--        Write Value         -->
+        <record id="payment_acquirer_transaction_mapping_buckaroo10" model="payment.transaction.mapping">
+            <field name="odoo_key">state</field>
+            <field name="provider_key">int(data.get('BRQ_STATUSCODE','0'))</field>
+            <field name="type">write_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_buckaroo11" model="payment.transaction.mapping">
+            <field name="odoo_key">transaction_id</field>
+            <field name="provider_key">data.get('BRQ_TRANSACTIONS')</field>
+            <field name="type">write_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_buckaroo"/>
+        </record>
     </data>
 </openerp>

@@ -3,7 +3,7 @@
     <data noupdate="1">
 
         <template id="buckaroo_acquirer_button">
-            <form t-if="acquirer.brq_websitekey" t-att-action="tx_url" method="post" target="_self">
+            <form t-if="acquirer.login" t-att-action="tx_url" method="post" target="_self">
                 <input type="hidden" name="Brq_websitekey" t-att-value="tx_values['Brq_websitekey']"/>
                 <input type="hidden" name="Brq_amount" t-att-value="tx_values['Brq_amount'] or '0.0'"/>
                 <input type="hidden" name="Brq_currency" t-att-value="tx_values['Brq_currency']"/>
