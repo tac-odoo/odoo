@@ -2725,7 +2725,7 @@ class BaseModel(object):
         groupby_terms, orderby_terms = self._read_group_prepare(order, aggregated_fields, groupby, qualified_groupby_field, query, groupby_type)
 
         from_clause, where_clause, where_clause_params = query.get_sql()
-        if len(groupby_list) < 2 and context.get('group_by_no_leaf'):
+        if len(groupby_list) < 1:
             count_field = '_'
         else:
             count_field = groupby
