@@ -144,6 +144,7 @@
                                 <separator string="Invalid Parameter Mapping"/>
                                 <field name="transaction_check_mapping_ids" context="{'default_type':'check_field'}">
                                     <tree editable="bottom">
+                                        <field name="type" invisible="1"/>
                                         <field name="odoo_key"/>
                                         <field name="provider_key"/>
                                     </tree>
@@ -151,6 +152,7 @@
                                 <separator string="Error Code Mapping"/>
                                 <field name="transaction_code_mapping_ids" context="{'default_type':'error_code'}">
                                     <tree editable="bottom">
+                                        <field name="type" invisible="1"/>
                                         <field name="odoo_key"/>
                                         <field name="provider_key"/>
                                     </tree>
@@ -158,6 +160,7 @@
                                 <separator string="Required Value Mapping"/>
                                 <field name="transaction_value_mapping_ids" context="{'default_type':'value'}">
                                     <tree editable="bottom">
+                                        <field name="type" invisible="1"/>
                                         <field name="odoo_key"/>
                                         <field name="provider_key"/>
                                     </tree>
@@ -165,6 +168,7 @@
                                 <separator string="Write Field Mapping"/>
                                 <field name="transaction_write_value_mapping_ids" context="{'default_type':'write_field'}">
                                     <tree editable="bottom">
+                                        <field name="type" invisible="1"/>
                                         <field name="odoo_key"/>
                                         <field name="provider_key"/>
                                     </tree>

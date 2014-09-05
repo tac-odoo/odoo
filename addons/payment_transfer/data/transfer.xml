@@ -20,8 +20,22 @@
             </field>
         </record>
 
-        <!--     Error Code Mapping   -->
+        <!--     Invalid Parametr Mapping    -->
         <record id="payment_acquirer_transaction_mapping_transfer1" model="payment.transaction.mapping">
+            <field name="odoo_key">tx.amount</field>
+            <field name="provider_key">float(data.get('amount', '0.0'))</field>
+            <field name="type">check_field</field>
+            <field name="provider_id" ref="payment_acquirer_transfer_provider"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_transfer2" model="payment.transaction.mapping">
+            <field name="odoo_key">tx.currency_id.name</field>
+            <field name="provider_key">data.get('currency')</field>
+            <field name="type">check_field</field>
+            <field name="provider_id" ref="payment_acquirer_transfer_provider"/>
+        </record>
+
+        <!--     Error Code Mapping   -->
+        <record id="payment_acquirer_transaction_mapping_transfer3" model="payment.transaction.mapping">
             <field name="odoo_key">pending</field>
             <field name="provider_key">['pending']</field>
             <field name="type">error_code</field>
@@ -29,19 +43,19 @@
         </record>
 
         <!--     required Value Mapping   -->
-        <record id="payment_acquirer_transaction_mapping_transfer2" model="payment.transaction.mapping">
+        <record id="payment_acquirer_transaction_mapping_transfer4" model="payment.transaction.mapping">
             <field name="odoo_key">reference</field>
             <field name="provider_key">data.get('reference')</field>
             <field name="type">value</field>
             <field name="provider_id" ref="payment_acquirer_transfer_provider"/>
         </record>
-        <record id="payment_acquirer_transaction_mapping_transfer3" model="payment.transaction.mapping">
+        <record id="payment_acquirer_transaction_mapping_transfer5" model="payment.transaction.mapping">
             <field name="odoo_key">amount</field>
             <field name="provider_key">data.get('amount')</field>
             <field name="type">value</field>
             <field name="provider_id" ref="payment_acquirer_transfer_provider"/>
         </record>
-        <record id="payment_acquirer_transaction_mapping_transfer4" model="payment.transaction.mapping">
+        <record id="payment_acquirer_transaction_mapping_transfer6" model="payment.transaction.mapping">
             <field name="odoo_key">currency_name</field>
             <field name="provider_key">data.get('currency')</field>
             <field name="type">value</field>
@@ -49,7 +63,7 @@
         </record>
 
          <!--        Write Value         -->
-        <record id="payment_acquirer_transaction_mapping_transfer5" model="payment.transaction.mapping">
+        <record id="payment_acquirer_transaction_mapping_transfer7" model="payment.transaction.mapping">
             <field name="odoo_key">state</field>
             <field name="provider_key">'pending'</field>
             <field name="type">write_field</field>
