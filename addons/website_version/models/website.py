@@ -7,7 +7,7 @@ class NewWebsite(osv.Model):
     _inherit = "website"
 
     _columns = {
-        'snapshot_id':fields.many2one("website_version.snapshot",string="Snapshot", domain="[('website_id','=',context.get('active_id'))]")
+        'experiment_id':fields.many2one("website_version.experiment",string="Experiment", domain="[('website_id','=',context.get('active_id'))]")
     }
 
     def get_current_snapshot(self,cr,uid,context=None):
@@ -36,8 +36,8 @@ class NewWebsite(osv.Model):
             request.context['snapshot_id'] = request.session.get('snapshot_id')
         elif request.session.get('master'):
             request.context['snapshot_id'] = 0
-        elif website.snapshot_id:
-            request.context['snapshot_id'] = website.snapshot_id.id
+        elif website.experiment_id:
+            request.context['experiment_id'] = website.experiment_id.id
         else:
             request.context['snapshot_id'] = 0
         

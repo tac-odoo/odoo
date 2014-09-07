@@ -22,10 +22,6 @@
         	<field name="website_id" ref="website.second_website"/>
         </record>
 
-        <record id="website.second_website" model="website">
-            <field name="snapshot_id" ref="snapshot_0_0_0_0"/>
-        </record>
-
         <record id="homepage_0_0_0_0_other" model="ir.ui.view">
             <field name="name">Homepage</field>
             <field name="type">qweb</field>

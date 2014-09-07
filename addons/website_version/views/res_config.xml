@@ -6,10 +6,10 @@
             <field name="model">website.config.settings</field>
             <field name="inherit_id" ref="website.view_website_config_settings"/>
             <field name="arch" type="xml">
-                <!-- find field name, and insert field name before it -->
                 <field name="website_id" position="replace">
                     <field name="website_id" invisible="False" on_change="on_change_website_id(website_id)"/>
                 </field>
+
             </field>
         </record>
     </data>
