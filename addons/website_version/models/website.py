@@ -13,6 +13,9 @@ class NewWebsite(osv.Model):
     def get_current_snapshot(self,cr,uid,context=None):
         snap = request.registry['website_version.snapshot']
         snapshot_id=request.context.get('snapshot_id')
+        experiment_id=request.context.get('experiment_id')
+        if experiment_id:
+            return (0, 'experiment')
 
         if not snapshot_id:
             request.context['snapshot_id'] = 0
