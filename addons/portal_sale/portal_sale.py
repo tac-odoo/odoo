@@ -44,19 +44,6 @@ class sale_order(osv.Model):
                     partner_id=this.partner_id.id, company_id=this.company_id.id, context=context)
         return result
 
-    def action_quotation_send(self, cr, uid, ids, context=None):
-        '''  Override to use a modified template that includes a portal signup link '''
-        action_dict = super(sale_order, self).action_quotation_send(cr, uid, ids, context=context)
-        try:
-            template_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'portal_sale', 'email_template_edi_sale')[1]
-            # assume context is still a dict, as prepared by super
-            ctx = action_dict['context']
-            ctx['default_template_id'] = template_id
-            ctx['default_use_template'] = True
-        except Exception:
-            pass
-        return action_dict
-
     def action_button_confirm(self, cr, uid, ids, context=None):
         # fetch the partner's id and subscribe the partner to the sale order
         assert len(ids) == 1

@@ -44,6 +44,9 @@ class sale_order(osv.osv):
         },
     }
 
+    def render_email_template(self, cr, uid, template, values, context=None):
+        return self.pool['ir.ui.view'].render(cr, uid, template, values, context=context)
+
     def _amount_line_tax(self, cr, uid, line, context=None):
         val = 0.0
         for c in self.pool.get('account.tax').compute_all(cr, uid, line.tax_id, line.price_unit * (1-(line.discount or 0.0)/100.0), line.product_uom_qty, line.product_id, line.order_id.partner_id)['taxes']:
