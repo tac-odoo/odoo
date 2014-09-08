@@ -223,7 +223,7 @@
             'click #last': 'last',
             'click #first': 'first',
             'click #fullscreen': 'fullscreen',
-            'change #page_number': 'change_page_number'
+            'change #page_number': 'change_page_number',
         },
         init: function(id, file){
             this.id = id;
@@ -293,10 +293,17 @@
                     //context: context
                 },
             }).then(function(data){
-                console.log('data',data);
+                self.$( ".slide-overlay" ).remove();
+                $(openerp.qweb.render("website.slide.overlay", {slides:data})).appendTo(self.$(".slide-wrapper"));
+                self.$('.slide-thumbnail').hover(
+                    function(){
+                        $(this).find('.slide-caption').slideDown(250); //.fadeIn(250)
+                    },
+                    function(){
+                        $(this).find('.slide-caption').slideUp(250); //.fadeOut(205)
+                    }
+                );
             });
-            this.$( ".slide-overlay" ).remove();
-            $(openerp.qweb.render("website.slide.overlay")).appendTo(self.$(".slide-wrapper"));
         },
         previous: function(ev){
             ev.preventDefault();

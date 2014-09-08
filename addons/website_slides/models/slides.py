@@ -72,7 +72,9 @@ class ir_attachment(models.Model):
 
     @api.multi
     def get_next_slides(self):
-        return {'rga':'good'}
+        return [{'img_src':'http://lorempixel.com/400/300/sports/1/','caption':'Slide Title'},
+                {'img_src':'http://lorempixel.com/400/300/sports/1/','caption':'Other'}]
+
 
     @api.multi
     def check_constraint(self, values):
