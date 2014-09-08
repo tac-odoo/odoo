@@ -5,19 +5,19 @@ import datetime
 
 class TableExporter(http.Controller):
         
-    @http.route(['/change_snapshot'], type = 'json', auth = "user", website = True)
+    @http.route(['/website_version/change_snapshot'], type = 'json', auth = "user", website = True)
     def change_snapshot(self, snapshot_id):
         request.session['snapshot_id'] = int(snapshot_id)
         request.session['master'] = 0
         return snapshot_id
 
-    @http.route(['/master'], type = 'json', auth = "user", website = True)
+    @http.route(['/website_version/master'], type = 'json', auth = "user", website = True)
     def master(self):
         request.session['snapshot_id'] = 0
         request.session['master'] = 1
         return 0
 
-    @http.route(['/create_snapshot'], type = 'json', auth = "user", website = True)
+    @http.route(['/website_version/create_snapshot'], type = 'json', auth = "user", website = True)
     def create_snapshot(self,name):
         cr, uid, context = request.cr, openerp.SUPERUSER_ID, request.context
         if name == "":
@@ -35,7 +35,7 @@ class TableExporter(http.Controller):
         request.session['master'] = 0
         return name
 
-    @http.route(['/delete_snapshot'], type = 'json', auth = "user", website = True)
+    @http.route(['/website_version/delete_snapshot'], type = 'json', auth = "user", website = True)
     def delete_snapshot(self):
         cr, uid, context = request.cr, openerp.SUPERUSER_ID, request.context
         snap = request.registry['website_version.snapshot']
@@ -50,7 +50,7 @@ class TableExporter(http.Controller):
             name = "nothing to do"
         return name
     
-    @http.route(['/all_snapshots'], type = 'json', auth = "public", website = True)
+    @http.route(['/website_version/all_snapshots'], type = 'json', auth = "public", website = True)
     def get_all_snapshots(self):
         #from pudb import set_trace; set_trace()
         cr, uid, context = request.cr, openerp.SUPERUSER_ID, request.context

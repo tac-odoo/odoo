@@ -23,7 +23,7 @@
             });
 
             this.$el.find('#version-menu-button').click(function() {
-                openerp.jsonRpc( '/all_snapshots', 'call', {}).then(function (result) {
+                openerp.jsonRpc( '/website_version/all_snapshots', 'call', {}).then(function (result) {
                     self.$el.find(".snapshot").remove();
                     self.$el.find(".version_menu").append(QWeb.render("all_versions", {snapshots:result}));
                 });
@@ -39,7 +39,7 @@
                 default :(new Date()),
             }).then(function (name) {
                 var context = website.get_context();
-                openerp.jsonRpc( '/create_snapshot', 'call', { 'name': name }).then(function (result) {
+                openerp.jsonRpc( '/website_version/create_snapshot', 'call', { 'name': name }).then(function (result) {
 
                     location.reload();
                 }).fail(function(){
@@ -50,20 +50,20 @@
         
         change_snapshot: function(event) {
             var snapshot_id = $(event.target).data("snapshot_id");
-            openerp.jsonRpc( '/change_snapshot', 'call', { 'snapshot_id':snapshot_id }).then(function (result) {
+            openerp.jsonRpc( '/website_version/change_snapshot', 'call', { 'snapshot_id':snapshot_id }).then(function (result) {
                     location.reload();
                 });
         },
 
         master: function(event) {
-            openerp.jsonRpc( '/master', 'call', {}).then(function (result) {
+            openerp.jsonRpc( '/website_version/master', 'call', {}).then(function (result) {
                     location.reload();
                 });
         },
 
         delete_snapshot: function(event) {
             var text = $(event.target).text();
-            openerp.jsonRpc( '/delete_snapshot', 'call', {}).then(function (result) {
+            openerp.jsonRpc( '/website_version/delete_snapshot', 'call', {}).then(function (result) {
                     location.reload();
                 });
         },
