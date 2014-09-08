@@ -15,7 +15,7 @@
 								<small class="dropdown">Recent Joinees</small>
 						</h1>
 						<div t-if="not emp_ser">
-		          		<form action="/page/employees" role="search" class="navbar-form navbar-right" method="get">
+		          		<form action="/employees" role="search" class="navbar-form navbar-right" method="get">
 		            		<div class="form-group">
 		              			<input placeholder="Search Employee..." type="search" class="form-control" name="search"/>
 		              			<button type="submit" class="btn btn-info">Search</button>
@@ -40,7 +40,7 @@
 								<small class="dropdown">Recent Jobs</small>
 						</h1>
 						<div t-if="not job_ser">
-		          		<form action="/page/jobs" role="search" class="navbar-form navbar-right" method="get">
+		          		<form action="/jobs" role="search" class="navbar-form navbar-right" method="get">
 		            		<div class="form-group">
 		              			<input placeholder="Search Jobs..." type="search" class="form-control" name="search"/>
 		              			<button type="submit" class="btn btn-info">Search</button>
@@ -62,7 +62,7 @@
 		        </div>
 
 				<div class="col-md-9 clearfix">
-					<a t-attf-href="/page/jobs/#{job.id}" t-field="job.name" class="lead" style="padding-top: 1px;"/>
+					<a t-attf-href="/jobs/#{job.id}" t-field="job.name" class="lead" style="padding-top: 1px;"/>
 					<span t-if="not job.website_published" class="pull-righ label label-danger">Not Published</span>
 					<div style="padding-top: 5px;">
 						<!--, <b t-field="job.analytic_account_id.quantity_max"/> <span class="text-muted">hours of work.</span>-->
@@ -80,9 +80,9 @@
 						</span>
 
 					</div>
-					<div class="pull-righ" t-foreach="job.tag_ids" t-as="tag" style="padding-top: 5px;">
-						<a class="label label-default" t-attf-href="/page/jobs/tag/#{tag.id}" t-esc="tag.name"/>
-					</div>
+					<span class="pull-righ" t-foreach="job.tag_ids" t-as="tag" style="padding-top: 5px;">
+						<a class="label label-default" t-attf-href="/jobs/tag/#{tag.id}" t-esc="tag.name"/>
+					</span>
 				</div>
 			</div>
 		</template>
@@ -117,7 +117,7 @@
 						</div>
 						<div class="col-sm-3" id="right-column">
 							<div t-if="superuser">
-								<a class="btn btn-primary btn-lg btn-block mb16" t-attf-href="/page/jobs/new">
+								<a class="btn btn-primary btn-lg btn-block mb16" t-attf-href="/jobs/new">
 								Post Job
 								</a>
 							</div>
@@ -148,7 +148,7 @@
 				<div id="wrap" class="container">
 					<div class="row">
 						<div class="col-sm-9">
-					        <form action="/page/jobs/post" method="post" class="form-horizontal mt32" enctype="multipart/form-data">
+					        <form action="/jobs/post" method="post" class="form-horizontal mt32" enctype="multipart/form-data">
 					            <div t-attf-class="form-group #{error and 'name' in error and 'has-error' or ''}">
 					                <label class="col-md-3 col-sm-4 control-label" for="name">Project Name</label>
 					                <div class="col-md-7 col-sm-8">
@@ -225,9 +225,9 @@
 							<div class="mt0">
 								<b t-field="job.partner_id.name"/> <span class="text-muted"> posted on <i t-field="job.create_date"/></span>, <b t-field="job.analytic_account_id.quantity_max"/> hours of work.
 							</div>
-							<div class="mt0" t-foreach="job.tag_ids" t-as="tag">
-								<span class="label label-default"><t t-esc="tag.name"/></span> 
-							</div><br/>
+							<span class="mt0" t-foreach="job.tag_ids" t-as="tag">
+								<span class="label label-default"><t t-esc="tag.name"/></span>
+							</span><br/><br/>
 							<div t-field="job.website_description"/>
 
 							<form id="comment" t-attf-action="/jobs/comment/#{job.id}" method="POST" style="margin-bottom: 10px;">
@@ -297,13 +297,16 @@
 		        </div>
 
 				<div class="text-center">
-					<a t-attf-href="/page/jobs/#{employee.id}" t-field="employee.name" class="lead"/>
+					<a t-attf-href="/employees/#{employee.id}" t-field="employee.name" class="lead"/>
 					<p>
 						Joined on <i t-field="employee.create_date"/>
 					</p>
 					<p>
-						<span class="label label-default">Web Modules</span> <span class="label label-default">Accounting</span>
+						<span class="pull-righ" t-foreach="employee.badge_ids" t-as="badge" style="padding-top: 5px;">
+							<a class="label label-default" t-attf-href="/employee/badge/#{badge.badge_id.id}" t-esc="badge.badge_id.name"/>
+						</span>
 					</p>
+					
 				</div>
 
 			</div>
@@ -323,9 +326,10 @@
 								<span>Employees</span>
 								<small class="dropdown">Recent Joinees</small>
 							</h1>-->
-
-							<div t-foreach="employees" t-as="employee" class="mb16">
+							<div t-foreach="employees" t-as="empl">
+							<div t-foreach="empl" t-as="employee" class="mb16">
 								<t t-call="website_jobs.display_employees" />
+							</div>
 							</div>
 						</div>
 						<div class="col-sm-3" id="right-column">

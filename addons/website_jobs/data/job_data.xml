@@ -3,13 +3,13 @@
     <data noupdate="1">
         <record id="menu_jobs" model="website.menu">
             <field name="name">Jobs</field>
-            <field name="url">/page/jobs/</field>
+            <field name="url">/jobs/</field>
             <field name="parent_id" ref="website.main_menu"/>
             <field name="sequence" type="int">30</field>
         </record>
         <record id="menu_employee" model="website.menu">
             <field name="name">Employee</field>
-            <field name="url">/page/employees/</field>
+            <field name="url">/employees/</field>
             <field name="parent_id" ref="website.main_menu"/>
             <field name="sequence" type="int">40</field>
         </record>

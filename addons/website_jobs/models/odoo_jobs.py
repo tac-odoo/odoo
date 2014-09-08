@@ -28,4 +28,4 @@ class Employee(models.Model):
 	create_date = fields.Datetime(string='Joined Since')
 
 	def img(self,field='image_small',context=None):
-		return "/website/image?model=%s&field=%s&id=%s" % (self._name,field,self.id)		
+		return "/website/image?model=%s&field=%s&id=%s" % (self._name,field,self.id)

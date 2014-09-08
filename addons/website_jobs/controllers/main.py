@@ -11,9 +11,9 @@ class Jobs(http.Controller):
 	_project_per_page = 5
 
 	@http.route([
-		'/page/jobs',
-		'/page/jobs/page/<int:page>',
-		'/page/jobs/tag/<model("project.tag"):tag>'],type='http',auth='public', website=True)
+		'/jobs',
+		'/jobs/page/<int:page>',
+		'/jobs/tag/<model("project.tag"):tag>'],type='http',auth='public', website=True)
 	def jobs(self, page=1, tag=None,**post):
 		#retrive search parameter
 		search = post.get('search')
@@ -31,7 +31,7 @@ class Jobs(http.Controller):
 		
 		job_obj = env['project.project']
 		
-		url = '/page/jobs'	
+		url = '/jobs'	
 
 		if not superuser:
 			domain.append(('website_published','=',True))
@@ -45,7 +45,7 @@ class Jobs(http.Controller):
 		return request.website.render("website_jobs.index",values)
 
 	@http.route([
-		'/page/jobs/new',
+		'/jobs/new',
 		],type='http',auth='user',website=True)
 	def new_job(self):
 		env = request.env()
@@ -54,7 +54,7 @@ class Jobs(http.Controller):
 		return request.website.render("website_jobs.new_job",{"tags":job_tags})
 
 	@http.route([
-		'/page/jobs/post',],type="http", auth="user",website=True)
+		'/jobs/post',],type="http", auth="user",website=True)
 	def new_job_post(self, **kwargs):
 		env = request.env()
 		user = env['res.users'].browse(request.uid)
@@ -71,30 +71,52 @@ class Jobs(http.Controller):
 			'website_description':kwargs['website_description']
 			}
 		job_id = job_obj.create(vals)
-		return request.redirect("/page/jobs/%s" % (job_id))
+		return request.redirect("/jobs/%s" % (job_id))
 
 	@http.route([
-		'/page/jobs/<model("project.project"):job>'],type="http",auth="public",website=True)
+		'/jobs/<model("project.project"):job>'],type="http",auth="public",website=True)
 	def job_view(self, job):
 		job.sudo().update({'number_view':job.number_view + 1})
 		values= {'job':job}
 		return request.website.render("website_jobs.jobview",values)
 
 	@http.route([
-		'/page/employees',], type='http',auth='public', website=True)
-	def employee(self, **post):
+		'/employees',
+		'/employee/badge/<model("gamification.badge"):badge>',
+		'/employees/<model("hr.employee"):emp>',], type='http',auth='public', website=True)
+	def employee(self, badge=None, emp=None, **post):
 		search = post.get('search')
 		emp_ser = False
+		employees = []
 		domain = []
+		emp_count = 0
 		env = request.env()
 		emp_obj = env['hr.employee']
+		gami_obj = env['gamification.badge.user']
+		'''
+		if badge:
+			employees = []
+			badges = gami_obj.search([('badge_id','=',badge.id)])
+			for badge in badges:
+				employees.append(badge.employee_id)
+			raise Exception (employees)
+		'''
 		if search:
 			domain.append(('name','ilike',search))
 			emp_ser = True
-		employees = emp_obj.search(domain).sudo()
+		if badge:
+			
+			badges = gami_obj.search([('badge_id','=',badge.id)])
+			for badge in badges:
+				employees.append(badge.employee_id)
+			emp_count = len(employees)
+		else:
+			employees.append(emp_obj.search(domain).sudo())
+			emp_count = len(emp_obj.search(domain).sudo())
+		#employees = emp_obj.search(domain).sudo()
 		values = {
 			'employees':employees,
-			'employees_count': len(employees),
+			'employees_count': emp_count,
 			'emp_ser':emp_ser
 		}
-		return request.website.render('website_jobs.employees',values)		
+		return request.website.render('website_jobs.employees',values)
