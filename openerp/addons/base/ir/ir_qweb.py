@@ -252,7 +252,6 @@ class QWeb(orm.AbstractModel):
                         result.append([page.ponderation+pond_sum, page.snapshot_id.id])
                         pond_sum+=page.ponderation
                 if pond_sum:
-                    #from pudb import set_trace; set_trace()
                     x = random.randrange(0,pond_sum)
                     for res in result:
                         if x<res[0]:
