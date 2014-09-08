@@ -429,28 +429,21 @@ $(document).ready(function() {
     });
 
     website.slide.modifyembedcode = function(currentVal) {
-        var $embed_input = $('#slide_embed_code');
+        var $embed_input = $('.slide_embed_code');
         var slide_embed_code = $embed_input.val();
         var tmp_embed_code = slide_embed_code.replace(/(page=).*?([^\d]+)/,'$1' + currentVal + '$2');
         $embed_input.val(tmp_embed_code);
     };
 
-    $('#btnplus').on('click', function(e){
+    $('.embed-page-counter').on('change', function(e){
         e.preventDefault();
-        var currentVal = parseInt($('#page_embed').val());
+        var currentVal = parseInt($(this).val());
         var maxval = parseInt($('#page_count').text());
-        if(currentVal < maxval){
-            $('#page_embed').val(currentVal + 1);
-            website.slide.modifyembedcode(currentVal + 1);
-        }
-    });
-
-    $("#btnminus").on('click', function(e) {
-        e.preventDefault();
-        var currentVal = parseInt($('#page_embed').val());
-        if (currentVal > 1) {
-            $('#page_embed').val(currentVal - 1);
-            website.slide.modifyembedcode(currentVal - 1);
+        if(currentVal > 0 && currentVal <= maxval){
+            website.slide.modifyembedcode(currentVal);
+        }else{
+            $(this).val(1);
+            website.slide.modifyembedcode(1);
         }
     });
 

@@ -192,7 +192,7 @@ $(document).ready(function() {
     });
 
     modifyembedcode = function(currentVal) {
-        var $embed_input = $('#slide_embed_code');
+        var $embed_input = $('.slide_embed_code');
         var slide_embed_code = $embed_input.val();
         var tmp_embed_code = slide_embed_code.replace(/(page=).*?([^\d]+)/,'$1' + currentVal + '$2');
         $embed_input.val(tmp_embed_code);
