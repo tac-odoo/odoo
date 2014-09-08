@@ -71,7 +71,7 @@
                                     <a class="toggle-slide-option" data-slide-option-id="#slide_embed"><i class="fa fa-code"></i> Embed</a>
                                 </div>
                                 <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">
-                                    <a id="like" t-att-user-id="user.id" t-att-attachment-id="slide.id" t-attf-data-href="/slides/#{slug(channel)}/view/#{slug(slide)}/like"><i class="fa fa-thumbs-up"></i> Like</a>
+                                    <a id="like" class="slide-like" t-att-user-id="user.id" t-att-attachment-id="slide.id" t-attf-data-href="/slides/#{slug(channel)}/view/#{slug(slide)}/like"><i class="fa fa-thumbs-up"></i> Like</a>
                                 </div>
                             </div>
                         </div>

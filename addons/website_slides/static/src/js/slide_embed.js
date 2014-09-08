@@ -176,6 +176,20 @@ $(document).ready(function() {
             website.slide.pdfembed_obj.next(ev);
         }
     });
+    
+    $('.slide-like, .slide-unlike').on('click', function(ev){
+        ev.preventDefault();
+        var link_id = $(this).attr('id');
+        var attachment_id = $(this).attr('attachment-id');
+        var user_id = $(this).attr('user-id');
+        if(localStorage[link_id+'_'+attachment_id] != user_id){
+            var $link = $(ev.currentTarget);
+            openerp.jsonRpc($link.data('href'), 'call', {}).then(function(data){
+                    $($link.data('count-el')).text(data);
+            });
+            localStorage[link_id+'_'+attachment_id] = user_id;
+        }
+    });
 
     modifyembedcode = function(currentVal) {
         var $embed_input = $('#slide_embed_code');
