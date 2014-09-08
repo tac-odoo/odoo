@@ -22,6 +22,32 @@
         	<field name="website_id" ref="website.second_website"/>
         </record>
 
+        <record id="experiment_default" model="website_version.experiment">
+            <field name="name">Default_experience</field>
+            <field name="website_id" ref="website.second_website"/>
+        </record>
+
+        <record id="page_experiment_default_1" model="website_version.experiment_page">
+            <field name="view_id" ref="website.homepage"/>
+            <field name="key">website.homepage</field>
+            <field name="snapshot_id" ref="snapshot_0_0_0_0"/>
+            <field name="experiment_id" ref="experiment_default"/>
+            <field name="ponderation">50</field>
+        </record>
+
+        <record id="page_experiment_default_2" model="website_version.experiment_page">
+            <field name="view_id" ref="website.homepage"/>
+            <field name="key">website.homepage</field>
+            <field name="snapshot_id" ref="default_2"/>
+            <field name="experiment_id" ref="experiment_default"/>
+            <field name="ponderation">50</field>
+        </record>
+
+        <record id="website.second_website" model="website">
+            <field name="experiment_id" ref="experiment_default"/>
+        </record>
+
+
         <record id="homepage_0_0_0_0_other" model="ir.ui.view">
             <field name="name">Homepage</field>
             <field name="type">qweb</field>
