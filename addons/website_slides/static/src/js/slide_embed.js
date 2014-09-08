@@ -170,10 +170,10 @@ $(document).ready(function() {
 
     $(document).keydown(function(ev){
         if (ev.keyCode == 37) {
-            website.slide.pdfembed_obj.previous(ev);
+            onPrevPage();
         }
         if (ev.keyCode == 39) {
-            website.slide.pdfembed_obj.next(ev);
+            onNextPage();
         }
     });
     
