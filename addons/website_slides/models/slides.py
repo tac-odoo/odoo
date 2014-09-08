@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import json
 
 from openerp import models, fields, api, _
 import urllib2
 import requests
+import json
 
 from urlparse import urlparse,parse_qs
 from openerp.addons.website.models.website import slug
@@ -21,6 +21,7 @@ class document_directory(models.Model):
     description = fields.Text(string='Website Description', tranalate=True)
     website_description = fields.Html('Website Description', tranalate=True)
     slide_id = fields.Many2one('ir.attachment', string='Promoted Presentation')
+    is_channel = fields.Boolean(string='Is Channel', default=False)
     promote = fields.Selection([('donot','Do not Promote'), ('latest','Latest Published'), ('mostview','Most Viewed'), ('custom','User Defined')], string="Method", default='donot')
 
     def get_mostviewed(self):
@@ -69,9 +70,35 @@ class ir_attachment(models.Model):
     likes = fields.Integer(string='Likes', default=0)
     dislikes = fields.Integer(string='Dislikes', default=0)
 
-    def get_next_slides(self, *args):
-        print '>>>>>>',self,args
+    @api.multi
+    def get_next_slides(self):
         return {'rga':'good'}
+
+    @api.multi
+    def check_constraint(self, values):
+        if values.get('video_id'):
+            domain = [('youtube_id','=',values['video_id'])]
+            slide = self.search(domain)
+            if slide:
+                return "/slides/%s/%s/%s" % (slide.parent_id.id, slide.slide_type, slide.id)
+        if values.get('file_name'):
+            def get_unique_name(name):
+                domain = [('name','=',name)]
+                if self.search(domain):
+                    postfix = 1
+                    try:
+                        name, postfix = name.rsplit('_', 1)
+                        postfix = int(postfix) + 1
+                    except:
+                        pass
+                    name = "%s_%d" % (name, postfix)
+                    return get_unique_name(name)
+                else:
+                    return name
+            name = values['file_name']
+            return get_unique_name(name)
+        return False
+
 
     def _get_share_url(self):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
@@ -112,7 +139,7 @@ class ir_attachment(models.Model):
         for partner in self.parent_id.message_follower_ids:
             partner_ids.append(partner.id)
         if self.parent_id:
-            self.parent_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides', partner_ids=partner_ids)
+            self.parent_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides')
 
     def notify_request_to_approve(self):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
@@ -126,7 +153,7 @@ class ir_attachment(models.Model):
         for partner in self.parent_id.message_follower_ids:
             partner_ids.append(partner.id)
         if self.parent_id:
-            self.parent_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides_validation', partner_ids=partner_ids)
+            self.parent_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides_validation')
     
     @api.multi
     def write(self, values):

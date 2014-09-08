@@ -7,6 +7,7 @@
             <field name="user_id" eval="False"/>
             <field name="website_published" eval="True"/>
             <field name="ressource_id">0</field>
+            <field name="is_channel" eval="True"/>
             <field name="description">Public channel is default channel for slides, all public user can access content of public channel.</field>
         </record>
 
@@ -15,6 +16,7 @@
             <field name="user_id" eval="False"/>
             <field name="website_published" eval="False"/>
             <field name="ressource_id">0</field>
+            <field name="is_channel" eval="True"/>
             <field name="description">Partner channel use to publish slides in partner network privately.</field>
         </record>
         
@@ -23,6 +25,7 @@
             <field name="user_id" eval="False"/>
             <field name="website_published" eval="False"/>
             <field name="ressource_id">0</field>
+            <field name="is_channel" eval="True"/>
             <field name="description">Employee channel use to publish internal slides of company.</field>
         </record>
 

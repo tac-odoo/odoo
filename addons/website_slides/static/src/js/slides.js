@@ -37,14 +37,32 @@
             if (!video_id && url){
                 this.$('.url-error').show();
             }else{
+                var constraint = this.check_constraint({'video_id': video_id});
                 var api_url = "https://www.googleapis.com/youtube/v3/videos?id="+ video_id +" &key=AIzaSyBKDzf7KjjZqwPWAME6JOeHzzBlq9nrpjk&part=snippet&fields=items(snippet/title, snippet/thumbnails/high/url)";
                 $.getJSON(api_url,function(data){
                     var title = data.items[0].snippet.title;
                     var image_src = data.items[0].snippet.thumbnails.high.url;
-                    self.$('#name').val(title);
+                    console.log('....',constraint);
+                    constraint.then(function(url){
+                        if (url){
+                            $('<div class="alert alert-danger" role="alert">This video already exists in this channel <a href='+ url +'>click here to view it </a></div>').insertBefore(self.$('.modal-body'));
+                        }else{
+                            self.$('#name').val(title);
+                        }
+                    });
                     self.$("#slide-image").attr("src",image_src);
                 });
             }
+        },
+        check_constraint: function(values){
+            var self = this;
+            _.extend(values, {'channel_id': self.channel_id});
+            return openerp.jsonRpc('/web/dataset/call_kw', 'call', {
+                model: 'ir.attachment',
+                method: 'check_constraint',
+                args: [false, values],
+                kwargs: {},
+            });
         },
         url_parser: function(url){
            var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
@@ -96,7 +114,10 @@
             }
 
             var input = file.name;
-            self.$('#name').val(input.substr(0, input.lastIndexOf('.')) || input);
+            var input_val = input.substr(0, input.lastIndexOf('.')) || input;
+            this.check_constraint({'file_name': input_val}).then(function(file_name){
+                self.$('#name').val(file_name);
+            });
         },
         set_tags: function(){
             var self = this;
@@ -165,15 +186,14 @@
             if(this.validate()){
                 var values = this.get_value();
                 if($(ev.target).data('published')){
-                    _.extend(values, {
-                        'website_published': true
-                    });
+                    _.extend(values, {'website_published': true});
                 }
                 this.$('.modal-body').html("<h4><i class='fa fa-spinner fa-spin'></i> Redirecting to new presenation...  </h4>");
                 this.$('.modal-footer').hide();
-                website.form('/slides/add_slide', 'POST', values);
+                openerp.jsonRpc("/slides/add_slide", 'call', values).then(function(url){
+                    window.location = url;
+                });
             }
-
         },
         cancel: function () {
             this.trigger("cancel");
@@ -263,11 +283,12 @@
         },
         fetch_next_slide: function(){
             var self = this;
+            var id = parseInt(self.id, 10);
             var context = website.get_context();
             openerp.jsonRpc('/web/dataset/call_kw', 'call', {
                 model: 'ir.attachment',
                 method: 'get_next_slides',
-                args: [self.id],
+                args: [[id]],
                 kwargs: {
                     //context: context
                 },
