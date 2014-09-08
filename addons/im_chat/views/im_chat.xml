@@ -10,5 +10,15 @@
                 <script type="text/javascript" src="/im_chat/static/src/js/im_chat.js"></script>
             </xpath>
         </template>
+
+        <template id="im_top_button" name="im_chat top button" inherit_id="web.menu">
+             <xpath expr="//ul[contains(@class, 'oe_systray')]" position="inside">
+                <li title='Display Instant Messaging' groups="base.group_user">
+                    <a href="#">
+                        <i id="oe_topbar_imbutton_icon" class="fa fa-comments-o"/>
+                    </a>
+                </li>
+            </xpath>
+        </template>
     </data>
 </openerp>

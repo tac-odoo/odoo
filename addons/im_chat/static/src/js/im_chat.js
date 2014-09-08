@@ -567,38 +567,22 @@
         }
     });
 
-    im_chat.ImTopButton = openerp.Widget.extend({
-        template:'im_chat.ImTopButton',
-        events: {
-            "click": "clicked",
-        },
-        clicked: function(ev) {
-            ev.preventDefault();
-            this.trigger("clicked");
-        },
-    });
-
     if(openerp.web && openerp.web.UserMenu) {
         openerp.web.UserMenu.include({
             do_update: function(){
                 var self = this;
-                var Users = new openerp.web.Model('res.users');
-                Users.call('has_group', ['base.group_user']).done(function(is_employee) {
-                    if (is_employee) {
-                        self.update_promise.then(function() {
-                            var im = new openerp.im_chat.InstantMessaging(self);
-                            openerp.im_chat.single = im;
-                            im.appendTo(openerp.client.$el);
-                            var button = new openerp.im_chat.ImTopButton(this);
-                            button.on("clicked", im, im.switch_display);
-                            button.appendTo(window.$('.oe_systray'));
-                        });
-                    }
-                });
+                if($('.oe_systray #oe_topbar_imbutton_icon')){
+                    self.update_promise.then(function() {
+                        var im = new openerp.im_chat.InstantMessaging(self);
+                        openerp.im_chat.single = im;
+                        im.appendTo(openerp.client.$el);
+                        $('#oe_topbar_imbutton_icon').parent().on("click", im, _.bind(im.switch_display, im));
+                    });
+                }
                 return this._super.apply(this, arguments);
             },
         });
     }
-
     return im_chat;
+
 })();
