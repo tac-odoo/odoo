@@ -10,11 +10,10 @@
         start: function() {
             var self = this;
             var snapshot_id = this.$el.find("#version-menu-button").data("snapshot_id");
-            var experiment_id = this.$el.find("#version-menu-button").data("experiment_id");
 
             var _get_context = website.get_context;
             website.get_context = function (dict) {
-                return _.extend({ 'snapshot_id': snapshot_id, 'experiment_id': experiment_id }, _get_context(dict));
+                return _.extend({ 'snapshot_id': snapshot_id }, _get_context(dict));
             };
 
             self.$el.on('click', 'a[data-action]', function(ev) {
@@ -74,6 +73,7 @@
     $(document).ready(function() {
         var version = new website.EditorVersion();
         version.setElement($("#version-menu"));
+        console.log($('html').attr('data-view-xmlid'))
         version.start();
     });
     
