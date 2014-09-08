@@ -82,7 +82,7 @@ class ir_attachment(models.Model):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
         embedcode = False
         if self.datas and not self.youtube_id:
-            embedcode = '<iframe  src="%s/website_slides/static/lib/pdfjs/web/viewer.html?file=%s#page="></iframe>' % (base_url, self.url)
+            embedcode = '<iframe  src="%s/slides/embed/%s?page=1"></iframe>' % (base_url, self.id)
         if self.youtube_id:
             embedcode = '<iframe src="//www.youtube.com/embed/%s?theme=light"></iframe>' % (self.youtube_id)
         return embedcode

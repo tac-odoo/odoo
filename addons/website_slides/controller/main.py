@@ -283,3 +283,14 @@ class main(http.Controller):
 
         slide_id = slide_obj.create(post)
         return request.redirect("/slides/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id.id))
+
+
+    @http.route('/slides/embed/<model("ir.attachment"):slide>', type='http', auth="public", website=True)
+    def slides_comment(self, slide, page="1"):
+        user = request.env.user
+        values = {
+           'slide':slide,
+           'user':user,
+           'channel':slide.parent_id,
+        }
+        return request.website.render('website_slides.pdfembed', values)

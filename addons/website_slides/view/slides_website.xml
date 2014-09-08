@@ -48,6 +48,81 @@
             </div>
         </template>
 
+        <template id="pdfembed" name="pdfembed">
+            <html>
+                <head>
+                    <title><t t-esc="slide.name"/></title>
+                    <link href="/web/css/web.assets_common/b6496be" rel="stylesheet"/>
+                    <link href="/web/css/website.assets_frontend/44e82bd" rel="stylesheet"/>
+                    <link rel="stylesheet" href="/website_slides/static/src/css/website_slides.css"/>
+                </head>
+                <body style="padding-top: 50px;padding-bottom: 50px;">
+                    <!-- Fixed top navbar -->
+                    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+                        <div class="container">
+                            <div class="row" style="margin-top: 15px;">
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">
+                                    <a class="toggle-slide-option" data-slide-option-id="#slide_share"><i class="fa fa-share"></i> Share</a>
+                                </div>
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">
+                                    <a class="toggle-slide-option" data-slide-option-id="#slide_email"><i class="fa fa-envelope"></i> Email</a>
+                                </div>
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">
+                                    <a class="toggle-slide-option" data-slide-option-id="#slide_embed"><i class="fa fa-code"></i> Embed</a>
+                                </div>
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">
+                                    <a id="like" t-att-user-id="user.id" t-att-attachment-id="slide.id" t-attf-data-href="/slides/#{slug(channel)}/view/#{slug(slide)}/like"><i class="fa fa-thumbs-up"></i> Like</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- pdf container -->
+                    <div style="position:relative;">
+                        <div id="slide_share" class="slide-option-toggle">
+                            <t t-call="website_slides.socialshare"/>
+                            <t t-call="website_slides.sendemail"/>
+                            <t t-call="website_slides.embed"/>
+                        </div>
+                        <div id="slide_email" class="slide-option-toggle">
+                            <t t-call="website_slides.sendemail"/>
+                        </div>
+                        <div id="slide_embed" class="slide-option-toggle">
+                            <t t-call="website_slides.embed"/>
+                        </div>
+
+                        <canvas id="pdfcanvas" class="img-responsive" style="width:100%;height:100%"></canvas>
+                    </div>
+
+                    <!-- Fixed bottom navbar -->
+                    <div class="navbar navbar-default navbar-fixed-bottom" role="navigation">
+                        <div class="container">
+                            <div class="row" style="margin-top: 10px;">
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3 text-left">
+                                    <input type="number" style="width: 45px;border: 1px solid #ddd;text-align: center;" id="page_number"></input> / <span id="page_count"></span>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6 text-center">
+                                    <a id="first" role="button"><i class="fa fa-step-backward fa-2x"></i></a>
+                                    <a id="previous" role="button"><i class="fa fa-arrow-circle-left fa-2x"></i></a>
+                                    <a id="next" role="button"><i class="fa fa-arrow-circle-right fa-2x"></i></a>
+                                    <a id="last" role="button"><i class="fa fa-step-forward fa-2x"></i></a>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3 text-right">
+                                    <a id="fullscreen"><i class="fa fa-arrows-alt fa-2x"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="pdf_file" t-att-value="slide.url"/>
+
+                <script type="text/javascript" src="/web/js/web.assets_common/b6496be"></script>
+                <script type="text/javascript" src="/web/js/website.assets_frontend/44e82bd"></script>
+                <script type="text/javascript" src="/website_slides/static/lib/pdfjs/build/pdf.js"></script>
+                <script type="text/javascript" src="/website_slides/static/src/js/slide_embed.js"></script>
+                </body>
+            </html>
+        </template>
+
+
         <!-- all share components -->
         <template id='socialshare' name="Social Media Share">
             <h4 class="mt0">Share</h4>
@@ -84,15 +159,8 @@
             </div>
             <div class="form-group" t-if="slide.slide_type in ('presentation', 'document')">
                 <div class="input-group col-lg-3 col-md-3 col-sm-6 col-xs-6">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" id="btnminus"><i class="fa fa-minus-circle"></i></button>
-                    </span>
-                    <input type="text" class="form-control text-center" value="1" id="page_embed" readonly="readonly"/>
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" id="btnplus"><i class="fa fa-plus-circle"></i></button>
-                    </span>
+                    <input type="number" value="1" class="form-control embed-page-counter"/>
                 </div>
-                <input type="hidden" id="pdf_page_count" value=""/>
                 <span class="help-block">Select page to start with</span>
             </div>
         </template>
