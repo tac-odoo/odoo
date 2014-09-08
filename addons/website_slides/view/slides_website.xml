@@ -16,8 +16,12 @@
         </template>
 
         <!-- header template to add scripts to all pages -->
+        <template id="assets_frontend" inherit_id="website.assets_frontend" name="Slide">
+          <xpath expr="." position="inside">
+                <link type="text/less" href="/website_slides/static/src/less/website_slides.less" rel="stylesheet" t-ignore="true"/>
+          </xpath>
+        </template>
         <template id="head" name="slides">
-            <link href="/website_slides/static/src/css/website_slides.css" rel="stylesheet"/>
             <script type="text/javascript" src="/website_slides/static/src/js/slides.js"></script>
         </template>
 
@@ -25,9 +29,9 @@
         <template id="search" name="search">
             <form t-attf-action="/slides/#{slug(channel)}" role="search" method="get">
                 <div class="input-group">
-                    <input type="text" class="form-control" name="search" placeholder="Search Slides..." t-att-value="search" style="border-radius: 0px;"/>
+                    <input type="text" class="form-control slide-border-radius" name="search" placeholder="Search Slides..." t-att-value="search"/>
                     <span class="input-group-btn">
-                        <button class="btn btn-primary" type="submit" style="border-radius: 0px;">
+                        <button class="btn btn-primary slide-border-radius" type="submit">
                             <i class="fa fa-search"></i>
                         </button>
                     </span>
@@ -36,8 +40,8 @@
         </template>
 
         <template id='pdfview' name="pdfview">
-            <div class="panel panel-default" style="border-radius: 0px;">
-                <div class="panel-body" style="position: relative;padding:0px;">
+            <div class="panel panel-default slide-border-radius">
+                <div class="panel-body slide-pl0 slide-pr0">
                     <t t-if="slide.slide_type == 'infographic'">
                         <img t-attf-src="/website/image/ir.attachment/#{slide.id}/image" class="img-responsive"/>
                     </t>
@@ -167,8 +171,8 @@
 
         <template id='videoview' name="Video Viewer">
             <div class="row">
-                <div class="panel panel-default" style="border-radius: 0px;">
-                    <div class="panel-body" style="padding: 0px;">
+                <div class="panel panel-default slide-border-radius">
+                    <div class="panel-body slide-pl0 slide-pr0">
                         <div class="embed-responsive embed-responsive-4by3 embed-responsive-item">
                              <iframe t-attf-src="//www.youtube.com/embed/#{famous.youtube_id}?theme=light"></iframe>
                          </div>
@@ -187,31 +191,29 @@
             </t>
             <t t-call="website.layout">
                 <div class="wrap">
-                    <section style="box-shadow: 0 0 5px #CCC;">
+                    <section class="slide-box-shadow">
                         <div class="container">
                             <div class="row">
-                                <div class="col-md-12 col-sm-12 col-xs-12">
-                                    <div class="pull-left col-md-8 col-sm-12 col-xs-12 mt16 mb8" style="padding-left: 0px;padding-right: 0px;">
-                                        <h3 class="mt0">
-                                            <t t-esc="channel.name" />
-                                            <t t-if="is_public_user">
-                                                <a t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger" style="border-radius: 0px;">
-                                                    <i class="fa fa-cloud-upload"></i> Upload 
-                                                </a>
-                                            </t> 
-                                            <t t-if="not is_public_user">
-                                                <a class="btn btn-danger upload" t-attf-channel_id="#{channel.id}" style="border-radius: 0px;">
-                                                    <i class="fa fa-cloud-upload"></i> Upload 
-                                                </a>
-                                            </t>
-                                        </h3>
-                                    </div>
-                                    <div class="col-md-4 col-sm-12 col-xs-12 pul-right mt16 mb8" style="padding-left: 0px;padding-right: 0px;">
-                                        <t t-call="website_slides.search"/>
-                                    </div>
+                                <div class="pull-left col-md-8 col-sm-12 col-xs-12 mt16 mb8">
+                                    <h3 class="mt0">
+                                        <t t-esc="channel.name" />
+                                        <t t-if="is_public_user">
+                                            <a t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger slide-border-radius">
+                                                <i class="fa fa-cloud-upload"></i> Upload 
+                                            </a>
+                                        </t> 
+                                        <t t-if="not is_public_user">
+                                            <a class="btn btn-danger upload slide-border-radius" t-attf-channel_id="#{channel.id}">
+                                                <i class="fa fa-cloud-upload"></i> Upload 
+                                            </a>
+                                        </t>
+                                    </h3>
+                                </div>
+                                <div class="col-md-4 col-sm-12 col-xs-12 pul-right mt16 mb8">
+                                    <t t-call="website_slides.search"/>
                                 </div>
                                 <div class="col-md-6 col-sm-12 col-xs-12">
-                                    <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm" style="border-bottom: 0px solid #ddd;">
+                                    <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm nav-tabs-border">
                                         <li t-attf-class="slide-tabs-li #{not types and 'active' ''}">
                                             <a  t-attf-href="/slides/#{slug(channel)}" class="slide-tabs" data-toggle="tab">Home</a>
                                         </li>
@@ -230,7 +232,7 @@
                                         </li>
                                     </ul>
                                 </div>
-                                <div class="pull-right col-md-6 col-sm-12 col-xs-12">
+                                <div class="col-md-6 col-sm-12 col-xs-12">
                                     <span class="pull-right">
                                         Sort by :
                                             <a href="?sorting=date">Recently Published</a> |
@@ -260,7 +262,7 @@
                     </section>
                     <section t-if="not famous and not tags and not types and not search and not is_public_user" class="wrap mt16 mb0">
                         <div class="container">
-                            <div class="alert alert-danger alert-dismissable mb0" style="border-radius: 0px;">
+                            <div class="alert alert-danger alert-dismissable mb0 slide-border-radius">
                                 <p>
                                     Review your channel settings to promote your most viewed or recent published presentation
                                 </p>
@@ -270,7 +272,7 @@
                             </div>
                         </div>
                     </section>
-                    <section style="background-color: #f1f1f1;border-top: 1px solid #ccc;border-bottom: 1px solid #ccc;" t-if="famous and not tags and not types and not search">
+                    <section class="slide-border-top slide-border-bottom" t-if="famous and not tags and not types and not search">
                         <div class="container">
                             <div class="row">
                                 <div>
@@ -288,14 +290,14 @@
                                         </a>
                                     </div>
                                     <div class="col-md-6 mt16">
-                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 0px;">
-                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 0px;">
-                                                <p class="oe-slides-text-truncation lead mb0" style="padding-left: 0px;">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 slide-pl0">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 slide-pl0">
+                                                <p class="oe-slides-text-truncation lead mb0 slide-pl0">
                                                     <a t-attf-href="/slides/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
                                                         <t t-esc="famous.name"/>
                                                     </a>
                                                 </p>
-                                                <div class="mt8 mb8 col-md-16" t-if="famous.tag_ids" style="padding-left: 0px;">
+                                                <div class="mt8 mb8 col-md-16 slide-pl0" t-if="famous.tag_ids">
                                                     <t t-foreach="famous.tag_ids" t-as="att_tag">
                                                         <a t-attf-href="/slides/#{slug(channel)}/#{famous.slide_type}/tag/#{att_tag.name}">
                                                             <span t-attf-class="label label-default #{tags and tags == att_tag.name and 'label-primary' ''}" t-field="att_tag.name"/>
@@ -314,23 +316,23 @@
                         <div class="container mt16">
                             <div class="row">
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 15px;padding-right: 15px;" t-if="count_all == 0">
-                                    <div class="jumbotron" style="border-radius: 0px;border:1px solid #ccc">
+                                    <div class="jumbotron slide-border-top slide-border-radius">
                                         <h1>No presentation published yet.</h1>
                                         <p>
                                             The <i><t t-esc="channel.name"/></i> is empty. Upload PDF presentations, documents, videos or infographic using the button below.
                                         </p>
                                         <p>
-                                            <a t-if="is_public_user" t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger upload" style="border-radius: 0px;padding: 10px 20px;">
+                                            <a t-if="is_public_user" t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger upload slide-border-radius slide-pading">
                                                 <i class="fa fa-cloud-upload"></i> Upload 
                                             </a>
-                                            <a t-if="not is_public_user" class="btn btn-danger upload" t-attf-channel_id="#{channel.id}" style="border-radius: 0px;padding: 10px 20px;">
+                                            <a t-if="not is_public_user" class="btn btn-danger upload slide-border-radius slide-pading" t-attf-channel_id="#{channel.id}">
                                                 <i class="fa fa-cloud-upload"></i> Upload
                                             </a>
                                         </p>
                                     </div>
                                 </div>
 
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16" style="padding-left: 0px;padding-right: 0px;" t-if="types">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16 slide-pr0 slide-pl0" t-if="types">
                                     <t t-call="website_slides.gridview"/>
                                     <!--div class="jumbotron" style="border-radius: 0px;border:1px solid #ccc" t-if="not attachment_ids">
                                         <h1>Empty !</h1>
@@ -343,18 +345,18 @@
                                     </div-->
                                 </div>
 
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16" style="padding-left: 0px;padding-right: 0px;" t-if="types">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16" t-if="types">
                                     <div class="row text-center">
                                         <t t-call="website.pager"/>
                                     </div>
                                 </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16" style="padding-left: 0px;padding-right: 0px;" t-if="not types">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16 slide-pr0 slide-pl0" t-if="not types">
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" t-if="slides">
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left" style="padding-left: 0px;">
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left slide-pl0">
                                             <a t-attf-href="/slides/#{slug(channel)}/presentation" class="h3 mt0 mb0">Presentations</a>
                                         </div>
-                                        <div t-if="more_count_presentation" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
-                                            <a t-attf-href="/slides/#{slug(channel)}/presentation" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="more_count_presentation"/> more</a>
+                                        <div t-if="more_count_presentation" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0 slide-pr0">
+                                            <a t-attf-href="/slides/#{slug(channel)}/presentation" class="btn btn-primary fa fa-arrow-right slide-bg-color">View <t t-esc="more_count_presentation"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
@@ -362,35 +364,35 @@
                                     </t>
 
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" t-if="videos">
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left" style="padding-left: 0px;">
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left slide-pl0">
                                             <a t-attf-href="/slides/#{slug(channel)}/video" class="h3 mt0 mb0">Videos</a>
                                         </div>
 
-                                        <div t-if="more_count_video" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
-                                            <a t-attf-href="/slides/#{slug(channel)}/video" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="more_count_video"/> more</a>
+                                        <div t-if="more_count_video" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0 slide-pr0">
+                                            <a t-attf-href="/slides/#{slug(channel)}/video" class="btn btn-primary fa fa-arrow-right slide-bg-color">View <t t-esc="more_count_video"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
                                         <t t-set="attachment_ids" t-value="videos"/>
                                     </t>
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" t-if="documents">
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left" style="padding-left: 0px;">
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left slide-pl0">
                                             <a t-attf-href="/slides/#{slug(channel)}/document" class="h3 mt0 mb0">Documents</a>
                                         </div>
 
-                                        <div t-if="more_count_document" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
-                                            <a t-attf-href="/slides/#{slug(channel)}/document" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="more_count_document"/> more</a>
+                                        <div t-if="more_count_document" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0 slide-pr0">
+                                            <a t-attf-href="/slides/#{slug(channel)}/document" class="btn btn-primary fa fa-arrow-right slide-bg-color">View <t t-esc="more_count_document"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
                                         <t t-set="attachment_ids" t-value="documents"/>
                                     </t>
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" t-if="infographics">
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left" style="padding-left: 0px;">
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left slide-pl0">
                                             <a t-attf-href="/slides/#{slug(channel)}/infographic" class="h3 mt0 mb0">Infographic</a>
                                         </div>
-                                        <div t-if="more_count_infographic" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0" style="padding-right: 0px;">
-                                            <a t-attf-href="/slides/#{slug(channel)}/infographic" class="btn btn-primary fa fa-arrow-right" style="background-color: #a24689;border-color:#a24689">View <t t-esc="more_count_infographic"/> more</a>
+                                        <div t-if="more_count_infographic" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0 slide-pr0">
+                                            <a t-attf-href="/slides/#{slug(channel)}/infographic" class="btn btn-primary fa fa-arrow-right slide-bg-color">View <t t-esc="more_count_infographic"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
@@ -416,12 +418,12 @@
                             <div class="oe-channel-grid-thumbnail">
                                 <a t-attf-href="/slides/#{slug(channel)}" t-if="famous">
                                     <span class="channel-box">
-                                        <img t-attf-src="/website/image/ir.attachment/#{famous.id}/image" class="img-responsive" style="width: 100%;opacity: .5;"/>
+                                        <img t-attf-src="/website/image/ir.attachment/#{famous.id}/image" class="img-responsive slide-width slide-opacity"/>
                                     </span>
                                 </a>
                                 <a t-attf-href="/slides/#{slug(channel)}" t-if="not famous">
                                     <span class="channel-box">
-                                        <img src="/website_slides/static/description/channel-default.jpg" class="img-responsive" style="width: 100%;opacity: .5;"/>
+                                        <img src="/website_slides/static/description/channel-default.jpg" class="img-responsive slide-width slide-opacity"/>
                                     </span>
                                 </a>
                                 <div style="padding: 5px;">
@@ -463,11 +465,11 @@
 
         <!-- slide grid view -->
         <template id='gridview' name="Slides">
-            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="margin-top: 15px;margin-bottom: 15px;"  t-foreach="attachment_ids" t-as="attachment">
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 slide-collection" t-foreach="attachment_ids" t-as="attachment">
                 <div t-attf-class="oe-#{attachment.slide_type}-grid-thumbnail">
                     <a t-attf-href="/slides/#{slug(channel)}/#{attachment.slide_type}/#{slug(attachment)}">
                         <span t-attf-class="oe-#{attachment.slide_type}-image-thumbnail">
-                            <img t-attf-src="/website/image/ir.attachment/#{attachment.id}/image" style="width: 100%;" class="img-responsive"/>
+                            <img t-attf-src="/website/image/ir.attachment/#{attachment.id}/image" class="img-responsive slide-width"/>
                         </span>
                     </a>
                     <span t-if="not attachment.website_published" class="label label-danger" style="position: absolute;right: 20px;top: 7px;">Not Published</span>
@@ -511,7 +513,7 @@
                 <div t-if="slideview.youtube_id" class="embed-responsive embed-responsive-16by9 embed-responsive-item mb8">
                     <iframe t-attf-src="//www.youtube.com/embed/#{slideview.youtube_id}?theme=light"></iframe>
                 </div>
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 slide-pl0 slide-pr0">
                     <h3 class="oe-slides-text-truncation mt0">
                         <t t-esc="slideview.name"/>
                         <t t-call="website.publish_management">
@@ -520,7 +522,7 @@
                         </t>
                     </h3>
 
-                    <div class="pull-left mb16 col-md-6" t-if="slideview.tag_ids" style="padding-left: 0px;">
+                    <div class="pull-left mb16 col-md-6 slide-pl0" t-if="slideview.tag_ids ">
                         <t t-foreach="slideview.tag_ids" t-as="att_tag">
                             <a t-attf-href="/slides/#{slug(channel)}/#{slideview.slide_type}/tag/#{att_tag.name}">
                                 <span t-attf-class="label label-default #{tags and tags == att_tag.name and 'label-primary' ''}" t-field="att_tag.name"/>
@@ -532,27 +534,14 @@
                         <a id="unlike" t-att-user-id="user.id" t-att-attachment-id="slideview.id" class="slide-unlike text-muted" data-count-el=".count-dislikes" t-attf-data-href="/slides/#{slug(channel)}/view/#{slug(slideview)}/dislike"><i class="fa fa-thumbs-down fa-2x"></i></a>
                     </div-->
                 </div>
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px;">
-                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2" style="padding: 0px;">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 slide-pl0 slide-pr0">
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2 slide-pl0 slide-pr0">
                         <a t-attf-href="/slides/#{slug(channel)}/#{types}">
                             <img src="/website_slides/static/description/odoo-logo.jpg" class="img-responsive" style="border: 1px solid #CCC;"/>
                         </a>
                     </div>
-                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10" style="padding-right:0px;padding-left: 10px;">
-                        <div class="pull-right text-right col-md-4" style="padding-right:0px;">
-                            <div style="border-bottom: 1px solid #77B5FE;font-size:130%">
-                                <b><t t-esc="slideview.slide_views"/></b> views
-                            </div>
-                            <div class="text-muted mt4">
-                                <div class="pull-right mb16 col-md-6 text-right text-muted" style="padding-right: 0px">
-                                    <a id="like" t-att-user-id="user.id" t-att-attachment-id="slideview.id" class="slide-like text-muted" data-count-el='.count-likes' t-attf-data-href="/slides/#{slug(channel)}/view/#{slug(slideview)}/like"><i class="fa fa-thumbs-up fa-1x count-likes"> <t t-esc="slideview.likes"/></i> Like</a>
-
-                                    <a id="unlike" t-att-user-id="user.id" t-att-attachment-id="slideview.id" class="slide-unlike text-muted" data-count-el=".count-dislikes" t-attf-data-href="/slides/#{slug(channel)}/view/#{slug(slideview)}/dislike"><i class="fa fa-thumbs-down fa-1x count-dislikes"> <t t-esc="slideview.dislikes"/></i></a>
-                                </div>
-                            </div>
-                            
-                        </div>
-                        <div class="pull-left col-md-7" style="padding-left: 0;">
+                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10">
+                        <div class="pull-left col-md-7 slide-pl0">
                             <a t-attf-href="/slides/#{slug(channel)}/#{types}">
                                 <p t-field="channel.name"/>
                             </a>
@@ -563,10 +552,22 @@
                                 </t>
                             </div>
                         </div>
+                        <div class="pull-right text-right col-md-4 slide-pr0">
+                            <div class="slide-border-font">
+                                <b><t t-esc="slideview.slide_views"/></b> views
+                            </div>
+                            <div class="text-muted mt4">
+                                <div class="pull-right mb16 col-md-6 text-right text-muted slide-pr0">
+                                    <a id="like" t-att-user-id="user.id" t-att-attachment-id="slideview.id" class="slide-like text-muted" data-count-el='.count-likes' t-attf-data-href="/slides/#{slug(channel)}/view/#{slug(slideview)}/like"><i class="fa fa-thumbs-up fa-1x count-likes"> <t t-esc="slideview.likes"/></i> Like</a>
+
+                                    <a id="unlike" t-att-user-id="user.id" t-att-attachment-id="slideview.id" class="slide-unlike text-muted" data-count-el=".count-dislikes" t-attf-data-href="/slides/#{slug(channel)}/view/#{slug(slideview)}/dislike"><i class="fa fa-thumbs-down fa-1x count-dislikes"> <t t-esc="slideview.dislikes"/></i></a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 10px 0px 10px 0px;">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mt8 mb8 slide-pr0 slide-pl0">
                     <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm" role="tablist">
                         <li t-att-class="not comments and 'slide-tabs-li active' or 'slide-tabs-li'"><a href="#about" role="tab" data-toggle="tab" class="slide-tabs">About</a></li>
                         <li class="slide-tabs-li"><a href="#share" role="tab" data-toggle="tab" class="slide-tabs">Share</a></li>
@@ -623,7 +624,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12" style="padding-left: 5px;">
+            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                 <ul class="nav nav-tabs" role="tablist">
                     <li class="active"><a href="#related" data-toggle="tab">Related</a></li>
                     <li><a href="#most_viewed" data-toggle="tab">Most Viewed</a></li>

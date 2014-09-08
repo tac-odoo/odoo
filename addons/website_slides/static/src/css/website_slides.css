@@ -4,105 +4,88 @@
   padding-top: 5px;
   padding: 5px;
 }
-
 .slide-box .slide-container {
   margin: 0px;
   padding: 5px;
   cursor: pointer;
 }
-
 .slide-box .slide-container:hover {
   background: #efeff0;
 }
-
 .slide-box .image-box {
   border: 1px solid #dddddd;
   max-height: 60px;
   overflow: hidden;
   display: block;
 }
-
+.slide-box .text-truncation {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .slide-small-box {
   max-height: 60px;
   display: block;
   overflow: hidden;
   width: 100px;
 }
-
 .oe-channel-grid-thumbnail {
   background-color: #fcfcfc !important;
   min-height: 450px;
   border: 1px solid #ccc;
 }
-
 .channel-box {
   border: 1px solid #dddddd;
   max-height: 260px;
   overflow: hidden;
   display: block;
 }
-
-.slide-box .text-truncation {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .oe-presentation-image-thumbnail {
   max-height: 195px;
   overflow: hidden;
   display: block;
 }
-
 .oe-video-image-thumbnail {
   max-height: 147px;
   overflow: hidden;
   display: block;
 }
-
 .oe-document-image-thumbnail {
   max-height: 325px;
   overflow: hidden;
   display: block;
 }
-
 .oe-infographic-image-thumbnail {
   max-height: 325px;
   overflow: hidden;
   display: block;
 }
-
 .oe-presentation-grid-thumbnail {
   background-color: #fcfcfc !important;
   min-height: 300px;
   border: 1px solid #ccc;
 }
-
 .oe-infographic-grid-thumbnail {
   background-color: #fcfcfc !important;
   min-height: 425px;
   border: 1px solid #ccc;
 }
-
 .oe-document-grid-thumbnail {
   background-color: #fcfcfc !important;
   min-height: 425px;
   border: 1px solid #ccc;
 }
-
 .oe-video-grid-thumbnail {
   background-color: #fcfcfc !important;
   min-height: 250px;
   border: 1px solid #ccc;
 }
-
 .oe-slides-text-truncation {
   white-space: nowrap;
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .channel-description {
   height: 60px;
   overflow: hidden;
@@ -112,39 +95,42 @@
   -webkit-box-orient: vertical;
   display: inline-block;
 }
-
-.slide-like{
+.slide-cursor {
   cursor: pointer;
 }
-.slide-unlike{
+.slide-like {
   cursor: pointer;
 }
-
+.slide-unlike {
+  cursor: pointer;
+}
+.nav-tabs li.active  > a.slide-tabs,
+nav-tabs li.active  > a.slide-tabs:focus {
+  border: none;
+}
 .nav-tabs > li > a {
   border-radius: 0px 0px 0 0;
 }
-
 .nav-tabs > li.slide-tabs-li {
-    margin-bottom: 0px;
-    padding-right: 15px; 
+  margin-bottom: 0px;
+  padding-right: 15px;
 }
 .nav-tabs li > a.slide-tabs {
-    border:none;
-    padding: 5px 0px;
-    color: #8f8f8f ;
+  border: none;
+  padding: 5px 0px;
+  color: #8f8f8f;
 }
 .nav-tabs li > a.slide-tabs:hover {
   border-bottom: 4px solid #a24689;
   background-color: transparent;
 }
-.nav-tabs li.active>a.slide-tabs, nav-tabs li.active>a.slide-tabs:focus {
-  border: none;
-}
-.nav-tabs li.active>a.slide-tabs{
+.nav-tabs li.active > a.slide-tabs {
   border-bottom: 4px solid #a24689;
   font-weight: bold;
-} 
-
+}
+.nav-tabs-border {
+  border-bottom: None;
+}
 .slide-option-toggle {
   position: absolute;
   padding: 30px 30px 30px 30px;
@@ -154,27 +140,66 @@
   bottom: 0px;
   background-color: #eee;
   opacity: 1;
-  display:none;
+  display: none;
   overflow-y: auto;
 }
-.img-document{
+.img-document {
   width: 170px;
   height: 170px;
   border: 1px solid #CCC;
 }
 .slide-wrapper {
-  position:relative;
+  position: relative;
 }
 .slide-overlay {
- position: absolute;
- width: 100%;
- height: 100%;
- top: 0px;
- left: 0px;
- opacity: 0.9;
- background: rgb(204, 204, 204);
- padding: 10px
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  left: 0px;
+  opacity: 0.9;
+  background: #cccccc;
 }
-.pr0{
- padding-right:0px;
+.slide-border-top {
+  border: 1px solid #ccc;
+}
+.slide-border-bottom {
+  border-bottom: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+.slide-bg-color {
+  background-color: #a24689;
+  border-color: #a24689;
+}
+.slide-border-radius {
+  border-radius: 0px !important;
+}
+.slide-border-radius .slide-pading {
+  padding: 10px 20px;
+}
+.slide-width {
+  width: 100%;
+}
+.slide-width .slide-opacity {
+  opacity: .5;
+}
+.slide-pl0 {
+  padding-left: 0px;
+}
+.slide-pr0 {
+  padding-right: 0px;
+}
+.slide-collection {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+.slide-border-font {
+  border-bottom: 1px solid #77B5FE;
+  font-size: 130%;
+}
+.slide-box-shadow {
+  box-shadow: 0 0 5px #CCC;
+}
+.slide-img-border {
+  border: 1px solid #CCC;
 }

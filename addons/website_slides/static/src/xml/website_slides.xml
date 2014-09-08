@@ -100,13 +100,13 @@
                     <input type="number" style="width: 45px;border: 1px solid #ddd;text-align: center;" id="page_number"></input> / <span id="page_count"></span>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6 text-center">
-                    <a id="first" role="button"><i class="fa fa-step-backward fa-2x"></i></a>
-                    <a id="previous" role="button"><i class="fa fa-arrow-circle-left fa-2x"></i></a>
-                    <a id="next" role="button"><i class="fa fa-arrow-circle-right fa-2x"></i></a>
-                    <a id="last" role="button"><i class="fa fa-step-forward fa-2x"></i></a>
+                    <a id="first" role="button"><i class="fa fa-step-backward fa-2x slide-cursor"></i></a>
+                    <a id="previous" role="button"><i class="fa fa-arrow-circle-left fa-2x slide-cursor"></i></a>
+                    <a id="next" role="button"><i class="fa fa-arrow-circle-right fa-2x slide-cursor"></i></a>
+                    <a id="last" role="button"><i class="fa fa-step-forward fa-2x slide-cursor"></i></a>
                 </div>
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3 text-right">
-                    <a id="fullscreen"><i class="fa fa-arrows-alt fa-2x"></i></a>
+                    <a id="fullscreen"><i class="fa fa-arrows-alt fa-2x slide-cursor"></i></a>
                 </div>
             </div>
         </div>
