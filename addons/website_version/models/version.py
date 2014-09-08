@@ -15,7 +15,6 @@ class ViewVersion(osv.Model):
             'Key must be unique per snapshot.'),
     ]
 
-
     def write(self, cr, uid, ids, vals, context=None):
         if context is None:
             context = {}
@@ -37,8 +36,12 @@ class ViewVersion(osv.Model):
                 if current.snapshot_id.id == snapshot_id:
                     snap_ids.append(current.id)
                 else:
-                    copy_id=self.copy(cr,uid, current.id,{'snapshot_id':snapshot_id, 'website_id':website_id},context=ctx)
-                    snap_ids.append(copy_id)
+                    new_id = self.search(cr, uid, [('website_id', '=', website_id),('snapshot_id', '=', snapshot_id), ('key', '=', current.key)], context=context)
+                    if new_id:
+                        snap_ids.append(new_id[0])
+                    else:
+                        copy_id=self.copy(cr,uid, current.id,{'snapshot_id':snapshot_id, 'website_id':website_id},context=ctx)
+                        snap_ids.append(copy_id)
             super(ViewVersion, self).write(cr, uid, snap_ids, vals, context=ctx)
         else:
             ctx = dict(context, mykey=True)
