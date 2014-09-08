@@ -14,6 +14,7 @@ import textwrap
 import uuid
 from subprocess import Popen, PIPE
 from urlparse import urlparse
+import random
 
 import babel
 import babel.dates
@@ -244,10 +245,20 @@ class QWeb(orm.AbstractModel):
             experiment_id=context.get('experiment_id')
             if 'experiment_id' in context:
                 exp=self.pool["website_version.experiment"].browse(cr, uid, [experiment_id], context=context)[0]
+                result=[]
+                pond_sum=0
                 for page in exp.experiment_page_ids:
                     if page.key == id_or_xml_id:
-                        context['snapshot_id'] = page.snapshot_id.id
-                        break
+                        result.append([page.ponderation+pond_sum, page.snapshot_id.id])
+                        pond_sum+=page.ponderation
+                if pond_sum:
+                    #from pudb import set_trace; set_trace()
+                    x = random.randrange(0,pond_sum)
+                    for res in result:
+                        if x<res[0]:
+                            context['snapshot_id'] = res[1]
+                            break
+
             if 'snapshot_id' in context:
                 snapshot_id=context.get('snapshot_id')
                 id_or_xml_id=self.pool["ir.ui.view"].search(cr, uid, [('key', '=', id_or_xml_id), '|', ('snapshot_id', '=', False), ('snapshot_id', '=', snapshot_id), '|',('website_id','=',website_id),('website_id','=',False)], order='website_id, snapshot_id', limit=1, context=context)[0]

@@ -25,6 +25,7 @@
                                     <field name="view_id" domain="[('type','=','qweb'),('snapshot_id','=',False)]" on_change="onchange_get_key(view_id,context)" colspan="4"/>
                                     <field name="key" invisible='True'/>
                                     <field name="snapshot_id" domain="[('view_ids.key','=',key),('website_id','=',context.get('website_id'))]" colspan="4"/>
+                                    <field name="ponderation"/>
                                 </tree>
                             </field>
                         </page>
@@ -50,9 +51,11 @@
                 <form string="Experiment_page Form">
                     <notebook colspan="4">
                         <page string="Features" colspan="4" >
-                            <field name="experiment_id" colspan="4"/>
-                            <field name="view_id" domain="[('type','=','qweb'),('snapshot_id','=',False)]" colspan="4"/>
-                            <field name="snapshot_id" domain="[('view_ids.key','=',view_id.key),('website_id','=',experiment_id.website_id.id)]" colspan="4"/>
+                            <field name="view_id" domain="[('type','=','qweb'),('snapshot_id','=',False)]" on_change="onchange_get_key(view_id,context)" colspan="4"/>
+                            <field name="key" invisible='True'/>
+                            <field name="snapshot_id" domain="[('view_ids.key','=',key),('website_id','=',context.get('website_id'))]" 
+                            colspan="4"/>
+                            <field name="ponderation"/>
                         </page>
                     </notebook>
                 </form>
