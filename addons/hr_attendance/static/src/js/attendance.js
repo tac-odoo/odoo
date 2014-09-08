@@ -1,12 +1,11 @@
 
 openerp.hr_attendance = function (instance) {
-    
+
     var QWeb = instance.web.qweb;
     var _t = instance.web._t;
     var _lt = instance.web._lt;
 
     instance.hr_attendance.AttendanceSlider = instance.web.Widget.extend({
-        template: 'AttendanceSlider',
         init: function (parent) {
             this._super(parent);
             this.set({"signed_in": false});
@@ -66,7 +65,7 @@ openerp.hr_attendance = function (instance) {
                 self.last_sign = instance.web.str_to_datetime(self.employee.last_sign);
                 self.set({"signed_in": self.employee.state !== "absent"});
             });
-        },
+        }
     });
 
     instance.web.UserMenu.include({
@@ -77,16 +76,13 @@ openerp.hr_attendance = function (instance) {
                 if (!_.isUndefined(self.attendanceslider)) {
                     return;
                 }
-                // check current user is an employee
-                var Users = new instance.web.Model('res.users');
-                Users.call('has_group', ['base.group_user']).done(function(is_employee) {
-                    if (is_employee) {
-                        self.attendanceslider = new instance.hr_attendance.AttendanceSlider(self);
-                        self.attendanceslider.prependTo(instance.webclient.$('.oe_systray'));
-                    } else {
-                        self.attendanceslider = null;
-                    }
-                });
+                if($('.oe_systray .oe_attendance_status')){
+                    self.attendanceslider = new instance.hr_attendance.AttendanceSlider(self);
+                    self.attendanceslider.prependTo(instance.webclient.$('.oe_systray'));
+                    //rebind the event on the new $el
+                    self.attendanceslider.setElement($('.oe_systray .oe_attendance_status'));
+                    self.attendanceslider.start();
+                }
             });
         },
     });
