@@ -45,7 +45,7 @@
                     console.log('....',constraint);
                     constraint.then(function(url){
                         if (url){
-                            $('<div class="alert alert-danger" role="alert">This video already exists in this channel <a src='+ url +'>click here to view it </a></div>').insertBefore(self.$('.modal-body'));
+                            $('<div class="alert alert-danger" role="alert">This video already exists in this channel <a href='+ url +'>click here to view it </a></div>').insertBefore(self.$('.modal-body'));
                         }else{
                             self.$('#name').val(title);
                         }
@@ -114,7 +114,10 @@
             }
 
             var input = file.name;
-            self.$('#name').val(input.substr(0, input.lastIndexOf('.')) || input);
+            var input_val = input.substr(0, input.lastIndexOf('.')) || input;
+            this.check_constraint({'file_name': input_val}).then(function(file_name){
+                self.$('#name').val(file_name);
+            });
         },
         set_tags: function(){
             var self = this;

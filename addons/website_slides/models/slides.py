@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import json
 
 from openerp import models, fields, api, _
 import urllib2
 import requests
+import json
 
 from urlparse import urlparse,parse_qs
 from openerp.addons.website.models.website import slug
@@ -81,7 +81,24 @@ class ir_attachment(models.Model):
             slide = self.search(domain)
             if slide:
                 return "/slides/%s/%s/%s" % (slide.parent_id.id, slide.slide_type, slide.id)
+        if values.get('file_name'):
+            def get_unique_name(name):
+                domain = [('name','=',name)]
+                if self.search(domain):
+                    postfix = 1
+                    try:
+                        name, postfix = name.rsplit('_', 1)
+                        postfix = int(postfix) + 1
+                    except:
+                        pass
+                    name = "%s_%d" % (name, postfix)
+                    return get_unique_name(name)
+                else:
+                    return name
+            name = values['file_name']
+            return get_unique_name(name)
         return False
+
 
     def _get_share_url(self):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
