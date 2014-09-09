@@ -16,7 +16,7 @@ $(document).ready(function() {
     PDFJS.disableWorker = true;
 
     var pdfDoc = null,
-        pageNum = parseInt(document.getElementById('pdf_page').value),
+        pageNum = 1,
         pageRendering = false,
         pageNumPending = null,
         scale = 1.5,
@@ -115,6 +115,23 @@ $(document).ready(function() {
     }
     document.getElementById('first').addEventListener('click', onFirstPage);
 
+    /**
+     * Displays Search page.
+     */
+    function onPagecSearch() {
+        var currentVal = parseInt($(this).val());
+        if(currentVal > 0 && currentVal <= pdfDoc.numPages){
+            pageNum = currentVal;
+            renderPage(pageNum);
+        }else{
+            $(this).val(pageNum);
+        }
+    }
+    document.getElementById('page_number').addEventListener('change', onPagecSearch);
+
+    /**
+     * keyboard next previous navigation 
+     */
     document.addEventListener('keydown', function(e) {
       if(e.keyCode==37){
         onPrevPage();
@@ -131,6 +148,8 @@ $(document).ready(function() {
       pdfDoc = pdfDoc_;
       document.getElementById('page_count').textContent = pdfDoc.numPages;
 
+      var initpage = parseInt(document.getElementById('pdf_page').value);
+      pageNum = (initpage > 0 && initpage <= pdfDoc.numPages)? initpage : 1;
       // Initial/first page rendering
       renderPage(pageNum);
     });
