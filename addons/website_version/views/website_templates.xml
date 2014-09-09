@@ -24,6 +24,13 @@
             </xpath>
         </template>
 
+        <!-- <template id="user_navbar_content" inherit_id="website.user_navbar" groups="base.group_user">
+            <xpath expr="//nav/ul/li/a['id=content-menu-button']" position="after">
+                    <li class="divider" groups="base.group_website_designer"> </li>
+                    <li groups="base.group_website_designer"><a href="#" data-action="AB_testing">AB Testing</a></li>
+            </xpath>
+        </template> -->
+
         <template id="assets_frontend_menu_version" name="website_menu_version assets" inherit_id="website.assets_editor">
             <xpath expr="." position="inside">
                 <script type="text/javascript" src="/website_version/static/src/js/menu_version.js"></script>
