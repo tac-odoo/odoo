@@ -30,4 +30,5 @@ class Experiment(osv.Model):
         'name': fields.char(string="Title", size=256, required=True),
         'experiment_page_ids': fields.one2many('website_version.experiment_page', 'experiment_id',string="page_ids"),
         'website_id': fields.many2one('website',string="Website", required=True),
+        'active': fields.boolean('Active', select=2, help="If the active field is set to False, it will allow you to hide the experience without removing it."),
     }

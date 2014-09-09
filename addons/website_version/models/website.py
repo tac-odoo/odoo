@@ -6,10 +6,6 @@ from openerp.http import request
 class NewWebsite(osv.Model):
     _inherit = "website"
 
-    _columns = {
-        'experiment_id':fields.many2one("website_version.experiment",string="Experiment", domain="[('website_id','=',context.get('active_id'))]")
-    }
-
     def get_current_snapshot(self,cr,uid,context=None):
         snap = request.registry['website_version.snapshot']
         snapshot_id=request.context.get('snapshot_id')
@@ -39,10 +35,8 @@ class NewWebsite(osv.Model):
             request.context['snapshot_id'] = request.session.get('snapshot_id')
         elif request.session.get('master'):
             request.context['snapshot_id'] = 0
-        elif website.experiment_id:
-            request.context['experiment_id'] = website.experiment_id.id
         else:
-            request.context['snapshot_id'] = 0
+            request.context['experiment_id'] = 1
         
 
         return website

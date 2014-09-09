@@ -25,6 +25,7 @@
         <record id="experiment_default" model="website_version.experiment">
             <field name="name">Default_experience</field>
             <field name="website_id" ref="website.second_website"/>
+            <field name="active">True</field>
         </record>
 
         <record id="page_experiment_default_1" model="website_version.experiment_page">
@@ -41,10 +42,6 @@
             <field name="snapshot_id" ref="default_2"/>
             <field name="experiment_id" ref="experiment_default"/>
             <field name="ponderation">50</field>
-        </record>
-
-        <record id="website.second_website" model="website">
-            <field name="experiment_id" ref="experiment_default"/>
         </record>
 
 

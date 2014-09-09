@@ -242,21 +242,23 @@ class QWeb(orm.AbstractModel):
         website_id=context.get('website_id')
 
         if website_id:
-            experiment_id=context.get('experiment_id')
             if 'experiment_id' in context:
-                exp=self.pool["website_version.experiment"].browse(cr, uid, [experiment_id], context=context)[0]
-                result=[]
-                pond_sum=0
-                for page in exp.experiment_page_ids:
-                    if page.key == id_or_xml_id:
-                        result.append([page.ponderation+pond_sum, page.snapshot_id.id])
-                        pond_sum+=page.ponderation
-                if pond_sum:
-                    x = random.randrange(0,pond_sum)
-                    for res in result:
-                        if x<res[0]:
-                            context['snapshot_id'] = res[1]
-                            break
+                page_id = self.pool["website_version.experiment_page"].search(cr, uid, [('key', '=', id_or_xml_id),('experiment_id.active','!=',False)], context=context)
+                if page_id:
+                    page = self.pool["website_version.experiment_page"].browse(cr, uid, [page_id[0]], context=context)
+                    exp = page.experiment_id
+                    result=[]
+                    pond_sum=0
+                    for page in exp.experiment_page_ids:
+                        if page.key == id_or_xml_id:
+                            result.append([page.ponderation+pond_sum, page.snapshot_id.id])
+                            pond_sum+=page.ponderation
+                    if pond_sum:
+                        x = random.randrange(0,pond_sum)
+                        for res in result:
+                            if x<res[0]:
+                                context['snapshot_id'] = res[1]
+                                break
 
             if 'snapshot_id' in context:
                 snapshot_id=context.get('snapshot_id')
