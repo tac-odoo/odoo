@@ -298,14 +298,8 @@
             var self = this;
             var id = parseInt(self.id, 10);
             var context = website.get_context();
-            openerp.jsonRpc('/web/dataset/call_kw', 'call', {
-                model: 'ir.attachment',
-                method: 'get_next_slides',
-                args: [[id]],
-                kwargs: {
-                    //context: context
-                },
-            }).then(function(data){
+            openerp.jsonRpc('/slides/overlay/'+ id, 'call')
+            .then(function(data){
                 self.$( ".slide-overlay" ).remove();
                 $(openerp.qweb.render("website.slide.overlay", {slides:data})).appendTo(self.$(".slide-wrapper"));
                 self.$('.slide-thumbnail').hover(
