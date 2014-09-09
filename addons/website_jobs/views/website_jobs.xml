@@ -297,7 +297,7 @@
 		        </div>
 
 				<div class="text-center">
-					<a t-attf-href="/employees/#{employee.id}" t-field="employee.name" class="lead"/>
+					<a t-attf-href="/employee/#{employee.id}" t-field="employee.name" class="lead"/>
 					<p>
 						Joined on <i t-field="employee.create_date"/>
 					</p>
@@ -351,6 +351,56 @@
 					</div>
 				</div>
 				<div class="oe_structure" />
+			</t>
+		</template>
+
+		<template id='employee_detail' name="employee_detail">
+			<t t-call="website.layout">
+				<div class="container">
+					<div class="row">
+						<div class="col-sm-9">
+							<div class="row">
+								<div class="col-md-4">
+
+								</div>
+								<div class="col-md-8">
+									<h1 t-esc="employee.name"/>
+									<p><i t-field="employee.job_id.name"/></p>
+									<p>Joined On : <small><i t-field="employee.create_date"/></small></p>
+								</div>
+							</div>
+							<div class="row">
+								<div class="panel panel-default">
+  									<div class="panel-heading">
+    									<h3 class="panel-title">Recieved Badges</h3>
+  									</div>
+  									<div class="panel-body">
+    									<span class="pull-righ" t-foreach="employee.badge_ids" t-as="badge" style="padding-top: 5px;">
+											<a class="label label-default" t-esc="badge.badge_id.name"	/>
+										</span>
+  									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-3">
+							<br/>
+							<a class="btn btn-success btn-lg btn-block mb16" t-attf-href="/forum/ask">
+								Join Odoo Jobs
+							</a>
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h3 class="panel-title">About Odoo Jobs</h3>
+								</div>
+								<div class="panel-body">
+									<p>Odoo Jobs is running on the Oldest Odoo Professionals by being a bridge between Community and Companies looking for customizations.</p>
+
+									<p><a class="fa fa-arrow-right" href="#"> Read Guidelines</a></p>
+									<p><a class="fa fa-arrow-right" href="#"> Back to </a></p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 			</t>
 		</template>
 
