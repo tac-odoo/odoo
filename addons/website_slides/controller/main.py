@@ -205,8 +205,8 @@ class main(http.Controller):
         domain = [('is_slide','=',True), ('website_published', '=', True)]
         slideview.sudo().set_viewed()
 
-        most_viewed_ids = attachment._get_most_viewed_slides(self._slides_per_list)
-        related_ids = attachment._get_related_slides(self._slides_per_list)
+        most_viewed_ids = slideview._get_most_viewed_slides(self._slides_per_list)
+        related_ids = slideview._get_related_slides(self._slides_per_list)
 
         comments = slideview.website_message_ids
 
@@ -308,7 +308,7 @@ class main(http.Controller):
         slides_to_suggest = 9
         suggested_ids = slide._get_related_slides(slides_to_suggest)
         if len(suggested_ids) < slides_to_suggest:
-            slides_to_suggest = slides_to_suggest - len(related_ids)
+            slides_to_suggest = slides_to_suggest - len(suggested_ids)
             suggested_ids += slide._get_most_viewed_slides(slides_to_suggest)
 
         vals = []

@@ -89,10 +89,7 @@ class ir_attachment(models.Model):
 
     @api.multi
     def _get_related_slides(self, limit=20):
-        tags = self.tag_ids.ids
-        domain = [('is_slide','=',True), ('website_published', '=', True), ('id','!=',self.id)]
-        if tags:
-            domain += [('tag_ids', 'in', tags)]
+        domain = [('is_slide','=',True), ('website_published', '=', True), ('id','!=',self.id), ('category_id','=',self.category_id.id)]
         related_ids = self.search(domain, limit=limit, offset=0)
         return related_ids
 
