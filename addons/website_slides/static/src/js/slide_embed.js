@@ -16,7 +16,7 @@ $(document).ready(function() {
     PDFJS.disableWorker = true;
 
     var pdfDoc = null,
-        pageNum = parseInt(document.getElementById('pdf_page').value),
+        pageNum = 1,
         pageRendering = false,
         pageNumPending = null,
         scale = 1.5,
@@ -148,6 +148,8 @@ $(document).ready(function() {
       pdfDoc = pdfDoc_;
       document.getElementById('page_count').textContent = pdfDoc.numPages;
 
+      var initpage = parseInt(document.getElementById('pdf_page').value);
+      pageNum = (initpage > 0 && initpage <= pdfDoc.numPages)? initpage : 1;
       // Initial/first page rendering
       renderPage(pageNum);
     });
