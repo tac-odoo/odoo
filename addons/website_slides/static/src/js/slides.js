@@ -310,10 +310,10 @@
                 $(openerp.qweb.render("website.slide.overlay", {slides:data})).appendTo(self.$(".slide-wrapper"));
                 self.$('.slide-thumbnail').hover(
                     function(){
-                        $(this).find('.slide-caption').slideDown(250); //.fadeIn(250)
+                        $(this).find('.slide-caption').stop().slideDown(250); //.fadeIn(250)
                     },
                     function(){
-                        $(this).find('.slide-caption').slideUp(250); //.fadeOut(205)
+                        $(this).find('.slide-caption').stop().slideUp(250); //.fadeOut(205)
                     }
                 );
             });
