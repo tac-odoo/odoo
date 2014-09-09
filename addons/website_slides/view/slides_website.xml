@@ -191,7 +191,7 @@
             </t>
             <t t-call="website.layout">
                 <div class="wrap">
-                    <section class="slide-box-shadow slide-border-bottom">
+                    <section class="slide-box-shadow">
                         <div class="container">
                             <div class="row">
                                 <div class="pull-left col-md-8 col-sm-12 col-xs-12 mt16 mb8">
@@ -239,27 +239,11 @@
                                             <a href="?sorting=view">Most Viewed</a> | 
                                             <a href="?sorting=vote">Most Voted</a>
                                     </span>
-                                    <!--ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm pull-right" style="border-bottom: 0px solid #ddd;padding-right: 5px;"  t-if="types">
-                                        <li class="slide-tabs-li active dropdown" style="padding-right: 0px;">
-                                            <a  href="javascript:void(0);" class="slide-tabs dropdown-toggle" data-toggle="tab">
-                                                <t t-esc="all_count"/>
-                                                <span class="text-capitalize"><t t-esc="types"/></span>
-                                                <t t-if="sorting == 'date'"> by Recently Published</t>
-                                                <t t-if="sorting == 'view'"> by Most Viewed</t>
-                                                <t t-if="sorting == 'vote'"> by Most Voted</t>
-                                                <span class="caret"></span>
-                                            </a>
-                                            <ul class="dropdown-menu" role="menu">
-                                                <li><a href="?sorting=date">Recently Published</a></li>
-                                                <li><a href="?sorting=view">Most Viewed</a></li>
-                                                <li><a href="?sorting=vote">Most Voted</a></li>
-                                            </ul>
-                                        </li>
-                                    </ul-->
                                 </div>
                             </div>
                         </div>
                     </section>
+
                     <section t-if="not famous and not tags and not types and not search and not is_public_user" class="wrap mt16 mb0">
                         <div class="container">
                             <div class="alert alert-danger alert-dismissable mb0 slide-border-radius">
@@ -272,7 +256,7 @@
                             </div>
                         </div>
                     </section>
-                    <section class="slide-border-top" t-if="famous and not tags and not types and not search">
+                    <section class="slide-promote-box" t-if="famous and not tags and not types and not search">
                         <div class="container">
                             <div class="row">
                                 <div>
@@ -466,9 +450,9 @@
         <!-- slide grid view -->
         <template id='gridview' name="Slides">
             <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 slide-collection" t-foreach="attachment_ids" t-as="attachment">
-                <div t-attf-class="oe-#{attachment.slide_type}-grid-thumbnail">
+                <div t-attf-class="oe-grid-thumbnail">
                     <a t-attf-href="/slides/#{slug(channel)}/#{attachment.slide_type}/#{slug(attachment)}">
-                        <span t-attf-class="oe-#{attachment.slide_type}-image-thumbnail">
+                        <span t-attf-class="oe-image-thumbnail">
                             <img t-attf-src="/website/image/ir.attachment/#{attachment.id}/image" class="img-responsive slide-width"/>
                         </span>
                     </a>

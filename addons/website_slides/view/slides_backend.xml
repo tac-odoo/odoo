@@ -68,6 +68,7 @@
                             </group>
                             <group string="Categorization">
                                 <field name="parent_id" string="Channel"/>
+                                <field name="category_id" domain="[('document_id','=',parent_id)]"/>
                             </group>
                         </group>
                         <group name="description_group" string="Description" colspan="4">

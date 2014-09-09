@@ -43,14 +43,25 @@ class MailMessage(models.Model):
     path = fields.Char(
             string='Discussion Path', select=1,
             help='Used to display messages in a paragraph-based chatter using a unique path;')
-            
+
+class Categoty(models.Model):
+    _name = 'ir.attachment.category'
+    _description = "Category of Documents"
+    _order = "id desc"
+
+    document_id = fields.Many2one('document.directory', string="Channel")
+    name = fields.Char(string="Category", tranalate=True)
+    sequence = fields.Integer(string='Sequence', default=10)
+
+
 class ir_attachment(models.Model):
     _name = 'ir.attachment'
     _inherit = ['ir.attachment','mail.thread']
     _order = "id desc"
 
+    category_id = fields.Many2one('ir.attachment.category', string="Category")
     is_slide = fields.Boolean(string='Is Slide')
-    slide_type = fields.Selection([('infographic','Infographic'), ('presentation', 'Presentation'), ('document', 'Document'), ('video', 'Video')], string='Type')
+    slide_type = fields.Selection([('infographic','Infographic'), ('presentation', 'Presentation'), ('document', 'Document'), ('video', 'Video')], string='Type', help="Document type will be set automatically depending on the height and width, however you can change it manually.")
     tag_ids = fields.Many2many('ir.attachment.tag', 'rel_attachments_tags', 'attachment_id', 'tag_id', string='Tags')
     image = fields.Binary('Thumb')
     slide_views = fields.Integer(string='Number of Views', default=0)

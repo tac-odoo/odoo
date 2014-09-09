@@ -4,6 +4,7 @@
     @body-bg: #fcfcfc;
     @brand-primary: #a24689;
 } .define-color-if-not-defined();
+
 .slide-box {
     border: 1px solid @nav-tabs-border-color;
     border-width: 0 1px 1px 1px;
@@ -46,46 +47,19 @@
     overflow: hidden;
     display: block;
 }
-.oe-presentation-image-thumbnail {
-    max-height: 195px;
+
+.oe-image-thumbnail {
+    max-height: 190px;
     overflow: hidden;
     display: block;
 }
-.oe-video-image-thumbnail {
-    max-height: 147px;
-    overflow: hidden;
-    display: block;
-}
-.oe-document-image-thumbnail {
-    max-height: 325px;
-    overflow: hidden;
-    display: block;
-}
-.oe-infographic-image-thumbnail {
-    max-height: 325px;
-    overflow: hidden;
-    display: block;
-}
-.oe-presentation-grid-thumbnail {
-    background-color: @body-bg !important;
+
+.oe-grid-thumbnail {
+    background-color: @jumbotron-bg !important;
     min-height: 300px;
-    border: 1px solid @brand-info;
-}
-.oe-infographic-grid-thumbnail {
-    background-color: @body-bg !important;
-    min-height: 425px;
-    border: 1px solid @brand-info;
-}
-.oe-document-grid-thumbnail {
-    background-color: @body-bg !important;
-    min-height: 425px;
     border: 1px solid @nav-tabs-border-color;
 }
-.oe-video-grid-thumbnail {
-    background-color: @body-bg !important;
-    min-height: 250px;
-    border: 1px solid @nav-tabs-border-color;
-}
+
 .oe-slides-text-truncation {
     white-space: nowrap;
     width: 100%;
@@ -144,7 +118,7 @@
     }
 }
 .nav-tabs-border {
-    border-bottom: None;//1px solid @nav-tabs-border-color !important;
+    border-bottom: None;
 }
 .slide-option-toggle {
     position: absolute;
@@ -163,13 +137,11 @@
     height: 170px;
     border: 1px solid @brand-info;
 }
-.slide-border-top {
-    border:0px solid @nav-tabs-border-color;
+
+.slide-promote-box{
+    background-color: @alert-info-bg;
 }
-.slide-border-bottom {
-    border-bottom:1px solid @brand-primary;
-    background-color: @body-bg;
-}
+
 .slide-bg-color {
     background-color: @body-bg;
     border-color:#a24689;

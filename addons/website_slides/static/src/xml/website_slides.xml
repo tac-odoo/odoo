@@ -11,12 +11,12 @@
                     <div class="modal-body">
                         <form class="clearfix form-horizontal">
                             <div class="control-group">
-                                <div class="controls col-sm-4 input-group-sm" style="padding: 0px;;">
+                                <div class="controls col-sm-4 input-group-sm" style="padding-right: 0px;">
                                     <span class="oe-presentation-image-thumbnail" style="max-height: 166px;border: 1px solid #ccc;">
                                         <img src="/website_slides/static/src/img/document.png"  id="slide-image" title="Content Preview" class="img-responsive" />
                                     </span>
                                 </div>
-                                <div class="controls col-sm-8 input-group-sm" style="padding-right: 0px;">
+                                <div class="controls col-sm-8 input-group-sm">
                                     <ul class="list-group">
                                         <li class="list-group-item active">
                                             <h5 class="list-group-item-heading">
@@ -59,11 +59,9 @@
                             </div>
 
                             <div class="control-group">
-
                                 <label for="description" name="slide-description" class="pr0 control-label col-sm-2">
                                     Description:
                                 </label>
-                                <br/>
                                 <div class="controls col-sm-10">
                                     <textarea id="description"  placeholder="Description" class="form-control"  maxlength="150"></textarea>
                                 </div>
