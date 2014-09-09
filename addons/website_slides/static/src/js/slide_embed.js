@@ -115,6 +115,23 @@ $(document).ready(function() {
     }
     document.getElementById('first').addEventListener('click', onFirstPage);
 
+    /**
+     * Displays Search page.
+     */
+    function onPagecSearch() {
+        var currentVal = parseInt($(this).val());
+        if(currentVal > 0 && currentVal <= pdfDoc.numPages){
+            pageNum = currentVal;
+            renderPage(pageNum);
+        }else{
+            $(this).val(pageNum);
+        }
+    }
+    document.getElementById('page_number').addEventListener('change', onPagecSearch);
+
+    /**
+     * keyboard next previous navigation 
+     */
     document.addEventListener('keydown', function(e) {
       if(e.keyCode==37){
         onPrevPage();
