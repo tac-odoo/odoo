@@ -16,7 +16,7 @@ class ResCompany(osv.Model):
         ], limit=1, context=context)
         if paypal_ids:
             paypal = Acquirer.browse(cr, uid, paypal_ids[0], context=context)
-            return dict.fromkeys(ids, paypal.paypal_email_account)
+            return dict.fromkeys(ids, paypal.login)
         return dict.fromkeys(ids, False)
 
     def _set_paypal_account(self, cr, uid, id, name, value, arg, context=None):
@@ -25,11 +25,11 @@ class ResCompany(osv.Model):
         paypal_account = self.browse(cr, uid, id, context=context).paypal_account
         paypal_ids = Acquirer.search(cr, uid, [
             ('website_published', '=', True),
-            ('paypal_email_account', '=', paypal_account),
+            ('login', '=', paypal_account),
             ('company_id', '=', company_id),
         ], context=context)
         if paypal_ids:
-            Acquirer.write(cr, uid, paypal_ids, {'paypal_email_account': value}, context=context)
+            Acquirer.write(cr, uid, paypal_ids, {'login': value}, context=context)
         return True
 
     _columns = {

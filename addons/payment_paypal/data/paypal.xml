@@ -2,18 +2,223 @@
 <openerp>
     <data noupdate="1">
 
+        <record id="payment_acquirer_provider_paypal" model="payment.acquirer.provider">
+            <field name="name">Paypal</field>
+            <field name="production_url">https://www.paypal.com/cgi-bin/webscr</field>
+            <field name="test_url">https://www.sandbox.paypal.com/cgi-bin/webscr</field>
+        </record>
+
         <record id="payment_acquirer_paypal" model="payment.acquirer">
             <field name="name">Paypal</field>
-            <field name="provider">paypal</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
             <field name="company_id" ref="base.main_company"/>
             <field name="view_template_id" ref="paypal_acquirer_button"/>
             <field name="environment">test</field>
             <field name="pre_msg"><![CDATA[
 <p>You will be redirected to the Paypal website after cliking on the payment button.</p>]]></field>
-            <field name="paypal_email_account">dummy</field>
-            <field name="paypal_seller_account">dummy</field>
-            <field name="paypal_api_username">dummy</field>
-            <field name="paypal_api_password">dummy</field>
+            <field name="login">dummy</field>
+            <field name="transaction_key">dummy</field>
+            <field name="paypal_use_ipn">True</field>
+        </record>
+
+        <!--      Mapping Keys      -->
+        <record id="payment_acquirer_provider_mapping_paypal1" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">cmd</field>
+            <field name="odoo_key">'_xclick'</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal2" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">business</field>
+            <field name="odoo_key">acquirer.login</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal3" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">item_name</field>
+            <field name="odoo_key">tx_values['reference']</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal4" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">item_number</field>
+            <field name="odoo_key">tx_values['reference']</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal5" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">amount</field>
+            <field name="odoo_key">tx_values['amount']</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal6" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">currency_code</field>
+            <field name="odoo_key">tx_values['currency'] and tx_values['currency'].name or ''</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+         <record id="payment_acquirer_provider_mapping_paypal7" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">address1</field>
+            <field name="odoo_key">partner_values['address']</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal8" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">city</field>
+            <field name="odoo_key">partner_values['city']</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal9" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">country</field>
+            <field name="odoo_key">partner_values['country'] and partner_values['country'].name or ''</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal10" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">state</field>
+            <field name="odoo_key">partner_values['state'] and partner_values['state'].name or ''</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal11" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">email</field>
+            <field name="odoo_key">partner_values['email']</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal12" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">zip</field>
+            <field name="odoo_key">partner_values['zip']</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal13" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">first_name</field>
+            <field name="odoo_key">partner_values['first_name']</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal14" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">last_name</field>
+            <field name="odoo_key">partner_values['last_name']</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal15" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">state</field>
+            <field name="odoo_key">partner_values['state'] and partner_values['state'].name or ''</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal16" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">return</field>
+            <field name="odoo_key">'%s' % urlparse.urljoin(base_url, '/payment/paypal/dpn/')</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal17" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">notify_url</field>
+            <field name="odoo_key">'%s' % urlparse.urljoin(base_url, '/payment/paypal/ipn/')</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal18" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">cancel_return</field>
+            <field name="odoo_key">'%s' % urlparse.urljoin(base_url, '/payment/paypal/cancel/')</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal19" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">handling</field>
+            <field name="odoo_key">'%.2f' % tx_values.pop('fees', 0.0) if acquirer.provider_id.fees_active else 0.0 </field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_provider_mapping_paypal20" model="payment.acquirer.provider.mapping">
+            <field name="provider_key">custom</field>
+            <field name="odoo_key">json.dumps({'return_url': '%s' % tx_values.pop('return_url')}) if tx_values.get('return_url') else '' </field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+
+        <!--     Invalid Parametr Mapping    -->
+        <record id="payment_acquirer_transaction_mapping_paypal1" model="payment.transaction.mapping">
+            <field name="odoo_key">tx.acquirer_reference</field>
+            <field name="provider_key">data.get('txn_id')</field>
+            <field name="type">check_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_paypal2" model="payment.transaction.mapping">
+            <field name="odoo_key">(tx.amount + tx.fees)</field>
+            <field name="provider_key">float(data.get('mc_gross', '0.0'))</field>
+            <field name="type">check_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_paypal3" model="payment.transaction.mapping">
+            <field name="odoo_key">tx.currency_id.name</field>
+            <field name="provider_key">data.get('mc_currency')</field>
+            <field name="type">check_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_paypal4" model="payment.transaction.mapping">
+            <field name="odoo_key">tx.fees</field>
+            <field name="provider_key">float(data.get('handling_amount'))</field>
+            <field name="type">check_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_paypal5" model="payment.transaction.mapping">
+            <field name="odoo_key">tx.partner_reference</field>
+            <field name="provider_key">data.get('payer_id')</field>
+            <field name="type">check_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_paypal6" model="payment.transaction.mapping">
+            <field name="odoo_key">tx.acquirer_id.login</field>
+            <field name="provider_key">data.get('receiver_email')</field>
+            <field name="type">check_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_paypal7" model="payment.transaction.mapping">
+            <field name="odoo_key">tx.acquirer_id.transaction_key</field>
+            <field name="provider_key">data.get('receiver_id')</field>
+            <field name="type">check_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+
+        <!--     Error Code Mapping   -->
+        <record id="payment_acquirer_transaction_mapping_paypal8" model="payment.transaction.mapping">
+            <field name="odoo_key">done</field>
+            <field name="provider_key">['Completed', 'Processed']</field>
+            <field name="type">error_code</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_paypal9" model="payment.transaction.mapping">
+            <field name="odoo_key">pending</field>
+            <field name="provider_key">['Pending', 'Expired']</field>
+            <field name="type">error_code</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+
+        <!--     required Value Mapping   -->
+        <record id="payment_acquirer_transaction_mapping_paypal10" model="payment.transaction.mapping">
+            <field name="odoo_key">reference</field>
+            <field name="provider_key">data.get('item_number')</field>
+            <field name="type">value</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_paypal11" model="payment.transaction.mapping">
+            <field name="odoo_key">txn_id</field>
+            <field name="provider_key">data.get('txn_id')</field>
+            <field name="type">value</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+
+        <!--        Write Value         -->
+        <record id="payment_acquirer_transaction_mapping_paypal12" model="payment.transaction.mapping">
+            <field name="odoo_key">state</field>
+            <field name="provider_key">data.get('payment_status')</field>
+            <field name="type">write_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_paypal13" model="payment.transaction.mapping">
+            <field name="odoo_key">transaction_type</field>
+            <field name="provider_key">data.get('payment_type')</field>
+            <field name="type">write_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_paypal14" model="payment.transaction.mapping">
+            <field name="odoo_key">acquirer_reference</field>
+            <field name="provider_key">data.get('txn_id')</field>
+            <field name="type">write_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
+        </record>
+        <record id="payment_acquirer_transaction_mapping_paypal15" model="payment.transaction.mapping">
+            <field name="odoo_key">partner_reference</field>
+            <field name="provider_key">data.get('payer_id')</field>
+            <field name="type">write_field</field>
+            <field name="provider_id" ref="payment_acquirer_provider_paypal"/>
         </record>
 
         <function model="payment.acquirer" name="_migrate_paypal_account"/>

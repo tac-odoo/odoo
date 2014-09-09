@@ -1,4 +1,8 @@
 # -*- coding: utf-'8' "-*-"
+try:
+    import simplejson as json
+except ImportError:
+    import json
 from hashlib import sha1
 import time
 import hmac
@@ -76,7 +80,6 @@ class PaymentAcquirer(osv.Model):
         'account': fields.char('Merchant Account/PSPID/Account'),
         'login': fields.char('Skin Code/WebsiteKey/Email ID/API User ID/Login'),
         'transaction_key': fields.char('Skin HMAC Key/SecretKey/Seller ID/API User Password'),
-        'use_ipn': fields.boolean('Use IPN', help='Instant Payment Notification'),
         'sign_in': fields.char('SHA Key IN/Signature Key IN'),
         'sign_out': fields.char('SHA Key OUT/Signature Key OUT'),
     }

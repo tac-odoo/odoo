@@ -46,7 +46,6 @@
                             <field name="account"/>
                             <field name="login"/>
                             <field name="transaction_key"/>
-                            <field name="use_ipn"/>
                             <field name="sign_in"/>
                             <field name="sign_out"/>
                         </group>

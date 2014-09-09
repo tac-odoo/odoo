@@ -16,9 +16,6 @@ _logger = logging.getLogger(__name__)
 
 
 class PaypalController(http.Controller):
-    _notify_url = '/payment/paypal/ipn/'
-    _return_url = '/payment/paypal/dpn/'
-    _cancel_url = '/payment/paypal/cancel/'
 
     def _get_return_url(self, **post):
         """ Extract the return URL from the data coming from paypal. """
@@ -47,14 +44,13 @@ class PaypalController(http.Controller):
             tx_ids = request.registry['payment.transaction'].search(cr, uid, [('reference', '=', reference)], context=context)
             if tx_ids:
                 tx = request.registry['payment.transaction'].browse(cr, uid, tx_ids[0], context=context)
-        paypal_urls = request.registry['payment.acquirer']._get_paypal_urls(cr, uid, tx and tx.acquirer_id and tx.acquirer_id.env or 'prod', context=context)
-        validate_url = paypal_urls['paypal_form_url']
+        validate_url = request.registry['payment.acquirer'].get_form_action_url(cr, SUPERUSER_ID, tx and tx.acquirer_id.id, context=context)
         urequest = urllib2.Request(validate_url, werkzeug.url_encode(new_post))
         uopen = urllib2.urlopen(urequest)
         resp = uopen.read()
         if resp == 'VERIFIED':
             _logger.info('Paypal: validated data')
-            res = request.registry['payment.transaction'].form_feedback(cr, SUPERUSER_ID, post, 'paypal', context=context)
+            res = request.registry['payment.transaction'].form_feedback(cr, SUPERUSER_ID, 'Paypal', post, context=context)
         elif resp == 'INVALID':
             _logger.warning('Paypal: answered INVALID on data verification')
         else:
