@@ -73,7 +73,6 @@
     $(document).ready(function() {
         var version = new website.EditorVersion();
         version.setElement($("#version-menu"));
-        console.log($('html').attr('data-view-xmlid'))
         version.start();
     });
     
