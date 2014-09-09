@@ -3,6 +3,8 @@
     @brand-info: #dddddd;
     @body-bg: #fcfcfc;
     @brand-primary: #a24689;
+    @link-color: @brand-primary;
+    @panel-footer-bg: ##d3d3d3;
 } .define-color-if-not-defined();
 
 .slide-box {
@@ -88,6 +90,7 @@
 .nav-tabs li.active &>a.slide-tabs, nav-tabs li.active &>a.slide-tabs:focus {
     border: none;
     background-color: @body-bg;
+    color: @link-color;
 }
 .nav-tabs {
     & > li {
@@ -103,7 +106,6 @@
         & > a.slide-tabs {
             border:none;
             padding: 5px 0px;
-            color: #8f8f8f;
         }
         & > a.slide-tabs:hover {
             border-bottom: 4px solid @brand-primary;
