@@ -117,6 +117,7 @@
                         </div>
                     </div>
                     <input type="hidden" id="pdf_file" t-att-value="slide.url"/>
+                    <input type="hidden" id="pdf_page" t-att-value="page"/>
 
                 <script type="text/javascript" src="/web/js/web.assets_common/b6496be"></script>
                 <script type="text/javascript" src="/web/js/website.assets_frontend/44e82bd"></script>

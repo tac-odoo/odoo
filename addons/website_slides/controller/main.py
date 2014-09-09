@@ -286,5 +286,6 @@ class main(http.Controller):
            'slide':slide,
            'user':user,
            'channel':slide.parent_id,
+           'page':page,
         }
         return request.website.render('website_slides.pdfembed', values)
