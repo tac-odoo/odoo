@@ -41,7 +41,7 @@
 
         <template id='pdfview' name="pdfview">
             <div class="panel panel-default slide-border-radius">
-                <div class="panel-body slide-pl0 slide-pr0">
+                <div class="panel-body" style="padding: 0px;">
                     <t t-if="slide.slide_type == 'infographic'">
                         <img t-attf-src="/website/image/ir.attachment/#{slide.id}/image" class="img-responsive"/>
                     </t>
@@ -191,7 +191,7 @@
             </t>
             <t t-call="website.layout">
                 <div class="wrap">
-                    <section class="slide-box-shadow">
+                    <section class="slide-box-shadow slide-border-bottom">
                         <div class="container">
                             <div class="row">
                                 <div class="pull-left col-md-8 col-sm-12 col-xs-12 mt16 mb8">
@@ -272,7 +272,7 @@
                             </div>
                         </div>
                     </section>
-                    <section class="slide-border-top slide-border-bottom" t-if="famous and not tags and not types and not search">
+                    <section class="slide-border-top" t-if="famous and not tags and not types and not search">
                         <div class="container">
                             <div class="row">
                                 <div>
@@ -356,7 +356,7 @@
                                             <a t-attf-href="/slides/#{slug(channel)}/presentation" class="h3 mt0 mb0">Presentations</a>
                                         </div>
                                         <div t-if="more_count_presentation" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0 slide-pr0">
-                                            <a t-attf-href="/slides/#{slug(channel)}/presentation" class="btn btn-primary fa fa-arrow-right slide-bg-color">View <t t-esc="more_count_presentation"/> more</a>
+                                            <a t-attf-href="/slides/#{slug(channel)}/presentation" class="btn btn-primary fa fa-arrow-right">View <t t-esc="more_count_presentation"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
@@ -369,7 +369,7 @@
                                         </div>
 
                                         <div t-if="more_count_video" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0 slide-pr0">
-                                            <a t-attf-href="/slides/#{slug(channel)}/video" class="btn btn-primary fa fa-arrow-right slide-bg-color">View <t t-esc="more_count_video"/> more</a>
+                                            <a t-attf-href="/slides/#{slug(channel)}/video" class="btn btn-primary fa fa-arrow-right">View <t t-esc="more_count_video"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
@@ -381,7 +381,7 @@
                                         </div>
 
                                         <div t-if="more_count_document" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0 slide-pr0">
-                                            <a t-attf-href="/slides/#{slug(channel)}/document" class="btn btn-primary fa fa-arrow-right slide-bg-color">View <t t-esc="more_count_document"/> more</a>
+                                            <a t-attf-href="/slides/#{slug(channel)}/document" class="btn btn-primary fa fa-arrow-right">View <t t-esc="more_count_document"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
@@ -392,7 +392,7 @@
                                             <a t-attf-href="/slides/#{slug(channel)}/infographic" class="h3 mt0 mb0">Infographic</a>
                                         </div>
                                         <div t-if="more_count_infographic" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0 slide-pr0">
-                                            <a t-attf-href="/slides/#{slug(channel)}/infographic" class="btn btn-primary fa fa-arrow-right slide-bg-color">View <t t-esc="more_count_infographic"/> more</a>
+                                            <a t-attf-href="/slides/#{slug(channel)}/infographic" class="btn btn-primary fa fa-arrow-right">View <t t-esc="more_count_infographic"/> more</a>
                                         </div>
                                     </div>
                                     <t t-call="website_slides.gridview">
@@ -540,7 +540,7 @@
                             <img src="/website_slides/static/description/odoo-logo.jpg" class="img-responsive" style="border: 1px solid #CCC;"/>
                         </a>
                     </div>
-                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10">
+                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10 slide-pr0">
                         <div class="pull-left col-md-7 slide-pl0">
                             <a t-attf-href="/slides/#{slug(channel)}/#{types}">
                                 <p t-field="channel.name"/>
