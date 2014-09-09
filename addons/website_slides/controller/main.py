@@ -51,6 +51,31 @@ class main(http.Controller):
         }
         return request.website.render('website_slides.channels', vals)
 
+
+    @http.route(['/slides/<model("document.directory"):channel>/category/<model("ir.attachment.category"):category>',
+                '/slides/<model("document.directory"):channel>/category/<model("ir.attachment.category"):category>/page/<int:page>'
+                ], type='http', auth="public", website=True)
+    def categories(self, channel, category, order='id', page=1):
+        attachment = request.env['ir.attachment']
+
+        domain = [('is_slide','=','True'), ('parent_id','=',channel.id), ('category_id','=',category.id)]
+
+        url = "/slides/%s/category/%s" % (channel.id, category.id)
+        pager_count = attachment.search_count(domain)
+        pager = request.website.pager(url=url, total=pager_count, page=page,
+                                      step=self._slides_per_page, scope=self._slides_per_page,
+                                      url_args={})
+
+        attachment_ids = attachment.search(domain, limit=self._slides_per_page, offset=pager['offset'], order=order)
+        values = {
+            'attachment_ids':attachment_ids,
+            'pager': pager,
+            'channel': channel,
+            'category':category
+        }
+        return request.website.render('website_slides.category', values)
+
+
     @http.route(['/slides/<model("document.directory"):channel>',
                 '/slides/<model("document.directory"):channel>/<types>',
                 '/slides/<model("document.directory"):channel>/<types>/tag/<tags>',
@@ -61,6 +86,7 @@ class main(http.Controller):
     def slides(self, channel=0, page=1, types='', tags='', sorting='creation', search=''):
         user = request.env.user
         attachment = request.env['ir.attachment']
+        category = request.env['ir.attachment.category']
 
         domain = [('is_slide','=','True'), ('parent_id','=',channel.id)]
 
@@ -138,28 +164,31 @@ class main(http.Controller):
                 'search': search
             })
         else:
-            count_domain = domain + [('slide_type', '=', 'video')]
-            videos = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
-            values['more_count_video'] = values.get('count_video', 0) - len(videos)
+            category_ids = category.search([('document_id','=',channel.id)])
 
-            count_domain = domain + [('slide_type', '=', 'presentation')]
-            slides = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
-            values['more_count_presentation'] = values.get('count_presentation', 0) - len(slides)
+            # count_domain = domain + [('slide_type', '=', 'video')]
+            # videos = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
+            # values['more_count_video'] = values.get('count_video', 0) - len(videos)
 
-            count_domain = domain + [('slide_type', '=', 'document')]
-            documents = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
-            values['more_count_document'] = values.get('count_document', 0) - len(documents)
+            # count_domain = domain + [('slide_type', '=', 'presentation')]
+            # slides = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
+            # values['more_count_presentation'] = values.get('count_presentation', 0) - len(slides)
 
-            count_domain = domain + [('slide_type', '=', 'infographic')]
-            infographics = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
-            values['more_count_infographic'] = values.get('count_infographic', 0) - len(infographics)
+            # count_domain = domain + [('slide_type', '=', 'document')]
+            # documents = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
+            # values['more_count_document'] = values.get('count_document', 0) - len(documents)
+
+            # count_domain = domain + [('slide_type', '=', 'infographic')]
+            # infographics = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
+            # values['more_count_infographic'] = values.get('count_infographic', 0) - len(infographics)
 
             famous = channel.get_mostviewed()
             values.update({
-                'videos':videos,
-                'slides':slides,
-                'documents':documents,
-                'infographics': infographics,
+                # 'videos':videos,
+                # 'slides':slides,
+                # 'documents':documents,
+                # 'infographics': infographics,
+                'category_ids':category_ids,
                 'famous':famous
             })
 

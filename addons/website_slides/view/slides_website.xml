@@ -183,6 +183,32 @@
         </template>
 
         <!-- entry page of the slide application -->
+        <template id='category' name="Odoo Slides by Category">
+            <t t-set="head">
+                <t t-call="website_slides.head"/>
+                <script type="text/javascript" src="/web/static/lib/jquery.textext/jquery.textext.js"/>
+                <link rel='stylesheet' href="/web/static/lib/jquery.textext/jquery.textext.css"/>
+                <script type="text/javascript" src="/website_slides/static/lib/pdfjs/build/pdf.js"></script>
+            </t>
+            <t t-call="website.layout">
+                <div class="wrap">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16 slide-pr0 slide-pl0">
+                                <t t-call="website_slides.gridview"/>
+                            </div>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16">
+                                <div class="row text-center">
+                                    <t t-call="website.pager"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <!-- entry page of the slide application -->
         <template id='home' name="Odoo Slides">
             <t t-set="head">
                 <t t-call="website_slides.head"/>
@@ -218,7 +244,6 @@
                                         <li t-attf-class="slide-tabs-li #{not types and 'active' ''}">
                                             <a  t-attf-href="/slides/#{slug(channel)}" class="slide-tabs" data-toggle="tab">Home</a>
                                         </li>
-
                                         <li t-if="count_presentation" t-attf-class="slide-tabs-li #{types == 'presentation' and 'active' ''}">
                                             <a t-attf-href="/slides/#{slug(channel)}/presentation" class="slide-tabs" data-toggle="tab"> <t t-esc="count_presentation"/> Presentations</a>
                                         </li>
@@ -319,15 +344,6 @@
 
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16 slide-pr0 slide-pl0" t-if="types">
                                     <t t-call="website_slides.gridview"/>
-                                    <!--div class="jumbotron" style="border-radius: 0px;border:1px solid #ccc" t-if="not attachment_ids">
-                                        <h1>Empty !</h1>
-                                        <p>No <t t-esc="types"/> found in <b><t t-esc="channel.name"/></b>, click on Upload button to upload first <t t-esc="types"/> !</p>
-                                        <p>
-                                            <a t-if="is_public_user" t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger upload" style="border-radius: 0px;padding: 10px 20px;"><i class="fa fa-cloud-upload"></i> Upload </a>
-
-                                            <a t-if="not is_public_user" class="btn btn-danger upload" t-attf-channel_id="#{channel.id}" style="border-radius: 0px;padding: 10px 20px;"><i class="fa fa-cloud-upload"></i> Upload </a>
-                                        </p>
-                                    </div-->
                                 </div>
 
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16" t-if="types">
@@ -335,53 +351,19 @@
                                         <t t-call="website.pager"/>
                                     </div>
                                 </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16 slide-pr0 slide-pl0" t-if="not types">
-                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" t-if="slides">
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left slide-pl0">
-                                            <a t-attf-href="/slides/#{slug(channel)}/presentation" class="h3 mt0 mb0">Presentations</a>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16 slide-pl0 slide-pr0" t-if="not types">
+                                    <t t-foreach="category_ids" t-as="category">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mt8">
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left slide-pl0">
+                                                <a t-attf-href="/slides/#{slug(channel)}/category/#{slug(category)}" class="h3 mt0 mb0"><t t-esc="category.name"/></a>
+                                            </div>
+                                            <div t-if="more_count_presentation" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0 slide-pr0">
+                                                <a t-attf-href="/slides/#{slug(channel)}/presentation" class="btn btn-primary fa fa-arrow-right">View <t t-esc="more_count_presentation"/> more</a>
+                                            </div>
                                         </div>
-                                        <div t-if="more_count_presentation" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0 slide-pr0">
-                                            <a t-attf-href="/slides/#{slug(channel)}/presentation" class="btn btn-primary fa fa-arrow-right">View <t t-esc="more_count_presentation"/> more</a>
-                                        </div>
-                                    </div>
-                                    <t t-call="website_slides.gridview">
-                                        <t t-set="attachment_ids" t-value="slides"/>
-                                    </t>
-
-                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" t-if="videos">
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left slide-pl0">
-                                            <a t-attf-href="/slides/#{slug(channel)}/video" class="h3 mt0 mb0">Videos</a>
-                                        </div>
-
-                                        <div t-if="more_count_video" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0 slide-pr0">
-                                            <a t-attf-href="/slides/#{slug(channel)}/video" class="btn btn-primary fa fa-arrow-right">View <t t-esc="more_count_video"/> more</a>
-                                        </div>
-                                    </div>
-                                    <t t-call="website_slides.gridview">
-                                        <t t-set="attachment_ids" t-value="videos"/>
-                                    </t>
-                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" t-if="documents">
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left slide-pl0">
-                                            <a t-attf-href="/slides/#{slug(channel)}/document" class="h3 mt0 mb0">Documents</a>
-                                        </div>
-
-                                        <div t-if="more_count_document" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0 slide-pr0">
-                                            <a t-attf-href="/slides/#{slug(channel)}/document" class="btn btn-primary fa fa-arrow-right">View <t t-esc="more_count_document"/> more</a>
-                                        </div>
-                                    </div>
-                                    <t t-call="website_slides.gridview">
-                                        <t t-set="attachment_ids" t-value="documents"/>
-                                    </t>
-                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" t-if="infographics">
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left slide-pl0">
-                                            <a t-attf-href="/slides/#{slug(channel)}/infographic" class="h3 mt0 mb0">Infographic</a>
-                                        </div>
-                                        <div t-if="more_count_infographic" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0 slide-pr0">
-                                            <a t-attf-href="/slides/#{slug(channel)}/infographic" class="btn btn-primary fa fa-arrow-right">View <t t-esc="more_count_infographic"/> more</a>
-                                        </div>
-                                    </div>
-                                    <t t-call="website_slides.gridview">
-                                        <t t-set="attachment_ids" t-value="infographics"/>
+                                        <t t-call="website_slides.gridview">
+                                            <t t-set="attachment_ids" t-value="category.get_slides(4)"/>
+                                        </t>
                                     </t>
                                 </div>
                             </div>

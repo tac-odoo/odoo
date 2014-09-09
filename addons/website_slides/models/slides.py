@@ -47,11 +47,17 @@ class MailMessage(models.Model):
 class Categoty(models.Model):
     _name = 'ir.attachment.category'
     _description = "Category of Documents"
-    _order = "id desc"
+    _order = "sequence"
 
     document_id = fields.Many2one('document.directory', string="Channel")
     name = fields.Char(string="Category", tranalate=True)
     sequence = fields.Integer(string='Sequence', default=10)
+
+    @api.multi
+    def get_slides(self, limit):
+        slides = self.env['ir.attachment']
+        slides_ids = slides.search([('category_id','=',self.id)], limit=limit, offset=0)
+        return slides_ids
 
 
 class ir_attachment(models.Model):
