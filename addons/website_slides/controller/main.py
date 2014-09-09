@@ -176,12 +176,8 @@ class main(http.Controller):
         domain = [('is_slide','=',True), ('website_published', '=', True)]
         slideview.sudo().set_viewed()
 
-        most_viewed_ids = attachment.search(domain, limit=self._slides_per_list, offset=0, order='slide_views desc')
-
-        tags = slideview.tag_ids.ids
-        if tags:
-            domain += [('tag_ids', 'in', tags)]
-        related_ids = attachment.search(domain, limit=self._slides_per_list, offset=0)
+        most_viewed_ids = attachment._get_most_viewed_slides(self._slides_per_list)
+        related_ids = attachment._get_related_slides(self._slides_per_list)
 
         comments = slideview.website_message_ids
 
@@ -278,6 +274,24 @@ class main(http.Controller):
         slide_id = slide_obj.create(post)
         return {'url': "/slides/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id.id)}
 
+    @http.route('/slides/overlay/<model("ir.attachment"):slide>', type='json', auth="public", website=True)
+    def get_next_slides(self, slide):
+        slides_to_suggest = 9
+        suggested_ids = slide._get_related_slides(slides_to_suggest)
+        if len(suggested_ids) < slides_to_suggest:
+            slides_to_suggest = slides_to_suggest - len(related_ids)
+            suggested_ids += slide._get_most_viewed_slides(slides_to_suggest)
+
+        vals = []
+        for suggest in suggested_ids:
+            val = {
+                'img_src':'/website/image/ir.attachment/%s/image' % (suggest.id),
+                'caption':suggest.name,
+                'url':suggest._get_share_url()
+            }
+            vals.append(val)
+
+        return vals
 
     @http.route('/slides/embed/<model("ir.attachment"):slide>', type='http', auth="public", website=True)
     def slides_embed(self, slide, page="1"):

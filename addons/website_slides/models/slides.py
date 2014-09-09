@@ -82,15 +82,19 @@ class ir_attachment(models.Model):
     dislikes = fields.Integer(string='Dislikes', default=0)
 
     @api.multi
-    def get_next_slides(self):
-        return [{'img_src':'http://lorempixel.com/400/300/sports/1/','caption':'Slide Title'},
-                {'img_src':'http://lorempixel.com/400/300/sports/1/','caption':'Slide Title'},
-                {'img_src':'http://lorempixel.com/400/300/sports/1/','caption':'Slide Title'},
-                {'img_src':'http://lorempixel.com/400/300/sports/1/','caption':'Slide Title'},
-                {'img_src':'http://lorempixel.com/400/300/sports/1/','caption':'Slide Title'},
+    def _get_related_slides(self, limit=20):
+        tags = self.tag_ids.ids
+        domain = [('is_slide','=',True), ('website_published', '=', True), ('id','!=',self.id)]
+        if tags:
+            domain += [('tag_ids', 'in', tags)]
+        related_ids = self.search(domain, limit=limit, offset=0)
+        return related_ids
 
-                {'img_src':'http://lorempixel.com/400/300/sports/1/','caption':'Other'}]
-
+    @api.multi
+    def _get_most_viewed_slides(self, limit=20):
+        domain = [('is_slide','=',True), ('website_published', '=', True)]
+        most_viewed_ids = self.search(domain, limit=limit, offset=0, order='slide_views desc')
+        return most_viewed_ids
 
     @api.multi
     def check_constraint(self, values):
@@ -105,10 +109,9 @@ class ir_attachment(models.Model):
                 return True
         return False
 
-
     def _get_share_url(self):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
-        shareurl = "%s/%s/%s/%s" % (base_url, slug(self.parent_id), self.slide_type, slug(self))
+        shareurl = "%s/slides/%s/%s/%s" % (base_url, slug(self.parent_id), self.slide_type, slug(self))
         return shareurl
     
     def _get_embade_code(self):

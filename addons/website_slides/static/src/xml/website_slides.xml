@@ -81,23 +81,25 @@
         </div>
     </t>
 
-
     <t t-name="website.slide.overlay">
         <div class="slide-overlay">
             <t t-foreach="slides" t-as="slide">
-                <div class="col-md-3 col-sm-4 col-xs-6 pr0 pl0">
-                    <a href="/slide/link">
+                <div class="col-md-4 col-sm-4 col-xs-6 slide-pr0 slide-pl0">
+                    <a t-att-href="slide.url">
                         <div class="slide-thumbnail">
                             <div class="slide-caption">
-                                <h5><t t-esc="slide.caption"/></h5>
+                                <h3><t t-esc="slide.caption"/></h3>
                             </div>
-                            <img class="img-responsive" t-att-src="slide.img_src"  alt="..."/>
+                            <span class="oe-suggest-image-thumbnail">
+                                <img class="img-responsive" style="min-height:185px;" t-att-src="slide.img_src"  alt="..."/>
+                            </span>
                         </div>
                     </a>
                 </div>
             </t>
         </div>
     </t>
+
     <t t-name="website.slide.PDFViewer">
         <div>
         <div id="PDFLoader" class="img-responsive" style="width:100%;"><h3><i class='fa fa-spinner fa-spin'></i> Loading presenation...  </h3></div>
