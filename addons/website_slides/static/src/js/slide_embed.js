@@ -16,7 +16,7 @@ $(document).ready(function() {
     PDFJS.disableWorker = true;
 
     var pdfDoc = null,
-        pageNum = 1,
+        pageNum = parseInt(document.getElementById('pdf_page').value),
         pageRendering = false,
         pageNumPending = null,
         scale = 1.5,
