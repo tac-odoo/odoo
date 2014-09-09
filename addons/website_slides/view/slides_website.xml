@@ -172,7 +172,7 @@
         <template id='videoview' name="Video Viewer">
             <div class="row">
                 <div class="panel panel-default slide-border-radius">
-                    <div class="panel-body slide-pl0 slide-pr0">
+                    <div class="panel-body" style="padding: 0px;">
                         <div class="embed-responsive embed-responsive-4by3 embed-responsive-item">
                              <iframe t-attf-src="//www.youtube.com/embed/#{famous.youtube_id}?theme=light"></iframe>
                          </div>
