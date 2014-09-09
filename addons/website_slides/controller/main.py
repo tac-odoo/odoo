@@ -272,10 +272,11 @@ class main(http.Controller):
 
             del post['height']
             del post['width']
+        if request.env['ir.attachment'].search([('name','=',post['name']),('parent_id','=',post['parent_id'])]):
+            return {'error':'Could not create presentation. Same presenatation title already exist in this channel. please rename tile and try again.'}
 
         slide_id = slide_obj.create(post)
-        # TODO: return error message if server fail to create new presentation
-        return "/slides/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id.id)
+        return {'url': "/slides/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id.id)}
 
 
     @http.route('/slides/embed/<model("ir.attachment"):slide>', type='http', auth="public", website=True)

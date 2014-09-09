@@ -233,3 +233,7 @@ nav-tabs li.active  > a.slide-tabs:focus {
     color:#fff !important;
     z-index:2;
 }
+.slide-loading {
+    text-align: center;
+    height:40px
+}

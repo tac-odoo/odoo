@@ -20,7 +20,7 @@
         },
         init: function (el, channel_id) {
             this._super();
-            this.channel_id = channel_id;
+            this.channel_id = parseInt(channel_id, 10);
             this.file = {};
         },
         start: function () {
@@ -45,7 +45,7 @@
                     console.log('....',constraint);
                     constraint.then(function(url){
                         if (url){
-                            $('<div class="alert alert-danger" role="alert">This video already exists in this channel <a href='+ url +'>click here to view it </a></div>').insertBefore(self.$('.modal-body'));
+                            $('<div class="alert alert-warning" role="alert">This video already exists in this channel <a target="_blank" href='+ url +'>click here to view it </a></div>').insertBefore(self.$('form'));
                         }else{
                             self.$('#name').val(title);
                         }
@@ -115,8 +115,12 @@
 
             var input = file.name;
             var input_val = input.substr(0, input.lastIndexOf('.')) || input;
-            this.check_constraint({'file_name': input_val}).then(function(file_name){
-                self.$('#name').val(file_name);
+            this.$('.alert-warning').remove();
+            this.check_constraint({'file_name': input_val}).then(function(value){
+                if (value){
+                    $('<div class="alert alert-warning" role="alert">Title name already exists in this channel. Plase change title name before save.</div>').insertBefore(self.$('form'));
+                }
+                self.$('#name').val(input_val);
             });
         },
         set_tags: function(){
@@ -183,15 +187,24 @@
             return true;
         },
         save: function (ev) {
+            var self= this;
             if(this.validate()){
                 var values = this.get_value();
                 if($(ev.target).data('published')){
                     _.extend(values, {'website_published': true});
                 }
-                this.$('.modal-body').html("<h4><i class='fa fa-spinner fa-spin'></i> Redirecting to new presenation...  </h4>");
-                this.$('.modal-footer').hide();
-                openerp.jsonRpc("/slides/add_slide", 'call', values).then(function(url){
-                    window.location = url;
+                this.$('.slide-loading').show();
+                this.$('.modal-footer, .modal-body').hide();
+                openerp.jsonRpc("/slides/add_slide", 'call', values).then(function(data){
+                    if (data.error){
+                        self.$('.alert-warning').remove();
+                        $('<div class="alert alert-danger" role="alert">'+ data.error +'</div>').insertBefore(self.$('form'));
+                        self.$('.slide-loading').hide();
+                        self.$('.modal-footer, .modal-body').show();
+
+                    }else{
+                        window.location = data.url;
+                    }
                 });
             }
         },

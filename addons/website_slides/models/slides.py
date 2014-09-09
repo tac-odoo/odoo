@@ -79,26 +79,14 @@ class ir_attachment(models.Model):
     @api.multi
     def check_constraint(self, values):
         if values.get('video_id'):
-            domain = [('youtube_id','=',values['video_id'])]
+            domain = [('parent_id','=',values['channel_id']),('youtube_id','=',values['video_id'])]
             slide = self.search(domain)
             if slide:
                 return "/slides/%s/%s/%s" % (slide.parent_id.id, slide.slide_type, slide.id)
         if values.get('file_name'):
-            def get_unique_name(name):
-                domain = [('name','=',name)]
-                if self.search(domain):
-                    postfix = 1
-                    try:
-                        name, postfix = name.rsplit('_', 1)
-                        postfix = int(postfix) + 1
-                    except:
-                        pass
-                    name = "%s_%d" % (name, postfix)
-                    return get_unique_name(name)
-                else:
-                    return name
-            name = values['file_name']
-            return get_unique_name(name)
+            domain = [('parent_id','=',values['channel_id']),('name','=',values['file_name'])]
+            if self.search(domain):
+                return True
         return False
 
 
