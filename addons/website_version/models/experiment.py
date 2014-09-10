@@ -12,6 +12,26 @@ class Experiment_page(osv.Model):
         'ponderation': fields.integer(string="Ponderation"),
     }
 
+    def _check_page(self, cr, uid, ids, context=None):
+        page_ids = self.search(cr,uid,[],context=context)
+        key_results = self.read(cr,uid,page_ids,['key'],context=context)
+        keys = []
+        for res_k in key_results:
+            key = res_k['key']
+            if not key in keys:
+                keys.append(key)
+                current_ids = self.search(cr,uid,[('key','=',key)],context=context)
+                exp_results = self.read(cr,uid,current_ids,['experiment_id'],context=context)
+                exp_id = exp_results.pop(0)['experiment_id']
+                for res_e in exp_results:
+                    if not res_e['experiment_id'] == exp_id:
+                        return False
+        return True
+
+    _constraints = [
+        (_check_page, 'This page is already used in another experience', ['key','experiment_id']),
+    ]
+
     # _sql_constraints = [
     #     ('view_experiment_uniq', 'unique(view_id, experiment_id)', 'You cannot have multiple records with the same view ID in the same experiment!'),
     # ]
@@ -32,3 +52,4 @@ class Experiment(osv.Model):
         'website_id': fields.many2one('website',string="Website", required=True),
         'active': fields.boolean('Active', select=2, help="If the active field is set to False, it will allow you to hide the experience without removing it."),
     }
+
