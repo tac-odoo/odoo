@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="website_slides.attachment_1" model="ir.attachment">
+            <field name="name" >Open Source Website Builder and eCommerce: OpenERP</field>
+            <field name="url" >https://www.youtube.com/watch?v=pp7OCqWoRjQ</field>
+            <field name="is_slide" >True</field>
+            <field name="slide_type" >video</field>
+            <field name="channel_id" ref="website_slides.dir_public"/>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <record id="website_slides.attachment_2" model="ir.attachment">
+            <field name="name" >Odoo Open Days 2014 </field>
+            <field name="url" >https://www.youtube.com/watch?v=ILTPZUTWKhg&amp;list=UUkQPikELWZFLgQNHd73jkdg</field>
+            <field name="is_slide" >True</field>
+            <field name="slide_type" >video</field>
+            <field name="channel_id" ref="website_slides.dir_public"/>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <record id="website_slides.attachment_3" model="ir.attachment">
+            <field name="name" >Odoo - The Voice of the Customer: Alpinter</field>
+            <field name="url" >https://www.youtube.com/watch?v=5DPGnN9_uKU&amp;list=UUkQPikELWZFLgQNHd73jkdg</field>
+            <field name="is_slide" >True</field>
+            <field name="slide_type" >video</field>
+            <field name="channel_id" ref="website_slides.dir_public"/>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <record id="website_slides.attachment_4" model="ir.attachment">
+            <field name="name" >OpenERP SEO - Boost Your Website Trafic</field>
+            <field name="url" >https://www.youtube.com/watch?v=5PKqZpl0TcA</field>
+            <field name="is_slide" >True</field>
+            <field name="slide_type" >video</field>
+            <field name="channel_id" ref="website_slides.dir_public"/>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <record id="website_slides.attachment_5" model="ir.attachment">
+            <field name="name" >OpenERP POS Indiegogo Campaign</field>
+            <field name="url" >https://www.youtube.com/watch?v=C_Laaz4mORg</field>
+            <field name="is_slide" >True</field>
+            <field name="slide_type" >video</field>
+            <field name="channel_id" ref="website_slides.dir_public"/>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <record id="website_slides.attachment_6" model="ir.attachment">
+            <field name="name" >Odoo Marketing - part 1: ATTRACT</field>
+            <field name="url" >https://www.youtube.com/watch?v=qhSCMShJkTY&amp;list=UUkQPikELWZFLgQNHd73jkdg</field>
+            <field name="is_slide" >True</field>
+            <field name="slide_type" >video</field>
+            <field name="channel_id" ref="website_slides.dir_public"/>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <record id="website_slides.attachment_7" model="ir.attachment">
+            <field name="name" >Odoo Marketing - part 1: ATTRACT_2</field>
+            <field name="url" >https://www.youtube.com/watch?v=L1Ye6ATzZXY&amp;list=UUkQPikELWZFLgQNHd73jkdg</field>
+            <field name="is_slide" >True</field>
+            <field name="slide_type" >video</field>
+            <field name="channel_id" ref="website_slides.dir_public"/>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <record id="website_slides.attachment_8" model="ir.attachment">
+            <field name="name" >Odoo Marketing - part 1: ATTRACT_3</field>
+            <field name="url" >https://www.youtube.com/watch?v=sEvZyNZCtOs&amp;list=UUkQPikELWZFLgQNHd73jkdg</field>
+            <field name="is_slide" >True</field>
+            <field name="slide_type" >video</field>
+            <field name="channel_id" ref="website_slides.dir_public"/>
+            <field name="website_published" eval="True"/>
+        </record>
+        
+        <record id="website_slides.attachment_9" model="ir.attachment">
+            <field name="name">odoo black</field>
+            <field name="datas" type="base64" file="website_slides/static/src/img/logo_black.png"/>
+            <field name="image" type="base64" file="website_slides/static/src/img/logo_black.png"/>
+            <field name="datas_fname">logo_black.png</field>
+            <field name="is_slide" >True</field>
+            <field name="slide_type" >infographic</field>
+            <field name="channel_id" ref="website_slides.dir_public"/>
+            <field name="website_published" eval="True"/>
+            <field name="likes">21</field>
+        </record>
+
+        <record id="website_slides.attachment_10" model="ir.attachment">
+            <field name="name">odoo white</field>
+            <field name="datas" type="base64" file="website_slides/static/src/img/logo_white.png"/>
+            <field name="image" type="base64" file="website_slides/static/src/img/logo_white.png"/>
+            <field name="datas_fname">logo_white.png</field>
+            <field name="is_slide" >True</field>
+            <field name="slide_type" >infographic</field>
+            <field name="channel_id" ref="website_slides.dir_public"/>
+            <field name="website_published" eval="True"/>
+            <field name="likes">17</field>
+        </record>
+
+        <record id="website_slides.attachment_11" model="ir.attachment">
+            <field name="name">OpenERP Technical Memento</field>
+            <field name="datas" type="base64" file="website_slides/static/src/img/OpenERP_Technical_Memento.pdf"/>
+            <field name="image" type="base64" file="website_slides/static/src/img/OpenERP_Technical_Memento.png"/>
+            <field name="datas_fname">OpenERP_Technical_Memento.pdf</field>
+            <field name="is_slide" >True</field>
+            <field name="slide_type" >document</field>
+            <field name="channel_id" ref="website_slides.dir_public"/>
+            <field name="website_published" eval="True"/>
+            <field name="likes">18</field>
+        </record>
+
+        <record id="website_slides.attachment_12" model="ir.attachment">
+            <field name="name">keynote</field>
+            <field name="datas" type="base64" file="website_slides/static/src/img/keynote.pdf"/>
+            <field name="image" type="base64" file="website_slides/static/src/img/keynote.png"/>
+            <field name="datas_fname">keynote.pdf</field>
+            <field name="is_slide" >True</field>
+            <field name="slide_type" >presentation</field>
+            <field name="channel_id" ref="website_slides.dir_public"/>
+            <field name="website_published" eval="True"/>
+            <field name="likes">13</field>
+        </record>
+
+        <record id="website_slides.attachment_13" model="ir.attachment">
+            <field name="name">odoo-cms-comparision</field>
+            <field name="datas" type="base64" file="website_slides/static/src/img/odoo-cms-comparision.pdf"/>
+            <field name="image" type="base64" file="website_slides/static/src/img/odoo-cms-comparision.png"/>
+            <field name="datas_fname">odoo-cms-comparision.pdf</field>
+            <field name="is_slide" >True</field>
+            <field name="slide_type" >presentation</field>
+            <field name="channel_id" ref="website_slides.dir_public"/>
+            <field name="website_published" eval="True"/>
+            <field name="likes">10</field>            
+        </record>
+
+  </data>
+</openerp>
+
