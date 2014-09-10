@@ -22,6 +22,7 @@
             this._super();
             this.channel_id = parseInt(channel_id, 10);
             this.file = {};
+            this.index_content = "";
         },
         start: function () {
             var self = this;
@@ -74,6 +75,7 @@
             var file = ev.target.files[0];
             this.file.name = file.name;
             this.file.type = file.type;
+            var loaded = false;
             var BinaryReader = new FileReader();
             // file read as DataURL
             BinaryReader.readAsDataURL(file);
@@ -106,9 +108,35 @@
                             page.render({canvasContext: context, viewport: viewport}).then(function(){
                                 var image_data = self.$('#the-canvas')[0].toDataURL();
                                 self.$("#slide-image").attr("src", image_data);
-                                self.$('.save').button('reset');
+                                if (loaded){
+                                    self.$('.save').button('reset');
+                                }
+                                loaded = true;
+
                             });
                         });
+                        var maxPages = pdf.pdfInfo.numPages;
+                        self.index_content = "";
+                        for (var j = 1; j <= maxPages; j++) {
+                            var page = pdf.getPage(j);
+                            page.then(function(p){
+                                var page_number = p.pageInfo.pageIndex + 1;
+                                p.getTextContent().then(function(data){
+                                var page_content = '';
+                                _.each(data.items,function(obj){
+                                    page_content += obj.str;
+                                });
+                                self.index_content = self.index_content + page_number +". "  + page_content + '\n';
+                                if (maxPages == page_number){
+                                    if (loaded){
+                                        self.$('.save').button('reset');
+                                    }
+                                    loaded = true;
+                                } 
+
+                            });
+                         });}
+
                     });
                 };
             }
@@ -159,7 +187,8 @@
                 _.extend(values, {
                     'image': canvas.toDataURL().split(',')[1],
                     'width': canvas.width,
-                    'height':canvas.height
+                    'height':canvas.height,
+                    'indext_content': self.index_content
                 });
             }
             _.extend(values, {
