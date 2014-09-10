@@ -81,7 +81,7 @@
                         </div>
                     </div>
                     <!-- pdf container -->
-                    <div style="position:relative;">
+                    <div id="pdf_container" style="position:relative;">
                         <div id="slide_share" class="slide-option-toggle">
                             <t t-call="website_slides.socialshare"/>
                             <t t-call="website_slides.sendemail"/>

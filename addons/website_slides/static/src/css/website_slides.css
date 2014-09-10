@@ -141,7 +141,7 @@ nav-tabs li.active  > a.slide-tabs:focus {
   background-color: #eee;
   opacity: 1;
   display: none;
-  overflow-y: auto;
+  overflow-y: auto !important;
 }
 .img-document {
   width: 170px;

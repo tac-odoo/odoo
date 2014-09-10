@@ -43,8 +43,7 @@ $(document).ready(function() {
         };
         var renderTask = page.render(renderContext);  
         
-        $.blockUI.defaults.css = {};
-        $('div#pdf_container').block({ message: $('#pdf_loader_status') });
+        
         // Wait for rendering to finish
         renderTask.promise.then(function () {
           pageRendering = false;
@@ -53,7 +52,6 @@ $(document).ready(function() {
             renderPage(pageNumPending);
             pageNumPending = null;
           }
-          $('div#pdf_container').unblock();
         });
       });
 
@@ -148,10 +146,15 @@ $(document).ready(function() {
       pdfDoc = pdfDoc_;
       document.getElementById('page_count').textContent = pdfDoc.numPages;
 
+
+      $.blockUI.defaults.css = {};
+      $('div#pdf_container').block({ message: 'wait' });
+
       var initpage = parseInt(document.getElementById('pdf_page').value);
       pageNum = (initpage > 0 && initpage <= pdfDoc.numPages)? initpage : 1;
       // Initial/first page rendering
       renderPage(pageNum);
+      $('div#pdf_container').unblock();
     });
 
     /**
