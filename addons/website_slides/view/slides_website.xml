@@ -182,30 +182,117 @@
             </div>
         </template>
 
-        <!-- entry page of the slide application -->
-        <template id='category' name="Odoo Slides by Category">
-            <t t-set="head">
-                <t t-call="website_slides.head"/>
-                <script type="text/javascript" src="/web/static/lib/jquery.textext/jquery.textext.js"/>
-                <link rel='stylesheet' href="/web/static/lib/jquery.textext/jquery.textext.css"/>
-                <script type="text/javascript" src="/website_slides/static/lib/pdfjs/build/pdf.js"></script>
-            </t>
-            <t t-call="website.layout">
-                <div class="wrap">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16 slide-pr0 slide-pl0">
-                                <t t-call="website_slides.gridview"/>
-                            </div>
-                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16">
-                                <div class="row text-center">
-                                    <t t-call="website.pager"/>
-                                </div>
-                            </div>
+        <template id="channelheader" name="Slide Channel Header">
+            <section class="slide-box-shadow">
+                <div class="container">
+                    <div class="row">
+                        <div class="pull-left col-md-8 col-sm-12 col-xs-12 mt16 mb8">
+                            <h3 class="mt0">
+                                <t t-esc="channel.name"/>
+                                <t t-if="is_public_user">
+                                    <a t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger slide-border-radius">
+                                        <i class="fa fa-cloud-upload"></i> Upload 
+                                    </a>
+                                </t>
+                                <t t-if="not is_public_user">
+                                    <a class="btn btn-danger upload slide-border-radius" t-attf-channel_id="#{channel.id}">
+                                        <i class="fa fa-cloud-upload"></i> Upload 
+                                    </a>
+                                </t>
+                            </h3>
+                        </div>
+                        <div class="col-md-4 col-sm-12 col-xs-12 pul-right mt16 mb8">
+                            <t t-call="website_slides.search"/>
+                        </div>
+                        <div class="col-md-6 col-sm-12 col-xs-12">
+                            <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm nav-tabs-border">
+                                <li t-attf-class="slide-tabs-li #{not types and 'active' ''}">
+                                    <a  t-attf-href="/slides/#{slug(channel)}" class="slide-tabs" data-toggle="tab"> <span class="badge"><t t-esc="channel.total"/></span> Home</a>
+                                </li>
+                                <li t-if="channel.presentations" t-attf-class="slide-tabs-li #{types == 'presentation' and 'active' ''}">
+                                    <a t-attf-href="/slides/#{slug(channel)}/presentation" class="slide-tabs" data-toggle="tab"> <span class="badge"><t t-esc="channel.presentations"/></span> Presentations</a>
+                                </li>
+                                <li t-if="channel.videos" t-attf-class="slide-tabs-li #{types == 'video' and 'active' ''}">
+                                    <a t-attf-href="/slides/#{slug(channel)}/video" class="slide-tabs" data-toggle="tab"> <span class="badge"><t t-esc="channel.videos"/></span> Videos</a>
+                                </li>
+                                <li t-if="channel.documents" t-attf-class="slide-tabs-li #{types == 'document' and 'active' ''}">
+                                    <a t-attf-href="/slides/#{slug(channel)}/document" class="slide-tabs" data-toggle="tab"> <span class="badge"><t t-esc="channel.documents"/></span> Documents</a>
+                                </li>
+                                <li t-if="channel.infographics" t-attf-class="slide-tabs-li #{types == 'infographic' and 'active' ''}">
+                                    <a t-attf-href="/slides/#{slug(channel)}/infographic" class="slide-tabs" data-toggle="tab"><span class="badge"><t t-esc="channel.infographics"/></span> Infographics</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 col-sm-12 col-xs-12">
+                            <span class="pull-right">
+                                Sort by :
+                                    <a href="?sorting=date">Recently Published</a> |
+                                    <a href="?sorting=view">Most Viewed</a> | 
+                                    <a href="?sorting=vote">Most Voted</a>
+                            </span>
                         </div>
                     </div>
                 </div>
-            </t>
+            </section>
+        </template>
+
+        <template id="categoryheader" name="Slide Category Header">
+            <section class="slide-box-shadow">
+                <div class="container">
+                    <div class="row">
+                        <div class="pull-left col-md-8 col-sm-12 col-xs-12 mt16 mb8">
+                            <h3 class="mt0">
+                                <a t-attf-href="/slides/#{slug(channel)}">
+                                    <t t-esc="channel.name"/>
+                                </a>
+                                <t t-if="category">
+                                    / <t t-esc="category.name"/>
+                                </t>
+                                <t t-if="is_public_user">
+                                    <a t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger slide-border-radius">
+                                        <i class="fa fa-cloud-upload"></i> Upload 
+                                    </a>
+                                </t>
+                                <t t-if="not is_public_user">
+                                    <a class="btn btn-danger upload slide-border-radius" t-attf-channel_id="#{channel.id}">
+                                        <i class="fa fa-cloud-upload"></i> Upload 
+                                    </a>
+                                </t>
+                            </h3>
+                        </div>
+                        <div class="col-md-4 col-sm-12 col-xs-12 pul-right mt16 mb8">
+                            <t t-call="website_slides.search"/>
+                        </div>
+                        <div class="col-md-6 col-sm-12 col-xs-12">
+                            <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm nav-tabs-border">
+                                <li t-attf-class="slide-tabs-li #{not types and 'active' ''}">
+                                    <a  t-attf-href="/slides/#{slug(channel)}/category/#{slug(category)}" class="slide-tabs" data-toggle="tab"> <span class="badge"><t t-esc="category.total"/></span> Home</a>
+                                </li>
+                                <li t-if="category.presentations" t-attf-class="slide-tabs-li #{types == 'presentation' and 'active' ''}">
+                                    <a t-attf-href="/slides/#{slug(channel)}/category/#{slug(category)}/presentation" class="slide-tabs" data-toggle="tab"> <span class="badge"><t t-esc="category.presentations"/></span> Presentations</a>
+                                </li>
+                                <li t-if="category.videos" t-attf-class="slide-tabs-li #{types == 'video' and 'active' ''}">
+                                    <a t-attf-href="/slides/#{slug(channel)}/category/#{slug(category)}/video" class="slide-tabs" data-toggle="tab"> <span class="badge"><t t-esc="category.videos"/></span> Videos</a>
+                                </li>
+                                <li t-if="category.documents" t-attf-class="slide-tabs-li #{types == 'document' and 'active' ''}">
+                                    <a t-attf-href="/slides/#{slug(channel)}/category/#{slug(category)}/document" class="slide-tabs" data-toggle="tab"> <span class="badge"><t t-esc="category.documents"/></span> Documents</a>
+                                </li>
+                                <li t-if="category.infographics" t-attf-class="slide-tabs-li #{types == 'infographic' and 'active' ''}">
+                                    <a t-attf-href="/slides/#{slug(channel)}/category/#{slug(category)}/infographic" class="slide-tabs" data-toggle="tab"><span class="badge"><t t-esc="category.infographics"/></span> Infographics</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 col-sm-12 col-xs-12">
+                            <span class="pull-right">
+                                Sort by :
+                                    <a href="?sorting=date">Recently Published</a> |
+                                    <a href="?sorting=view">Most Viewed</a> | 
+                                    <a href="?sorting=vote">Most Voted</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </template>
 
         <!-- entry page of the slide application -->
@@ -218,59 +305,15 @@
             </t>
             <t t-call="website.layout">
                 <div class="wrap">
-                    <section class="slide-box-shadow">
-                        <div class="container">
-                            <div class="row">
-                                <div class="pull-left col-md-8 col-sm-12 col-xs-12 mt16 mb8">
-                                    <h3 class="mt0">
-                                        <t t-esc="channel.name" />
-                                        <t t-if="is_public_user">
-                                            <a t-attf-href="/web?redirect=#{request.httprequest.url}" class="btn btn-danger slide-border-radius">
-                                                <i class="fa fa-cloud-upload"></i> Upload 
-                                            </a>
-                                        </t> 
-                                        <t t-if="not is_public_user">
-                                            <a class="btn btn-danger upload slide-border-radius" t-attf-channel_id="#{channel.id}">
-                                                <i class="fa fa-cloud-upload"></i> Upload 
-                                            </a>
-                                        </t>
-                                    </h3>
-                                </div>
-                                <div class="col-md-4 col-sm-12 col-xs-12 pul-right mt16 mb8">
-                                    <t t-call="website_slides.search"/>
-                                </div>
-                                <div class="col-md-6 col-sm-12 col-xs-12">
-                                    <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm nav-tabs-border">
-                                        <li t-attf-class="slide-tabs-li #{not types and 'active' ''}">
-                                            <a  t-attf-href="/slides/#{slug(channel)}" class="slide-tabs" data-toggle="tab">Home</a>
-                                        </li>
-                                        <li t-if="count_presentation" t-attf-class="slide-tabs-li #{types == 'presentation' and 'active' ''}">
-                                            <a t-attf-href="/slides/#{slug(channel)}/presentation" class="slide-tabs" data-toggle="tab"> <t t-esc="count_presentation"/> Presentations</a>
-                                        </li>
-                                        <li t-if="count_video" t-attf-class="slide-tabs-li #{types == 'video' and 'active' ''}">
-                                            <a t-attf-href="/slides/#{slug(channel)}/video" class="slide-tabs" data-toggle="tab"> <t t-esc="count_video"/> Videos</a>
-                                        </li>
-                                        <li t-if="count_document" t-attf-class="slide-tabs-li #{types == 'document' and 'active' ''}">
-                                            <a t-attf-href="/slides/#{slug(channel)}/document" class="slide-tabs" data-toggle="tab"> <t t-esc="count_document"/> Documents</a>
-                                        </li>
-                                        <li t-if="count_infographic" t-attf-class="slide-tabs-li #{types == 'infographic' and 'active' ''}">
-                                            <a t-attf-href="/slides/#{slug(channel)}/infographic" class="slide-tabs" data-toggle="tab"><t t-esc="count_infographic"/> Infographics</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="col-md-6 col-sm-12 col-xs-12">
-                                    <span class="pull-right">
-                                        Sort by :
-                                            <a href="?sorting=date">Recently Published</a> |
-                                            <a href="?sorting=view">Most Viewed</a> | 
-                                            <a href="?sorting=vote">Most Voted</a>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                    
+                    <t t-if="not category">
+                        <t t-call="website_slides.channelheader"/>
+                    </t>
+                    <t t-if="category">
+                        <t t-call="website_slides.categoryheader"/>
+                    </t>
 
-                    <section t-if="not famous and not tags and not types and not search and not is_public_user" class="wrap mt16 mb0">
+                    <section t-if="not famous and not tags and not types and not search and not is_public_user and not category" class="wrap mt16 mb0">
                         <div class="container">
                             <div class="alert alert-danger alert-dismissable mb0 slide-border-radius">
                                 <p>
@@ -282,7 +325,7 @@
                             </div>
                         </div>
                     </section>
-                    <section class="slide-promote-box" t-if="famous and not tags and not types and not search">
+                    <section class="slide-promote-box" t-if="famous and not tags and not types and not search and not category">
                         <div class="container">
                             <div class="row">
                                 <div>
@@ -309,7 +352,7 @@
                                                 </p>
                                                 <div class="mt8 mb8 col-md-16 slide-pl0" t-if="famous.tag_ids">
                                                     <t t-foreach="famous.tag_ids" t-as="att_tag">
-                                                        <a t-attf-href="/slides/#{slug(channel)}/#{famous.slide_type}/tag/#{att_tag.name}">
+                                                        <a t-attf-href="/slides/#{slug(channel)}/tag/#{att_tag.name}">
                                                             <span t-attf-class="label label-default #{tags and tags == att_tag.name and 'label-primary' ''}" t-field="att_tag.name"/>
                                                         </a>
                                                     </t>
@@ -322,10 +365,11 @@
                             </div>
                         </div>
                     </section>
+
                     <section>
                         <div class="container mt16">
                             <div class="row">
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 15px;padding-right: 15px;" t-if="count_all == 0">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 15px;padding-right: 15px;" t-if="channel.total == 0">
                                     <div class="jumbotron slide-border-top slide-border-radius">
                                         <h1>No presentation published yet.</h1>
                                         <p>
@@ -342,27 +386,28 @@
                                     </div>
                                 </div>
 
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16 slide-pr0 slide-pl0" t-if="types">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16 slide-pr0 slide-pl0" t-if="types or category">
                                     <t t-call="website_slides.gridview"/>
-                                </div>
 
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16" t-if="types">
                                     <div class="row text-center">
                                         <t t-call="website.pager"/>
                                     </div>
                                 </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16 slide-pl0 slide-pr0" t-if="not types">
+
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mb16 slide-pl0 slide-pr0" t-if="not types and category_ids">
                                     <t t-foreach="category_ids" t-as="category">
                                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 mt8">
-                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-left slide-pl0">
-                                                <a t-attf-href="/slides/#{slug(channel)}/category/#{slug(category)}" class="h3 mt0 mb0"><t t-esc="category.name"/></a>
+                                            <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9 text-left slide-pl0">
+                                                <a t-attf-href="/slides/#{slug(channel)}/category/#{slug(category)}" class="h3 mt0 mb0">
+                                                    <t t-esc="category.name"/>
+                                                </a>
                                             </div>
-                                            <div t-if="more_count_presentation" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right mt0 mb0 slide-pr0">
-                                                <a t-attf-href="/slides/#{slug(channel)}/presentation" class="btn btn-primary fa fa-arrow-right">View <t t-esc="more_count_presentation"/> more</a>
+                                            <div t-if="category.total - 4 > 0" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-right mt0 mb0 slide-pr0">
+                                                <a t-attf-href="/slides/#{slug(channel)}/category/#{slug(category)}" class="btn btn-primary fa fa-arrow-right">View <t t-esc="category.total - 4"/> more</a>
                                             </div>
                                         </div>
                                         <t t-call="website_slides.gridview">
-                                            <t t-set="attachment_ids" t-value="category.get_slides(4)"/>
+                                            <t t-set="attachment_ids" t-value="category_datas.get(category.name, [])"/>
                                         </t>
                                     </t>
                                 </div>
@@ -458,7 +503,7 @@
                         </div>
                         <p t-if="attachment.tag_ids" class="oe-slides-text-truncation" style="padding-top: 5px;">
                             <t t-foreach="attachment.tag_ids" t-as="att_tag">
-                                <a t-attf-href="/slides/#{slug(channel)}/#{attachment.slide_type}/tag/#{att_tag.name}">
+                                <a t-attf-href="/slides/#{slug(channel)}/tag/#{att_tag.name}">
                                     <span t-attf-class="label label-default #{tags and tags == att_tag.name and 'label-primary' ''}" t-field="att_tag.name"/>
                                 </a>
                             </t>
@@ -491,7 +536,7 @@
 
                     <div class="pull-left mb16 col-md-6 slide-pl0" t-if="slideview.tag_ids ">
                         <t t-foreach="slideview.tag_ids" t-as="att_tag">
-                            <a t-attf-href="/slides/#{slug(channel)}/#{slideview.slide_type}/tag/#{att_tag.name}">
+                            <a t-attf-href="/slides/#{slug(channel)}/tag/#{att_tag.name}">
                                 <span t-attf-class="label label-default #{tags and tags == att_tag.name and 'label-primary' ''}" t-field="att_tag.name"/>
                             </a>
                         </t>
@@ -503,13 +548,13 @@
                 </div>
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 slide-pl0 slide-pr0">
                     <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2 slide-pl0 slide-pr0">
-                        <a t-attf-href="/slides/#{slug(channel)}/#{types}">
+                        <a t-attf-href="/slides/#{slug(channel)}">
                             <img src="/website_slides/static/description/odoo-logo.jpg" class="img-responsive" style="border: 1px solid #CCC;"/>
                         </a>
                     </div>
                     <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10 slide-pr0">
                         <div class="pull-left col-md-7 slide-pl0">
-                            <a t-attf-href="/slides/#{slug(channel)}/#{types}">
+                            <a t-attf-href="/slides/#{slug(channel)}">
                                 <p t-field="channel.name"/>
                             </a>
                             <div class="mt0">
@@ -585,8 +630,12 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="tab-pane fade" id="transcript">
-                            <p t-field="slideview.index_content"></p>
+                        <div class="tab-pane fade text-muted" id="transcript">
+                            <t t-if="slideview.index_content">
+                                <t t-foreach="slideview.index_content.split('\n')" t-as="line">
+                                    <p t-esc="line"></p>
+                                </t>
+                            </t>
                         </div>
                     </div>
                 </div>

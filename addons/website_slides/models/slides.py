@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
 
-
-from openerp import models, fields, api, _
+import json
+import pyPdf
 import urllib2
 import requests
-import json
-
 from urlparse import urlparse,parse_qs
+
+from openerp import models, fields, api, _
 from openerp.addons.website.models.website import slug
 
 class ir_attachment_tags(models.Model):
     _name = 'ir.attachment.tag'
     name = fields.Char()
 
-class document_directory(models.Model):
-    _name = 'document.directory'
-    _inherit = ['document.directory','mail.thread']
+class Channel(models.Model):
+    _name = 'slide.channel'
+    _inherit = ['mail.thread']
+
+    name = fields.Char(string="Name", tranalate=True)
 
     website_published = fields.Boolean(string='Publish', help="Publish on the website", copy=False)
     description = fields.Text(string='Website Description', tranalate=True)
@@ -24,14 +26,38 @@ class document_directory(models.Model):
     is_channel = fields.Boolean(string='Is Channel', default=False)
     promote = fields.Selection([('donot','Do not Promote'), ('latest','Latest Published'), ('mostview','Most Viewed'), ('custom','User Defined')], string="Method", default='donot')
 
+    presentations = fields.Integer(compute='_compute_presentations', string="Presentations")
+    documents = fields.Integer(compute='_compute_presentations', string="Documents")
+    videos = fields.Integer(compute='_compute_presentations', string="Videos")
+    infographics = fields.Integer(compute='_compute_presentations', string="Infographics")
+
+    total = fields.Integer(compute='_compute_presentations', string="Total")
+
+    @api.multi
+    def _compute_presentations(self):
+        attachment = self.env['ir.attachment']
+        for record in self:
+            domain = [('is_slide','=',True), ('website_published','=',True), ('channel_id','=',record.id)]
+            counts = attachment.read_group(domain, ['slide_type'], groupby='slide_type')
+            countvals = {}
+            for count in counts:
+                countvals[count.get('slide_type')] = count.get('slide_type_count', 0)
+
+            record.presentations = countvals.get('presentation', 0)
+            record.documents = countvals.get('document', 0)
+            record.videos = countvals.get('video', 0)
+            record.infographics = countvals.get('infographic', 0)
+
+            record.total = countvals.get('presentation', 0) + countvals.get('document', 0) + countvals.get('video', 0) + countvals.get('infographic', 0)
+
     def get_mostviewed(self):
         attachment = self.env['ir.attachment']
         famous = None
         if self.promote == 'mostview':
-            domain = [('website_published', '=', True), ('parent_id','=',self.id)]
+            domain = [('website_published', '=', True), ('channel_id','=',self.id)]
             famous = attachment.search(domain, limit=1, offset=0, order="slide_views desc")
         elif self.promote == 'latest':
-            domain = [('website_published', '=', True), ('parent_id','=',self.id)]
+            domain = [('website_published', '=', True), ('channel_id','=',self.id)]
             famous = attachment.search(domain, limit=1, offset=0, order="write_date desc")
         elif self.promote == 'custom':
                 famous = self.slide_id
@@ -49,23 +75,49 @@ class Categoty(models.Model):
     _description = "Category of Documents"
     _order = "sequence"
 
-    document_id = fields.Many2one('document.directory', string="Channel")
+    channel_id = fields.Many2one('slide.channel', string="Channel")
     name = fields.Char(string="Category", tranalate=True)
     sequence = fields.Integer(string='Sequence', default=10)
 
+    presentations = fields.Integer(compute='_compute_presentations', string="Presentations")
+    documents = fields.Integer(compute='_compute_presentations', string="Documents")
+    videos = fields.Integer(compute='_compute_presentations', string="Videos")
+    infographics = fields.Integer(compute='_compute_presentations', string="Infographics")
+
+    total = fields.Integer(compute='_compute_presentations', string="Total")
+
     @api.multi
-    def get_slides(self, limit):
+    def _compute_presentations(self):
+        attachment = self.env['ir.attachment']
+        for record in self:
+            domain = [('is_slide','=',True), ('website_published','=',True), ('category_id','=',record.id)]
+            counts = attachment.read_group(domain, ['slide_type'], groupby='slide_type')
+            countvals = {}
+            for count in counts:
+                countvals[count.get('slide_type')] = count.get('slide_type_count')
+
+            record.presentations = countvals.get('presentation', 0)
+            record.documents = countvals.get('document', 0)
+            record.videos = countvals.get('video', 0)
+            record.infographics = countvals.get('infographic', 0)
+
+            record.total = countvals.get('presentation', 0) + countvals.get('document', 0) + countvals.get('video', 0) + countvals.get('infographic', 0)
+
+    @api.multi
+    def get_slides(self, domain, limit, order):
         slides = self.env['ir.attachment']
-        slides_ids = slides.search([('category_id','=',self.id)], limit=limit, offset=0)
+        context_domain = domain + [('category_id', '=', self.id)]
+        slides_ids = slides.search(context_domain, limit=limit, offset=0, order=order)
         return slides_ids
 
 
 class ir_attachment(models.Model):
     _name = 'ir.attachment'
     _inherit = ['ir.attachment','mail.thread']
-    _order = "id desc"
 
     category_id = fields.Many2one('ir.attachment.category', string="Category")
+    channel_id = fields.Many2one('slide.channel', string="Channel")
+
     is_slide = fields.Boolean(string='Is Slide')
     slide_type = fields.Selection([('infographic','Infographic'), ('presentation', 'Presentation'), ('document', 'Document'), ('video', 'Video')], string='Type', help="Document type will be set automatically depending on the height and width, however you can change it manually.")
     tag_ids = fields.Many2many('ir.attachment.tag', 'rel_attachments_tags', 'attachment_id', 'tag_id', string='Tags')
@@ -86,6 +138,7 @@ class ir_attachment(models.Model):
     website_description = fields.Html('Website Description', tranalate=True)
     likes = fields.Integer(string='Likes', default=0)
     dislikes = fields.Integer(string='Dislikes', default=0)
+    index_content = fields.Text('Description', tranalate=True)
 
     @api.multi
     def _get_related_slides(self, limit=20):
@@ -102,19 +155,19 @@ class ir_attachment(models.Model):
     @api.multi
     def check_constraint(self, values):
         if values.get('video_id'):
-            domain = [('parent_id','=',values['channel_id']),('youtube_id','=',values['video_id'])]
+            domain = [('channel_id','=',values['channel_id']),('youtube_id','=',values['video_id'])]
             slide = self.search(domain)
             if slide:
-                return "/slides/%s/%s/%s" % (slide.parent_id.id, slide.slide_type, slide.id)
+                return "/slides/%s/%s/%s" % (slide.channel_id.id, slide.slide_type, slide.id)
         if values.get('file_name'):
-            domain = [('parent_id','=',values['channel_id']),('name','=',values['file_name'])]
+            domain = [('channel_id','=',values['channel_id']),('name','=',values['file_name'])]
             if self.search(domain):
                 return True
         return False
 
     def _get_share_url(self):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
-        shareurl = "%s/slides/%s/%s/%s" % (base_url, slug(self.parent_id), self.slide_type, slug(self))
+        shareurl = "%s/slides/%s/%s/%s" % (base_url, slug(self.channel_id), self.slide_type, slug(self))
         return shareurl
     
     def _get_embade_code(self):
@@ -145,27 +198,27 @@ class ir_attachment(models.Model):
 
         body = _(
             '<p>A new presentation <i>%s</i> has been published under %s channel. <a href="%s/slides/%s/%s/%s">Click here to access the presentation.</a></p>' %
-            (self.name, self.parent_id.name, base_url, slug(self.parent_id), self.slide_type, slug(self))
+            (self.name, self.channel_id.name, base_url, slug(self.channel_id), self.slide_type, slug(self))
         )
         partner_ids = []
-        for partner in self.parent_id.message_follower_ids:
+        for partner in self.channel_id.message_follower_ids:
             partner_ids.append(partner.id)
-        if self.parent_id:
-            self.parent_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides')
+        if self.channel_id:
+            self.channel_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides')
 
     def notify_request_to_approve(self):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
 
         body = _(
             '<p>A new presentation <i>%s</i> has been uplodated under %s channel andwaiting for your review. <a href="%s/slides/%s/%s/%s">Click here to review the presentation.</a></p>' %
-            (self.name, self.parent_id.name, base_url, slug(self.parent_id), self.slide_type, slug(self))
+            (self.name, self.channel_id.name, base_url, slug(self.channel_id), self.slide_type, slug(self))
         )
         #Todo: fix me, search only people subscribe for new_slides_validation
         partner_ids = []
-        for partner in self.parent_id.message_follower_ids:
+        for partner in self.channel_id.message_follower_ids:
             partner_ids.append(partner.id)
-        if self.parent_id:
-            self.parent_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides_validation')
+        if self.channel_id:
+            self.channel_id.message_post(subject=self.name, body=body, subtype='website_slide.new_slides_validation')
     
     @api.multi
     def write(self, values):

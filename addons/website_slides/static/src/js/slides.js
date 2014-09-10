@@ -126,7 +126,7 @@
                                 _.each(data.items,function(obj){
                                     page_content += obj.str;
                                 });
-                                self.index_content = self.index_content + page_number +". "  + page_content + '\n';
+                                self.index_content = self.index_content + page_number +". "  + page_content + '\n\n';
                                 if (maxPages == page_number){
                                     if (loaded){
                                         self.$('.save').button('reset');
@@ -188,7 +188,7 @@
                     'image': canvas.toDataURL().split(',')[1],
                     'width': canvas.width,
                     'height':canvas.height,
-                    'indext_content': self.index_content
+                    'index_content': self.index_content
                 });
             }
             _.extend(values, {
@@ -198,7 +198,7 @@
                 'datas_fname': self.file.name || '',
                 'mimetype':self.file.type,
                 'url': this.$('#url').val(),
-                'parent_id': self.channel_id || '',
+                'channel_id': self.channel_id || '',
                 'description': this.$('#description').val()
             });
             return _.extend(values, default_val);

@@ -67,8 +67,8 @@
                                 <field name="slide_type"/>
                             </group>
                             <group string="Categorization">
-                                <field name="parent_id" string="Channel"/>
-                                <field name="category_id" domain="[('document_id','=',parent_id)]"/>
+                                <field name="channel_id" string="Channel"/>
+                                <field name="category_id" domain="[('channel_id','=',channel_id)]"/>
                             </group>
                         </group>
                         <group name="description_group" string="Description" colspan="4">
@@ -126,8 +126,8 @@
 
         <!-- Change the directory view -->
         <record model="ir.ui.view" id="view_document_directory_form">
-            <field name="name">document.directory</field>
-            <field name="model">document.directory</field>
+            <field name="name">slide.channel</field>
+            <field name="model">slide.channel</field>
             <field name="arch" type="xml">
                 <form string="Directories" col="4">
                     <sheet>
@@ -138,15 +138,6 @@
                             <h1>
                                 <field name="name" default_focus="1" placeholder="Name"/>
                             </h1>
-
-                            <label for="parent_id" invisible="True"/>
-                            <field name="parent_id" invisible="True"/>
-
-                            <label for="user_id" invisible="True"/>
-                            <field name="user_id" context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'base.group_document_user']}" invisible="True"/>
-
-                            <label for="company_id" groups="base.group_multi_company" />
-                            <field name="company_id" groups="base.group_multi_company" widget="selection"/>
                         </div>
                         <div class="oe_right oe_button_box" name="buttons">
                             <field name="website_published" class="pull-right" widget="website_button"/>
@@ -158,16 +149,11 @@
                                         <field name="promote"/>
                                     </group>
                                     <group>
-                                        <field name="slide_id" attrs="{'invisible':[('promote','!=','custom')]}" domain="[('parent_id','=',id), ('website_published','=',True)]"/>
+                                        <field name="slide_id" attrs="{'invisible':[('promote','!=','custom')]}" domain="[('channel_id','=',id), ('website_published','=',True)]"/>
                                     </group>
                                 </group>
 
                                 <field name="description" colspan="4" nolabel="1"/>
-                            </page>
-                            <page string="Security">
-                                <label colspan="4" string="Only members of these groups will have access to this channel and its documents." />
-                                <label colspan="4" string="These groups, however, do NOT apply to children channels, which must define their own groups." />
-                                <field name="group_ids" colspan="4" nolabel="1"/>
                             </page>
                         </notebook>
                     </sheet>
@@ -183,25 +169,13 @@
         <record id="action_presentation_channels" model="ir.actions.act_window">
             <field name="name">Channels</field>
             <field name="type">ir.actions.act_window</field>
-            <field name="res_model">document.directory</field>
+            <field name="res_model">slide.channel</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" eval="False"/>
 
             <field name="domain">[('is_channel','=',True)]</field>
             <field name="context">{'default_is_channel':True}</field>
-        </record>
-        <record id="action_presentation_channels_tree_view1" model="ir.actions.act_window.view">
-            <field eval="1" name="sequence"/>
-            <field name="view_mode">tree</field>
-            <field name="view_id" ref="document.view_document_directory_tree"/>
-            <field name="act_window_id" ref="action_presentation_channels"/>
-        </record>
-        <record id="action_presentation_channels_tree_view2" model="ir.actions.act_window.view">
-            <field eval="2" name="sequence"/>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="view_document_directory_form"/>
-            <field name="act_window_id" ref="action_presentation_channels"/>
         </record>
         <menuitem action="action_presentation_channels" id="menu_action_presentation_channel" parent="main_slides" sequence="0"/>
 

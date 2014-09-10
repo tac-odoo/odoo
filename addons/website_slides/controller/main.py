@@ -37,7 +37,7 @@ class main(http.Controller):
 
     @http.route('/slides', type='http', auth="public", website=True)
     def channels(self, *args, **post):
-        directory = request.env['document.directory']
+        directory = request.env['slide.channel']
         user = request.env.user
         channels = directory.search([('website_published','=', True)])
         
@@ -52,58 +52,38 @@ class main(http.Controller):
         return request.website.render('website_slides.channels', vals)
 
 
-    @http.route(['/slides/<model("document.directory"):channel>/category/<model("ir.attachment.category"):category>',
-                '/slides/<model("document.directory"):channel>/category/<model("ir.attachment.category"):category>/page/<int:page>'
+    @http.route(['/slides/<model("slide.channel"):channel>',
+                '/slides/<model("slide.channel"):channel>/page/<int:page>',
+
+                '/slides/<model("slide.channel"):channel>/<types>',
+                '/slides/<model("slide.channel"):channel>/<types>/page/<int:page>',
+
+                '/slides/<model("slide.channel"):channel>/tag/<tags>',
+                '/slides/<model("slide.channel"):channel>/tag/<tags>/page/<int:page>',
+
+                '/slides/<model("slide.channel"):channel>/category/<model("ir.attachment.category"):category>',
+                '/slides/<model("slide.channel"):channel>/category/<model("ir.attachment.category"):category>/page/<int:page>',
+
+                '/slides/<model("slide.channel"):channel>/category/<model("ir.attachment.category"):category>/<types>',
+                '/slides/<model("slide.channel"):channel>/category/<model("ir.attachment.category"):category>/<types>/page/<int:page>',
+
+                '/slides/<model("slide.channel"):channel>/category/<model("ir.attachment.category"):category>/tag/<tags>',
+                '/slides/<model("slide.channel"):channel>/category/<model("ir.attachment.category"):category>/tag/<tags>/page/<int:page>',
                 ], type='http', auth="public", website=True)
-    def categories(self, channel, category, order='id', page=1):
-        attachment = request.env['ir.attachment']
-
-        domain = [('is_slide','=','True'), ('parent_id','=',channel.id), ('category_id','=',category.id)]
-
-        url = "/slides/%s/category/%s" % (channel.id, category.id)
-        pager_count = attachment.search_count(domain)
-        pager = request.website.pager(url=url, total=pager_count, page=page,
-                                      step=self._slides_per_page, scope=self._slides_per_page,
-                                      url_args={})
-
-        attachment_ids = attachment.search(domain, limit=self._slides_per_page, offset=pager['offset'], order=order)
-        values = {
-            'attachment_ids':attachment_ids,
-            'pager': pager,
-            'channel': channel,
-            'category':category
-        }
-        return request.website.render('website_slides.category', values)
-
-
-    @http.route(['/slides/<model("document.directory"):channel>',
-                '/slides/<model("document.directory"):channel>/<types>',
-                '/slides/<model("document.directory"):channel>/<types>/tag/<tags>',
-                '/slides/<model("document.directory"):channel>/page/<int:page>',
-                '/slides/<model("document.directory"):channel>/<types>/page/<int:page>',
-                '/slides/<model("document.directory"):channel>/<types>/tag/<tags>/page/<int:page>',
-                   ], type='http', auth="public", website=True)
-    def slides(self, channel=0, page=1, types='', tags='', sorting='creation', search=''):
+    def slides(self, channel=0, category=0, page=1, types='', tags='', sorting='creation'):
         user = request.env.user
         attachment = request.env['ir.attachment']
-        category = request.env['ir.attachment.category']
+        category_pool = request.env['ir.attachment.category']
 
-        domain = [('is_slide','=','True'), ('parent_id','=',channel.id)]
+        domain = [('is_slide','=','True'), ('channel_id','=',channel.id)]
 
-        count_all = count_slide = count_video = count_document = count_infographic = 0
-        attachment_ids = videos = slides = documents = infographics = []
+        attachment_ids = []
         famous = None
 
         if request.env.user.id == request.website.user_id.id: 
             domain += [('website_published', '=', True)]
 
         all_count = attachment.search_count(domain)
-        if channel: 
-            domain += [('parent_id','=',channel.id)]
-
-        if search: 
-            domain += ['|', ('name', 'ilike', search), ('index_content', 'ilike', search)]
-
         if tags: 
             domain += [('tag_ids.name', '=', tags)]
 
@@ -111,92 +91,80 @@ class main(http.Controller):
             'tags':tags,
             'channel': channel,
             'user': user,
-            'is_public_user': user.id == request.website.user_id.id,
+            'is_public_user': user.id == request.website.user_id.id
         }
 
-        counts = attachment.read_group(domain, ['slide_type'], groupby='slide_type')
-        countvals = {}
-        for count in counts:
-            countvals['count_'+count.get('slide_type')] = count.get('slide_type_count')
-            count_all += count.get('slide_type_count')
-
-        values.update(countvals)
-        values.update({'count_all':count_all})
-        
         if types:
             domain += [('slide_type', '=', types)]
-
-            if sorting == 'date':
-                order = 'write_date desc'
-            elif sorting == 'view':
-                order = 'slide_views desc'
-            elif sorting == 'vote':
-                order = 'likes desc'
-            else:
-                sorting = 'creation'
-                order = 'create_date desc'
-
-            url = "/slides/%s" % (channel.id)
-            if types:
-                url = "/slides/%s/%s" % (channel.id, types)
-            elif types and tags:
-                url = "/slides/%s/%s/%s" % (channel.id, types, tags)
-
-            url_args = {}
-            if search:
-                url_args['search'] = search
-            if sorting:
-                url_args['sorting'] = sorting
-
-            pager_count = attachment.search_count(domain)
-            pager = request.website.pager(url=url, total=pager_count, page=page,
-                                          step=self._slides_per_page, scope=self._slides_per_page,
-                                          url_args=url_args)
             
-            attachment_ids = attachment.search(domain, limit=self._slides_per_page, offset=pager['offset'], order=order)
-            
-            values.update({
-                'attachment_ids': attachment_ids,
-                'all_count': pager_count,
-                'pager': pager,
-                'types': types,
-                'sorting': sorting,
-                'search': search
-            })
+        if category:
+            domain += [('category_id', '=', category.id)]
+
+        if sorting == 'date':
+            order = 'write_date desc'
+        elif sorting == 'view':
+            order = 'slide_views desc'
+        elif sorting == 'vote':
+            order = 'likes desc'
         else:
-            category_ids = category.search([('document_id','=',channel.id)])
+            sorting = 'creation'
+            order = 'create_date desc'
 
-            # count_domain = domain + [('slide_type', '=', 'video')]
-            # videos = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
-            # values['more_count_video'] = values.get('count_video', 0) - len(videos)
+        url = "/slides/%s" % (channel.id)
+        if tags:
+            url = "/slides/%s/%s" % (channel.id, tags)
 
-            # count_domain = domain + [('slide_type', '=', 'presentation')]
-            # slides = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
-            # values['more_count_presentation'] = values.get('count_presentation', 0) - len(slides)
+        if types:
+            url = "/slides/%s/%s" % (channel.id, types)
+        
+        if category:
+            url = "/slides/%s/category/%s" % (channel.id, category.id)
 
-            # count_domain = domain + [('slide_type', '=', 'document')]
-            # documents = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
-            # values['more_count_document'] = values.get('count_document', 0) - len(documents)
+        if category and types:
+            url = "/slides/%s/category/%s/%s" % (channel.id, category.id, types)
 
-            # count_domain = domain + [('slide_type', '=', 'infographic')]
-            # infographics = attachment.search(count_domain, limit=4, offset=0, order='create_date desc')
-            # values['more_count_infographic'] = values.get('count_infographic', 0) - len(infographics)
+        url_args = {}
+        if sorting:
+            url_args['sorting'] = sorting
 
-            famous = channel.get_mostviewed()
+        pager_count = attachment.search_count(domain)
+        pager = request.website.pager(url=url, total=pager_count, page=page,
+                                      step=self._slides_per_page, scope=self._slides_per_page,
+                                      url_args=url_args)
+        
+        attachment_ids = attachment.search(domain, limit=self._slides_per_page, offset=pager['offset'], order=order)
+        print 'XXXXXXXX : ', order, attachment_ids
+        famous = channel.get_mostviewed()
+        
+        values.update({
+            'attachment_ids': attachment_ids,
+            'all_count': pager_count,
+            'pager': pager,
+            'types': types,
+            'sorting': sorting,
+            'category': category,
+            'famous': famous
+        })
+
+        if not types and not category:
+            category_ids = category_pool.search([('channel_id','=',channel.id)])
+            category_datas = {}
+            for category_id in category_ids:
+                result = category_id.get_slides(domain, 4, order)
+                category_datas.update({
+                    category_id.name:result
+                })
+
             values.update({
-                # 'videos':videos,
-                # 'slides':slides,
-                # 'documents':documents,
-                # 'infographics': infographics,
+                'category_datas':category_datas,
                 'category_ids':category_ids,
-                'famous':famous
             })
 
         return request.website.render('website_slides.home', values)
 
     @http.route([
-                '/slides/<model("document.directory"):channel>/<types>/<model("ir.attachment"):slideview>',
-                '/slides/<model("document.directory"):channel>/<types>/tag/<tags>/<model("ir.attachment"):slideview>'
+                '/slides/<model("slide.channel"):channel>/<types>/<model("ir.attachment"):slideview>',
+                '/slides/<model("slide.channel"):channel>/<types>/tag/<tags>/<model("ir.attachment"):slideview>'
                 ], type='http', auth="public", website=True)
     def slide_view(self, channel, slideview, types='', sorting='', search='', tags=''):
         attachment = request.env['ir.attachment']
@@ -215,7 +183,7 @@ class main(http.Controller):
             'most_viewed_ids':most_viewed_ids,
             'related_ids': related_ids,
             'comments': comments,
-            'channel': slideview.parent_id,
+            'channel': slideview.channel_id,
             'user':user,
             'types':types,
             'is_public_user': user.id == request.website.user_id.id
@@ -238,14 +206,14 @@ class main(http.Controller):
         data = [tag['name'] for tag in tags]
         return simplejson.dumps(data)
     
-    @http.route('/slides/<model("document.directory"):channel>/view/<model("ir.attachment"):slideview>/like', type='json', auth="public", website=True)
+    @http.route('/slides/<model("slide.channel"):channel>/view/<model("ir.attachment"):slideview>/like', type='json', auth="public", website=True)
     def slide_like(self, channel, slideview, **post):
         if slideview.sudo().set_like():
             return slideview.likes
 
         return {'error': 'Error on wirte Data'}
 
-    @http.route('/slides/<model("document.directory"):channel>/view/<model("ir.attachment"):slideview>/dislike', type='json', auth="public", website=True)
+    @http.route('/slides/<model("slide.channel"):channel>/view/<model("ir.attachment"):slideview>/dislike', type='json', auth="public", website=True)
     def slide_dislike(self, channel, slideview, **post):
         if slideview.sudo().set_dislike():
             return slideview.dislikes
@@ -254,7 +222,7 @@ class main(http.Controller):
 
     @http.route('/slides/get_channel', type='json', auth="public", website=True)
     def get_channel(self, **post):
-        directory = request.env['document.directory']
+        directory = request.env['slide.channel']
         attachment = request.env['ir.attachment']
         channels = directory.name_search(name='', args=[('website_published','=', True)], operator='ilike', limit=100)
         res = []
@@ -297,11 +265,12 @@ class main(http.Controller):
 
             del post['height']
             del post['width']
-        if request.env['ir.attachment'].search([('name','=',post['name']),('parent_id','=',post['parent_id'])]):
+        if request.env['ir.attachment'].search([('name','=',post['name']),('channel_id','=',post['channel_id'])]):
             return {'error':'Could not create presentation. Same presenatation title already exist in this channel. please rename tile and try again.'}
 
+        print 'XXXXXXXX post ', post.get('index_content')
         slide_id = slide_obj.create(post)
-        return {'url': "/slides/%s/%s/%s" % (post.get('parent_id'), post['slide_type'], slide_id.id)}
+        return {'url': "/slides/%s/%s/%s" % (post.get('channel_id'), post['slide_type'], slide_id.id)}
 
     @http.route('/slides/overlay/<model("ir.attachment"):slide>', type='json', auth="public", website=True)
     def get_next_slides(self, slide):
@@ -328,7 +297,7 @@ class main(http.Controller):
         values = {
            'slide':slide,
            'user':user,
-           'channel':slide.parent_id,
+           'channel':slide.channel_id,
            'page':page,
         }
         return request.website.render('website_slides.pdfembed', values)

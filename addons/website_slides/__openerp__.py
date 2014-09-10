@@ -36,7 +36,7 @@ You can upload presentations, videos, documents and infographic and moderate and
 """,
     'author': 'OpenERP SA',
     'website': 'http://www.openerp.com',
-    'depends': ['website', 'website_mail', 'document'],
+    'depends': ['website', 'website_mail'],
     'data': [
         'view/slides_website.xml',
         'view/slides_backend.xml',

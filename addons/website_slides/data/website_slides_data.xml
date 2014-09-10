@@ -2,7 +2,7 @@
 <openerp>
     <data noupdate="1">
 
-        <record model="document.directory" id="dir_public">
+        <record model="slide.channel" id="dir_public">
             <field name="name">Public Channel</field>
             <field name="user_id" eval="False"/>
             <field name="website_published" eval="True"/>
@@ -11,7 +11,7 @@
             <field name="description">Public channel is default channel for slides, all public user can access content of public channel.</field>
         </record>
 
-        <record model="document.directory" id="dir_private">
+        <record model="slide.channel" id="dir_private">
             <field name="name">Partner Channel</field>
             <field name="user_id" eval="False"/>
             <field name="website_published" eval="False"/>
@@ -20,7 +20,7 @@
             <field name="description">Partner channel use to publish slides in partner network privately.</field>
         </record>
         
-        <record model="document.directory" id="dir_employee">
+        <record model="slide.channel" id="dir_employee">
             <field name="name">Employee Channel</field>
             <field name="user_id" eval="False"/>
             <field name="website_published" eval="False"/>
@@ -32,7 +32,7 @@
         <!-- Channel subtypes -->
         <record id="new_slides" model="mail.message.subtype">
             <field name="name">Presentation Published</field>
-            <field name="res_model">document.directory</field>
+            <field name="res_model">slide.channel</field>
             <field name="default" eval="True"/>
             <field name="description">Presentation Published</field>
         </record>
@@ -40,7 +40,7 @@
         <!-- Channel subtypes -->
         <record id="new_slides_validation" model="mail.message.subtype">
             <field name="name">Presentation Validations</field>
-            <field name="res_model">document.directory</field>
+            <field name="res_model">slide.channel</field>
             <field name="default" eval="False"/>
             <field name="description">Presentation Validations</field>
         </record>
