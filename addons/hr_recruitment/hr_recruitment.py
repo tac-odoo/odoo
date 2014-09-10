@@ -426,7 +426,7 @@ class hr_applicant(osv.Model):
                 cr, uid, [applicant.id],
                 body = _("%s's Application \n From: %s \n\n %s \n") % (name, vals.get('email_from') or "", vals.get('description',"") or ""),
                 attachments = context.get('attachments'),
-                content_subtype = 'plaintext',
+                # content_subtype = 'plaintext',  " TDE FIXME": deprecated attribute
                 subtype = "hr_recruitment.mt_applicant_hired",
                 context = context)
         return obj_id

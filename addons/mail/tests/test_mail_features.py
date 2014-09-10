@@ -64,8 +64,10 @@ class test_mail(TestMail):
         self.assertEqual(follower_ids, set([user_admin.partner_id.id]), 'Admin should be the only Pigs fan')
 
         # Subscribe Bert through a '4' command
+        print '------------------'
         group_pigs.write({'message_follower_ids': [(4, partner_bert_id)]})
         group_pigs.refresh()
+        print '------------------'
         follower_ids = set([follower.id for follower in group_pigs.message_follower_ids])
         self.assertEqual(follower_ids, set([partner_bert_id, user_admin.partner_id.id]), 'Bert and Admin should be the only Pigs fans')
 

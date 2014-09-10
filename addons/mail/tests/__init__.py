@@ -19,15 +19,16 @@
 #
 ##############################################################################
 
-from . import test_mail_group, test_mail_message, test_mail_features, test_mail_gateway, test_message_read, test_invite
+# from . import test_mail_group, test_mail_message, test_mail_features, test_mail_gateway, test_message_read, test_invite
+from . import test_mail_features
 
 checks = [
-    test_mail_group,
-    test_mail_message,
+    # test_mail_group,
+    # test_mail_message,
     test_mail_features,
-    test_mail_gateway,
-    test_message_read,
-    test_invite,
+    # test_mail_gateway,
+    # test_message_read,
+    # test_invite,
 ]
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

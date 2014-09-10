@@ -262,7 +262,7 @@ openerp_mail_followers = function(session, mail) {
                 }
             }
             var id = this.view.datarecord.id;
-            this.ds_model.call('message_get_subscription_data', [[id], user_pid, new session.web.CompoundContext(this.build_context(), {})])
+            this.ds_model.call('get_subscription_data', [[id], user_pid, new session.web.CompoundContext(this.build_context(), {})])
                 .then(function (data) {self.display_subtypes(data, id, dialog);});
         },
 
@@ -275,7 +275,7 @@ openerp_mail_followers = function(session, mail) {
             else {
                 var $list = this.$('.oe_subtype_list ul');
             }
-            var records = data[id].message_subtype_data;
+            var records = data[id];
             this.records_length = $.map(records, function(value, index) { return index; }).length;
             if (this.records_length > 1) { self.display_followers(); }
             var old_model = '';
