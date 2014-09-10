@@ -21,10 +21,11 @@ class Experiment_page(osv.Model):
             if not key in keys:
                 keys.append(key)
                 current_ids = self.search(cr,uid,[('key','=',key)],context=context)
-                exp_results = self.read(cr,uid,current_ids,['experiment_id'],context=context)
-                exp_id = exp_results.pop(0)['experiment_id']
-                for res_e in exp_results:
-                    if not res_e['experiment_id'] == exp_id:
+                exp_results = self.browse(cr,uid,current_ids,context=context)
+                exp_id = exp_results[0]
+                for i in range(1,len(current_ids)):
+                    res_e = exp_results[i]
+                    if not res_e.experiment_id.id == exp_id.experiment_id.id and res_e.experiment_id.website_id.id == exp_id.experiment_id.website_id.id:
                         return False
         return True
 

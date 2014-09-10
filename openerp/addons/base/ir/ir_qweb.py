@@ -243,8 +243,9 @@ class QWeb(orm.AbstractModel):
 
         if website_id:
             if 'experiment_id' in context:
-                page_id = self.pool["website_version.experiment_page"].search(cr, uid, [('key', '=', id_or_xml_id),('experiment_id.active','!=',False)], context=context)
+                page_id = self.pool["website_version.experiment_page"].search(cr, uid, [('key', '=', id_or_xml_id),('experiment_id.active','!=',False),('experiment_id.website_id.id','=',website_id)], context=context)
                 if page_id:
+                    #from pudb import set_trace; set_trace()
                     RNG_exp = int(context.get('RNG_exp'))
                     number_id = int(''.join(str(ord(c)) for c in id_or_xml_id))
 
