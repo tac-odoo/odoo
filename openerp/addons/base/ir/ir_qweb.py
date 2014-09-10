@@ -269,7 +269,7 @@ class QWeb(orm.AbstractModel):
                 snapshot_id=context.get('snapshot_id')
                 id_or_xml_id=self.pool["ir.ui.view"].search(cr, uid, [('key', '=', id_or_xml_id), '|', ('snapshot_id', '=', False), ('snapshot_id', '=', snapshot_id), '|',('website_id','=',website_id),('website_id','=',False)], order='website_id, snapshot_id', limit=1, context=context)[0]
             else:
-                id_or_xml_id=self.pool["ir.ui.view"].search(cr, uid, [('key', '=', id_or_xml_id), '|', ('website_id','=',website_id),('website_id','=',False)], order='website_id', limit=1, context=context)[0]
+                id_or_xml_id=self.pool["ir.ui.view"].search(cr, uid, [('key', '=', id_or_xml_id), '|', ('website_id','=',website_id),('website_id','=',False),('snapshot_id', '=', False)], order='website_id', limit=1, context=context)[0]
 
             
 
