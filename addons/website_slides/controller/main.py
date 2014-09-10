@@ -233,6 +233,11 @@ class main(http.Controller):
     @http.route(['/slides/add_slide'], type='json', auth="user", methods=['POST'], website=True)
     def create_slide(self, *args, **post):
         Tag = request.env['ir.attachment.tag']
+
+        #Todo: Improve message, make it translateable
+        if request.env['ir.attachment'].search([('name','=',post['name']),('channel_id','=',post['channel_id'])]):
+            return {'error':'Could not create presentation. Same presenatation title already exist in this channel. please rename tile and try again.'}
+
         tags = post.get('tag_ids')
         tag_ids = []
         for tag in tags:
@@ -263,9 +268,11 @@ class main(http.Controller):
 
             del post['height']
             del post['width']
-        if request.env['ir.attachment'].search([('name','=',post['name']),('channel_id','=',post['channel_id'])]):
-            return {'error':'Could not create presentation. Same presenatation title already exist in this channel. please rename tile and try again.'}
 
+        print 'XXXXXXX : ', post.get('index_content')
+        if not post.get('index_content'):
+            post['index_content'] = post.get('description')
+        print 'XXXXXXX : ', post.get('index_content')
         slide_id = slide_obj.create(post)
         return {'url': "/slides/%s/%s/%s" % (post.get('channel_id'), post['slide_type'], slide_id.id)}
 

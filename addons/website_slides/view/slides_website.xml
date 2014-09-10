@@ -259,7 +259,7 @@
                         <div class="col-md-4 col-sm-12 col-xs-12 pul-right mt16 mb8">
                             <t t-call="website_slides.search"/>
                         </div>
-                        <div class="col-md-6 col-sm-12 col-xs-12">
+                        <div class="col-md-8 col-sm-12 col-xs-12">
                             <ul class="nav nav-tabs nav-tabs-simple nav-tabs-sm nav-tabs-border">
                                 <li t-attf-class="slide-tabs-li #{not types and 'active' ''}">
                                     <a  t-attf-href="/slides/#{slug(channel)}/category/#{slug(category)}" class="slide-tabs" data-toggle="tab">Home</a>
@@ -278,12 +278,12 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="col-md-6 col-sm-12 col-xs-12">
+                        <div class="col-md-4 col-sm-12 col-xs-12">
                             <span class="pull-right small">
                                 Sort by :
-                                    <a href="?sorting=date">Recently Published</a> |
-                                    <a href="?sorting=view">Most Viewed</a> | 
-                                    <a href="?sorting=vote">Most Voted</a>
+                                <a href="?sorting=date">Recently Published</a> |
+                                <a href="?sorting=view">Most Viewed</a> | 
+                                <a href="?sorting=vote">Most Voted</a>
                             </span>
                         </div>
                     </div>
@@ -325,23 +325,12 @@
                         <div class="container">
                             <div class="row">
                                 <div>
-                                    <!--div class="col-md-4 mt16" t-if="famous.youtube_id" style="padding-left: 30px;padding-right: 30px;">
-                                        <a t-attf-href="/slides/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
-                                            <t t-call="website_slides.videoview"/>
-                                        </a>
-                                    </div>
-                                    <div class="col-md-4 mt16" t-if="not famous.youtube_id" >
-                                        <a t-attf-href="/slides/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
-                                            <t t-if="not famous.youtube_id and famous.url" t-call="website_slides.pdfview">
-                                                <t t-set="pdf_file" t-value="famous.url"/>
-                                                <t t-set="slide" t-value="famous"/>
-                                            </t>
-                                        </a>
-                                    </div-->
-
                                     <div class="col-md-5 mt16 mb16">
                                         <a t-attf-href="/slides/#{slug(channel)}/#{famous.slide_type}/#{slug(famous)}">
-                                            <img t-attf-src="/website/image/ir.attachment/#{famous.id}/image" class="img-responsive shadow slide-width slide-opacity"/>
+                                            <span class="slide-promore-image">
+                                                <img t-attf-src="/website/image/ir.attachment/#{famous.id}/image" class="img-responsive shadow slide-width slide-opacity"/>
+                                                <span class="label label-info" style="position: absolute;right: 20px;top: 7px;">Latest Published</span>
+                                            </span>
                                         </a>
                                     </div>
 
@@ -360,7 +349,7 @@
                                                         </a>
                                                     </t>
                                                 </div>
-                                                <p t-if="famous.description"><t t-raw="'&lt;br/&gt;'.join(famous.description.split('\n')[0:14])"/></p>
+                                                <p t-if="famous.description"><t t-raw="'&lt;br/&gt;'.join(famous.description.split('\n')[0:10])"/></p>
                                             </div>
                                         </div>
                                     </div>
@@ -403,8 +392,8 @@
                                                 <a t-attf-href="/slides/#{slug(channel)}/category/#{slug(category)}" class="h3 mt0 mb0">
                                                     <t t-esc="category.name"/>
                                                 </a>
-                                                <a t-attf-href="/slides/#{slug(channel)}/category/#{slug(category)}" class="fa fa-arrow-right pull-right">
-                                                    View <t t-esc="category.total - 4"/> more
+                                                <a t-attf-href="/slides/#{slug(channel)}/category/#{slug(category)}" class="pull-right">
+                                                    <i class="fa fa-arrow-right"></i> View <t t-esc="category.total - 4"/> more
                                                 </a>
                                             </div>
                                         </div>
@@ -535,7 +524,12 @@
                             <t t-set="publish_edit" t-value="True"/>
                         </t>
                     </h3>
-                    <div class="pull-left mb16 col-md-6 slide-pl0" t-if="slideview.tag_ids ">
+                    <div class="mb16 col-md-6 slide-pl0 pull-left text-left" t-if="slideview.tag_ids">
+                        <t t-if="slideview.category_id">
+                            Published under <a t-attf-href="/slides/#{slug(channel)}/category/#{slug(slideview.category_id)}"><t t-esc="slideview.category_id.name"/></a>
+                        </t>
+                    </div>
+                    <div class="mb16 col-md-6 slide-pr0 pull-right text-right" t-if="slideview.tag_ids ">
                         <t t-foreach="slideview.tag_ids" t-as="att_tag">
                             <a t-attf-href="/slides/#{slug(channel)}/tag/#{att_tag.name}">
                                 <span t-attf-class="label label-default #{tags and tags == att_tag.name and 'label-primary' ''}" t-field="att_tag.name"/>
@@ -544,13 +538,14 @@
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 slide-pl0 slide-pr0">
-                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2 slide-pl0 slide-pr0">
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2 slide-pl0">
                         <a t-attf-href="/slides/#{slug(channel)}">
-                            <img src="/website_slides/static/description/odoo-logo.jpg" class="img-responsive" style="border: 1px solid #CCC;"/>
+                            <i class="fa fa-circle-o fa-5x" style="color: #a24689;font-weight: bold;"></i>
+                            <!--img src="/website_slides/static/description/odoo-logo.jpg" class="img-responsive" style="border: 1px solid #CCC;"/-->
                         </a>
                     </div>
-                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10 slide-pr0">
-                        <div class="pull-left col-md-7 slide-pl0">
+                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-10 slide-pl0 slide-pr0">
+                        <div class="pull-left col-md-7">
                             <a t-attf-href="/slides/#{slug(channel)}">
                                 <p t-field="channel.name"/>
                             </a>
