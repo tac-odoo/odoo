@@ -112,7 +112,7 @@ class main(http.Controller):
 
         url = "/slides/%s" % (channel.id)
         if tags:
-            url = "/slides/%s/%s" % (channel.id, tags)
+            url = "/slides/%s/tag/%s" % (channel.id, tags)
 
         if types:
             url = "/slides/%s/%s" % (channel.id, types)
@@ -133,9 +133,7 @@ class main(http.Controller):
                                       url_args=url_args)
         
         attachment_ids = attachment.search(domain, limit=self._slides_per_page, offset=pager['offset'], order=order)
-        print 'XXXXXXXX : ', order, attachment_ids
         famous = channel.get_mostviewed()
-        
         values.update({
             'attachment_ids': attachment_ids,
             'all_count': pager_count,
@@ -268,7 +266,6 @@ class main(http.Controller):
         if request.env['ir.attachment'].search([('name','=',post['name']),('channel_id','=',post['channel_id'])]):
             return {'error':'Could not create presentation. Same presenatation title already exist in this channel. please rename tile and try again.'}
 
-        print 'XXXXXXXX post ', post.get('index_content')
         slide_id = slide_obj.create(post)
         return {'url': "/slides/%s/%s/%s" % (post.get('channel_id'), post['slide_type'], slide_id.id)}
 
