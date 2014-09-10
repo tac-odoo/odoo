@@ -27,9 +27,9 @@
 
         <!-- search box -->
         <template id="search" name="search">
-            <form t-attf-action="/slides/#{slug(channel)}" role="search" method="get">
+            <form t-attf-action="/slides/#{slug(channel)}/search" role="search" method="get">
                 <div class="input-group">
-                    <input type="text" class="form-control slide-border-radius" name="search" placeholder="Search Slides..." t-att-value="search"/>
+                    <input type="text" class="form-control slide-border-radius" name="query" placeholder="Search Slides..." t-att-value="query"/>
                     <span class="input-group-btn">
                         <button class="btn btn-primary slide-border-radius" type="submit">
                             <i class="fa fa-search"></i>
@@ -289,6 +289,38 @@
                     </div>
                 </div>
             </section>
+        </template>
+
+        <!-- entry page of the slide application -->
+        <template id='searchresult' name="Odoo Slide Search">
+            <t t-call="website.layout">
+                <div class="wrap">
+                    <section class="slide-box-shadow">
+                        <div class="container">
+                            <div class="row slide-pr0 slide-pl0 mt16 mb16">
+                                <div class="col-md-8 pull-left">
+                                    <h3 class="mt0">
+                                        Searching in <a t-attf-href="/slides/#{slug(channel)}"><t t-esc="channel.name"/></a>
+                                    </h3>
+                                </div>
+                                <div class="col-md-4 pull-right">
+                                    <t t-call="website_slides.search"/>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section>
+                        <div class="container">
+                            <div class="row slide-pr0 slide-pl0">
+                                <t t-call="website_slides.gridview"/>
+                            </div>
+                            <div class="row text-center">
+                                <t t-call="website.pager"/>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </t>
         </template>
 
         <!-- entry page of the slide application -->

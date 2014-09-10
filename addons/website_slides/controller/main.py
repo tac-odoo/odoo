@@ -51,6 +51,41 @@ class main(http.Controller):
         }
         return request.website.render('website_slides.channels', vals)
 
+    @http.route(['/slides/<model("slide.channel"):channel>/search',
+                '/slides/<model("slide.channel"):channel>/search/page/<int:page>'
+                ], type='http', auth="public", website=True)
+    def search(self, channel=0, query=False, page=1, order=False):
+        attachment = request.env['ir.attachment']
+
+        domain = [('is_slide','=','True'), ('channel_id','=',channel.id)]
+
+        if request.env.user.id == request.website.user_id.id:
+            domain += [('website_published', '=', True)]
+       
+        if query:
+            domain += ['|', '|', ('name', 'ilike', query), ('description', 'ilike', query), ('index_content', 'ilike', query)]
+        
+        url = "/slides/%s/search" % (channel.id)
+        url_args = {}
+        if query:
+            url_args['query'] = query
+
+        pager_count = attachment.search_count(domain)
+        pager = request.website.pager(url=url, total=pager_count, page=page,
+                                      step=self._slides_per_page, scope=self._slides_per_page,
+                                      url_args=url_args)
+        
+        attachment_ids = attachment.search(domain, limit=self._slides_per_page, offset=pager['offset'], order=order)
+
+        values = {
+            'channel': channel,
+            'pager': pager,
+            'attachment_ids': attachment_ids,
+            'query': query,
+            'order': order
+        }
+        return request.website.render('website_slides.searchresult', values)
+
 
     @http.route(['/slides/<model("slide.channel"):channel>',
                 '/slides/<model("slide.channel"):channel>/page/<int:page>',
@@ -66,9 +101,6 @@ class main(http.Controller):
 
                 '/slides/<model("slide.channel"):channel>/category/<model("ir.attachment.category"):category>/<types>',
                 '/slides/<model("slide.channel"):channel>/category/<model("ir.attachment.category"):category>/<types>/page/<int:page>',
-
-                '/slides/<model("slide.channel"):channel>/category/<model("ir.attachment.category"):category>/tag/<tags>',
-                '/slides/<model("slide.channel"):channel>/category/<model("ir.attachment.category"):category>/tag/<tags>/page/<int:page>',
                 ], type='http', auth="public", website=True)
     def slides(self, channel=0, category=0, page=1, types='', tags='', sorting='creation'):
         user = request.env.user
@@ -269,10 +301,9 @@ class main(http.Controller):
             del post['height']
             del post['width']
 
-        print 'XXXXXXX : ', post.get('index_content')
         if not post.get('index_content'):
             post['index_content'] = post.get('description')
-        print 'XXXXXXX : ', post.get('index_content')
+
         slide_id = slide_obj.create(post)
         return {'url': "/slides/%s/%s/%s" % (post.get('channel_id'), post['slide_type'], slide_id.id)}
 
