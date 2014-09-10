@@ -5,6 +5,7 @@
     @brand-primary: #a24689;
     @link-color: @brand-primary;
     @panel-footer-bg: ##d3d3d3;
+    @nav-link-hover-bg: #efeff0
 } .define-color-if-not-defined();
 
 .slide-box {
@@ -18,7 +19,7 @@
         cursor: pointer;
     }
     .slide-container:hover {
-        background: #efeff0;
+        background: @nav-link-hover-bg;
     }
     .image-box {
         border: 1px solid @brand-info;
