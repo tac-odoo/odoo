@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from openerp.osv import osv,fields
-from openerp.http import request
+import werkzeug.wrappers
+from openerp.http import request, Response
+import random
 
 
 class NewWebsite(osv.Model):
@@ -19,6 +21,12 @@ class NewWebsite(osv.Model):
         return snap.name_get(cr, uid, [snapshot_id], context=context)[0];
 
     def get_current_website(self, cr, uid, context=None):
+
+        if not 'RNG_exp' in request.httprequest.cookies:
+            request.context['RNG_exp'] = str(random.getrandbits(128))
+        else:
+            request.context['RNG_exp'] = request.httprequest.cookies.get('RNG_exp')         
+
         ids=self.search(cr, uid, [], context=context)
         url = request.httprequest.url
         

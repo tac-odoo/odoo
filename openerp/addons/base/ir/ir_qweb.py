@@ -245,6 +245,9 @@ class QWeb(orm.AbstractModel):
             if 'experiment_id' in context:
                 page_id = self.pool["website_version.experiment_page"].search(cr, uid, [('key', '=', id_or_xml_id),('experiment_id.active','!=',False)], context=context)
                 if page_id:
+                    RNG_exp = int(context.get('RNG_exp'))
+                    number_id = int(''.join(str(ord(c)) for c in id_or_xml_id))
+
                     page = self.pool["website_version.experiment_page"].browse(cr, uid, [page_id[0]], context=context)
                     exp = page.experiment_id
                     result=[]
@@ -254,7 +257,8 @@ class QWeb(orm.AbstractModel):
                             result.append([page.ponderation+pond_sum, page.snapshot_id.id])
                             pond_sum+=page.ponderation
                     if pond_sum:
-                        x = random.randrange(0,pond_sum)
+                        #RANDOM
+                        x = (RNG_exp+number_id)*179426549%pond_sum
                         for res in result:
                             if x<res[0]:
                                 context['snapshot_id'] = res[1]
