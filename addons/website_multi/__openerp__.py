@@ -12,8 +12,13 @@ OpenERP Multi Website
     'author': 'OpenERP SA',
     'depends': ['website'],
     'installable': True,
-    'data': [],
-    'demo': [],
+    'data': [
+        'views/res_config.xml',
+        'views/website_views.xml',
+    ],
+    'demo': [
+        'data/demo.xml',
+    ],
     'qweb': [],
     'application': True,
 }
