@@ -173,12 +173,22 @@
 					            <div class="form-group">
 					            	<label class="col-md-3 col-sm-4 control-label" for="tags">Tags</label>
 					            	<div class="col-md-7 col-sm-8">
-					            		<div t-foreach="tags" t-as="tag">
-					            		<input type="checkbox" t-att-value="tag.id" t-att-name="tag.name" t-esc="tag.name"/>
+					            		<span t-foreach="tags" t-as="tag">
+					            			<input type="checkbox" t-att-value="tag.id" t-att-name="tag.name" t-esc="tag.name"/>
+					            		</span>
 					            	</div>
-					            	</div>
-					            	
 					            </div>
+
+					            <div class="form-group">
+					            	<label class="col-md-3 col-sm-4 control-label" for="visibility">Privacy Visibility</label>
+					            	<div class="col-md-7 col-sm-8">
+					            		<input type="radio" name="visibility" value="public">Public</input>
+					            		<input type="radio" name="visibility" value="portal">Portal</input>
+					            		<input type="radio" name="visibility" value="employees">Employees</input>
+					            		<input type="radio" name="visibility" value="followers">Followers</input>
+					            	</div>
+					            </div>
+
 					            <div class="form-group">
 					                <div class="col-md-offset-3 col-sm-offset-4 col-sm-8 col-md-7">
 					                    <button class="btn btn-primary btn-lg">Post Project</button>
@@ -289,7 +299,8 @@
 			<div class="col-md-4 text-center" style="min-height: 200px;">
 
 				<div class="pull-center">
-					<img t-attf-src="/page/employee/#{employee.id}/avatar"/>
+					<!--<img t-attf-src="#{employee.img()}"/>-->
+					<img t-attf-src="/employee/#{employee.id}/avatar"/>
 		            <!--div class="alert alert-success text-muted" style="padding: 0px;padding-left: 10px;padding-right: 10px;margin-bottom:10px;">
 		                <span style="font-size: 40px;"><b>0</b></span>
 		                <div class="subtitle">Jobs Done</div>
@@ -361,7 +372,9 @@
 						<div class="col-sm-9">
 							<div class="row">
 								<div class="col-md-4">
-
+									<!--<img t-attf-src="#{employee.img()}"/>-->
+									<img t-attf-src="/employee/#{employee.id}/avatar"/>
+									<!--<img src="..." alt="..." class="img-rounded"/>-->
 								</div>
 								<div class="col-md-8">
 									<h1 t-esc="employee.name"/>
@@ -370,16 +383,21 @@
 								</div>
 							</div>
 							<div class="row">
-								<div class="panel panel-default">
-  									<div class="panel-heading">
-    									<h3 class="panel-title">Recieved Badges</h3>
-  									</div>
-  									<div class="panel-body">
-    									<span class="pull-righ" t-foreach="employee.badge_ids" t-as="badge" style="padding-top: 5px;">
-											<a class="label label-default" t-esc="badge.badge_id.name"	/>
-										</span>
-  									</div>
+								<div class="col-md-4">
 								</div>
+								<div class="col-md-8">
+									<div class="panel panel-default">
+	  									<div class="panel-heading">
+	    									<h3 class="panel-title">Recieved Badges</h3>
+	  									</div>
+	  									<div class="panel-body">
+	    									<span class="pull-righ" t-foreach="employee.badge_ids" t-as="badge" style="padding-top: 5px;">
+												<a class="label label-default" t-esc="badge.badge_id.name"	/>
+											</span>
+	  									</div>
+									</div>	
+								</div>
+								
 							</div>
 						</div>
 						<div class="col-sm-3">

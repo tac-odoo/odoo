@@ -61,7 +61,7 @@ class Jobs(http.Controller):
 		tags = env['project.tag'].search([])
 		job_obj = env['project.project']
 		vals = {
-			'privacy_visibility':'public',
+			'privacy_visibility':kwargs['visibility'],
 			'partner_id':user.partner_id.id,
 			'user_id':False,
 			'name':kwargs['name'],
@@ -70,8 +70,8 @@ class Jobs(http.Controller):
 			'amount_max':kwargs['amount_max'],
 			'website_description':kwargs['website_description']
 			}
-		job_id = job_obj.create(vals)
-		return request.redirect("/jobs/%s" % (job_id))
+		job = job_obj.create(vals)
+		return request.redirect("/jobs/%s" % (job.id))
 
 	@http.route([
 		'/jobs/<model("project.project"):job>'], type="http", auth="public", website=True)
@@ -116,3 +116,12 @@ class Jobs(http.Controller):
 	def employee_detail(self,emp):
 		values = {"employee":emp}
 		return request.website.render('website_jobs.employee_detail',values)
+
+	@http.route(['/employee/<int:user_id>/avatar'], type='http', auth='public', website=True)
+	def user_avatar(self, user_id=0, **post):
+		env = request.env()
+		response = werkzeug.wrappers.Response()
+		User = env['hr.employee']
+		Website = env['website']
+		user = User.browse(user_id)
+		return Website._image('hr.employee', user.id, 'image', response, max_height=100)
