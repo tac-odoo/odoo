@@ -61,7 +61,7 @@ This module also uses analytic accounting and is compatible with the invoice on 
     ],
     'demo': [
          'hr_expense_demo.xml',
-         'test/hr_expense_data.yml'
+#         'test/hr_expense_data.yml'
      ],
      'test': [
         'test/expense_demo.yml',

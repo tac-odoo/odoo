@@ -8,7 +8,7 @@
     line_ids:
       - date_value: '2014-09-10'
         name: 'Meal'
-        analytic_account: account.analytic_nebula
+        analytic_account: analytic.analytic_nebula
         unit_amount: 960.00
         uom_id: product.product_uom_unit
         unit_quantity: 1.0
@@ -25,7 +25,7 @@
       - date_value: '2014-05-23'
         product_id: hotel_rent
         name: 'Hotel Expense'
-        analytic_account: account.analytic_nebula
+        analytic_account: analytic.analytic_nebula
         unit_amount: 1850.00
         uom_id: product.product_uom_unit
         unit_quantity: 1.0
@@ -45,14 +45,14 @@
       -  date_value: '2014-02-12'
          product_id: hotel_rent
          name: 'Hotel Expense during training'
-         analytic_account: account.analytic_nebula
+         analytic_account: analytic.analytic_nebula
          unit_amount: 1250.0
          uom_id: product.product_uom_unit
          unit_quantity: 1.0
       -  date_value: '2014-02-12'
          product_id: car_travel
          name: 'Travelling'
-         analytic_account: account.analytic_nebula
+         analytic_account: analytic.analytic_nebula
          uom_id: product.product_uom_km
          unit_amount: 0.25
          unit_quantity: 350.0
@@ -67,7 +67,7 @@
       -  date_value: '2014-02-20'
          product_id: hotel_rent
          name: 'Hotel Rent'
-         analytic_account: account.analytic_nebula
+         analytic_account: analytic.analytic_nebula
          unit_amount: 2200.0
          uom_id: product.product_uom_unit
          unit_quantity: 1.0
