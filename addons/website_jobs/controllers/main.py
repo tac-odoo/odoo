@@ -40,7 +40,7 @@ class Jobs(http.Controller):
 			domain.append(('tag_ids','=',tag.id))
 
 		pager = request.website.pager(url=url, total=len(job_obj.search(domain)) ,page=page, step=self._project_per_page, scope=self._project_per_page, url_args={})
-		jobs = job_obj.search(domain).sudo()
+		jobs = job_obj.search(domain, limit=self._project_per_page, offset=pager['offset']).sudo()
 		values = {'jobs':jobs,'job_count':len(job_obj.search(domain)),'pager':pager,"superuser":superuser,"job_ser":job_ser}
 		return request.website.render("website_jobs.index",values)
 
@@ -124,4 +124,4 @@ class Jobs(http.Controller):
 		User = env['hr.employee']
 		Website = env['website']
 		user = User.browse(user_id)
-		return Website._image('hr.employee', user.id, 'image', response, max_height=100)
+		return Website._image('hr.employee', user.id, 'image', response, max_height=200)
