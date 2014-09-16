@@ -204,6 +204,7 @@ class hr_employee(osv.osv):
         'work_email': fields.char('Work Email', size=240),
         'work_location': fields.char('Office Location'),
         'notes': fields.text('Notes'),
+        'user_id': fields.many2one('res.users', 'Related User'),
         'parent_id': fields.many2one('hr.employee', 'Manager'),
         'category_ids': fields.many2many('hr.employee.category', 'employee_category_rel', 'emp_id', 'category_id', 'Tags'),
         'child_ids': fields.one2many('hr.employee', 'parent_id', 'Subordinates'),

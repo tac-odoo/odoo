@@ -1,29 +1,7 @@
-# -*- encoding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-Today OpenERP S.A. (<http://www.openerp.com>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
-
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from dateutil import parser
-import uuid
-import urlparse
+import uuid, urlparse
 from openerp import fields, api, tools, models
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
@@ -61,6 +39,7 @@ class hr_evaluation(models.Model):
     _name = "hr_evaluation.evaluation"
     _inherit = ['mail.thread']
     _description = "Employee Appraisal"
+    _order = 'date_close,interview_deadline'
 
     EVALUATION_STATE = [
         ('new', 'To Start'),
@@ -128,22 +107,22 @@ class hr_evaluation(models.Model):
     def _set_display_name(self):
         self.display_name = self.employee_id.name_related
 
-    @api.one
     @api.onchange('employee_id')
     def onchange_employee_id(self):
-        self.department_id = self.employee_id.department_id
-        self.appraisal_manager = self.employee_id.appraisal_manager
-        self.apprasial_manager_ids = self.employee_id.apprasial_manager_ids
-        self.apprasial_manager_survey_id = self.employee_id.apprasial_manager_survey_id
-        self.appraisal_colleagues = self.employee_id.appraisal_colleagues
-        self.appraisal_colleagues_ids = self.employee_id.appraisal_colleagues_ids
-        self.appraisal_colleagues_survey_id = self.employee_id.appraisal_colleagues_survey_id
-        self.appraisal_self = self.employee_id.appraisal_self
-        self.apprasial_employee = self.employee_id.name
-        self.appraisal_self_survey_id = self.employee_id.appraisal_self_survey_id
-        self.appraisal_subordinates = self.employee_id.appraisal_subordinates
-        self.appraisal_subordinates_ids = self.employee_id.appraisal_subordinates_ids
-        self.appraisal_subordinates_survey_id = self.employee_id.appraisal_subordinates_survey_id
+        if self.employee_id:
+            self.department_id = self.employee_id.department_id
+            self.appraisal_manager = self.employee_id.appraisal_manager or True
+            self.apprasial_manager_ids = self.employee_id.apprasial_manager_ids if self.employee_id.apprasial_manager_ids else  [self.employee_id.parent_id.id]
+            self.apprasial_manager_survey_id = self.employee_id.apprasial_manager_survey_id
+            self.appraisal_colleagues = self.employee_id.appraisal_colleagues
+            self.appraisal_colleagues_ids = self.employee_id.appraisal_colleagues_ids
+            self.appraisal_colleagues_survey_id = self.employee_id.appraisal_colleagues_survey_id
+            self.appraisal_self = self.employee_id.appraisal_self
+            self.apprasial_employee = self.employee_id.name
+            self.appraisal_self_survey_id = self.employee_id.appraisal_self_survey_id
+            self.appraisal_subordinates = self.employee_id.appraisal_subordinates
+            self.appraisal_subordinates_ids = self.employee_id.appraisal_subordinates_ids
+            self.appraisal_subordinates_survey_id = self.employee_id.appraisal_subordinates_survey_id
 
     @api.one
     @api.constrains('employee_id', 'department_id', 'date_close')
@@ -209,14 +188,17 @@ class hr_evaluation(models.Model):
     def create_receiver_list(self, apprasial):
         """ Create one mail by recipients and __URL__ by link with identification token """
         mail_obj = self.env['mail.thread']
+        find_no_email = [emp.name for rec in apprasial for emp in rec[1] if not emp.work_email]
+        if find_no_email:
+            raise Warning(_("Following employees do not have configured an email address. \n- %s")% ('\n- ').join(find_no_email))
         for rec in apprasial:
             for emp in rec[1]:
                 if emp.work_email:
-                    email = tools.email_split(emp.work_email)
+                    email = tools.email_split(emp.work_email) and tools.email_split(emp.work_email)[0] or False
                     if email:
-                        partner_id = mail_obj._find_partner_from_emails(email[0]) or emp.user_id.partner_id or None
-                        token = self.create_token(email[0], rec[0], partner_id)[0]
-                        self.update_appraisal_url(rec[0].public_url, email[0], token)
+                        partner_id = mail_obj._find_partner_from_emails(email) or emp.user_id.partner_id or None
+                        token = self.create_token(email, rec[0], partner_id)[0]
+                        self.update_appraisal_url(rec[0].public_url, email, token)
                         self.mail_template.send_mail(self.id, force_send=True)
         return True
 
@@ -308,7 +290,7 @@ class hr_evaluation(models.Model):
                 raise Warning(_("You cannot delete appraisal which is in '%s' state") % (eva_state[appraisal.state]))
         return super(hr_evaluation, self).unlink()
 
-    @api.cr_uid_ids_context
+    @api.v7
     def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False, lazy=True):
         """ Override read_group to always display all states. """
         if groupby and groupby[0] == "state":
@@ -329,7 +311,7 @@ class hr_evaluation(models.Model):
         else:
             return super(hr_evaluation, self).read_group(cr, uid, domain, fields, groupby, offset=offset, limit=limit, context=context, orderby=orderby, lazy=lazy)
 
-    @api.cr_uid_ids_context
+    @api.v7
     def get_sent_appraisal(self, cr, uid, ids, context=None):
         """ Link to open sent appraisal"""
         sur_res_obj = self.pool.get('survey.user_input')
@@ -346,7 +328,7 @@ class hr_evaluation(models.Model):
         action['domain'] = str([('id', 'in', sent_appraisal_ids)])  
         return action
 
-    @api.cr_uid_ids_context
+    @api.v7
     def get_result_appraisal(self, cr, uid, ids, context=None):
         """ Link to open answers appraisal"""
         sur_res_obj = self.pool.get('survey.user_input')
@@ -363,7 +345,7 @@ class hr_evaluation(models.Model):
         action['domain'] = str([('id', 'in', sent_appraisal_ids)])  
         return action
 
-    @api.cr_uid_ids_context
+    @api.v7
     def schedule_interview_date(self, cr, uid, ids, context=None):
         """ Link to open calendar view for creating employee interview and meeting"""
         if context is None:
@@ -408,26 +390,28 @@ class hr_employee(models.Model):
     appraisal_subordinates = fields.Boolean('Collaborator')
     appraisal_subordinates_ids = fields.Many2many('hr.employee', 'appraisal_subordinates_rel', 'hr_evaluation_evaluation_id')
     appraisal_subordinates_survey_id = fields.Many2one('survey.survey', "collaborate's Appraisal")
-    appraisal_repeat = fields.Boolean('Repeat', default=False)
-    appraisal_repeat_number = fields.Integer('Appraisal Cycle', default=1)
+    appraisal_repeat = fields.Boolean('Periodic Appraisal', default=False)
+    appraisal_repeat_number = fields.Integer('Repeat Every', default=1)
     appraisal_repeat_delay = fields.Selection([('year','Year'),('month','Month')], 'Repeat Every', copy=False, default='year')
     appraisal_count = fields.Integer(compute='_appraisal_count', string='Appraisal Interviews')
 
-    @api.one
+    @api.multi
     def _appraisal_count(self):
         Evaluation = self.env['hr_evaluation.evaluation']
         for rec in self:
-            self.appraisal_count = Evaluation.search_count([('employee_id', '=', rec.id)],)
+            rec.appraisal_count = Evaluation.search_count([('employee_id', '=', rec.id)],)
 
-    @api.one
     @api.onchange('appraisal_manager')
     def onchange_manager_appraisal(self):
         self.apprasial_manager_ids = [self.parent_id.id]
 
-    @api.one
     @api.onchange('appraisal_self')
     def onchange_self_employee(self):
         self.apprasial_employee = self.name
+
+    @api.onchange('appraisal_colleagues')
+    def onchange_colleagues(self):
+        self.appraisal_colleagues_ids = self.search([('parent_id', '=', self.parent_id.id),('department_id', '=', self.department_id.id)])
 
     @api.model
     def run_employee_evaluation(self, automatic=False, use_new_cursor=False):  # cronjob
