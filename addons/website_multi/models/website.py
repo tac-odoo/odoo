@@ -15,7 +15,7 @@ class website(orm.Model):
             ids = [ids]
         if value:
             self.write(cr, uid, ids, {
-                'menu_id': field_value
+                'menu_id': value
             }, context=context)
 
     def _get_menu(self, cr, uid, ids, name, arg, context=None):
