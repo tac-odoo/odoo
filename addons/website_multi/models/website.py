@@ -10,9 +10,13 @@ class website(orm.Model):
 
     _inherit = "website"
 
-    def _get_menu_website(self, cr, uid, ids, context=None):
-        print self
-        return []
+    def _set_menu(self, cr, uid, ids, name, value, arg, context=None):
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        if value:
+            self.write(cr, uid, ids, {
+                'menu_id': field_value
+            }, context=context)
 
     def _get_menu(self, cr, uid, ids, name, arg, context=None):
         result = {}
@@ -27,9 +31,9 @@ class website(orm.Model):
 
         return result
 
-    # _columns = {
-    #     'menu_id': fields.function(_get_menu, relation='website.menu', type="many2one", string="Main Menu")
-    # }
+    _columns = {
+        'menu_id': fields.function(_get_menu, fnct_inv='_set_menu', relation='website.menu', type="many2one", string="Main Menu")
+    }
 
     _defaults = {
         'user_id': lambda s, c, u, x: s.pool['ir.model.data'].xmlid_to_res_id(c, SUPERUSER_ID, 'base.public_user'),
