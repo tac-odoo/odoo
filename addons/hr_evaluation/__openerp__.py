@@ -20,7 +20,7 @@
 ##############################################################################
 
 {
-    'name': 'Employee Appraisals',
+    'name': 'Employee Evaluations',
     'version': '0.1',
     'author': 'OpenERP SA',
     'category': 'Human Resources',
@@ -32,7 +32,7 @@
                'images/hr_interview_requests.jpeg'],
     'depends': ['hr', 'calendar', 'survey'],
     'description': """
-Periodical Employees evaluation and appraisals
+Periodical Employees evaluation
 ==============================================
 
 By using this application you can maintain the motivational process by doing periodical evaluations of your employees' performance. The regular assessment of human resources can benefit your people as well your organization.

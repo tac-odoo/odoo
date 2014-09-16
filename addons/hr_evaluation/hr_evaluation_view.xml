@@ -226,7 +226,7 @@
                             <field name="apprasial_employee" nolabel="1" attrs="{'invisible':[('appraisal_self','=',False)]}"/>
                             <field name="appraisal_self_survey_id" nolabel="1" placeholder="Appraisal Form..." attrs="{'invisible':[('appraisal_self','=',False)], 'required':[('appraisal_self','=',True)]}"/>
                             <div class="address_format">
-                                <field name="appraisal_subordinates"/>
+                                <field name="appraisal_subordinates" on_change="1"/>
                                 <label string="Collaborators"/>
                             </div>
                             <field name="appraisal_subordinates_ids" nolabel="1" placeholder="Select Appraisal Reviewer..." widget="many2many_tags" attrs="{'invisible':[('appraisal_subordinates','=',False)], 'required':[('appraisal_subordinates','=',True)]}"/>

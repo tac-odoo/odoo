@@ -20,28 +20,28 @@
 ##############################################################################
 
 from openerp import tools
-from openerp.osv import fields, osv
+from openerp import api, fields, models
 
 
-class hr_evaluation_report(osv.Model):
+class hr_evaluation_report(models.Model):
     _name = "hr.evaluation.report"
     _description = "Evaluations Statistics"
     _auto = False
-    _columns = {
-        'create_date': fields.date('Create Date', readonly=True),
-        'department_id' : fields.many2one('hr.department', 'Department'),
-        'delay_date': fields.float('Delay to Start', digits=(16, 2), readonly=True),
-        'overpass_delay': fields.float('Overpassed Deadline', digits=(16, 2), readonly=True),
-        'deadline': fields.date("Deadline", readonly=True),
-        'final_interview': fields.date("Interview", readonly=True),
-        'employee_id': fields.many2one('hr.employee', "Employee", readonly=True),
-        'nbr': fields.integer('# of Requests', readonly=True),
-        'state': fields.selection([
+
+    create_date = fields.Date('Create Date', readonly=True)
+    department_id = fields.Many2one('hr.department', string='Department')
+    delay_date = fields.Float('Delay to Start', digits=(16, 2), readonly=True)
+    overpass_delay = fields.Float('Overpassed Deadline', digits=(16, 2), readonly=True)
+    deadline = fields.Date("Deadline", readonly=True)
+    final_interview = fields.Date("Interview", readonly=True)
+    employee_id = fields.Many2one('hr.employee', string="Employee", readonly=True)
+    nbr = fields.Integer('# of Requests', readonly=True)  # TDE FIXME master: rename into nbr_requests
+    state = fields.Selection([
             ('new', 'To Start'),
             ('pending', 'Appraisal Sent'),
             ('done', 'Done')
-        ], 'Status', readonly=True),
-    }
+        ], 'Status', readonly=True)
+
     _order = 'create_date desc'
 
     _depends = {

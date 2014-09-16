@@ -107,6 +107,14 @@ class hr_evaluation(models.Model):
     def _set_display_name(self):
         self.display_name = self.employee_id.name_related
 
+    @api.returns('hr.evaluation')
+    def default_collaborators_data(self):
+        return self.env['hr.employee'].search([('parent_id', '=', self.employee_id.parent_id.id),('department_id', '=', self.department_id.id)])
+
+    @api.returns('hr.evaluation')
+    def default_colleagues_data(self):
+        return self.env['hr.employee'].search([('department_id', '=', self.department_id.id), ('id', '!=', self.employee_id.parent_id.id)])
+
     @api.onchange('employee_id')
     def onchange_employee_id(self):
         if self.employee_id:
@@ -115,13 +123,13 @@ class hr_evaluation(models.Model):
             self.apprasial_manager_ids = self.employee_id.apprasial_manager_ids if self.employee_id.apprasial_manager_ids else  [self.employee_id.parent_id.id]
             self.apprasial_manager_survey_id = self.employee_id.apprasial_manager_survey_id
             self.appraisal_colleagues = self.employee_id.appraisal_colleagues
-            self.appraisal_colleagues_ids = self.employee_id.appraisal_colleagues_ids
+            self.appraisal_colleagues_ids = self.employee_id.appraisal_colleagues_ids if self.employee_id.appraisal_colleagues_ids else self.default_colleagues_data()
             self.appraisal_colleagues_survey_id = self.employee_id.appraisal_colleagues_survey_id
             self.appraisal_self = self.employee_id.appraisal_self
-            self.apprasial_employee = self.employee_id.name
+            self.apprasial_employee = self.employee_id.apprasial_employee or self.employee_id.name
             self.appraisal_self_survey_id = self.employee_id.appraisal_self_survey_id
             self.appraisal_subordinates = self.employee_id.appraisal_subordinates
-            self.appraisal_subordinates_ids = self.employee_id.appraisal_subordinates_ids
+            self.appraisal_subordinates_ids = self.employee_id.appraisal_subordinates_ids if self.employee_id.appraisal_subordinates_ids else self.default_collaborators_data()
             self.appraisal_subordinates_survey_id = self.employee_id.appraisal_subordinates_survey_id
 
     @api.one
@@ -199,7 +207,7 @@ class hr_evaluation(models.Model):
                         partner_id = mail_obj._find_partner_from_emails(email) or emp.user_id.partner_id or None
                         token = self.create_token(email, rec[0], partner_id)[0]
                         self.update_appraisal_url(rec[0].public_url, email, token)
-                        self.mail_template.send_mail(self.id, force_send=True)
+                        self.mail_template.send_mail(self.id, force_send=False)
         return True
 
     @api.one
@@ -217,7 +225,10 @@ class hr_evaluation(models.Model):
                 appraisal_receiver.append((self.appraisal_subordinates_survey_id,self.appraisal_subordinates_ids))
             if self.appraisal_self and self.apprasial_employee:
                 appraisal_receiver.append((self.appraisal_self_survey_id,self.employee_id))
-            self.create_receiver_list(appraisal_receiver)
+            if appraisal_receiver:
+                self.create_receiver_list(appraisal_receiver)
+            else:
+                raise Warning(_("Employee do not have configured evaluation plan."))
             if self.state == 'new':
                 self.with_context(send_mail_status=True).write({'state': 'pending'})#avoid recursive process
         return True
@@ -411,7 +422,11 @@ class hr_employee(models.Model):
 
     @api.onchange('appraisal_colleagues')
     def onchange_colleagues(self):
-        self.appraisal_colleagues_ids = self.search([('parent_id', '=', self.parent_id.id),('department_id', '=', self.department_id.id)])
+        self.appraisal_colleagues_ids = self.search([('department_id', '=', self.department_id.id), ('id', '!=', self.parent_id.id)])
+
+    @api.onchange('appraisal_subordinates')
+    def onchange_subordinates(self):
+        self.appraisal_subordinates_ids = self.search([('parent_id', '=', self.parent_id.id),('department_id', '=', self.department_id.id)])
 
     @api.model
     def run_employee_evaluation(self, automatic=False, use_new_cursor=False):  # cronjob
