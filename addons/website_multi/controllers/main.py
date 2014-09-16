@@ -15,14 +15,11 @@ class website_multi(Website):
 
         xml_id = request.registry['website'].new_page(request.cr, request.uid, path, context=request.context)
         if add_menu:
-            current = request.website
-            new_menu_id = current.menu_id.id
-
             request.registry['website.menu'].create(cr, uid, {
                 'name': path,
                 'url': '/page/' + xml_id,
-                'parent_id': new_menu_id,
-                'website_id': current.id
+                'parent_id': request.website.menu_id.id,
+                'website_id': request.website.id
             }, context=context)
 
             # Reverse action in order to allow shortcut for /page/<website_xml_id>

@@ -7,9 +7,8 @@ class ir_http(orm.AbstractModel):
     _inherit = 'ir.http'
 
     def _dispatch(self):
-        result = super(ir_http, self)._dispatch()
-
         if request.website_enabled:
             request.context['website_id'] = request.website.id
+            request.website = request.website.with_context(request.context)
 
-        return result
+        return super(ir_http, self)._dispatch()
