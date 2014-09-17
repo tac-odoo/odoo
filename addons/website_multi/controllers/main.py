@@ -22,10 +22,10 @@ class website_multi(Website):
                 'website_id': request.website.id
             }, context=context)
 
-            # Reverse action in order to allow shortcut for /page/<website_xml_id>
-            url = "/page/" + re.sub(r"^website\.", '', xml_id)
+        # Reverse action in order to allow shortcut for /page/<website_xml_id>
+        url = "/page/" + re.sub(r"^website\.", '', xml_id)
 
-            if noredirect:
-                return werkzeug.wrappers.Response(url, mimetype='text/plain')
+        if noredirect:
+            return werkzeug.wrappers.Response(url, mimetype='text/plain')
 
-            return werkzeug.utils.redirect(url)
+        return werkzeug.utils.redirect(url)
