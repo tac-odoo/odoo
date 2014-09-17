@@ -15,7 +15,7 @@
         <record id="website2_homepage" model="ir.ui.view">
             <field name="name">Homepage</field>
             <field name="type">qweb</field>
-            <field name="key">website.homepage</field>
+            <field name="key">website.homepage_website2</field>
             <field name="website_id" ref="website2"/>
             <field name="arch" type="xml">
                 <t name="Homepage" priority="29" t-name="website.homepage">
@@ -61,7 +61,7 @@
 
         <record id="website2_menu_homepage" model="website.menu">
             <field name="name">Home</field>
-            <field name="url">/page/homepage</field>
+            <field name="url">/page/website.homepage_website2</field>
             <field name="parent_id" ref="website_multi.website2_main_menu"/>
             <field name="sequence" type="int">10</field>
             <field name="website_id" ref="website2"/>

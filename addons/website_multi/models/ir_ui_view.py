@@ -16,3 +16,17 @@ class view(osv.osv):
         'unique(key, website_id)',
         'Key must be unique per website.'
     )]
+
+    @tools.ormcache_context(accepted_keys=('website_id',))
+    def get_view_id(self, cr, uid, xml_id, context=None):
+        if context and 'website_id' in context and not isinstance(xml_id, (int, long)):
+            domain = [
+                ('key', '=', xml_id),
+                '|',
+                ('website_id', '=', context['website_id']),
+                ('website_id', '=', False)
+            ]
+            xml_id = self.search(cr, uid, domain, order='website_id', limit=1, context=context)
+        else:
+            xml_id = self.pool['ir.model.data'].xmlid_to_res_id(cr, uid, xml_id, raise_if_not_found=True)
+        return xml_id
