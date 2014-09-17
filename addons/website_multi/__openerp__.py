@@ -13,12 +13,8 @@ OpenERP Multi Website
     'depends': ['website'],
     'installable': True,
     'data': [
-        'data/data.xml',
         'views/res_config.xml',
         'views/website_views.xml',
-    ],
-    'demo': [
-        'data/demo.xml',
     ],
     'qweb': [],
     'application': True,
