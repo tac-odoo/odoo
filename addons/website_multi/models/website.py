@@ -10,6 +10,10 @@ class website(orm.Model):
 
     _inherit = "website"
 
+    def _get_menu_website(self, cr, uid, ids, context=None):
+        import pudb
+        pudb.set_trace()
+
     def _get_menu(self, cr, uid, ids, name, arg, context=None):
         result = {}
         menu_obj = self.pool['website.menu']
@@ -25,7 +29,7 @@ class website(orm.Model):
 
     _defaults = {
         'user_id': lambda s, c, u, x: s.pool['ir.model.data'].xmlid_to_res_id(c, SUPERUSER_ID, 'base.public_user'),
-        'company_id': lambda s, c, u, x: s.pool['ir.model.data'].xmlid_to_res_id(c, SUPERUSER_ID, 'base.main_company')
+        'company_id': lambda s, c, u, x: s.pool['ir.model.data'].xmlid_to_res_id(c, SUPERUSER_ID, 'base.main_company'),
     }
 
     def new_page(self, cr, uid, name, template='website.default_page', ispage=True, context=None):
@@ -78,25 +82,10 @@ class website(orm.Model):
         return self.browse(cr, uid, website_id, context=context)
 
     def get_template(self, cr, uid, ids, template, context=None):
-        xml_id = None
-
-        imd = self.pool['ir.model.data']
-        view = self.pool['ir.ui.view']
-
         if not isinstance(template, (int, long)) and '.' not in template:
             template = 'website.%s' % template
-
-        if context and 'website_id' in context:
-            domain = [
-                ('key', '=', template),
-                '|',
-                ('website_id', '=', context['website_id']),
-                ('website_id', '=', False)
-            ]
-            xml_id = view.search(cr, uid, domain, order='website_id', limit=1, context=context)
-            xml_id = xml_id and xml_id[0] or False
-
-        if not xml_id:
-            xml_id = imd.xmlid_to_res_id(cr, uid, template, raise_if_not_found=True)
-
-        return view.browse(cr, uid, xml_id, context=context)
+        View = self.pool['ir.ui.view']
+        view_id = View.get_view_id(cr, uid, template, context=context)
+        if not view_id:
+            raise NotFound
+        return View.browse(cr, uid, view_id, context=context)
