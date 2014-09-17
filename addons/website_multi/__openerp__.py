@@ -16,6 +16,5 @@ OpenERP Multi Website
         'views/res_config.xml',
         'views/website_views.xml',
     ],
-    'qweb': [],
     'application': True,
 }
