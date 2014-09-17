@@ -30,8 +30,8 @@ class website(orm.Model):
 
     def new_page(self, cr, uid, name, template='website.default_page', ispage=True, context=None):
         context = context or {}
-        imd = self.pool.get('ir.model.data')
-        view = self.pool.get('ir.ui.view')
+        imd = self.pool['ir.model.data']
+        view = self.pool['ir.ui.view']
         template_module, template_name = template.split('.')
 
         # completely arbitrary max_length
@@ -64,7 +64,9 @@ class website(orm.Model):
     def _get_current_website_id(self, cr, uid, domain_name, context=None):
         website_id = 1
         if request:
-            ids = self.search(cr, uid, [('name', '=', domain_name)], context=context)
+            ids = self.search(cr, uid, [
+                ('name', '=', domain_name)
+            ], context=context)
             if ids:
                 website_id = ids[0]
         return website_id
@@ -78,6 +80,9 @@ class website(orm.Model):
     def get_template(self, cr, uid, ids, template, context=None):
         xml_id = None
 
+        imd = self.pool['ir.model.data']
+        view = self.pool['ir.ui.view']
+
         if not isinstance(template, (int, long)) and '.' not in template:
             template = 'website.%s' % template
 
@@ -88,10 +93,10 @@ class website(orm.Model):
                 ('website_id', '=', context['website_id']),
                 ('website_id', '=', False)
             ]
-            xml_id = self.pool['ir.ui.view'].search(cr, uid, domain, order='website_id', limit=1, context=context)
+            xml_id = view.search(cr, uid, domain, order='website_id', limit=1, context=context)
             xml_id = xml_id and xml_id[0] or False
 
         if not xml_id:
-            xml_id = self.pool['ir.model.data'].xmlid_to_res_id(cr, uid, template, raise_if_not_found=True)
+            xml_id = imd.xmlid_to_res_id(cr, uid, template, raise_if_not_found=True)
 
-        return self.pool['ir.ui.view'].browse(cr, uid, xml_id, context=context)
+        return view.browse(cr, uid, xml_id, context=context)
