@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+     <data noupdate="1">
+
+        <record id="main_menu_inherit" model="website.menu">
+            <record name="inherit_id" ref="website.main_menu"/>
+            <data>
+                <xpath expr="." position="inside">
+                    <field name="website_id" ref="default_website"/>
+                </xpath>
+            </data>
+        </record>
+
+        <record id="menu_homepage_inherit" model="website.menu">
+            <record name="inherit_id" ref="website.main_menu"/>
+            <data>
+                <xpath expr="." position="inside">
+                    <field name="website_id" ref="default_website"/>
+                </xpath>
+            </data>
+        </record>
+
+        <record id="menu_contactus_inherit" model="website.menu">
+            <record name="inherit_id" ref="website.main_menu"/>
+            <data>
+                <xpath expr="." position="inside">
+                    <field name="website_id" ref="default_website"/>
+                </xpath>
+            </data>
+        </record>
+
+     </data>
+</openerp>
