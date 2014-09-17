@@ -89,6 +89,7 @@ class website(orm.Model):
     def get_current_website(self, cr, uid, context=None):
         domain_name = request.httprequest.environ.get('HTTP_HOST', '').split(':')[0]
         website_id = self._get_current_website_id(cr, uid, domain_name, context=context)
+        request.context['website_id'] = website_id
         return self.browse(cr, uid, website_id, context=context)
 
     def get_template(self, cr, uid, ids, template, context=None):
