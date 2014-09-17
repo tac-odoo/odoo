@@ -17,9 +17,7 @@ class website(orm.Model):
         for id in ids:
             menu_ids = menu_obj.search(cr, uid, [
                 ('parent_id', '=', False),
-                '|',
                 ('website_id', '=', id),
-                ('website_id', '=', False)
             ], order='id', context=context)
             result[id] = menu_ids and menu_ids[0] or False
 
@@ -78,12 +76,22 @@ class website(orm.Model):
         return self.browse(cr, uid, website_id, context=context)
 
     def get_template(self, cr, uid, ids, template, context=None):
+        xml_id = None
+
         if not isinstance(template, (int, long)) and '.' not in template:
             template = 'website.%s' % template
 
-        View = self.pool['ir.ui.view']
-        view_id = View.get_view_id(cr, uid, template, context=context)
-        if not view_id:
-            raise NotFound
+        if context and 'website_id' in context:
+            domain = [
+                ('key', '=', template),
+                '|',
+                ('website_id', '=', context['website_id']),
+                ('website_id', '=', False)
+            ]
+            xml_id = self.pool['ir.ui.view'].search(cr, uid, domain, order='website_id', limit=1, context=context)
+            xml_id = xml_id and xml_id[0] or False
 
-        return View.browse(cr, uid, view_id, context=context)
+        if not xml_id:
+            xml_id = self.pool['ir.model.data'].xmlid_to_res_id(cr, uid, template, raise_if_not_found=True)
+
+        return self.pool['ir.ui.view'].browse(cr, uid, xml_id, context=context)
