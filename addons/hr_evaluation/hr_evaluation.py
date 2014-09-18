@@ -450,7 +450,7 @@ class hr_employee(models.Model):
                     'appraisal_colleagues_ids': [(4,colleagues.id) for colleagues in emp.appraisal_colleagues_ids] or [(4,rec.id) for rec in emp.search([('department_id', '=', emp.department_id.id), ('id', '!=', emp.parent_id.id)])],
                     'appraisal_colleagues_survey_id': emp.appraisal_colleagues_survey_id.id,
                     'appraisal_self': emp.appraisal_self,
-                    'apprasial_employee': emp.name,
+                    'apprasial_employee': emp.apprasial_employee or emp.name,
                     'appraisal_self_survey_id': emp.appraisal_self_survey_id.id,
                     'appraisal_subordinates': emp.appraisal_subordinates,
                     'appraisal_subordinates_ids': [(4,subordinates.id) for subordinates in emp.appraisal_subordinates_ids] or [(4,rec.id) for rec in emp.search([('parent_id', '=', emp.parent_id.id),('department_id', '=', emp.department_id.id)])],
