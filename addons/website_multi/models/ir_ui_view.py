@@ -9,7 +9,7 @@ class view(osv.osv):
     _inherit = "ir.ui.view"
 
     _columns = {
-        'website_id': fields.many2one('website', ondelete='cascade', string="Website"),
+        'website_id': fields.many2one('website', ondelete='cascade', string="Website", copy=False),
         'key': fields.char('Key')
     }
 

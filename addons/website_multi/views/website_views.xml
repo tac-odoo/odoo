@@ -15,6 +15,7 @@
                 <xpath expr="//header" position="replace"></xpath>
                 <xpath expr="//field[@name='name']" position="after">
                     <field name="menu_id"/>
+                    <field name="user_id" />
                 </xpath>
                 <xpath expr="//div[@name='other']" position="after">
                     <div name="menu">
