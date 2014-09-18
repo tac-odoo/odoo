@@ -10,10 +10,6 @@ class website(orm.Model):
 
     _inherit = "website"
 
-    def _get_menu_website(self, cr, uid, ids, context=None):
-        import pudb
-        pudb.set_trace()
-
     def _get_menu(self, cr, uid, ids, name, arg, context=None):
         result = {}
         menu_obj = self.pool['website.menu']
@@ -26,6 +22,14 @@ class website(orm.Model):
             result[id] = menu_ids and menu_ids[0] or False
 
         return result
+
+    def _set_menu(self, cr, uid, ids, name, value, arg, context=None):
+        pass
+
+    _columns = {
+        'menu_id': fields.function(_get_menu, string='Main Menu', type="many2one", relation="website.menu"),
+        'menu_ids': fields.one2many('website.menu', 'website_id', string='Main Menu'),
+    }
 
     _defaults = {
         'user_id': lambda s, c, u, x: s.pool['ir.model.data'].xmlid_to_res_id(c, SUPERUSER_ID, 'base.public_user'),
