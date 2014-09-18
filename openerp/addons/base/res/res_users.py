@@ -354,7 +354,7 @@ class res_users(osv.osv):
             context={}
         ids = []
         if name:
-            ids = self.search(cr, user, [('login','=',name)]+ args, limit=limit, context=context)
+            ids = self.search(cr, user, [('login','ilike',name)]+ args, limit=limit, context=context)
         if not ids:
             ids = self.search(cr, user, [('name',operator,name)]+ args, limit=limit, context=context)
         return self.name_get(cr, user, ids, context=context)
