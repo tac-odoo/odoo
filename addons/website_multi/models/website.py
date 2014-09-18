@@ -9,17 +9,25 @@ from werkzeug.exceptions import NotFound
 class website(orm.Model):
 
     _inherit = "website"
-
+    
+    def _get_menu_website(self, cr, uid, ids, context=None):
+        res = []
+        for menu in self.pool.get('website.menu').browse(cr, uid, ids, context=context):
+            if menu.website_id:
+                res.append(menu.website_id.id)
+        # IF a menu is changed, update all websites
+        return res
+    
     def _get_menu(self, cr, uid, ids, name, arg, context=None):
         result = {}
         menu_obj = self.pool['website.menu']
 
-        for id in ids:
+        for website_id in ids:
             menu_ids = menu_obj.search(cr, uid, [
                 ('parent_id', '=', False),
-                ('website_id', '=', id),
+                ('website_id', '=', website_id),
             ], order='id', context=context)
-            result[id] = menu_ids and menu_ids[0] or False
+            result[website_id] = menu_ids and menu_ids[0] or False
 
         return result
 
@@ -27,8 +35,10 @@ class website(orm.Model):
         pass
 
     _columns = {
-        'menu_id': fields.function(_get_menu, string='Main Menu', type="many2one", relation="website.menu"),
-        'menu_ids': fields.one2many('website.menu', 'website_id', string='Main Menu'),
+        'menu_id': fields.function(_get_menu, relation='website.menu', type='many2one', string='Main Menu',
+            store= {
+                'website.menu': (_get_menu_website, ['sequence','parent_id','website_id'], 10)
+            })
     }
 
     _defaults = {

@@ -7,23 +7,14 @@
         </record>
 
         <record id="website.main_menu" model="website.menu">
-            <!-- <field name="website_ids" eval="[
-                (6, 0, [ref('website.default_website')])
-            ]"/> -->
             <field name="website_id" ref='website.default_website'/>
         </record>
 
         <record id="website.menu_homepage" model="website.menu">
-            <!-- <field name="website_ids" eval="[
-                (6, 0, [ref('website.default_website')])
-            ]"/> -->
             <field name="website_id" ref='website.default_website'/>
         </record>
 
         <record id="website.menu_contactus" model="website.menu">
-            <!-- <field name="website_ids" eval="[
-                (6, 0, [ref('website.default_website')])
-            ]"/> -->
             <field name="website_id" ref='website.default_website'/>
         </record>
 
