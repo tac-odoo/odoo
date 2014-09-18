@@ -440,11 +440,13 @@ class hr_employee(models.Model):
             else:
                 next_date = (now + relativedelta(months=emp.appraisal_repeat_number * 12)).strftime(DEFAULT_SERVER_DATE_FORMAT)
             emp.write({'evaluation_date': next_date})
+            emp.onchange_subordinates()
+            emp.onchange_colleagues()
             vals = {'employee_id': emp.id,
                     'date_close': now,
                     'department_id': emp.department_id.id,
                     'appraisal_manager': emp.appraisal_manager,
-                    'apprasial_manager_ids': [(4,manager.id) for manager in emp.apprasial_manager_ids],
+                    'apprasial_manager_ids': [(4,manager.id) for manager in emp.apprasial_manager_ids] or [(4,emp.parent_id.id)],
                     'apprasial_manager_survey_id' : emp.apprasial_manager_survey_id.id,
                     'appraisal_colleagues': emp.appraisal_colleagues,
                     'appraisal_colleagues_ids': [(4,colleagues.id) for colleagues in emp.appraisal_colleagues_ids],
