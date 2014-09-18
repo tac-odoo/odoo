@@ -440,8 +440,6 @@ class hr_employee(models.Model):
             else:
                 next_date = (now + relativedelta(months=emp.appraisal_repeat_number * 12)).strftime(DEFAULT_SERVER_DATE_FORMAT)
             emp.write({'evaluation_date': next_date})
-            emp.onchange_subordinates()
-            emp.onchange_colleagues()
             vals = {'employee_id': emp.id,
                     'date_close': now,
                     'department_id': emp.department_id.id,
@@ -449,13 +447,13 @@ class hr_employee(models.Model):
                     'apprasial_manager_ids': [(4,manager.id) for manager in emp.apprasial_manager_ids] or [(4,emp.parent_id.id)],
                     'apprasial_manager_survey_id' : emp.apprasial_manager_survey_id.id,
                     'appraisal_colleagues': emp.appraisal_colleagues,
-                    'appraisal_colleagues_ids': [(4,colleagues.id) for colleagues in emp.appraisal_colleagues_ids],
+                    'appraisal_colleagues_ids': [(4,colleagues.id) for colleagues in emp.appraisal_colleagues_ids] or [(4,rec.id) for rec in emp.search([('department_id', '=', emp.department_id.id), ('id', '!=', emp.parent_id.id)])],
                     'appraisal_colleagues_survey_id': emp.appraisal_colleagues_survey_id.id,
                     'appraisal_self': emp.appraisal_self,
                     'apprasial_employee': emp.name,
                     'appraisal_self_survey_id': emp.appraisal_self_survey_id.id,
                     'appraisal_subordinates': emp.appraisal_subordinates,
-                    'appraisal_subordinates_ids': [(4,subordinates.id) for subordinates in emp.appraisal_subordinates_ids],
+                    'appraisal_subordinates_ids': [(4,subordinates.id) for subordinates in emp.appraisal_subordinates_ids] or [(4,rec.id) for rec in emp.search([('parent_id', '=', emp.parent_id.id),('department_id', '=', emp.department_id.id)])],
                     'appraisal_subordinates_survey_id': emp.appraisal_subordinates_survey_id.id
             }
             obj_evaluation.create(vals)
