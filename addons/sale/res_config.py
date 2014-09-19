@@ -80,6 +80,8 @@ Example: 10% for retailers, promotion of 5 EUR on this product, etc."""),
         'group_sale_delivery_address': fields.boolean("Allow a different address for delivery and invoicing ",
             implied_group='sale.group_delivery_invoice_address',
             help="Allows you to specify different delivery and invoice addresses on a sales order."),
+        'module_sale_coupon': fields.boolean('Allow presale voucher',
+            help="To allow Coupon on selected products."),
     }
 
     def set_sale_defaults(self, cr, uid, ids, context=None):

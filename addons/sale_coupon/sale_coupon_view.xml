@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record model="ir.ui.view" id="sale_coupon_form">
+             <field name="name">sale.coupon.form</field>
+             <field name="model">sale.order</field>
+             <field name="inherit_id" ref="sale.view_order_form" />
+             <field name="arch" type="xml">
+                <field name="price_unit" position="after">
+                    <field name="sales_coupon_type"/>
+                </field>
+             </field>
+        </record>
+
+        <record model="ir.ui.view" id="sale_coupon_tree">
+             <field name="name">sale.coupon.tree</field>
+             <field name="model">sale.order</field>
+             <field name="inherit_id" ref="sale.view_order_form" />
+             <field name="arch" type="xml">
+                <xpath expr="//tree/field[@name='price_unit']" position="after">
+                    <field name="sales_coupon_type"/>
+                </xpath>
+             </field>
+        </record>
+
+        <record id="product_coupon_type_template" model="ir.ui.view">
+            <field name="name">product.coupon.type</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@string='Sales']//group[@name='sale_condition']" position="inside">
+                    <field name="coupon_type"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_sale_coupon_tree">
+            <field name="name">Sales Coupon</field>
+            <field name="model">sales.coupon</field>
+            <field name="arch" type="xml">
+                <tree string="Sales Coupon">
+                    <field name="name"/>
+                    <field name="validity_use"/>
+                    <field name="expiration_date"/>
+                    <field name="expiration_use"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_sale_coupon_form" model="ir.ui.view">
+            <field name="name">Sales Coupon</field>
+            <field name="model">sales.coupon</field>
+            <field name="arch" type="xml">
+                <form string="Sales Coupon">
+                    <sheet string="Sales Coupon">
+                        <group>
+                            <field name="name" placeholder="Coupon Name"/>
+                            <label for="validity_use"/>
+                            <div>
+                                <div>
+                                    <field name="validity_use" widget="selection"/>
+                                </div>
+                            </div>
+                        </group>
+                        <group>
+                            <label for="expiration_date" attrs="{'invisible':[('validity_use','=','expiration_use')]}"/>
+                            <div attrs="{'invisible':[('validity_use','=','expiration_use')]}">
+                                <div>
+                                    <field name="expiration_date" class="oe_inline"/>
+                                </div>
+                            </div>
+                            <label for="expiration_use" attrs="{'invisible':[('validity_use','=','expiration_date')]}"/>
+                            <div attrs="{'invisible':[('validity_use','=','expiration_date')]}">
+                                <div>
+                                    <field name="expiration_use" class="oe_inline"/>
+                                </div>
+                            </div>
+                        </group>
+<!--                    <group>
+                            <label for="id" string="Products"/>
+                            <div>
+                                <div>
+                                    <field name="product_id" colspan="4"/>
+                                </div>
+                            </div>
+                        </group>
+                        <group>
+                            <label for="id" string="Product Category"/>
+                            <div>
+                                <div>
+                                    <field name="product_categ_id" colspan="4"/>
+                                </div>
+                            </div>
+                        </group> -->
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="action_sale_coupon_configuration" model="ir.actions.act_window">
+            <field name="name">Sales Coupon Type</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sales.coupon</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="menu_sale_coupon_configuration" parent="base.menu_base_config" name="Sales Coupon"/>
+        <menuitem action="action_sale_coupon_configuration" id="menu_sale_coupon_type" parent="menu_sale_coupon_configuration"/>
+
+        <record model="ir.ui.view" id="view_coupon_manager_tree">
+            <field name="name">Sales Coupons</field>
+            <field name="model">coupon.manager</field>
+            <field name="arch" type="xml">
+                <tree string="Coupon Manager" >
+                    <field name="code"/>
+                    <field name="partner_id"/>
+                    <field name="coupon_type"/>
+                    <field name="product_id"/>
+                    <field name="validity"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_coupon_manager_form" model="ir.ui.view">
+            <field name="name">Coupon Manager</field>
+            <field name="model">coupon.manager</field>
+            <field name="arch" type="xml">
+                <form string="Coupon Manager">
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="current,used,expired" statusbar_colors='{"expired":"red"}'/>
+                    </header>
+                    <sheet string="Coupon Manager">
+                        <div class="oe_title">
+                        <label for="code" class="oe_edit_only"/>
+                            <h1>
+                                <field name="code" placeholder="Coupon Code"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <label for="partner_id"/>
+                                <div>
+                                    <field name="partner_id"/>
+                                </div>
+                                <label for="product_id"/>
+                                <div>
+                                    <field name="product_id" class="oe_inline"/>
+                                </div>
+                            </group>
+                            <group>
+                                <label for="coupon_type"/>
+                                <div>
+                                    <field name="coupon_type"/>
+                                </div>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_coupon_manager_filter" model="ir.ui.view">
+            <field name="name">Coupon Manager</field>
+            <field name="model">coupon.manager</field>
+            <field name="arch" type="xml">
+                <search string="Coupon Manager">
+                    <filter string="Current" domain="[('state','=',current)]"/>
+                    <filter string="Expired" domain="[('state','=','expired')]"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Coupon type" domain="[]" context="{'group_by':'coupon_type'}"/>
+                        <filter string="state" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Customer" domain="[]" context="{'group_by':'partner_id'}"/>
+                        <filter string="Product" domain="[]" context="{'group_by':'product_id'}"/>
+                    </group>
+               </search>
+            </field>
+        </record>
+
+        <record id="sales_coupon_manager" model="ir.actions.act_window">
+            <field name="name">Sales Coupons</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">coupon.manager</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_coupon_manager_filter"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to create a New Coupon.
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="base.menu_invoiced" name="Invoicing" parent="base.menu_base_partner" sequence="5"/>
+        <menuitem action="sales_coupon_manager" id="menu_sales_coupon_manager" parent="base.menu_invoiced"/>
+
+    </data>
+</openerp>
+

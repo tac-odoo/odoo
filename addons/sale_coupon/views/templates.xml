@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!-- Editor custom -->
+        <template id="assets_editor" inherit_id="website.assets_editor" name="Forum Editor Assets" groups="base.group_user">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/sale_coupon/static/src/js/sale_coupon.js"/>
+            </xpath>
+        </template>
+
+        <template id="sales_coupon_code" inherit_id="website_sale.payment" active="True">
+              <xpath expr="//div[@id='right_column']" position="inside">
+                <div class="coupon_box">
+                  <h4>Coupon Code</h4>
+                  <p>
+                      Have a coupon code? Fill in this field and apply.
+                  </p>
+                  <div class="input-group">
+                      <input name="promo" class='form-control' type="text" placeholder="code..." t-att-value="website_sale_order.pricelist_id.code or ''"/>
+                      <div class="input-group-btn">
+                          <a class="btn btn-default a-submit check_coupon">Apply</a>
+                      </div>
+                  </div>
+              </div>
+              </xpath>
+        </template>
+    </data>
+</openerp>

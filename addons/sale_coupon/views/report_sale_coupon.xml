@@ -1,0 +1,27 @@
+<openerp>
+    <data>
+        <template id="sales_coupon" inherit_id="sale.report_saleorder_document" name="Sale Coupon Report">
+            <xpath expr="//p[@t-field='o.note']" position="before">
+                <p> Coupon Recived </p>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Coupon Code</th>
+                        </tr>
+                    </thead>
+                    <tbody class="sale__coupon_tbody">
+                        <tr t-foreach="o.order_line" t-as="l">
+                            <td>
+                               <span t-field="l.sale_coupon_manager_id.product_id"/>
+                            </td>
+                            <td>
+                               <span t-field="l.sale_coupon_manager_id.code"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </xpath>
+        </template>
+    </data>
+</openerp>
