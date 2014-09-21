@@ -32,9 +32,6 @@ class website(orm.Model):
 
         return result
 
-    def _set_menu(self, cr, uid, ids, name, value, arg, context=None):
-        pass
-
     _columns = {
         'menu_id': fields.function(_get_menu, relation='website.menu', type='many2one', string='Main Menu',
             store= {
@@ -112,13 +109,9 @@ class ir_http(osv.AbstractModel):
 
     def _auth_method_public(self):
         if not request.session.uid:
-            domain = request.httprequest.host.split(':')[0]
-            website_ids = self.pool.get('website').search(request.cr, openerp.SUPERUSER_ID, [('name', '=', domain)])
-            if website_ids :
-                website = self.pool.get('website').browse(request.cr, openerp.SUPERUSER_ID, website_ids[0])
-                if website.user_id:
-                    request.uid = website.user_id.id 
-            if not request.uid:
+            if request.website and request.website.user_id:
+                request.uid = request.website.user_id.id
+            else:
                 dummy, request.uid = self.pool['ir.model.data'].get_object_reference(request.cr, openerp.SUPERUSER_ID, 'base', 'public_user')
         else:
             request.uid = request.session.uid
