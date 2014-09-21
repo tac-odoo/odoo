@@ -1,9 +1,10 @@
 import openerp
 from openerp import SUPERUSER_ID
-from openerp.osv import orm, fields
+from openerp.osv import orm, fields, osv
 from openerp.addons.website.models.website import slugify
 from openerp.addons.web.http import request
 from werkzeug.exceptions import NotFound
+
 
 
 class website(orm.Model):
@@ -103,3 +104,21 @@ class website(orm.Model):
         if not view_id:
             raise NotFound
         return View.browse(cr, uid, view_id, context=context)
+    
+    
+
+class ir_http(osv.AbstractModel):
+    _inherit = 'ir.http'
+
+    def _auth_method_public(self):
+        if not request.session.uid:
+            domain = request.httprequest.host.split(':')[0]
+            website_ids = self.pool.get('website').search(request.cr, openerp.SUPERUSER_ID, [('name', '=', domain)])
+            if website_ids :
+                website = self.pool.get('website').browse(request.cr, openerp.SUPERUSER_ID, website_ids[0])
+                if website.user_id:
+                    request.uid = website.user_id.id 
+            if not request.uid:
+                dummy, request.uid = self.pool['ir.model.data'].get_object_reference(request.cr, openerp.SUPERUSER_ID, 'base', 'public_user')
+        else:
+            request.uid = request.session.uid

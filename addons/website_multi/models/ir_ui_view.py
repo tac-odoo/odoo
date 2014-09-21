@@ -39,7 +39,7 @@ class view(osv.osv):
             xml_id = self.pool['ir.model.data'].xmlid_to_res_id(cr, uid, xml_id, raise_if_not_found=True)
         return xml_id
 
-    _read_template_cache = dict(accepted_keys=('lang', 'inherit_branding', 'editable', 'translatable'))
+    _read_template_cache = dict(accepted_keys=('lang', 'inherit_branding', 'editable', 'translatable', 'website_id'))
 
     @tools.ormcache_context(**_read_template_cache)
     def _read_template(self, cr, uid, view_id, context=None):
@@ -67,3 +67,14 @@ class view(osv.osv):
 
     def clear_cache(self):
         self._read_template.clear_cache(self)
+        
+    def get_inheriting_views_arch(self, cr, uid, view_id, model, context=None):
+        arch = super(view, self).get_inheriting_views_arch(cr, uid, view_id, model, context=context)
+        view_arch = dict([(v, a) for a, v in arch])
+        if context and 'website_id' in context:
+            for view_rec in self.browse(cr, 1, view_arch.keys(), context):
+                if view_rec.website_id and view_rec.website_id.id != context['website_id']:
+                    view_arch.pop(view_rec.id)
+        return [(arch, view_id) for view_id, arch in view_arch.items()]
+        
+            

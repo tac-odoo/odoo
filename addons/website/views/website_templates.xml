@@ -135,7 +135,7 @@
                     <t t-raw="0"/>
                 </main>
                 <footer>
-                    <div id="footer_container">
+                    <div id="footer">
                     </div>
                 </footer>
             </div>
