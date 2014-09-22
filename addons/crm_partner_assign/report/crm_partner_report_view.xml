@@ -51,6 +51,13 @@
             <field name="domain">[('grade_id', '!=', False)]</field>
         </record>
 
+       <record model="ir.actions.act_window.view" id="action_report_crm_partner_assign_graph">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">graph</field>
+            <field name="view_id" ref="view_report_crm_partner_assign_graph"/>
+            <field name="act_window_id" ref="action_report_crm_partner_assign"/>
+       </record>
+
        <menuitem id="menu_report_crm_partner_assign_tree"
            parent="base.next_id_64" action="action_report_crm_partner_assign" sequence="25"/>
 
