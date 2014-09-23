@@ -62,7 +62,6 @@ class report_project_task_user(osv.osv):
                     t.date_deadline as date_deadline,
                     abs((extract('epoch' from (t.write_date-t.date_start)))/(3600*24))  as no_of_days,
                     t.user_id,
-                    t.reviewer_id,
                     t.project_id,
                     t.priority,
                     t.name as name,
