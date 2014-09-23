@@ -114,6 +114,12 @@ class mail_message(osv.Model):
         """ Search for starred messages by the current user."""
         return ['&', ('notification_ids.partner_id.user_ids', 'in', [uid]), ('notification_ids.starred', '=', domain[0][2])]
 
+    def _set_model(self, cr, uid, ids, field_name, value, arg, context=None):
+        if not value:
+            return
+        model_obj = self.pool['ir.model'].browse(cr, uid, value, context=context)
+        return self.write(cr, uid, ids, {'model': model_obj.model}, context=context)
+
     def _get_model_id(self, cr, uid, ids, name, args, context):
         res = {}
         #TOFIX: why getting 'mail.compose.message' into self._name 
@@ -154,7 +160,8 @@ class mail_message(osv.Model):
         'child_ids': fields.one2many('mail.message', 'parent_id', 'Child Messages'),
         'model': fields.char('Related Document Model', select=True),
         'model_id': fields.function(_get_model_id, string='Application',
-            store={'mail.message': (lambda self, cr, uid, ids, c: ids, ['model'], 10)},
+            fnct_inv=_set_model,
+            store={'mail.message': (lambda self, cr, uid, ids, c={}: ids, ['model'], 10)},
             type='many2one', relation='ir.model',
             select=True, readonly=True),
         'res_id': fields.integer('Related Document ID', select=1),
