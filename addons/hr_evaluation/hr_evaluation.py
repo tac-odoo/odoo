@@ -280,6 +280,8 @@ class hr_evaluation(models.Model):
     def write(self, vals):
         emp_obj = self.env['hr.employee']
         for evl_rec in self:
+            if self.state == 'new' and vals.get('state') == 'done':
+                raise Warning(_("You can not move directly in done state."))
             if vals.get('state') == 'pending' and not evl_rec._context.get('send_mail_status'): #avoid recursive process
                 evl_rec.button_sent_appraisal()
             if vals.get('interview_deadline') and not vals.get('meeting_id'):
