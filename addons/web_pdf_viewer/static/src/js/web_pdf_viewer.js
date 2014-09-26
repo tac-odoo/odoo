@@ -68,23 +68,23 @@ openerp.web_pdf_viewer = function (openerp) {
                     options.complete();
                 }
             };
-            $('.oe_view_manager.oe_view_manager_current').children().hide();
-            var height_window = ($(window).height()) - 32;
-            var $target = $('<iframe style="top:100px;left:1px;z-index:500;width:100%;height:' + height_window + 'px;">')
+            $('.oe-view-manager.oe_view_manager_current').children().hide();
+            var height_window = ($(window).height()) - parseInt($('#oe_main_menu_navbar').css('height'),10);
+            var $target = $('<iframe style="border:0px;display:block;left:1px;z-index:500;width:100%;height:' + height_window + 'px;">')
                 .attr({ id: id, name: id })
-                .prependTo(".oe_view_manager.oe_view_manager_current");
+                .prependTo(".oe-view-manager.oe_view_manager_current");
                 $('<a><iframe class="ie_problem" src="about:blank"></iframe><div class="close_print"><div><div>X</div><i>Close</i></div></div></a>')
-                        .attr({id: 'close_print'})
-                        .prependTo(".oe_view_manager.oe_view_manager_current");
-                $("#close_print").click(function () {
+                        .addClass('iframe_close_print')
+                        .prependTo(".oe-view-manager.oe_view_manager_current");
+                $(".iframe_close_print").click(function () {
                     clearTimeout(timer);
                     $form_data.remove();
                     $target.remove();
                     if (remove_form && $form) {
                         $form.remove();
                     }
-                    $("#close_print").remove();
-                    $('.oe_view_manager.oe_view_manager_current').children().show();
+                    $(".iframe_close_print").remove();
+                    $('.oe-view-manager.oe_view_manager_current').children().show();
                 });
             
             if (options.form) {
