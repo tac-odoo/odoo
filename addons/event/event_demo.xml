@@ -214,7 +214,7 @@
         <field name="phone">003281588558</field>
         <field name="event_id" ref="event_1"/>
         <field name="partner_id" ref="base.res_partner_2"/>
-        <field name="nb_register">5</field>
+        <!-- <field name="nb_register">5</field> -->
     </record>
 
     <record id="reg_1_2" model="event.registration">
@@ -223,7 +223,7 @@
         <field name="phone">+ 1 64 61 04 01</field>
         <field name="partner_id" ref="base.res_partner_1"/>
         <field name="event_id" ref="event_1"/>
-        <field name="nb_register">10</field>
+        <!-- <field name="nb_register">10</field> -->
     </record>
 
     <record id="reg_0_2" model="event.registration">
@@ -232,7 +232,7 @@
         <field name="phone">+41 21 619 10 04 </field>
         <field name="event_id" ref="event_2"/>
         <field name="partner_id" ref="base.res_partner_12"/>
-        <field name="nb_register">5</field>
+        <!-- <field name="nb_register">5</field> -->
     </record>
 
     </data>

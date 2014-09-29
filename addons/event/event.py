@@ -70,6 +70,11 @@ class event_event(models.Model):
         store=True, readonly=True, compute='_compute_seats')
     seats_used = fields.Integer(oldname='register_attended', string='Number of Participations',
         store=True, readonly=True, compute='_compute_seats')
+    available_seat =  fields.Selection(
+        [('limited', 'Limited'),
+        ('unlimited', 'Unlimited'),
+        ],'Available Seat',
+        default='unlimited')
 
     @api.multi
     @api.depends('seats_max', 'registration_ids.state', 'registration_ids.nb_register')
@@ -202,8 +207,9 @@ class event_event(models.Model):
     @api.one
     @api.constrains('seats_max', 'seats_available')
     def _check_seats_limit(self):
-        if self.seats_max and self.seats_available < 0:
-            raise Warning(_('No more available seats.'))
+        if self.available_seat != 'unlimited':
+            if self.seats_max and self.seats_available < 0:
+                raise Warning(_('No more available seats.'))
 
     @api.one
     @api.constrains('date_begin', 'date_end')
@@ -327,7 +333,7 @@ class event_registration(models.Model):
     def _check_seats_limit(self):
         if self.event_id.seats_max and \
             self.event_id.seats_available < (self.nb_register if self.state == 'draft' else 0):
-                raise Warning(_('No more available seats.'))
+                raise Warning(_('No more available seatsssss.'))
 
     @api.one
     def do_draft(self):

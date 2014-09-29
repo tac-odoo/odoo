@@ -96,15 +96,16 @@
                                 <group>
                                     <group>
                                         <field name="seats_min"/>
-                                        <field name="seats_max"/>
-                                        <label for="seats_reserved" string="Current Registrations" groups="base.group_user"/>
+                                        <field name="available_seat" widget='radio'/>
+                                        <field name="seats_max" attrs="{'invisible':[('available_seat','=','unlimited')]}"/>
+<!--                                         <label for="seats_reserved" string="Current Registrations" groups="base.group_user"/>
                                         <div groups="base.group_user">
                                              <field name="seats_unconfirmed" class="oe_inline"/> (confirmed: <field name="seats_reserved" class="oe_inline"/>)
-                                        </div>
-                                        <field name="seats_used"/>
+                                        </div> -->
+<!--                                         <field name="seats_used"/> -->
                                     </group>
                                 </group>
-                                <field name="registration_ids" colspan="4" nolabel="1" groups="event.group_event_manager,event.group_event_user" context="{'event_id': active_id}">
+<!--                                 <field name="registration_ids" colspan="4" nolabel="1" groups="event.group_event_manager,event.group_event_user" context="{'event_id': active_id}">
                                     <tree string="Registration" editable="top">
                                         <field name="name" />
                                         <field name="email" />
@@ -136,11 +137,11 @@
                                                 <button name="button_reg_cancel" string="Cancel Registration" states="draft,open" type="object" icon="gtk-cancel"/>
                                             </group>
                                     </form>
-                                </field>
+                                </field> -->
                             </page>
-                            <page string="Description">
+<!--                             <page string="Description">
                                 <field name="description" nolabel="1" placeholder="Event Description..."/>
-                            </page>
+                            </page> -->
                             <page string='Event Details' groups="base.group_no_one">
                                 <group colspan="4">
                                     <field name="reply_to"/>
@@ -196,6 +197,7 @@
                     <field name="seats_max"/>
                     <field name="seats_reserved"/>
                     <field name="seats_available"/>
+                    <field name="available_seat"/>
                     <templates>
                     <t t-name="kanban-box">
                       <div class="oe_module_vignette">
@@ -213,8 +215,13 @@
                               <t t-if="record.country_id.raw_value">@<field name="country_id"/><br/></t>
                               <t t-if="record.user_id.raw_value">Organized by <field name="user_id"/><br/></t>
                               <t t-if="record.seats_available.raw_value lte 10 and record.seats_available.raw_value gt 0"><i>Only</i></t>
-                              <t t-if="!record.seats_max.raw_value"><i>No ticket available.</i></t>
-                              <t t-if="record.seats_max.raw_value">
+                              <t t-if="record.available_seat.raw_value == 'limited'">
+                                <t t-if="!record.seats_max.raw_value"><i>No ticket available.</i></t>
+                              </t>
+                              <t t-if="record.available_seat.raw_value == 'unlimited'">
+                                <i>Unlimited tickets available.</i>
+                              </t>
+                              <t t-if="record.seats_max.raw_value and record.available_seat.raw_value == 'limited'">
                                 <i t-if="record.seats_available.raw_value">
                                     <b><field name="seats_available"/></b>
                                     <t t-if="record.seats_available.raw_value > 1">tickets </t>
@@ -224,14 +231,15 @@
                               </t>
                             </p>
                             <div groups="base.group_user,base.group_portal">
-                                <t t-if="record.seats_available.raw_value gt 0 and record.seats_max.raw_value">
+                                
+
                                   <t t-if="!record.is_subscribed.raw_value">
                                     <input t-att-id="record.id.raw_value" type="text" name="subscribe" class="no_of_seats" value="1" onchange="document.getElementById('btn_sub' +this.id).setAttribute('data-context',JSON.stringify({'ticket':this.value}))"/>
                                     <button t-att-id="'btn_sub'+record.id.raw_value" type="object" name="subscribe_to_event" class="oe_subscribe_button">
                                         <span >Subscribe</span>
                                     </button>
                                   </t>
-                                </t>
+
                                 <t t-if="record.is_subscribed.raw_value">
                                   <button type="object" name="unsubscribe_to_event" class="oe_unsubscribe_button ">
                                     <span>Subscribed</span>

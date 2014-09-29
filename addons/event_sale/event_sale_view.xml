@@ -92,9 +92,9 @@
                             </field>
                         </page>
                     </xpath>
-                    <field name="nb_register" position="after">
+<!--                     <field name="nb_register" position="after">
                         <field name="event_ticket_id" domain="[('event_id', '=', context.get('event_id'))]"/>
-                    </field>
+                    </field> -->
                </data>
             </field>
         </record>
@@ -121,10 +121,10 @@
                             </field>
                         </page>
                     </xpath>
-                    <field name="nb_register" position="after">
+<!--                     <field name="nb_register" position="after">
                         <field name="event_ticket_id" domain="[('event_id', '=', context.get('event_id'))]"/>
-                    </field>
-                     <xpath expr="//notebook" position="inside">
+                    </field> -->
+<!--                      <xpath expr="//notebook" position="inside">
                         <page string="Badge">
                             <label for="badge_back" class="oe_edit_only">Badge (Back)</label>
                             <field name="badge_back" nolabel="1" placeholder="Event badge_back..."/>
@@ -135,7 +135,7 @@
                             <label for="badge_innerright" class="oe_edit_only">Badge (Inner Right)</label>
                             <field name="badge_innerright" nolabel="1" placeholder="Event badge_innerright..."/>
                         </page>
-                    </xpath>
+                    </xpath> -->
                </data>
             </field>
         </record>
