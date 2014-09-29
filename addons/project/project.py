@@ -986,21 +986,23 @@ class task(osv.osv):
                         pass
         return super(task, self).message_update(cr, uid, ids, msg, update_vals=update_vals, context=context)
 
-class account_analytic_account(osv.osv):
+from openerp import models, fields, api, _
+class account_analytic_account(models.Model):
     _inherit = 'account.analytic.account'
     _description = 'Analytic Account'
-    _columns = {
-        'use_tasks': fields.boolean('Tasks',help="If checked, this contract will be available in the project menu and you will be able to manage tasks or track issues"),
-        'company_uom_id': fields.related('company_id', 'project_time_mode_id', type='many2one', relation='product.uom'),
-    }
 
-    def on_change_template(self, cr, uid, ids, template_id, date_start=False, context=None):
-        res = super(account_analytic_account, self).on_change_template(cr, uid, ids, template_id, date_start=date_start, context=context)
+    use_tasks = fields.Boolean('Tasks',help="If checked, this contract will be available in the project menu and you will be able to manage tasks or track issues")
+    company_uom_id = fields.Many2one(related='company_id.project_time_mode_id', comodel_name='product.uom')
+
+    @api.onchange('template_id')
+    def on_change_template(self, template_id, date_start=False):
+        res = super(account_analytic_account, self).on_change_template(template_id, date_start=date_start)
         if template_id and 'value' in res:
-            template = self.browse(cr, uid, template_id, context=context)
+            template = self.browse(template_id)
             res['value']['use_tasks'] = template.use_tasks
         return res
 
+    @api.v7
     def _trigger_project_creation(self, cr, uid, vals, context=None):
         '''
         This function is used to decide if a project needs to be automatically created or not when an analytic account is created. It returns True if it needs to be so, False otherwise.
@@ -1008,6 +1010,14 @@ class account_analytic_account(osv.osv):
         if context is None: context = {}
         return vals.get('use_tasks') and not 'project_creation_in_progress' in context
 
+    @api.v8
+    def _trigger_project_creation(self, vals):
+        '''
+        This function is used to decide if a project needs to be automatically created or not when an analytic account is created. It returns True if it needs to be so, False otherwise.
+        '''
+        return vals.get('use_tasks') and not 'project_creation_in_progress' in self._context
+
+    @api.v7
     def project_create(self, cr, uid, analytic_account_id, vals, context=None):
         '''
         This function is called at the time of analytic account creation and is used to create a project automatically linked to it if the conditions are meet.
@@ -1023,46 +1033,59 @@ class account_analytic_account(osv.osv):
             return project_pool.create(cr, uid, project_values, context=context)
         return False
 
-    def create(self, cr, uid, vals, context=None):
-        if context is None:
-            context = {}
-        if vals.get('child_ids', False) and context.get('analytic_project_copy', False):
+    @api.v8
+    def project_create(self, analytic_account_id, vals):
+        '''
+        This function is called at the time of analytic account creation and is used to create a project automatically linked to it if the conditions are meet.
+        '''
+        project_pool = self.env['project.project']
+        project_id = project_pool.search([('analytic_account_id','=', analytic_account_id if isinstance(analytic_account_id, (int)) else analytic_account_id.id)])
+        if not project_id and self._trigger_project_creation(vals):
+            project_values = {
+                'name': vals.get('name'),
+                'analytic_account_id': analytic_account_id,
+                'type': vals.get('type','contract'),
+            }
+            return project_pool.create(project_values)
+        return False
+
+    @api.model
+    def create(self, vals):
+        if vals.get('child_ids', False) and self._context.get('analytic_project_copy', False):
             vals['child_ids'] = []
-        analytic_account_id = super(account_analytic_account, self).create(cr, uid, vals, context=context)
-        self.project_create(cr, uid, analytic_account_id, vals, context=context)
+        analytic_account_id = super(account_analytic_account, self).create(vals)
+        self.project_create(analytic_account_id, vals)
         return analytic_account_id
 
-    def write(self, cr, uid, ids, vals, context=None):
-        if isinstance(ids, (int, long)):
-            ids = [ids]
+    @api.multi
+    def write(self, vals):
         vals_for_project = vals.copy()
-        for account in self.browse(cr, uid, ids, context=context):
+        for account in self:
             if not vals.get('name'):
                 vals_for_project['name'] = account.name
             if not vals.get('type'):
                 vals_for_project['type'] = account.type
-            self.project_create(cr, uid, account.id, vals_for_project, context=context)
-        return super(account_analytic_account, self).write(cr, uid, ids, vals, context=context)
+            self.project_create(account.id, vals_for_project)
+        return super(account_analytic_account, self).write(vals)
 
-    def unlink(self, cr, uid, ids, context=None):
-        proj_ids = self.pool['project.project'].search(cr, uid, [('analytic_account_id', 'in', ids)])
-        has_tasks = self.pool['project.task'].search(cr, uid, [('project_id', 'in', proj_ids)], count=True, context=context)
+    @api.multi
+    def unlink(self):
+        proj_ids = self.env['project.project'].search([('analytic_account_id', 'in', [ids for ids in self])])
+        has_tasks = self.evn['project.task'].search(cr, uid, [('project_id', 'in', [ids for ids in proj_ids])], count=True)
         if has_tasks:
             raise osv.except_osv(_('Warning!'), _('Please remove existing tasks in the project linked to the accounts you want to delete.'))
-        return super(account_analytic_account, self).unlink(cr, uid, ids, context=context)
+        return super(account_analytic_account, self).unlink()
 
-    def name_search(self, cr, uid, name, args=None, operator='ilike', context=None, limit=100):
+    @api.model
+    def name_search(self, name, args=None, operator='ilike', limit=100):
         if args is None:
             args = []
-        if context is None:
-            context={}
-        if context.get('current_model') == 'project.project':
-            project_ids = self.search(cr, uid, args + [('name', operator, name)], limit=limit, context=context)
-            return self.name_get(cr, uid, project_ids, context=context)
+        if self._context.get('current_model') == 'project.project':
+            project_ids = self.search(args + [('name', operator, name)], limit=limit)
+            return project_ids.name_get()
+        return super(account_analytic_account, self).name_search(name, args=args, operator=operator, limit=limit) 
 
-        return super(account_analytic_account, self).name_search(cr, uid, name, args=args, operator=operator, context=context, limit=limit)
-
-
+from openerp.osv import fields, osv
 class project_project(osv.osv):
     _inherit = 'project.project'
     _defaults = {
