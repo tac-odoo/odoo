@@ -1,5 +1,8 @@
 $(document).ready(function () {
 
+	$('.taxtip').tooltip({
+		placement : 'bottom'
+	});
     // When choosing an acquirer, display its Pay Now button
     var $payment = $("#payment_method");
     $payment.on("click", "input[name='acquirer']", function (ev) {
