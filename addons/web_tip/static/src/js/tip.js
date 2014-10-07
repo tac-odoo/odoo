@@ -184,15 +184,7 @@
                     return def.reject();
                 }
 
-                // if needed, scroll prior to displaying the tip
-                var scroll = _.find(self.$element.parentsUntil('body'), function(el) {
-                    var overflow = $(el).css('overflow-y');
-                    return (overflow === 'auto' || overflow === 'scroll');
-                });
-                if (scroll) {
-                    $(scroll).scrollTo(self.$element);
-                }
-
+                self.scroll_tip();
                 self.$helper = $("<div>", { class: 'oe_tip_helper' });
                 self.$element.after(self.$helper);
                 self._set_helper_position();
@@ -250,7 +242,13 @@
                         def.resolve();
                     }
                 });
-
+                self.$element.on('mousedown', function($ev) {
+                    if (tip.mode == 'kanban')
+                    {
+                        self.end_tip(tip);
+                        def.resolve();
+                    }
+                });
                 // resize
                 instance.web.bus.on('resize', this, function() {
                     self.reposition();
@@ -260,11 +258,24 @@
             }
             return def;
         },
+ 
+        //if needed, scroll prior to displaying the tip
+        scroll_tip: function(){
+            var self = this;
+            var scroll = _.find(self.$element.parentsUntil('body'), function(el) {
+                var overflow = $(el).css('overflow-y');
+                return (overflow === 'auto' || overflow === 'scroll');
+            });
+            if (scroll) {
+                $(scroll).scrollTo(self.$element);
+            }
+        },
 
         end_tip: function(tip) {
             var self = this;
             var Tips = new instance.web.Model('web.tip');
             $('#' + self.$element.attr('aria-describedby')).remove();
+            self.$element.popover('destroy');
             self.$overlay.remove();
             self.$helper.remove();
             self.$element.removeClass('oe_tip_show_element');
@@ -279,6 +290,7 @@
         reposition: function() {
             var self = this;
             if (self.tip_mutex.def.state() === 'pending') {
+                self.scroll_tip();
                 self._set_helper_position();
                 self.$element.popover('show');
             }
