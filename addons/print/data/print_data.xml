@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+      <data noupdate="1">
+
+            <record forcecreate="True" id="ir_cron_print_scheduler_action" model="ir.cron">
+                  <field name="name">Print Queue Manager</field>
+                  <field name="user_id" ref="base.user_root"/>
+                  <field name="interval_number">4</field>
+                  <field name="interval_type">hours</field>
+                  <field name="numbercall">-1</field>
+                  <field eval="False" name="doall"/>
+                  <field eval="'print.order'" name="model"/>
+                  <field eval="'process_order_queue'" name="function"/>
+                  <field eval="'()'" name="args"/>
+                  <field name="priority">20</field>
+            </record>
+
+      </data>
+</openerp>
