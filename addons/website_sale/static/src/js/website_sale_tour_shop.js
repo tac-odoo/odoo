@@ -62,6 +62,14 @@
                 content:   _t("Click here to set an image describing your product."),
             },
             {
+                waitFor:   '.modal-content:visible',
+                element:   'input#icon-search',
+                placement: 'hidden',
+                onload: function(tour) {
+                    $("input#icon-search").val('ip').trigger('input');
+                },
+            },
+            {
                 element:   'img[alt=ipad]',
                 placement: 'top',
                 title:     _t("Select an Image"),

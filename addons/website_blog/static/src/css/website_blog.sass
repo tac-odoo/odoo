@@ -29,15 +29,10 @@ div#blog_angle_down
         text-decoration: none
 
 .cover
-    -webkit-background-size: cover
-    -moz-background-size: cover
-    -o-background-size: cover
-    background-size: cover
-    background-position: center
-    background-repeat: no-repeat
-    background-color: #000
-    color: #fff
+    background: black
+    color: white
     position: relative
+    padding: 0
     .blog_title
         position: absolute
         text-align: center
@@ -47,21 +42,48 @@ div#blog_angle_down
         h1
             font-weight: bold
 
+.cover_full
+    height: 100vh
+
+.cover_narrow
+    height: 50vh
+
 .cover_footer
-    min-height : 350px
-    height: 65vh
+    min-height: 300px
+    height: 50vh
+    -webkit-background-size: cover
+    -moz-background-size: cover
+    -o-background-size: cover
+    background-size: cover
+    background-blend-mode: multiply
+
+.read_next
     cursor: pointer
 
 /* mobile preview: for blog h1,h2 font-size and cover-footer height of image overlapas */
 @media (max-width: 768px)
     .cover
-        h1
-            font-size: 26px
-        h2
-            font-size: 20px
+        .blog_title
+            h1
+                font-size: 26px
+
+    .cover 
+        .blog_title
+            h2
+                font-size: 20px
+
+    .cover_narrow
+        height: 65vh
+
+    #title 
+        .blog_title
+            top: 10%
+
     .cover_footer
         min-height: 280px
         height: 50vh
+
+    .cover 
         .blog_title
             top: 2%
 
@@ -150,3 +172,21 @@ mark + .popover
 
 .discussion_scroll_post
     overflow-x: auto
+
+.customize_cover_button
+    position: absolute 
+    width: 100%
+    cursor: pointer
+
+.publish_button
+    position: absolute
+    top: 2%
+    right: 5%
+
+.js_blogcover 
+    background-blend-mode: multiply
+    -webkit-background-size: cover
+    -moz-background-size: cover
+    -o-background-size: cover
+    background-size: cover
+    height: 100%
