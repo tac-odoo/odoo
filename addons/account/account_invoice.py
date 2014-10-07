@@ -524,13 +524,9 @@ class account_invoice(models.Model):
         return {'value': {}}
 
     @api.multi
-    def onchange_company_id(self, company_id, part_id, type, invoice_line, currency_id,context):
-        # TODO: add the missing context parameter when forward-porting in trunk
-        # so we can remove this hack!
-        self = self.with_context(self.env['res.users'].context_get())
+    def onchange_company_id(self, company_id, part_id, type, invoice_line, currency_id, context):
         values = {}
         domain = {}
-
         if company_id and part_id and type:
             p = self.env['res.partner'].browse(part_id)
             if p.property_account_payable and p.property_account_receivable and \
@@ -583,8 +579,8 @@ class account_invoice(models.Model):
             journals = self.env['account.journal'].search([('type', '=', journal_type), ('company_id', '=', company_id)])
             if journals:
                 values['journal_id'] = journals[0].id
-                if context.get('default_journal_id') in journals:
-                    values['journal_id'] = context.get('default_journal_id')
+                if context.get('default_journal_id', False) and context.get('default_journal_id') in journals:
+                    values['journal_id'] = context.get('default_journal_id', False)
             journal_defaults = self.env['ir.values'].get_defaults_dict('account.invoice', 'type=%s' % type)
             if 'journal_id' in journal_defaults:
                 values['journal_id'] = journal_defaults['journal_id']
