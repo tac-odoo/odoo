@@ -85,3 +85,12 @@
 
 }
 
+.oe_kanban_quick_create_arrow:before {
+ left: 280px;
+ top: 80px;
+}
+
+.oe_kanban_quick_create_margin {
+ margin-left: 180px !important;
+}
+
