@@ -178,7 +178,7 @@
             <field name="model">account.journal</field>
             <field name="inherit_id" ref="account.view_account_journal_kanban_view"/>
             <field name="arch" type="xml">
-                <xpath expr="//div[@name='sale_journal_bottom']" position="inside">
+                <xpath expr="//div[@name='sale-create-link']" position="inside">
                     <a type='action' name='%(account_followup.action_account_followup_print)d'>Automated Follow-Ups</a>
                     <a> | </a>
                     <a type='action' name='%(action_customer_followup)d'>Manual Follow-Ups</a>
