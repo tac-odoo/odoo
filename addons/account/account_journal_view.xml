@@ -85,7 +85,7 @@
                                     </div>
                                     <div class="col-md-3">
                                         <div class="oe_journal_title">
-                                            <p t-if="journal_type == 'sale' or journal_type == 'purchase'">Paid</p>
+                                            <p t-if="journal_type == 'sale' or journal_type == 'purchase'"><a type="object" name="open_action" context="{'search_default_state':'paid'}">Paid</a></p>
                                         </div>
                                         <div class="oe_journal_data">
                                             <span t-esc="dashboard.paid_invoice_amount"/>

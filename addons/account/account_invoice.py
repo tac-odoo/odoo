@@ -579,7 +579,7 @@ class account_invoice(models.Model):
             journals = self.env['account.journal'].search([('type', '=', journal_type), ('company_id', '=', company_id)])
             if journals:
                 values['journal_id'] = journals[0].id
-                if context.get('default_journal_id', False) and context.get('default_journal_id') in journals:
+                if context.get('default_journal_id', False) and context.get('default_journal_id') in [j.id for j in journals]:
                     values['journal_id'] = context.get('default_journal_id', False)
             journal_defaults = self.env['ir.values'].get_defaults_dict('account.invoice', 'type=%s' % type)
             if 'journal_id' in journal_defaults:

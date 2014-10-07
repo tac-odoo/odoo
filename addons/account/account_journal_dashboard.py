@@ -331,7 +331,10 @@ class account_journal(models.Model):
             'default_type': invoice_type,
             'type': invoice_type
         })
-        domain = [('journal_id.type', '=', self.type),('journal_id', '=', self.id)]
+        if self.type in ('sale', 'purchase'):
+            domain = [('journal_id.type', 'in', (self.type, self.refund_journal_id.type)),('journal_id', 'in', (self.id, self.refund_journal_id.id))]
+        else:
+            domain = [('journal_id.type', '=', self.type),('journal_id', '=', self.id)]
         ir_model_obj = self.pool['ir.model.data']
         model, action_id = ir_model_obj.get_object_reference(self._cr, self._uid, 'account', action_name)
         action = self.pool[model].read(self._cr, self._uid, action_id, context=self._context)
