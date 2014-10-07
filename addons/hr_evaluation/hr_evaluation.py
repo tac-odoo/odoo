@@ -15,7 +15,7 @@ class calendar_event(models.Model):
         res = super(calendar_event, self).create(vals)
         if self.env.context.get('active_model') == 'hr_evaluation.evaluation':
             evaluation_obj = self.env['hr_evaluation.evaluation'].browse(self.env.context.get('active_id', []))
-            evaluation_obj.log_meeting(res.name, res.start, res.duration)
+            evaluation_obj.log_meeting(res.name, res.start)
             evaluation_obj.write({'meeting_id': res.id, 'interview_deadline': res.start_date if res.allday else res.start_datetime})
         return res
 
@@ -116,7 +116,7 @@ class hr_evaluation(models.Model):
             self.appraisal_colleagues_ids = self.employee_id.appraisal_colleagues_ids
             self.appraisal_colleagues_survey_id = self.employee_id.appraisal_colleagues_survey_id
             self.appraisal_self = self.employee_id.appraisal_self
-            self.apprasial_employee = self.employee_id.apprasial_employee
+            self.apprasial_employee = self.employee_id.apprasial_employee or self.employee_id.name
             self.appraisal_self_survey_id = self.employee_id.appraisal_self_survey_id
             self.appraisal_subordinates = self.employee_id.appraisal_subordinates
             self.appraisal_subordinates_ids = self.employee_id.appraisal_subordinates_ids
@@ -138,8 +138,8 @@ class hr_evaluation(models.Model):
                         found_duplicat_data.append(is_duplicat)
 
     @api.one
-    def create_message_subscribe_users_list(self, val):
-        user_ids = [emp.user_id.id for rec in val for emp in rec if emp.user_id]
+    def create_message_subscribe_users_list(self, subscribe_users):
+        user_ids = [emp.user_id.id for emp in subscribe_users if emp.user_id]
         if self.employee_id.user_id:
             user_ids.append(self.employee_id.user_id.id)
         if self.employee_id.department_id.manager_id.user_id:
@@ -151,8 +151,30 @@ class hr_evaluation(models.Model):
     @api.model
     def create(self, vals):
         res = super(hr_evaluation, self).create(vals)
-        # res.create_message_subscribe_users_list([res.apprasial_manager_ids])
+        if res.apprasial_manager_ids:
+            res.create_message_subscribe_users_list(res.apprasial_manager_ids)
         return res
+
+    @api.multi
+    def write(self, vals):
+        emp_obj = self.env['hr.employee']
+        for evl_rec in self:
+            if self.state == 'new' and vals.get('state') == 'done':
+                raise Warning(_("You can not move directly in done state."))
+            #avoid recursive process
+            if vals.get('state') == 'pending' and not evl_rec._context.get('send_mail_status'):
+                evl_rec.button_sent_appraisal()
+            if vals.get('interview_deadline') and not vals.get('meeting_id'):
+                if datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT) > vals.get('interview_deadline'):
+                    raise Warning(_("The interview date can not be in the past"))
+                #creating employee meeting and interview date
+                evl_rec.create_update_meeting(vals)
+            if vals.get('apprasial_manager_ids'):
+                # add followers
+                for follower_id in emp_obj.browse(vals['apprasial_manager_ids'][0][2]):
+                    if follower_id.user_id:
+                        evl_rec.message_subscribe_users(user_ids=[follower_id.user_id.id])
+        return super(hr_evaluation, self).write(vals)
 
     @api.one
     def update_appraisal_url(self, url, email_to, token):
@@ -246,7 +268,7 @@ class hr_evaluation(models.Model):
                 'allday': True,
                 'partner_ids': partner_ids,
             })
-        return self.log_meeting(self.meeting_id.name, self.meeting_id.start, self.meeting_id.duration)
+        return self.log_meeting(self.meeting_id.name, self.meeting_id.start)
 
     @api.multi
     @api.depends('employee_id')
@@ -255,27 +277,6 @@ class hr_evaluation(models.Model):
         for hr_evaluation in self:
             result.append((hr_evaluation.id, '%s' % (hr_evaluation.employee_id.name_related)))
         return result
-
-    @api.multi
-    def write(self, vals):
-        emp_obj = self.env['hr.employee']
-        for evl_rec in self:
-            if self.state == 'new' and vals.get('state') == 'done':
-                raise Warning(_("You can not move directly in done state."))
-            #avoid recursive process
-            if vals.get('state') == 'pending' and not evl_rec._context.get('send_mail_status'):
-                evl_rec.button_sent_appraisal()
-            if vals.get('interview_deadline') and not vals.get('meeting_id'):
-                if datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT) > vals.get('interview_deadline'):
-                    raise Warning(_("The interview date can not be in the past"))
-                #creating employee meeting and interview date
-                evl_rec.create_update_meeting(vals)
-            if vals.get('apprasial_manager_ids'):
-                # add followers
-                for follower_id in emp_obj.browse(vals['apprasial_manager_ids'][0][2]):
-                    if follower_id.user_id:
-                        evl_rec.message_subscribe_users(user_ids=[follower_id.user_id.id])
-        return super(hr_evaluation, self).write(vals)
 
     @api.multi
     def unlink(self):
@@ -306,67 +307,59 @@ class hr_evaluation(models.Model):
         else:
             return super(hr_evaluation, self).read_group(cr, uid, domain, fields, groupby, offset=offset, limit=limit, context=context, orderby=orderby, lazy=lazy)
 
-    @api.v7
-    def get_sent_appraisal(self, cr, uid, ids, context=None):
+    @api.multi
+    def get_sent_appraisal(self):
         """ Link to open sent appraisal"""
-        sur_res_obj = self.pool.get('survey.user_input')
+        sur_res_obj = self.env['survey.user_input']
         sent_appraisal_ids = []
-        for rec in self.browse(cr, uid, ids, context=context):
-            sent_ids = sur_res_obj.search(cr, uid, [
-                ('survey_id', 'in', [rec.apprasial_manager_survey_id.id, rec.appraisal_colleagues_survey_id.id, rec.appraisal_self_survey_id.id, rec.appraisal_subordinates_survey_id.id]),
-                ('type', '=', 'link'), ('deadline', '=', rec.date_close),
-                ('evaluation_id', '=', rec.id)])
-            for id in sent_ids:
-                sent_appraisal_ids.append(id)
-        model, action_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'survey', 'action_survey_user_input')
-        action = self.pool.get(model).read(cr, uid, action_id, context=context)
+        for evaluation in self:
+            sent_survey_ids = sur_res_obj.search([('survey_id', 'in', [
+                evaluation.apprasial_manager_survey_id.id, evaluation.appraisal_colleagues_survey_id.id,
+                evaluation.appraisal_self_survey_id.id, evaluation.appraisal_subordinates_survey_id.id]),
+                ('type', '=', 'link'), ('deadline', '=', evaluation.date_close), ('evaluation_id', '=', evaluation.id)])
+            sent_appraisal_ids = [sent_survey_id.id for sent_survey_id in sent_survey_ids]
+        action = self.env.ref('survey.action_survey_user_input').read()[0]
         action['domain'] = str([('id', 'in', sent_appraisal_ids)])
         return action
 
-    @api.v7
-    def get_result_appraisal(self, cr, uid, ids, context=None):
+    @api.multi
+    def get_result_appraisal(self):
         """ Link to open answers appraisal"""
-        sur_res_obj = self.pool.get('survey.user_input')
+        sur_res_obj = self.env['survey.user_input']
         sent_appraisal_ids = []
-        for rec in self.browse(cr, uid, ids, context=context):
-            sent_ids = sur_res_obj.search(cr, uid, [
-                ('survey_id', 'in', [rec.apprasial_manager_survey_id.id, rec.appraisal_colleagues_survey_id.id, rec.appraisal_self_survey_id.id, rec.appraisal_subordinates_survey_id.id]),
-                ('type', '=', 'link'), ('deadline', '=', rec.date_close),
-                ('evaluation_id', '=', rec.id), ('state', '=', 'done')])
-            for id in sent_ids:
-                sent_appraisal_ids.append(id)
-        model, action_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'survey', 'action_survey_user_input')
-        action = self.pool.get(model).read(cr, uid, action_id, context=context)
+        for evaluation in self:
+            result_survey_ids = sur_res_obj.search([('survey_id', 'in', [
+                evaluation.apprasial_manager_survey_id.id, evaluation.appraisal_colleagues_survey_id.id,
+                evaluation.appraisal_self_survey_id.id, evaluation.appraisal_subordinates_survey_id.id]),
+                ('type', '=', 'link'), ('deadline', '=', evaluation.date_close),
+                ('evaluation_id', '=', evaluation.id), ('state', '=', 'done')])
+            sent_appraisal_ids = [result_survey_id.id for result_survey_id in result_survey_ids]
+        action = self.env.ref('survey.action_survey_user_input').read()[0]
         action['domain'] = str([('id', 'in', sent_appraisal_ids)])
         return action
 
-    @api.v7
-    def schedule_interview_date(self, cr, uid, ids, context=None):
+    @api.multi
+    def schedule_interview_date(self):
         """ Link to open calendar view for creating employee interview and meeting"""
-        if context is None:
-            context = {}
         partner_ids = []
-        for rec in self.browse(cr, uid, ids, context=context):
-            for manager in rec.apprasial_manager_ids:
+        for evaluation in self:
+            for manager in evaluation.apprasial_manager_ids:
                 if manager.user_id:
                     partner_ids.append(manager.user_id.partner_id.id)
-            if rec.employee_id.user_id:
-                partner_ids.append(rec.employee_id.user_id.partner_id.id)
-        res = self.pool.get('ir.actions.act_window').for_xml_id(cr, uid, 'calendar', 'action_calendar_event', context)
+            if evaluation.employee_id.user_id:
+                partner_ids.append(evaluation.employee_id.user_id.partner_id.id)
+        res = self.env.ref('calendar.action_calendar_event').read()[0]
+        partner_ids.append(self.env['res.users'].browse(self._uid).partner_id.id)
         res['context'] = {
             'default_partner_ids': partner_ids,
         }
-        meeting_ids = self.pool.get('calendar.event').search(cr, uid, [('partner_ids', 'in', partner_ids)])
-        res['domain'] = str([('id', 'in', meeting_ids)])
+        meeting_ids = self.env['calendar.event'].search([('partner_ids', 'in', partner_ids)])
+        res['domain'] = str([('id', 'in', [meeting.id for meeting in meeting_ids])])
         return res
 
     @api.one
-    def log_meeting(self, meeting_subject, meeting_date, duration):
-        if not duration:
-            duration = _('unknown')
-        else:
-            duration = str(duration)
-        message = _("Meeting scheduled at '%s'<br> Subject: %s <br> Duration: %s hour(s)") % (meeting_date, meeting_subject, duration)
+    def log_meeting(self, meeting_subject, meeting_date):
+        message = _("Subject: %s <br> Meeting scheduled at '%s'<br>") % (meeting_subject, meeting_date.split(' ')[0])
         return self.message_post(body=message)
 
 class hr_employee(models.Model):
