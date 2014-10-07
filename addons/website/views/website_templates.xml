@@ -245,7 +245,7 @@
 </template>
 
 <template id="footer_custom" inherit_id="website.layout" name="Footer">
-    <xpath expr="//div[@id='footer_container']" position="replace">
+    <xpath expr="//div[@id='footer']" position="replace">
         <div class="oe_structure" id="footer">
             <section data-snippet-id='three-columns' class="mt16 mb16">
                 <div class="container">
