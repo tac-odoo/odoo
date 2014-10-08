@@ -1300,10 +1300,15 @@ class account_invoice(osv.Model):
         for order in purchase_order_obj.browse(cr, uid, po_ids, context=context):
             # Signal purchase order workflow that an invoice has been validated.
             invoiced = []
+            shipped = []
+            if all(picking.invoice_state in ['invoiced'] for picking in order.picking_ids):
+                shipped.append(order.id)
             for po_line in order.order_line:
-                if any(line.invoice_id.state not in ['draft', 'cancel'] for line in po_line.invoice_lines):
+                if all(line.invoice_id.state not in ['draft', 'cancel'] for line in po_line.invoice_lines):
                     invoiced.append(po_line.id)
-            if invoiced:
+            if order.invoice_method == 'picking' and invoiced and shipped:
+                self.pool['purchase.order.line'].write(cr, uid, invoiced, {'invoiced': True})
+            if order.invoice_method == 'order' and invoiced:
                 self.pool['purchase.order.line'].write(cr, uid, invoiced, {'invoiced': True})
             wf_service.trg_write(uid, 'purchase.order', order.id, cr)
         return res
