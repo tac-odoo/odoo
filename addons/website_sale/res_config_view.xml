@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_sales_config" model="ir.ui.view">
+            <field name="name">sale settings</field>
+            <field name="model">sale.config.settings</field>
+            <field name="inherit_id" ref="base_setup.view_sale_config_settings"/>
+            <field name="arch" type="xml">
+                <div name="Sale Features" position="inside">
+                    <div name="module_website_sale_coupon">
+                        <field name="module_website_sale_coupon" class="oe_inline"/>
+                        <label for="module_website_sale_coupon"/>
+                    </div>
+                </div>
+            </field>
+        </record>
+    </data>
+</openerp>

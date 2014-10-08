@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="sale_coupon_form">
+             <field name="name">sale.coupon.form</field>
+             <field name="model">sale.order</field>
+             <field name="inherit_id" ref="sale.view_order_form" />
+             <field name="arch" type="xml">
+                <field name="price_unit" position="after">
+                    <field name="sales_coupon_type_id"/>
+                </field>
+             </field>
+        </record>
+
+        <record model="ir.ui.view" id="sale_coupon_tree">
+             <field name="name">sale.coupon.tree</field>
+             <field name="model">sale.order</field>
+             <field name="inherit_id" ref="sale.view_order_form" />
+             <field name="arch" type="xml">
+                <xpath expr="//page[@name='order_lines']//tree/field[@name='price_unit']" position="after">
+                    <field name="sales_coupon_type_id"/>
+                </xpath>
+             </field>
+        </record>
+    </data>
+</openerp>
+

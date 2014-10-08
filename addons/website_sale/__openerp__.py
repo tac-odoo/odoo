@@ -20,6 +20,7 @@ OpenERP E-Commerce
         'views/snippets.xml',
         'security/ir.model.access.csv',
         'security/website_sale.xml',
+        'res_config_view.xml',
     ],
     'demo': [
         'data/demo.xml',

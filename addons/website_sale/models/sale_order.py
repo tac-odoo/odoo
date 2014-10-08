@@ -12,7 +12,7 @@ class sale_order(osv.Model):
     def _cart_qty(self, cr, uid, ids, field_name, arg, context=None):
         res = dict()
         for order in self.browse(cr, uid, ids, context=context):
-            res[order.id] = int(sum(l.product_uom_qty for l in (order.website_order_line or [])))
+            res[order.id] = int(sum(l.product_uom_qty for l in (order.website_order_line or []) if l.product_id))
         return res
 
     _columns = {

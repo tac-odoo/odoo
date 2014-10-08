@@ -1103,7 +1103,11 @@
                               <td>
                                   <div>
                                       <a t-attf-href="/shop/product/#{ slug(line.product_id.product_tmpl_id) }">
-                                          <strong t-esc="line.product_id.name_get()[0][1]"/>
+                                          <strong>
+                                            <t t-if="line.product_id">
+                                              <t t-esc="line.product_id.name_get()[0][1]"/>
+                                            </t>
+                                          </strong>
                                       </a>
                                   </div>
                                   <div class="text-muted" t-field="line.name"/>

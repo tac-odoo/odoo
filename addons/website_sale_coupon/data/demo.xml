@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!-- Demo Data for Sales Coupon Type  -->
+        <record id="sale_coupon_type_month" model="sales.coupon.type">
+            <field name="name">Monthly Coupon</field>
+            <field name="validity_duration">month</field>
+            <field name="month">1</field>
+            <field eval="(DateTime.today() + relativedelta(months=1)).strftime('%Y-%m-%d %H:%M')" name="expiration_date"/>
+            <field name="expiration_use">3</field>
+        </record>
+
+        <record id="sale_coupon_type_year" model="sales.coupon.type">
+            <field name="name">Yearly Coupon</field>
+            <field name="validity_duration">year</field>
+            <field name="year">1</field>
+            <field eval="(DateTime.today() + relativedelta(months=12)).strftime('%Y-%m-%d %H:%M')" name="expiration_date"/>
+            <field name="expiration_use">3</field>
+        </record>
+
+        <!-- Demo Data for Sales Coupon  -->
+        <record id="sale_coupon_1" model="sales.coupon">
+            <field name="partner_id" ref="base.res_partner_7"/>
+            <field name="coupon_type" ref="sale_coupon_type_month"/>
+            <field name="product_id" ref="product.product_product_2"/>
+            <field eval="(DateTime.today() + relativedelta(months=1)).strftime('%Y-%m-%d %H:%M')" name="expiration_date"/>
+            <field name="expiration_use">3</field>
+            <field name="state">current</field>
+        </record>
+
+        <record id="sale_coupon_2" model="sales.coupon">
+            <field name="partner_id" ref="base.res_partner_2"/>
+            <field name="coupon_type" ref="sale_coupon_type_year"/>
+            <field name="product_id" ref="product.product_product_4"/>
+            <field eval="(DateTime.today() + relativedelta(months=12)).strftime('%Y-%m-%d %H:%M')" name="expiration_date"/>
+            <field name="expiration_use">3</field>
+            <field name="state">current</field>
+        </record>
+
+        <record id="sale_coupon_3" model="sales.coupon">
+            <field name="partner_id" ref="base.res_partner_7"/>
+            <field name="coupon_type" ref="sale_coupon_type_year"/>
+            <field name="product_id" ref="product.product_product_6"/>
+            <field eval="(DateTime.today() + relativedelta(months=12)).strftime('%Y-%m-%d %H:%M')" name="expiration_date"/>
+            <field name="expiration_use">0</field>
+            <field name="state">used</field>
+        </record>
+    </data>
+</openerp>
