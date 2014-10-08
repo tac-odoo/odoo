@@ -609,11 +609,15 @@
                                         type="action" class="oe_stat_button oe_inline">
                                         <field name="replied_ratio" widget="percentpie" string="Replied"/>
                                     </button>
+                                    <button name="%(action_view_mass_mailings_from_campaign)d"
+                                        type="action" class="oe_inline oe_stat_button" icon="fa-envelope-o">
+                                        <field name="total_mailings" widget="statinfo" string="Mailings"/>
+                                    </button>
                                 </div>
                             </group>
                         </group>
-                        <strong>Related Mailing(s)</strong>
-                        <field name="mass_mailing_ids" readonly="1" string="Related Mailing(s)">
+                        <separator string="Related Mailing(s)" groups="base.group_no_one"/>
+                        <field name="mass_mailing_ids" readonly="1" groups="base.group_no_one">
                             <tree>
                                 <field name="name"/>
                                 <field name="sent_date"/>
