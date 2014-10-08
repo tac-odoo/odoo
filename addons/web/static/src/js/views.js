@@ -900,6 +900,9 @@ instance.web.ViewManagerAction = instance.web.ViewManager.extend({
         // dataset initialization will take the session from ``this``, so if we
         // do not have it yet (and we don't, because we've not called our own
         // ``_super()``) rpc requests will blow up.
+        if (_.isString(action.flags)) {
+            action.flags = new instance.web.CompoundContext(action.flags).eval() || {};
+        }
         var flags = action.flags || {};
         if (!('auto_search' in flags)) {
             flags.auto_search = action.auto_search !== false;
