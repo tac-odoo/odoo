@@ -118,7 +118,7 @@ class account_journal(models.Model):
     def get_journal_dashboard_datas(self):
         balance, date = self._get_last_statement()
         journal_ids = self.id
-        if self.type in ('sale', 'purchase'):
+        if self.type in ('sale', 'purchase') and self.refund_journal_id:
             journal_ids = [self.id, self.refund_journal_id.id]
         values = self.env['account.invoice'].get_stats(journal_ids)
         currency_symbol = self.company_id.currency_id.symbol
