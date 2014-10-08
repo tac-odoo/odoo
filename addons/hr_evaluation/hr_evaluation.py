@@ -398,14 +398,15 @@ class hr_employee(models.Model):
 
     @api.onchange('appraisal_colleagues')
     def onchange_colleagues(self):
-        self.appraisal_colleagues_ids = self.search([('department_id', '=', self.department_id.id), ('id', '!=', self.parent_id.id)])
+        if self.department_id.id:
+            self.appraisal_colleagues_ids = self.search([('department_id', '=', self.department_id.id), ('id', '!=', self.parent_id.id)])
 
     @api.onchange('appraisal_subordinates')
     def onchange_subordinates(self):
         manager = set()
-        for emp in self.search_read([], ['parent_id']):
-            if emp['parent_id'] != False:
-                manager.add(emp['parent_id'][0])
+        for emp in self.search([]):
+            if emp.parent_id:
+                manager.add(emp.parent_id.id)
         self.appraisal_subordinates_ids = list(manager)
 
     @api.model
