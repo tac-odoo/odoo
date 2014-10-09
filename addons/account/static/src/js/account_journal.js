@@ -17,7 +17,7 @@ openerp.account.graph_kanban = function (instance)
                     case "line":
                         var chart = nv.models.lineChart()
                         .x(function (d,u) { return u })
-                        .forceY([0, 100])
+                        // .forceY([0, 100])
                         .width(self.$el.find('svg').width())
                         .height(self.$el.find('svg').height())
                         // .margin({'left': 0, 'right':0})
@@ -39,7 +39,7 @@ openerp.account.graph_kanban = function (instance)
                         .width(self.$el.find('svg').width())
                         .height(self.$el.find('svg').height())
                         .showControls(false)
-                        .forceY([0, 100])
+                        // .forceY([0, 100])
                         .reduceXTicks(false)
                         .showLegend(data[0].show_legend || false);
                         break

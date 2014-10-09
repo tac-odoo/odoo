@@ -253,12 +253,12 @@ class account_journal(models.Model):
             left join on account_move if we want only posted entries then we can use.
             query will return sum of line.debit and month for related sale,purchase,sale_refund,purchase_refund type journal based on period id
         """
-        self._cr.execute("SELECT to_char(line.date, 'dd') as day, to_char(line.date,'MM') as month, SUM(line.debit) as amount\
+        self._cr.execute("SELECT to_char(line.date, 'dd') as day, to_char(line.date,'MM') as month, SUM(line.debit) as amount, line.journal_id\
                     FROM account_move_line AS line LEFT JOIN account_move AS move ON line.move_id=move.id\
                     WHERE line.journal_id in %s \
                     AND move.state = 'posted' AND line.date >= %s\
-                    GROUP BY day, month \
-                    ORDER BY day, month", ((self.id, self.refund_journal_id.id), previous_month_date))
+                    GROUP BY day, month, line.journal_id \
+                    ORDER BY day, month, line.journal_id", ((self.id, self.refund_journal_id.id), previous_month_date))
 
         total_amount_this_month = 0
         total_amount_last_month = 0
@@ -266,10 +266,16 @@ class account_journal(models.Model):
         last_month = {}
         for value in self._cr.dictfetchall():
             if int(value['month']) == first_of_this_month.month:
-                total_amount_this_month += value['amount']
+                if (value['journal_id'] == self.id):
+                    total_amount_this_month += value['amount']
+                else:
+                    total_amount_this_month -= value['amount']
                 this_month[int(value['day'])] = total_amount_this_month
             else:
-                total_amount_last_month += value['amount']
+                if (value['journal_id'] == self.id):
+                    total_amount_last_month += value['amount']
+                else:
+                    total_amount_last_month -= value['amount']
                 last_month[int(value['day'])] = total_amount_last_month
 
         temp_amount_curmonth = 0
