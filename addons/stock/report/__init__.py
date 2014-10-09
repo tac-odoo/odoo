@@ -21,6 +21,7 @@
 
 import product_stock
 import report_stock
+import report_stock_forecast
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
