@@ -18,11 +18,32 @@
             </div>
             <h2>Companies</h2>
             <div class="oe_linkedin_pop_c">
-                <div class="oe_linkedin_company_entities"></div>
+                <div class="oe_linkedin_company_entities"/>
                 <div class="oe_linkedin_show_more"></div>
+                 <div style="display:inline-block" class="oe_linkedin_pop_company_p" id="linkedin_pop_company_p"/>
+                <center><ul class="pagination" id="employee_page"></ul></center>
             </div>
         </div>
     </t>
+    <t t-name="Linkedin.company_info">
+        <h2>Employee of <t t-esc="data.name"/></h2>
+        <div>
+            <h4>Select employee to get import in company. OR </h4>
+            <button class="oe_highlight" id="import_all">Import All</button>
+        </div>
+     </t>
+    <t t-name="Linkedin.company_employee">
+        <div class="oe_content_employee oe_linkedin_entity oe_left" style="margin-top: 30px; width:18%">
+            <div>
+                <img t-if="data.image" t-attf-src="data:image/png;base64,#{data.image}"/>
+                <img t-if="!data.image" src="/web/static/src/img/placeholder.png"/>
+            </div>
+            <button t-if="!data.current_company or !data.id" t-att-name="data.name" class="oe_highlight" style="margin-top: 10px">Import</button>
+            <button t-if="data.id and data.current_company" t-att-id="data.id" style="margin-top: 10px">Upgrade</button>
+            <h3><t t-esc="data.name"/></h3>
+            <div class="oe_linkedin_entity_headline"><t t-esc="data.function"/></div>
+         </div>
+     </t>
     <t t-name="Linkedin.show_more">
         <button t-attf-class="#{class} oe_button">Show more... (<span class="oe_linkedin_remaining"><t t-esc="remaining"></t></span> remaining)</button>
     </t>
@@ -59,20 +80,19 @@
         </div>
     </t>
 
-    <t t-name="LinkedIn.InitialDialog">
-        <div class="oe_linkedin_initial_dialog_button">
-            Well done! You can use Web Linkedin Integration now, 
-            If you still not set API key and Secret key of linkedin application then follow the tutorial by clicking button Set API Key,
-            If you already set the API key and Secret key then you can import your Linkedin contacts here by clicking Import Contact button.   
-        </div>
-    </t>
-
     <t t-name="KanbanView.linkedinButton">
         <t t-if="widget.is_action_enabled('create')">
             <span class="oe_fade">or</span>
         </t>
         <div class="oe_kanban_import_contact">
-            <a href="#" class="oe_bold">Import Contacts from Linkedin</a>
+            <a t-if="href != true" t-attf-href="#{href}" class="oe_bold">Import Contacts from Linkedin</a>
+            <a t-if="href == true" href="#" class="oe_bold">Import Contacts from Linkedin</a>
+        </div>
+    </t>
+
+    <t t-name="LinkedIn.PeopleAccess">
+        <div>
+            <strong class="text-danger">You does not have access to People Search. </strong><strong><a href='https://help.linkedin.com/app/api-dvr' target='NEW'>Click Here</a> to access People search using <a href='https://developer.linkedin.com/blog/vetted-api-access' target='NEW'>Vetted API Access. </a></strong>
         </div>
     </t>
 </templates>

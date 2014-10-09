@@ -14,7 +14,6 @@ openerp.web_linkedin = function(instance) {
     *   - reject if the authentication is wrong or when the user logout
     */
 
-    openerp_client_action(instance);
     instance.web_linkedin.LinkedinTester = instance.web.Class.extend({
         init: function() {
             this.is_set_keys = false;
@@ -25,14 +24,14 @@ openerp.web_linkedin = function(instance) {
                 return $.when();
             }
             return new instance.web.Model("linkedin").call("test_linkedin_keys", []).then(function(a) {
-                if (!!a) {
+                if (a == true) {
                     self.is_set_keys = a;
                     return true;
                 } else {
                     if (show_dialog) {
-                        self.show_error({'name': "Linkedin API key not set."})
+                        self.show_error({'name': "Linkedin API key not set."});
                     }
-                    return $.Deferred().reject();
+                    return a;
                 }
             });
         },
@@ -42,9 +41,9 @@ openerp.web_linkedin = function(instance) {
                 title: _t("LinkedIn is not enabled"),
                 buttons: [
                     {text: _t("Ok"), click: function() { dialog.$dialog_box.modal('hide'); }}
-                ],
+                ]
             }, QWeb.render('LinkedIn.DisabledWarning', {error: error})).open();
-        },
+        }
     });
     
     instance.web_linkedin.tester = new instance.web_linkedin.LinkedinTester();
@@ -92,7 +91,112 @@ openerp.web_linkedin = function(instance) {
                         }
                     }
                 });
-                self.view.set_values(to_change);
+                if (entity.__type === "company" && to_change.child_ids.length) {
+                    self.get_employee_list(entity, to_change);
+                } else {
+                    self.view.set_values(to_change).then( function() { $('.modal').modal('hide'); });
+                }
+            });
+        },
+        get_employee_list: function(entity, to_change) {
+            var self = this;
+            var p_to_change = to_change.child_ids;
+            to_change.child_ids = [];
+            $('.oe_linkedin_pop_company_p').html($(QWeb.render("Linkedin.company_info", {'data':entity})));
+            $('.modal:last').scrollTo('#linkedin_pop_company_p');
+
+            $('#import_all').on("click", function () {
+                self.import_all_employee(to_change, p_to_change);
+            });
+
+            _(p_to_change).each( function(data) {
+                var contact = data[2];
+                var btn_import = 'button[name="'+contact.name+'"]';
+                var btn_upgrade = 'button[id="'+contact.id+'"]';
+                $('.oe_linkedin_pop_company_p').append($(QWeb.render("Linkedin.company_employee", {'data':contact})));
+                if (contact.id && contact.parent_id && contact.current_company) {
+                    to_change.child_ids.push(data);
+                }
+
+                $(btn_import).on("click", function () {
+                    // [0,0,data] if it's a new partner
+                    if(contact.id){
+                        self.on_click_import(to_change, contact);
+                    } else {
+                        to_change.child_ids.push([0, 0, contact] );
+                        self.view.set_values(to_change);
+                        $(btn_import).prop('disabled', true);
+                    }
+                });
+
+                $(btn_upgrade).on("click", function () {
+                    self.view.dataset._model.call('write', [[contact.id], contact, self.view.dataset.get_context()]);
+                    $(btn_upgrade).prop('disabled', true);
+                });
+            });
+            self.set_page(p_to_change);
+            self.showPage(1);
+        },
+        on_click_import: function(to_change, contact) {
+            var self = this;
+            $('div.oe_edit_actions').remove();
+            self.$dialog = new instance.web.Dialog(this, {
+                size: 'small',
+                title: _t('Import Contact'),
+                buttons: [
+                        { text: _t("Import"), click: function() {
+                            delete contact['id'];
+                            delete contact['parent_name'];
+                            to_change.child_ids.push([0, 0, contact]);
+                            self.view.set_values(to_change);
+                            $('button[name="'+contact.name+'"]').prop('disabled', true);
+                            this.parents('.modal').modal('hide');
+                        }},
+                        { text: _t("Upgrade"), click: function() {
+                            delete contact['parent_name'];
+                            self.view.dataset._model.call('write', [[contact.id], contact, self.view.dataset.get_context()]).done(function() {
+                                self.view.set_values(to_change);
+                                $('button[name="'+contact.name+'"]').prop('disabled', true);
+                                $('button[name="'+contact.name+'"]').text('Upgrade');
+                                self.$dialog.destroy();
+                            });
+                        }},
+                            { text: _t("Cancel"), click: function() { this.parents('.modal').modal('hide'); }}
+                        ]
+            },'<div class="oe_edit_actions"><span><b>'+ contact.name +'</b> already exist in the company <b>'+ contact.parent_name +'</b><br/>what do you like to do?</span><ul><li><b>Upgrade: </b>Upgrade Existing contact</li><li><b>Import: </b>Import as a new contact</li></ul></div>').open();
+        },
+        import_all_employee: function(to_change, p_to_change){
+           var self = this;
+            _.each(p_to_change, function (data) {
+                    // [0,0,data] if it's a new partner
+                    if (!data[2].id) {
+                        to_change.child_ids.push(data);
+                    }
+                });
+                self.view.set_values(to_change).then( function() {
+                    $('.modal').modal('hide');
+                });
+        },
+        set_page: function(p_to_change) {
+            var self = this;
+            var i;
+            $('#employee_page').empty();
+            for (i=1; i<=Math.round(p_to_change.length/5); i++) {
+                $('#employee_page').append('<li><a href="#">' + i + '</a></li>');
+            }
+            $("#employee_page li:first").addClass("active");
+            $("#employee_page li a").click(function() {
+                $("#employee_page li").removeClass("active");
+                $(this).closest('li').addClass("active");
+                self.showPage(parseInt($(this).text()));
+            });
+        },
+        showPage: function(page) {
+            var pageSize = 5;
+            $(".oe_content_employee").hide();
+            $(".oe_content_employee").each(function(n) {
+                if (n >= pageSize * (page - 1) && n < pageSize * page)
+                    $(this).show();
             });
         },
         create_on_change: function(entity) {
@@ -132,7 +236,7 @@ openerp.web_linkedin = function(instance) {
             res = new instance.web.Model("linkedin").call("get_people_from_company", [entity.universalName, 25, window.location.href, context]).done(function(result) {
                 if (result.people) {
                     var result = _.reject(result.people.values || [], function(el) {
-                            return ! el.formattedName;
+                        return ! el.formattedName;
                     });
                     self.create_or_modify_company_partner(result).then(function (childs_to_change) {
                         _.each(childs_to_change, function (data) {
@@ -143,7 +247,7 @@ openerp.web_linkedin = function(instance) {
                     });
                 } else { children_def.resolve(); /*No people found for the company, simply resolve child_def*/}
             }).fail(function () {
-                    children_def.reject();
+                children_def.reject();
             });
 
             return $.when(image_def, children_def).then(function () {
@@ -169,11 +273,10 @@ openerp.web_linkedin = function(instance) {
             $.when.apply($, defs).then(function () {
                 new instance.web.DataSetSearch(this, 'res.partner').call("linkedin_check_similar_partner", [entities]).then(function (partners) {
                     _.each(partners, function (partner, i) {
-                        _.each(partner, function (val, key) {
-                            if (val) {
-                                childs_to_change[i][key] = val;
-                            }
-                        });
+                         //append only id to enable upgrade the profile.
+                        childs_to_change[i]['id'] = partner.id;
+                        childs_to_change[i]['parent_name'] = partner.parent_name;
+                        childs_to_change[i]['current_company'] = partner.current_company;
                     });
                     deferrer.resolve(childs_to_change);
                 });
@@ -226,18 +329,18 @@ openerp.web_linkedin = function(instance) {
                     }
                     break;
                 }
-            };
+            }
 
             if (entity.parent_id) {
                 to_change.parent_id = entity.parent_id;
             }
-            to_change.linkedin_url = to_change.linkedin_public_url = entity.publicProfileUrl || false;
+            to_change.linkedin_url = entity.publicProfileUrl || false;
             to_change.linkedin_id = entity.id || false;
 
             return $.when.apply($, defs).then(function () {
                 return to_change;
             });
-        },
+        }
     });
     instance.web.form.widgets.add('linkedin', 'instance.web_linkedin.Linkedin');
     
@@ -249,7 +352,7 @@ openerp.web_linkedin = function(instance) {
         render_value: function() {
             this._super();
             this.$(".oe_linkedin_url").attr("href", this.field_manager.datarecord.linkedin_url || "#").toggle(!!this.field_manager.datarecord.linkedin_url);
-        },
+        }
     });
     instance.web.form.widgets.add('linkedin_url', 'instance.web_linkedin.Linkedin_url');
     
@@ -268,7 +371,7 @@ openerp.web_linkedin = function(instance) {
             var self = this;
             this._super();
             this.bind_event();
-            this.has_been_loaded = $.Deferred()
+            this.has_been_loaded = $.Deferred();
             $.when(this.has_been_loaded).done(function(profile) {
                 self.display_account(profile);
             });
@@ -310,14 +413,14 @@ openerp.web_linkedin = function(instance) {
             var self = this;
             var deferrers = [];
             var params = {};
-            this.$(".oe_linkedin_pop_c .oe_linkedin_company_entities, .oe_linkedin_pop_c .oe_linkedin_show_more, .oe_linkedin_pop_p .oe_linkedin_people_entities, .oe_linkedin_pop_p .oe_linkedin_show_more").empty();
+            this.$(".oe_linkedin_pop_c .oe_linkedin_company_entities, .oe_linkedin_pop_c .oe_linkedin_show_more, .oe_linkedin_pop_p .oe_linkedin_people_entities, .oe_linkedin_pop_p .oe_linkedin_show_more, .oe_linkedin_pop_company_p, #employee_page").empty();
             this.company_offset = 0;
             this.people_offset = 0;
 
             if (url && url.length) {
                 var url = url.replace(/\/+$/, ''); //Will remove trailing forward slace
                 var uid = url.replace(/(.*linkedin\.com\/[a-z]+\/)|(^.*\/company\/)|(\&.*$)/gi, '');
-                var re = /[^\w\d-_]/g //Will replace special characters except - and _
+                var re = /[^\w\d-_]/g; //Will replace special characters except - and _
                 if (re.test(uid)) { //Test whether url having special characters other than - and _
                     uid = uid.replace(re, '');
                 }
@@ -329,15 +432,13 @@ openerp.web_linkedin = function(instance) {
             _.extend(params, {'search_term': this.search, 'from_url': window.location.href, 'local_context': context});
             self.rpc("/linkedin/get_search_popup_data", params).done(function(result) {
                 if(result.status && result.status == 'need_auth') {
-                    if (confirm(_t("You may redirected to LinkedIn authorization page, once you authorized after that you can use this widget."))) {
-                        instance.web.redirect(result.url);
-                    }
+                    instance.web.redirect(result.url);
                 } else { //We can check (result.status == 'OK') and other status
                     self.trigger('search_completed');
-                    self.has_been_loaded.resolve(result.current_profile)
+                    self.has_been_loaded.resolve(result.current_profile);
                     self.do_result_companies(result.companies);
                     if (result.companies && result.companies.companies._total > (self.company_offset + self.limit)) {
-                        var remaining = result.companies.companies._total - (self.company_offset + self.limit)
+                        var remaining = result.companies.companies._total - (self.company_offset + self.limit);
                         var $company_more = $(QWeb.render("Linkedin.show_more", {'remaining': remaining, class: 'company'}));
                         $company_more.on("click", self, function(e) {
                             self.do_more_companies(e, params);
@@ -346,7 +447,7 @@ openerp.web_linkedin = function(instance) {
                     }
                     self.do_result_people(result.people);
                     if (result.people && result.people.people._total > (self.people_offset + self.limit)) {
-                        var remaining = result.people.people._total - (self.people_offset + self.limit)
+                        var remaining = result.people.people._total - (self.people_offset + self.limit);
                         var $people_more = $(QWeb.render("Linkedin.show_more", {'remaining': remaining, class: 'people'}));
                         $people_more.on("click", self, function(e) {
                             self.do_more_people(e, params);
@@ -354,6 +455,9 @@ openerp.web_linkedin = function(instance) {
                         $people_more.appendTo(self.$(".oe_linkedin_pop_p .oe_linkedin_show_more"));
                     }
                     if (result.warnings) { self.show_warnings(result.warnings); }
+                    if (result.people_status == 403) {
+                        $(".oe_linkedin_pop_p .oe_linkedin_people_entities").append($(QWeb.render("LinkedIn.PeopleAccess")));
+                    }
                 }
             }).fail(function (error, event) {
                 if (error.data.arguments[0] == 401) {
@@ -369,7 +473,6 @@ openerp.web_linkedin = function(instance) {
         },
         do_result_companies: function(companies) {
             var lst = (companies.companies || {}).values || [];
-            //lst = _.first(companies, this.limit);
             lst = _.map(lst, function(el) {
                 el.__type = "company";
                 return el;
@@ -379,12 +482,11 @@ openerp.web_linkedin = function(instance) {
         },
         do_result_people: function(people) {
             var plst = (people.people || {}).values || [];
-            //plst = _.first(plst, this.limit);
             plst = _.map(plst, function(el) {
                 el.__type = "people";
                 return el;
             });
-            console.debug("Linkedin people found:", people.people._total, '=>', plst.length, plst);
+            //console.debug("Linkedin people found:", people.people._total, '=>', plst.length, plst);
             return this.display_result(plst, this.$(".oe_linkedin_pop_p .oe_linkedin_people_entities"));
         },
         display_result: function(result, $elem) {
@@ -406,10 +508,12 @@ openerp.web_linkedin = function(instance) {
                 pc.$el.css("width", "20%");
                 pc.on("selected", self, function(data) {
                     self.trigger("selected", data);
-                    self.destroy();
+                    if (data.__type === "people" ) {
+                        self.destroy();
+                    }
                 });
             });
-            if (!$elem.find("div").size()) {
+            if (!$(".oe_linkedin_pop_p").size()) {
                 $elem.append($('<div class="oe_no_result">').text(_t("No results found")));
             }
         },
@@ -440,7 +544,7 @@ openerp.web_linkedin = function(instance) {
             _.each(warnings, function(warning) {
                 self.do_warn(warning[0], warning[1]);
             });
-        },
+        }
     });
     
     instance.web_linkedin.EntityWidget = instance.web.Widget.extend({
@@ -455,8 +559,9 @@ openerp.web_linkedin = function(instance) {
                 self.trigger("selected", self.data);
             });
             if (this.data.__type === "company") {
-                this.$el.addClass("linkedin_id_"+this.data.id)
+                this.$el.addClass("linkedin_id_"+this.data.id);
                 this.$("h3").text(this.data.name);
+                self.$el.attr("name", this.data.name);
                 self.$("img").attr("src", this.data.logoUrl);
                 self.$(".oe_linkedin_entity_headline").text(this.data.industry);
             } else { // people
@@ -464,7 +569,7 @@ openerp.web_linkedin = function(instance) {
                 self.$("img").attr("src", this.data.pictureUrl);
                 self.$(".oe_linkedin_entity_headline").text(this.data.headline);
             }
-        },
+        }
     });
 
     /*
@@ -478,36 +583,35 @@ openerp.web_linkedin = function(instance) {
         load_kanban: function() {
             var self = this;
             var super_res = this._super.apply(this, arguments);
-            if(this.dataset.model == 'res.partner') {
-                this.display_dm.add(instance.web_linkedin.tester.test_linkedin(false)).done(function() {
-                    $linkedin_button = $(QWeb.render("KanbanView.linkedinButton", {'widget': self}));
+            if(this.dataset.model == 'res.partner' && !this.dataset.child_name) {
+                this.display_dm.add(instance.web_linkedin.tester.test_linkedin(false)).done(function(result) {
+                    $linkedin_button = $(QWeb.render("KanbanView.linkedinButton", {'widget': self, 'href': result}));
                     $linkedin_button.appendTo(self.$buttons);
-                    $linkedin_button.click(function() {
-                        var context = instance.web.pyeval.eval('context');
-                        res = self.rpc("/linkedin/sync_linkedin_contacts", {
-                            from_url: window.location.href,
-                            local_context: context
-                        }).done(function(result) {
-                            if (result instanceof Object && result.status && result.status == 'need_auth') {
-                                if (confirm(_t("You will be redirected to LinkedIn authentication page, once authenticated after that you use this widget."))) {
+                    if (result == true) {
+                        $linkedin_button.click(function() {
+                            var context = instance.web.pyeval.eval('context');
+                            res = self.rpc("/linkedin/sync_linkedin_contacts", {
+                                from_url: window.location.href,
+                                local_context: context
+                            }).done(function(result) {
+                                if (result instanceof Object && result.status && result.status == 'need_auth') {
                                     instance.web.redirect(result.url);
+                                } else {
+                                    if (result.status && result.status == "AccessError") {
+                                        var message = _.str.sprintf("Total %s records retrieved from Linkedin\n\n", result._total);
+                                        _(result.fail_warnings).each(function(msg) {
+                                            message += _.str.sprintf("%s      %s\n\n", msg[0], msg[1]);
+                                        });
+                                        alert(message);
+                                    }
+                                    self.do_reload();
                                 }
-                            } else {
-                                if (result.status && result.status == "AccessError") {
-                                    var message = _.str.sprintf("Total %s records retrieved from Linkedin\n\n", result._total);
-                                    _(result.fail_warnings).each(function(msg) {
-                                        message += _.str.sprintf("%s      %s\n\n", msg[0], msg[1]);
-                                    });
-                                    alert(message);
-                                }
-                                self.do_reload();
-                            }
+                            });
                         });
-                    });
+                    }
                 });
             }
             return super_res;
         }
     });
 };
-// vim:et fdc=0 fdl=0:
