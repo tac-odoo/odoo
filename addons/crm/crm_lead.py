@@ -277,6 +277,7 @@ class crm_lead(format_address, osv.osv):
                             domain="[('section_id','=',section_id)]"),
         'planned_cost': fields.float('Planned Costs'),
         'meeting_count': fields.function(_meeting_count, string='# Meetings', type='integer'),
+        'lost_reason': fields.many2one('crm.lost.reason', 'Lost Reason', select=True, track_visibility='onchange')
     }
 
     _defaults = {
@@ -1093,4 +1094,12 @@ class crm_lead(format_address, osv.osv):
                     break
         return res
 
+
+class crm_lost_reason(osv.osv):
+    _name = "crm.lost.reason"
+
+    _columns = {
+        'id': fields.integer('ID', readonly=True),
+        'name': fields.char('Name', required=True),
+    }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
