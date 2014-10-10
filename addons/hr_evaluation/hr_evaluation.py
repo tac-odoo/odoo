@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, time
 from dateutil.relativedelta import relativedelta
 from dateutil import parser
 import uuid, urlparse
@@ -127,15 +127,11 @@ class hr_evaluation(models.Model):
     def _check_employee_appraisal_duplication(self):
         """ Avoid duplication"""
         if self.employee_id and self.department_id and self.date_close:
-            appraisal_ids = self.search([('employee_id', '=', self.employee_id.id), ('department_id', '=', self.department_id.id)])
-            if appraisal_ids:
-                duplicat_list = [(datetime.strptime(appraisal.date_close, DEFAULT_SERVER_DATE_FORMAT).month, datetime.strptime(appraisal.date_close, DEFAULT_SERVER_DATE_FORMAT).year) for appraisal in appraisal_ids]
-                found_duplicat_data = []
-                for is_duplicat in duplicat_list:
-                    if is_duplicat in found_duplicat_data:
-                        raise except_orm(_('Warning'), _("You cannot create more than one appraisal for same Month & Year"))
-                    else:
-                        found_duplicat_data.append(is_duplicat)
+            appraisal_ids = self.search([
+                ('employee_id', '=', self.employee_id.id), ('department_id', '=', self.department_id.id),
+                ('date_close', '<=', self.date_close), ('date_close', '>=', time.strftime('%Y-%m-01'))])
+            if len(appraisal_ids) > 1:
+                raise except_orm(_('Warning'), _("You cannot create more than one appraisal for same Month & Year"))
 
     @api.one
     def create_message_subscribe_users_list(self, subscribe_users):
