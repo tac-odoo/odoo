@@ -23,7 +23,6 @@
                 <t t-set="title">Comparison</t>
                 <div class="oe_structure">
                     <div class="container">
-                        <h1>Evaluation Matrix</h1>
                         <a t-attf-href="/comparison/selection/"><p>Back to selection</p></a>
                         <table class="table table-hover oe_table-comparison-factors">
                             <thead>
