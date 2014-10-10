@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <templates id="template" xml:space="preserve">
     <t t-name="comparison_factor_children">
         <t t-foreach="comp_factor_children" t-as="comp_factor_child">
@@ -6,7 +7,17 @@
                 <td><span class="children_name_in_table"><t t-esc="comp_factor_child.name"/></span></td>
                 <td></td>
                 <td></td>
-                <td><t t-esc="comp_factor_child.ponderation"/></td>
+                <td class="oe_ponderation">
+                    <t t-esc="comp_factor_child.ponderation"/>
+                    <span class="pond"> 
+                        <a href='#'>
+                            <i style='color:green' class='fa fa-arrow-circle-o-up fa-2x'></i>
+                        </a> 
+                        <a href='#'>
+                            <i style='color:red' class='fa fa-arrow-circle-o-down fa-2x'></i>
+                        </a>
+                    </span>
+                </td>
                 <t t-foreach="comparison_products" t-as="comparison_product">
                     <td><t t-esc="comparison_results[comp_factor_child.id][comparison_product.id]"/>%</td>
                 </t>

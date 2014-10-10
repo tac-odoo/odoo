@@ -49,7 +49,17 @@
                                             <a t-if= "len(comparison_factor.child_ids) != 0 and comparison_factor.parent_id" class="show-children" t-att-comparison-factor="comparison_factor.id"><i height="20" width="20" class="fa fa-search"></i></a>
                                         </td>
                                         <td></td>
-                                        <td><t t-esc="comparison_factor.ponderation"/></td>
+                                        <td class="oe_ponderation">
+                                            <t t-esc="comparison_factor.ponderation"/>
+                                            <span class="pond"> 
+                                                <a href='#'>
+                                                    <i style='color:green' class='fa fa-arrow-circle-o-up fa-2x'></i>
+                                                </a> 
+                                                <a href='#'>
+                                                    <i style='color:red' class='fa fa-arrow-circle-o-down fa-2x'></i>
+                                                </a>
+                                            </span>
+                                        </td>
                                         <t t-foreach="comparison_products" t-as="comparison_product">
                                             <td><t t-esc="comparison_results[comparison_factor.id][comparison_product.id]"/>%</td>
                                         </t>

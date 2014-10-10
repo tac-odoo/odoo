@@ -1,8 +1,16 @@
 .children_name_in_table{
-  margin-left: 2em;
+   margin-left: 2em;
 }
 
 tr.comparison_factor_row td{
-  border-bottom:2px solid black;
-  height:4em;
+   border-bottom:2px solid black;
+   height:4em;
+}
+
+.pond{
+   visibility:hidden;
+}
+
+.oe_ponderation:hover .pond{
+   visibility:visible; 
 }
