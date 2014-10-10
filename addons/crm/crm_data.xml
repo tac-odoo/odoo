@@ -101,10 +101,10 @@
             <field name="name">Too expensive</field>
         </record>
         <record model="crm.lost.reason" id="lost_reason_2">
-            <field name="name">We don't heave people/skills</field>
+            <field name="name">We don't have people/skills</field>
         </record>
         <record model="crm.lost.reason" id="lost_reason_3">
-            <field name="name">Not enough stocks</field>
+            <field name="name">Not enough stock</field>
         </record>
     </data>
 

@@ -436,7 +436,7 @@
                                     widget="many2many_tags"
                                     context="{'object_name': 'crm.lead'}"
                                     domain="[('object_id.model', '=', 'crm.lead')]"/>
-                                <field name="lost_reason"/>
+                                <field name="lost_reason" domain="[('stage_id','=','stage_lead7')]"/>
                             </group>
                         </group>
 

@@ -32,3 +32,6 @@ access_crm_lead_partner_manager,crm.lead.partner.manager,model_crm_lead,base.gro
 access_crm_phonecall_partner_manager,crm.phonecall.partner.manager,model_crm_phonecall,base.group_partner_manager,1,1,1,1
 access_crm_payment_mode_user,crm.payment.mode,model_crm_payment_mode,base.group_sale_salesman,1,0,0,0
 access_crm_payment_mode,crm.payment.mode,model_crm_payment_mode,base.group_sale_manager,1,1,1,1
+access_crm_lost_reason,crm.lost.reason,model_crm_lost_reason,base.group_sale_manager,1,1,1,1
+access_crm_lost_reason,crm.lost.reason,model_crm_lost_reason,base.group_sale_salesman,1,1,1,0
+access_crm_lost_reason,crm.lost.reason,model_crm_lost_reason,base.group_user,1,0,0,0
