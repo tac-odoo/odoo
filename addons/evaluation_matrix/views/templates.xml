@@ -1,0 +1,89 @@
+<openerp>
+    <data>
+        <template id="assets_frontend" name="evaluation matrix assets" inherit_id="website.assets_frontend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/evaluation_matrix/static/src/js/evaluation_matrix.js"></script>
+                <link rel="stylesheet" href="/evaluation_matrix/static/src/css/evaluation_matrix.css"/>
+            </xpath>
+        </template>
+
+        <template id="index" name="Selection comparison">
+            <t t-call="website.layout">
+                <t t-set="title">Review</t>
+                <div class="oe_structure">
+                    <div class="container">
+                        <a href="/comparison/">All</a>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <template id="comparison" name="Comparison Table">
+            <t t-call="website.layout">
+                <t t-set="title">Comparison</t>
+                <div class="oe_structure">
+                    <div class="container">
+                        <a t-attf-href="/comparison/selection/"><p>Back to selection</p></a>
+                        <table class="table table-hover oe_table-comparison-factors">
+                            <thead>
+                                <tr>
+                                    <th width="400"></th>
+                                    <th width="20"></th>
+                                    <th></th>
+                                    <th></th>
+                                    <t t-foreach="comparison_products" t-as="comparison_product">
+                                        <th t-attf-class="oe_comparison-product" t-att-product-id="comparison_product.id"><t t-esc="comparison_product.name"/></th>
+                                    </t>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="comparison_factors" t-as="comparison_factor">
+                                    <tr t-attf-class="row_#{comparison_factor.id}" t-attf-children="hidden">
+                                        <td>
+                                            <t t-if= "comparison_factor.parent_id">
+                                                > <t t-esc="comparison_factor.name"/>
+                                            </t>
+                                            <a t-if= "not comparison_factor.parent_id" href=""><t t-esc="comparison_factor.name"/></a>
+                                        </td>
+                                        <td>
+                                            <a t-if= "len(comparison_factor.child_ids) != 0 and comparison_factor.parent_id" class="show-children" t-att-comparison-factor="comparison_factor.id"><i height="20" width="20" class="fa fa-search"></i></a>
+                                        </td>
+                                        <td></td>
+                                        <td><t t-esc="comparison_factor.ponderation"/></td>
+                                        <t t-foreach="comparison_products" t-as="comparison_product">
+                                            <td><t t-esc="comparison_results[comparison_factor.id][comparison_product.id]"/>%</td>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </t>
+        </template> 
+        
+        <menuitem sequence="0" id="main_evaluation_matrix_menu" name="Evaluation Matrix"/>
+        <menuitem id="evaluation_matrix_menu" name="Evaluation Matrix" parent="main_evaluation_matrix_menu"/>
+        
+
+        <record model="ir.actions.act_window" id="comparison_factors_list_action">
+            <field name="name">Comparison Factors</field>
+            <field name="res_model">comparison_factor</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="comparison_factors_menu" name="Comparison Factors" parent="evaluation_matrix_menu" action="comparison_factors_list_action" sequence="1"/>
+        
+
+        <record model="ir.actions.act_window" id="comparison_items_list_action">
+            <field name="name">Comparison Items</field>
+            <field name="res_model">comparison_item</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="comparison_items_menu" name="Comparison Items" parent="evaluation_matrix_menu" action="comparison_items_list_action" sequence="2"/>
+
+    </data>
+</openerp>

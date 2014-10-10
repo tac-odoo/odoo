@@ -1,0 +1,108 @@
+id,name,code,version,note,state
+item_6,SAP R/3,SAP,4.70,"Version Studied : SAP R/3 Enterprise 4.70
+
+The SAP ERP application is an integrated enterprise resource planning (ERP)
+software manufactured by SAP AG.SAP stands for Systems, Applications and 
+Products.SAP targets business software requirements of midsize and large 
+organizations in all industries and sectors.
+
+SAP R/3 (The ""R"" was for ""Real-time data processing"" and 3 was for 3-tier) is a 
+client/server based application, utilizing a 3-tiered model.SAP R/3 functionality 
+is structured using its own proprietary language called ABAP (Advanced Business 
+Application Programming).R/3 is scalable and highly suited for many types and 
+sizes of organizations.
+
+SAP R/3 runs on several databases Oracle, Adabas D, Informix, DB2 for UNIX, 
+DB2/400, Microsoft's SQL Server 6.0.
+
+Homepage : http://www.sap.com/index.epx
+Online Demo : http://www.sap.com/search/index.epx?q1=demo ",open
+item_2,Open Bravo,OBRA,2.4,"Version Studied : 2.40
+
+OpenBravo is an open source enterprise resource planning. It's a fork of
+Compiere v2.31a. OpenBravo Inc, the editor, have redeveloped the Compiere user
+interface as a web-based frontend. So, the kernel and core server is quite
+similar to Compiere but the GUI is totally different. 
+
+They provide all generic modules along with CRM, BI, and POS as a part of ERP.
+The current stable version is 2.40. It is mostly used in manufacturing, engineering, 
+retails and distributions with service sector environments.
+
+The core of Open Bravo uses JAVA and SQL (preferably Oracle, but they don't have a
+fully working version on PostgreSQL). They organised the services around
+Open Bravo based on a partner network, available in several countries.
+
+Homepage : http://openbravo.com
+Online Demo : http://demo.openbravo.com  ",open
+item_5,Sage/API,SAPI,4,"Version Studied : V4
+
+SAGE/API is a Small Business Division and its the entity of the Sage Group,
+which specializes in dedicated software for small businesses.
+Sage is the partner company for their management.
+
+SAGE/API provides scalable solutions for businesses of all sizes: Artisans, shopkeepers,
+TPE, PME, PMI and software for all aspects of trading: shops, service, craft, industry,
+consulting, independent agriculture.
+
+Homepage : http://www.apisoft.com/v4/index.htm
+Online Demo : http://www.apisoft.com/v4/index.htm",open
+item_4,Microsoft Dynamics NAV,MSDY,5,"Version Studied : 5.0
+
+Microsoft Navision is designed specifically for medium-sized companies 
+seeking one solution to help increase productivity without disrupting 
+everyday business operations. It delivers integrated functionality 
+to support solutions for all industry.
+
+Microsoft Dynamics uses Microsoft SQL server as database.
+Microsoft Dynamics Navision 5.0 does not have full web support.
+Its not an open source. License is necessary for this.
+
+Homepage : http://www.microsoft.com/dynamics/nav/default.mspx
+Online Demo : http://www.microsoft.com/dynamics/nav/product/demos.mspx",open
+item_7,Microsoft Dynamics Nav 09,NAV9,6,"Version Studied : 6.0
+
+Microsoft has launched exciting NAV 2009. This is a completely upgraded version 
+of Microsoft Dynamics NAV which deal for small and midsized organizations.The 
+previous version of Microsoft Dynamics Navision used two-tier architecture of 
+the Classic client environment, the new Microsoft Dynamics Navision 2009 uses 
+three-tier architecture on which the RoleTailored client is based.
+
+Microsoft Dynamics NAV 2009 provides a streamlined, RoleTailored user experience
+to help people work more effectively.It also provides new options for designing 
+reports that are intuitive to work with and easier to distribute.
+
+Homepage : http://www.microsoft.com/dynamics/nav/default.mspx
+Online Demo : http://www.microsoft.com/dynamics/nav/product/demos.mspx",draft
+item_1,Open ERP,OERP,5,"Version Studied : 5.0.0
+
+Open ERP is an open source enterprise management solution. Fabien Pinckaers
+originated Tiny ERP, now Open ERP, and is the CEO of Tiny sprl, the editor of
+Tiny ERP. Open ERP has developed several large scale projects, such as Auction-
+in-Europe.com, which became the leader in the art market in Belgium. As Open ERP
+is modular, each adoption produces new module. So they can be installed
+optionally, depending on need of the organization.
+
+There are two types of services for Open ERP:
+A. Open ERP On Demand: a SaaS offer
+B. Integration of Open ERP : customization and implementation service
+
+The first one is dedicated to small enterprises (less than 30 employees). It's a
+self-service and low-cost offer with a unique price that includes: the hosting,
+maintenance, support, training, Open ERP modules and migrations.
+
+Where as the organization with higher budget and employee strength ranging from
+20 to 2000, can choose the second type of service for successful implementation
+of Open ERP. Here are few examples of successful implementation of Open ERP in
+different verticals:
+
+Government organizations: Financial Administration of Vaud
+Educational institutes: ENA (Ecole Nationale d'Administration)
+Non profit organizations: Chamber of Commerce of Belgium (CCI)
+Manufacturing Industry: Whirlpool
+Food and Distribution Industry: Groupe Costes
+
+The latest stable version for Open ERP is 5.0.0 and core of Open ERP uses Python
+and PostgreSQL. Open ERP has more than 90 partners spread over 20 + countries.
+
+Homepage : http://www.openerp.com
+Online Demo : http://demo.openerp.com/",open

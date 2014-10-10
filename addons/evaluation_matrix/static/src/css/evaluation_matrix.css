@@ -1,0 +1,8 @@
+.children_name_in_table{
+  margin-left: 2em;
+}
+
+tr.comparison_factor_row td{
+  border-bottom:2px solid black;
+  height:4em;
+}
