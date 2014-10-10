@@ -2518,7 +2518,7 @@ class stock_inventory(osv.osv):
 
     _columns = {
         'name': fields.char('Inventory Reference', required=True, readonly=True, states={'draft': [('readonly', False)]}, help="Inventory Name."),
-        'date': fields.datetime('Inventory Date', required=True, readonly=True, help="The date that will be used for the stock level check of the products and the validation of the stock move related to this inventory."),
+        'date': fields.datetime('Inventory Date', required=True, readonly=False, help="The date that will be used for the stock level check of the products and the validation of the stock move related to this inventory."),
         'line_ids': fields.one2many('stock.inventory.line', 'inventory_id', 'Inventories', readonly=False, states={'done': [('readonly', True)]}, help="Inventory Lines.", copy=True),
         'move_ids': fields.one2many('stock.move', 'inventory_id', 'Created Moves', help="Inventory Moves.", states={'done': [('readonly', True)]}),
         'state': fields.selection(INVENTORY_STATE_SELECTION, 'Status', readonly=True, select=True, copy=False),
@@ -2581,6 +2581,7 @@ class stock_inventory(osv.osv):
         #as they will be moved to inventory loss, and other quants will be created to the encoded quant location. This is a normal behavior
         #as quants cannot be reuse from inventory location (users can still manually move the products before/after the inventory if they want).
         move_obj = self.pool.get('stock.move')
+        move_obj.write(cr, uid, [x.id for x in inv.move_ids], {'date': inv.date}, context=context)
         move_obj.action_done(cr, uid, [x.id for x in inv.move_ids], context=context)
 
     def _create_stock_move(self, cr, uid, inventory, todo_line, context=None):
