@@ -868,4 +868,11 @@ class website_seo_metadata(osv.Model):
         'website_meta_keywords': fields.char("Website meta keywords", translate=True),
     }
 
+    def open_website_url(self, cr, uid, id, context=None):
+        return {
+            'type': 'ir.actions.act_url',
+            'url': self.browse(cr, uid, id).website_url,
+            'target': 'self',
+        }
+
 # vim:et:
