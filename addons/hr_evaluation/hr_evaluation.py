@@ -1,7 +1,8 @@
-from datetime import datetime, time
+import time
+import uuid, urlparse
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from dateutil import parser
-import uuid, urlparse
 from openerp import fields, api, tools, models, _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 from openerp.exceptions import except_orm, Warning
@@ -127,9 +128,11 @@ class hr_evaluation(models.Model):
     def _check_employee_appraisal_duplication(self):
         """ Avoid duplication"""
         if self.employee_id and self.department_id and self.date_close:
+            date_closed = datetime.strptime(self.date_close, DEFAULT_SERVER_DATE_FORMAT)
             appraisal_ids = self.search([
                 ('employee_id', '=', self.employee_id.id), ('department_id', '=', self.department_id.id),
-                ('date_close', '<=', self.date_close), ('date_close', '>=', time.strftime('%Y-%m-01'))])
+                ('date_close', '<=', time.strftime('%Y-' + str(date_closed.month) + '-' + str(date_closed.day))),
+                ('date_close', '>=', time.strftime('%Y-' + str(date_closed.month) + '-01'))])
             if len(appraisal_ids) > 1:
                 raise except_orm(_('Warning'), _("You cannot create more than one appraisal for same Month & Year"))
 
