@@ -5,15 +5,6 @@ $(document).ready(function () {
     website = openerp.website;
     website.add_template_file('/evaluation_matrix/static/src/views/evaluation_matrix.xml');
 
-    $(".progress-bar").each(function() {
-            $vote_value = $(this).find("span");
-            if($vote_value.text() <= 40){
-                $(this).addClass("progress-bar-danger");
-            }
-            else if($vote_value.text() >= 80){
-                $(this).addClass("progress-bar-success");
-            }
-    });
 	$('.oe_table-comparison-factors')
         .on('click', '.show-children', function (ev) {
                 ev.preventDefault();

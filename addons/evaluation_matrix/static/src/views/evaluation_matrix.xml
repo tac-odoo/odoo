@@ -7,7 +7,7 @@
                 <td><span class="children_name_in_table"><t t-esc="comp_factor_child.name"/></span></td>
                 <td></td>
                 <td></td>
-                <td class="oe_ponderation">
+                <td class="ponderation">
                     <t t-esc="comp_factor_child.ponderation"/>
                     <span class="pond"> 
                         <a href='#'>
@@ -19,7 +19,13 @@
                     </span>
                 </td>
                 <t t-foreach="comparison_products" t-as="comparison_product">
-                    <td><t t-esc="comparison_results[comp_factor_child.id][comparison_product.id]"/>%</td>
+                    <td class="center-text-cell">
+                        <div t-attf-class="#{comparison_results[comp_factor_child.id][comparison_product.id] &gt; 80 ? 'votes-green' : comparison_results[comp_factor_child.id][comparison_product.id] &lt; 40 ? 'votes-red' : 'votes-blue'}">
+                            <span>
+                                <t t-esc="comparison_results[comp_factor_child.id][comparison_product.id]"/> 
+                            </span> %
+                        </div>
+                    </td>
                 </t>
             </tr>
         </t>
