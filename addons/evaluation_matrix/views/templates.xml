@@ -27,7 +27,7 @@
                             <thead>
                                 <tr>
                                     <th width="400"></th>
-                                    <th width="5"></th>
+                                    <th></th>
                                     <th width="10"></th>
                                     <th></th>
                                     <t t-foreach="comparison_products" t-as="comparison_product">

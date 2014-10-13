@@ -20,7 +20,7 @@
                 </td>
                 <t t-foreach="comparison_products" t-as="comparison_product">
                     <td class="center-text-cell">
-                        <div t-attf-class="#{comparison_results[comp_factor_child.id][comparison_product.id] &gt; 80 ? 'votes-green' : comparison_results[comp_factor_child.id][comparison_product.id] &lt; 40 ? 'votes-red' : 'votes-blue'}">
+                        <div t-attf-class="#{comparison_results[comp_factor_child.id][comparison_product.id] &gt; 80 ? 'child-votes-green' : comparison_results[comp_factor_child.id][comparison_product.id] &lt; 40 ? 'child-votes-red' : 'child-votes-blue'}">
                             <span>
                                 <t t-esc="comparison_results[comp_factor_child.id][comparison_product.id]"/> 
                             </span> %

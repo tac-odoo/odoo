@@ -28,10 +28,24 @@
 	height: 30px;
 }
 
+.child-votes-red{
+	background-color: #d9534f;
+	color: white;
+	width: 100px;
+	text-align: center;
+}
+
 .votes-green{
 	background-color: #5cb85c;
 	color: white;
 	height: 30px;
+}
+
+.child-votes-green{
+	background-color: #5cb85c;
+	color: white;
+	width: 100px;
+	text-align: center;
 }
 
 .votes-blue{
@@ -40,6 +54,9 @@
 	height: 30px;
 }
 
-.table tbody>tr>td.vert-align{
-    vertical-align: middle;
+.child-votes-blue{
+	background-color: #428bca;
+	color: white;
+	width: 100px;
+	text-align: center;
 }
