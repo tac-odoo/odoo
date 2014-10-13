@@ -28,11 +28,11 @@
                             <thead>
                                 <tr>
                                     <th width="400"></th>
-                                    <th width="20"></th>
-                                    <th></th>
+                                    <th width="5"></th>
+                                    <th width="10"></th>
                                     <th></th>
                                     <t t-foreach="comparison_products" t-as="comparison_product">
-                                        <th t-attf-class="oe_comparison-product" t-att-product-id="comparison_product.id"><t t-esc="comparison_product.name"/></th>
+                                        <th t-attf-class="oe_comparison-product" t-att-product-id="comparison_product.id" width="200"><t t-esc="comparison_product.name"/></th>
                                     </t>
                                 </tr>
                             </thead>
@@ -61,7 +61,15 @@
                                             </span>
                                         </td>
                                         <t t-foreach="comparison_products" t-as="comparison_product">
-                                            <td><t t-esc="comparison_results[comparison_factor.id][comparison_product.id]"/>%</td>
+                                            <td>
+                                                <div class="progress">
+                                                    <div class="progress-bar" role="progressbar" t-attf-aria-valuenow="#{comparison_results[comparison_factor.id][comparison_product.id]}" aria-valuemin="0" aria-valuemax="100" t-attf-style="width: #{comparison_results[comparison_factor.id][comparison_product.id]}%;">
+                                                        <span>
+                                                            <t t-esc="comparison_results[comparison_factor.id][comparison_product.id]"/>
+                                                        </span> %
+                                                    </div>
+                                                </div>
+                                            </td>
                                         </t>
                                     </tr>
                                 </t>

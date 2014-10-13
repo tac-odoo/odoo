@@ -14,3 +14,11 @@ tr.comparison_factor_row td{
 .oe_ponderation:hover .pond{
    visibility:visible; 
 }
+
+.oe_ponderation{
+	text-align: center;
+}
+.progress-bar{
+
+    min-width:30px;
+}
