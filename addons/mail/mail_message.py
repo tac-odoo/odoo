@@ -122,9 +122,6 @@ class mail_message(osv.Model):
 
     def _get_model_id(self, cr, uid, ids, name, args, context):
         res = {}
-        #TOFIX: why getting 'mail.compose.message' into self._name 
-        if self._name != 'mail.message':
-            return res
         model_obj = self.pool['ir.model']
         for message in self.browse(cr, uid, ids, context=context):
             model_ids = model_obj.search(cr, uid, [('model', '=', message.model)], context=context)
