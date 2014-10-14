@@ -12,11 +12,11 @@ class comparison_factor(models.Model):
     child_ids = fields.One2many('comparison_factor', 'parent_id', string="Child Factors")
     note = fields.Text(string="Note")
     #sequence = fields.Integer(string="Sequence")
-    type = fields.Selection([('view','Category'),('criterion','Criteria')], string="Type", required=True)
+    type = fields.Selection([('view','Category'),('criterion','Criteria')], default='criterion',string="Type", required=True)
     #result_ids = fields.One2many('comparison.factor.result', 'factor_id', string="Results")
-    ponderation = fields.Float(string="Ponderation")
+    ponderation = fields.Float(string="Ponderation", default=0)
     #pond_computed = 
-    state = fields.Selection([('draft','Draft'),('open','Open')], string="Status", required=True)
+    state = fields.Selection([('draft','Draft'),('open','Open')], default='open',string="Status", required=True)
 
     _sql_constraints = [
         ('name', 'unique(parent_id,name)', 'The name of the Comparison Factor must be unique!' )
@@ -79,6 +79,6 @@ class comparison_factor_result(models.Model):
 
     factor_id = fields.Many2one('comparison_factor', string="Factor", required=True, ondelete="cascade", readonly=True)
     item_id = fields.Many2one('comparison_item', string="Item", ondelete="cascade", required=True, readonly=True)
-    votes = fields.Float(string="Votes", readonly=True)
-    result = fields.Float(string="Goodness(%)" ,readonly=True, digits=(16,3)) 
+    votes = fields.Float(string="Votes", readonly=True, default=0)
+    result = fields.Float(string="Goodness(%)" ,readonly=True, digits=(16,3), default=0) 
     # This field must be recomputed each time we add a vote

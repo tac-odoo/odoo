@@ -23,6 +23,7 @@
                 <t t-set="title">Comparison</t>
                 <div class="oe_structure">
                     <div class="container">
+                        <button type="button" class="btn btn-default oe_create-criterion"><i class="fa fa-plus"></i> Add criterion </button>
                         <table class="table oe_table-comparison-factors">
                             <thead>
                                 <tr>

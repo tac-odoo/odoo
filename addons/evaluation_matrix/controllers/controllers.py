@@ -71,7 +71,6 @@ class EvaluationMatrix(http.Controller):
             comp_products.append({
                 "id": comparison_product,
             })
-
         
         return {
             'comp_factor_children' : comp_factor_children,
@@ -79,4 +78,31 @@ class EvaluationMatrix(http.Controller):
             'comparison_products' : comp_products,
         }
 
+    @http.route(['/comparison/get_categories'], type='json', auth="public", website=True)
+    def get_categories(self, **post):
+        Comparison_factor = http.request.env['comparison_factor']
+        
+        main_categories = Comparison_factor.search([('parent_id','=',False)])
+
+        comparison_categories = []
+        for main_category in main_categories:
+            comparison_categories.append({
+                "id": main_category.id,
+                "name": main_category.name,
+            })
+            for category in main_category.child_ids:
+                comparison_categories.append({
+                    "id": category.id,
+                    "name": category.name,
+                })
+
+        return comparison_categories
+
+    @http.route(['/comparison/create_criterion'], type='json', auth="public", website=True)
+    def create_criterion(self, name, note, parent_id):
+        Comparison_factor = http.request.env['comparison_factor']
+
+        vals = {'name' : name, 'note' : note,'parent_id' : parent_id}
+        Comparison_factor.create(vals)
+ 
         
