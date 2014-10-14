@@ -41,6 +41,12 @@
     .zero_min_height {
         min-height: 0px !important;
     }
+    .oe-avoid-page-break{
+        page-break-inside:avoid;
+    }
+    .hidden-print{
+        display:none;
+    }
 </template>
 
 <template id="external_layout">

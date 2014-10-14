@@ -33,7 +33,7 @@ class sale_quote(http.Controller):
         "/quote/<int:order_id>",
         "/quote/<int:order_id>/<token>"
     ], type='http', auth="public", website=True)
-    def view(self, order_id, token=None, message=False, **post):
+    def view(self, order_id, pdf=None, token=None, message=False, **post):
         # use SUPERUSER_ID allow to access/view order for public user
         # only if he knows the private token
         order = request.registry.get('sale.order').browse(request.cr, token and SUPERUSER_ID or request.uid, order_id)
@@ -58,6 +58,11 @@ class sale_quote(http.Controller):
             'days_valid': max(days, 0),
             'action': action
         }
+        if pdf:
+            report_obj = request.registry['report']
+            pdf = report_obj.get_pdf(request.cr, SUPERUSER_ID, [order_id], 'website_quote.report_quote', data=None, context=request.context)
+            pdfhttpheaders = [('Content-Type', 'application/pdf'), ('Content-Length', len(pdf))]
+            return request.make_response(pdf, headers=pdfhttpheaders)
         return request.website.render('website_quote.so_quotation', values)
 
     @http.route(['/quote/accept'], type='json', auth="public", website=True)
