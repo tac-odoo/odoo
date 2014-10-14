@@ -38,7 +38,7 @@
                             </thead>
                             <tbody>
                                 <t t-foreach="comparison_factors" t-as="comparison_factor">
-                                    <tr t-attf-class="row_#{comparison_factor.id}" t-attf-children="hidden">
+                                    <tr t-attf-class="row_#{comparison_factor.id}" data-children="hidden">
                                         <td>
                                             <t t-if= "comparison_factor.parent_id">
                                                 > <t t-esc="comparison_factor.name"/>

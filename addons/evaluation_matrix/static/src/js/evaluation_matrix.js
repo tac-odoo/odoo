@@ -10,7 +10,7 @@ $(document).ready(function () {
             ev.preventDefault();
             var $elem = $(ev.currentTarget);
             var comparison_factor_id = $elem.attr('comparison-factor');
-            var children = $elem.closest("tr").attr('children'); // children are displayed or hidden (hidden by default)
+            var children = $elem.closest("tr").data('children'); // children are displayed or hidden (hidden by default)
             if(children == "hidden") {
                 var products = [];
                 $('.oe_comparison-product').each(function() {
@@ -20,20 +20,21 @@ $(document).ready(function () {
                     'comparison_factor_id': +comparison_factor_id,
                     'comparison_products': products,
                 }).then(function (res) {
-                    $('.row_' + comparison_factor_id).after(qweb.render("comparison_factor_children", {'comp_factor_children': res.comp_factor_children, 'comparison_results' : res.comparison_results, 'comparison_products' : res.comparison_products}));
-                    $('.row_' + comparison_factor_id).attr('children','displayed');
+                    $('.child_row_' + comparison_factor_id).remove();
+                    $('.row_' + comparison_factor_id).after(qweb.render("comparison.factor_children", {'comp_factor_children': res.comp_factor_children, 'comparison_results' : res.comparison_results, 'comparison_products' : res.comparison_products}));
+                    $('.row_' + comparison_factor_id).data('children','displayed');
                 });
             }
             else {
                 $('.child_row_' + comparison_factor_id).remove();
-                $('.row_' + comparison_factor_id).closest("tr").attr('children','hidden');
+                $('.row_' + comparison_factor_id).closest("tr").data('children','hidden');
             }
         })
     $('.oe_create-criterion')
         .on('click', function () {
             var self = this;
             openerp.jsonRpc( '/comparison/get_categories', 'call', {}).then(function (result) {
-                self.wizard = $(openerp.qweb.render("comparison_create_criterion",{'comparison_categories': result}));
+                self.wizard = $(openerp.qweb.render("comparison.create_criterion",{'comparison_categories': result}));
                 self.wizard.appendTo($('body')).modal({"keyboard" :true});
                 self.wizard.on('click','.create', function(){
                     var category = self.wizard.find('.select-cat').attr("value");

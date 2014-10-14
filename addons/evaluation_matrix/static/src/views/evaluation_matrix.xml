@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <templates id="template" xml:space="preserve">
-    <t t-name="comparison_factor_children">
+    <t t-name="comparison.factor_children">
         <t t-foreach="comp_factor_children" t-as="comp_factor_child">
             <tr t-attf-class="child_row_#{comp_factor_child.parent_id}">
                 <td><span class="children_name_in_table"><t t-esc="comp_factor_child.name"/></span></td>
@@ -31,7 +31,7 @@
         </t>
     </t>
 
-    <t t-name="comparison_create_criterion">
+    <t t-name="comparison.create_criterion">
         <div class="modal fade">
             <div class="modal-dialog">
                 <div class="modal-content">
