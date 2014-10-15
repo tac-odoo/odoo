@@ -68,3 +68,12 @@
 .oe_snippet.o_mail_block_four_cols .oe_snippet_thumbnail_img{
     background-image: url("/website_mail/static/src/img/blocks/block_four_columns.png")
 }
+.oe_snippet.o_mail_block_button .oe_snippet_thumbnail_img{
+    background-image: url("/website_mail/static/src/img/blocks/block_button.png")
+}
+.oe_snippet.o_mail_block_simple_text .oe_snippet_thumbnail_img{
+    background-image: url("/website_mail/static/src/img/blocks/block_simple_text.png")
+}
+.oe_snippet.o_mail_block_three_cols .oe_snippet_thumbnail_img{
+    background-image: url("/website_mail/static/src/img/blocks/block_three_columns.png")
+}
