@@ -1,5 +1,13 @@
-.children_name_in_table{
+.row-level-2 td:first-child{
    padding-left: 20px !important;
+}
+
+.row-level-3 td:first-child{
+   padding-left: 40px !important;
+}
+
+.row-level-4 td:first-child{
+   padding-left: 60px !important;
 }
 
 .pond{

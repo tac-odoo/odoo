@@ -18,7 +18,7 @@ $(document).ready(function () {
                 });
 
                 $parent = $elem.closest("tr");
-                var row_level = + $parent[0].className.match(/row-level-([0-9]+)/)[1];
+                var row_level = 1 + parseInt($parent[0].className.match(/row-level-([0-9]+)/)[1]);
 
                 openerp.jsonRpc('/comparison/load_children', 'call', {
                     'comparison_factor_id': +comparison_factor_id,
