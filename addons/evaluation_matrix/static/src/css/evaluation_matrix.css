@@ -1,9 +1,15 @@
 .children_name_in_table{
-   margin-left: 2em;
+   padding-left: 20px !important;
 }
 
 .pond{
    visibility:hidden;
+   position: absolute;
+   margin-left: 6px;
+   background: #fff;
+   padding: 3px;
+   border: 1px solid #aaa;
+   border-radius: 6px;
 }
 
 .ponderation:hover .pond{
@@ -60,3 +66,4 @@
 	width: 100px;
 	text-align: center;
 }
+

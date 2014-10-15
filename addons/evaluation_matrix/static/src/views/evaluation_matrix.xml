@@ -3,9 +3,11 @@
 <templates id="template" xml:space="preserve">
     <t t-name="comparison.factor_children">
         <t t-foreach="comp_factor_children" t-as="comp_factor_child">
-            <tr t-attf-class="child_row_#{comp_factor_child.parent_id}">
-                <td><span class="children_name_in_table"><t t-esc="comp_factor_child.name"/></span></td>
-                <td></td>
+            <tr t-attf-class="row-level-#{row_level}" t-att-parent-id="comp_factor_child.parent_id" t-att-factor-id="comp_factor_child.id" data-children="hidden">
+                <td><t t-esc="comp_factor_child.name"/></td>
+                <td>
+                    <a t-if= "comp_factor_child.child_ids.length != 0" class="show-children"><i height="20" width="20" class="fa fa-search"></i></a>
+                </td>
                 <td></td>
                 <td class="ponderation">
                     <t t-esc="comp_factor_child.ponderation"/>

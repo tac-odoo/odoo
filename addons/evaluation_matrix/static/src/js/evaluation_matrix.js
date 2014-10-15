@@ -9,25 +9,29 @@ $(document).ready(function () {
         .on('click', '.show-children', function (ev) {
             ev.preventDefault();
             var $elem = $(ev.currentTarget);
-            var comparison_factor_id = $elem.attr('comparison-factor');
+            var comparison_factor_id = $elem.closest("tr").attr('factor-id');
             var children = $elem.closest("tr").data('children'); // children are displayed or hidden (hidden by default)
             if(children == "hidden") {
                 var products = [];
                 $('.oe_comparison-product').each(function() {
                     products.push(parseInt($(this).attr("product-id")));
                 });
+
+                $parent = $elem.closest("tr");
+                var row_level = + $parent[0].className.match(/row-level-([0-9]+)/)[1];
+
                 openerp.jsonRpc('/comparison/load_children', 'call', {
                     'comparison_factor_id': +comparison_factor_id,
                     'comparison_products': products,
                 }).then(function (res) {
-                    $('.child_row_' + comparison_factor_id).remove();
-                    $('.row_' + comparison_factor_id).after(qweb.render("comparison.factor_children", {'comp_factor_children': res.comp_factor_children, 'comparison_results' : res.comparison_results, 'comparison_products' : res.comparison_products}));
-                    $('.row_' + comparison_factor_id).data('children','displayed');
+                    $('tr[parent-id=' + comparison_factor_id + ']').remove();
+                    $('tr[factor-id=' + comparison_factor_id + ']').after(qweb.render("comparison.factor_children", {'comp_factor_children': res.comp_factor_children, 'comparison_results' : res.comparison_results, 'comparison_products' : res.comparison_products, 'row_level' : row_level}));
+                    $('tr[factor-id=' + comparison_factor_id + ']').data('children','displayed');
                 });
             }
             else {
-                $('.child_row_' + comparison_factor_id).remove();
-                $('.row_' + comparison_factor_id).closest("tr").data('children','hidden');
+                $('tr[parent-id=' + comparison_factor_id + ']').remove();
+                $('tr[factor-id=' + comparison_factor_id + ']').data('children','hidden');
             }
         })
     $('.oe_create-criterion')
