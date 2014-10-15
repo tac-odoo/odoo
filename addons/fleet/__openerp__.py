@@ -51,8 +51,8 @@ Main Features
     'data' : [
         'security/fleet_security.xml',
         'security/ir.model.access.csv',
-        'view/fleet_view.xml',
-        'view/fleet_board_view.xml',
+        'views/fleet_view.xml',
+        'views/fleet_board_view.xml',
         'data/fleet_cars.xml',
         'data/fleet_data.xml',
     ],
