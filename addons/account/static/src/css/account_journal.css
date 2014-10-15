@@ -1,6 +1,6 @@
-.openerp .oe_kanban_view .oe_journal_card {
-  width: 500px;
-}
+/*.openerp .oe_kanban_view .oe_kanban_record {
+  width: 50%;
+}*/
 .openerp .oe_kanban_view .oe_journal_title {
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;

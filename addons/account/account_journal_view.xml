@@ -15,8 +15,8 @@
                             <t t-value="JSON.parse(record.kanban_dashboard.raw_value)" t-set="dashboard"/>
                             <t t-value="record.type.raw_value" t-set="journal_type"/>
                             <t t-value="dashboard.draft_invoice_amount or dashboard.overdue_invoice_amount or dashboard.todo_payment_amount or dashboard.paid_invoice_amount" t-set="is_invoice_stats"/>
-                            <div class="oe_kanban_vignette oe_semantic_html_override oe_kanban_card oe_journal_card">
-                                <div class="row">
+                            <div class="panel panel-default oe_semantic_html_override">
+                                <div class="panel-heading">
                                     <t t-call="JournalTop" />
                                 </div>
                                 <div class="row">
@@ -31,8 +31,8 @@
                             </div>
                         </t>
                         <t t-name="JournalTop">   
-                            <div class="col-md-12 oe_journal_card_title text-center">
-                                <a class="mt0" style="font-size: 16px;" t-att-title="record.name.raw_value"><strong><field name="name"/></strong></a>
+                            <div class="text-center">
+                                <p class="mt0" style="font-size: 16px;" t-att-title="record.name.raw_value"><strong><field name="name"/></strong></p>
                             </div>
                         </t>
                         <t t-name="JournalDetails">

@@ -5,6 +5,7 @@ openerp.account.graph_kanban = function (instance)
     instance.web_kanban.JournalDashboardGraph = instance.web_kanban.AbstractField.extend({
         start: function() {
             var self = this;
+            this.$el.parents('.oe_kanban_record').addClass('col-md-6');
             self.graph_type = self.$node.attr('graph_type')
             self.display_graph(JSON.parse(self.field.raw_value));
         },

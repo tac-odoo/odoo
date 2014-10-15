@@ -335,6 +335,7 @@ class account_journal(models.Model):
             'default_journal_id': self.id,
             'search_default_journal_id': self.id,
             'default_type': invoice_type,
+            # 'target': 'new',
             'type': invoice_type
         })
         if self.type in ('sale', 'purchase'):
