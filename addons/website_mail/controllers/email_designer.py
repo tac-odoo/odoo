@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import io
 from urllib import urlencode
+import werkzeug.wrappers
+from PIL import Image, ImageFont, ImageDraw
 
 from openerp.addons.web import http
 from openerp.addons.web.http import request
@@ -47,7 +50,7 @@ class WebsiteEmailDesigner(http.Controller):
             'body_field': body_field,
         }
 
-        if getattr(record, body_field):
+        if getattr(record, body_field) or kw.get('theme_id'):
             values['mode'] = 'email_designer'
         else:
             if kw.get('enable_editor'):
@@ -69,6 +72,53 @@ class WebsiteEmailDesigner(http.Controller):
 
         return request.website.render("website_mail.email_designer", values)
 
-    @http.route(['/website_mail/snippets'], type='json', auth="user", website=True)
-    def snippets(self):
-        return request.website._render('website_mail.email_designer_snippets')
+    @http.route(['/website_mail/snippets','/website_mail/snippets/<snippet_xml_id>'], type='json', auth="user", website=True)
+    def snippets(self, snippet_xml_id='website_mail.email_designer_default_snippets'):
+        return request.website._render(snippet_xml_id)
+
+    @http.route(['/website_mail/set_template_theme'], type='json', auth="user", website=True)
+    def set_template_theme(self,**post):
+        cr, uid, context = request.cr, request.uid, request.context
+        if post.get('model') and post.get('res_id'):
+            request.registry[post['model']].write(cr, uid, int(post['res_id']), {'theme_xml_id': post.get('snippet_xml_id')})
+        return {}
+
+    @http.route([
+        '/fa_to_img/<icon>',
+        '/fa_to_img/<icon>/<color>',
+        '/fa_to_img/<icon>/<color>/<int:size>',
+        '/fa_to_img/<icon>/<color>/<int:size>/<int:alpha>',
+        ], auth="public", website=True)
+    def export_icon_to_png(self, icon, color='#000', size=100, alpha=255):
+        if color.startswith('rgba'):
+            color = color.replace('rgba','rgb')
+            color = ','.join(color.split(',')[:-1])+')'
+        image = Image.new("RGBA", (size, size), color=(0,0,0,0))
+        draw = ImageDraw.Draw(image)
+        addons_path = http.addons_manifest['web']['addons_path']
+        font = ImageFont.truetype(addons_path+'/web/static/lib/fontawesome/fonts/fontawesome-webfont.ttf', (size*92)/100) # Initialize font
+
+        width,height = draw.textsize(icon, font=font)# Determine the dimensions of the icon
+        draw.text(((size - width) / 2, (size - height) / 2), icon, font=font, fill=color)
+        bbox = image.getbbox() # Get bounding box
+
+        imagemask = Image.new("L", (size, size), 0) # Create an alpha mask
+        drawmask = ImageDraw.Draw(imagemask)
+
+        drawmask.text(((size - width) / 2, (size - height) / 2), icon, font=font, fill=alpha) # Draw the icon on the mask
+
+        iconimage = Image.new("RGBA", (size,size), color) # Create a solid color image and apply the mask
+        iconimage.putalpha(imagemask)
+        if bbox:
+            iconimage = iconimage.crop(bbox)
+        borderw = int((size - (bbox[2] - bbox[0])) / 2)
+        borderh = int((size - (bbox[3] - bbox[1])) / 2)
+
+        outimage = Image.new("RGBA", (size, size), (0,0,0,0)) # Create output image
+        outimage.paste(iconimage, (borderw,borderh))
+        output = io.BytesIO()
+        outimage.save(output, format="PNG")
+        response = werkzeug.wrappers.Response()
+        response.mimetype = 'image/png'
+        response.data = output.getvalue()
+        return response

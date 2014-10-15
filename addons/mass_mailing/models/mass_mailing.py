@@ -469,7 +469,8 @@ class MassMailing(osv.Model):
         'replied_daily': fields.function(
             _get_daily_statistics, string='Replied',
             type='char', multi='_get_daily_statistics',
-        )
+        ),
+        'theme_xml_id': fields.char('Theme XML id')
     }
 
     def default_get(self, cr, uid, fields, context=None):
@@ -577,6 +578,8 @@ class MassMailing(osv.Model):
             raise ValueError('One and only one ID allowed for this action')
         mail = self.browse(cr, uid, ids[0], context=context)
         url = '/website_mail/email_designer?model=mail.mass_mailing&res_id=%d&template_model=%s&enable_editor=1' % (ids[0], mail.mailing_model)
+        if mail.theme_xml_id:
+            url+='&theme_id=%s'%(mail.theme_xml_id)
         return {
             'name': _('Open with Visual Editor'),
             'type': 'ir.actions.act_url',
