@@ -13,10 +13,7 @@ $(document).ready(function () {
                     for(var i= 0; i < parent_ids.length; i++)
                     {
                         $('tr[parent-id=' + parent_ids[i] + ']').each( function(){
-                            try{
-                                child_ids.push($(this).attr('factor-id'));
-                            }
-                            catch(err){}
+                            child_ids.push($(this).attr('factor-id'));
                             $(this).remove();
                         });
                     }
