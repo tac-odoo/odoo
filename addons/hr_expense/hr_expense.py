@@ -303,7 +303,7 @@ class hr_expense_expense(osv.osv):
                     line.unit_amount ,
                     line.unit_quantity, line.product_id,
                     exp.user_id.partner_id)['taxes']:
-                tax_code_id = tax['base_code_id']
+                tax_code_id = tax['tax_code_id']
                 if not tax_code_id:
                     continue
                 res[-1]['tax_code_id'] = tax_code_id
