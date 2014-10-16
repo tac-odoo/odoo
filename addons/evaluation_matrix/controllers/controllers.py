@@ -7,7 +7,7 @@ class EvaluationMatrix(http.Controller):
     @http.route('/comparison/selection/', auth='public', website=True)
     def index(self, **kwargs):
     	Comparison_products = http.request.env['comparison_item']
-        Comparison_factor = http.request.env['comparison_factor']
+        Comparison_factor = http.request.env['comparison_factors']
     	return http.request.render('evaluation_matrix.index', {})
 
     def get_result(self, comparison_factors, comparison_products):
@@ -71,11 +71,12 @@ class EvaluationMatrix(http.Controller):
             comp_products.append({
                 "id": comparison_product,
             })
-        
+
         return {
             'comp_factor_children' : comp_factor_children,
             'comparison_results' : comparison_results,
             'comparison_products' : comp_products,
+            'parent_id' : comparison_factor_id,
         }
 
     @http.route(['/comparison/get_categories'], type='json', auth="public", website=True)

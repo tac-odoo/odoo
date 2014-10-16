@@ -13,7 +13,10 @@ $(document).ready(function () {
                     for(var i= 0; i < parent_ids.length; i++)
                     {
                         $('tr[parent-id=' + parent_ids[i] + ']').each( function(){
-                            child_ids.push($(this).attr('factor-id'));
+                            try{
+                                child_ids.push($(this).attr('factor-id'));
+                            }
+                            catch(err){}
                             $(this).remove();
                         });
                     }
@@ -40,7 +43,7 @@ $(document).ready(function () {
                     'comparison_factor_id': +comparison_factor_id,
                     'comparison_products': products,
                 }).then(function (res) {
-                    $('tr[factor-id=' + comparison_factor_id + ']').after(qweb.render("comparison.factor_children", {'comp_factor_children': res.comp_factor_children, 'comparison_results' : res.comparison_results, 'comparison_products' : res.comparison_products, 'row_level' : row_level}));
+                    $('tr[factor-id=' + comparison_factor_id + ']').after(qweb.render("comparison.factor_children", {'comp_factor_children': res.comp_factor_children, 'comparison_results' : res.comparison_results, 'comparison_products' : res.comparison_products, 'row_level' : row_level, 'parent_id' : res.parent_id}));
                     $('tr[factor-id=' + comparison_factor_id + ']').data('children','displayed');
                 });
             }

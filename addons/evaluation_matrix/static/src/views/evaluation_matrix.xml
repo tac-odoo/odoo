@@ -31,6 +31,17 @@
                 </t>
             </tr>
         </t>
+        <tr t-attf-class="row-level-#{row_level}" t-att-parent-id="parent_id">
+            <td>
+                <button type="button" class="btn btn-default oe_create-criterion"><i class="fa fa-plus"></i> Propose new criterion </button>
+            </td>
+            <td><t t-esc="parent_id"/></td>
+            <td></td>
+            <td></td>
+            <t t-foreach="comparison_products" t-as="comparison_product">
+                <td></td>
+            </t>
+        </tr>
     </t>
 
     <t t-name="comparison.create_criterion">
