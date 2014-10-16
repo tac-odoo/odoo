@@ -5,7 +5,23 @@ $(document).ready(function () {
     website = openerp.website;
     website.add_template_file('/evaluation_matrix/static/src/views/evaluation_matrix.xml');
 
-	$('.oe_table-comparison-factors')
+	function remove_children(comparison_factor_id) {
+        var parent_ids = new Array();
+                parent_ids.push(comparison_factor_id);
+                while(parent_ids.length > 0){
+                    var child_ids = new Array();
+                    for(var i= 0; i < parent_ids.length; i++)
+                    {
+                        $('tr[parent-id=' + parent_ids[i] + ']').each( function(){
+                            child_ids.push($(this).attr('factor-id'));
+                            $(this).remove();
+                        });
+                    }
+                    parent_ids = child_ids;
+                }
+    }
+
+    $('.oe_table-comparison-factors')
         .on('click', '.show-children', function (ev) {
             ev.preventDefault();
             var $elem = $(ev.currentTarget);
@@ -24,25 +40,12 @@ $(document).ready(function () {
                     'comparison_factor_id': +comparison_factor_id,
                     'comparison_products': products,
                 }).then(function (res) {
-                    $('tr[parent-id=' + comparison_factor_id + ']').remove();
                     $('tr[factor-id=' + comparison_factor_id + ']').after(qweb.render("comparison.factor_children", {'comp_factor_children': res.comp_factor_children, 'comparison_results' : res.comparison_results, 'comparison_products' : res.comparison_products, 'row_level' : row_level}));
                     $('tr[factor-id=' + comparison_factor_id + ']').data('children','displayed');
                 });
             }
             else {
-                var parent_ids = new Array();
-                parent_ids.push(comparison_factor_id);
-                while(parent_ids.length > 0){
-                    var child_ids = new Array();
-                    for(var i= 0; i < parent_ids.length; i++)
-                    {
-                        $('tr[parent-id=' + parent_ids[i] + ']').each( function(){
-                            child_ids.push($(this).attr('factor-id'));
-                            $(this).remove();
-                        });
-                    }
-                    parent_ids = child_ids;
-                }
+                remove_children(comparison_factor_id);
                 $('tr[factor-id=' + comparison_factor_id + ']').data('children','hidden');
             }
         });
