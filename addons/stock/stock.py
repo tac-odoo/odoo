@@ -289,6 +289,14 @@ class stock_quant(osv.osv):
     def _get_inventory_value(self, cr, uid, quant, context=None):
         return quant.product_id.standard_price * quant.qty
 
+    def _get_pack_ops(self, cr, uid, ids, name, args, context=None):
+        res = {}
+        for quant in ids:
+            cr.execute("""select operation_id from stock_move_operation_link where reserved_quant_id = %s
+            """, (quant,))
+            res[quant] = [x[0] for x in cr.fetchall()]
+        return res
+
     _columns = {
         'name': fields.function(_get_quant_name, type='char', string='Identifier'),
         'product_id': fields.many2one('product.product', 'Product', required=True, ondelete="restrict", readonly=True, select=True),
@@ -307,6 +315,8 @@ class stock_quant(osv.osv):
         'history_ids': fields.many2many('stock.move', 'stock_quant_move_rel', 'quant_id', 'move_id', 'Moves', help='Moves that operate(d) on this quant'),
         'company_id': fields.many2one('res.company', 'Company', help="The company to which the quants belong", required=True, readonly=True, select=True),
         'inventory_value': fields.function(_calc_inventory_value, string="Inventory Value", type='float', readonly=True),
+        'related_pack_operation_ids': fields.function(_get_pack_ops, string="Related Pack Operations", type="many2many",
+                                                   relation="stock.pack.operation", readonly=True),
 
         # Used for negative quants to reconcile after compensated by a new positive one
         'propagated_from_id': fields.many2one('stock.quant', 'Linked Quant', help='The negative quant this is coming from', readonly=True, select=True),
@@ -331,6 +341,25 @@ class stock_quant(osv.osv):
                         inv_value += line2.inventory_value
                     line['inventory_value'] = inv_value
         return res
+
+    def action_view_quant_pack_history(self, cr, uid, ids, context=None):
+        '''
+        This function returns an action that display the history of the quant, which
+        mean all the stock moves that lead to this quant creation with this quant quantity.
+        '''
+        mod_obj = self.pool.get('ir.model.data')
+        act_obj = self.pool.get('ir.actions.act_window')
+
+        result = mod_obj.get_object_reference(cr, uid, 'stock', 'action_packop')
+        id = result and result[1] or False
+        result = act_obj.read(cr, uid, [id], context={})[0]
+
+        op_ids = []
+        for quant in self.browse(cr, uid, ids, context=context):
+            op_ids += [ops.id for ops in quant.related_pack_operation_ids]
+
+        result['domain'] = "[('id','in',[" + ','.join(map(str, op_ids)) + "])]"
+        return result
 
     def action_view_quant_history(self, cr, uid, ids, context=None):
         '''
@@ -414,6 +443,7 @@ class stock_quant(osv.osv):
                 for quant in quants_reconcile:
                     quant.refresh()
                     self._quant_reconcile_negative(cr, uid, quant, move, context=context)
+        return quants_reconcile
 
     def move_quants_write(self, cr, uid, quants, move, location_dest_id, dest_package_id, context=None):
         vals = {'location_id': location_dest_id.id,
@@ -2250,6 +2280,17 @@ class stock_move(osv.osv):
             if vals:
                 self.write(cr, uid, [move.id], vals, context=context)
 
+    def _pack_tracking(self, cr, uid, ids, quants_moved, context=None):
+        link_obj = self.pool.get('stock.move.operation.link')
+        to_delete = link_obj.search(cr, uid, [('move_id', 'in', 'ids')], context=context)
+        link_obj.unlink(cr, uid, to_delete, context=context)
+        for ops, move in quants_moved.keys():
+            for quant in quants_moved[(ops, move)]:
+                link_obj.create(cr, uid, {'move_id': move.id,
+                                          'operation_id': ops.id,
+                                          'reserved_quant_id': quant.id}, context=context)
+
+
     def action_done(self, cr, uid, ids, context=None):
         """ Process completely the moves given as ids and if all moves are done, it will finish the picking.
         """
@@ -2273,6 +2314,7 @@ class stock_move(osv.osv):
         operations = list(operations)
         operations.sort(key=lambda x: ((x.package_id and not x.product_id) and -4 or 0) + (x.package_id and -2 or 0) + (x.lot_id and -1 or 0))
 
+        quants_moved = {}
         for ops in operations:
             if ops.picking_id:
                 pickings.add(ops.picking_id.id)
@@ -2296,7 +2338,7 @@ class stock_move(osv.osv):
                 else:
                     #otherwise we keep the current pack of the quant, which may mean None
                     quant_dest_package_id = ops.package_id.id
-                quant_obj.quants_move(cr, uid, quants, move, ops.location_dest_id, location_from=ops.location_id, lot_id=ops.lot_id.id, owner_id=ops.owner_id.id, src_package_id=ops.package_id.id, dest_package_id=quant_dest_package_id, context=context)
+                quants_moved[(ops, move)] = quant_obj.quants_move(cr, uid, quants, move, ops.location_dest_id, location_from=ops.location_id, lot_id=ops.lot_id.id, owner_id=ops.owner_id.id, src_package_id=ops.package_id.id, dest_package_id=quant_dest_package_id, context=context)
                 # Handle pack in pack
                 if not ops.product_id and ops.package_id and ops.result_package_id.id != ops.package_id.parent_id.id:
                     self.pool.get('stock.quant.package').write(cr, SUPERUSER_ID, [ops.package_id.id], {'parent_id': ops.result_package_id.id}, context=context)
@@ -2339,6 +2381,8 @@ class stock_move(osv.osv):
                 done_picking.append(picking.id)
         if done_picking:
             picking_obj.write(cr, uid, done_picking, {'date_done': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)}, context=context)
+        if quants_moved:
+            self._pack_tracking(cr, uid, ids, quants_moved, context=context)
         return True
 
     def unlink(self, cr, uid, ids, context=None):

@@ -1151,7 +1151,35 @@
               </p>
             </field>
         </record>
-        
+
+        <record id="pack_op_tree" model="ir.ui.view">
+            <field name="name">stock.pack.operation.tree</field>
+            <field name="model">stock.pack.operation</field>
+            <field name="arch" type="xml">
+                <tree string="Pack Operations" create="false" editable="false">
+                    <field name="package_id" groups="stock.group_tracking_lot" readonly="1"/>
+                    <field name="product_id" readonly="1" on_change="product_id_change(product_id, product_uom_id, product_qty)"/>
+                    <field name="product_uom_id" readonly="1" groups="product.group_uom"/>
+                    <field name="lot_id" readonly="1" domain="[('product_id','=?', product_id)]" context="{'product_id': product_id}" groups="stock.group_production_lot"/>
+                    <field name="picking_id" readonly="1" invisible="1"/>
+                    <field name="owner_id" readonly="1" groups="stock.group_tracking_owner"/>
+                    <field name="product_qty" readonly="1" attrs="{'required': [('product_id', '!=', False)]}"/>
+                    <field name="location_id" readonly="1"/>
+                    <field name="location_dest_id" readonly="1"/>
+                    <field name="result_package_id" readonly="1" groups="stock.group_tracking_lot" context="{'location_id': location_dest_id}"/>
+                </tree>
+            </field>
+        </record>
+        <record id="action_packop" model="ir.actions.act_window">
+            <field name="name">Pack operation</field>
+            <field name="res_model">stock.pack.operation</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="stock.pack_op_tree"/>
+        </record>
+
+
         <record model="ir.actions.act_window.view" id="action_stock_move_tree_all">
             <field name="sequence" eval="1"/>
             <field name="view_mode">tree</field>
@@ -1664,7 +1692,8 @@
             <field name="arch" type="xml">
                 <form string="Quants" create="false" edit="false">
                     <div class="oe_right oe_button_box">
-                        <button name="action_view_quant_history" type="object" string="Quant History"/>                            
+                        <button name="action_view_quant_history" type="object" string="Quant History"/>
+                        <button name="action_view_quant_pack_history" type="object" string="Quant Pack History"/>
                     </div>
                     <group>
                         <field name="product_id"/>
