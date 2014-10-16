@@ -30,10 +30,22 @@ $(document).ready(function () {
                 });
             }
             else {
-                $('tr[parent-id=' + comparison_factor_id + ']').remove();
+                var parent_ids = new Array();
+                parent_ids.push(comparison_factor_id);
+                while(parent_ids.length > 0){
+                    var child_ids = new Array();
+                    for(var i= 0; i < parent_ids.length; i++)
+                    {
+                        $('tr[parent-id=' + parent_ids[i] + ']').each( function(){
+                            child_ids.push($(this).attr('factor-id'));
+                            $(this).remove();
+                        });
+                    }
+                    parent_ids = child_ids;
+                }
                 $('tr[factor-id=' + comparison_factor_id + ']').data('children','hidden');
             }
-        })
+        });
     $('.oe_create-criterion')
         .on('click', function () {
             var self = this;
