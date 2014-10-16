@@ -1,5 +1,115 @@
 $(document).ready(function () {
     if ($('.website_forum').length){
+        if( $("#karmagraph").length) {
+            var data = [
+                          {
+                              key: "Cumulative Return",
+                              values: [
+                                          {
+                                              "label" : "2014-04-01" ,
+                                              "value" : 29
+                                          } ,
+                                          {
+                                              "label" : "2014-05-01" ,
+                                              "value" : 0
+                                          } ,
+                                          {
+                                              "label" : "2014-06-01" ,
+                                              "value" : 32
+                                          } ,
+                                          {
+                                              "label" : "2014-06-15" ,
+                                              "value" : 31
+                                          } ,
+                                          {
+                                              "label" : "2014-07-01" ,
+                                              "value" : 3
+                                          } ,
+                                          {
+                                              "label" : "2014-08-01" ,
+                                              "value" : 18
+                                          } ,
+                                          {
+                                              "label" : "2014-08-15" ,
+                                              "value" : 13
+                                          } ,
+                                          {
+                                              "label" : "2014-09-01" ,
+                                              "value" : 5
+                                          },
+                                          {
+                                              "label" : "2014-10-01" ,
+                                              "value" : 20
+                                          },
+                                          {
+                                              "label" : "2014-10-02" ,
+                                              "value" : 15
+                                          },
+                                          {
+                                              "label" : "2014-10-03" ,
+                                              "value" : 5
+                                          },
+                                          {
+                                              "label" : "2014-10-04" ,
+                                              "value" : 7
+                                          },
+                                          {
+                                              "label" : "2014-10-05" ,
+                                              "value" : 12
+                                          },
+                                          {
+                                              "label" : "2014-10-06" ,
+                                              "value" : 3
+                                          },
+                                          {
+                                              "label" : "2014-10-07" ,
+                                              "value" : 20
+                                          },
+                                          {
+                                              "label" : "2014-10-08" ,
+                                              "value" : 14
+                                          },
+                                          {
+                                              "label" : "2014-10-09" ,
+                                              "value" : 12
+                                          },
+                                          {
+                                              "label" : "2014-10-10" ,
+                                              "value" : 5
+                                          },
+                                          {
+                                              "label" : "2014-10-11" ,
+                                              "value" : 26
+                                          },
+                                          {
+                                              "label" : "2014-10-12" ,
+                                              "value" : 12
+                                          },
+                                          {
+                                              "label" : "2014-10-13" ,
+                                              "value" : 10
+                                          },
+                                  ]
+                              }
+                          ]
+            var chart = nv.models.discreteBarChart()
+                .x(function(d) { return d.label })
+                .y(function(d) { return d.value })
+                .staggerLabels(false)
+                .tooltips(true)
+                .showYAxis(false)
+                .showXAxis(false)
+                .color([$(".btn-primary").css('background-color')])
+                .tooltipContent(function (key, date, e, graph) {
+                    var value = graph.value;
+                    return "<div class='popover-title'>" + date + "</br>K : " + value + "+</div>";
+                });
+            d3.select('#karmagraph svg')
+                .datum(data)
+                .transition().duration(500)
+                .call(chart)
+            nv.utils.windowResize(chart.update);
+        }
         $('.karma_required').on('click', function (ev) {
             var karma = $(ev.currentTarget).data('karma');
             if (karma) {

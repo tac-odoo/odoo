@@ -6,6 +6,9 @@
   border-radius: 4px;
   min-width: 80px;
 }
+.nvtooltip {
+    margin-left : 200px !important;
+}
 .box span {
   font-size: 200%;
   font-weight: bold;
