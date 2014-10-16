@@ -48,30 +48,28 @@ $(document).ready(function () {
                 remove_children(comparison_factor_id);
                 $('tr[factor-id=' + comparison_factor_id + ']').data('children','hidden');
             }
-        });
-    $('.oe_create-criterion')
-        .on('click', function () {
+        })
+        .on('click', '.oe_create-criterion', function (ev) {
+            var $elem = $(ev.currentTarget);
             var self = this;
-            openerp.jsonRpc( '/comparison/get_categories', 'call', {}).then(function (result) {
-                self.wizard = $(openerp.qweb.render("comparison.create_criterion",{'comparison_categories': result}));
-                self.wizard.appendTo($('body')).modal({"keyboard" :true});
-                self.wizard.on('click','.create', function(){
-                    var category = self.wizard.find('.select-cat').attr("value");
-                    var name = $('.name').val();
-                    var note = $('.note').val();
+            var category = $elem.closest("tr").attr('parent-id');
 
-                    var check = true;
-                    if (name ==''){
-                        alert("You must give a name to your criterion.");
-                        check = false;
-                    }
-                    if (check){
-                        openerp.jsonRpc( '/comparison/create_criterion', 'call', { 'name':name, 'note':note, 'parent_id':category }).then(function (result) {
-                            alert("Your criterion " + name + " has been added.");
-                            location.reload();
-                        });
-                    }
-                });
+            self.wizard = $(openerp.qweb.render("comparison.create_criterion",{}));
+            self.wizard.appendTo($('body')).modal({"keyboard" :true});
+            self.wizard.on('click','.create', function(){
+                var name = $('.name').val();
+                var note = $('.note').val();
+                var check = true;
+                if (name ==''){
+                    alert("You must give a name to your criterion.");
+                    check = false;
+                }
+                if (check){
+                    openerp.jsonRpc( '/comparison/create_criterion', 'call', { 'name':name, 'note':note, 'parent_id':category }).then(function (result) {
+                        alert("Your criterion " + name + " has been added.");
+                        location.reload();
+                    });
+                }
             });
         });
 });
