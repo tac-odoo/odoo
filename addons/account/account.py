@@ -1362,13 +1362,17 @@ class account_move(osv.osv):
             context = {}
         c = context.copy()
         c['novalidate'] = True
+        if vals.get('period_id'):
+            move_obj = self.pool['account.move.line']
+            if vals.get('journal_id'):
+                move_obj._update_journal_check(cr, uid, vals['journal_id'], vals['period_id'], context=c)
+            else:
+                for move in self.browse(cr, uid, ids, context=c):
+                    move_obj._update_journal_check(cr, uid, move.journal_id.id, vals['period_id'], context=c)
         result = super(account_move, self).write(cr, uid, ids, vals, c)
         self.validate(cr, uid, ids, context=context)
         return result
 
-    #
-    # TODO: Check if period is closed !
-    #
     def create(self, cr, uid, vals, context=None):
         context = dict(context or {})
         if vals.get('line_id'):
@@ -1400,6 +1404,7 @@ class account_move(osv.osv):
             if journal.entry_posted and tmp:
                 self.button_validate(cr,uid, [result], context)
         else:
+            self.pool['account.move.line']._update_journal_check(cr, uid, vals.get('journal_id'), vals.get('period_id'), context=context)
             result = super(account_move, self).create(cr, uid, vals, context)
         return result
 
