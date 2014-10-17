@@ -12,9 +12,9 @@
                         <h1>
                             <field name="modelname" />
                         </h1>
-                        <label for="brand_id" class="oe_edit_only"/>
+                        <label for="make_id" class="oe_edit_only"/>
                         <h2>
-                            <field name="brand_id" />
+                            <field name="make_id" />
                         </h2>
                     </div>
                     <notebook>
@@ -47,7 +47,7 @@
             <field name="model">fleet.vehicle.model</field>
             <field name="arch" type="xml">
                 <tree string="Models">
-                    <field name="brand_id" />
+                    <field name="make_id" />
                     <field name="modelname" />
                 </tree>
             </field>
@@ -58,9 +58,9 @@
             <field name="model">fleet.vehicle.model</field>
             <field name="arch" type="xml">
                 <search string="Vehicles costs" >
-                    <field name="brand_id" />
+                    <field name="make_id" />
                     <group expand="1" string="Group By">
-                        <filter name="groupby_brand" context="{'group_by' : 'brand_id'}" string="Make"/>
+                        <filter name="groupby_brand" context="{'group_by' : 'make_id'}" string="Make"/>
                     </group>
                 </search>
             </field>
@@ -81,9 +81,9 @@
             </field>
         </record>
 
-        <record model='ir.ui.view' id='fleet_vehicle_model_brand_tree'>
-            <field name="name">fleet.vehicle.model.brand.tree</field>
-            <field name="model">fleet.vehicle.model.brand</field>
+        <record model='ir.ui.view' id='fleet_make_tree'>
+            <field name="name">fleet.make.tree</field>
+            <field name="model">fleet.make</field>
             <field name="arch" type="xml">
                 <tree string="Model Make">
                     <field name="name" />
@@ -91,9 +91,9 @@
             </field>
         </record>
 
-        <record model='ir.ui.view' id='fleet_vehicle_model_brand_form'>
-            <field name="name">fleet.vehicle.model.brand.form</field>
-            <field name="model">fleet.vehicle.model.brand</field>
+        <record model='ir.ui.view' id='fleet_make_form'>
+            <field name="name">fleet.make.form</field>
+            <field name="model">fleet.make</field>
             <field name="arch" type="xml">
                 <form string="Model Make">
                     <group>
@@ -109,9 +109,9 @@
             </field>
         </record>
 
-        <record model='ir.ui.view' id='fleet_vehicle_model_brand_kanban'>
-            <field name="name">fleet.vehicle.model.brandkanban</field>
-            <field name="model">fleet.vehicle.model.brand</field>
+        <record model='ir.ui.view' id='fleet_make_kanban'>
+            <field name="name">fleet.make.kanban</field>
+            <field name="model">fleet.make</field>
             <field name="arch" type="xml">
                 <kanban>
                     <field name="name" />
@@ -120,7 +120,7 @@
                         <t t-name="kanban-box">
                             <div class="oe_kanban_vignette oe_semantic_html_override">
                                 <a type="open" href="#" class="oe_kanban_action oe_kanban_action_a">
-                                    <img t-att-src="kanban_image('fleet.vehicle.model.brand', 'image_small', record.id.value)" class="oe_employee_picture"/>
+                                    <img t-att-src="kanban_image('fleet.make', 'image_small', record.id.value)" class="oe_employee_picture"/>
                                 </a>
                                 <div style="text-align:center;">
                                     <h4 class="oe_partner_heading">
@@ -139,9 +139,9 @@
             </field>
         </record>
 
-        <record model='ir.actions.act_window' id='fleet_vehicle_model_brand_act'>
+        <record model='ir.actions.act_window' id='fleet_make_act'>
             <field name="name">Model make of Vehicle</field>
-            <field name="res_model">fleet.vehicle.model.brand</field>
+            <field name="res_model">fleet.make</field>
             <field name="view_type">form</field>
             <field name="view_mode">kanban,tree,form</field>
             <field name="help" type="html">
@@ -151,9 +151,9 @@
             </field>
         </record>
 
-        <record model='ir.ui.view' id='fleet_vehicle_state_tree'>
-            <field name="name">fleet.vehicle.state.tree</field>
-            <field name="model">fleet.vehicle.state</field>
+        <record model='ir.ui.view' id='fleet_vehicle_stage_tree'>
+            <field name="name">fleet.vehicle.stage.tree</field>
+            <field name="model">fleet.vehicle.stage</field>
             <field name="arch" type="xml">
                 <tree string="State" editable="bottom">
                     <field name="sequence" widget="handler" invisible="1"/>
@@ -163,9 +163,9 @@
             </field>
         </record>
 
-        <record model='ir.actions.act_window' id='fleet_vehicle_state_act'>
+        <record model='ir.actions.act_window' id='fleet_vehicle_stage_act'>
             <field name="name">Vehicle Status</field>
-            <field name="res_model">fleet.vehicle.state</field>
+            <field name="res_model">fleet.vehicle.stage</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
@@ -181,8 +181,8 @@
         <menuitem name="Fleet" id="menu_root" sequence="110" groups="group_fleet_user"/>
         <menuitem name="Configuration" parent="menu_root" id="fleet_configuration" sequence="3" groups="group_fleet_manager"/>
         <menuitem action="fleet_vehicle_model_act" parent="fleet_configuration" id="fleet_vehicle_model_menu" groups="base.group_no_one"/>
-        <menuitem action="fleet_vehicle_model_brand_act" parent="fleet_configuration" id="fleet_vehicle_model_brand_menu" groups="base.group_no_one"/>
-        <menuitem action="fleet_vehicle_state_act" parent="fleet_configuration" id="fleet_vehicle_state_menu" groups="group_fleet_manager"/>
+        <menuitem action="fleet_make_act" parent="fleet_configuration" id="fleet_make_menu" groups="base.group_no_one"/>
+        <menuitem action="fleet_vehicle_stage_act" parent="fleet_configuration" id="fleet_vehicle_stage_menu" groups="group_fleet_manager"/>
 
         <record model='ir.ui.view' id='fleet_vehicle_form'>
             <field name="name">fleet.vehicle.form</field>
@@ -190,7 +190,7 @@
             <field name="arch" type="xml">
                 <form string="Vehicle">
                     <header>
-                        <field name="state_id"  widget="statusbar" clickable="True" />
+                        <field name="stage_id"  widget="statusbar" clickable="True" />
                     </header>
                     <sheet>
                         <field name="image_medium" widget='image' class="oe_left oe_avatar"/>
@@ -304,7 +304,7 @@
                     <field name="driver_id" />
                     <field name="vin_sn" />
                     <field name="acquisition_date" />
-                    <field name="state_id"/>
+                    <field name="stage_id"/>
                     <field name="odometer" />
                     <field name="odometer_unit" />
                     <field name="contract_renewal_due_soon" invisible="1"/>
@@ -323,10 +323,10 @@
                     <field name="driver_id"/>
                     <field name="tag_ids"/>
                     <field name="location"/>
-                    <field name="state_id" />
+                    <field name="stage_id" />
                     <filter name="alert_true" domain="['|',('contract_renewal_due_soon','=',True),('contract_renewal_overdue','=',True)]" string="Has Alert(s)"/>
                     <group expand="1" string="Group By">
-                        <filter name="groupby_status" context="{'group_by' : 'state_id'}" string="Status"/>
+                        <filter name="groupby_status" context="{'group_by' : 'stage_id'}" string="Status"/>
                         <filter name="groupby_model" context="{'group_by' : 'model_id'}" string="Model"/>
                     </group>
                </search>
@@ -343,7 +343,7 @@
                     <field name="model_id" />
                     <field name="driver_id" />
                     <field name="location" />
-                    <field name="state_id" />
+                    <field name="stage_id" />
 
                     <field name="image" />
                     <field name="tag_ids" />
@@ -588,7 +588,7 @@
             <field name="name">fleet.vehicle.odometer.tree</field>
             <field name="model">fleet.vehicle.odometer</field>
             <field name="arch" type="xml">
-                <tree string="Odometer Logs" editable="top">
+                <tree string="Odometer Logs" editable="top" >
                     <field name="date" />
                     <field name="vehicle_id" />
                     <field name="value" />

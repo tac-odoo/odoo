@@ -1,23 +1,4 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
 
 from openerp import models, fields, api, _
 import time
@@ -42,18 +23,15 @@ class fleet_vehicle_cost(models.Model):
             self.odometer = self.odometer_id.value
        
     @api.one
-    def _set_odometer(self, value):
-        if not value:
+    @api.depends('name')
+    def _set_odometer(self):
+        if not self.odometer:
             raise except_orm(_('Operation not allowed!'), _('Emptying the odometer value of a vehicle is not allowed.'))
-        date = self.browse(self._id).date
-        if not(date):
-            date = fields.Date.today()
-        vehicle_id = self.browse(self._id).vehicle_id
-        data = {'value': value, 'date': date, 'vehicle_id': vehicle_id.id}
+        vehicle_id = self.vehicle_id
+        data = {'value': self.odometer, 'date': self.date or fields.Date.today(), 'vehicle_id': vehicle_id.id}
         odometer_id = self.env['fleet.vehicle.odometer'].create(data)
         return self.write({'odometer_id': odometer_id})
-   
-   
+
     name = fields.Char(related='vehicle_id.name', string='Name', store=True)
     vehicle_id = fields.Many2one(comodel_name='fleet.vehicle', string='Vehicle', required=True, help='Vehicle concerned by this log')
     cost_subtype_id = fields.Many2one(comodel_name='fleet.service.type', string='Type', help='Cost type purchased with this cost')
@@ -87,15 +65,13 @@ class fleet_vehicle_cost(models.Model):
             del(data['odometer'])
         return super(fleet_vehicle_cost, self).create(data)
     
-
 class fleet_vehicle_tag(models.Model):
     _name = 'fleet.vehicle.tag'
 
     name = fields.Char(string='Name', required=True, translate=True)
 
-
-class fleet_vehicle_state(models.Model):
-    _name = 'fleet.vehicle.state'
+class fleet_vehicle_stage(models.Model):
+    _name = 'fleet.vehicle.stage'
     _order = 'sequence asc'
 
     name = fields.Char(string='Name', required=True)
@@ -103,21 +79,20 @@ class fleet_vehicle_state(models.Model):
 
     _sql_constraints = [('fleet_state_name_unique','unique(name)', 'State name already exists')]
 
-
 class fleet_vehicle_model(models.Model):
 
     @api.one
     @api.depends('modelname')
     def _model_name_get_fnc(self):
         name = self.modelname
-        if self.brand_id.name:
-            name = self.brand_id.name + ' / ' + name
+        if self.make_id.name:
+            name = self.make_id.name + ' / ' + name
         self.name = name
 
     @api.one
     @api.onchange('model_id')
     def on_change_brand(self):
-        brand = self.env['fleet.vehicle.model.brand'].browse(self.model_id.id) 
+        brand = self.env['fleet.make'].browse(self.model_id.id) 
         self.image_medium = brand.image,
 
     _name = 'fleet.vehicle.model'
@@ -126,51 +101,52 @@ class fleet_vehicle_model(models.Model):
 
     name = fields.Char(compute='_model_name_get_fnc', string='Name', store=True)
     modelname = fields.Char(string='Model name', required=True)
-    brand_id = fields.Many2one(comodel_name='fleet.vehicle.model.brand', string='Make', required=True, help='Make of the vehicle')
+    make_id = fields.Many2one(comodel_name='fleet.make', string='Make', required=True, help='Make of the vehicle')
     vendors = fields.Many2many(comodel_name='res.partner', relation='fleet_vehicle_model_vendors', column1='model_id', column2='partner_id', string='Vendors')
-    image = fields.Binary(related='brand_id.image', string="Logo")
-    image_medium = fields.Binary(related='brand_id.image_medium', string="Logo (medium)")
-    image_small = fields.Binary(related='brand_id.image_small', string="Logo (small)")
+    image = fields.Binary(related='make_id.image', string="Logo")
+    image_medium = fields.Binary(related='make_id.image_medium', string="Logo (medium)")
+    image_small = fields.Binary(related='make_id.image_small', string="Logo (small)")
 
-
-class fleet_vehicle_model_brand(models.Model):
-    _name = 'fleet.vehicle.model.brand'
+class fleet_make(models.Model):
+    _name = 'fleet.make'
     _description = 'Brand model of the vehicle'
 
     _order = 'name asc'
 
-    @api.multi
+    @api.one
+    @api.depends('name')
     def _get_image(self):
-#         result = dict.fromkeys(ids, False)
         for obj in self:
             obj.image_medium = tools.image_get_resized_images(obj.image)
             obj.image_small = tools.image_get_resized_images(obj.image)
-#         return result
 
-    @api.multi
-    def _set_image(self, value):
-        return self.write([self._id], {'image': tools.image_resize_image_big(value)})
+
+    @api.one
+    @api.depends('name', 'image')
+    def _set_image(self):
+        return self.write({'image': tools.image_resize_image_big(self.image)})
 
     name = fields.Char(string='Make', required=True)
     image = fields.Binary(string='Logo',
             help="This field holds the image used as logo for the brand, limited to 1024x1024px.")
     image_medium = fields.Binary(compute='_get_image', inverse='_set_image',
             string="Medium-sized photo", multi="_get_image",
-            store = {
-                'fleet.vehicle.model.brand': (lambda self, cr, uid, ids, c={}: ids, ['image'], 10),
-            },
+#             store = {
+#                 'fleet.make': (lambda self: self._ids, ['image'], 10),
+#             },
+            store = True,
             help="Medium-sized logo of the brand. It is automatically "\
                  "resized as a 128x128px image, with aspect ratio preserved. "\
                  "Use this field in form views or some kanban views.")
     image_small = fields.Binary(compute='_get_image', inverse='_set_image',
-            string="Smal-sized photo", multi="_get_image",
-            store = {
-                'fleet.vehicle.model.brand': (lambda self, cr, uid, ids, c={}: ids, ['image'], 10),
-            },
+            string="Small-sized photo", multi="_get_image",
+#             store = {
+#                 'fleet.make': (lambda self: self._ids, ['image'], 10),
+#             },
+            store = True,
             help="Small-sized photo of the brand. It is automatically "\
                  "resized as a 64x64px image, with aspect ratio preserved. "\
                  "Use this field anywhere a small image is required.")
-
 
 class fleet_vehicle(models.Model):
 
@@ -180,36 +156,35 @@ class fleet_vehicle(models.Model):
     @api.depends('license_plate')
     def _vehicle_name_get_fnc(self):
         if self.model_id:
-            self.name = self.model_id.brand_id.name + '/' + self.model_id.modelname + ' / ' + self.license_plate
+            self.name = self.model_id.make_id.name + '/' + self.model_id.modelname + ' / ' + self.license_plate
         else:
             self.name = ' '
 
-
-    def return_action_to_open(self, cr, uid, ids, context=None):
+    @api.multi
+    def return_action_to_open(self):
         """ This opens the xml view specified in xml_id for the current vehicle """
-        if context is None:
-            context = {}
+        context = dict(self._context or {})
         if context.get('xml_id'):
-            res = self.pool.get('ir.actions.act_window').for_xml_id(cr, uid ,'fleet', context['xml_id'], context=context)
+            res = self.env['ir.actions.act_window'].for_xml_id('fleet', context['xml_id'])
             res['context'] = context
-            res['context'].update({'default_vehicle_id': ids[0]})
-            res['domain'] = [('vehicle_id','=', ids[0])]
+            res['context'].update({'default_vehicle_id': self._ids[0]})
+            res['domain'] = [('vehicle_id','=', self._ids[0])]
             return res
         return False
 
-    def act_show_log_cost(self, cr, uid, ids, context=None):
+    @api.multi
+    def act_show_log_cost(self):
         """ This opens log view to view and add new log for this vehicle, groupby default to only show effective costs
             @return: the costs log view
         """
-        if context is None:
-            context = {}
-        res = self.pool.get('ir.actions.act_window').for_xml_id(cr, uid ,'fleet','fleet_vehicle_costs_act', context=context)
+        context = dict(self._context or {})
+        res = self.env['ir.actions.act_window'].for_xml_id('fleet','fleet_vehicle_costs_act')
         res['context'] = context
         res['context'].update({
-            'default_vehicle_id': ids[0],
+            'default_vehicle_id': self._ids[0],
             'search_default_parent_false': True
         })
-        res['domain'] = [('vehicle_id','=', ids[0])]
+        res['domain'] = [('vehicle_id','=', self._ids[0])]
         return res
 
     @api.multi
@@ -243,6 +218,7 @@ class fleet_vehicle(models.Model):
             res.append(('id', search_operator, res_ids))
         return res
 
+    @api.multi
     def _search_contract_renewal_due_soon(self, obj, name, args):
         res = []
         for field, operator, value in args:
@@ -290,7 +266,6 @@ class fleet_vehicle(models.Model):
             record.contract_renewal_total = (total - 1) #we remove 1 from the real total for display purposes
             record.contract_renewal_name = name
 
-
     @api.one
     def _get_default_state(self):
         try:
@@ -332,9 +307,9 @@ class fleet_vehicle(models.Model):
     service_count = fields.Integer(compute='_count_all', string='Services')
     fuel_logs_count = fields.Integer(compute='_count_all', string='Fuel Logs')
     odometer_count = fields.Integer(compute='_count_all', string='Odometer')
-    acquisition_date = fields.Date(string='Acquisition Date', required=False, help='Date when the vehicle has been bought')
+    acquisition_date = fields.Date(string='Acquisition Date', help='Date when the vehicle has been bought')
     color = fields.Char(string='Color', help='Color of the vehicle')
-    state_id = fields.Many2one(comodel_name='fleet.vehicle.state', string='State', default=_get_default_state, help='Current state of the vehicle', ondelete="set null")
+    stage_id = fields.Many2one(comodel_name='fleet.vehicle.stage', string='State', default=_get_default_state, help='Current state of the vehicle', ondelete="set null")
     location = fields.Char(string='Location', help='Location of the vehicle (garage, ...)')
     seats = fields.Integer(string='Seats Number', help='Number of seats of the vehicle')
     doors = fields.Integer(string='Doors Number', default=5, help='Number of doors of the vehicle')
@@ -356,14 +331,12 @@ class fleet_vehicle(models.Model):
     contract_renewal_total = fields.Integer(compute='_get_contract_reminder_fnc', string='Total of contracts due or overdue minus one', multi='contract_info')
     car_value = fields.Float(string='Car Value', help='Value of the bought vehicle')
 
-
     @api.one
     @api.depends('model_id')
     def on_change_model(self):
         model = self.env['fleet.vehicle.model'].browse(model_id.id)
     
         self.image_medium = model.image
-
 
     @api.model
     def create(self, data):
@@ -387,9 +360,9 @@ class fleet_vehicle(models.Model):
                 value = vehicle.env['res.partner'].browse(vals['driver_id']).name
                 olddriver = (vehicle.driver_id.name) or _('None')
                 changes.append(_("Driver: from '%s' to '%s'") %(olddriver, value))
-            if 'state_id' in vals and vehicle.state_id.id != vals['state_id']:
-                value = vehicle.env['fleet.vehicle.state'].browse(vals['state_id']).name
-                oldstate = vehicle.state_id.name or _('None')
+            if 'stage_id' in vals and vehicle.stage_id.id != vals['stage_id']:
+                value = vehicle.env['fleet.vehicle.stage'].browse(vals['stage_id']).name
+                oldstate = vehicle.stage_id.name or _('None')
                 changes.append(_("State: from '%s' to '%s'") %(oldstate, value))
             if 'license_plate' in vals and vehicle.license_plate != vals['license_plate']:
                 old_license_plate = vehicle.license_plate or _('None')
@@ -400,7 +373,6 @@ class fleet_vehicle(models.Model):
 
         return super(fleet_vehicle, self).write(vals)
 
-
 class fleet_vehicle_odometer(models.Model):
     _name='fleet.vehicle.odometer'
     _description='Odometer log for a vehicle'
@@ -410,7 +382,6 @@ class fleet_vehicle_odometer(models.Model):
     @api.depends('vehicle_id', 'date')
     def _vehicle_log_name_get_fnc(self):
         for record in self:
-            print "------------", record.vehicle_id
             if record.vehicle_id:
                 name = record.vehicle_id.name
                 if record.date:
@@ -431,13 +402,12 @@ class fleet_vehicle_odometer(models.Model):
     vehicle_id = fields.Many2one(comodel_name='fleet.vehicle', string='Vehicle', required=True)
     unit = fields.Selection(related='vehicle_id.odometer_unit', string="Unit", readonly=True)
 
-
 class fleet_vehicle_log_fuel(models.Model):
 
     @api.one
     @api.onchange('vehicle_id')
     def on_change_vehicle(self):
-        vehicle = self.env['fleet.vehicle'].browse(self.vehicle_id.id)
+        vehicle = self.env['fleet.vehicle']
         odometer_unit = vehicle.odometer_unit
         driver = vehicle.driver_id.id
         
@@ -478,7 +448,6 @@ class fleet_vehicle_log_fuel(models.Model):
         elif self.amount > 0 and self.liter > 0 and round(self.amount/self.liter,2) != self.price_per_liter:
             self.price_per_liter = round(self.amount / self.liter,2)
 
-
     @api.one
     @api.onchange('liter', 'price_per_liter', 'amount')
     def on_change_amount(self):
@@ -499,7 +468,7 @@ class fleet_vehicle_log_fuel(models.Model):
     @api.model
     def _get_default_service_type(self):
         try:
-            model, model_id = self.env['ir.model.data'].get_object_reference('fleet', 'type_service_refueling')
+            model_id = self.env.ref('fleet.type_service_refueling').id 
         except ValueError:
             model_id = False
         return model_id
@@ -523,20 +492,17 @@ class fleet_vehicle_log_fuel(models.Model):
         'cost_type': 'fuel',
     }
 
-
 class fleet_vehicle_log_services(models.Model):
  
     @api.one
     @api.onchange('vehicle_id')
     def on_change_vehicle(self):
-        vehicle = self.env['fleet.vehicle'].browse(self.vehicle_id.id)
+        vehicle = self.env['fleet.vehicle']
         odometer_unit = vehicle.odometer_unit
         driver = vehicle.driver_id.id
-
         self.odometer_unit = odometer_unit
         self.purchaser_id = driver
 
-  
     @api.model
     def _get_default_service_type(self):
         try:
@@ -562,14 +528,12 @@ class fleet_vehicle_log_services(models.Model):
         'cost_type': 'services'
     }
 
-
 class fleet_service_type(models.Model):
     _name = 'fleet.service.type'
     _description = 'Type of services available on a vehicle'
 
     name = fields.Char(string='Name', required=True, translate=True)
     category = fields.Selection([('contract', 'Contract'), ('service', 'Service'), ('both', 'Both')], string='Category', required=True, help='Choose wheter the service refer to contracts, vehicle services or both')
-
 
 class fleet_vehicle_log_contract(models.Model):
 
@@ -582,23 +546,23 @@ class fleet_vehicle_log_contract(models.Model):
         #The created costs are associated to a contract thanks to the many2one field contract_id
         #If the contract has no start_date, no cost will be created, even if the contract has recurring costs
         vehicle_cost_obj = self.env['fleet.vehicle.cost']
-        d = datetime.datetime.strptime(fields.Date.today(), tools.DEFAULT_SERVER_DATE_FORMAT).date()
-        contract_ids = self.env['fleet.vehicle.log.contract'].search([('state','!=','closed')], offset=0, limit=None, order=None, count=False)
+        d = date.today()
+        contract_ids = self.env['fleet.vehicle.log.contract'].search([('state','!=','closed')])
         deltas = {'yearly': relativedelta(years=+1), 'monthly': relativedelta(months=+1), 'weekly': relativedelta(weeks=+1), 'daily': relativedelta(days=+1)}
-        for contract in self.env['fleet.vehicle.log.contract'].browse(contract_ids):
+        for contract in contract_ids:
             if not contract.start_date or contract.cost_frequency == 'no':
                 continue
             found = False
             last_cost_date = contract.start_date
             if contract.generated_cost_ids:
-                last_autogenerated_cost_id = vehicle_cost_obj.search(['&', ('contract_id','=',contract.id), ('auto_generated','=',True)], offset=0, limit=1, order='date desc', count=False)
+                last_autogenerated_cost_id = vehicle_cost_obj.search(['&', ('contract_id','=',contract.id), ('auto_generated','=',True)], limit=1, order='date desc')
                 if last_autogenerated_cost_id:
                     found = True
-                    last_cost_date = vehicle_cost_obj.browse(last_autogenerated_cost_id[0]).date
+                    last_cost_date = vehicle_cost_obj.date
             startdate = datetime.datetime.strptime(last_cost_date, tools.DEFAULT_SERVER_DATE_FORMAT).date()
             if found:
                 startdate += deltas.get(contract.cost_frequency)
-            while (startdate <= d) & (startdate <= datetime.datetime.strptime(contract.expiration_date, tools.DEFAULT_SERVER_DATE_FORMAT).date()):
+            while (startdate <= d) and (startdate <= contract.expiration_date):
                 data = {
                     'amount': contract.cost_generated,
                     'date': startdate.strftime(tools.DEFAULT_SERVER_DATE_FORMAT),
@@ -617,7 +581,7 @@ class fleet_vehicle_log_contract(models.Model):
         #It manages the state of a contract, possibly by posting a message on the vehicle concerned and updating its status
         datetime_today = datetime.datetime.strptime(fields.Date.today(), tools.DEFAULT_SERVER_DATE_FORMAT)
         limit_date = (datetime_today + relativedelta(days=+15)).strftime(tools.DEFAULT_SERVER_DATE_FORMAT)
-        ids = self.search(['&', ('state', '=', 'open'), ('expiration_date', '<', limit_date)], offset=0, limit=None, order=None, count=False)
+#         ids = self.search(['&', ('state', '=', 'open'), ('expiration_date', '<', limit_date)])
         res = {}
         for contract in self:
             if contract.vehicle_id.id in res:
@@ -629,28 +593,27 @@ class fleet_vehicle_log_contract(models.Model):
             self.env['fleet.vehicle'].message_post(vehicle, body=_('%s contract(s) need(s) to be renewed and/or closed!') % (str(value)))
         return self.write({'state': 'toclose'})
 
-
     @api.one
     def run_scheduler(self):
         self.scheduler_manage_auto_costs()
         self.scheduler_manage_contract_expiration()
         return True
 
-
     @api.multi
+    @api.depends('vehicle_id', 'date', 'cost_subtype_id')
     def _vehicle_contract_name_get_fnc(self):
-#         res = {}
         for record in self:
-            name = record.vehicle_id.name
-            if record.cost_subtype_id.name:
-                name += ' / '+ record.cost_subtype_id.name
-            if record.date:
-                name += ' / '+ record.date
-            record.name = name
-#         return res
+            if record.vehicle_id:
+                name = record.vehicle_id.name
+                if record.cost_subtype_id.name:
+                    name += ' / '+ record.cost_subtype_id.name
+                    if record.date:
+                        name += ' / '+ record.date
+                record.name = name
+            else:
+                record.name = ' ' 
 
     @api.one
-    @api.depends('vehicle_id')
     def on_change_vehicle(self):
         odometer_unit = self.env['fleet.vehicle'].browse(vehicle_id.id).odometer_unit
         
@@ -675,7 +638,6 @@ class fleet_vehicle_log_contract(models.Model):
         if contract is in a closed state, return -1
         otherwise return the number of days before the contract expires
         """
-#         res = {}
         for record in self:
             if (record.expiration_date and (record.state == 'open' or record.state == 'toclose')):
                 today = str_to_datetime(time.strftime(tools.DEFAULT_SERVER_DATE_FORMAT))
@@ -684,7 +646,6 @@ class fleet_vehicle_log_contract(models.Model):
                 record.days_left = diff_time > 0 and diff_time or 0
             else:
                 record.days_left = -1
-
 
     @api.multi
     def act_renew_contract(self):
@@ -722,9 +683,7 @@ class fleet_vehicle_log_contract(models.Model):
             model_id = False
         return model_id
 
-
     @api.one
-    @api.depends('cost_ids')
     def on_change_indic_cost(self):
         totalsum = 0.0
         for element in cost_ids:
@@ -735,13 +694,12 @@ class fleet_vehicle_log_contract(models.Model):
 
     @api.multi
     def _get_sum_cost(self):
-#         res = {}
         for contract in self:
             totalsum = 0
-            for cost in contract.cost_ids:
-                totalsum += cost.amount
-            self.sum_cost = totalsum
-#         return res
+#             for cost in contract.cost_ids:
+#                 totalsum += cost.amount
+#             self.sum_cost = totalsum
+            self.sum_cost = sum(cost.amount for cost in contract.cost_ids)
 
     _inherits = {'fleet.vehicle.cost': 'cost_id'}
     _name = 'fleet.vehicle.log.contract'
@@ -781,9 +739,3 @@ class fleet_vehicle_log_contract(models.Model):
     def contract_open(self):
         return self.write({'state': 'open'})
 
-
-class fleet_contract_state(models.Model):
-    _name = 'fleet.contract.state'
-    _description = 'Contains the different possible status of a leasing contract'
-
-    name = fields.Char(string='Contract Status', required=True)
