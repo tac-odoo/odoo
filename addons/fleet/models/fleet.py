@@ -91,8 +91,8 @@ class fleet_vehicle_tag(models.Model):
 
     name = fields.Char('Name', required=True, translate=True)
 
-class fleet_vehicle_state(models.Model):
-    _name = 'fleet.vehicle.state'
+class fleet_vehicle_stage(models.Model):
+    _name = 'fleet.vehicle.stage'
     _order = 'sequence asc'
 
     name = fields.Char('Name', required=True)
@@ -103,16 +103,16 @@ class fleet_vehicle_state(models.Model):
 
 class fleet_vehicle_model(models.Model):
 
-    @api.depends('modelname', 'brand_id')
+    @api.depends('modelname', 'make_id')
     def _model_name_get_fnc(self):
         name = self.modelname
-        if self.brand_id.name:
-            name = self.brand_id.name + ' / ' + name if name else ''
+        if self.make_id.name:
+            name = self.make_id.name + ' / ' + name if name else ''
         self.name = name
 
-    @api.onchange('brand_id')
+    @api.onchange('make_id')
     def on_change_brand(self):
-        self.image_medium = self.brand_id.image
+        self.image_medium = self.make_id.image
 
     _name = 'fleet.vehicle.model'
     _description = 'Model of a vehicle'
@@ -120,15 +120,15 @@ class fleet_vehicle_model(models.Model):
 
     name = fields.Char(compute='_model_name_get_fnc', string='Name', store=True)
     modelname = fields.Char('Model name', required=True)
-    brand_id = fields.Many2one('fleet.vehicle.model.brand', string='Make', required=True, help='Make of the vehicle')
+    make_id = fields.Many2one('fleet.make', string='Make', required=True, help='Make of the vehicle')
     vendors = fields.Many2many('res.partner', 'fleet_vehicle_model_vendors', 'model_id', 'partner_id', string='Vendors')
-    image = fields.Binary(related='brand_id.image', string="Logo")
-    image_medium = fields.Binary(related='brand_id.image_medium', string="Logo (medium)")
-    image_small = fields.Binary(related='brand_id.image_small', string="Logo (small)")
+    image = fields.Binary(related='make_id.image', string="Logo")
+    image_medium = fields.Binary(related='make_id.image_medium', string="Logo (medium)")
+    image_small = fields.Binary(related='make_id.image_small', string="Logo (small)")
 
 
-class fleet_vehicle_model_brand(models.Model):
-    _name = 'fleet.vehicle.model.brand'
+class fleet_make(models.Model):
+    _name = 'fleet.make'
     _description = 'Brand model of the vehicle'
 
     _order = 'name asc'
@@ -151,7 +151,7 @@ class fleet_vehicle_model_brand(models.Model):
              "Use this field in form views or some kanban views.")
     image_small = fields.Binary(
         compute='_get_image', inverse='_set_image',
-        string="Smal-sized photo", store=True,
+        string="Small-sized photo", store=True,
         help="Small-sized photo of the brand. It is automatically "\
              "resized as a 64x64px image, with aspect ratio preserved. "\
              "Use this field anywhere a small image is required.")
@@ -166,7 +166,7 @@ class fleet_vehicle(models.Model):
     def _vehicle_name_get_fnc(self):
         for record in self:
             if record.model_id:
-                record.name = record.model_id.brand_id.name + '/' + record.model_id.modelname + ' / ' + record.license_plate
+                record.name = record.model_id.make_id.name + '/' + record.model_id.modelname + ' / ' + record.license_plate
             else:
                 record.name = record.license_plate
 
@@ -309,9 +309,9 @@ class fleet_vehicle(models.Model):
     service_count = fields.Integer(compute='_count_all', string='Services')
     fuel_logs_count = fields.Integer(compute='_count_all', string='Fuel Logs')
     odometer_count = fields.Integer(compute='_count_all', string='Odometer')
-    acquisition_date = fields.Date('Acquisition Date', required=False, help='Date when the vehicle has been bought')
+    acquisition_date = fields.Date('Acquisition Date', help='Date when the vehicle has been bought')
     color = fields.Char('Color', help='Color of the vehicle')
-    state_id = fields.Many2one('fleet.vehicle.state', string='State', help='Current state of the vehicle', ondelete="set null", default=_get_default_state)
+    stage_id = fields.Many2one('fleet.vehicle.stage', string='Stage', help='Current state of the vehicle', ondelete="set null", default=_get_default_state)
     location = fields.Char('Location', help='Location of the vehicle (garage, ...)')
     seats = fields.Integer('Seats Number', help='Number of seats of the vehicle')
     doors = fields.Integer('Doors Number', help='Number of doors of the vehicle', default=5)
@@ -362,9 +362,9 @@ class fleet_vehicle(models.Model):
                 value = self.env['res.partner'].browse(vals['driver_id']).name
                 olddriver = (vehicle.driver_id.name) or _('None')
                 changes.append(_("Driver: from '%s' to '%s'") % (olddriver, value))
-            if 'state_id' in vals and vehicle.state_id.id != vals['state_id']:
-                value = self.env['fleet.vehicle.state'].browse(vals['state_id']).name
-                oldstate = vehicle.state_id.name or _('None')
+            if 'stage_id' in vals and vehicle.stage_id.id != vals['stage_id']:
+                value = self.env['fleet.vehicle.stage'].browse(vals['stage_id']).name
+                oldstate = vehicle.stage_id.name or _('None')
                 changes.append(_("State: from '%s' to '%s'") % (oldstate, value))
             if 'license_plate' in vals and vehicle.license_plate != vals['license_plate']:
                 old_license_plate = vehicle.license_plate or _('None')
@@ -726,9 +726,3 @@ class fleet_vehicle_log_contract(models.Model):
     @api.multi
     def contract_open(self):
         return self.write({'state': 'open'})
-
-class fleet_contract_state(models.Model):
-    _name = 'fleet.contract.state'
-    _description = 'Contains the different possible status of a leasing contract'
-
-    name = fields.Char('Contract Status', required=True)
