@@ -71,5 +71,27 @@ $(document).ready(function () {
                     });
                 }
             });
+        })
+        .on('click', '.oe_up-ponderation', function(ev) {
+            var $elem = $(ev.currentTarget);
+            var comparison_factor_id = $elem.closest("tr").attr("factor-id");
+
+            openerp.jsonRpc('/comparison/up_ponderation', 'call', {
+                    'comparison_factor_id': +comparison_factor_id,
+                }).then(function () {
+                    alert("Ponderation updated.");
+                    location.reload();
+                });
+        })
+        .on('click', '.oe_down-ponderation', function(ev) {
+            var $elem = $(ev.currentTarget);
+            var comparison_factor_id = $elem.closest("tr").attr("factor-id");
+
+            openerp.jsonRpc('/comparison/down_ponderation', 'call', {
+                    'comparison_factor_id': +comparison_factor_id,
+                }).then(function () {
+                    alert("Ponderation updated.");
+                    location.reload();
+                });
         });
 });

@@ -44,10 +44,10 @@
                                         <td class="ponderation">
                                             <t t-esc="comparison_category.ponderation"/>
                                             <span class="pond"> 
-                                                <a href='#'>
+                                                <a href="" class="oe_up-ponderation">
                                                     <i style='color:green' class='fa fa-arrow-circle-o-up fa-2x'></i>
                                                 </a> 
-                                                <a href='#'>
+                                                <a href="" class="oe_down-ponderation">
                                                     <i style='color:red' class='fa fa-arrow-circle-o-down fa-2x'></i>
                                                 </a>
                                             </span>
@@ -78,10 +78,10 @@
                                             <td class="ponderation">
                                                 <t t-esc="comparison_factor.ponderation"/>
                                                 <span class="pond"> 
-                                                    <a href='#'>
+                                                    <a href="" class="oe_up-ponderation">
                                                         <i style='color:green' class='fa fa-arrow-circle-o-up fa-2x'></i>
                                                     </a> 
-                                                    <a href='#'>
+                                                    <a href="" class="oe_down-ponderation">
                                                         <i style='color:red' class='fa fa-arrow-circle-o-down fa-2x'></i>
                                                     </a>
                                                 </span>

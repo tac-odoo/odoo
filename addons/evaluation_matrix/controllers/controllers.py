@@ -4,11 +4,11 @@ from openerp.addons.web.http import request
 from openerp import SUPERUSER_ID
 
 class EvaluationMatrix(http.Controller):
-    @http.route('/comparison/selection/', auth='public', website=True)
+    '''@http.route('/comparison/selection/', auth='public', website=True)
     def index(self, **kwargs):
     	Comparison_products = http.request.env['comparison_item']
         Comparison_factor = http.request.env['comparison_factors']
-    	return http.request.render('evaluation_matrix.index', {})
+    	return http.request.render('evaluation_matrix.index', {})'''
 
     def get_result(self, comparison_factors, comparison_products):
         Comparison_results = http.request.env['comparison_factor_result']
@@ -79,7 +79,7 @@ class EvaluationMatrix(http.Controller):
             'parent_id' : comparison_factor_id,
         }
 
-    @http.route(['/comparison/get_categories'], type='json', auth="public", website=True)
+    '''@http.route(['/comparison/get_categories'], type='json', auth="public", website=True)
     def get_categories(self, **post):
         Comparison_factor = http.request.env['comparison_factor']
         
@@ -97,7 +97,7 @@ class EvaluationMatrix(http.Controller):
                     "name": category.name,
                 })
 
-        return comparison_categories
+        return comparison_categories'''
 
     @http.route(['/comparison/create_criterion'], type='json', auth="public", website=True)
     def create_criterion(self, name, note, parent_id):
@@ -105,5 +105,23 @@ class EvaluationMatrix(http.Controller):
 
         vals = {'name' : name, 'note' : note,'parent_id' : parent_id}
         Comparison_factor.create(vals)
- 
+
+    @http.route(['/comparison/up_ponderation'], type='json', auth="public", website=True)
+    def up_ponderation(self, comparison_factor_id):
+        Comparison_factor = http.request.env['comparison_factor']
+
+        comparison_factor = Comparison_factor.browse([(comparison_factor_id)])
+        comparison_factor.ponderation += 0.1
+        Comparison_factor.write([comparison_factor])
+
+    @http.route(['/comparison/down_ponderation'], type='json', auth="public", website=True)
+    def down_ponderation(self, comparison_factor_id):
+        Comparison_factor = http.request.env['comparison_factor']
+
+        comparison_factor = Comparison_factor.browse([(comparison_factor_id)])
+        if comparison_factor.ponderation >= 0.1:
+            comparison_factor.ponderation -= 0.1
+            Comparison_factor.write([comparison_factor])
+    
+
         
