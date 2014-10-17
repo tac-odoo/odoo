@@ -21,11 +21,16 @@
                     </span>
                 </td>
                 <t t-foreach="comparison_products" t-as="comparison_product">
-                    <td class="center-text-cell">
-                        <div t-attf-class="#{comparison_results[comp_factor_child.id][comparison_product.id] &gt; 80 ? 'child-votes-green' : comparison_results[comp_factor_child.id][comparison_product.id] &lt; 40 ? 'child-votes-red' : 'child-votes-blue'}">
+                    <td t-attf-class="center-text-cell #{(comp_factor_child.type === 'criterion') ? 'votes' : ''}">
+                        <div t-attf-class="#{comparison_results[comp_factor_child.id][comparison_product.id] &gt; 80 ? 'child-votes-green' : comparison_results[comp_factor_child.id][comparison_product.id] &lt; 40 ? 'child-votes-red' : 'child-votes-blue'} votes-result">
                             <span>
                                 <t t-esc="comparison_results[comp_factor_child.id][comparison_product.id]"/> 
                             </span> %
+                        </div>
+                        <div class="votes-buttons">
+                            <button type="button" class="btn btn-danger"><i class="fa fa-close"></i></button>
+                            <button type="button" class="btn btn-info">3rd Party</button>
+                            <button type="button" class="btn btn-success"><i class="fa fa-check"></i></button>
                         </div>
                     </td>
                 </t>

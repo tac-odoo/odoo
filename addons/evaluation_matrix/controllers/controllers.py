@@ -43,7 +43,7 @@ class EvaluationMatrix(http.Controller):
         comparison_results = self.get_result(comparison_factors, comparison_products)
 
         return http.request.render('evaluation_matrix.comparison', {
-            'comparison_factors': comparison_factors,
+            'comparison_categories': comparison_categories,
             'comparison_products': comparison_products,
             'comparison_results': comparison_results,
         })
@@ -63,7 +63,7 @@ class EvaluationMatrix(http.Controller):
                 "ponderation": comp_factor_child.ponderation,
                 "child_ids": map(int, comp_factor_child.child_ids),
                 "parent_id": comparison_factor_id,
-                "comparison_results": comparison_results,
+                "type": comp_factor_child.type,
             })
 
         comp_products = []

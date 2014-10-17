@@ -23,7 +23,6 @@
                 <t t-set="title">Comparison</t>
                 <div class="oe_structure">
                     <div class="container">
-                        <button type="button" class="btn btn-default oe_create-criterion"><i class="fa fa-plus"></i> Add criterion </button>
                         <table class="table oe_table-comparison-factors">
                             <thead>
                                 <tr>
@@ -37,20 +36,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <t t-foreach="comparison_factors" t-as="comparison_factor">
-                                    <tr class="row-level-1" t-att-factor-id="comparison_factor.id" data-children="hidden">
-                                        <td>
-                                            <t t-if= "comparison_factor.parent_id">
-                                                > <t t-esc="comparison_factor.name"/>
-                                            </t>
-                                            <a t-if= "not comparison_factor.parent_id" href=""><t t-esc="comparison_factor.name"/></a>
-                                        </td>
-                                        <td>
-                                            <a t-if= "len(comparison_factor.child_ids) != 0 and comparison_factor.parent_id" class="show-children"><i height="20" width="20" class="fa fa-search"></i></a>
-                                        </td>
+                                <t t-foreach="comparison_categories" t-as="comparison_category">
+                                    <tr class="row-level-1" t-att-factor-id="comparison_category.id">
+                                        <td><a href=""><t t-esc="comparison_category.name"/></a></td>
+                                        <td></td>
                                         <td></td>
                                         <td class="ponderation">
-                                            <t t-esc="comparison_factor.ponderation"/>
+                                            <t t-esc="comparison_category.ponderation"/>
                                             <span class="pond"> 
                                                 <a href='#'>
                                                     <i style='color:green' class='fa fa-arrow-circle-o-up fa-2x'></i>
@@ -62,23 +54,58 @@
                                         </td>
                                         <t t-foreach="comparison_products" t-as="comparison_product">
                                             <td class="center-text-cell vert-align">
-                                                <t t-if="not comparison_factor.parent_id">
-                                                    <div class="progress">
-                                                        <div t-attf-class="progress-bar #{ 'progress-bar-success' if comparison_results[comparison_factor.id][comparison_product.id] &gt;= 80  else 'progress-bar-danger' if comparison_results[comparison_factor.id][comparison_product.id] &lt;= 40 else 'progress-bar-primary'}" role="progressbar" t-attf-aria-valuenow="#{comparison_results[comparison_factor.id][comparison_product.id]}" aria-valuemin="0" aria-valuemax="100" t-attf-style="width: #{comparison_results[comparison_factor.id][comparison_product.id]}%;">
-                                                            <span>
-                                                                <t t-esc="comparison_results[comparison_factor.id][comparison_product.id]"/>
-                                                            </span> %
-                                                        </div>
+                                                <div class="progress">
+                                                    <div t-attf-class="progress-bar #{ 'progress-bar-success' if comparison_results[comparison_category.id][comparison_product.id] &gt;= 80  else 'progress-bar-danger' if comparison_results[comparison_category.id][comparison_product.id] &lt;= 40 else 'progress-bar-primary'}" role="progressbar" t-attf-aria-valuenow="#{comparison_results[comparison_category.id][comparison_product.id]}" aria-valuemin="0" aria-valuemax="100" t-attf-style="width: #{comparison_results[comparison_category.id][comparison_product.id]}%;">
+                                                        <span>
+                                                            <t t-esc="comparison_results[comparison_category.id][comparison_product.id]"/>
+                                                        </span> %
                                                     </div>
-                                                </t>
-                                                <t t-if="comparison_factor.parent_id">
+                                                </div>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <t t-foreach="comparison_category.child_ids" t-as="comparison_factor">
+                                        <tr class="row-level-1" t-att-factor-id="comparison_factor.id" data-children="hidden">
+                                            <td>
+                                                <t t-esc="comparison_factor.name"/>
+                                            </td>
+                                            <td>
+                                                <a t-if= "len(comparison_factor.child_ids) != 0" class="show-children">
+                                                    <i height="20" width="20" class="fa fa-search"></i>
+                                                </a>
+                                            </td>
+                                            <td></td>
+                                            <td class="ponderation">
+                                                <t t-esc="comparison_factor.ponderation"/>
+                                                <span class="pond"> 
+                                                    <a href='#'>
+                                                        <i style='color:green' class='fa fa-arrow-circle-o-up fa-2x'></i>
+                                                    </a> 
+                                                    <a href='#'>
+                                                        <i style='color:red' class='fa fa-arrow-circle-o-down fa-2x'></i>
+                                                    </a>
+                                                </span>
+                                            </td>
+                                            <t t-foreach="comparison_products" t-as="comparison_product">
+                                                <td class="center-text-cell vert-align">
                                                     <div t-attf-class="#{ 'votes-green' if comparison_results[comparison_factor.id][comparison_product.id] &gt;= 80  else 'votes-red' if comparison_results[comparison_factor.id][comparison_product.id] &lt;= 40 else 'votes-blue'}">
                                                         <span>
                                                             <t t-esc="comparison_results[comparison_factor.id][comparison_product.id]"/>
                                                         </span> %
                                                     </div>
-                                                </t>
-                                            </td>
+                                                </td>
+                                            </t>
+                                        </tr>
+                                    </t>
+                                    <tr t-attf-class="row-level-1" t-att-parent-id="comparison_category.id">
+                                        <td>
+                                            <button type="button" class="btn btn-default oe_create-criterion"><i class="fa fa-plus"></i> Propose new criterion </button>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <t t-foreach="comparison_products" t-as="comparison_product">
+                                            <td></td>
                                         </t>
                                     </tr>
                                 </t>

@@ -3,11 +3,10 @@
     'name': "evaluation_matrix",
 
     'summary': """
-        Short (1 phrase/line) summary of the module's purpose, used as
-        subtitle on modules listing or apps.openerp.com""",
+        Compare Odoo and his concurrents base on criteria""",
 
     'description': """
-        Long description of module's purpose
+        Compare Odoo and his concurrents base on criteria
     """,
 
     'author': "odoo",

@@ -36,6 +36,18 @@
 	text-align: center;
 }
 
+.votes-buttons{
+	display: none;
+}
+
+.votes:hover .votes-buttons{
+	display: inline;
+}
+
+.votes:hover .votes-result{
+	display: none;
+}
+
 .votes-red{
 	background-color: #d9534f;
 	color: white;
