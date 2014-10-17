@@ -29,7 +29,8 @@
         'data/comparison_item.csv',
         'data/comparison_factor_result.csv',
         'data/comparison_vote_values.csv',
-        'data/comparison_vote.csv'
+        'data/comparison_vote.csv',
+        'security/ir.model.access.csv',
     ],
     'qweb': [
         'static/src/views/*.xml',

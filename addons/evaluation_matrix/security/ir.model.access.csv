@@ -1,2 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_evaluation_matrix_evaluation_matrix,evaluation_matrix.evaluation_matrix,model_evaluation_matrix_evaluation_matrix,,1,0,0,0
+access_comparison_factor,access_comparison_factor,model_comparison_factor,,1,1,1,1
+access_comparison_item,access_comparison_item,model_comparison_item,,1,1,1,1
+access_comparison_vote_values,access_comparison_vote_values,model_comparison_vote_values,,1,1,1,1
+access_comparison_vote,access_comparison_vote,model_comparison_vote,,1,1,1,1
+access_comparison_factor_result,access_comparison_factor_result,model_comparison_factor_result,,1,1,1,1
