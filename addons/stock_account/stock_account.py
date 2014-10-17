@@ -67,6 +67,13 @@ class stock_location(osv.osv):
 
 class stock_quant(osv.osv):
     _inherit = "stock.quant"
+    
+    def _calc_inventory_value(self, cr, uid, ids, name, attr, context=None):
+        return super(stock_quant,self)._calc_inventory_value(cr, uid, ids, name, attr, context=context)
+    
+    _columns = {
+        'inventory_value': fields.function(_calc_inventory_value, string="Inventory Value", type='float', readonly=True),
+        }
 
     def _get_inventory_value(self, cr, uid, quant, context=None):
         if quant.product_id.cost_method in ('real'):
