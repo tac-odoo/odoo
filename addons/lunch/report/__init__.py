@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2009 Tiny SPRL (<http://tiny.be>).
+#    Copyright (C) 2014-TODAY OpenERP SA (<https://www.odoo.com>).
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -21,5 +21,3 @@
 
 import order
 import report_lunch_order
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
-

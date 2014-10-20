@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Business Applications
-#    Copyright (c) 2012-TODAY OpenERP S.A. <http://openerp.com>
+#    Copyright (C) 2014-TODAY OpenERP SA (<https://www.odoo.com>).
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -23,5 +23,3 @@ from . import test_lunch
 checks = [
     test_lunch,
 ]
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
