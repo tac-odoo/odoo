@@ -8,7 +8,7 @@
     <field name="inherit_id" ref="crm_partner_assign.view_partner_grade_form"/>
     <field name="arch" type="xml">
       <field name="active" position="after">
-        <field name="website_published"/>
+        <!-- <field name="website_published"/> -->
       </field>
     </field>
   </record>
