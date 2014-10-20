@@ -2,14 +2,14 @@
 <openerp>
     <data>
 
-        <menuitem name="Evaluation" parent="hr.menu_hr_root" id="menu_eval_hr" sequence="25"/>
+        <menuitem name="Appraisal" parent="hr.menu_hr_root" id="menu_eval_hr" sequence="25"/>
         <menuitem name="Periodic Appraisal" parent="hr.menu_hr_configuration" id="menu_eval_hr_config" sequence="4"/>
 
         <record model="ir.ui.view" id="view_hr_evaluation_form">
             <field name="name">hr_evaluation.evaluation.form</field>
             <field name="model">hr_evaluation.evaluation</field>
             <field name="arch" type="xml">
-                <form string="Employees Evaluations">
+                <form string="Appraisal">
                 <header>
                     <button name="button_sent_appraisal" string="Start Appraisal and Send Forms" states="new" type="object" class="oe_highlight"  groups="base.group_hr_user"/>
                     <button name="button_done_appraisal" string="Done" states="pending" type="object"  groups="base.group_hr_user"/>
@@ -79,7 +79,7 @@
             <field name="name">hr_evaluation.evaluation.tree</field>
             <field name="model">hr_evaluation.evaluation</field>
             <field name="arch" type="xml">
-                <tree string="Employees Evaluations">
+                <tree string="Appraisal">
                     <field name="employee_id" string="Name"/>
                     <field name="date_close"/>
                     <field name="interview_deadline"/>
@@ -94,7 +94,7 @@
             <field name="name">hr_evaluation.evaluation_search</field>
             <field name="model">hr_evaluation.evaluation</field>
             <field name="arch" type="xml">
-                <search string="Search Employees Evaluations">
+                <search string="Search Appraisal">
                     <field name="employee_id"/>
                     <group expand='0' string='Group by...'>
                         <filter string='Employee' icon="terp-personal" domain="[]" context="{'group_by' : 'employee_id'}"/>
@@ -165,7 +165,7 @@
         </record>
 
         <record model="ir.actions.act_window" id="open_view_hr_evaluation_tree">
-            <field name="name">Employee Evaluations</field>
+            <field name="name">Appraisal</field>
             <field name="res_model">hr_evaluation.evaluation</field>
             <field name="view_type">form</field>
             <field name="view_mode">kanban,tree,form</field>
@@ -184,11 +184,11 @@
             </field>
         </record>
 
-        <menuitem name="Employee Evaluations" parent="menu_eval_hr" id="menu_open_view_hr_evaluation_tree"
+        <menuitem name="Appraisal" parent="menu_eval_hr" id="menu_open_view_hr_evaluation_tree"
             action="open_view_hr_evaluation_tree" groups="base.group_user"/>
 
         <record model="ir.actions.act_window" id="open_view_hr_evaluation_tree2">
-            <field name="name">Employee Evaluations</field>
+            <field name="name">Appraisal</field>
             <field name="res_model">hr_evaluation.evaluation</field>
             <field name="view_type">form</field>
             <field name="view_mode">kanban,tree,form</field>
@@ -209,7 +209,7 @@
                 </button>
             </xpath>
             <xpath expr="//page[@name='hr_setting']" position="after">
-                <page string="Evaluation">
+                <page string="Appraisal">
                     <group col="4">
                         <label for="appraisal_manager" string="Send Appraisal Form To"/>
                         <group col="3">

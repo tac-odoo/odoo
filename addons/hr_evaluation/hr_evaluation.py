@@ -149,9 +149,11 @@ class hr_evaluation(models.Model):
 
     @api.model
     def create(self, vals):
+        self = self.with_context(mail_create_nolog=True)
         res = super(hr_evaluation, self).create(vals)
         if res.apprasial_manager_ids:
             res.create_message_subscribe_users_list(res.apprasial_manager_ids)
+            res.message_post(body=_("Employee Appraisal created"), subtype="mail.mt_comment", type="notification")
         return res
 
     @api.multi
