@@ -54,6 +54,13 @@
             <field name="arch" type="xml">
                 <form string="Blog Post">
                     <sheet>
+                        <div class="oe_right oe_button_box">
+                            <!-- <field name="website_url" invisible="1"/> -->
+                            <button class="oe_inline oe_stat_button" name="open_website_url"
+                                type="object" icon="fa-globe">
+                                <field name="website_published" widget="website_button"/>
+                            </button>
+                        </div>
                         <group>
                             <field name="name" placeholder="Name"/>
                             <field name="tag_ids" widget="many2many_tags"/>
