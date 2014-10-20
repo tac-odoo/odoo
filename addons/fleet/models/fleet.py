@@ -19,13 +19,13 @@
 #
 ##############################################################################
 
-from openerp import models, fields, api, _
-import time
 import datetime
+import time
+from dateutil.relativedelta import relativedelta
+from openerp import models, fields, api, _
 from openerp import tools
 from openerp.osv.orm import except_orm
 from openerp.tools.translate import _
-from dateutil.relativedelta import relativedelta
 
 def str_to_datetime(strdate):
     return datetime.datetime.strptime(strdate, tools.DEFAULT_SERVER_DATE_FORMAT)
@@ -100,7 +100,6 @@ class fleet_vehicle_stage(models.Model):
 
     _sql_constraints = [('fleet_state_name_unique','unique(name)', 'State name already exists')]
 
-
 class fleet_vehicle_model(models.Model):
 
     @api.depends('modelname', 'make_id')
@@ -125,7 +124,6 @@ class fleet_vehicle_model(models.Model):
     image = fields.Binary(related='make_id.image', string="Logo")
     image_medium = fields.Binary(related='make_id.image_medium', string="Logo (medium)")
     image_small = fields.Binary(related='make_id.image_small', string="Logo (small)")
-
 
 class fleet_make(models.Model):
     _name = 'fleet.make'
@@ -158,9 +156,6 @@ class fleet_make(models.Model):
              "resized as a 64x64px image, with aspect ratio preserved. "\
              "Use this field anywhere a small image is required.")
 
-
-
-from openerp import models, fields, api, _
 class fleet_vehicle(models.Model):
 
     _inherit = 'mail.thread'
@@ -378,7 +373,6 @@ class fleet_vehicle(models.Model):
                 vehicle.message_post(body=", ".join(changes))
         return super(fleet_vehicle, self).write(vals)
 
-
 class fleet_vehicle_odometer(models.Model):
     _name = 'fleet.vehicle.odometer'
     _description = 'Odometer log for a vehicle'
@@ -400,7 +394,6 @@ class fleet_vehicle_odometer(models.Model):
     value = fields.Float('Odometer Value', group_operator="max")
     vehicle_id = fields.Many2one('fleet.vehicle', 'Vehicle', required=True)
     unit = fields.Selection(related='vehicle_id.odometer_unit', string="Unit", readonly=True)
-
 
 class fleet_vehicle_log_fuel(models.Model):
 
@@ -466,10 +459,10 @@ class fleet_vehicle_log_fuel(models.Model):
         elif liter > 0 and price_per_liter > 0 and round(liter*price_per_liter, 2) != amount:
             self.amount = round(liter * price_per_liter, 2)
 
-    @api.v7
-    def _get_default_service_type(self, cr, uid, context):
+    @api.model
+    def _get_default_service_type(self):
         try:
-            model, model_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'fleet', 'type_service_refueling')
+            model_id = self.env.ref('fleet.type_service_refueling').id
         except ValueError:
             model_id = False
         return model_id
@@ -493,7 +486,6 @@ class fleet_vehicle_log_fuel(models.Model):
         'cost_type': 'fuel',
     }
 
-
 class fleet_vehicle_log_services(models.Model):
 
     @api.onchange('vehicle_id')
@@ -501,10 +493,10 @@ class fleet_vehicle_log_services(models.Model):
         self.odometer_unit = self.vehicle_id.odometer_unit
         self.purchaser_id = self.vehicle_id.driver_id
 
-    @api.v7
-    def _get_default_service_type(self, cr, uid, context):
+    @api.model
+    def _get_default_service_type(self):
         try:
-            model, model_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'fleet', 'type_service_service_8')
+            model_id = self.env.ref('fleet.type_service_service_8').id
         except ValueError:
             model_id = False
         return model_id
@@ -526,7 +518,6 @@ class fleet_vehicle_log_services(models.Model):
         'cost_type': 'services'
     }
 
-
 class fleet_service_type(models.Model):
     _name = 'fleet.service.type'
     _description = 'Type of services available on a vehicle'
@@ -537,7 +528,6 @@ class fleet_service_type(models.Model):
         ('service', 'Service'),
         ('both', 'Both')],
         string='Category', required=True, help='Choose wheter the service refer to contracts, vehicle services or both')
-
 
 class fleet_vehicle_log_contract(models.Model):
 
@@ -668,10 +658,10 @@ class fleet_vehicle_log_contract(models.Model):
             'context': {'active_id': newid},
         }
 
-    @api.v7
-    def _get_default_contract_type(self, cr, uid, context=None):
+    @api.model
+    def _get_default_contract_type(self):
         try:
-            model, model_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'fleet', 'type_contract_leasing')
+            model_id = self.env.ref('fleet.type_contract_leasing').id
         except ValueError:
             model_id = False
         return model_id
@@ -730,4 +720,4 @@ class fleet_vehicle_log_contract(models.Model):
     @api.multi
     def contract_open(self):
         return self.write({'state': 'open'})
-
+    
