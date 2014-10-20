@@ -1094,7 +1094,8 @@ class Binary(http.Controller):
         if not filecontent:
             return request.not_found()
         else:
-            filename = '%s_%s' % (model.replace('.', '_'), id)
+            res = Model.browse([int(id)], request.context)
+            filename = '%s' % (res.name or '')
             if filename_field:
                 filename = res.get(filename_field, '') or filename
             return request.make_response(filecontent,
