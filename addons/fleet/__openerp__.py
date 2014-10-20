@@ -63,3 +63,4 @@ Main Features
     'installable' : True,
     'application' : True,
 }
+

@@ -19,7 +19,7 @@
 #
 ##############################################################################
 
-from openerp import fields, models, api
+from openerp import models, fields, api, _
 import time
 import datetime
 from openerp import tools
@@ -130,17 +130,19 @@ class fleet_vehicle_model(models.Model):
 class fleet_make(models.Model):
     _name = 'fleet.make'
     _description = 'Brand model of the vehicle'
-
+ 
     _order = 'name asc'
-
+ 
     @api.depends('image')
     def _get_image(self):
-        self.image_medium = tools.image_get_resized_images(self.image)['image_medium']
-        self.image_small = tools.image_get_resized_images(self.image)['image_small']
-
-    def _set_image(self, value):
-        self.write({'image': tools.image_resize_image_big(value)})
-
+        all_image = tools.image_get_resized_images(self.image)
+        self.image_medium = all_image.get('image_medium')
+        self.image_small = all_image.get('image_small')
+    
+    @api.one
+    def _set_image(self):
+        self.write({'image': tools.image_resize_image_big(self.image_medium)})
+ 
     name = fields.Char('Make', required=True)
     image = fields.Binary("Logo", help="This field holds the image used as logo for the brand,limited to 1024x1024px.")
     image_medium = fields.Binary(
@@ -157,6 +159,8 @@ class fleet_make(models.Model):
              "Use this field anywhere a small image is required.")
 
 
+
+from openerp import models, fields, api, _
 class fleet_vehicle(models.Model):
 
     _inherit = 'mail.thread'
@@ -585,7 +589,7 @@ class fleet_vehicle_log_contract(models.Model):
         from collections import defaultdict
         res = defaultdict(int)
         for contract in ids:
-                res[contract.vehicle_id.id] += 1
+            res[contract.vehicle_id.id] += 1
         for vehicle, value in res.items():
             self.env['fleet.vehicle'].browse(vehicle).message_post(body=_('%s contract(s) need(s) to be renewed and/or closed!') % (str(value)))
         return self.write({'state': 'toclose'})
@@ -613,7 +617,7 @@ class fleet_vehicle_log_contract(models.Model):
 
     @api.returns('fleet_vehicle_log_contract')
     def compute_next_year_date(self, strdate):
-        oneyear = datetime.timedelta(days=365)
+        oneyear = relativedelta(years=+1)
         curdate = str_to_datetime(strdate)
         return datetime.datetime.strftime(curdate + oneyear, tools.DEFAULT_SERVER_DATE_FORMAT)
 
@@ -726,3 +730,4 @@ class fleet_vehicle_log_contract(models.Model):
     @api.multi
     def contract_open(self):
         return self.write({'state': 'open'})
+
