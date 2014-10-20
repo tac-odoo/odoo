@@ -868,6 +868,23 @@ class website_seo_metadata(osv.Model):
         'website_meta_keywords': fields.char("Website meta keywords", translate=True),
     }
 
+class website_published_mixin(osv.Model):
+    _name = "website.website_published.mixin"
+
+    _website_url_proxy = lambda self, *a, **kw: self._website_url(*a, **kw)
+
+    _columns = {
+        'website_published': fields.boolean('Visible in Website', copy=False),
+        'website_url': fields.function(_website_url_proxy, type='char', string='Website URL', help='The full URL to access the document through the website.'),
+    }
+
+    _defaults = {
+        'website_published': False,
+    }
+
+    def _website_url(self, cr, uid, ids, name, arg, context=None):
+        return dict.fromkeys(ids, '#')
+
     def open_website_url(self, cr, uid, id, context=None):
         return {
             'type': 'ir.actions.act_url',
