@@ -868,7 +868,7 @@ class website_seo_metadata(osv.Model):
         'website_meta_keywords': fields.char("Website meta keywords", translate=True),
     }
 
-class website_published_mixin(osv.Model):
+class website_published_mixin(osv.AbstractModel):
     _name = "website.website_published.mixin"
 
     _website_url_proxy = lambda self, *a, **kw: self._website_url(*a, **kw)
