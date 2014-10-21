@@ -3,12 +3,16 @@
 from openerp.osv import osv, fields
 
 
-class hr(osv.osv):
-    _inherit = 'hr.employee'
+class hr_employee(osv.osv):
+    _name = 'hr.employee'
+    _inherit = ['hr.employee', 'website.website_published.mixin']
+
     _columns = {
-        'website_published': fields.boolean('Available in the website', copy=False),
         'public_info': fields.text('Public Info'),
     }
-    _defaults = {
-        'website_published': False
-    }
+
+    def _website_url(self, cr, uid, ids, field_name, arg, context=None):
+        res = super(hr_employee, self)._website_url(cr, uid, ids, field_name, arg, context=context)
+        for product in self.browse(cr, uid, ids, context=context):
+            res[product.id] = "/page/website.aboutus#team"
+        return res
