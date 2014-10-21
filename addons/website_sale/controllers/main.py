@@ -132,7 +132,6 @@ class website_sale(http.Controller):
     ], type='http', auth="public", website=True)
     def shop(self, page=0, category=None, search='', **post):
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
-
         domain = request.website.sale_product_domain()
         if search:
             domain += ['|', '|', '|', ('name', 'ilike', search), ('description', 'ilike', search),

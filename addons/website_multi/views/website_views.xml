@@ -15,7 +15,10 @@
                 <xpath expr="//header" position="replace"></xpath>
                 <xpath expr="//field[@name='name']" position="after">
                     <field name="menu_id"/>
-                    <field name="user_id" />
+                    <field name="user_id" context="{ 'active_test' : False }" />
+                </xpath>
+                <xpath expr="//field[@name='default_lang_id']" position="attributes">
+                	<attribute name="required">True</attribute>
                 </xpath>
                 <xpath expr="//div[@name='other']" position="after">
                     <div name="menu">

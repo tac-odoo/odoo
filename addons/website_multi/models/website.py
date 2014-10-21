@@ -113,7 +113,10 @@ class ir_http(osv.AbstractModel):
         if not request.session.uid:
             if request.website and request.website.user_id:
                 request.uid = request.website.user_id.id
+                print "set user id", request.website.user_id.name
             else:
                 dummy, request.uid = self.pool['ir.model.data'].get_object_reference(request.cr, openerp.SUPERUSER_ID, 'base', 'public_user')
         else:
             request.uid = request.session.uid
+            
+    

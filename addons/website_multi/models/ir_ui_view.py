@@ -1,7 +1,7 @@
 from lxml import etree
 
 from openerp import tools
-from openerp.osv import osv, fields
+from openerp.osv import osv, fields, orm
 
 
 class view(osv.osv):
@@ -77,5 +77,7 @@ class view(osv.osv):
                 if view_rec.website_id and view_rec.website_id.id != context['website_id']:
                     view_arch.pop(view_rec.id)
         return [(arch, view_id) for view_id, arch in view_arch.items()]
-        
+      
+      
+
             
