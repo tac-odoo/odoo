@@ -55,8 +55,7 @@ class project_task_type(models.Model):
                            help='This stage is folded in the kanban view when'
                            'there are no records in that stage to display.')
 
-from openerp.osv import fields, osv
-class project(osv.osv):
+class project(models.Model):
     _name = "project.project"
     _description = "Project"
     _inherits = {'account.analytic.account': "analytic_account_id",
@@ -64,6 +63,7 @@ class project(osv.osv):
     _inherit = ['mail.thread', 'ir.needaction_mixin']
     _period_number = 5
 
+    @api.v7
     def _auto_init(self, cr, context=None):
         """ Installation hook: aliases, project.project """
         # create aliases for all projects and avoid constraint errors
@@ -71,66 +71,70 @@ class project(osv.osv):
         return self.pool.get('mail.alias').migrate_to_alias(cr, self._name, self._table, super(project, self)._auto_init,
             'project.task', self._columns['alias_id'], 'id', alias_prefix='project+', alias_defaults={'project_id':'id'}, context=alias_context)
 
-    def onchange_partner_id(self, cr, uid, ids, part=False, context=None):
-        partner_obj = self.pool.get('res.partner')
+    @api.onchange('partner_id')
+    def onchange_partner_id(self, part=False):
+        partner_obj = self.env['res.partner']
         val = {}
         if not part:
             return {'value': val}
-        if 'pricelist_id' in self.fields_get(cr, uid, context=context):
-            pricelist = partner_obj.read(cr, uid, part, ['property_product_pricelist'], context=context)
+        if 'pricelist_id' in self.fields_get():
+            pricelist = partner_obj.read(part, ['property_product_pricelist'])
             pricelist_id = pricelist.get('property_product_pricelist', False) and pricelist.get('property_product_pricelist')[0] or False
             val['pricelist_id'] = pricelist_id
         return {'value': val}
 
-    def unlink(self, cr, uid, ids, context=None):
+    @api.multi
+    def unlink(self):
         alias_ids = []
-        mail_alias = self.pool.get('mail.alias')
-        analytic_account_to_delete = set()
-        for proj in self.browse(cr, uid, ids, context=context):
+        analytic_account_to_delete = []
+        for proj in self:
             if proj.tasks:
-                raise osv.except_osv(_('Invalid Action!'),
+                raise except_orm(_('Invalid Action!'),
                                      _('You cannot delete a project containing tasks. You can either delete all the project\'s tasks and then delete the project or simply deactivate the project.'))
             elif proj.alias_id:
-                alias_ids.append(proj.alias_id.id)
+                alias_ids.append(proj.alias_id)
             if proj.analytic_account_id and not proj.analytic_account_id.line_ids:
-                analytic_account_to_delete.add(proj.analytic_account_id.id)
-        res = super(project, self).unlink(cr, uid, ids, context=context)
-        mail_alias.unlink(cr, uid, alias_ids, context=context)
-        self.pool['account.analytic.account'].unlink(cr, uid, list(analytic_account_to_delete), context=context)
+                analytic_account_to_delete.append(proj.analytic_account_id)
+        res = super(project, self).unlink()
+        [alias_id.unlink() for alias_id in alias_ids]
+        # [analytic_account_rec_delete.unlink() for analytic_account_rec_delete in analytic_account_to_delete]
         return res
 
-    def _get_attached_docs(self, cr, uid, ids, field_name, arg, context):
-        res = {}
-        attachment = self.pool.get('ir.attachment')
-        task = self.pool.get('project.task')
-        for id in ids:
-            project_attachments = attachment.search(cr, uid, [('res_model', '=', 'project.project'), ('res_id', '=', id)], context=context, count=True)
-            task_ids = task.search(cr, uid, [('project_id', '=', id)], context=context)
-            task_attachments = attachment.search(cr, uid, [('res_model', '=', 'project.task'), ('res_id', 'in', task_ids)], context=context, count=True)
-            res[id] = (project_attachments or 0) + (task_attachments or 0)
-        return res
-    def _task_count(self, cr, uid, ids, field_name, arg, context=None):
-        res={}
-        for tasks in self.browse(cr, uid, ids, context):
-            res[tasks.id] = len(tasks.task_ids)
-        return res
-    def _get_alias_models(self, cr, uid, context=None):
+    @api.multi
+    def _get_attached_docs(self):
+        attachment = self.env['ir.attachment']
+        task = self.env['project.task']
+        for rec in self:
+            project_attachments = attachment.search_count([('res_model', '=', 'project.project'), ('res_id', '=', rec.id)])
+            task_ids = task.search([('project_id', '=', rec.id)])
+            task_attachments = attachment.search_count([('res_model', '=', 'project.task'), ('res_id', 'in', task_ids._ids)])
+            rec.doc_count = (project_attachments or 0) + (task_attachments or 0)
+
+    @api.multi
+    def _task_count(self):
+        for tasks in self:
+            tasks.task_count = len(tasks.task_ids)
+
+    @api.model
+    def _get_alias_models(self):
         """ Overriden in project_issue to offer more options """
         return [('project.task', "Tasks")]
 
-    def _get_visibility_selection(self, cr, uid, context=None):
+    @api.model
+    def _get_visibility_selection(self):
         """ Overriden in portal_project to offer more options """
         return [('public', 'Public project'),
                 ('employees', 'Internal project: all employees can access'),
                 ('followers', 'Private project: followers Only')]
 
-    def attachment_tree_view(self, cr, uid, ids, context):
-        task_ids = self.pool.get('project.task').search(cr, uid, [('project_id', 'in', ids)])
+    @api.multi
+    def attachment_tree_view(self):
+        task_ids = self.env['project.task'].search([('project_id', 'in', self._ids)])
         domain = [
              '|',
-             '&', ('res_model', '=', 'project.project'), ('res_id', 'in', ids),
-             '&', ('res_model', '=', 'project.task'), ('res_id', 'in', task_ids)]
-        res_id = ids and ids[0] or False
+             '&', ('res_model', '=', 'project.project'), ('res_id', 'in', self._ids),
+             '&', ('res_model', '=', 'project.task'), ('res_id', 'in', task_ids._ids)]
+        res_id = self._ids and self._ids[0] or False
         return {
             'name': _('Attachments'),
             'domain': domain,
@@ -143,7 +147,8 @@ class project(osv.osv):
             'context': "{'default_res_model': '%s','default_res_id': %d}" % (self._name, res_id)
         }
 
-    def __get_bar_values(self, cr, uid, obj, domain, read_fields, value_field, groupby_field, context=None):
+    @api.model
+    def __get_bar_values(self, obj, domain, read_fields, value_field, groupby_field):
         """ Generic method to generate data for bar chart values using SparklineBarWidget.
             This method performs obj.read_group(cr, uid, domain, read_fields, groupby_field).
 
@@ -164,91 +169,79 @@ class project(osv.osv):
                           'value': 0,
                           'tooltip': (month_begin + relativedelta.relativedelta(months=-i)).strftime('%B'),
                           } for i in range(self._period_number - 1, -1, -1)]
-        group_obj = obj.read_group(cr, uid, domain, read_fields, groupby_field, context=context)
-        pattern = tools.DEFAULT_SERVER_DATE_FORMAT if obj.fields_get(cr, uid, groupby_field)[groupby_field]['type'] == 'date' else tools.DEFAULT_SERVER_DATETIME_FORMAT
+        group_obj = obj.read_group(domain, read_fields, groupby_field)
+        pattern = tools.DEFAULT_SERVER_DATE_FORMAT if obj.fields_get(groupby_field)[groupby_field]['type'] == 'date' else tools.DEFAULT_SERVER_DATETIME_FORMAT
         for group in group_obj:
             group_begin_date = datetime.strptime(group['__domain'][0][2], pattern)
             month_delta = relativedelta.relativedelta(month_begin, group_begin_date)
             section_result[self._period_number - (month_delta.months + 1)] = {'value': group.get(value_field, 0), 'tooltip': group.get(groupby_field, 0)}
         return section_result
 
-    def _get_project_task_data(self, cr, uid, ids, field_name, arg, context=None):
-        obj = self.pool['project.task']
+    @api.multi
+    def _get_project_task_data(self):
+        obj = self.env['project.task']
         month_begin = date.today().replace(day=1)
         date_begin = (month_begin - relativedelta.relativedelta(months=self._period_number - 1)).strftime(tools.DEFAULT_SERVER_DATE_FORMAT)
         date_end = month_begin.replace(day=calendar.monthrange(month_begin.year, month_begin.month)[1]).strftime(tools.DEFAULT_SERVER_DATE_FORMAT)
-        res = {}
-        for id in ids:
-            created_domain = [('project_id', '=', id), ('create_date', '>=', date_begin ), ('create_date', '<=', date_end ), ('stage_id.fold', '=', False)]
-            res[id] = json.dumps(self.__get_bar_values(cr, uid, obj, created_domain, [ 'create_date'], 'create_date_count', 'create_date', context=context))
-        return res
+        for rec in self:
+            created_domain = [('project_id', '=', rec.id), ('create_date', '>=', date_begin), ('create_date', '<=', date_end), ('stage_id.fold', '=', False)]
+            rec.monthly_tasks = json.dumps(self.__get_bar_values(obj, created_domain, ['create_date'], 'create_date_count', 'create_date'))
+
+    @api.model
+    def _get_type_common(self):
+        return self.env['project.task.type'].search([('case_default', '=', 1)])
 
     # Lambda indirection method to avoid passing a copy of the overridable method when declaring the field
     _alias_models = lambda self, *args, **kwargs: self._get_alias_models(*args, **kwargs)
     _visibility_selection = lambda self, *args, **kwargs: self._get_visibility_selection(*args, **kwargs)
 
-    _columns = {
-        'active': fields.boolean('Active', help="If the active field is set to False, it will allow you to hide the project without removing it."),
-        'sequence': fields.integer('Sequence', help="Gives the sequence order when displaying a list of Projects."),
-        'analytic_account_id': fields.many2one(
-            'account.analytic.account', 'Contract/Analytic',
-            help="Link this project to an analytic account if you need financial management on projects. "
-                 "It enables you to connect projects with budgets, planning, cost and revenue analysis, timesheets on projects, etc.",
-            ondelete="cascade", required=True, auto_join=True),
-        'members': fields.many2many('res.users', 'project_user_rel', 'project_id', 'uid', 'Project Members',
-            help="Project's members are users who can have an access to the tasks related to this project.", states={'close':[('readonly',True)], 'cancelled':[('readonly',True)]}),
-        'tasks': fields.one2many('project.task', 'project_id', "Task Activities"),
-        'resource_calendar_id': fields.many2one('resource.calendar', 'Working Time', help="Timetable working hours to adjust the gantt diagram report", states={'close':[('readonly',True)]} ),
-        'type_ids': fields.many2many('project.task.type', 'project_task_type_rel', 'project_id', 'type_id', 'Tasks Stages', states={'close':[('readonly',True)], 'cancelled':[('readonly',True)]}),
-        'task_count': fields.function(_task_count, type='integer', string="Tasks",),
-        'task_ids': fields.one2many('project.task', 'project_id',
-                                    domain=[('stage_id.fold', '=', False)]),
-        'color': fields.integer('Color Index'),
-        'alias_id': fields.many2one('mail.alias', 'Alias', ondelete="restrict", required=True,
-                                    help="Internal email associated with this project. Incoming emails are automatically synchronized"
-                                         "with Tasks (or optionally Issues if the Issue Tracker module is installed)."),
-        'alias_model': fields.selection(_alias_models, "Alias Model", select=True, required=True,
-                                        help="The kind of document created when an email is received on this project's email alias"),
-        'privacy_visibility': fields.selection(_visibility_selection, 'Privacy / Visibility', required=True,
-            help="Holds visibility of the tasks or issues that belong to the current project:\n"
-                    "- Public: everybody sees everything; if portal is activated, portal users\n"
-                    "   see all tasks or issues; if anonymous portal is activated, visitors\n"
-                    "   see all tasks or issues\n"
-                    "- Portal (only available if Portal is installed): employees see everything;\n"
-                    "   if portal is activated, portal users see the tasks or issues followed by\n"
-                    "   them or by someone of their company\n"
-                    "- Employees Only: employees see all tasks or issues\n"
-                    "- Followers Only: employees see only the followed tasks or issues; if portal\n"
-                    "   is activated, portal users see the followed tasks or issues."),
-        'state': fields.selection([('template', 'Template'),
-                                   ('draft','New'),
-                                   ('open','In Progress'),
-                                   ('cancelled', 'Cancelled'),
-                                   ('pending','Pending'),
-                                   ('done','Done')],
-                                  'Status', required=True, copy=False),
-        'monthly_tasks': fields.function(_get_project_task_data, type='char', readonly=True,
-                                             string='Project Task By Month'),
-        'doc_count': fields.function(
-            _get_attached_docs, string="Number of documents attached", type='integer'
-        )
-     }
+    active = fields.Boolean('Active', help="If the active field is set to False, it will allow you to hide the project without removing it.", default=True)
+    sequence = fields.Integer('Sequence', help="Gives the sequence order when displaying a list of Projects.", default=10)
+    analytic_account_id = fields.Many2one(
+        'account.analytic.account', 'Contract/Analytic',
+        help="Link this project to an analytic account if you need financial management on projects. "
+             "It enables you to connect projects with budgets, planning, cost and revenue analysis, timesheets on projects, etc.",
+        ondelete="cascade", required=True, auto_join=True)
+    members = fields.Many2many('res.users', 'project_user_rel', 'project_id', 'uid', 'Project Members',
+        help="Project's members are users who can have an access to the tasks related to this project.", states={'close': [('readonly', True)], 'cancelled': [('readonly', True)]})
+    tasks = fields.One2many('project.task', 'project_id', "Task Activities")
+    resource_calendar_id = fields.Many2one('resource.calendar', 'Working Time', help="Timetable working hours to adjust the gantt diagram report", states={'close':[('readonly',True)]} )
+    type_ids = fields.Many2many('project.task.type', 'project_task_type_rel', 'project_id', 'type_id', 'Tasks Stages', states={'close':[('readonly',True)], 'cancelled':[('readonly',True)]}, default=_get_type_common)
+    task_count = fields.Integer(compute='_task_count', string="Tasks",)
+    task_ids = fields.One2many('project.task', 'project_id',
+                                domain=[('stage_id.fold', '=', False)])
+    color = fields.Integer('Color Index')
+    alias_id = fields.Many2one('mail.alias', 'Alias', ondelete="restrict", required=True,
+                                help="Internal email associated with this project. Incoming emails are automatically synchronized"
+                                     "with Tasks (or optionally Issues if the Issue Tracker module is installed).")
+    alias_model = fields.Selection(_alias_models, "Alias Model", select=True, required=True,
+                                    help="The kind of document created when an email is received on this project's email alias", default='project.task')
+    privacy_visibility = fields.Selection(_visibility_selection, 'Privacy / Visibility', required=True,
+        help="Holds visibility of the tasks or issues that belong to the current project:\n"
+                "- Public: everybody sees everything; if portal is activated, portal users\n"
+                "   see all tasks or issues; if anonymous portal is activated, visitors\n"
+                "   see all tasks or issues\n"
+                "- Portal (only available if Portal is installed): employees see everything;\n"
+                "   if portal is activated, portal users see the tasks or issues followed by\n"
+                "   them or by someone of their company\n"
+                "- Employees Only: employees see all tasks or issues\n"
+                "- Followers Only: employees see only the followed tasks or issues; if portal\n"
+                "   is activated, portal users see the followed tasks or issues.", default='employees')
+    state = fields.Selection([('template', 'Template'),
+                               ('draft','New'),
+                               ('open','In Progress'),
+                               ('cancelled', 'Cancelled'),
+                               ('pending','Pending'),
+                               ('done','Done')],
+                              'Status', required=True, copy=False, default='open')
+    monthly_tasks = fields.Char(compute='_get_project_task_data', readonly=True,
+                                         string='Project Task By Month')
+    doc_count = fields.Integer(compute='_get_attached_docs', string="Number of documents attached")
 
-    def _get_type_common(self, cr, uid, context):
-        ids = self.pool.get('project.task.type').search(cr, uid, [('case_default','=',1)], context=context)
-        return ids
 
     _order = "sequence, id"
-    _defaults = {
-        'active': True,
-        'type': 'contract',
-        'state': 'open',
-        'sequence': 10,
-        'type_ids': _get_type_common,
-        'alias_model': 'project.task',
-        'privacy_visibility': 'employees',
-    }
 
+    @api.v7
     def message_get_suggested_recipients(self, cr, uid, ids, context=None):
         recipients = super(project, self).message_get_suggested_recipients(cr, uid, ids, context=context)
         for data in self.browse(cr, uid, ids, context=context):
@@ -257,24 +250,24 @@ class project(osv.osv):
                 self._message_add_suggested_recipient(cr, uid, recipients, data, partner=data.partner_id, reason= '%s' % reason)
         return recipients
 
-    # TODO: Why not using a SQL contraints ?
-    def _check_dates(self, cr, uid, ids, context=None):
-        for leave in self.read(cr, uid, ids, ['date_start', 'date'], context=context):
+    # TODO: Why not using a SQL contraints ?# TODO: Why not using a SQL contraints ?
+    @api.multi
+    @api.constrains('date_start', 'date')
+    def _check_dates(self):
+        for leave in self.read(['date_start', 'date']):
             if leave['date_start'] and leave['date']:
                 if leave['date_start'] > leave['date']:
-                    return False
-        return True
+                    raise except_orm(_('Error!'), _('project start-date must be lower then project end-date.'))
 
-    _constraints = [
-        (_check_dates, 'Error! project start-date must be lower then project end-date.', ['date_start', 'date'])
-    ]
-
+    @api.v7
     def set_template(self, cr, uid, ids, context=None):
         return self.setActive(cr, uid, ids, value=False, context=context)
 
+    @api.v7
     def reset_project(self, cr, uid, ids, context=None):
         return self.setActive(cr, uid, ids, value=True, context=context)
 
+    @api.v7
     def map_tasks(self, cr, uid, old_project_id, new_project_id, context=None):
         """ copy and map tasks from old to new project """
         if context is None:
@@ -291,6 +284,7 @@ class project(osv.osv):
         task_obj.duplicate_task(cr, uid, map_task_id, context=context)
         return True
 
+    @api.v7
     def copy(self, cr, uid, id, default=None, context=None):
         if default is None:
             default = {}
@@ -303,6 +297,7 @@ class project(osv.osv):
         self.map_tasks(cr, uid, id, res, context=context)
         return res
 
+    @api.v7
     def duplicate_template(self, cr, uid, ids, context=None):
         context = dict(context or {})
         data_obj = self.pool.get('ir.model.data')
@@ -352,6 +347,7 @@ class project(osv.osv):
             }
 
     # set active value for a project, its sub projects and its tasks
+    @api.v7
     def setActive(self, cr, uid, ids, value=True, context=None):
         task_obj = self.pool.get('project.task')
         for proj in self.browse(cr, uid, ids, context=None):
@@ -365,6 +361,7 @@ class project(osv.osv):
                 self.setActive(cr, uid, child_ids, value, context=None)
         return True
 
+    @api.v7
     def _schedule_header(self, cr, uid, ids, force_members=True, context=None):
         context = context or {}
         if type(ids) in (long, int,):
@@ -425,12 +422,14 @@ def Project():
         return result
 
     #TODO: DO Resource allocation and compute availability
+    @api.v7
     def compute_allocation(self, rc, uid, ids, start_date, end_date, context=None):
         if context ==  None:
             context = {}
         allocation = {}
         return allocation
 
+    @api.v7
     def schedule_tasks(self, cr, uid, ids, context=None):
         context = context or {}
         if type(ids) in (long, int,):
@@ -463,6 +462,7 @@ def Project():
                     }, context=context)
         return True
 
+    @api.v7
     def create(self, cr, uid, vals, context=None):
         if context is None:
             context = {}
@@ -483,14 +483,15 @@ def Project():
         self.pool.get('mail.alias').write(cr, uid, [project_rec.alias_id.id], values, context=context)
         return project_id
 
-    def write(self, cr, uid, ids, vals, context=None):
+    @api.multi
+    def write(self, vals):
         # if alias_model has been changed, update alias_model_id accordingly
         if vals.get('alias_model'):
-            model_ids = self.pool.get('ir.model').search(cr, uid, [('model', '=', vals.get('alias_model', 'project.task'))])
+            model_ids = self.env('ir.model').search([('model', '=', vals.get('alias_model', 'project.task'))])
             vals.update(alias_model_id=model_ids[0])
-        return super(project, self).write(cr, uid, ids, vals, context=context)
+        return super(project, self).write(vals)
 
-
+from openerp.osv import fields, osv
 class task(osv.osv):
     _name = "project.task"
     _description = "Task"
