@@ -101,3 +101,7 @@ class Users(osv.Model):
         else:
             excluded_categories = ['forum']
         return super(Users, self).get_serialised_gamification_summary(cr, uid, excluded_categories=excluded_categories, context=context)
+
+    # Wrapper for call_kw with inherits
+    def open_website_url(self, cr, uid, id, context=None):
+        return self.browse(cr, uid, id, context=context).partner_id.open_website_url()[0]

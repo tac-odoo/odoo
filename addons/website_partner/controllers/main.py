@@ -25,7 +25,8 @@ class WebsitePartnerPage(http.Controller):
                 current_country = request.registry['res.country'].browse(request.cr, request.uid, country_ids[0], context=request.context)
         if partner_id:
             partner = request.registry['res.partner'].browse(request.cr, SUPERUSER_ID, partner_id, context=request.context)
-            if partner.exists() and partner.website_published:
+            is_website_publisher = request.registry['res.users'].has_group(request.cr, request.uid, 'base.group_website_publisher')
+            if partner.exists() and (partner.website_published or is_website_publisher):
                 values = {
                     'main_object': partner,
                     'partner': partner,
