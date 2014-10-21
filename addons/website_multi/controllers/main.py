@@ -13,20 +13,13 @@ class website_multi(Website):
     def index(self, **kw):
         cr, uid, context = request.cr, request.uid, request.context
         page = 'homepage'
-        try:
-            website = request.registry['website']
-            website_id = request.context['website_id']
-            website = website.browse(cr, uid, website_id, context=context)
-            main_menu = website.menu_id
-        except Exception:
-            pass
-        else:
-            first_menu = main_menu.child_id and main_menu.child_id[0]
-            if first_menu:
-                if not (first_menu.url.startswith(('/page/', '/?', '/#')) or (first_menu.url == '/')):
-                    return request.redirect(first_menu.url)
-                if first_menu.url.startswith('/page/'):
-                    return request.registry['ir.http'].reroute(first_menu.url)
+        main_menu = request.website.menu_id
+        first_menu = main_menu.child_id and main_menu.child_id[0]
+        if first_menu:
+            if not (first_menu.url.startswith(('/page/', '/?', '/#')) or (first_menu.url == '/')):
+                return request.redirect(first_menu.url)
+            if first_menu.url.startswith('/page/'):
+                return request.registry['ir.http'].reroute(first_menu.url)
         return self.page(page)
 
     @http.route('/website/add/<path:path>', type='http', auth="user", website=True)
