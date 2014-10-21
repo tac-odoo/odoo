@@ -79,8 +79,8 @@ $(document).ready(function () {
             openerp.jsonRpc('/comparison/up_ponderation', 'call', {
                     'comparison_factor_id': +comparison_factor_id,
                 }).then(function () {
-                    alert("Ponderation updated.");
                     location.reload();
+                    alert("Ponderation updated.");
                 });
         })
         .on('click', '.oe_down-ponderation', function(ev) {
@@ -90,8 +90,8 @@ $(document).ready(function () {
             openerp.jsonRpc('/comparison/down_ponderation', 'call', {
                     'comparison_factor_id': +comparison_factor_id,
                 }).then(function () {
-                    alert("Ponderation updated.");
                     location.reload();
+                    alert("Ponderation updated.");
                 });
         });
 });

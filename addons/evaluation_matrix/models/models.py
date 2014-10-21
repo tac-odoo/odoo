@@ -33,6 +33,8 @@ class comparison_factor(models.Model):
         
         return result
 
+    
+
 class comparison_item(models.Model):
     _name = 'comparison_item'
 
