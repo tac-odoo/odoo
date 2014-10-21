@@ -31,7 +31,7 @@
                                     <th width="10"></th>
                                     <th></th>
                                     <t t-foreach="comparison_products" t-as="comparison_product">
-                                        <th t-attf-class="oe_comparison-product" t-att-product-id="comparison_product.id" width="200"><t t-esc="comparison_product.name"/></th>
+                                        <th class="oe_comparison-product center-text-cell" t-att-product-id="comparison_product.id" width="200"><t t-esc="comparison_product.name"/></th>
                                     </t>
                                 </tr>
                             </thead>
@@ -44,42 +44,34 @@
                                         <td></td>
                                         <t t-foreach="comparison_products" t-as="comparison_product">
                                             <td class="center-text-cell vert-align">
-                                                <div class="progress">
-                                                    <div t-attf-class="progress-bar #{ 'progress-bar-success' if comparison_results[comparison_category.id][comparison_product.id] &gt;= 80  else 'progress-bar-danger' if comparison_results[comparison_category.id][comparison_product.id] &lt;= 40 else 'progress-bar-primary'}" role="progressbar" t-attf-aria-valuenow="#{comparison_results[comparison_category.id][comparison_product.id]}" aria-valuemin="0" aria-valuemax="100" t-attf-style="width: #{comparison_results[comparison_category.id][comparison_product.id]}%;">
-                                                        <span>
-                                                            <t t-esc="comparison_results[comparison_category.id][comparison_product.id]"/>
-                                                        </span> %
+                                                <a t-attf-href="##{comparison_category.name}">
+                                                    <div class="progress">
+                                                        <div t-attf-class="progress-bar #{ 'progress-bar-success' if comparison_results[comparison_category.id][comparison_product.id] &gt;= 80  else 'progress-bar-danger' if comparison_results[comparison_category.id][comparison_product.id] &lt;= 40 else 'progress-bar-primary'}" role="progressbar" t-attf-aria-valuenow="#{comparison_results[comparison_category.id][comparison_product.id]}" aria-valuemin="0" aria-valuemax="100" t-attf-style="width: #{comparison_results[comparison_category.id][comparison_product.id]}%;">
+                                                            <span>
+                                                                <t t-esc="comparison_results[comparison_category.id][comparison_product.id]"/>
+                                                            </span> %
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                </a>
                                             </td>
                                         </t>
                                     </tr>
                                 </t>
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <t t-foreach="comparison_products" t-as="comparison_product">
-                                        <td><b><t t-esc="comparison_product.name"/></b></td>
-                                    </t>
-                                </tr>
                                 <t t-foreach="comparison_categories" t-as="comparison_category">
+                                    <tr t-attf-class="separation-categories">
+                                        <td><a t-attf-name="#{comparison_category.name}"></a></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="center-text-cell">Ponderation</td>
+                                        <t t-foreach="comparison_products" t-as="comparison_product">
+                                            <td class="center-text-cell"><b><t t-esc="comparison_product.name"/></b></td>
+                                        </t>
+                                    </tr>
                                     <tr class="row-level-1" t-att-factor-id="comparison_category.id">
                                         <td><a href=""><t t-esc="comparison_category.name"/></a></td>
                                         <td></td>
                                         <td></td>
-                                        <td class="ponderation">
-                                            <t t-esc="comparison_category.ponderation"/>
-                                            <span class="pond"> 
-                                                <a href="" class="oe_up-ponderation">
-                                                    <i style='color:green' class='fa fa-arrow-circle-o-up fa-2x'></i>
-                                                </a> 
-                                                <a href="" class="oe_down-ponderation">
-                                                    <i style='color:red' class='fa fa-arrow-circle-o-down fa-2x'></i>
-                                                </a>
-                                            </span>
-                                        </td>
+                                        <td></td>
                                         <t t-foreach="comparison_products" t-as="comparison_product">
                                             <td class="center-text-cell vert-align">
                                                 <div class="progress">
@@ -130,7 +122,7 @@
                                             </t>
                                         </tr>
                                     </t>
-                                    <tr t-attf-class="row-level-1" t-att-parent-id="comparison_category.id">
+                                    <tr class="row-level-1" t-att-parent-id="comparison_category.id">
                                         <td>
                                             <button type="button" class="btn btn-default oe_create-criterion"><i class="fa fa-plus"></i> Propose new criterion </button>
                                         </td>

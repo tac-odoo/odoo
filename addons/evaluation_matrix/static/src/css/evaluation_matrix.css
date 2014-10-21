@@ -1,13 +1,17 @@
+.separation-categories{
+   border-top: black solid 2px;
+}
+
 .row-level-2 td:first-child{
-   padding-left: 24px !important;
+   padding-left: 30px !important;
 }
 
 .row-level-3 td:first-child{
-   padding-left: 40px !important;
+   padding-left: 50px !important;
 }
 
 .row-level-4 td:first-child{
-   padding-left: 60px !important;
+   padding-left: 90px !important;
 }
 
 .pond{
