@@ -30,12 +30,12 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage):
         country_obj = request.registry['res.country']
         search = post.get('search', '')
 
-        base_partner_domain = [('is_company', '=', True), ('grade_id.website_published', '=', True), ('website_published', '=', True)]
+        base_partner_domain = [('is_company', '=', True), ('grade_id', '!=', False), ('website_published', '=', True)]
         if search:
             base_partner_domain += ['|', ('name', 'ilike', search), ('website_description', 'ilike', search)]
 
         # group by grade
-        grade_domain = list(base_partner_domain)
+        grade_domain = list(base_partner_domain) + [('grade_id.website_published', '=', True)]
         if not country and not country_all:
             country_code = request.session['geoip'].get('country_code')
             if country_code:
@@ -125,6 +125,7 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage):
             'pager': pager,
             'searches': post,
             'search_path': "%s" % werkzeug.url_encode(post),
+            'view_all': request.registry['res.users'].has_group(request.cr, request.uid, 'base.group_website_publisher'),
         }
         return request.website.render("website_crm_partner_assign.index", values)
 

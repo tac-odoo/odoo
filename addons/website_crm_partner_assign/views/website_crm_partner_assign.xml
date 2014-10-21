@@ -76,11 +76,18 @@
                     </div>
                 </div>
                 <div>
+                    <t t-if="not view_all">
+                        <t t-set="partners" t-value="[p for p in partners if p.grade_id.website_published]"/>
+                    </t>
                     <p t-if="not partners">No result found</p>
                     <t t-foreach="partners" t-as="partner">
                         <t t-if="last_grade != partner.grade_id.id">
                             <h3 class="text-center">
                                 <span t-field="partner.grade_id"/> Partners
+                                <t t-call="website.publish_management">
+                                    <t t-set="object" t-value="partner.grade_id"/>
+                                    <t t-set="publish_edit" t-value="True"/>
+                                </t>
                             </h3>
                             <t t-set="last_grade" t-value="partner.grade_id.id"/>
                         </t>

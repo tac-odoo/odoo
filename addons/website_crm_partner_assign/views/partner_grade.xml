@@ -7,9 +7,15 @@
     <field name="model">res.partner.grade</field>
     <field name="inherit_id" ref="crm_partner_assign.view_partner_grade_form"/>
     <field name="arch" type="xml">
-      <field name="active" position="after">
-        <!-- <field name="website_published"/> -->
-      </field>
+      <xpath expr="//div[@class='oe_title']" position="before">
+        <div class="oe_right oe_button_box">
+          <!-- <field name="website_url" invisible="1"/> -->
+          <button class="oe_inline oe_stat_button" name="open_website_url"
+              type="object" icon="fa-globe">
+              <field name="website_published" widget="website_button"/>
+          </button>
+        </div>
+      </xpath>
     </field>
   </record>
 
