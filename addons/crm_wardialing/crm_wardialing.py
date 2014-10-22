@@ -46,6 +46,11 @@ class crm_phonecall(models.Model):
 					appArgs="SIP/"+self.env['ir.values'].get_default('sale.config.settings', 'asterisk_phone'))
 			else:
 				raise osv.except_osv(_('Error!'), _('You tried to call a contact without phone or mobile number.'))
+		except:
+			raise osv.except_osv(_('Error!'), _('The connection to the Asterisk server failed. Please check your configuration.'))
+		try:
+			incoming = client.channels.originate(endpoint="SIP/"+self.opportunity_id.partner_id.phone, app="bridge-dial", 
+				appArgs="SIP/"+self.env['ir.values'].get_default('sale.config.settings', 'asterisk_phone'))
 			self.start_time = int(time.time())
 			
 			def incoming_on_start(channel,event):
