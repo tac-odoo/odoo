@@ -83,16 +83,13 @@ class website(orm.Model):
     @openerp.tools.ormcache(skiparg=4)
     def _get_current_website_id(self, cr, uid, context=None):
         domain_name = request.httprequest.environ.get('HTTP_HOST', '').split(':')[0]
-        website_id = 1
         ids = self.search(cr, uid, [('name', '=', domain_name)], context=context)
-        if ids:
-            website_id = ids[0]
-        return website_id
+        return ids and ids[0] or None
 
     def get_current_website(self, cr, uid, context=None):
         website_id = self._get_current_website_id(cr, uid, context=context)
-        request.context['website_id'] = website_id
-        return self.browse(cr, uid, website_id, context=context)
+        request.context['website_id'] = website_id or 1
+        return self.browse(cr, uid, website_id or 1, context=context)
 
     def get_template(self, cr, uid, ids, template, context=None):
         if not isinstance(template, (int, long)) and '.' not in template:
