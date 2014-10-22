@@ -93,5 +93,14 @@ $(document).ready(function () {
                     location.reload();
                     alert("Ponderation updated.");
                 });
+        })
+        .on('click', '.vote-down,.vote-up,.vote-3rd', function(ev) {
+            ev.preventDefault();
+            var $link = $(ev.currentTarget);
+            openerp.jsonRpc($link.data('href'), 'call', {})
+                .then(function (data) {
+                    location.reload();
+                    alert("Vote updated.")
+                });
         });
 });

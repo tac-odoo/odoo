@@ -5,11 +5,6 @@ from openerp.api import Environment
 from openerp.http import request
 
 class EvaluationMatrix(http.Controller):
-    '''@http.route('/comparison/selection/', auth='public', website=True)
-    def index(self, **kwargs):
-    	Comparison_products = http.request.env['comparison_item']
-        Comparison_factor = http.request.env['comparison_factors']
-    	return http.request.render('evaluation_matrix.index', {})'''
 
     def get_result(self, comparison_factors, comparison_products):
         Comparison_results = http.request.env['comparison_factor_result']
@@ -106,26 +101,6 @@ class EvaluationMatrix(http.Controller):
             'parent_id' : comparison_factor_id,
         }
 
-    '''@http.route(['/comparison/get_categories'], type='json', auth="public", website=True)
-    def get_categories(self, **post):
-        Comparison_factor = http.request.env['comparison_factor']
-        
-        main_categories = Comparison_factor.search([('parent_id','=',False)])
-
-        comparison_categories = []
-        for main_category in main_categories:
-            comparison_categories.append({
-                "id": main_category.id,
-                "name": main_category.name,
-            })
-            for category in main_category.child_ids:
-                comparison_categories.append({
-                    "id": category.id,
-                    "name": category.name,
-                })
-
-        return comparison_categories'''
-
     @http.route(['/comparison/create_criterion'], type='json', auth="public", website=True)
     def create_criterion(self, name, note, parent_id):
         Comparison_factor = http.request.env['comparison_factor']
@@ -166,6 +141,22 @@ class EvaluationMatrix(http.Controller):
                     self.compute_parents(cr,comparison_factor,comparison_item)
                 comparison_factor = comparison_factor.parent_id
 
+
+    @http.route(['/comparison/vote/<value>/<int:factor>/<int:item>/'], type='json', auth='public', website=True)
+    def vote(self, value, factor, item):
+        Comparison_vote = http.request.env['comparison_vote']
+        Comparison_vote_values = http.request.env['comparison_vote_values']
+        if value == 'down':
+            type_vote = 'Feature Not Available'
+        elif value == 'up':
+            type_vote = 'Feature Available'
+        else:
+            type_vote = 'Available From Third Party Product'
+
+        comparison_vote_value = Comparison_vote_values.search([('name','=',type_vote)])
+
+        vals = {'factor_id' : factor, 'item_id' : item, 'score_id' : comparison_vote_value[0]['id'], 'note' : "", 'state' : 'valid'}
+        Comparison_vote.create(vals)
 
 
 

@@ -28,9 +28,9 @@
                             </span> %
                         </div>
                         <div class="votes-buttons">
-                            <button type="button" class="btn btn-danger"><i class="fa fa-close"></i></button>
-                            <button type="button" class="btn btn-info">3rd Party</button>
-                            <button type="button" class="btn btn-success"><i class="fa fa-check"></i></button>
+                            <button type="button" class="vote-down btn btn-danger" t-attf-data-href="/comparison/vote/down/#{comp_factor_child.id}/#{comparison_product.id}"><i class="fa fa-close"></i></button>
+                            <button type="button" class="vote-3rd btn btn-info" t-attf-data-href="/comparison/vote/3rd/#{comp_factor_child.id}/#{comparison_product.id}">3rd Party</button>
+                            <button type="button" class="vote-up btn btn-success" t-attf-data-href="/comparison/vote/up/#{comp_factor_child.id}/#{comparison_product.id}"><i class="fa fa-check"></i></button>
                         </div>
                     </td>
                 </t>
