@@ -153,8 +153,7 @@ class view(osv.osv):
                 editable=request.website.is_publisher(),
                 menu_data=self.pool['ir.ui.menu'].load_menus_root(cr, uid, context=context) if request.website.is_user() else None,
             )
-            import pprint
-            pprint.pprint(qcontext)
+
             # add some values
             if values:
                 qcontext.update(values)

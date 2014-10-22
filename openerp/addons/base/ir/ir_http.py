@@ -69,13 +69,10 @@ class ir_http(osv.AbstractModel):
         request.uid = None
 
     def _auth_method_public(self):
-        print "authenticate"
-
         if not request.session.uid:
             dummy, request.uid = self.pool['ir.model.data'].get_object_reference(request.cr, openerp.SUPERUSER_ID, 'base', 'public_user')
         else:
             request.uid = request.session.uid
-        return 'ir_http'
 
     def _authenticate(self, auth_method='user'):
         try:

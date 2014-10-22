@@ -81,18 +81,16 @@ class website(orm.Model):
         return page_xmlid
 
     @openerp.tools.ormcache(skiparg=4)
-    def _get_current_website_id(self, cr, uid, domain_name, context=None):
+    def _get_current_website_id(self, cr, uid, context=None):
+        domain_name = request.httprequest.environ.get('HTTP_HOST', '').split(':')[0]
         website_id = 1
-        ids = self.search(cr, uid, [
-            ('name', '=', domain_name)
-        ], context=context)
+        ids = self.search(cr, uid, [('name', '=', domain_name)], context=context)
         if ids:
             website_id = ids[0]
         return website_id
 
     def get_current_website(self, cr, uid, context=None):
-        domain_name = request.httprequest.environ.get('HTTP_HOST', '').split(':')[0]
-        website_id = self._get_current_website_id(cr, uid, domain_name, context=context)
+        website_id = self._get_current_website_id(cr, uid, context=context)
         request.context['website_id'] = website_id
         return self.browse(cr, uid, website_id, context=context)
 
@@ -111,12 +109,10 @@ class ir_http(osv.AbstractModel):
 
     def _auth_method_public(self):
         if not request.session.uid:
-            if request.website and request.website.user_id:
-                request.uid = request.website.user_id.id
-                print "set user id", request.website.user_id.name
+            website_id = self.pool['website']._get_current_website_id(request.cr, openerp.SUPERUSER_ID, context=request.context)
+            if website_id:
+                request.uid = self.pool['website'].browse(request.cr, openerp.SUPERUSER_ID, website_id, request.context).user_id.id
             else:
                 dummy, request.uid = self.pool['ir.model.data'].get_object_reference(request.cr, openerp.SUPERUSER_ID, 'base', 'public_user')
         else:
             request.uid = request.session.uid
-            
-    
