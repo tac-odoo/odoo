@@ -130,7 +130,7 @@ class hr_evaluation(models.Model):
         if self.employee_id and self.department_id and self.date_close:
             date_closed = datetime.strptime(self.date_close, DEFAULT_SERVER_DATE_FORMAT)
             appraisal_ids = self.search([
-                ('employee_id', '=', self.employee_id.id), ('department_id', '=', selfself.department_id.id),
+                ('employee_id', '=', self.employee_id.id), ('department_id', '=', self.department_id.id),
                 ('date_close', '<=', time.strftime('%Y-' + str(date_closed.month) + '-' + str(date_closed.day))),
                 ('date_close', '>=', time.strftime('%Y-' + str(date_closed.month) + '-01'))])
             if len(appraisal_ids) > 1:
@@ -217,7 +217,7 @@ class hr_evaluation(models.Model):
                     partner_id = mail_obj._find_partner_from_emails(email) or emp.user_id.partner_id or None
                     token = self.create_token(email, record['survey_id'], partner_id)[0]
                     self.update_appraisal_url(record['survey_id'].public_url, email, token)
-                    self.mail_template.send_mail(self.id, force_send=True)
+                    self.mail_template.send_mail(self.id, force_send=False)
         return True
 
     @api.one
