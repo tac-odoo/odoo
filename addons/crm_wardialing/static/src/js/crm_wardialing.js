@@ -1,5 +1,4 @@
 
-
 openerp.crm_wardialing = function(instance) {
 
     var _t = openerp._t;
@@ -73,7 +72,8 @@ openerp.crm_wardialing = function(instance) {
 
         start: function() {
             var self = this;
-            
+            ari_client = new openerp.ari_client();
+            ari_client.init();
             //To get the formatCurrency function from the server
             new instance.web.Model("res.currency")
                 .call("get_format_currencies_js_function")
@@ -237,6 +237,11 @@ openerp.crm_wardialing = function(instance) {
 
         //action done when the button "call" is clicked
         call_button: function(){
+            console.log("asterisk_conf");
+            new openerp.web.Model("crm.phonecall").call("get_asterisk_config").then(function(result){
+                console.log(result);
+
+            });
             var phonecall_model = new openerp.web.Model("crm.phonecall");
             var self = this;
             if(this.$el.find(".oe_dial_selected_phonecall").find(".phonecall_id").text() != ''){

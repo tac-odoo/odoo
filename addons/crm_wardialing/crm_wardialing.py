@@ -7,6 +7,7 @@ from requests import HTTPError
 import time
 from openerp.osv import osv, expression
 from openerp.tools.translate import _
+import openerp
 #----------------------------------------------------------
 # Models
 #----------------------------------------------------------
@@ -31,11 +32,20 @@ class crm_phonecall(models.Model):
 			client = ari.connect(self.env['ir.values'].get_default('sale.config.settings', 'asterisk_url'), 
 				self.env['ir.values'].get_default('sale.config.settings', 'asterisk_login'), 
 				self.env['ir.values'].get_default('sale.config.settings', 'asterisk_password'))
-		except:
+		except Exception:
+			#_, action_id = self.env['ir.model.data'].xmlid_to_res_model_res_id('base_setup.action_sale_config')
+			# msg = "The connection to the Asterisk server failed. Please check your configuration."
+			#raise openerp.exceptions.RedirectWarning("test", action_id, _('Configure Asterisk Server Now'))
 			raise osv.except_osv(_('Error!'), _('The connection to the Asterisk server failed. Please check your configuration.'))
 		try:
-			incoming = client.channels.originate(endpoint="SIP/"+self.opportunity_id.partner_id.phone, app="bridge-dial", 
-				appArgs="SIP/"+self.env['ir.values'].get_default('sale.config.settings', 'asterisk_phone'))
+			if(self.opportunity_id.partner_id.phone):
+				incoming = client.channels.originate(endpoint="SIP/"+self.opportunity_id.partner_id.phone, app="bridge-dial", 
+					appArgs="SIP/"+self.env['ir.values'].get_default('sale.config.settings', 'asterisk_phone'))
+			elif(self.opportunity_id.partner_id.mobile):
+				incoming = client.channels.originate(endpoint="SIP/"+self.opportunity_id.partner_id.mobile, app="bridge-dial", 
+					appArgs="SIP/"+self.env['ir.values'].get_default('sale.config.settings', 'asterisk_phone'))
+			else:
+				raise osv.except_osv(_('Error!'), _('You tried to call a contact without phone or mobile number.'))
 			self.start_time = int(time.time())
 			
 			def incoming_on_start(channel,event):
@@ -97,6 +107,12 @@ class crm_phonecall(models.Model):
 	def get_list(self, current_search):
 		return {"phonecalls": self.search([('to_call','=',True)], order='sequence, id').get_info()}
 
+	@api.model
+	def get_asterisk_config(self):
+		return {'url':self.env['ir.values'].get_default('sale.config.settings', 'asterisk_url'), 
+				'login':self.env['ir.values'].get_default('sale.config.settings', 'asterisk_login'), 
+				'password':self.env['ir.values'].get_default('sale.config.settings', 'asterisk_password')}
+				
 class crm_lead(models.Model):
 	_inherit = "crm.lead"
 	in_call_center_queue = fields.Boolean("Is in the Call Center Queue", compute='compute_is_call_center')

@@ -40,11 +40,11 @@
             <input class="oe_dial_searchbox" t-att-placeholder="_t('Search phonecalls...')"/>
             <span class="oe_e oe_dial_search_clear">[</span>
             <div style="float:right;">
-                <a href="#">
-                        <i title="Refresh the Panel" class="oe_dial_refresh_icon fa fa-refresh"></i>
+                <a href="#" title="Refresh the Panel">
+                        <i class="oe_dial_refresh_icon fa fa-refresh"></i>
                 </a>
-                <a href="#">
-                        <i title="Close the Panel" class="oe_dial_close_icon fa fa-times"></i>
+                <a href="#" title="Close the Panel">
+                        <i class="oe_dial_close_icon fa fa-times"></i>
                 </a>
             </div>
         </div>
