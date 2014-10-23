@@ -38,6 +38,8 @@ class crm_phonecall(models.Model):
 			#raise openerp.exceptions.RedirectWarning("test", action_id, _('Configure Asterisk Server Now'))
 			raise osv.except_osv(_('Error!'), _('The connection to the Asterisk server failed. Please check your configuration.'))
 		try:
+			print(self.opportunity_id.partner_id.phone)
+			print(self.env['ir.values'].get_default('sale.config.settings', 'asterisk_phone'))
 			if(self.opportunity_id.partner_id.phone):
 				incoming = client.channels.originate(endpoint="SIP/"+self.opportunity_id.partner_id.phone, app="bridge-dial", 
 					appArgs="SIP/"+self.env['ir.values'].get_default('sale.config.settings', 'asterisk_phone'))
@@ -49,8 +51,6 @@ class crm_phonecall(models.Model):
 		except:
 			raise osv.except_osv(_('Error!'), _('The connection to the Asterisk server failed. Please check your configuration.'))
 		try:
-			incoming = client.channels.originate(endpoint="SIP/"+self.opportunity_id.partner_id.phone, app="bridge-dial", 
-				appArgs="SIP/"+self.env['ir.values'].get_default('sale.config.settings', 'asterisk_phone'))
 			self.start_time = int(time.time())
 			
 			def incoming_on_start(channel,event):
