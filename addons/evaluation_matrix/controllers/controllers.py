@@ -14,31 +14,6 @@ class EvaluationMatrix(http.Controller):
             comparison_results[ result.factor_id.id ][ result.item_id.id ] = int(round(result.result, 0))
         return comparison_results
 
-    def compute_parents(self, cr, factor, item):
-
-        if factor.parent_id:
-            Comparison_result =  http.request.env['comparison_factor_result']
-
-            final_score = 0.0
-
-            children_tot_ponderation = 0.0
-            for child in factor.parent_id.child_ids:
-                children_tot_ponderation += child.ponderation
-
-            all_children = (','.join([str(x.id) for x in factor.parent_id.child_ids]))
-
-            cr.execute("select cfr.result,cf.ponderation from comparison_factor_result as cfr,comparison_factor as cf where cfr.item_id=%s and cfr.votes > 0.0 and cfr.factor_id = cf.id and cf.id in (%s)"%(item.id,all_children))
-            res = cr.fetchall()
-
-            if res:
-                for record in res:
-                    final_score += (record[0] * record[1])
-
-                final_score = final_score / children_tot_ponderation
-
-                parent_result = Comparison_result.search([('factor_id', '=', factor.parent_id.id),('item_id', '=', item.id)])
-                parent_result[0]['result'] = final_score
-                Comparison_result.write(parent_result[0])
 
     @http.route(['/comparison',
                  '/comparison/<first_product>',
@@ -110,37 +85,37 @@ class EvaluationMatrix(http.Controller):
 
     @http.route(['/comparison/up_ponderation'], type='json', auth="public", website=True)
     def up_ponderation(self, comparison_factor_id):
-        cr = request.cr
         Comparison_factor = http.request.env['comparison_factor']
+        Comparison_vote = http.request.env['comparison_vote']
         Comparison_item = http.request.env['comparison_item']
 
         comparison_factor = Comparison_factor.browse([(comparison_factor_id)])
 
-        comparison_factor.ponderation += 0.1
-        Comparison_factor.write([comparison_factor])
+        new_pond = comparison_factor.ponderation + 0.1
+        comparison_factor.write({'ponderation' : new_pond})
         comparison_items = Comparison_item.search([])
         while(comparison_factor and comparison_factor.parent_id):
             for comparison_item in comparison_items:
-                self.compute_parents(cr,comparison_factor,comparison_item)
+                Comparison_vote.compute_parents('up_ponderation',comparison_factor,comparison_item)
             comparison_factor = comparison_factor.parent_id
 
     @http.route(['/comparison/down_ponderation'], type='json', auth="public", website=True)
     def down_ponderation(self, comparison_factor_id):
-        cr = request.cr
         Comparison_factor = http.request.env['comparison_factor']
+        Comparison_vote = http.request.env['comparison_vote']
         Comparison_item = http.request.env['comparison_item']
 
         comparison_factor = Comparison_factor.browse([(comparison_factor_id)])
 
         if comparison_factor.ponderation >= 0.1:
-            comparison_factor.ponderation -= 0.1
-            Comparison_factor.write([comparison_factor])
+            new_pond = comparison_factor.ponderation - 0.1
+            comparison_factor.write({'ponderation' : new_pond})
             comparison_items = Comparison_item.search([])
             while(comparison_factor and comparison_factor.parent_id):
                 for comparison_item in comparison_items:
-                    self.compute_parents(cr,comparison_factor,comparison_item)
+                    Comparison_vote.compute_parents('up_ponderation',comparison_factor,comparison_item)
                 comparison_factor = comparison_factor.parent_id
-
+            
 
     @http.route(['/comparison/vote/<value>/<int:factor>/<int:item>/'], type='json', auth='public', website=True)
     def vote(self, value, factor, item):

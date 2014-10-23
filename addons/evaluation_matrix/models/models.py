@@ -21,7 +21,7 @@ class comparison_factor(models.Model):
 
     @api.model
     def create(self, vals):
-        result = super(comparison_factor, self).create(vals)
+        result = super(comparison_factor,self).create(vals)
         
         obj_item = self.env['comparison_item']
         obj_factor_result = self.env['comparison_factor_result']
@@ -29,7 +29,7 @@ class comparison_factor(models.Model):
         for item in obj_item.search([]):
             obj_factor_result.create({'factor_id':result[0]['id'],'item_id':item.id})
         
-        return result  
+        return result 
 
 class comparison_item(models.Model):
     _name = 'comparison_item'
@@ -73,7 +73,7 @@ class comparison_vote(models.Model):
     note = fields.Text(string="Note")
     state = fields.Selection([('draft','Draft'),('valid','Valide'),('cancel','Cancel')], string="Status", required=True, readonly=True)
 
-    def compute_parents(self, factor, item):
+    def compute_parents(self, origin, factor, item):
         cr = self._cr
         if factor.parent_id:
             Comparison_result =  self.env['comparison_factor_result']
@@ -84,11 +84,9 @@ class comparison_vote(models.Model):
                 children_tot_ponderation += child.ponderation
 
             all_children = (','.join([str(x.id) for x in factor.parent_id.child_ids]))
-            print all_children
-            print item.id
+
             cr.execute("select cfr.result,cf.ponderation from comparison_factor_result as cfr,comparison_factor as cf where cfr.item_id=%s and cfr.votes > 0.0 and cfr.factor_id = cf.id and cf.id in (%s)"%(item.id,all_children))
             res = cr.fetchall()
-            print res
 
             if res:
                 for record in res:
@@ -98,7 +96,8 @@ class comparison_vote(models.Model):
 
                 parent_result = Comparison_result.search([('factor_id', '=', factor.parent_id.id),('item_id', '=', item.id)])
                 parent_result.result = final_score
-                parent_result.votes += 1
+                if origin == 'create_vote':
+                    parent_result.votes += 1
                 Comparison_result.write(parent_result)
 
     @api.model
@@ -124,7 +123,7 @@ class comparison_vote(models.Model):
             factor = obj_vote.factor_id
             item_obj = obj_vote.item_id
             while (factor and  factor.parent_id):
-                self.compute_parents(factor, item_obj)
+                self.compute_parents('create_vote', factor, item_obj)
                 factor = factor.parent_id
 
         return result
