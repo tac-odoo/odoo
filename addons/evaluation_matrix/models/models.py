@@ -11,7 +11,7 @@ class comparison_factor(models.Model):
     child_ids = fields.One2many('comparison_factor', 'parent_id', string="Child Factors")
     note = fields.Text(string="Note")
     type = fields.Selection([('view','Category'),('criterion','Criteria')], default='criterion',string="Type", required=True)
-    #result_ids = fields.One2many('comparison.factor.result', 'factor_id', string="Results")
+    #result_ids = fields.One2many('comparison_factor_result', 'factor_id', string="Results")
     ponderation = fields.Float(string="Ponderation", default=0)
     state = fields.Selection([('draft','Draft'),('open','Open')], default='open',string="Status", required=True)
 
@@ -73,12 +73,59 @@ class comparison_vote(models.Model):
     note = fields.Text(string="Note")
     state = fields.Selection([('draft','Draft'),('valid','Valide'),('cancel','Cancel')], string="Status", required=True, readonly=True)
 
+    def compute_parents(self, factor, item):
+        cr = self._cr
+        if factor.parent_id:
+            Comparison_result =  self.env['comparison_factor_result']
+            final_score = 0.0
+
+            children_tot_ponderation = 0.0
+            for child in factor.parent_id.child_ids:
+                children_tot_ponderation += child.ponderation
+
+            all_children = (','.join([str(x.id) for x in factor.parent_id.child_ids]))
+            print all_children
+            print item.id
+            cr.execute("select cfr.result,cf.ponderation from comparison_factor_result as cfr,comparison_factor as cf where cfr.item_id=%s and cfr.votes > 0.0 and cfr.factor_id = cf.id and cf.id in (%s)"%(item.id,all_children))
+            res = cr.fetchall()
+            print res
+
+            if res:
+                for record in res:
+                    final_score += (record[0] * record[1])
+
+                final_score = final_score / children_tot_ponderation
+
+                parent_result = Comparison_result.search([('factor_id', '=', factor.parent_id.id),('item_id', '=', item.id)])
+                parent_result.result = final_score
+                parent_result.votes += 1
+                Comparison_result.write(parent_result)
+
     @api.model
     def create(self, vals):
         result = super(comparison_vote,self).create(vals)
         obj_factor = self.env['comparison_factor']
         obj_factor_result = self.env['comparison_factor_result']
         obj_vote_values = self.env['comparison_vote_values']
+        pond_div = 5.0
+
+        for obj_vote in result:
+            obj_result = obj_factor_result.search([('factor_id','=',obj_vote.factor_id.id),('item_id','=',obj_vote.item_id.id)])
+            votes_old = obj_result[0]['votes']
+            score = (obj_vote.score_id.vote / float(pond_div)) * 100
+
+            if votes_old:
+                score = (score + obj_result[0]['result']) / 2
+
+            obj_result.votes = votes_old + 1
+            obj_result.result = score
+            obj_factor_result.write(obj_result)
+
+            factor = obj_vote.factor_id
+            item_obj = obj_vote.item_id
+            while (factor and  factor.parent_id):
+                self.compute_parents(factor, item_obj)
+                factor = factor.parent_id
 
         return result
 
@@ -87,6 +134,6 @@ class comparison_factor_result(models.Model):
 
     factor_id = fields.Many2one('comparison_factor', string="Factor", required=True, ondelete="cascade", readonly=True)
     item_id = fields.Many2one('comparison_item', string="Item", ondelete="cascade", required=True, readonly=True)
-    votes = fields.Float(string="Votes", readonly=True, default=0)
+    votes = fields.Float(string="Votes", readonly=True, default=0.0)
     result = fields.Float(string="Goodness(%)" ,readonly=True, digits=(16,3), default=0) 
     # This field must be recomputed each time we add a vote
