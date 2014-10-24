@@ -2641,12 +2641,13 @@ class stock_inventory(osv.osv):
         inventory_line_obj = self.pool.get('stock.inventory.line')
         for inventory in self.browse(cr, uid, ids, context=context):
             #clean the existing inventory lines before redoing an inventory proposal
+            # INSTEAD: if there are already inventory lines, respect those
             line_ids = [line.id for line in inventory.line_ids]
-            inventory_line_obj.unlink(cr, uid, line_ids, context=context)
-            #compute the inventory lines and create them
-            vals = self._get_inventory_lines(cr, uid, inventory, context=context)
-            for product_line in vals:
-                inventory_line_obj.create(cr, uid, product_line, context=context)
+            if not line_ids:
+                #compute the inventory lines and create them
+                vals = self._get_inventory_lines(cr, uid, inventory, context=context)
+                for product_line in vals:
+                    inventory_line_obj.create(cr, uid, product_line, context=context)
         return self.write(cr, uid, ids, {'state': 'confirm', 'date': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
 
     def _get_inventory_lines(self, cr, uid, inventory, context=None):
