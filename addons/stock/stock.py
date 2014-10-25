@@ -2284,11 +2284,21 @@ class stock_move(osv.osv):
         link_obj = self.pool.get('stock.move.operation.link')
         to_delete = link_obj.search(cr, uid, [('move_id', 'in', 'ids')], context=context)
         link_obj.unlink(cr, uid, to_delete, context=context)
+        quant_obj = self.pool.get("stock.quant")
         for ops, move in quants_moved.keys():
             for quant in quants_moved[(ops, move)]:
-                link_obj.create(cr, uid, {'move_id': move.id,
-                                          'operation_id': ops.id,
-                                          'reserved_quant_id': quant.id}, context=context)
+                if quant.qty > 0:
+                    link_obj.create(cr, uid, {'move_id': move.id,
+                                              'operation_id': ops.id,
+                                              'reserved_quant_id': quant.id,
+                                              'qty': quant.qty}, context=context)
+                else:
+                    quants = quant_obj.search(cr, uid, [('propagated_from_id', '=', quant.id)], context=context)
+                    if quants:
+                        link_obj.create(cr, uid, {'move_id': move.id,
+                                              'operation_id': ops.id,
+                                              'reserved_quant_id': quants[0],
+                                              'qty': - quant.qty}, context=context)
 
 
     def action_done(self, cr, uid, ids, context=None):
