@@ -487,12 +487,11 @@ def Project():
     def write(self, vals):
         # if alias_model has been changed, update alias_model_id accordingly
         if vals.get('alias_model'):
-            model_ids = self.env('ir.model').search([('model', '=', vals.get('alias_model', 'project.task'))])
+            model_ids = self.env['ir.model'].search([('model', '=', vals.get('alias_model', 'project.task'))])
             vals.update(alias_model_id=model_ids[0])
         return super(project, self).write(vals)
 
-from openerp.osv import fields, osv
-class task(osv.osv):
+class task(models.Model):
     _name = "project.task"
     _description = "Task"
     _date_name = "date_start"
@@ -514,23 +513,27 @@ class task(osv.osv):
         },
     }
 
-    def _get_default_partner(self, cr, uid, context=None):
-        project_id = self._get_default_project_id(cr, uid, context)
+    @api.model
+    def _get_default_partner(self):
+        project_id = self._get_default_project_id()
         if project_id:
-            project = self.pool.get('project.project').browse(cr, uid, project_id, context=context)
+            project = self.env['project.project'].browse(project_id)
             if project and project.partner_id:
                 return project.partner_id.id
         return False
 
-    def _get_default_project_id(self, cr, uid, context=None):
+    @api.model
+    def _get_default_project_id(self):
         """ Gives default section by checking if present in the context """
-        return (context.get('default_project_id') or False)
+        return (self._context.get('default_project_id') or False)
 
-    def _get_default_stage_id(self, cr, uid, context=None):
+    @api.model
+    def _get_default_stage_id(self):
         """ Gives default stage_id """
-        project_id = self._get_default_project_id(cr, uid, context=context)
-        return self.stage_find(cr, uid, [], project_id, [('fold', '=', False)], context=context)
+        project_id = self._get_default_project_id()
+        return self.stage_find([], project_id, [('fold', '=', False)])
 
+    @api.v7
     def _read_group_stage_ids(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
         stage_obj = self.pool.get('project.task.type')
         order = stage_obj._order
@@ -552,6 +555,7 @@ class task(osv.osv):
             fold[stage.id] = stage.fold or False
         return result, fold
 
+    @api.v7
     def _read_group_user_id(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
         res_users = self.pool.get('res.users')
         project_id = context.get('default_project_id')
@@ -574,27 +578,37 @@ class task(osv.osv):
         'user_id': _read_group_user_id,
     }
 
-    def onchange_remaining(self, cr, uid, ids, remaining=0.0, planned=0.0):
-        if remaining and not planned:
-            return {'value': {'planned_hours': remaining}}
+    @api.onchange('remaining_hours', 'planned_hours')
+    def onchange_remaining(self):
+        if self.remaining_hours and not self.planned_hours:
+            return {'value': {'planned_hours': self.remaining_hours}}
         return {}
 
-    def onchange_planned(self, cr, uid, ids, planned=0.0, effective=0.0):
+    @api.onchange('planned_hours')
+    def onchange_planned(self):
+        planned = self['planned_hours'] or 0.0
+        if 'effective_hours' in dir(self):
+            effective = self['effective_hours']
+        else:
+            effective = 0.0
         return {'value': {'remaining_hours': planned - effective}}
 
-    def onchange_project(self, cr, uid, id, project_id, context=None):
-        if project_id:
-            project = self.pool.get('project.project').browse(cr, uid, project_id, context=context)
+    @api.onchange('project_id')
+    def onchange_project(self):
+        if self.project_id:
+            project = self.env['project.project'].browse(self.project_id.id)
             if project and project.partner_id:
                 return {'value': {'partner_id': project.partner_id.id}}
         return {}
 
-    def onchange_user_id(self, cr, uid, ids, user_id, context=None):
+    @api.onchange('user_id')
+    def onchange_user_id(self):
         vals = {}
-        if user_id:
+        if self.user_id:
             vals['date_start'] = fields.datetime.now()
         return {'value': vals}
 
+    @api.v7
     def duplicate_task(self, cr, uid, map_ids, context=None):
         mapper = lambda t: map_ids.get(t.id, t.id)
         for task in self.browse(cr, uid, map_ids.values(), context):
@@ -604,6 +618,7 @@ class task(osv.osv):
                 task.write({'parent_ids': [(6,0,list(new_parent_ids))],
                             'child_ids':  [(6,0,list(new_child_ids))]})
 
+    @api.v7
     def copy_data(self, cr, uid, id, default=None, context=None):
         if default is None:
             default = {}
@@ -612,114 +627,92 @@ class task(osv.osv):
             default['name'] = _("%s (copy)") % current.name
         return super(task, self).copy_data(cr, uid, id, default, context)
 
-    def _is_template(self, cr, uid, ids, field_name, arg, context=None):
-        res = {}
-        for task in self.browse(cr, uid, ids, context=context):
-            res[task.id] = True
+    @api.multi
+    def _is_template(self):
+        for task in self:
+            task.active = True
             if task.project_id:
                 if task.project_id.active == False or task.project_id.state == 'template':
-                    res[task.id] = False
-        return res
+                    task.active = False
 
-    _columns = {
-        'active': fields.function(_is_template, store=True, string='Not a Template Task', type='boolean', help="This field is computed automatically and have the same behavior than the boolean 'active' field: if the task is linked to a template or unactivated project, it will be hidden unless specifically asked."),
-        'name': fields.char('Task Summary', track_visibility='onchange', size=128, required=True, select=True),
-        'description': fields.html('Description'),
-        'priority': fields.selection([('0','Low'), ('1','Normal'), ('2','High')], 'Priority', select=True),
-        'sequence': fields.integer('Sequence', select=True, help="Gives the sequence order when displaying a list of tasks."),
-        'stage_id': fields.many2one('project.task.type', 'Stage', track_visibility='onchange', select=True,
-                        domain="[('project_ids', '=', project_id)]", copy=False),
-        'tag_ids': fields.many2many('project.tags', string='Tags'),
-        'kanban_state': fields.selection([('normal', 'In Progress'),('done', 'Ready for next stage'),('blocked', 'Blocked')], 'Kanban State',
-                                         track_visibility='onchange',
-                                         help="A task's kanban state indicates special situations affecting it:\n"
-                                              " * Normal is the default situation\n"
-                                              " * Blocked indicates something is preventing the progress of this task\n"
-                                              " * Ready for next stage indicates the task is ready to be pulled to the next stage",
-                                         required=False, copy=False),
-        'create_date': fields.datetime('Create Date', readonly=True, select=True),
-        'write_date': fields.datetime('Last Modification Date', readonly=True, select=True), #not displayed in the view but it might be useful with base_action_rule module (and it needs to be defined first for that)
-        'date_start': fields.datetime('Starting Date', select=True, copy=False),
-        'date_end': fields.datetime('Ending Date', select=True, copy=False),
-        'date_deadline': fields.date('Deadline', select=True, copy=False),
-        'date_last_stage_update': fields.datetime('Last Stage Update', select=True, copy=False),
-        'project_id': fields.many2one('project.project', 'Project', ondelete='set null', select=True, track_visibility='onchange', change_default=True),
-        'parent_ids': fields.many2many('project.task', 'project_task_parent_rel', 'task_id', 'parent_id', 'Parent Tasks'),
-        'child_ids': fields.many2many('project.task', 'project_task_parent_rel', 'parent_id', 'task_id', 'Delegated Tasks'),
-        'notes': fields.text('Notes'),
-        'planned_hours': fields.float('Initially Planned Hours', help='Estimated time to do the task, usually set by the project manager when the task is in draft state.'),
-        'remaining_hours': fields.float('Remaining Hours', digits=(16,2), help="Total remaining time, can be re-estimated periodically by the assignee of the task."),
-        'user_id': fields.many2one('res.users', 'Assigned to', select=True, track_visibility='onchange'),
-        'delegated_user_id': fields.related('child_ids', 'user_id', type='many2one', relation='res.users', string='Delegated To'),
-        'partner_id': fields.many2one('res.partner', 'Customer'),
-        'manager_id': fields.related('project_id', 'analytic_account_id', 'user_id', type='many2one', relation='res.users', string='Project Manager'),
-        'company_id': fields.many2one('res.company', 'Company'),
-        'id': fields.integer('ID', readonly=True),
-        'color': fields.integer('Color Index'),
-        'user_email': fields.related('user_id', 'email', type='char', string='User Email', readonly=True),
-    }
-    _defaults = {
-        'stage_id': _get_default_stage_id,
-        'project_id': _get_default_project_id,
-        'date_last_stage_update': fields.datetime.now,
-        'kanban_state': 'normal',
-        'priority': '0',
-        'sequence': 10,
-        'active': True,
-        'user_id': lambda obj, cr, uid, ctx=None: uid,
-        'company_id': lambda self, cr, uid, ctx=None: self.pool.get('res.company')._company_default_get(cr, uid, 'project.task', context=ctx),
-        'partner_id': lambda self, cr, uid, ctx=None: self._get_default_partner(cr, uid, context=ctx),
-        'date_start': fields.datetime.now,
-    }
+    active = fields.Boolean(compute='_is_template', store=True, string='Not a Template Task', help="This field is computed automatically and have the same behavior than the boolean 'active' field: if the task is linked to a template or unactivated project, it will be hidden unless specifically asked.", default=True)
+    name = fields.Char('Task Summary', track_visibility='onchange', size=128, required=True, select=True)
+    description = fields.Html('Description')
+    priority = fields.Selection([('0','Low'), ('1','Normal'), ('2','High')], 'Priority', select=True, default='0')
+    sequence = fields.Integer('Sequence', select=True, help="Gives the sequence order when displaying a list of tasks.", default=10)
+    stage_id = fields.Many2one('project.task.type', 'Stage', track_visibility='onchange', select=True,
+                    domain="[('project_ids', '=', project_id)]", copy=False, default=_get_default_stage_id)
+    tag_ids = fields.Many2many('project.tags', string='Tags')
+    kanban_state = fields.Selection([('normal', 'In Progress'),('done', 'Ready for next stage'),('blocked', 'Blocked')], 'Kanban State',
+                                     track_visibility='onchange',
+                                     help="A task's kanban state indicates special situations affecting it:\n"
+                                          " * Normal is the default situation\n"
+                                          " * Blocked indicates something is preventing the progress of this task\n"
+                                          " * Ready for next stage indicates the task is ready to be pulled to the next stage",
+                                     required=False, copy=False, default='normal')
+    create_date = fields.Datetime('Create Date', readonly=True, select=True)
+    write_date = fields.Datetime('Last Modification Date', readonly=True, select=True) #not displayed in the view but it might be useful with base_action_rule module (and it needs to be defined first for that)
+    date_start = fields.Datetime('Starting Date', select=True, copy=False, default=fields.Datetime.now)
+    date_end = fields.Datetime('Ending Date', select=True, copy=False)
+    date_deadline = fields.Date('Deadline', select=True, copy=False)
+    date_last_stage_update = fields.Datetime('Last Stage Update', select=True, copy=False, default=fields.Datetime.now)
+    project_id = fields.Many2one('project.project', 'Project', ondelete='set null', select=True, track_visibility='onchange', change_default=True, default=_get_default_project_id)
+    parent_ids = fields.Many2many('project.task', 'project_task_parent_rel', 'task_id', 'parent_id', 'Parent Tasks')
+    child_ids = fields.Many2many('project.task', 'project_task_parent_rel', 'parent_id', 'task_id', 'Delegated Tasks')
+    notes = fields.Text('Notes')
+    planned_hours = fields.Float('Initially Planned Hours', help='Estimated time to do the task, usually set by the project manager when the task is in draft state.')
+    remaining_hours = fields.Float('Remaining Hours', digits=(16,2), help="Total remaining time, can be re-estimated periodically by the assignee of the task.")
+    user_id = fields.Many2one('res.users', 'Assigned to', select=True, track_visibility='onchange', default=lambda self: self._uid)
+    delegated_user_id = fields.Many2one(related='child_ids.user_id', comodel_name='res.users', string='Delegated To')
+    partner_id = fields.Many2one('res.partner', 'Customer', default=lambda self: self._get_default_partner())
+    manager_id = fields.Many2one(related='project_id.analytic_account_id.user_id', comodel_name='res.users', string='Project Manager')
+    company_id = fields.Many2one('res.company', 'Company', default=lambda self: self.env['res.company']._company_default_get('project.task'))
+    id = fields.Integer('ID', readonly=True)
+    color = fields.Integer('Color Index')
+    user_email = fields.Char(related='user_id.email', string='User Email', readonly=True)
+
     _order = "priority desc, sequence, date_start, name, id"
 
-    def _check_recursion(self, cr, uid, ids, context=None):
-        for id in ids:
+    @api.constrains('parent_ids')
+    def _check_recursion(self):
+        for id in self:
             visited_branch = set()
             visited_node = set()
-            res = self._check_cycle(cr, uid, id, visited_branch, visited_node, context=context)
+            res = self._check_cycle(id, visited_branch, visited_node)
             if not res:
-                return False
+                raise Warning(_('Error ! \n  You cannot create recursive tasks'))
 
-        return True
-
-    def _check_cycle(self, cr, uid, id, visited_branch, visited_node, context=None):
-        if id in visited_branch: #Cycle
+    @api.model
+    def _check_cycle(self, id, visited_branch, visited_node):
+        if id.id in visited_branch: #Cycle
             return False
-
-        if id in visited_node: #Already tested don't work one more time for nothing
+        if id.id in visited_node: #Already tested don't work one more time for nothing
             return True
 
-        visited_branch.add(id)
-        visited_node.add(id)
+        visited_branch.add(id.id)
+        visited_node.add(id.id)
 
         #visit child using DFS
-        task = self.browse(cr, uid, id, context=context)
+        task = self.browse(id.id)
         for child in task.child_ids:
-            res = self._check_cycle(cr, uid, child.id, visited_branch, visited_node, context=context)
+            res = self._check_cycle(child.id, visited_branch, visited_nod)
             if not res:
                 return False
 
-        visited_branch.remove(id)
+        visited_branch.remove(id.id)
         return True
 
-    def _check_dates(self, cr, uid, ids, context=None):
-        if context == None:
-            context = {}
-        obj_task = self.browse(cr, uid, ids[0], context=context)
+    @api.constrains('date_start','date_end')
+    def _check_dates(self):
+        obj_task = self
         start = obj_task.date_start or False
         end = obj_task.date_end or False
         if start and end :
             if start > end:
-                return False
-        return True
+                raise Warning(_('Error ! \n Task end-date must be greater then task start-date'))
 
-    _constraints = [
-        (_check_recursion, 'Error ! You cannot create recursive tasks.', ['parent_ids']),
-        (_check_dates, 'Error ! Task end-date must be greater then task start-date', ['date_start','date_end'])
-    ]
-
-    # Override view according to the company definition
+#     # Override view according to the company definition
+    @api.v7
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
         users_obj = self.pool.get('res.users')
         if context is None: context = {}
@@ -751,6 +744,7 @@ class task(osv.osv):
                 res['fields'][f]['string'] = res['fields'][f]['string'].replace('Hours',tm)
         return res
 
+    @api.v7
     def get_empty_list_help(self, cr, uid, help, context=None):
         context = dict(context or {})
         context['empty_list_help_id'] = context.get('default_project_id')
@@ -758,11 +752,12 @@ class task(osv.osv):
         context['empty_list_help_document_name'] = _("tasks")
         return super(task, self).get_empty_list_help(cr, uid, help, context=context)
 
-    # ----------------------------------------
-    # Case management
-    # ----------------------------------------
+#     # ----------------------------------------
+#     # Case management
+#     # ----------------------------------------
 
-    def stage_find(self, cr, uid, cases, section_id, domain=[], order='sequence', context=None):
+    @api.model
+    def stage_find(self, cases, section_id, domain=[], order='sequence'):
         """ Override of the base.stage method
             Parameter of the stage search taken from the lead:
             - section_id: if set, stages must belong to this section or
@@ -770,7 +765,7 @@ class task(osv.osv):
               stages
         """
         if isinstance(cases, (int, long)):
-            cases = self.browse(cr, uid, cases, context=context)
+            cases = self
         # collect all section_ids
         section_ids = []
         if section_id:
@@ -785,22 +780,22 @@ class task(osv.osv):
                 search_domain.append(('project_ids', '=', section_id))
         search_domain += list(domain)
         # perform search, return the first found
-        stage_ids = self.pool.get('project.task.type').search(cr, uid, search_domain, order=order, context=context)
+        stage_ids = self.env['project.task.type'].search(search_domain, order=order)
         if stage_ids:
             return stage_ids[0]
         return False
 
-    def _check_child_task(self, cr, uid, ids, context=None):
-        if context == None:
-            context = {}
-        tasks = self.browse(cr, uid, ids, context=context)
+    @api.multi
+    def _check_child_task(self):
+        tasks = self
         for task in tasks:
             if task.child_ids:
                 for child in task.child_ids:
                     if child.stage_id and not child.stage_id.fold:
-                        raise osv.except_osv(_("Warning!"), _("Child task still open.\nPlease cancel or complete child task first."))
+                        raise Warning(_("Warning!"), _("Child task still open.\nPlease cancel or complete child task first."))
         return True
 
+    @api.v7
     def _delegate_task_attachments(self, cr, uid, task_id, delegated_task_id, context=None):
         attachment = self.pool.get('ir.attachment')
         attachment_ids = attachment.search(cr, uid, [('res_model', '=', self._name), ('res_id', '=', task_id)], context=context)
@@ -809,9 +804,11 @@ class task(osv.osv):
             new_attachment_ids.append(attachment.copy(cr, uid, attachment_id, default={'res_id': delegated_task_id}, context=context))
         return new_attachment_ids
 
+    @api.v7
     def _get_effective_hours(self, task):
         return  0.0
 
+    @api.v7
     def do_delegate(self, cr, uid, ids, delegate_data=None, context=None):
         """
         Delegate Task to another users.
@@ -841,9 +838,10 @@ class task(osv.osv):
             delegated_tasks[task.id] = delegated_task_id
         return delegated_tasks
 
-    def _store_history(self, cr, uid, ids, context=None):
-        for task in self.browse(cr, uid, ids, context=context):
-            self.pool.get('project.task.history').create(cr, uid, {
+    @api.multi
+    def _store_history(self):
+        for task in self:
+            self.env['project.task.history'].create({
                 'task_id': task.id,
                 'remaining_hours': task.remaining_hours,
                 'planned_hours': task.planned_hours,
@@ -851,32 +849,32 @@ class task(osv.osv):
                 'type_id': task.stage_id.id,
                 'user_id': task.user_id.id
 
-            }, context=context)
+            })
         return True
 
-    # ------------------------------------------------
-    # CRUD overrides
-    # ------------------------------------------------
-
-    def create(self, cr, uid, vals, context=None):
-        context = dict(context or {})
-
+#     # ------------------------------------------------
+#     # CRUD overrides
+#     # ------------------------------------------------
+    @api.model
+    def create(self, vals):
         # for default stage
-        if vals.get('project_id') and not context.get('default_project_id'):
-            context['default_project_id'] = vals.get('project_id')
+        if vals.get('project_id') and not self._context.get('default_project_id'):
+            create_context = dict(self._context, default_project_id=vals.get('project_id'))
         # user_id change: update date_start
         if vals.get('user_id') and not vals.get('start_date'):
             vals['date_start'] = fields.datetime.now()
 
         # context: no_log, because subtype already handle this
-        create_context = dict(context, mail_create_nolog=True)
-        task_id = super(task, self).create(cr, uid, vals, context=create_context)
-        self._store_history(cr, uid, [task_id], context=context)
+        create_context = dict(self._context, mail_create_nolog=True)
+        self.with_context(create_context)
+        task_id = super(task, self).create(vals)
+        task_id._store_history()
         return task_id
 
-    def write(self, cr, uid, ids, vals, context=None):
-        if isinstance(ids, (int, long)):
-            ids = [ids]
+    @api.multi
+    def write(self, vals):
+        if isinstance(self._ids, (int, long)):
+            ids = self._ids
 
         # stage change: update date_last_stage_update
         if 'stage_id' in vals:
@@ -890,27 +888,28 @@ class task(osv.osv):
         if vals and not 'kanban_state' in vals and 'stage_id' in vals:
             new_stage = vals.get('stage_id')
             vals_reset_kstate = dict(vals, kanban_state='normal')
-            for t in self.browse(cr, uid, ids, context=context):
+            for t in self:
                 write_vals = vals_reset_kstate if t.stage_id.id != new_stage else vals
-                super(task, self).write(cr, uid, [t.id], write_vals, context=context)
+                super(task, self).write(write_vals)
             result = True
         else:
-            result = super(task, self).write(cr, uid, ids, vals, context=context)
+            result = super(task, self).write(vals)
 
         if any(item in vals for item in ['stage_id', 'remaining_hours', 'user_id', 'kanban_state']):
-            self._store_history(cr, uid, ids, context=context)
+            self._store_history()
         return result
 
-    def unlink(self, cr, uid, ids, context=None):
-        if context == None:
-            context = {}
-        self._check_child_task(cr, uid, ids, context=context)
-        res = super(task, self).unlink(cr, uid, ids, context)
+    @api.multi
+    def unlink(self):
+        self._check_child_task()
+        res = super(task, self).unlink()
         return res
 
+    @api.v7
     def _get_total_hours(self, task):
         return self._get_effective_hours(task) + task.remaining_hours
 
+    @api.v7
     def _generate_task(self, cr, uid, tasks, ident=4, context=None):
         context = context or {}
         result = ""
@@ -938,10 +937,11 @@ class task(osv.osv):
         result += "\n"
         return result
 
-    # ---------------------------------------------------
-    # Mail gateway
-    # ---------------------------------------------------
+#     # ---------------------------------------------------
+#     # Mail gateway
+#     # ---------------------------------------------------
 
+    @api.v7
     def message_get_reply_to(self, cr, uid, ids, context=None):
         """ Override to get the reply_to of the parent project. """
         tasks = self.browse(cr, SUPERUSER_ID, ids, context=context)
@@ -949,6 +949,7 @@ class task(osv.osv):
         aliases = self.pool['project.project'].message_get_reply_to(cr, uid, list(project_ids), context=context)
         return dict((task.id, aliases.get(task.project_id and task.project_id.id or 0, False)) for task in tasks)
 
+    @api.v7
     def message_new(self, cr, uid, msg, custom_values=None, context=None):
         """ Override to updates the document according to the email. """
         if custom_values is None:
@@ -967,6 +968,7 @@ class task(osv.osv):
         self.message_subscribe(cr, uid, [res], partner_ids, context=context)
         return res
 
+    @api.v7
     def message_update(self, cr, uid, ids, msg, update_vals=None, context=None):
         """ Override to update the task according to the email. """
         if update_vals is None:
@@ -987,7 +989,6 @@ class task(osv.osv):
                         pass
         return super(task, self).message_update(cr, uid, ids, msg, update_vals=update_vals, context=context)
 
-from openerp import models, fields, api, _
 class account_analytic_account(models.Model):
     _inherit = 'account.analytic.account'
     _description = 'Analytic Account'
