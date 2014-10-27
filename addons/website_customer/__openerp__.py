@@ -40,6 +40,7 @@ OpenERP Customer References
     ],
     'data': [
         'views/website_customer.xml',
+        'views/website_customer_view.xml',
     ],
     'qweb': [],
     'installable': True,
