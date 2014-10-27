@@ -1320,11 +1320,6 @@ class procurement_order(osv.osv):
 
 
 
-
-
-
-
-
     @profile(immediate=True)
     def make_po(self, cr, uid, ids, context=None):
         """ Resolve the purchase from procurement, which may result in a new PO creation, a new PO line creation or a quantity change on existing PO line.
