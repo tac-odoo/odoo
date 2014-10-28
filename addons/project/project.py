@@ -993,7 +993,7 @@ class account_analytic_account(models.Model):
     _inherit = 'account.analytic.account'
     _description = 'Analytic Account'
 
-    use_tasks = fields.Boolean('Tasks',help="If checked, this contract will be available in the project menu and you will be able to manage tasks or track issues")
+    use_tasks = fields.Boolean('Tasks',help="If checked, this contract will be available in the project menu and you will be able to manage tasks or track issues", default=True)
     company_uom_id = fields.Many2one(related='company_id.project_time_mode_id', comodel_name='product.uom')
 
     @api.onchange('template_id')
@@ -1087,14 +1087,6 @@ class account_analytic_account(models.Model):
             return project_ids.name_get()
         return super(account_analytic_account, self).name_search(name, args=args, operator=operator, limit=limit) 
 
-from openerp.osv import fields, osv
-class project_project(osv.osv):
-    _inherit = 'project.project'
-    _defaults = {
-        'use_tasks': True
-    }
-
-from openerp import models, fields, api, _
 class project_task_history(models.Model):
     """
     Tasks History, used for cumulative flow charts (Lean/Agile)

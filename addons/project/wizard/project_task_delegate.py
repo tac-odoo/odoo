@@ -23,31 +23,30 @@ from lxml import etree
 
 from openerp import tools
 from openerp.tools.translate import _
-from openerp.osv import fields, osv
+from openerp import models, fields, api
 
-class project_task_delegate(osv.osv_memory):
+class project_task_delegate(models.TransientModel):
     _name = 'project.task.delegate'
     _description = 'Task Delegate'
 
-    _columns = {
-        'name': fields.char('Delegated Title', required=True, help="New title of the task delegated to the user"),
-        'prefix': fields.char('Your Task Title', help="Title for your validation task"),
-        'project_id': fields.many2one('project.project', 'Project', help="User you want to delegate this task to"),
-        'user_id': fields.many2one('res.users', 'Assign To', required=True, help="User you want to delegate this task to"),
-        'new_task_description': fields.text('New Task Description', help="Reinclude the description of the task in the task of the user"),
-        'planned_hours': fields.float('Planned Hours',  help="Estimated time to close this task by the delegated user"),
-        'planned_hours_me': fields.float('Hours to Validate', help="Estimated time for you to validate the work done by the user to whom you delegate this task"),
-        'state': fields.selection([('pending','Pending'), ('done','Done'), ], 'Validation State', help="New state of your own task. Pending will be reopened automatically when the delegated task is closed")
-    }
+    name = fields.Char('Delegated Title', required=True, help="New title of the task delegated to the user")
+    prefix = fields.Char('Your Task Title', help="Title for your validation task")
+    project_id = fields.Many2one('project.project', 'Project', help="User you want to delegate this task to")
+    user_id = fields.Many2one('res.users', 'Assign To', required=True, help="User you want to delegate this task to")
+    new_task_description = fields.Text('New Task Description', help="Reinclude the description of the task in the task of the user")
+    planned_hours = fields.Float('Planned Hours',  help="Estimated time to close this task by the delegated user")
+    planned_hours_me = fields.Float('Hours to Validate', help="Estimated time for you to validate the work done by the user to whom you delegate this task", default=1.0)
+    state = fields.Selection([('pending','Pending'), ('done','Done'), ], 'Validation State', help="New state of your own task. Pending will be reopened automatically when the delegated task is closed", default='pending')
 
-    def onchange_project_id(self, cr, uid, ids, project_id=False, context=None):
-        project_project = self.pool.get('project.project')
-        if not project_id:
-            return {'value':{'user_id': False}}
-        project = project_project.browse(cr, uid, project_id, context=context)
-        return {'value': {'user_id': project.user_id and project.user_id.id or False}}
-        
+    @api.onchange('project_id')
+    def onchange_project_id(self):
+        project_project = self.env['project.project']
+        if not self.project_id:
+            self.user_id = False
+        else:
+            self.user_id = self.project_id.user_id
 
+    @api.v7
     def default_get(self, cr, uid, fields, context=None):
         """
         This function gets default values
@@ -84,12 +83,7 @@ class project_task_delegate(osv.osv_memory):
             res['new_task_description'] = task.description
         return res
 
-
-    _defaults = {
-       'planned_hours_me': 1.0,
-       'state': 'pending',
-    }
-
+    @api.v7
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
         res = super(project_task_delegate, self).fields_view_get(cr, uid, view_id, view_type, context, toolbar, submenu=submenu)
         users_pool = self.pool.get('res.users')
