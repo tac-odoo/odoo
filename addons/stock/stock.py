@@ -438,11 +438,12 @@ class stock_quant(osv.osv):
             to_recompute_move_ids = [x.reservation_id.id for x in to_move_quants if x.reservation_id and x.reservation_id.id != move.id]
             self.move_quants_write(cr, uid, to_move_quants, move, location_to, dest_package_id, context=context)
             self.pool.get('stock.move').recalculate_move_state(cr, uid, to_recompute_move_ids, context=context)
+
         if location_to.usage == 'internal':
             if self.search(cr, uid, [('product_id', '=', move.product_id.id), ('qty','<', 0)], limit=1, context=context):
                 for quant in quants_reconcile:
-                    quant.refresh()
-                    self._quant_reconcile_negative(cr, uid, quant, move, context=context)
+                    reconcile_result = self._quant_reconcile_negative(cr, uid, quant, move, context=context)
+
         return quants_reconcile
 
     def move_quants_write(self, cr, uid, quants, move, location_dest_id, dest_package_id, context=None):
@@ -572,6 +573,7 @@ class stock_quant(osv.osv):
             When new quant arrive in a location, try to reconcile it with
             negative quants. If it's possible, apply the cost of the new
             quant to the conter-part of the negative quant.
+            Return the quants that will be added to the traceability
         """
         solving_quant = quant
         dom = [('qty', '<', 0)]
