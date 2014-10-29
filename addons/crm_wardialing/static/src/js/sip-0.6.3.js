@@ -1,5 +1,5 @@
 /*
- * SIP version 0.6.2
+ * SIP version 0.6.3
  * Copyright (c) 2014-2014 Junction Networks, Inc <http://www.onsip.com>
  * Homepage: http://sipjs.com
  * License: http://sipjs.com/license/
@@ -37,7 +37,7 @@ module.exports={
   "name": "sip.js",
   "title": "SIP.js",
   "description": "A simple, intuitive, and powerful JavaScript signaling library",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "main": "src/SIP.js",
   "homepage": "http://sipjs.com",
   "author": "Will Mitchell <will@onsip.com>",
@@ -1337,8 +1337,8 @@ module.exports = function(SIP) {
                             return text(); },
           /^[a-zA-Z0-9_\-]/,
           { type: "class", value: "[a-zA-Z0-9_\\-]", description: "[a-zA-Z0-9_\\-]" },
-          /^[a-zA-Z_\-]/,
-          { type: "class", value: "[a-zA-Z_\\-]", description: "[a-zA-Z_\\-]" },
+          /^[a-zA-Z0-9\-]/,
+          { type: "class", value: "[a-zA-Z0-9\\-]", description: "[a-zA-Z0-9\\-]" },
           function() {
                               data.host_type = 'IPv6';
                               return text(); },
@@ -1580,7 +1580,7 @@ module.exports = function(SIP) {
                             data.value=parseInt(cseq_value.join('')); },
           function(expires) {data = expires; },
           function(event_type) {
-                                 data.event = event_type.join('').toLowerCase(); },
+                                 data.event = event_type.toLowerCase(); },
           function() {
                           var tag = data.tag;
                             data = new SIP.NameAddrHeader(data.uri, data.displayName, data.params);
@@ -1819,7 +1819,7 @@ module.exports = function(SIP) {
           peg$decode("!7U*) \"7\\*# \"7X+& 4!6\x9D! %"),
           peg$decode("! ]!7V+3$.J\"\"2J3K+#%'\"%$\"# X\"# X,>&!7V+3$.J\"\"2J3K+#%'\"%$\"# X\"# X\"+G$7W+=%.J\"\"2J3K*# \" \\+'%4#6\x9E# %$## X$\"# X\"# X"),
           peg$decode(" ]0\x9F\"\"1!3\xA0+,$,)&0\x9F\"\"1!3\xA0\"\"\" X"),
-          peg$decode(" ]0\xA1\"\"1!3\xA2+,$,)&0\xA1\"\"1!3\xA2\"\"\" X"),
+          peg$decode("!0$\"\"1!3%+A$ ]0\xA1\"\"1!3\xA2,)&0\xA1\"\"1!3\xA2\"+#%'\"%$\"# X\"# X"),
           peg$decode("!.r\"\"2r3s+A$7Y+7%.t\"\"2t3u+'%4#6\xA3# %$## X$\"# X\"# X"),
           peg$decode("!!7Z+\xBF$.8\"\"2839+\xAF%7Z+\xA5%.8\"\"2839+\x95%7Z+\x8B%.8\"\"2839+{%7Z+q%.8\"\"2839+a%7Z+W%.8\"\"2839+G%7Z+=%.8\"\"2839+-%7[+#%'-%$-# X$,# X$+# X$*# X$)# X$(# X$'# X$&# X$%# X$$# X$## X$\"# X\"# X*\u0838 \"!.\xA4\"\"2\xA43\xA5+\xAF$7Z+\xA5%.8\"\"2839+\x95%7Z+\x8B%.8\"\"2839+{%7Z+q%.8\"\"2839+a%7Z+W%.8\"\"2839+G%7Z+=%.8\"\"2839+-%7[+#%',%$,# X$+# X$*# X$)# X$(# X$'# X$&# X$%# X$$# X$## X$\"# X\"# X*\u0795 \"!.\xA4\"\"2\xA43\xA5+\x95$7Z+\x8B%.8\"\"2839+{%7Z+q%.8\"\"2839+a%7Z+W%.8\"\"2839+G%7Z+=%.8\"\"2839+-%7[+#%'*%$*# X$)# X$(# X$'# X$&# X$%# X$$# X$## X$\"# X\"# X*\u070C \"!.\xA4\"\"2\xA43\xA5+{$7Z+q%.8\"\"2839+a%7Z+W%.8\"\"2839+G%7Z+=%.8\"\"2839+-%7[+#%'(%$(# X$'# X$&# X$%# X$$# X$## X$\"# X\"# X*\u069D \"!.\xA4\"\"2\xA43\xA5+a$7Z+W%.8\"\"2839+G%7Z+=%.8\"\"2839+-%7[+#%'&%$&# X$%# X$$# X$## X$\"# X\"# X*\u0648 \"!.\xA4\"\"2\xA43\xA5+G$7Z+=%.8\"\"2839+-%7[+#%'$%$$# X$## X$\"# X\"# X*\u060D \"!.\xA4\"\"2\xA43\xA5+-$7[+#%'\"%$\"# X\"# X*\u05EC \"!.\xA4\"\"2\xA43\xA5+-$7Z+#%'\"%$\"# X\"# X*\u05CB \"!7Z+\xA5$.\xA4\"\"2\xA43\xA5+\x95%7Z+\x8B%.8\"\"2839+{%7Z+q%.8\"\"2839+a%7Z+W%.8\"\"2839+G%7Z+=%.8\"\"2839+-%7[+#%'+%$+# X$*# X$)# X$(# X$'# X$&# X$%# X$$# X$## X$\"# X\"# X*\u0538 \"!7Z+\xB6$!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+\x8B%.\xA4\"\"2\xA43\xA5+{%7Z+q%.8\"\"2839+a%7Z+W%.8\"\"2839+G%7Z+=%.8\"\"2839+-%7[+#%'*%$*# X$)# X$(# X$'# X$&# X$%# X$$# X$## X$\"# X\"# X*\u0494 \"!7Z+\xC7$!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+\x9C%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+q%.\xA4\"\"2\xA43\xA5+a%7Z+W%.8\"\"2839+G%7Z+=%.8\"\"2839+-%7[+#%')%$)# X$(# X$'# X$&# X$%# X$$# X$## X$\"# X\"# X*\u03DF \"!7Z+\xD8$!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+\xAD%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+\x82%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+W%.\xA4\"\"2\xA43\xA5+G%7Z+=%.8\"\"2839+-%7[+#%'(%$(# X$'# X$&# X$%# X$$# X$## X$\"# X\"# X*\u0319 \"!7Z+\xE9$!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+\xBE%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+\x93%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+h%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+=%.\xA4\"\"2\xA43\xA5+-%7[+#%''%$'# X$&# X$%# X$$# X$## X$\"# X\"# X*\u0242 \"!7Z+\u0114$!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+\xE9%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+\xBE%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+\x93%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+h%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+=%.\xA4\"\"2\xA43\xA5+-%7Z+#%'(%$(# X$'# X$&# X$%# X$$# X$## X$\"# X\"# X*\u0140 \"!7Z+\u0135$!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+\u010A%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+\xDF%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+\xB4%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+\x89%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+^%!.8\"\"2839+-$7Z+#%'\"%$\"# X\"# X*# \" \\+3%.\xA4\"\"2\xA43\xA5+#%'(%$(# X$'# X$&# X$%# X$$# X$## X$\"# X\"# X+& 4!6\xA6! %"),
           peg$decode("!7#+S$7#*# \" \\+C%7#*# \" \\+3%7#*# \" \\+#%'$%$$# X$## X$\"# X\"# X"),
@@ -1913,7 +1913,7 @@ module.exports = function(SIP) {
           peg$decode("! ]7!+&$,#&7!\"\"\" X+' 4!6\u0124!! %"),
           peg$decode("!7\x9D+' 4!6\u0125!! %"),
           peg$decode("!7\xB5+d$ ]!7B+-$7\x9F+#%'\"%$\"# X\"# X,8&!7B+-$7\x9F+#%'\"%$\"# X\"# X\"+(%4\"6\u0126\"!!%$\"# X\"# X"),
-          peg$decode("!77+k$ ]!.J\"\"2J3K+-$77+#%'\"%$\"# X\"# X,>&!.J\"\"2J3K+-$77+#%'\"%$\"# X\"# X\"+#%'\"%$\"# X\"# X"),
+          peg$decode("!!77+k$ ]!.J\"\"2J3K+-$77+#%'\"%$\"# X\"# X,>&!.J\"\"2J3K+-$77+#%'\"%$\"# X\"# X\"+#%'\"%$\"# X\"# X+! (%"),
           peg$decode("!7L*# \"7\x98+c$ ]!7B+-$7\xB7+#%'\"%$\"# X\"# X,8&!7B+-$7\xB7+#%'\"%$\"# X\"# X\"+'%4\"6\u0127\" %$\"# X\"# X"),
           peg$decode("7\xB8*# \"7\x9F"),
           peg$decode("!/\u0128\"\"1#3\u0129+<$7<+2%76+(%4#6\u012A#! %$## X$\"# X\"# X"),
@@ -2451,6 +2451,27 @@ var Hacks;
 
 Hacks = {
 
+  AllBrowsers: {
+    maskDtls: function (message) {
+      if (message.body) {
+        message.body = message.body.replace(/ UDP\/TLS\/RTP\/SAVP/gmi, " RTP/SAVP");
+      }
+    },
+    unmaskDtls: function (sdp) {
+      /**
+       * Chrome does not handle DTLS correctly (Canaray does, but not production)
+       * keeping Chrome as SDES until DTLS is fixed (comment out 'is_opera' condition)
+       *
+       * UPDATE: May 21, 2014
+       * Chrome 35 now properly defaults to DTLS.  Only Opera remains using SDES
+       *
+       * UPDATE: 2014-09-24
+       * Opera now supports DTLS by default as well.
+       *
+       **/
+      return sdp.replace(/ RTP\/SAVP/gmi, " UDP/TLS/RTP/SAVP");
+    }
+  },
   Firefox: {
     /* Condition to detect if hacks are applicable */
     isFirefox: function () {
@@ -2512,6 +2533,7 @@ Hacks = {
   Chrome: {
     needsExplicitlyInactiveSDP: function (sdp) {
       var sub, index;
+
       if (Hacks.Firefox.isFirefox()) { // Fix this in Firefox before sending
         index = sdp.indexOf('m=video 0');
         if (index !== -1) {
@@ -2962,6 +2984,7 @@ function parseHeader(message, data, headerStart, headerEnd) {
 
       if (parsed === -1) {
         parsed = undefined;
+        break;
       }
 
       length = parsed.length;
@@ -2985,6 +3008,7 @@ function parseHeader(message, data, headerStart, headerEnd) {
 
       if (parsed === -1) {
         parsed = undefined;
+        break;
       }
 
       length = parsed.length;
@@ -4710,7 +4734,8 @@ Session.prototype = {
 
   refer: function(target, options) {
     options = options || {};
-    var extraHeaders = (options.extraHeaders || []).slice(), originalTarget;
+    var extraHeaders = (options.extraHeaders || []).slice(),
+        originalTarget = target;
 
     if (target === undefined) {
       throw new TypeError('Not enough arguments');
@@ -5484,6 +5509,7 @@ InviteServerContext = function(ua, request) {
   //TODO: move this into media handler
   SIP.Hacks.Firefox.cannotHandleRelayCandidates(request);
   SIP.Hacks.Firefox.cannotHandleExtraWhitespace(request);
+  SIP.Hacks.AllBrowsers.maskDtls(request);
 
   SIP.Utils.augment(this, SIP.ServerContext, [ua, request]);
   SIP.Utils.augment(this, SIP.Session, [ua.configuration.mediaHandlerFactory]);
@@ -5959,6 +5985,7 @@ InviteServerContext.prototype = {
             // ACK contains answer to an INVITE w/o SDP negotiation
             SIP.Hacks.Firefox.cannotHandleRelayCandidates(request);
             SIP.Hacks.Firefox.cannotHandleExtraWhitespace(request);
+            SIP.Hacks.AllBrowsers.maskDtls(request);
 
             this.hasAnswer = true;
             this.mediaHandler.setDescription(
@@ -6328,6 +6355,7 @@ InviteClientContext.prototype = {
 
           SIP.Hacks.Firefox.cannotHandleRelayCandidates(response);
           SIP.Hacks.Firefox.cannotHandleExtraWhitespace(response);
+          SIP.Hacks.AllBrowsers.maskDtls(response);
 
           if (!response.body) {
             extraHeaders.push('RAck: ' + response.getHeader('rseq') + ' ' + response.getHeader('cseq'));
@@ -6454,6 +6482,7 @@ InviteClientContext.prototype = {
 
         SIP.Hacks.Firefox.cannotHandleRelayCandidates(response);
         SIP.Hacks.Firefox.cannotHandleExtraWhitespace(response);
+        SIP.Hacks.AllBrowsers.maskDtls(response);
 
         // This is an invite without sdp
         if (!this.hasOffer) {
@@ -6883,9 +6912,7 @@ SIP.Subscription = function (ua, target, event, options) {
     this.event = event;
   }
 
-  if (!options.expires || options.expires < 3600) {
-    this.expires = 3600; //1 hour (this is minimum by RFC 6665)
-  } else if(typeof options.expires !== 'number'){
+  if(typeof options.expires !== 'number'){
     ua.logger.warn('expires must be a number. Using default of 3600.');
     this.expires = 3600;
   } else {
@@ -6931,7 +6958,8 @@ SIP.Subscription.prototype = {
   },
 
   receiveResponse: function(response) {
-    var expires, sub = this;
+    var expires, sub = this,
+        cause = SIP.C.REASON_PHRASE[response.status_code] || '';
 
     if (this.errorCodes.indexOf(response.status_code) !== -1) {
       this.failed(response, null);
@@ -6942,6 +6970,7 @@ SIP.Subscription.prototype = {
       if (this.createConfirmedDialog(response,'UAC')) {
         this.id = this.dialog.id.toString();
         this.ua.subscriptions[this.id] = this;
+        this.emit('accepted', response, cause);
         // UPDATE ROUTE SET TO BE BACKWARDS COMPATIBLE?
       }
 
@@ -7017,6 +7046,7 @@ SIP.Subscription.prototype = {
   createConfirmedDialog: function(message, type) {
     var dialog;
 
+    this.terminateDialog();
     dialog = new SIP.Dialog(this, message, type);
 
     if(!dialog.error) {
@@ -7034,6 +7064,7 @@ SIP.Subscription.prototype = {
   */
   terminateDialog: function() {
     if(this.dialog) {
+      delete this.ua.subscriptions[this.id];
       this.dialog.terminate();
       delete this.dialog;
     }
@@ -7048,7 +7079,7 @@ SIP.Subscription.prototype = {
     function setExpiresTimeout() {
       if (sub_state.expires) {
         sub_state.expires = Math.min(sub.expires,
-                                     Math.max(sub_state.expires, 3600));
+                                     Math.max(sub_state.expires, 0));
         sub.timers.sub_duration = SIP.Timers.setTimeout(sub.subscribe.bind(sub),
                                                     sub_state.expires * 1000);
       }
@@ -7954,6 +7985,8 @@ Transport.prototype = {
     if(this.ws && this.ws.readyState === window.WebSocket.OPEN) {
       if (this.ua.configuration.traceSip === true) {
         this.logger.log('sending WebSocket message:\n\n' + message + '\n');
+        // console.log('MESSAGE: ['+message+']');
+        // if (message.indexOf('ice-ufrag') > -1) { debugger; }
       }
       this.ws.send(message);
       return true;
@@ -8203,6 +8236,7 @@ SIP.Transport = Transport;
 };
 
 },{}],28:[function(_dereq_,module,exports){
+(function (global){
 /**
  * @augments SIP
  * @class Class creating a SIP User Agent.
@@ -8398,6 +8432,10 @@ UA = function(configuration) {
 
   if(this.configuration.autostart) {
     this.start();
+  }
+
+  if (typeof global.addEventListener === 'function') {
+    global.addEventListener('unload', this.stop.bind(this));
   }
 };
 UA.prototype = new SIP.EventEmitter();
@@ -8699,12 +8737,17 @@ UA.prototype.onTransportError = function(transport) {
   this.logger.log('transport ' + transport.server.ws_uri + ' failed | connection state set to '+ SIP.Transport.C.STATUS_ERROR);
 
   // Close sessions.
-  //Mark this transport as 'down' and try the next one
+  //Mark this transport as 'down'
   transport.server.status = SIP.Transport.C.STATUS_ERROR;
 
   this.emit('disconnected', {
     transport: transport
   });
+
+  // try the next transport if the UA isn't closed
+  if(this.status === C.STATUS_USER_CLOSED) {
+    return;
+  }
 
   server = this.getNextWsServer();
 
@@ -9282,8 +9325,6 @@ UA.configuration_skeleton = (function() {
     parameters = [
       // Internal parameters
       "sipjsId",
-      "wsServerMaxReconnection",
-      "wsServerReconnectionTimeout",
       "hostportParams",
 
       // Optional user configurable parameters
@@ -9308,6 +9349,8 @@ UA.configuration_skeleton = (function() {
       "traceSip",
       "turnServers",
       "usePreloadedRoute",
+      "wsServerMaxReconnection",
+      "wsServerReconnectionTimeout",
       "mediaHandlerFactory",
       "media",
       "mediaConstraints",
@@ -9628,6 +9671,26 @@ UA.configuration_check = {
       }
     },
 
+    wsServerMaxReconnection: function(wsServerMaxReconnection) {
+      var value;
+      if (SIP.Utils.isDecimal(wsServerMaxReconnection)) {
+        value = Number(wsServerMaxReconnection);
+        if (value > 0) {
+          return value;
+        }
+      }
+    },
+
+    wsServerReconnectionTimeout: function(wsServerReconnectionTimeout) {
+      var value;
+      if (SIP.Utils.isDecimal(wsServerReconnectionTimeout)) {
+        value = Number(wsServerReconnectionTimeout);
+        if (value > 0) {
+          return value;
+        }
+      }
+    },
+
     autostart: function(autostart) {
       if (typeof autostart === 'boolean') {
         return autostart;
@@ -9646,6 +9709,7 @@ UA.C = C;
 SIP.UA = UA;
 };
 
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],29:[function(_dereq_,module,exports){
 /**
  * @fileoverview SIP URI
@@ -10386,7 +10450,7 @@ var MediaHandler = function(session, options) {
   this.session = session;
   this.localMedia = null;
   this.ready = true;
-  this.mediaStreamManager = options.mediaStreamManager || new SIP.WebRTC.MediaStreamManager();
+  this.mediaStreamManager = options.mediaStreamManager || new SIP.WebRTC.MediaStreamManager(this.logger);
   this.audioMuted = false;
   this.videoMuted = false;
 
@@ -10439,6 +10503,8 @@ var MediaHandler = function(session, options) {
       self.logger.log('ICE candidate received: '+ (e.candidate.candidate === null ? null : e.candidate.candidate.trim()));
     } else if (self.onIceCompleted !== undefined) {
       self.onIceCompleted(this);
+    } else {
+      self.callOnIceCompleted = true;
     }
   };
 
@@ -10447,14 +10513,22 @@ var MediaHandler = function(session, options) {
     if (this.iceGatheringState === 'gathering') {
       self.emit('iceGathering', this);
     }
-    if (this.iceGatheringState === 'complete' &&
-        self.onIceCompleted !== undefined) {
-      self.onIceCompleted(this);
+    if (this.iceGatheringState === 'complete') {
+      if (self.onIceCompleted !== undefined) {
+        self.onIceCompleted(this);
+      } else {
+        self.callOnIceCompleted = true;
+      }
     }
   };
 
   this.peerConnection.oniceconnectionstatechange = function() {  //need e for commented out case
     self.logger.log('ICE connection state changed to "'+ this.iceConnectionState +'"');
+
+    if (this.iceConnectionState === 'failed') {
+      self.emit('iceFailed', this);
+    }
+
     //Bria state changes are always connected -> disconnected -> connected on accept, so session gets terminated
     //normal calls switch from failed to connected in some cases, so checking for failed and terminated
     /*if (this.iceConnectionState === 'failed') {
@@ -10552,6 +10626,7 @@ MediaHandler.prototype = Object.create(SIP.MediaHandler.prototype, {
         self.emit('dataChannel', self.dataChannel);
       }
 
+      self.render();
       self.createOfferOrAnswer(onSuccess, onFailure, self.RTCConstraints);
     }
 
@@ -10757,6 +10832,7 @@ MediaHandler.prototype = Object.create(SIP.MediaHandler.prototype, {
       var sdp = self.peerConnection.localDescription.sdp;
 
       sdp = SIP.Hacks.Chrome.needsExplicitlyInactiveSDP(sdp);
+      sdp = SIP.Hacks.AllBrowsers.unmaskDtls(sdp);
 
       var sdpWrapper = {
         type: methodName === 'createOffer' ? 'offer' : 'answer',
@@ -10770,7 +10846,7 @@ MediaHandler.prototype = Object.create(SIP.MediaHandler.prototype, {
     }
 
     function onSetLocalDescriptionSuccess() {
-      if (self.peerConnection.iceGatheringState === 'complete' && self.peerConnection.iceConnectionState === 'connected') {
+      if (self.peerConnection.iceGatheringState === 'complete' && (self.peerConnection.iceConnectionState === 'connected' || self.peerConnection.iceConnectionState === 'completed')) {
         readySuccess();
       } else {
         self.onIceCompleted = function(pc) {
@@ -10779,6 +10855,9 @@ MediaHandler.prototype = Object.create(SIP.MediaHandler.prototype, {
           self.emit('iceComplete', pc);
           readySuccess();
         };
+        if (self.callOnIceCompleted) {
+          self.onIceCompleted();
+        }
       }
     }
 
@@ -10852,7 +10931,7 @@ return MediaHandler;
 module.exports = function (SIP) {
 
 // Default MediaStreamManager provides single-use streams created with getUserMedia
-var MediaStreamManager = function MediaStreamManager (defaultMediaHint) {
+var MediaStreamManager = function MediaStreamManager (logger, defaultMediaHint) {
   if (!SIP.WebRTC.isSupported()) {
     throw new SIP.Exceptions.NotSupportedError('Media not supported');
   }
@@ -10866,6 +10945,7 @@ var MediaStreamManager = function MediaStreamManager (defaultMediaHint) {
     constraints: {audio: true, video: true}
   };
 
+  this.logger = logger;
   this.initEvents(events);
 
   // map of streams to acquisition manner:

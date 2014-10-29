@@ -68,12 +68,14 @@ openerp.crm_wardialing = function(instance) {
             this.widgets = {};
             this.formatCurrency;
             this.phonecall_channel;
+            this.ari_client;
         },
 
         start: function() {
             var self = this;
-            ari_client = new openerp.ari_client();
-            ari_client.init();
+            this.ari_client = new openerp.ari_client();
+            //this.ari_client.init();
+            this.testSip();
             //To get the formatCurrency function from the server
             new instance.web.Model("res.currency")
                 .call("get_format_currencies_js_function")
@@ -89,6 +91,112 @@ openerp.crm_wardialing = function(instance) {
             this.calc_box();
             openerp.web.bus.on('reload_panel', this, this.search_phonecalls_status);
             return;
+        },
+
+        testSip: function(){
+
+            var config = {
+                // Replace this IP address with your Asterisk IP address
+                uri: '1060@127.0.0.1',
+
+                // Replace this IP address with your Asterisk IP address,
+                // and replace the port with your Asterisk port from the http.conf file
+                ws_servers: 'ws://127.0.0.1:8088/ws',
+
+                // Replace this with the username from your sip.conf file
+                authorizationUser: '1060',
+
+                // Replace this with the password from your sip.conf file
+                password: '1234',
+
+                // HackIpInContact for Asterisk
+                hackIpInContact: true,
+
+                traceSip: true,
+
+            };
+
+            var ua = new SIP.UA(config);
+            
+            // Invite with audio only
+            ua.invite('1061',{
+            audio: true,
+            video: false,
+            // inviteWithoutSdp: true,
+            });
+            
+
+            /* SIPML
+            var makeCall = function(){
+                callSession = sipStack.newSession('call-audiovideo', {
+                    video_local: document.getElementById('video-local'),
+                    video_remote: document.getElementById('video-remote'),
+                    audio_remote: document.getElementById('audio-remote'),
+                    events_listener: { events: '*', listener: eventsListener } // optional: '*' means all events
+                });
+                callSession.call('2000');
+            }
+            var registerSession;
+            var login = function(){
+                registerSession = sipStack.newSession('register', {
+                    events_listener: { events: '*', listener: eventsListener } // optional: '*' means all events
+                });
+                registerSession.register();
+            }
+            var sipStack;
+            var eventsListener = function(e){
+                console.log("Event: ");
+                console.log(e);
+                console.info('session event = ' + e.type);
+                if(e.type == 'connected' && e.session == registerSession){
+                    makeCall();
+                }
+                if(e.type == 'connected' && e.session == callSession){
+                    console.log("IN CALL");
+                    if (callSession.transfer('2001') != 0) {
+                        return;
+                    }
+                }
+                if(e.type == 'started'){
+                    login();
+                }
+                else if(e.type == 'i_new_message'){ // incoming new SIP MESSAGE (SMS-like)
+                    acceptMessage(e);
+                }
+                else if(e.type == 'i_new_call'){ // incoming audio/video call
+                    acceptCall(e);
+                }
+            }
+            
+            function createSipStack(){
+                sipStack = new SIPml.Stack({
+                        realm: 'localhost', // mandatory: domain name
+                        impi: '1060', // mandatory: authorization name (IMS Private Identity)
+                        impu: 'sip:1060@localhost', // mandatory: valid SIP Uri (IMS Public Identity)
+                        password: '1234', // optional
+                        display_name: 'Bob legend', // optional
+                        websocket_proxy_url: 'ws://127.0.0.1:8088/ws', // optional
+                        outbound_proxy_url: 'udp://example.org:5060', // optional
+                        enable_rtcweb_breaker: false, // optional
+                        events_listener: { events: '*', listener: eventsListener }, // optional: '*' means all events
+                        sip_headers: [ // optional
+                                { name: 'User-Agent', value: 'IM-client/OMA1.0 sipML5-v1.0.0.0' },
+                                { name: 'Organization', value: 'Doubango Telecom' }
+                        ]
+                    }
+                );
+            }
+            
+            var readyCallback = function(e){
+                createSipStack(); // see next section
+                sipStack.start();
+            };
+            var errorCallback = function(e){
+                console.error('Failed to initialize the engine: ' + e.message);
+            }
+            SIPml.init(readyCallback, errorCallback);
+            */
+                
         },
 
         calc_box: function() {
@@ -246,17 +354,20 @@ openerp.crm_wardialing = function(instance) {
             var self = this;
             if(this.$el.find(".oe_dial_selected_phonecall").find(".phonecall_id").text() != ''){
                 var phonecall_id = this.$el.find(".oe_dial_selected_phonecall").find(".phonecall_id").text();
-                phonecall_model.call("call_partner", [this.phonecalls[phonecall_id].id]).then(function(channel){
+                phonecall_model.call("call_partner", [this.phonecalls[phonecall_id].id]);
+                this.ari_client.call(this.phonecalls[phonecall_id],function(channel){
                     console.log("after the call")
                     self.phonecall_channel = channel;
-                });  
+                    console.log(self.phonecall_channel);
+                });
             }else{
                 var phonecall_id = this.$el.find(".oe_dial_phonecalls > div:first-child").find(".phonecall_id").text();
                 if(phonecall_id){
-                    phonecall_model.call("call_partner", [this.phonecalls[phonecall_id].id]).then(function(channel){
+                    phonecall_model.call("call_partner", [this.phonecalls[phonecall_id].id]);
+                    this.ari_client.call(this.phonecalls[phonecall_id],function(channel){
                         console.log("after the call")
                         self.phonecall_channel = channel;
-                    });  
+                    });
                 }
             }
         },
@@ -266,15 +377,17 @@ openerp.crm_wardialing = function(instance) {
             var phonecall_model = new openerp.web.Model("crm.phonecall");
             if(this.$el.find(".oe_dial_selected_phonecall").find(".phonecall_id").text() != ''){
                 var phonecall_id = this.$el.find(".oe_dial_selected_phonecall").find(".phonecall_id").text();
-                phonecall_model.call("hangup_partner", [this.phonecalls[phonecall_id].id, this.phonecall_channel]).then(function(phonecall){
+                phonecall_model.call("hangup_partner", [this.phonecalls[phonecall_id].id]).then(function(phonecall){
                     openerp.web.bus.trigger('reload_panel');
-                });  
+                });
+                this.ari_client.hangup(this.phonecall_channel);
             }else{
                 var phonecall_id = this.$el.find(".oe_dial_phonecalls > div:first-child").find(".phonecall_id").text();
                 if(phonecall_id){
-                    phonecall_model.call("hangup_partner", [this.phonecalls[phonecall_id].id, this.phonecall_channel]).then(function(phonecall){
+                    phonecall_model.call("hangup_partner", [this.phonecalls[phonecall_id].id]).then(function(phonecall){
                         openerp.web.bus.trigger('reload_panel');
                     });
+                    this.ari_client.hangup(this.phonecall_channel);
                 }
             }
         },

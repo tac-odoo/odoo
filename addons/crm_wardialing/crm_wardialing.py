@@ -25,68 +25,16 @@ class crm_phonecall(models.Model):
 
 	@api.multi
 	def call_partner(self):
-
-		print("CALL FUNCTION")
-		print(self)
-		try:
-			client = ari.connect(self.env['ir.values'].get_default('sale.config.settings', 'asterisk_url'), 
-				self.env['ir.values'].get_default('sale.config.settings', 'asterisk_login'), 
-				self.env['ir.values'].get_default('sale.config.settings', 'asterisk_password'))
-		except Exception:
-			#_, action_id = self.env['ir.model.data'].xmlid_to_res_model_res_id('base_setup.action_sale_config')
-			# msg = "The connection to the Asterisk server failed. Please check your configuration."
-			#raise openerp.exceptions.RedirectWarning("test", action_id, _('Configure Asterisk Server Now'))
-			raise osv.except_osv(_('Error!'), _('The connection to the Asterisk server failed. Please check your configuration.'))
-		try:
-			print(self.opportunity_id.partner_id.phone)
-			print(self.env['ir.values'].get_default('sale.config.settings', 'asterisk_phone'))
-			if(self.opportunity_id.partner_id.phone):
-				incoming = client.channels.originate(endpoint="SIP/"+self.opportunity_id.partner_id.phone, app="bridge-dial", 
-					appArgs="SIP/"+self.env['ir.values'].get_default('sale.config.settings', 'asterisk_phone'))
-			elif(self.opportunity_id.partner_id.mobile):
-				incoming = client.channels.originate(endpoint="SIP/"+self.opportunity_id.partner_id.mobile, app="bridge-dial", 
-					appArgs="SIP/"+self.env['ir.values'].get_default('sale.config.settings', 'asterisk_phone'))
-			else:
-				raise osv.except_osv(_('Error!'), _('You tried to call a contact without phone or mobile number.'))
-		except:
-			raise osv.except_osv(_('Error!'), _('The connection to the Asterisk server failed. Please check your configuration.'))
-		try:
-			self.start_time = int(time.time())
-			
-			def incoming_on_start(channel,event):
-				print("ANSWERED")
-			def on_start(incoming, event):
-				print("ON_START ODOO")
-				
-			print("BEFORE BINDING")
-			#Not workign don't know why
-			incoming.on_event('StasisStart', incoming_on_start)
-			client.on_channel_event('StasisStart', on_start)
-			print("AFTER BINDING")
-			return incoming.json
-		except:
-			raise osv.except_osv(_('Error!'), _('You try to call a wrong phone number or the phonecall has been deleted. Please refresh the panel and check the phone number.'))
+		self.start_time = int(time.time())
 			
 
 	@api.multi
-	def hangup_partner(self, channel):
-		try:
-			client = ari.connect(self.env['ir.values'].get_default('sale.config.settings', 'asterisk_url'), 
-				self.env['ir.values'].get_default('sale.config.settings', 'asterisk_login'), 
-				self.env['ir.values'].get_default('sale.config.settings', 'asterisk_password'))
-		except:
-			raise osv.except_osv(_('Error!'), _('The connection to the Asterisk server failed. Please check your configuration.'))
-		current_channels = client.channels.list()
-		
-		if (len(current_channels) != 0):
-		    for chan in current_channels:
-		        if(chan.json.get('id') == channel.get('id')):
-					stop_time = int(time.time())
-					duration = float(stop_time - self.start_time)
-					self.duration = float(duration/60.0)	
-					self.state = "done"
-					self.to_call = False			
-					chan.hangup()	
+	def hangup_partner(self):
+		stop_time = int(time.time())
+		duration = float(stop_time - self.start_time)
+		self.duration = float(duration/60.0)	
+		self.state = "done"
+		self.to_call = False
 
 	@api.one
 	def get_info(self):
