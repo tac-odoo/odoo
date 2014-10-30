@@ -466,7 +466,7 @@
                             <group>
                                 <field name="insurer_id" context="{'default_supplier': True}"/>
                                 <field name="purchaser_id" />
-                                <field name="ins_ref" />
+                                <field name="contract_reference" />
                             </group>
                         </group>
                         <notebook>
@@ -588,7 +588,7 @@
             <field name="name">fleet.vehicle.odometer.tree</field>
             <field name="model">fleet.vehicle.odometer</field>
             <field name="arch" type="xml">
-                <tree string="Odometer Logs" editable="top" >
+                <tree string="Odometer Logs" editable="top">
                     <field name="date" />
                     <field name="vehicle_id" />
                     <field name="value" />
@@ -671,7 +671,7 @@
                             <group string="Additional Details">
                                 <field name="date" />
                                 <field name="purchaser_id" />
-                                <field name="inv_ref" />
+                                <field name="invoice_reference" />
                                 <field name="vendor_id" context="{'default_supplier': True}"/>
                             </group>
                         </group>
@@ -693,7 +693,7 @@
                     <field name="odometer" invisible="1"/>
                     <field name="odometer_unit" invisible="1"/>
                     <field name="purchaser_id" />
-                    <field name="inv_ref" invisible="1"/>
+                    <field name="invoice_reference" invisible="1"/>
                     <field name="vendor_id" invisible="1"/>
                     <field name="liter" />
                     <field name="price_per_liter" invisible="1"/>
@@ -775,7 +775,7 @@
                                 <field name="date" />
                                 <field name="purchaser_id" />
                                 <field name="vendor_id" context="{'default_supplier': True}"/>
-                                <field name="inv_ref" />
+                                <field name="invoice_reference" />
                             </group>
                         </group>
                         <group string="Included Services">
@@ -804,7 +804,7 @@
                     <field name="cost_subtype_id"/>
                     <field name="purchaser_id"/>
                     <field name="vendor_id" />
-                    <field name="inv_ref" />
+                    <field name="invoice_reference" />
                     <field name="notes" />
                     <field name="amount" sum="Total"/>
                 </tree>
