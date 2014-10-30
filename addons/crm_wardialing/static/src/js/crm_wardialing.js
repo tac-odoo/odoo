@@ -101,7 +101,7 @@ openerp.crm_wardialing = function(instance) {
 
                 // Replace this IP address with your Asterisk IP address,
                 // and replace the port with your Asterisk port from the http.conf file
-                ws_servers: 'ws://127.0.0.1:8088/ws',
+                wsServers: 'ws://127.0.0.1:8088/ws',
 
                 // Replace this with the username from your sip.conf file
                 authorizationUser: '1060',
@@ -119,14 +119,28 @@ openerp.crm_wardialing = function(instance) {
             var ua = new SIP.UA(config);
             
             // Invite with audio only
-            ua.invite('1061',{
+            /*
+            var session = ua.invite('2000',{
             audio: true,
             video: false,
             // inviteWithoutSdp: true,
             });
+            session.on('accepted',function(){console.log("ACCEPTED")});
             
-
-            /* SIPML
+            ua.on('invite', function (session) {
+                
+                console.log(session.remoteIdentity.displayName);
+                var confirmation = confirm("Incomming call from " + session.remoteIdentity.displayName);
+                if(confirmation){
+                    session.accept();  
+                    console.log("ACCEPTED");  
+                }else{
+                    session.reject();
+                }
+                
+            });
+            */
+            //SIPML
             var makeCall = function(){
                 callSession = sipStack.newSession('call-audiovideo', {
                     video_local: document.getElementById('video-local'),
@@ -134,7 +148,7 @@ openerp.crm_wardialing = function(instance) {
                     audio_remote: document.getElementById('audio-remote'),
                     events_listener: { events: '*', listener: eventsListener } // optional: '*' means all events
                 });
-                callSession.call('2000');
+                callSession.call('2001');
             }
             var registerSession;
             var login = function(){
@@ -153,9 +167,10 @@ openerp.crm_wardialing = function(instance) {
                 }
                 if(e.type == 'connected' && e.session == callSession){
                     console.log("IN CALL");
+                    /* TRANSFER
                     if (callSession.transfer('2001') != 0) {
                         return;
-                    }
+                    }*/
                 }
                 if(e.type == 'started'){
                     login();
@@ -195,8 +210,7 @@ openerp.crm_wardialing = function(instance) {
                 console.error('Failed to initialize the engine: ' + e.message);
             }
             SIPml.init(readyCallback, errorCallback);
-            */
-                
+            
         },
 
         calc_box: function() {
