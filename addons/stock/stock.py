@@ -1243,7 +1243,7 @@ class stock_picking(osv.osv):
             complete, too_many, too_few = [], [], []
             move_product_qty, prodlot_ids, product_avail, partial_qty, uos_qty, product_uoms = {}, {}, {}, {}, {}, {}
             for move in pick.move_lines:
-                if move.state in ('done', 'cancel'):
+                if move.state in ('done', 'cancel') or (move.product_qty == 0.0):
                     continue
                 partial_data = partial_datas.get('move%s'%(move.id), {})
                 product_qty = partial_data.get('product_qty',0.0)
