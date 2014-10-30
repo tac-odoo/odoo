@@ -31,7 +31,7 @@ import openerp.addons.decimal_precision as dp
 from openerp.osv.orm import browse_record_list, browse_record, browse_null
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP
 from openerp.tools.float_utils import float_compare
-from profilehooks import profile
+#from profilehooks import profile
 
 class purchase_order(osv.osv):
 
@@ -1322,7 +1322,7 @@ class procurement_order(osv.osv):
 
 
 
-    @profile(immediate=True)
+
     def make_po(self, cr, uid, ids, context=None):
         """ Resolve the purchase from procurement, which may result in a new PO creation, a new PO line creation or a quantity change on existing PO line.
         Note that some operations (as the PO creation) are made as SUPERUSER because the current user may not have rights to do it (mto product launched by a sale for example)
