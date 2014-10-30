@@ -4,7 +4,8 @@ import werkzeug.urls
 import werkzeug.wrappers
 import simplejson
 import lxml
-from urllib2 import urlopen
+import urllib
+from urllib2 import urlopen,URLError
 
 from openerp import tools
 from openerp.addons.web import http
@@ -84,8 +85,15 @@ class WebsiteForum(http.Controller):
         return request.website.render("website_forum.forum_all", {'forums': forums})
 
     @http.route('/forum/new', type='http', auth="user", methods=['POST'], website=True)
-    def forum_create(self, forum_name="New Forum", **kwargs):
+    def forum_create(self, forum_name="New Forum", add_menu=False):
         forum_id = request.env['forum.forum'].create({'name': forum_name})
+        if add_menu:
+            request.env['website.menu'].create({
+                'name': forum_name,
+                'url': "/forum/%s" % slug(forum_id),
+                'parent_id': request.website.menu_id.id,
+                'website_id': request.website.id,
+            })
         return request.redirect("/forum/%s" % slug(forum_id))
 
     @http.route('/forum/notification_read', type='json', auth="user", methods=['POST'], website=True)
@@ -164,23 +172,40 @@ class WebsiteForum(http.Controller):
         )
         return simplejson.dumps(data)
 
-    @http.route(['/forum/<model("forum.forum"):forum>/tag'], type='http', auth="public", website=True)
-    def tags(self, forum, page=1, **post):
-        tags = request.env['forum.tag'].search([('forum_id', '=', forum.id), ('posts_count', '>', 0)], limit=None, order='posts_count DESC')
+    @http.route(['/forum/<model("forum.forum"):forum>/tag','/forum/<model("forum.forum"):forum>/tag/<tag_char>'], type='http', auth="public", website=True)
+    def tags(self, forum, page=1, tag_char=False, **post):
+        pager_chars = forum.get_tags_char()
+        tag_char = urllib.unquote(tag_char).decode("unicode_escape") if tag_char else (pager_chars[0][0] if pager_chars else 'All')
+        if pager_chars: pager_chars.insert(0,('All',0))
+        domain = [('forum_id', '=', forum.id), ('posts_count', '>', 0)]
+        if tag_char.lower() != "all":
+            domain.append(('name','=ilike',tag_char+'%'))
+        tags = request.env['forum.tag'].search(domain, limit=None, order='posts_count DESC' if tag_char=='All' else 'name')
         values = self._prepare_forum_values(forum=forum, searches={'tags': True}, **post)
         values.update({
             'tags': tags,
             'main_object': forum,
+            'pager_chars': pager_chars,
+            'active_tag':tag_char,
+            'escape_char':lambda c: urllib.quote(c.encode("unicode_escape"))
         })
         return request.website.render("website_forum.tag", values)
+    
+
+    @http.route('/forum/<model("forum.forum"):forum>/update_introduction',auth="user", website=True)
+    def update_introduction_message(self, forum,**post):
+        return request.website.render("website_forum.introduction_message", {'forum':forum})
 
     # Questions
     # --------------------------------------------------
 
     @http.route('/forum/get_url_title', type='json', auth="user", methods=['POST'], website=True)
     def get_url_title(self, **kwargs):
-        arch = lxml.html.parse(urlopen(kwargs.get('url')))
-        return arch.find(".//title").text
+        try:
+            arch = lxml.html.parse(urlopen(kwargs.get('url')))
+            return arch.find(".//title").text
+        except URLError, e:
+            return False
 
     @http.route(['''/forum/<model("forum.forum"):forum>/question/<model("forum.post", "[('forum_id','=',forum[0]),('parent_id','=',False)]"):question>'''], type='http', auth="public", website=True)
     def question(self, forum, question, **post):
@@ -328,17 +353,21 @@ class WebsiteForum(http.Controller):
             'tags': tags,
             'post': post,
             'is_answer': bool(post.parent_id),
-            'searches': kwargs
+            'searches': kwargs,
+            'post_name': post.content_link,
+            'content': post.name,
         })
-        return request.website.render("website_forum.edit_post", values)
+        template = "website_forum.new_link" if post.post_type == 'link' and not post.parent_id else "website_forum.edit_post" 
+        return request.website.render(template, values)
 
     @http.route('/forum/<model("forum.forum"):forum>/post/<model("forum.post"):post>/save', type='http', auth="user", methods=['POST'], website=True)
     def post_save(self, forum, post, **kwargs):
-        post_tags = forum._tag_to_write_vals(kwargs.get('post_tag', ''))
+        post_tags = forum._tag_to_write_vals(kwargs.get('post_tags', ''))
         vals = {
             'tag_ids': post_tags,
             'name': kwargs.get('post_name'),
             'content': kwargs.get('content'),
+            'content_link': kwargs.get('content_link'),
         }
         post.write(vals)
         question = post.parent_id if post.parent_id else post

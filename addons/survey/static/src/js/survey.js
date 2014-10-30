@@ -146,7 +146,9 @@ $(document).ready(function () {
     // });
 
     // Launch prefilling
-    prefill();
+    if(prefill_controller){
+        prefill();
+    }
     if(quiz_correction_mode === true){
         display_scores();
     }

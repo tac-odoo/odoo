@@ -52,13 +52,8 @@
 <!-- Page Index -->
 <template id="header" name="Forum Index">
     <t t-call="website.layout">
-        <div t-if="is_public_user and not no_introduction_message" class="alert alert-success alert-dismissable">
-            <div class="container">
-                <h1 class="mt0">Welcome!</h1>
-                <div t-field="forum.description"/>
-                <a class='btn btn-primary' t-attf-href="/web?redirect=#{ request.httprequest.url }">Register</a>
-                <button type="button" class="btn btn-link js_close_intro" data-dismiss="alert" aria-hidden="true">Hide Intro</button>
-            </div>
+        <div t-if="is_public_user and not no_introduction_message" class="forum_intro">
+            <div t-field="forum.introduction_message"/>
         </div>
         <div class="container mt16 website_forum">
             <div class="navbar navbar-default">
@@ -100,6 +95,15 @@
                                 <button type="submit" class="btn btn-default">Search</button>
                             </span>
                         </div>
+                        <span class="dropdown" groups="base.group_erp_manager">
+                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">
+                                <i class="fa fa-cog"/>
+                            </button>
+                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                <li role="presentation"><a role="menuitem" tabindex="-1" t-attf-href="/forum/#{slug(forum)}/update_introduction?enable_editor=1">Design Welcome Message</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" t-attf-href="/web#id=#{forum.id}&amp;view_type=form&amp;model=forum.forum">Forum Setting</a></li>
+                            </ul>
+                        </span>
                     </form>
                 </div>
             </div>
@@ -131,21 +135,24 @@
                     <t t-raw="0"/>
                 </div>
                 <div class="col-sm-3" id="right-column">
-                    <div t-if="not header.get('ask_hide')" t-attf-class="btn-group btn-block mb16 #{(user.karma &lt; forum.karma_ask) and 'karma_required' or ''}" t-attf-data-karma="#{forum.karma_ask}">
-                        <a type="button" class="btn btn-primary btn-lg col-sm-10" t-attf-href="/forum/#{slug(forum)}/ask?post_type=#{forum.default_post_type}">
+                    <div t-if="not header.get('ask_hide')" t-attf-class="btn-group btn-block mb16 #{(user.karma &lt; forum.karma_ask) and not is_public_user and 'karma_required' or ''}" t-attf-data-karma="#{forum.karma_ask}">
+                        <t t-set="multi_type" t-value="(forum.allow_link and forum.allow_question) or (forum.allow_link and forum.allow_discussion) or (forum.allow_question and forum.allow_discussion)"/>
+                        <a type="button"  t-attf-class="btn btn-primary btn-lg #{'col-sm-10' if multi_type else 'col-sm-12'}" t-attf-href="/forum/#{slug(forum)}/ask?post_type=#{forum.default_post_type}">
                             <t t-if="forum.default_post_type == 'question'">Ask a Question</t>
                             <t t-if="forum.default_post_type == 'link'">Submit a Link</t>
                             <t t-if="forum.default_post_type == 'discussion'">New Discussion</t>
                         </a>
-                        <button type="button" class="btn btn-primary btn-lg col-sm-2 dropdown-toggle" data-toggle="dropdown">
-                            <span class="caret"></span>
-                            <span class="sr-only">Select Post</span>
-                        </button>
-                        <ul class="dropdown-menu" role="menu">
-                            <li t-if="forum.allow_question"><a t-attf-href="/forum/#{slug(forum)}/ask?post_type=question">Ask a Question</a></li>
-                            <li t-if="forum.allow_link"><a t-attf-href="/forum/#{slug(forum)}/ask?post_type=link">Submit a Link</a></li>
-                            <li t-if="forum.allow_discussion"><a t-attf-href="/forum/#{slug(forum)}/ask?post_type=discussion">New Discussion</a></li>
-                        </ul>
+                        <t t-if="multi_type">
+                            <button type="button" class="btn btn-primary btn-lg col-sm-2 dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                                <span class="sr-only">Select Post</span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li t-if="forum.allow_question"><a t-attf-href="/forum/#{slug(forum)}/ask?post_type=question">Ask a Question</a></li>
+                                <li t-if="forum.allow_link"><a t-attf-href="/forum/#{slug(forum)}/ask?post_type=link">Submit a Link</a></li>
+                                <li t-if="forum.allow_discussion"><a t-attf-href="/forum/#{slug(forum)}/ask?post_type=discussion">New Discussion</a></li>
+                            </ul>
+                        </t>
                     </div>
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -163,7 +170,7 @@
                             <h3 class="panel-title">About This Community</h3>
                         </div>
                         <div class="panel-body">
-                            <t t-raw="forum.description"/>
+                            <span t-field="forum.description"/>
                             <a t-if="not header.get('is_guidelines')" t-attf-href="/forum/#{slug(forum)}/faq" class="fa fa-arrow-right"> Read Guidelines</a>
                             <a t-if="header.get('is_guidelines')" t-attf-href="/forum/#{slug(forum)}" class="fa fa-arrow-right"> Back to <span t-field="forum.name"/></a>
                         </div>
@@ -201,6 +208,12 @@
     </t>
 </template>
 
+<template id="introduction_message">
+    <t t-call="website.layout">
+        <div t-field="forum.introduction_message"/>
+    </t>
+</template>
+
 <!-- Display a post -->
 <template id="display_post">
     <div class="question">
@@ -211,21 +224,15 @@
         </div>
         <div class="question-block">
             <div class="question-name">
-                <t t-if="question.post_type == 'link'">
-                    <a t-att-href="question.content_link" target="_blank">
-                        <span class="fa fa-link" t-if="forum.default_post_type != 'link'"/>
-                        <t t-esc="question.name"/>
-                    </a>
-                </t>
-                <t t-if="question.post_type in ('question', 'discussion')">
-                    <a t-attf-href="/forum/#{ slug(forum) }/question/#{ slug(question) }">
-                        <span class="fa fa-info-circle" t-if="question.post_type=='question' and forum.default_post_type != 'question'"/>
-                        <span class="fa fa-comment" t-if="question.post_type=='discussion' and forum.default_post_type != 'discussion'"/>
-                        <t t-esc="question.name"/>
-                    </a>
-                </t>
+                <a t-attf-href="/forum/#{ slug(forum) }/question/#{ slug(question) }">
+                    <span t-field="question.name"/>
+                </a>
                 <span t-if="not question.active"><b> [Deleted]</b></span>
                 <span t-if="question.state == 'close'"><b> [Closed]</b></span>
+                <t t-if="question.post_type == 'link'" >
+                    <a title="Redirect to external link" t-att-href="question.content_link" class="text-muted"><i class="fa fa-external-link forum_link"/></a>
+                </t>
+                <span t-if="question.has_validated_answer" title="Question has accepted answer"><i class="fa fa-check-circle oe_answer_true"/></span>
             </div>
             <t t-foreach="question.tag_ids" t-as="question_tag">
                 <a t-attf-href="/forum/#{ slug(forum) }/tag/#{slug(question_tag)}/questions">
@@ -234,12 +241,19 @@
                 </a>
             </t>
             <small class="text-muted">
+                <i t-attf-class="fa type_#{question.post_type}" t-att-title="question.post_type.capitalize()"/>
                 By <span t-field="question.create_uid" t-field-options='{"widget": "contact", "country_image": true, "fields": ["name", "country_id"]}' style="display: inline-block;"/>
                 • <span t-field="question.write_date" t-field-options='{"format":"short"}'/>
+                • <span t-field="question.views" /> View<t t-if="question.views&gt;1">s</t>
                 • <a t-attf-href="/forum/#{ slug(forum) }/question/#{ slug(question) }">
+                    
                     <t t-esc="question.child_count"/>
-                    <t t-if="question.child_count&gt;1">comments</t>
-                    <t t-if="question.child_count&lt;=1">comment</t>
+                    <t t-if="question.post_type == 'question'">
+                        Answer<t t-if="question.child_count&gt;1">s</t>
+                    </t>
+                    <t t-if="question.post_type != 'question'">
+                        Comment<t t-if="question.child_count&gt;1">s</t>
+                    </t>
                 </a>
             </small>
         </div>
@@ -267,6 +281,45 @@
 <template id="faq">
     <t t-call="website_forum.header">
         <div t-field="forum.faq"/>
+
+<table class="table table-striped">
+<tbody>
+    <tr>
+        <td class="faq-rep-item"><strong t-field="forum.karma_upvote"/></td>
+        <td>upvote, add comments</td>
+    </tr><tr>
+        <td class="faq-rep-item"><strong t-field="forum.karma_downvote"/></td>
+        <td>downvote</td>
+    </tr><tr>
+        <td class="faq-rep-item"><strong t-field="forum.karma_editor_link_files"/></td>
+        <td>insert text link, upload files</td>
+    </tr><tr>
+        <td class="faq-rep-item"><strong t-field="forum.karma_editor_clickable_link"/></td>
+        <td>insert clickable link, answer own question immediately</td>
+    </tr><tr>
+        <td class="faq-rep-item"><strong t-field="forum.karma_comment_unlink_own"/></td>
+        <td>delete own comment</td>
+    </tr><tr>
+        <td class="faq-rep-item"><strong t-field="forum.karma_close_own"/></td>
+        <td>flag offensive, close own questions</td>
+    </tr><tr>
+        <td class="faq-rep-item"><strong t-field="forum.karma_edit_all"/></td>
+        <td>edit any post, view offensive flags</td>
+    </tr><tr>
+        <td class="faq-rep-item"><strong t-field="forum.karma_answer_accept_all"/></td>
+        <td>accept any answer</td>
+    </tr><tr>
+        <td class="faq-rep-item"><strong t-field="forum.karma_comment_unlink_all"/></td>
+        <td>delete any comment</td>
+    </tr><tr>
+        <td class="faq-rep-item"><strong t-field="forum.karma_close_all"/></td>
+        <td>close any posts</td>
+    </tr><tr>
+        <td class="faq-rep-item"><strong t-field="forum.karma_unlink_all"/></td>
+        <td>delete any question or answer</td>
+    </tr>
+</tbody>
+</table>
     </t>
 </template>
 
@@ -364,7 +417,15 @@
 <!-- Edition: Post Article -->
 <template id="new_link">
     <t t-call="website_forum.header">
-        <h1 class="mt0">Submit a Link</h1>
+        <t t-set="link_create" t-value="False if post_name else True"/>
+        <t t-if="link_create">
+            <h1 class="mt0" >Submit a Link</h1>
+            <t t-set ="action_url" t-value="'/forum/' + slug(forum) +'/new?post_type=link'"/>
+        </t>
+        <t t-if="not link_create">
+            <h1 class="mt0" t-if="not link_create">Edit your Link</h1>
+            <t t-set ="action_url" t-value="'/forum/' + slug(forum) +'/post/' + slug(post) + '/save'"/>
+        </t>
         <p class="mb32">
             Share an awesome link. Your post will appear in the 'Newest' top-menu.
             If the community vote on your post, it will get traction by being promoted
@@ -373,8 +434,9 @@
             We keep a high level of quality in showcased posts, around 20% of the submited
             posts will be featured.
         </p>
-        <form t-attf-action="/forum/#{ slug(forum) }/new?post_type=link" method="post" role="form" class="tag_text form-horizontal">
+        <form t-att-action="action_url" method="post" role="form" class="post_link tag_text form-horizontal">
             <input type="hidden" name="karma" t-attf-value="#{user.karma}" id="karma"/>
+            <input type="hidden" name="karma_retag" t-attf-value="#{forum.karma_retag}" id="karma_retag"/>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="content_link">URL to Share</label>
                 <div class="col-sm-8">
@@ -483,7 +545,7 @@
             <div t-if="not is_answer">
                 <br/>
                 <input type="hidden" name="karma_retag" t-attf-value="#{forum.karma_retag}" id="karma_retag"/>
-                <input type="text" name="post_tag" class="form-control col-md-9 js_select2" placeholder="Tags" t-attf-data-init-value="#{tags}"/>
+                <input type="text" name="post_tags" class="form-control col-md-9 js_select2" placeholder="Tags" t-attf-data-init-value="#{tags}"/>
                 <br/>
             </div>
             <button class="btn btn-primary btn-lg">Save</button>
@@ -608,6 +670,7 @@
                     </div>
                 </div>
                 <div class="text-muted mb16">
+                    <i t-attf-class="fa type_#{question.post_type}" t-att-title="question.post_type.capitalize()"/>
                     By
                     <a t-attf-href="/forum/#{ slug(forum) }/user/#{ question.create_uid.id }"
                         t-field="question.create_uid"
@@ -860,6 +923,14 @@
             similar questions. Using the right tags makes it easier for
             others to find and answer your question.
         </p>
+        <nav t-if="pager_chars">
+            <ul class="pagination mt0 mb0">
+                <li class="disabled"><a><i class="fa fa-filter"></i></a></li>
+                <t t-foreach="pager_chars" t-as="c">
+                    <li t-attf-class="#{'active' if active_tag == c[0] else ''}"><a t-attf-href="/forum/#{ slug(forum) }/tag/#{escape_char(c[0])}" ><t t-esc="c[0]"/></a></li>
+                </t>
+            </ul>
+        </nav>
         <div class="row">
             <div class="col-sm-3 mt16" t-foreach="tags" t-as="tag">
                 <a t-attf-href="/forum/#{ slug(forum) }/tag/#{ slug(tag) }/questions?{{ keep_query( filters='tag') }}" class="label label-default">
