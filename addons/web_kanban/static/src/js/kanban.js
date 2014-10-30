@@ -33,8 +33,6 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
             records : {}
         };
         this.groups = [];
-        this.aggregates = {};
-        this.group_operators = ['avg', 'max', 'min', 'sum', 'count'];
         this.qweb = new QWeb2.Engine();
         this.qweb.debug = instance.session.debug;
         this.qweb.default_dict = _.clone(QWeb.default_dict);
@@ -110,19 +108,6 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
             if (child.tag === "templates") {
                 this.transform_qweb_template(child);
                 this.qweb.add_template(instance.web.json_node_to_xml(child));
-                break;
-            } else if (child.tag === 'field') {
-                this.extract_aggregates(child);
-            }
-        }
-    },
-    /*  extract_aggregates
-    *   extract the agggregates from the nodes (TagName="field")
-    */
-    extract_aggregates: function(node) {
-        for (var j = 0, jj = this.group_operators.length; j < jj;  j++) {
-            if (node.attrs[this.group_operators[j]]) {
-                this.aggregates[node.attrs.name] = node.attrs[this.group_operators[j]];
                 break;
             }
         }
@@ -228,7 +213,6 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
                     },
                     value: new_record[0],
                     length: 0,
-                    aggregates: {},
                 };
                 var new_group = new instance.web_kanban.KanbanGroup(self, [], datagroup, dataset);
                 self.do_add_groups([new_group]).done(function() {
@@ -248,7 +232,7 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
             self.grouped_by_m2o = (self.group_by_field.type === 'many2one');
             self.$buttons.find('.oe_alternative').toggle(self.grouped_by_m2o);
             self.$el.toggleClass('oe_kanban_grouped_by_m2o', self.grouped_by_m2o);
-            var grouping_fields = self.group_by ? [self.group_by].concat(_.keys(self.aggregates)) : undefined;
+            var grouping_fields = self.group_by ? [self.group_by] : undefined;
             if (!_.isEmpty(grouping_fields)) {
                 // ensure group_by fields are read.
                 self.fields_keys = _.unique(self.fields_keys.concat(grouping_fields));
@@ -451,7 +435,10 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
                     var old_group = self.currently_dragging.group;
                     var new_group = ui.item.parents('.oe_kanban_column:first').data('widget');
                     if (!(old_group.title === new_group.title && old_group.value === new_group.value && old_index == new_index)) {
-                        self.on_record_moved(record, old_group, old_index, new_group, new_index);
+                        $.when(self.on_record_moved(record, old_group, old_index, new_group, new_index)).done(function() {
+                            old_group.update_length(-1);
+                            new_group.update_length(1);
+                        });
                     }
                     setTimeout(function() {
                         // A bit hacky but could not find a better solution for Firefox (problem not present in chrome)
@@ -506,18 +493,17 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
     on_record_moved : function(record, old_group, old_index, new_group, new_index) {
         var self = this;
         record.$el.find('[title]').tooltip('destroy');
-        $(old_group.$el).add(new_group.$el).find('.oe_kanban_aggregates, .oe_kanban_group_length').hide();
         if (old_group === new_group) {
             new_group.records.splice(old_index, 1);
             new_group.records.splice(new_index, 0, record);
-            new_group.do_save_sequences();
+            return new_group.do_save_sequences();
         } else {
             old_group.records.splice(old_index, 1);
             new_group.records.splice(new_index, 0, record);
             record.group = new_group;
             var data = {};
             data[this.group_by] = new_group.value;
-            this.dataset.write(record.id, data, {}).done(function() {
+            return this.dataset.write(record.id, data, {}).done(function() {
                 record.do_reload();
                 new_group.do_save_sequences();
                 if (new_group.state.folded) {
@@ -625,7 +611,6 @@ instance.web_kanban.KanbanGroup = instance.web.Widget.extend({
         this.group = group;
         this.dataset = dataset;
         this.dataset_offset = 0;
-        this.aggregates = {};
         this.value = this.title = this.values = null;
         if (this.group) {
             this.values = group.values;
@@ -641,9 +626,6 @@ instance.web_kanban.KanbanGroup = instance.web.Widget.extend({
                     this.title = instance.web.format_value(group.get('value'), field, false);
                 } catch(e) {}
             }
-            _.each(this.view.aggregates, function(value, key) {
-                self.aggregates[value] = instance.web.format_value(group.get('aggregates')[key], {type: 'float'});
-            });
         }
 
         if (this.title === false) {
@@ -873,11 +855,16 @@ instance.web_kanban.KanbanGroup = instance.web.Widget.extend({
         var id = record, self = this;
         self.view.remove_no_result();
         self.trigger("add_record");
+        self.update_length(1);
         this.dataset.read_ids([id], this.view.fields_keys)
             .done(function (records) {
                 self.view.dataset.ids.push(id);
                 self.do_add_records(records, true);
             });
+    },
+    update_length: function(sign) {
+        this.group.attributes.length += 1*sign;
+        this.$el.find(".oe_kanban_group_length").text(this.group.get('length'));
     },
     highlight: function(show){
         if(show){
