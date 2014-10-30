@@ -91,12 +91,7 @@ class pos_config(osv.osv):
         'company_id': fields.many2one('res.company', 'Company', required=True),
         'group_pos_manager_id': fields.many2one('res.groups','Point of Sale Manager Group', help='This field is there to pass the id of the pos manager group to the point of sale client'),
         'group_pos_user_id':    fields.many2one('res.groups','Point of Sale User Group', help='This field is there to pass the id of the pos user group to the point of sale client'),
-        'barcode_product':  fields.char('Product Barcodes', size=64, help='The pattern that identifies product barcodes'),
-        'barcode_cashier':  fields.char('Cashier Barcodes', size=64, help='The pattern that identifies cashier login barcodes'),
-        'barcode_customer': fields.char('Customer Barcodes',size=64, help='The pattern that identifies customer\'s client card barcodes'),
-        'barcode_price':    fields.char('Price Barcodes',   size=64, help='The pattern that identifies a product with a barcode encoded price'),
-        'barcode_weight':   fields.char('Weight Barcodes',  size=64, help='The pattern that identifies a product with a barcode encoded weight'),
-        'barcode_discount': fields.char('Discount Barcodes',  size=64, help='The pattern that identifies a product with a barcode encoded discount'),
+        'barcode_nomenclature_id':  fields.many2one('barcode.nomenclature','Barcode Nomenclature', help='A barcode nomenclature', required="True"),
     }
 
     def _check_cash_control(self, cr, uid, ids, context=None):
@@ -188,6 +183,13 @@ class pos_config(osv.osv):
         else:
             return False
 
+    def _get_default_nomenclature(self, cr, uid, context=None):
+        default_nom_obj = self.pool.get('barcode.nomenclature')
+        res = default_nom_obj.search(cr, uid, [('id', '=', 1)], limit=1, context=context)
+        if res and res[0]:
+            return default_nom_obj.browse(cr, uid, res[0], context=context).id
+        return False
+
     _defaults = {
         'uuid'  : _generate_uuid,
         'state' : POS_CONFIG_STATE[0][0],
@@ -200,12 +202,7 @@ class pos_config(osv.osv):
         'company_id': _get_default_company,
         'group_pos_manager_id': _get_group_pos_manager,
         'group_pos_user_id': _get_group_pos_user,
-        'barcode_product': '*', 
-        'barcode_cashier': '041*', 
-        'barcode_customer':'042*', 
-        'barcode_weight':  '21xxxxxNNDDD', 
-        'barcode_discount':'22xxxxxxxxNN', 
-        'barcode_price':   '23xxxxxNNNDD', 
+        'barcode_nomenclature_id': _get_default_nomenclature,
     }
 
     def onchange_picking_type_id(self, cr, uid, ids, picking_type_id, context=None):
