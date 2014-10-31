@@ -99,7 +99,7 @@ class fleet_vehicle_stage(models.Model):
     name = fields.Char(string='Name', required=True)
     sequence = fields.Integer('Sequence', help="Used to order the note stages")
 
-    _sql_constraints = [('fleet_state_name_unique','unique(name)', 'State name already exists')]
+    _sql_constraints = [('fleet_stage_name_unique','unique(name)', 'Stage name already exists')]
 
 class fleet_vehicle_model(models.Model):
 
@@ -296,10 +296,10 @@ class fleet_vehicle(models.Model):
 
     name = fields.Char(compute='_vehicle_name_get_fnc', string='Name', store=True)
     company_id = fields.Many2one('res.company', string='Company')
-    license_plate = fields.Char(string='License Plate', required=True, help='License plate number of the vehicle (ie: plate number for a car)')
+    license_plate = fields.Char(string='License Plate', required=True, track_visibility='onchange', help='License plate number of the vehicle (ie: plate number for a car)')
     vin_sn = fields.Char(string='Chassis Number', help='Unique number written on the vehicle motor (VIN/SN number)', copy=False)
-    driver_id = fields.Many2one('res.partner', string='Driver', help='Driver of the vehicle')
-    model_id = fields.Many2one('fleet.vehicle.model', string='Model', required=True, help='Model of the vehicle')
+    driver_id = fields.Many2one('res.partner', string='Driver', track_visibility='onchange', help='Driver of the vehicle')
+    model_id = fields.Many2one('fleet.vehicle.model', string='Model', required=True, track_visibility='onchange', help='Model of the vehicle')
     log_fuel = fields.One2many('fleet.vehicle.log.fuel', 'vehicle_id', string='Fuel Logs')
     log_services = fields.One2many('fleet.vehicle.log.services', 'vehicle_id', string='Services Logs')
     log_contracts = fields.One2many('fleet.vehicle.log.contract', 'vehicle_id', string='Contracts')
@@ -310,7 +310,7 @@ class fleet_vehicle(models.Model):
     odometer_count = fields.Integer(compute='_count_all', string='Odometer')
     acquisition_date = fields.Date('Acquisition Date', help='Date when the vehicle has been bought')
     color = fields.Char(string='Color', help='Color of the vehicle')
-    stage_id = fields.Many2one('fleet.vehicle.stage', string='Stage', help='Current state of the vehicle', default=_get_default_state)
+    stage_id = fields.Many2one('fleet.vehicle.stage', string='Stage', track_visibility='onchange', help='Current state of the vehicle', default=_get_default_state)
     location = fields.Char(string='Location', help='Location of the vehicle (garage, ...)')
     seats = fields.Integer('Seats Number', help='Number of seats of the vehicle')
     doors = fields.Integer('Doors Number', help='Number of doors of the vehicle', default=5)
@@ -347,33 +347,6 @@ class fleet_vehicle(models.Model):
         vehicle_id.message_post(body=_('%s %s has been added to the fleet!') % (vehicle_id.model_id.name, vehicle_id.license_plate))
         return vehicle_id
 
-    @api.multi
-    def write(self, vals):
-        """
-        This function write an entry in the openchatter whenever we change important information
-        on the vehicle like the model, the drive, the state of the vehicle or its license plate
-        """
-        for vehicle in self:
-            changes = []
-            if 'model_id' in vals and vehicle.model_id.id != vals['model_id']:
-                value = self.env['fleet.vehicle.model'].browse(vals['model_id']).name
-                oldmodel = vehicle.model_id.name or _('None')
-                changes.append(_("Model: from '%s' to '%s'") % (oldmodel, value))
-            if 'driver_id' in vals and vehicle.driver_id.id != vals['driver_id']:
-                value = self.env['res.partner'].browse(vals['driver_id']).name
-                olddriver = (vehicle.driver_id.name) or _('None')
-                changes.append(_("Driver: from '%s' to '%s'") % (olddriver, value))
-            if 'stage_id' in vals and vehicle.stage_id.id != vals['stage_id']:
-                value = self.env['fleet.vehicle.stage'].browse(vals['stage_id']).name
-                oldstate = vehicle.stage_id.name or _('None')
-                changes.append(_("State: from '%s' to '%s'") % (oldstate, value))
-            if 'license_plate' in vals and vehicle.license_plate != vals['license_plate']:
-                old_license_plate = vehicle.license_plate or _('None')
-                changes.append(_("License Plate: from '%s' to '%s'") % (old_license_plate, vals['license_plate']))
-
-            if len(changes) > 0:
-                vehicle.message_post(body=", ".join(changes))
-        return super(fleet_vehicle, self).write(vals)
 
 class fleet_vehicle_odometer(models.Model):
     
@@ -627,6 +600,7 @@ class fleet_vehicle_log_contract(models.Model):
     def on_change_start_date(self, strdate, enddate):
         if (strdate):
             self.expiration_date = self.compute_next_year_date(strdate)
+
     
     @api.multi
     def compute_days_left(self):
