@@ -34,15 +34,21 @@ instance.web.ActionManager = instance.web.Widget.extend({
      * widget: typically, widgets added are instance.web.ViewManager.  The action manager
      *      uses this list of widget to handle the breadcrumbs.
      * action: new action
-     * clear_breadcrumbs: boolean, if true, current widgets are destroyed
+     * options.clear_breadcrumbs: boolean, if true, current widgets are destroyed
+     * options.replace_breadcrumb: boolean, if true, replace current breadcrumb
      */
-    push_widget: function(widget, action, clear_breadcrumbs) {
+    push_widget: function(widget, action, options) {
         var self = this,
+            to_destroy,
+            options = options || {},
             old_widget = this.inner_widget;
 
-        if (clear_breadcrumbs) {
-            var to_destroy = this.widgets;
+        if (options.clear_breadcrumbs) {
+            to_destroy = this.widgets;
             this.widgets = [];
+        } else if (options.replace_breadcrumb) {
+            to_destroy = _.last(this.widgets);
+            this.widgets = _.initial(this.widgets);
         }
         if (widget instanceof instance.web.Widget) {
             var title = widget.get('title') || action.display_name || action.name;
@@ -61,7 +67,7 @@ instance.web.ActionManager = instance.web.Widget.extend({
         return $.when(this.inner_widget.appendTo(this.$el)).done(function () {
             (action.target !== 'inline') && (!action.flags.headless) && widget.$header && widget.$header.show();
             old_widget && old_widget.$el.hide();
-            if (clear_breadcrumbs) {
+            if (options.clear_breadcrumbs) {
                 self.clear_widgets(to_destroy)
             }
         });
@@ -260,6 +266,7 @@ instance.web.ActionManager = instance.web.Widget.extend({
      * @param {Number|String|Object} Can be either an action id, a client action or an action descriptor.
      * @param {Object} [options]
      * @param {Boolean} [options.clear_breadcrumbs=false] Clear the breadcrumbs history list
+     * @param {Boolean} [options.replace_breadcrumb=false] Replace the current breadcrumb with the action
      * @param {Function} [options.on_reverse_breadcrumb] Callback to be executed whenever an anterior breadcrumb item is clicked on.
      * @param {Function} [options.hide_breadcrumb] Do not display this widget's title in the breadcrumb
      * @param {Function} [options.on_close] Callback to be executed when the dialog is closed (only relevant for target=new actions)
@@ -401,7 +408,7 @@ instance.web.ActionManager = instance.web.Widget.extend({
         }
         widget = executor.widget();
         this.dialog_stop(executor.action);
-        return this.push_widget(widget, executor.action, options.clear_breadcrumbs);
+        return this.push_widget(widget, executor.action, options);
     },
     ir_actions_act_window: function (action, options) {
         var self = this;
