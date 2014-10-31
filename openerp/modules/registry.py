@@ -404,8 +404,7 @@ class RegistryManager(object):
         changed = False
         if openerp.multi_process and db_name in cls.registries:
             registry = cls.get(db_name)
-            cr = registry.cursor()
-            try:
+            with registry.cursor() as cr:
                 cr.execute("""
                     SELECT base_registry_signaling.last_value,
                            base_cache_signaling.last_value
@@ -439,8 +438,6 @@ class RegistryManager(object):
                                 field._setup_digits(env)
                 registry.base_registry_signaling_sequence = r
                 registry.base_cache_signaling_sequence = c
-            finally:
-                cr.close()
         return changed
 
     @classmethod
@@ -451,14 +448,9 @@ class RegistryManager(object):
             registry = cls.get(db_name)
             if registry.any_cache_cleared():
                 _logger.info("At least one model cache has been cleared, signaling through the database.")
-                cr = registry.cursor()
-                r = 1
-                try:
+                with registry.cursor() as cr:
                     cr.execute("select nextval('base_cache_signaling')")
-                    r = cr.fetchone()[0]
-                finally:
-                    cr.close()
-                registry.base_cache_signaling_sequence = r
+                    registry.base_cache_signaling_sequence = cr.fetchone()[0]
                 registry.reset_any_cache_cleared()
 
     @classmethod
@@ -466,13 +458,8 @@ class RegistryManager(object):
         if openerp.multi_process and db_name in cls.registries:
             _logger.info("Registry changed, signaling through the database")
             registry = cls.get(db_name)
-            cr = registry.cursor()
-            r = 1
-            try:
+            with registry.cursor() as cr:
                 cr.execute("select nextval('base_registry_signaling')")
-                r = cr.fetchone()[0]
-            finally:
-                cr.close()
-            registry.base_registry_signaling_sequence = r
+                registry.base_registry_signaling_sequence = cr.fetchone()[0]
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
