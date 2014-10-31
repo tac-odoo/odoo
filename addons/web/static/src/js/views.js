@@ -34,6 +34,7 @@ instance.web.ActionManager = instance.web.Widget.extend({
      * widget: typically, widgets added are instance.web.ViewManager.  The action manager
      *      uses this list of widget to handle the breadcrumbs.
      * action: new action
+     * options.on_reverse_breadcrumb: will be called when breadcrumb is selected
      * options.clear_breadcrumbs: boolean, if true, current widgets are destroyed
      * options.replace_breadcrumb: boolean, if true, replace current breadcrumb
      */
@@ -62,6 +63,7 @@ instance.web.ActionManager = instance.web.Widget.extend({
                 destroy: function () {},
             });
         }
+        _.last(this.widgets).__on_reverse_breadcrumb = options.on_reverse_breadcrumb;
         this.inner_action = action;
         this.inner_widget = widget;
         return $.when(this.inner_widget.appendTo(this.$el)).done(function () {
@@ -104,13 +106,10 @@ instance.web.ActionManager = instance.web.Widget.extend({
         if (widget instanceof instance.web.ViewManager) {
             var nbr_views = widget.view_stack.length;
             if (nbr_views > 1) {
-                this.select_widget(widget, nbr_views - 2);
-            } else if (this.widgets.length > 1) {
-                widget = this.widgets[this.widgets.length -2];
-                nbr_views = widget.view_stack.length;
-                this.select_view(widget, nbr_views - 2)
-            }
-        } else if (this.widgets.length > 1) {
+                return this.select_widget(widget, nbr_views - 2);
+            } 
+        } 
+        if (this.widgets.length > 1) {
             widget = this.widgets[this.widgets.length - 2];
             var index = widget.view_stack && widget.view_stack.length - 1;
             this.select_widget(widget, index);
@@ -131,6 +130,9 @@ instance.web.ActionManager = instance.web.Widget.extend({
             self.inner_widget = _.last(self.widgets);
             self.inner_widget.display_breadcrumbs && self.inner_widget.display_breadcrumbs();
             self.inner_widget.$el.show();
+            if (widget.__on_reverse_breadcrumb) {
+                widget.__on_reverse_breadcrumb();
+            }
         });
     },
     clear_widgets: function(widgets) {
