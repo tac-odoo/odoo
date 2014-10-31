@@ -337,18 +337,25 @@
                     <field name="use_issues"/>
                     <field name="issue_ids" invisible="1"/>
                 </field>
-                <xpath expr="//div[contains(@class, 'oe_kanban_project_list')]/a" position="after">
-                    <a t-if="record.use_issues.raw_value" style="margin-right: 20px" class="pull-right"
-                        name="%(act_project_project_2_project_issue_all)d" type="action">
-                        <t t-raw="record.issue_ids.raw_value.length"/> <field name="label_issues"/>
-                        <field name="monthly_issues" widget="sparkline_bar" options="{'delayIn': '1000'}">
-                            Closed Issues
-                        </field>
-                    </a>
+                <xpath expr='//div[@name="tasks"]' position="after">
+                    <div t-if="record.use_issues.raw_value" class="col-md-6">
+                        <a name="%(act_project_project_2_project_issue_all)d" type="action">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <t t-raw="record.issue_ids.raw_value.length"/> <field name="label_issues"/>
+                                </div>
+                                <div class="col-md-3">
+                                    <field name="monthly_issues" widget="sparkline_bar" options="{'delayIn': '1000'}">
+                                        Closed Issues
+                                    </field>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 </xpath>
-                <xpath expr="//div[contains(@class, 'oe_kanban_project_list')]/div" position="replace">
-                     <div t-if="!(record.use_tasks.raw_value and record.task_count.raw_value gt 0) and !(record.use_issues.raw_value and record.issue_ids.raw_value.length gt 0)" style="margin-top: 6px;margin-left:20px;">
-                         <img src="/project/static/src/img/top_left_arrow.png" style="margin-top: -8px; width: 22px;" />
+                <xpath expr="//div[@name='project_help']" position="replace">
+                     <div name="project_help" t-if="!(record.use_tasks.raw_value and record.task_count.raw_value gt 0) and !(record.use_issues.raw_value and record.issue_ids.raw_value.length gt 0)" class="col-md-12 oe_margin_top_8">
+                         <img src="/project/static/src/img/top_left_arrow.png" style="width: 22px;"/>
                          <span>No activity yet, click to enter in the project.</span>
                      </div>
                 </xpath>
