@@ -101,6 +101,9 @@ instance.web.ActionManager = instance.web.Widget.extend({
         }
         return _.pluck(this.get_breadcrumbs(), 'title').join(' / ');
     },
+    get_widgets: function () {
+        return this.widgets.slice(0);
+    },
     history_back: function() {
         var widget = _.last(this.widgets);
         if (widget instanceof instance.web.ViewManager) {
