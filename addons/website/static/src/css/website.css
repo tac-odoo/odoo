@@ -168,6 +168,9 @@ html, body, #wrapwrap {
   display: table;
   width: 100%;
 }
+.nav-margin-top + #wrapwrap{
+  margin-top: 34px;
+}
 
 header, main, footer {
   display: table-row;
