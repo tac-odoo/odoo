@@ -47,7 +47,7 @@
         <field name="inherit_id" ref="account.view_invoice_line_form"/>
         <field name="arch" type="xml">
             <field name="account_analytic_id" position="replace">
-                <field name="analytics_id" context="{'journal_id':parent.journal_id}" domain="[('plan_id','&lt;&gt;',False)]" groups="analytic.group_analytic_accounting"/>
+                <field name="analytics_id" domain="[('plan_id','&lt;&gt;',False)]" groups="analytic.group_analytic_accounting"/>
             </field>
         </field>
     </record>
@@ -63,6 +63,17 @@
         </field>
     </record>
 
+    <!--supplier invoices-->
+    <record model="ir.ui.view" id="view_invoice_supp_form_analytic_inherit">
+        <field name="name">account.invoice.form.analytic.inherit</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_supplier_form"/>
+        <field name="arch" type="xml">
+            <field name="account_analytic_id" position="replace">
+                <field name="analytics_id" context="{'journal_id':parent.journal_id}" domain="[('plan_id', '&lt;&gt;', False)]" groups="analytic.group_analytic_accounting"/>
+            </field>
+        </field>
+    </record>
 
   </data>
 </openerp>

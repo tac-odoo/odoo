@@ -87,7 +87,7 @@ class account_analytic_account(osv.osv):
         res = {}
         for account in self.browse(cr, uid, ids, context=context):
             res[account.id] = 0.0
-            line_ids = lines_obj.search(cr, uid, [('account_id','=', account.id), ('invoice_id','!=',False), ('to_invoice','!=', False), ('journal_id.type', '=', 'purchase')], context=context)
+            line_ids = lines_obj.search(cr, uid, [('account_id','=', account.id), ('invoice_id','!=',False), ('to_invoice','!=', False), ('journal_id.type', '=', 'purchase'), ('invoice_id.state', 'not in', ['draft', 'cancel'])], context=context)
             #Put invoices in separate array in order not to calculate them double
             invoices = []
             for line in lines_obj.browse(cr, uid, line_ids, context=context):

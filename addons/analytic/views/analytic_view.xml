@@ -52,6 +52,8 @@
                                 </group>
                                 <separator string="Terms and Conditions" name="description"/>
                                 <field name="description"/>
+                                <separator string="Warning Message" name="warning_message"/>
+                                <field name="warning_message"/>
                             </page>
                         </notebook>
                     </sheet>

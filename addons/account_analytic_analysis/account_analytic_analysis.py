@@ -374,7 +374,7 @@ class account_analytic_account(osv.osv):
         inv_ids = []
         for account in self.browse(cr, uid, ids, context=context):
             res[account.id] = 0.0
-            line_ids = lines_obj.search(cr, uid, [('account_id','=', account.id), ('invoice_id','!=',False), ('to_invoice','!=', False), ('journal_id.type', '=', 'general'), ('invoice_id.type', 'in', ['out_invoice', 'out_refund'])], context=context)
+            line_ids = lines_obj.search(cr, uid, [('account_id','=', account.id), ('invoice_id','!=',False), ('to_invoice','!=', False), ('journal_id.type', '=', 'general'), ('invoice_id.type', 'in', ['out_invoice', 'out_refund']), ('invoice_id.state', 'not in', ['draft', 'cancel'])], context=context)
             for line in lines_obj.browse(cr, uid, line_ids, context=context):
                 if line.invoice_id not in inv_ids:
                     inv_ids.append(line.invoice_id)
@@ -453,6 +453,15 @@ class account_analytic_account(osv.osv):
             total_toinvoice += account.ca_to_invoice
         return total_toinvoice
 
+    def _get_due_invoice(self, cr, uid, analytic_account, name, args, context=None):
+        due_invoice = {}
+        today_date = fields.date.context_today(self, cr, uid, context=context)
+        acc_invoice_line_obj = self.pool.get("account.invoice.line")
+        for account_id in analytic_account:
+            invoice_line_data = acc_invoice_line_obj.read_group(cr, uid, [('account_analytic_id', '=', account_id), ('invoice_id.state', '=', 'open'), ('invoice_id.date_due', '<', today_date), ('invoice_id.date_due', '!=', False)], fields=["price_subtotal"], groupby=[], context=context)
+            due_invoice = {account_id: total['price_subtotal'] for total in invoice_line_data }
+        return due_invoice
+            
     def _sum_of_fields(self, cr, uid, ids, name, arg, context=None):
          res = dict([(i, {}) for i in ids])
          for account in self.browse(cr, uid, ids, context=context):
@@ -523,6 +532,7 @@ class account_analytic_account(osv.osv):
         'invoiced_total' : fields.function(_sum_of_fields, type="float",multi="sum_of_all", string="Total Invoiced"),
         'remaining_total' : fields.function(_sum_of_fields, type="float",multi="sum_of_all", string="Total Remaining", help="Expectation of remaining income for this contract. Computed as the sum of remaining subtotals which, in turn, are computed as the maximum between '(Estimation - Invoiced)' and 'To Invoice' amounts"),
         'toinvoice_total' : fields.function(_sum_of_fields, type="float",multi="sum_of_all", string="Total to Invoice", help=" Sum of everything that could be invoiced for this contract."),
+        'total_due_amount': fields.function(_get_due_invoice, type="float", string="Total Due Amount"),
         'recurring_invoice_line_ids': fields.one2many('account.analytic.invoice.line', 'analytic_account_id', 'Invoice Lines', copy=True),
         'recurring_invoices' : fields.boolean('Generate recurring invoices automatically'),
         'recurring_rule_type': fields.selection([
@@ -558,6 +568,20 @@ class account_analytic_account(osv.osv):
             'nodestroy': True,
         }
 
+    def contract_invoice_line(self, cr, uid, ids, context=None):
+        today_date = fields.date.context_today(self, cr, uid, context=context)
+        domain = [('account_analytic_id', 'in', ids), ('invoice_id.state', '=', 'open'), ('invoice_id.date_due', '<', today_date), ('invoice_id.date_due', '!=', False)]
+        invoice_line_ids = self.pool.get('account.invoice.line').search(cr, uid, domain)
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Invoice Lines'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'domain' : [('id', 'in', invoice_line_ids)],
+            'res_model': 'account.invoice.line',
+            'nodestroy': True,
+        }
+        
     def on_change_template(self, cr, uid, ids, template_id, date_start=False, context=None):
         if not template_id:
             return {}
@@ -639,6 +663,19 @@ class account_analytic_account(osv.osv):
             self.pool.get('email.template').send_mail(cr, uid, template_id, user_id, force_send=True, context=context)
 
         return True
+
+    def _cron_due_invoice_state(self, cr, uid, context=None):
+        today_date = fields.date.context_today(self, cr, uid, context=context)
+        acc_invoice_line_obj = self.pool.get("account.invoice.line")
+        acc_analytic_ids = self.search(cr, uid, [('state', 'in', ['draft','open'])], context=context)
+        for account in self.browse(cr, uid, acc_analytic_ids, context=context):
+            if (account.date and today_date > account.date) or account.is_overdue_quantity:
+                account.write({'state': 'pending'})
+            else:
+                acc_inv_line_ids = acc_invoice_line_obj.search(cr, uid, [('account_analytic_id', '=', account.id), ('invoice_id.state', '=', 'open'), ('invoice_id.date_due', '<', today_date), ('invoice_id.date_due', '!=', False)], context=context)
+                if acc_inv_line_ids:
+                   account.write({'state': 'pending'})
+        return True                
 
     def hr_to_invoice_timesheets(self, cr, uid, ids, context=None):
         domain = [('invoice_id','=',False),('to_invoice','!=',False), ('journal_id.type', '=', 'general'), ('account_id', 'in', ids)]

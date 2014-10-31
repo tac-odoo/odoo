@@ -29,22 +29,12 @@
                         <field name="sale_layout_cat_id"/>
                     </xpath>
 
+                    <xpath expr="//field[@name='invoice_line']/form/group/group/field[@name='product_id']" position="after">
+                        <field name="sale_layout_cat_id"/>
+                    </xpath>
                  </data>
              </field>
          </record>
-
-        <record model="ir.ui.view" id="view_invoice_line_form_inherit_2">
-            <field name="name">account.invoice.line.form.inherit_2</field>
-            <field name="model">account.invoice.line</field>
-            <field name="inherit_id" ref="account.view_invoice_line_form"/>
-            <field name="arch" type="xml">
-                <data>
-                    <xpath expr="//group/group/field[@name='product_id']" position="after">
-                        <field name="sale_layout_cat_id"/>
-                    </xpath>
-                </data>
-            </field>
-        </record>
 
         <!-- Report condiguration -->
         <record id="report_configuration_form_view" model="ir.ui.view">
