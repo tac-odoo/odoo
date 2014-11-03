@@ -573,8 +573,8 @@ class survey_question(osv.Model):
             oldname='descriptive_text'),
 
         # Answer
-        'type': fields.selection([('free_text', 'Long Text Zone'),
-                ('textbox', 'Text Input'),
+        'type': fields.selection([('free_text', 'Multiple Lines Text Zone'),
+                ('textbox', 'Single Line Text Zone'),
                 ('numerical_box', 'Numerical Value'),
                 ('datetime', 'Date and Time'),
                 ('simple_choice', 'Multiple choice: only one answer'),
@@ -601,7 +601,7 @@ class survey_question(osv.Model):
                                        ('2', '6')],
             'Number of columns'),
             # These options refer to col-xx-[12|6|4|3|2] classes in Bootstrap
-        'display_mode': fields.selection([('columns', 'Radio Buttons/Checkboxes'),
+        'display_mode': fields.selection([('columns', 'Radio Buttons'),
                                           ('dropdown', 'Selection Box')],
                                          'Display mode'),
 
@@ -613,7 +613,7 @@ class survey_question(osv.Model):
             oldname='make_comment_field'),
 
         # Validation
-        'validation_required': fields.boolean('Validate entry',
+        'validation_required': fields.boolean('Validation Restriction',
             oldname='is_validation_require'),
         'validation_email': fields.boolean('Input must be an email'),
         'validation_length_min': fields.integer('Minimum Text Length'),
