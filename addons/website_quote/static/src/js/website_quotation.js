@@ -81,7 +81,18 @@ website.if_dom_contains('div.o_website_quote', function () {
             case "h1":
                 id = _.uniqueId('quote_header_');
                 $(this.parentNode).attr('id',id);
-                sub_li = $("<li>").html('<a href="#'+id+'">'+$(this).text()+'</a>').appendTo(ul);
+                var menu_text = "";
+                var header = $(this).find(".quote-menu");
+                if (header.length){
+                    var node_text = "";
+                    _.each(header,function(node){
+                        node_text = node_text+$(node).text()+" ";
+                    });
+                    menu_text = node_text;
+                }
+                else
+                    menu_text = $(this).text();
+                sub_li = $("<li>").html('<a href="#'+id+'">'+menu_text+'</a>').appendTo(ul);
                 sub_ul = null;
                 break;
             case "h2":
