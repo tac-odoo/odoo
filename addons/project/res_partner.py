@@ -24,17 +24,15 @@ from openerp import models, fields, api, _
 
 class res_partner(models.Model):
     @api.multi
-    def _task_count(self):
+    def _compute_task_count(self):
         Task = self.env['project.task']
-        return {
-            partner_id: Task.search_count([('partner_id', '=', partner_id)])
-            for partner_id in self._ids
-        }
-    
+        for partner in self:
+            partner.task_count = Task.search_count([('partner_id', '=', partner.id)])
+
     """ Inherits partner and adds Tasks information in the partner form """
     _inherit = 'res.partner'
 
-    task_ids = fields.One2many('project.task', 'partner_id', 'Tasks')
-    task_count = fields.Integer(compute='_task_count', string='# Tasks')
+    task_ids = fields.One2many('project.task', 'partner_id', string='Tasks')
+    task_count = fields.Integer(compute='_compute_task_count', string='# Tasks')
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

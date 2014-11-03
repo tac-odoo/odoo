@@ -29,7 +29,6 @@ import time
 from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.addons.resource.faces import task as Task
-from openerp.tools.translate import _
 
 from openerp import models, fields, api, _
 
@@ -40,18 +39,18 @@ class project_task_type(models.Model):
 
     @api.model
     def _get_default_project_ids(self):
-        project_id = self.env['project.task']._get_default_project_id()
-        if project_id:
-            return [project_id]
-        return None
+        project = self.env['project.task']._get_default_project_id()
+        if project:
+            self.project_ids = project
+        self.project_ids = None
 
-    name = fields.Char('Stage Name', required=True, translate=True)
-    description = fields.Text('Description')
-    sequence= fields.Integer('Sequence', default=1)
-    case_default = fields.Boolean('Default for New Projects',
+    name = fields.Char(string='Stage Name', required=True, translate=True)
+    description = fields.Text(string='Description')
+    sequence= fields.Integer(string='Sequence', default=1)
+    case_default = fields.Boolean(string='Default for New Projects',
                     help="If you check this field, this stage will be proposed by default on each new project. It will not assign this stage to existing projects.")
-    project_ids = fields.Many2many('project.project', 'project_task_type_rel', 'type_id', 'project_id', 'Projects', default=_get_default_project_ids)
-    fold = fields.Boolean('Folded in Kanban View',
+    project_ids = fields.Many2many('project.project', 'project_task_type_rel', 'type_id', 'project_id', string='Projects', default=_get_default_project_ids)
+    fold = fields.Boolean(string='Folded in Kanban View',
                            help='This stage is folded in the kanban view when'
                            'there are no records in that stage to display.')
 
@@ -251,9 +250,9 @@ class project(models.Model):
         return recipients
 
     # TODO: Why not using a SQL contraints ?# TODO: Why not using a SQL contraints ?
-    @api.multi
     @api.constrains('date_start', 'date')
     def _check_dates(self):
+        print ">>>>>>>>>>>>>>>>>>>>"
         for leave in self.read(['date_start', 'date']):
             if leave['date_start'] and leave['date']:
                 if leave['date_start'] > leave['date']:
