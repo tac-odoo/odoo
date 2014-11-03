@@ -168,7 +168,10 @@
     </template>
 
     <template id="datetime" name="Datetime box">
-        <input type="text" class="form-control" t-att-name="prefix" placeholder="yyyy-mm-dd hh:mm:ss" />
+        <div class='input-group date'>
+            <input type="text" class="form-control" data-date-format="YYYY-MM-DD hh:mm:ss" t-att-name="prefix" placeholder="yyyy-mm-dd hh:mm:ss" />
+            <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+        </div>
     </template>
 
     <template id="simple_choice" name="Simple choice">

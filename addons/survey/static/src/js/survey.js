@@ -45,6 +45,10 @@ $(document).ready(function () {
         quiz_correction_mode = true;
     }
 
+    $("div.input-group > span span.glyphicon-calendar").on('click', function(e) {
+        $(e.currentTarget).closest("div.date").datetimepicker({useSeconds: true});
+    });
+
     // Custom code for right behavior of radio buttons with comments box
     $('.js_comments>input[type="text"]').focusin(function(){
         $(this).prev().find('>input').attr("checked","checked");
