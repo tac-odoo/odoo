@@ -31,8 +31,152 @@ class account_financial_report(models.Model):
                                    'Target Moves', default='posted', required=True)
     date_from = fields.Date("Start Date")
     date_to = fields.Date("End Date")
-    filter_id = fields.Many2one('ir.filters', 'Domain', ondelete='cascade')
-    group_by = fields.char('Group By')
-    credit = fields.Boolean('Show Credit and Debit Columns', default=False)
+    group_by = fields.Char('Group By')
+    debit_credit = fields.Boolean('Show Credit and Debit Columns', default=False)
     comparison = fields.Boolean('Enable Comparison', default=False)
-    line = fields.Many2one('account.financial.report.line', 'First/Top Line', required=True)
+    line = fields.Many2one('account.financial.report.line', 'First/Top Line')
+
+
+class account_financial_report_line(models.Model):
+    _name = "account.financial.report.line"
+    _description = "Account Report Line"
+
+    @api.one
+    def _get_level(self):
+        '''Returns the level of a record in the tree structure'''
+        level = 0
+        if self.parent_id:
+            level = self.parent_id.level + 1
+        return level
+
+    @api.one
+    def _get_children_by_order(self):
+        '''returns a dictionary with the key= the ID of a record and value = all its children,
+           computed recursively, and sorted by sequence. Ready for the printing'''
+        res = []
+        res.append(self)
+        children = self.search([('parent_id', '=', self.id)], order='sequence ASC')
+        res += children._get_children_by_order()
+        return res
+
+    @api.one
+    def _get_balance(self, field_names, args):
+        '''returns a dictionary with key=the ID of a record and value=the balance amount 
+           computed for this record. If the record is of type :
+               'accounts' : it's the sum of the linked accounts
+               'account_type' : it's the sum of leaf accoutns with such an account_type
+               'account_report' : it's the amount of the related report
+               'sum' : it's the sum of the children of this record (aka a 'view' record)'''
+        account_obj = self.env['account.account']
+        res = dict((fn, 0.0) for fn in field_names)
+        if self.type == 'account_type':
+            # it's the sum the leaf accounts with such an account type
+            report_types = [x.id for x in self.account_type_ids]
+            account_ids = account_obj.search([('user_type','in', report_types), ('type', '!=', 'view')])
+            for a in account_ids:
+                for field in field_names:
+                    res[field] += getattr(a, field)
+        elif self.type == 'sum':
+            # it's the sum of the children of this account.report
+            res2 = self.children_ids._get_balance(field_names, False)
+            for value in res2:
+                for field in field_names:
+                    res[field] += value[field]
+        elif self.type == 'formula':
+            
+
+    name = fields.Char('Line Name')
+    code = fields.Char('Line Code')
+    type = fields.Selection([
+        ('types', 'Account Types'),
+        ('tags', 'Account Tags'),
+        ('filter', 'Domain'),
+        ('sum', 'Sum Of Children'),
+        ('formula', 'Formula'),
+    ], 'Type', required=True)
+    balance = fields.Integer(compute='_get_balance', string='Balance', multi='balance')
+    debit = fields.Integer(compute='_get_balance', string='Debit', multi='balance')
+    credit = fields.Integer(compute='_get_balance', string='Credit', multi="balance")
+    action = fields.Many2one('ir.actions.actions', 'Action',
+                             help='Action triggered when clicking on the line')
+    figures_type = fields.Selection([
+        ('currency', 'Currency'),
+        ('percent', 'Percent'),
+        ('float', 'Float'),
+    ], 'Figures Type')
+    display_detail = fields.Selection([
+        ('sum', 'Sum Only'),
+        ('accounts', 'All Accounts'),
+        ('moves', 'All Journal Items'),
+        ('no_detail', 'No Detail'),
+    ], 'Display Details')
+    formula = fields.Char('Formula')
+    parent_id = fields.Many2one('account.financial.report.line', 'Parent')
+    children_ids = fields.One2many('account.financial.report.line', 'parent_id', 'Children')
+    financial_report = fields.Many2one('account.financial.report', 'Financial Report')
+    level = fields.Integer(compute='_get_level', string='Level', store=True)
+    sequence = fields.Integer('Sequence')
+    account_type_ids = fields.Many2many('account.account.type', 'account_account_financial_report_line_type', 'line_id', 'account_type_id', 'Account Types')
+    sign = fields.Selection([
+        (-1, 'Reverse balance sign'),
+        (1, 'Preserve balance sign')
+    ], 'Sign on Reports', required=True,
+       help="For accounts that are typically more debited than credited and that you would like to "
+            "print as negative amounts in your reports, you should reverse the sign of the balance; e.g.: "
+            "Expense account. The same applies for accounts that are typically more credited than debited "
+            "and that you would like to print as positive amounts in your reports; e.g.: Income account.")
+    ir_filter_id = fields.Many2one('ir.filters', 'Domain', ondelete='cascade')
+
+    def get_lines(self):
+        lines = []
+        account_obj = self.env['account.account']
+        currency_obj = self.env['res.currency']
+        for line in self._get_children_by_order():
+            vals = {
+                'name': line.name,
+                'balance': line.balance * line.sign or 0.0,
+                'type': 'line',
+                'level': line.level,
+                'account_type': line.type =='sum' and 'view' or False,#used to underline the financial line balances
+            }
+            if self.financial_report.debit_credit:
+                vals['debit'] = line.debit
+                vals['credit'] = line.credit
+            #if self.financial_report.comparison:
+                #vals['balance_cmp'] = self.pool.get('account.financial.report').browse(self.cr, self.uid, line.id, context=data['form']['comparison_context']).balance * line.sign or 0.0
+            lines.append(vals)
+            account_ids = []
+            if line.display_detail == 'no_detail':
+                #the rest of the loop is used to display the details of the financial report, so it's not needed here.
+                continue
+            # if line.type == 'accounts' and line.account_ids:
+            #     account_ids = account_obj._get_children_and_consol(self.cr, self.uid, [x.id for x in line.account_ids])
+            # elif line.type == 'account_type' and line.account_type_ids:
+            #     account_ids = account_obj.search(self.cr, self.uid, [('user_type', 'in', [x.id for x in line.account_type_ids])])
+            if line.type == 'types':
+                account_ids = account_obj.search([('user_type', 'in', [x.id for x in line.account_type_ids])])
+            if account_ids:
+                for account in account_ids:
+                    #if there are accounts to display, we add them to the lines with a level equals to their level in
+                    #the COA + 1 (to avoid having them with a too low level that would conflicts with the level of data
+                    #financial reports for Assets, liabilities...)
+                    flag = False
+                    vals = {
+                        'name': account.code + ' ' + account.name,
+                        'balance':  account.balance != 0 and account.balance * line.sign or account.balance,
+                        'type': 'account',
+                        'level': line.display_detail == 'detail_with_hierarchy' and min(account.level + 1, 6) or 6,#account.level + 1
+                        'account_type': account.type,
+                    }
+                    if self.financial_report.debit_credit:
+                        vals['debit'] = account.debit
+                        vals['credit'] = account.credit
+                    if not currency_obj.is_zero(self.cr, self.uid, account.company_id.currency_id, vals['balance']):
+                        flag = True
+                    if self.financial_report.comparison:
+                        vals['balance_cmp'] = account_obj.browse(self.cr, self.uid, account.id, context=data['form']['comparison_context']).balance * line.sign or 0.0
+                        if not currency_obj.is_zero(self.cr, self.uid, account.company_id.currency_id, vals['balance_cmp']):
+                            flag = True
+                    if flag:
+                        lines.append(vals)
+        return line
