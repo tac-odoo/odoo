@@ -127,15 +127,15 @@ instance.web.ActionManager = instance.web.Widget.extend({
             def = $.when(widget.select_view && widget.select_view(index));
 
         def.done(function () {
+            if (widget.__on_reverse_breadcrumb) {
+                widget.__on_reverse_breadcrumb();
+            }
             _.each(self.widgets.splice(widget_index + 1), function (w) {
                 w.destroy();
             });
             self.inner_widget = _.last(self.widgets);
             self.inner_widget.display_breadcrumbs && self.inner_widget.display_breadcrumbs();
-            self.inner_widget.$el.show();
-            if (widget.__on_reverse_breadcrumb) {
-                widget.__on_reverse_breadcrumb();
-            }
+            self.inner_widget.do_show && self.inner_widget.do_show();
         });
     },
     clear_widgets: function(widgets) {
