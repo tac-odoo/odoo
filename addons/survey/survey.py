@@ -821,7 +821,7 @@ class survey_label(osv.Model):
         'sequence': fields.integer('Label Sequence order'),
         'value': fields.char("Suggested value", translate=True,
             required=True),
-        'quizz_mark': fields.float('Score for this answer', help="A positive score indicates a correct answer; a negative or null score indicates a wrong answer"),
+        'quizz_mark': fields.float('Score for this choice', help="A positive score indicates a correct choice; a negative or null score indicates a wrong choice"),
     }
     _defaults = {
         'sequence': 10,
@@ -991,7 +991,7 @@ class survey_user_input_line(osv.Model):
         'value_free_text': fields.text("Free Text answer"),
         'value_suggested': fields.many2one('survey.label', "Suggested answer"),
         'value_suggested_row': fields.many2one('survey.label', "Row answer"),
-        'quizz_mark': fields.float("Score given for this answer")
+        'quizz_mark': fields.float("Score given for this choice")
     }
 
     _defaults = {

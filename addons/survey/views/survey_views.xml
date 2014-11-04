@@ -113,12 +113,13 @@
             <field name="model">survey.survey</field>
             <field name="arch" type="xml">
                 <form string="Survey">
+                    <field name="id" invisible="1"/>
                     <header groups="base.group_survey_manager">
-                        <button name="action_test_survey" string="Design Survey" type="object"/>
-                        <button name="action_test_survey" string="Test Survey" type="object"/>
-                        <button name="action_print_survey" string="Print Survey" type="object"/>
-                        <button name="action_send_survey" string="Share and invite by email" type="object" class="oe_highlight" />
-                        <button name="action_result_survey" string="View results" type="object" class="oe_highlight" />
+                        <button name="action_test_survey" string="Design Survey" type="object" class="oe_highlight"/>
+                        <button name="action_test_survey" string="Test Survey" type="object" attrs="{'invisible': [('id', '=', False)]}"/>
+                        <button name="action_print_survey" string="Print Survey" type="object" attrs="{'invisible': [('id', '=', False)]}"/>
+                        <button name="action_send_survey" string="Share and invite by email" type="object" class="oe_highlight"  attrs="{'invisible': [('id', '=', False)]}"/>
+                        <button name="action_result_survey" string="View results" type="object" class="oe_highlight" attrs="{'invisible': [('id', '=', False)]}"/>
                         <field name="stage_id" widget="statusbar" clickable="True" />
                     </header>
                     <sheet>
