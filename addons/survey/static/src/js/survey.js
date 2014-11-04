@@ -45,8 +45,16 @@ $(document).ready(function () {
         quiz_correction_mode = true;
     }
 
-    $("div.input-group > span span.glyphicon-calendar").on('click', function(e) {
-        $(e.currentTarget).closest("div.date").datetimepicker({useSeconds: true});
+    $("div.input-group > span span.fa-calendar").on('click', function(e) {
+        $(e.currentTarget).closest("div.date").datetimepicker({
+            useSeconds: true,
+            icons : {
+                time: 'fa fa-clock-o',
+                date: 'fa fa-calendar',
+                up: 'fa fa-chevron-up',
+                down: 'fa fa-chevron-down'
+            },
+        });
     });
 
     // Custom code for right behavior of radio buttons with comments box
