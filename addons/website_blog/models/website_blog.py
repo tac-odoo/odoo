@@ -20,7 +20,6 @@ class Blog(osv.Model):
     _columns = {
         'name': fields.char('Blog Name', required=True),
         'subtitle': fields.char('Blog Subtitle'),
-        'description': fields.text('Description'),
     }
 
     def all_tags(self, cr, uid, ids, min_limit=1, context=None):

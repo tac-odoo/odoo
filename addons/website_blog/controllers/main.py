@@ -11,6 +11,7 @@ from openerp.osv.orm import browse_record
 from openerp.tools.translate import _
 from openerp import SUPERUSER_ID
 from openerp.tools import html2plaintext
+from openerp.addons.web.controllers.main import login_redirect
 
 
 class QueryURL(object):
@@ -47,10 +48,11 @@ class WebsiteBlog(http.Controller):
     _blog_post_per_page = 20
     _post_comment_per_page = 10
 
-    def nav_list(self):
+    def nav_list(self, blog=None):
         blog_post_obj = request.registry['blog.post']
+        domain = [('blog_id', '=', blog.id)] if blog else []
         groups = blog_post_obj.read_group(
-            request.cr, request.uid, [], ['name', 'create_date'],
+            request.cr, request.uid, domain, ['name', 'create_date'],
             groupby="create_date", orderby="create_date desc", context=request.context)
         for group in groups:
             begin_date = datetime.datetime.strptime(group['__domain'][0][2], tools.DEFAULT_SERVER_DATETIME_FORMAT).date()
@@ -85,8 +87,8 @@ class WebsiteBlog(http.Controller):
     @http.route([
         '/blog/<model("blog.blog"):blog>',
         '/blog/<model("blog.blog"):blog>/page/<int:page>',
-        '/blog/<model("blog.blog"):blog>/tag/<model("blog.tag"):tag>',
-        '/blog/<model("blog.blog"):blog>/tag/<model("blog.tag"):tag>/page/<int:page>',
+        '/blog/<model("blog.blog"):blog>/tag/<string:tag>',
+        '/blog/<model("blog.blog"):blog>/tag/<string:tag>/page/<int:page>',
     ], type='http', auth="public", website=True)
     def blog(self, blog=None, tag=None, page=1, **opt):
         """ Prepare all values to display the blog.
@@ -96,7 +98,8 @@ class WebsiteBlog(http.Controller):
          - 'blog': current blog
          - 'blogs': all blogs for navigation
          - 'pager': pager of posts
-         - 'tag': current tag
+         - 'filter_tag': string of all active tag
+         - 'active_tag': list of all active tag
          - 'tags': all tags, for navigation
          - 'nav_list': a dict [year][month] for archives navigation
          - 'date': date_begin optional parameter, used in archives navigation
@@ -110,17 +113,19 @@ class WebsiteBlog(http.Controller):
         blog_obj = request.registry['blog.blog']
         blog_ids = blog_obj.search(cr, uid, [], order="create_date asc", context=context)
         blogs = blog_obj.browse(cr, uid, blog_ids, context=context)
-
         domain = []
+        active_tag = []
+        if tag:
+            tag_list = map(int, tag.split(','))
+            active_tag = filter(lambda x: tag_list.count(x) == 1, tag_list)
         if blog:
             domain += [('blog_id', '=', blog.id)]
-        if tag:
-            domain += [('tag_ids', 'in', tag.id)]
+        if active_tag:
+            domain += [('tag_ids', 'in', active_tag)]
         if date_begin and date_end:
             domain += [("create_date", ">=", date_begin), ("create_date", "<=", date_end)]
 
-        blog_url = QueryURL('', ['blog', 'tag'], blog=blog, tag=tag, date_begin=date_begin, date_end=date_end)
-        post_url = QueryURL('', ['blogpost'], tag_id=tag and tag.id or None, date_begin=date_begin, date_end=date_end)
+        blog_url = QueryURL('', ['blog', 'tag'], blog=blog, tag=','.join(map(str, active_tag)), date_begin=date_begin, date_end=date_end)
 
         blog_post_ids = blog_post_obj.search(cr, uid, domain, order="create_date desc", context=context)
         blog_posts = blog_post_obj.browse(cr, uid, blog_post_ids, context=context)
@@ -141,12 +146,12 @@ class WebsiteBlog(http.Controller):
             'blog': blog,
             'blogs': blogs,
             'tags': tags,
-            'tag': tag,
+            'filter_tag': ','.join(map(str, active_tag)) if active_tag else None,
+            'active_tag': active_tag,
             'blog_posts': blog_posts,
             'pager': pager,
-            'nav_list': self.nav_list(),
+            'nav_list': self.nav_list(blog),
             'blog_url': blog_url,
-            'post_url': post_url,
             'date': date_begin,
         }
         response = request.website.render("website_blog.blog_post_short", values)
@@ -217,7 +222,7 @@ class WebsiteBlog(http.Controller):
             'blog': blog,
             'blog_post': blog_post,
             'main_object': blog_post,
-            'nav_list': self.nav_list(),
+            'nav_list': self.nav_list(blog),
             'enable_editor': enable_editor,
             'next_post': next_post,
             'date': date_begin,
@@ -264,6 +269,8 @@ class WebsiteBlog(http.Controller):
     @http.route(['/blogpost/comment'], type='http', auth="public", methods=['POST'], website=True)
     def blog_post_comment(self, blog_post_id=0, **post):
         cr, uid, context = request.cr, request.uid, request.context
+        if not request.session.uid:
+            return login_redirect()
         if post.get('comment'):
             user = request.registry['res.users'].browse(cr, uid, uid, context=context)
             blog_post = request.registry['blog.post']
@@ -320,7 +327,7 @@ class WebsiteBlog(http.Controller):
         """
         cr, uid, context = request.cr, request.uid, request.context
         create_context = dict(context, mail_create_nosubscribe=True)
-        nid = request.registry['blog.post'].copy(cr, uid, blog_post_id, {}, context=create_context)
+        nid = request.registry['blog.post'].copy(cr, uid, int(blog_post_id), {}, context=create_context)
         new_blog_post = request.registry['blog.post'].browse(cr, uid, nid, context=context)
         post = request.registry['blog.post'].browse(cr, uid, nid, context)
         return werkzeug.utils.redirect("/blog/%s/post/%s?enable_editor=1" % (slug(post.blog_id), slug(new_blog_post)))
