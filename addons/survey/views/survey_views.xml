@@ -305,7 +305,7 @@
                             <field name="type" widget="radio" />
                         </group>
                         <notebook>
-                            <page string="Answers" attrs="{'invisible': [('type', 'in', ['free_text', 'numerical_box', 'datetime'])]}">
+                            <page string="Answers">
                                 <field name="validation_email" attrs="{'invisible': [('type', '!=', 'textbox')]}"/>
                                 <label for="validation_email" attrs="{'invisible': [('type', '!=', 'textbox')]}"/>
                                 <separator />
