@@ -268,6 +268,9 @@
             <div class="wrap">
                 <div class="container">
                     <div class="row">
+                        <div groups="base.group_website_publisher" t-ignore="true" class="text-right">
+                            <a t-att-href="'/survey/results/%s' % (slug(survey))" class="btn btn-default">Go back to survey result</a>
+                        </div>
                         <div class='jumbotron mt32'>
                             <h1><span t-field='survey.title'/></h1>
                             <t t-if="survey.description"><div t-field='survey.description' class="oe_no_empty"/></t>
