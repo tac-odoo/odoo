@@ -36,6 +36,7 @@ $(document).ready(function () {
 
     // Printing mode: will disable all the controls in the form
     if (_.isUndefined(submit_controller)) {
+        $(".js_surveyform .input-group-addon span.fa-calendar").removeClass().addClass("fa fa-ban");
         $('.js_surveyform :input').prop('disabled', true);
         print_mode = true;
     }
@@ -45,7 +46,7 @@ $(document).ready(function () {
         quiz_correction_mode = true;
     }
 
-    $("div.input-group > span span.fa-calendar").on('click', function(e) {
+    $("div.input-group span.fa-calendar").on('click', function(e) {
         $(e.currentTarget).closest("div.date").datetimepicker({
             useSeconds: true,
             icons : {
