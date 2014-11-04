@@ -19,17 +19,15 @@ class crm_phonecall(models.Model):
 	_order = "sequence, id"
 
 	to_call = fields.Boolean("Call Center Call", default = False)
-	made_call = fields.Boolean("Made Call", default = False)
 	sequence = fields.Integer('Sequence', select=True, help="Gives the sequence order when displaying a list of Phonecalls.")
 	start_time = fields.Integer("Start time")
 
 	@api.multi
-	def call_partner(self):
-		self.start_time = int(time.time())
-			
+	def init_call(self):
+		self.start_time = int(time.time())	
 
 	@api.multi
-	def hangup_partner(self):
+	def hangup_call(self):
 		stop_time = int(time.time())
 		duration = float(stop_time - self.start_time)
 		self.duration = float(duration/60.0)	
@@ -58,13 +56,15 @@ class crm_phonecall(models.Model):
 
 	@api.model
 	def get_list(self, current_search):
-		return {"phonecalls": self.search([('to_call','=',True)], order='sequence, id').get_info()}
+		return {"phonecalls": self.search([('to_call','=',True),('user_id','=',self.env.user[0].id)], order='sequence, id').get_info()}
 
 	@api.model
-	def get_asterisk_config(self):
-		return {'url':self.env['ir.values'].get_default('sale.config.settings', 'asterisk_url'), 
-				'login':self.env['ir.values'].get_default('sale.config.settings', 'asterisk_login'), 
-				'password':self.env['ir.values'].get_default('sale.config.settings', 'asterisk_password')}
+	def get_pbx_config(self):
+		return {'pbx_ip':self.env['ir.config_parameter'].get_param('crm.wardialing.pbx_ip'),
+				'wsServer':self.env['ir.config_parameter'].get_param('crm.wardialing.wsServer'),
+				'login':self.env.user[0].sip_login,
+				'password':self.env.user[0].sip_password,
+				'physicalPhone':self.env.user[0].sip_physicalPhone,}
 				
 class crm_lead(models.Model):
 	_inherit = "crm.lead"
@@ -83,6 +83,7 @@ class crm_lead(models.Model):
 		phonecall = self.env['crm.phonecall'].create({
 				'name' : self.name
 		});
+		phonecall.user_id = self.env.user[0].id
 		phonecall.to_call = True
 		phonecall.opportunity_id = self.id
 		phonecall.partner_id = self.partner_id
@@ -90,11 +91,12 @@ class crm_lead(models.Model):
 
 	@api.one
 	def delete_call_center_call(self):
+		#TODO correct the delete action, find a way to get the right phonecall id to delete
 		phonecall = self.env['crm.phonecall'].search([('opportunity_id','=',self.id)])
 		phonecall.unlink()
 
 class crm_phonecall_log_wizard(models.TransientModel):
-	_name = 'crm.phonecall.log.wizard';
+	_name = 'crm.phonecall.log.wizard'
 
 	@api.multi
 	def _default_description(self):
@@ -118,3 +120,10 @@ class crm_phonecall_log_wizard(models.TransientModel):
 			'type': 'ir.actions.client',
 			'tag': 'reload_panel',
 		}
+
+class res_users(models.Model):
+	_inherit = 'res.users'
+
+	sip_login = fields.Char("SIP Login / Browser's Extension")
+	sip_password = fields.Char('SIP Password')
+	sip_physicalPhone = fields.Char("Physical Phone's Number")

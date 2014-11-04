@@ -5,23 +5,28 @@ class crm_configuration(models.TransientModel):
     _name = 'sale.config.settings'
     _inherit = 'sale.config.settings'
 
-    asterisk_url = fields.Char("Asterisk Server")
-    asterisk_login = fields.Char("Asterisk Login")
-    asterisk_password = fields.Char("Asterisk Password")
-    asterisk_phone = fields.Char("Salesman's Phone", size=64)
+    wsServer = fields.Char("WebSocket")
+    pbx_ip = fields.Char("PBX Server IP")
+    
 
-    @api.one
-    def set_default_asterisk_url(self):
-        self.env['ir.values'].set_default('sale.config.settings', 'asterisk_url', self.asterisk_url)
+    @api.multi
+    def set_pbx_ip(self):
+        self.env['ir.config_parameter'].set_param('crm.wardialing.pbx_ip', self[0].pbx_ip)
+    
+    @api.multi
+    def set_wsServer(self):
+        self.env['ir.config_parameter'].set_param('crm.wardialing.wsServer', self[0].wsServer)
 
-    @api.one
-    def set_default_asterisk_login(self):
-        self.env['ir.values'].set_default('sale.config.settings', 'asterisk_login', self.asterisk_login)
+    @api.multi
+    def get_default_pbx_ip(self):
+        params = self.env['ir.config_parameter']
+        
+        pbx_ip = params.get_param('crm.wardialing.pbx_ip',default='localhost')
+        return {'pbx_ip': pbx_ip}
 
-    @api.one
-    def set_default_asterisk_password(self):
-        self.env['ir.values'].set_default('sale.config.settings', 'asterisk_password', self.asterisk_password)
-
-    @api.one
-    def set_default_asterisk_phone(self):
-        self.env['ir.values'].set_default('sale.config.settings', 'asterisk_phone', self.asterisk_phone)
+    @api.multi
+    def get_default_wsServer(self):
+        params = self.env['ir.config_parameter']
+        
+        wsServer = params.get_param('crm.wardialing.wsServer',default='ws://localhost')
+        return {'wsServer': wsServer}

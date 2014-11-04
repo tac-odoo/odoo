@@ -30,6 +30,12 @@
     }
 }
 /* button */
+
+.oe_dial_content{
+    position: relative;
+    text-align: center;
+    bottom: 0px;
+}
 .oe_systray #oe_topbar_dialbutton_icon {
     color: white;
 }
@@ -77,17 +83,8 @@
     width: 44%;
 }
 
-.oe_dial_callingbuttons{
-    text-align: center
-}
-
 .oe_dial_buttons{
     margin-bottom: 2px;
-}
-
-
-.oe_dial_optionalbuttons{
-    text-align: center
 }
 
 .oe_dial_changelog{
@@ -98,10 +95,6 @@
 .oe_dial_email{
     position: relative;
     width: 44%;
-}
-
-.oe_dial_redirectbuttons{
-    text-align: center
 }
 
 .oe_dial_to_lead{
@@ -153,6 +146,7 @@
     color: #888;
 }
 
+/* Phonecall */
 .oe_dial_selected_phonecall {
     background-color: #888;
 }

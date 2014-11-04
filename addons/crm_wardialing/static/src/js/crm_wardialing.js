@@ -14,7 +14,12 @@ openerp.crm_wardialing = function(instance) {
         init: function(parent, phonecall, image_small, email) {
             this._super(parent);
             this.set("id", phonecall.id);
-            this.set("partner", phonecall.partner_name);
+            if(phonecall.partner_name){
+                this.set("partner", phonecall.partner_name);
+            }else{
+                this.set("partner", "Unknow");
+            }
+            
 
             if(phonecall.description){
                 this.set("description", phonecall.description);
@@ -58,6 +63,7 @@ openerp.crm_wardialing = function(instance) {
             "click .oe_dial_email": "send_email",
             "click .oe_dial_to_client": "to_client",
             "click .oe_dial_to_lead": "to_lead",
+            "click .oe_dial_transferbutton": "transfer_button",
         },
 
         init: function(parent) {    
@@ -68,14 +74,19 @@ openerp.crm_wardialing = function(instance) {
             this.widgets = {};
             this.formatCurrency;
             this.phonecall_channel;
-            this.ari_client;
         },
 
         start: function() {
             var self = this;
-            this.ari_client = new openerp.ari_client();
+            //this.ari_client = new openerp.ari_client();
             //this.ari_client.init();
-            this.testSip();
+            try{
+                this.sip_js = new openerp.sip_js();
+                this.sip_js.init();
+            }catch(e){
+                console.log(e);
+            }
+            
             //To get the formatCurrency function from the server
             new instance.web.Model("res.currency")
                 .call("get_format_currencies_js_function")
@@ -86,141 +97,11 @@ openerp.crm_wardialing = function(instance) {
                     self.search_phonecalls_status();
                 });
             this.$el.css("bottom", -this.$el.outerHeight());
-            $(window).scroll(_.bind(this.calc_box, this));
-            $(window).resize(_.bind(this.calc_box, this));
-            this.calc_box();
             openerp.web.bus.on('reload_panel', this, this.search_phonecalls_status);
             return;
         },
 
-        testSip: function(){
-
-            var config = {
-                // Replace this IP address with your Asterisk IP address
-                uri: '1060@127.0.0.1',
-
-                // Replace this IP address with your Asterisk IP address,
-                // and replace the port with your Asterisk port from the http.conf file
-                wsServers: 'ws://127.0.0.1:8088/ws',
-
-                // Replace this with the username from your sip.conf file
-                authorizationUser: '1060',
-
-                // Replace this with the password from your sip.conf file
-                password: '1234',
-
-                // HackIpInContact for Asterisk
-                hackIpInContact: true,
-
-                traceSip: true,
-
-            };
-
-            var ua = new SIP.UA(config);
-            
-            // Invite with audio only
-            /*
-            var session = ua.invite('2000',{
-            audio: true,
-            video: false,
-            // inviteWithoutSdp: true,
-            });
-            session.on('accepted',function(){console.log("ACCEPTED")});
-            
-            ua.on('invite', function (session) {
-                
-                console.log(session.remoteIdentity.displayName);
-                var confirmation = confirm("Incomming call from " + session.remoteIdentity.displayName);
-                if(confirmation){
-                    session.accept();  
-                    console.log("ACCEPTED");  
-                }else{
-                    session.reject();
-                }
-                
-            });
-            */
-            //SIPML
-            var makeCall = function(){
-                callSession = sipStack.newSession('call-audiovideo', {
-                    video_local: document.getElementById('video-local'),
-                    video_remote: document.getElementById('video-remote'),
-                    audio_remote: document.getElementById('audio-remote'),
-                    events_listener: { events: '*', listener: eventsListener } // optional: '*' means all events
-                });
-                callSession.call('2001');
-            }
-            var registerSession;
-            var login = function(){
-                registerSession = sipStack.newSession('register', {
-                    events_listener: { events: '*', listener: eventsListener } // optional: '*' means all events
-                });
-                registerSession.register();
-            }
-            var sipStack;
-            var eventsListener = function(e){
-                console.log("Event: ");
-                console.log(e);
-                console.info('session event = ' + e.type);
-                if(e.type == 'connected' && e.session == registerSession){
-                    makeCall();
-                }
-                if(e.type == 'connected' && e.session == callSession){
-                    console.log("IN CALL");
-                    /* TRANSFER
-                    if (callSession.transfer('2001') != 0) {
-                        return;
-                    }*/
-                }
-                if(e.type == 'started'){
-                    login();
-                }
-                else if(e.type == 'i_new_message'){ // incoming new SIP MESSAGE (SMS-like)
-                    acceptMessage(e);
-                }
-                else if(e.type == 'i_new_call'){ // incoming audio/video call
-                    acceptCall(e);
-                }
-            }
-            
-            function createSipStack(){
-                sipStack = new SIPml.Stack({
-                        realm: 'localhost', // mandatory: domain name
-                        impi: '1060', // mandatory: authorization name (IMS Private Identity)
-                        impu: 'sip:1060@localhost', // mandatory: valid SIP Uri (IMS Public Identity)
-                        password: '1234', // optional
-                        display_name: 'Bob legend', // optional
-                        websocket_proxy_url: 'ws://127.0.0.1:8088/ws', // optional
-                        outbound_proxy_url: 'udp://example.org:5060', // optional
-                        enable_rtcweb_breaker: false, // optional
-                        events_listener: { events: '*', listener: eventsListener }, // optional: '*' means all events
-                        sip_headers: [ // optional
-                                { name: 'User-Agent', value: 'IM-client/OMA1.0 sipML5-v1.0.0.0' },
-                                { name: 'Organization', value: 'Doubango Telecom' }
-                        ]
-                    }
-                );
-            }
-            
-            var readyCallback = function(e){
-                createSipStack(); // see next section
-                sipStack.start();
-            };
-            var errorCallback = function(e){
-                console.error('Failed to initialize the engine: ' + e.message);
-            }
-            SIPml.init(readyCallback, errorCallback);
-            
-        },
-
-        calc_box: function() {
-            var $topbar = window.$('#oe_main_menu_navbar'); // .oe_topbar is replaced with .navbar of bootstrap3
-            var top = $topbar.offset().top + $topbar.height();
-            top = Math.max(top - $(window).scrollTop(), 0);
-            this.$el.css("left",0)
-            
-        },
-
+        //Modify the phonecalls list when the search input changes
         input_change: function() {
             var self = this;
             _.each(this.phonecalls,function(phonecall){
@@ -236,8 +117,6 @@ openerp.crm_wardialing = function(instance) {
         //Get the phonecalls and create the widget to put inside the panel
         search_phonecalls_status: function() {
             var phonecall_model = new openerp.web.Model("crm.phonecall");
-            this.$el.find(".oe_dial_phonecalls").css('height','270px');
-            console.log("UPDATE");
             var self = this;
 
             new openerp.web.Model("crm.phonecall").call("get_list",[this.get("current_search")]).then(function(result){
@@ -258,9 +137,8 @@ openerp.crm_wardialing = function(instance) {
                             var partner_name = phonecall.partner_title + ' ' + phonecall.partner_name;
                         }
                     }else{
-                        var partner_name = false;
+                        var partner_name = "Unknow";
                     }
-                    
                     var empty_star = parseInt(phonecall.max_priority) - parseInt(phonecall.opportunity_priority);
                     $("[rel='popover']").popover({
                         placement : 'right', // top, bottom, left or right
@@ -344,7 +222,9 @@ openerp.crm_wardialing = function(instance) {
             self.$(".oe_dial_selected_phonecall").removeClass("oe_dial_selected_phonecall");
             if(classes.indexOf("oe_dial_selected_phonecall") == -1){
                 phonecall_widget.$()[0].className += " oe_dial_selected_phonecall";
-                this.$el.find(".oe_dial_phonecalls").animate({'height' : '210px'});   
+                this.$el.find(".oe_dial_content").animate({
+                    bottom: this.$el.find(".oe_dial_optionalbuttons").outerHeight(),
+                });
                 this.$el.find(".oe_dial_email").css("display","none");
                 if(phonecall_widget.get('email')){
                     this.$el.find(".oe_dial_email").css("display","inline");
@@ -353,59 +233,75 @@ openerp.crm_wardialing = function(instance) {
                     this.$el.find(".oe_dial_changelog").css("width", "90%");
                 }
             }else{
-                this.$el.find(".oe_dial_phonecalls").animate({'height' : '270px'}); 
+                this.$el.find(".oe_dial_content").animate({
+                    bottom: 0,
+                });
             }    
         },
 
         //action done when the button "call" is clicked
         call_button: function(){
-            console.log("asterisk_conf");
-            new openerp.web.Model("crm.phonecall").call("get_asterisk_config").then(function(result){
-                console.log(result);
-
-            });
+            
             var phonecall_model = new openerp.web.Model("crm.phonecall");
             var self = this;
             if(this.$el.find(".oe_dial_selected_phonecall").find(".phonecall_id").text() != ''){
                 var phonecall_id = this.$el.find(".oe_dial_selected_phonecall").find(".phonecall_id").text();
-                phonecall_model.call("call_partner", [this.phonecalls[phonecall_id].id]);
+                
+                //Python Ari lib
+                phonecall_model.call("init_call", [this.phonecalls[phonecall_id].id]);
+                /*
+                //JS Ari lib
                 this.ari_client.call(this.phonecalls[phonecall_id],function(channel){
                     console.log("after the call")
                     self.phonecall_channel = channel;
                     console.log(self.phonecall_channel);
                 });
+                */
+                this.sip_js.call(this.phonecalls[phonecall_id]);
             }else{
                 var phonecall_id = this.$el.find(".oe_dial_phonecalls > div:first-child").find(".phonecall_id").text();
                 if(phonecall_id){
-                    phonecall_model.call("call_partner", [this.phonecalls[phonecall_id].id]);
+                    
+                    //Python Ari lib
+                    phonecall_model.call("init_call", [this.phonecalls[phonecall_id].id]);
+                    /*
+                    //JS Ari lib
                     this.ari_client.call(this.phonecalls[phonecall_id],function(channel){
                         console.log("after the call")
                         self.phonecall_channel = channel;
                     });
+                    */
+                    this.sip_js.call(this.phonecalls[phonecall_id]);
                 }
             }
         },
 
         //action done when the button "Hang Up" is clicked
         hangup_button: function(){
+            //TODO Add a test to see if in call or not
             var phonecall_model = new openerp.web.Model("crm.phonecall");
             if(this.$el.find(".oe_dial_selected_phonecall").find(".phonecall_id").text() != ''){
                 var phonecall_id = this.$el.find(".oe_dial_selected_phonecall").find(".phonecall_id").text();
-                phonecall_model.call("hangup_partner", [this.phonecalls[phonecall_id].id]).then(function(phonecall){
+                phonecall_model.call("hangup_call", [this.phonecalls[phonecall_id].id]).then(function(phonecall){
                     openerp.web.bus.trigger('reload_panel');
                 });
-                this.ari_client.hangup(this.phonecall_channel);
-            }else{
+                //this.ari_client.hangup(this.phonecall_channel);
+                this.sip_js.hangup();
+            }else if(this.$el.find(".oe_dial_phonecalls > div:first-child").find(".phonecall_id").text()){
                 var phonecall_id = this.$el.find(".oe_dial_phonecalls > div:first-child").find(".phonecall_id").text();
-                if(phonecall_id){
-                    phonecall_model.call("hangup_partner", [this.phonecalls[phonecall_id].id]).then(function(phonecall){
-                        openerp.web.bus.trigger('reload_panel');
-                    });
-                    this.ari_client.hangup(this.phonecall_channel);
-                }
+                phonecall_model.call("hangup_call", [this.phonecalls[phonecall_id].id]).then(function(phonecall){
+                    openerp.web.bus.trigger('reload_panel');
+                });
+                //this.ari_client.hangup(this.phonecall_channel);
+                this.sip_js.hangup();
             }
         },
 
+        //action done when the button "Transfer" is clicked
+        transfer_button: function(){
+            //TODO Add a test to see if in call or not
+            this.sip_js.transfer();
+        },
         //action done when the button "Call Log" is clicked
         change_log: function(){
             var id = this.$el.find(".oe_dial_selected_phonecall").find(".phonecall_id").text();

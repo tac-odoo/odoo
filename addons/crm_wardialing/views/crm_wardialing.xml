@@ -15,9 +15,10 @@
         <template id="assets_backend" name="crm_wardialing assets" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
                 <link rel="stylesheet" href="/crm_wardialing/static/src/css/crm_wardialing.css"/>
-                <script type="text/javascript" src="/crm_wardialing/static/src/js/SIPml-api.js"></script>
+                <!-- <script type="text/javascript" src="/crm_wardialing/static/src/js/SIPml-api.js"></script> -->
                 <script type="text/javascript" src="/crm_wardialing/static/src/js/sip-0.6.3.js"></script>
-                <script type="text/javascript" src="/crm_wardialing/static/src/js/ari_client.js"></script>
+                <script type="text/javascript" src="/crm_wardialing/static/src/js/sip_js.js"></script>
+                <!-- <script type="text/javascript" src="/crm_wardialing/static/src/js/ari_client.js"></script> -->
                 <script type="text/javascript" src="/crm_wardialing/static/src/js/crm_wardialing.js"></script>
                 
             </xpath>
