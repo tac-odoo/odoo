@@ -20,6 +20,7 @@
 ##############################################################################
 
 from openerp import models, fields, api
+import re
 
 
 class account_financial_report(models.Model):
@@ -32,8 +33,8 @@ class account_financial_report(models.Model):
     date_from = fields.Date("Start Date")
     date_to = fields.Date("End Date")
     group_by = fields.Char('Group By')
-    debit_credit = fields.Boolean('Show Credit and Debit Columns', default=False)
-    comparison = fields.Boolean('Enable Comparison', default=False)
+    debit_credit = fields.Boolean('Show Credit and Debit Columns')
+    comparison = fields.Boolean('Enable Comparison')
     line = fields.Many2one('account.financial.report.line', 'First/Top Line')
 
 
@@ -60,9 +61,31 @@ class account_financial_report_line(models.Model):
         return res
 
     @api.one
+    @api.constrains('type', 'formula')
+    def _check_formula(self):
+        formula = self.formula
+        if self.type == 'formula':
+            blocks = re.findall('\[.*\]', formula)
+            for block in blocks:
+                split_block = block.split(',')
+                if len(split_block) < 1 or len(split_block) > 2:
+                    raise exceptions.ValidationError(block + "doesn't have 1 or 2 arguments")
+                else:
+                    if self.search_count([('code', '=', split_block[0])]) < 1:
+                        raise exceptions.ValidationError("First argument must be a report code in " + block)
+                    if len(split_block) == 2 and split_block[1] not in ['balance', 'credit', 'debit', 'comparison']:
+                        raise exceptions.ValidationError("Second argument must be a column name in " + block)
+                formula.replace(block, '1')
+            formula.replace('#Days', '1')
+            formula.replace('#Months', '1')
+            try:
+                int(safe_eval(formula))
+            except Exception, e:
+                raise exceptions.ValidationError("Invalid formula")
+
+    @api.one
     def _get_balance(self, field_names, args):
-        '''returns a dictionary with key=the ID of a record and value=the balance amount 
-           computed for this record. If the record is of type :
+        '''returns the balance (or other fields) computed for this record. If the record is of type :
                'accounts' : it's the sum of the linked accounts
                'account_type' : it's the sum of leaf accoutns with such an account_type
                'account_report' : it's the amount of the related report
@@ -72,7 +95,7 @@ class account_financial_report_line(models.Model):
         if self.type == 'account_type':
             # it's the sum the leaf accounts with such an account type
             report_types = [x.id for x in self.account_type_ids]
-            account_ids = account_obj.search([('user_type','in', report_types), ('type', '!=', 'view')])
+            account_ids = account_obj.search([('user_type', 'in', report_types), ('type', '!=', 'view')])
             for a in account_ids:
                 for field in field_names:
                     res[field] += getattr(a, field)
@@ -83,7 +106,16 @@ class account_financial_report_line(models.Model):
                 for field in field_names:
                     res[field] += value[field]
         elif self.type == 'formula':
-            
+            # a formula is used to tell what should be displayed
+            formula = self.formula
+            formula.replace(' #Days ', )
+            formula.replace(' #Month ', )
+            blocks = re.findall('\[.*\]', self.formula)
+            for block in blocks:
+                split_block = block.split(',')
+                
+
+
 
     name = fields.Char('Line Name')
     code = fields.Char('Line Code')
@@ -127,11 +159,11 @@ class account_financial_report_line(models.Model):
             "and that you would like to print as positive amounts in your reports; e.g.: Income account.")
     ir_filter_id = fields.Many2one('ir.filters', 'Domain', ondelete='cascade')
 
-    def get_lines(self):
+    def get_lines(self, data):
         lines = []
         account_obj = self.env['account.account']
         currency_obj = self.env['res.currency']
-        for line in self._get_children_by_order():
+        for line in self.with_context(data['form']['used_context'])._get_children_by_order():
             vals = {
                 'name': line.name,
                 'balance': line.balance * line.sign or 0.0,
