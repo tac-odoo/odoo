@@ -57,13 +57,15 @@ So, that we can compare the theoretic delay and real delay.
     'images': ['images/work_order_analysis.jpeg','images/work_order_planning.jpeg','images/work_order.jpeg'],
     'depends': ['mrp'],
     'data': [
+        'data/report_paperformat.xml',
         'security/ir.model.access.csv',
         'mrp_operation_data.xml',
         'mrp_operations_workflow.xml',
         'mrp_operations_view.xml',
         'mrp_operations_report.xml',
         'report/mrp_workorder_analysis_view.xml',
-        'mrp_operations_workflow_instance.xml'
+        'mrp_operations_workflow_instance.xml',
+        'views/report_wcbarcode.xml',
     ],
     'demo': [ 
              'mrp_operations_demo.yml'
