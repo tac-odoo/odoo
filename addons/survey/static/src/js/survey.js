@@ -36,7 +36,7 @@ $(document).ready(function () {
 
     // Printing mode: will disable all the controls in the form
     if (_.isUndefined(submit_controller)) {
-        $(".js_surveyform .input-group-addon span.fa-calendar").removeClass().addClass("fa fa-ban");
+        $(".js_surveyform .input-group-addon").css("visibility", "hidden");
         $('.js_surveyform :input').prop('disabled', true);
         print_mode = true;
     }

@@ -268,8 +268,16 @@
             <div class="wrap">
                 <div class="container">
                     <div class="row">
-                        <div groups="base.group_website_publisher" t-ignore="true" class="text-right">
-                            <a t-att-href="'/survey/results/%s' % (slug(survey))" class="btn btn-default">Go back to survey result</a>
+                        <div class="row">
+                            <div groups="base.group_website_publisher" t-ignore="true" class="text-right col-xs-9 mt16">
+                                <a t-att-href="'/survey/results/%s' % (slug(survey))" class="btn btn-default">Go back to survey result</a>
+                            </div>
+                            <ul class="pagination col-xs-3">
+                                <li><a href="#">First</a></li>
+                                <li><a href="#">Prev</a></li>
+                                <li><a href="#">Next</a></li>
+                                <li><a href="#">Last</a></li>
+                            </ul>
                         </div>
                         <div class='jumbotron mt32'>
                             <h1><span t-field='survey.title'/></h1>
