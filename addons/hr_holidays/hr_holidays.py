@@ -556,9 +556,9 @@ class hr_employee(osv.Model):
         date_begin = date.today().replace(day=1)
         date_end = date_begin.replace(day=calendar.monthrange(date_begin.year, date_begin.month)[1])
         for employee_id in ids:
-            leaves = Holidays.search_count(cr, uid, [('employee_id', '=', employee_id), ('type', '=', 'remove')], context=context)
-            approved_leaves = Holidays.search_count(cr, uid, [('employee_id', '=', employee_id), ('type', '=', 'remove'), ('date_from', '>=', date_begin.strftime(tools.DEFAULT_SERVER_DATE_FORMAT)), ('date_from', '<=', date_end.strftime(tools.DEFAULT_SERVER_DATE_FORMAT)), ('state', '=', 'validate'), ('payslip_status', '=', False)], context=context)
-            res[employee_id] = {'leaves_count': leaves, 'approved_leaves_count': approved_leaves}
+            leaves = Holidays.read_group(cr, uid, [('employee_id', '=', employee_id), ('holiday_status_id.limit', '=', False)], fields=['number_of_days'], groupby=[], context=context)
+            approved_leaves = Holidays.search_count(cr, uid, [('employee_id', '=', employee_id), ('type', '=', 'remove'), ('date_from', '>=', date_begin.strftime(tools.DEFAULT_SERVER_DATE_FORMAT)), ('date_from', '<=', date_end.strftime(tools.DEFAULT_SERVER_DATE_FORMAT)), ('payslip_status', '=', False)], context=context)
+            res[employee_id] = {'leaves_count': leaves[0]['number_of_days'], 'approved_leaves_count': approved_leaves}
         return res
 
     _columns = {
@@ -570,6 +570,6 @@ class hr_employee(osv.Model):
         'current_leave_id': fields.function(_get_leave_status, multi="leave_status", string="Current Leave Type", type='many2one', relation='hr.holidays.status'),
         'leave_date_from': fields.function(_get_leave_status, multi='leave_status', type='date', string='From Date'),
         'leave_date_to': fields.function(_get_leave_status, multi='leave_status', type='date', string='To Date'),
-        'leaves_count': fields.function(_leaves_count, multi='_leaves_count', type='integer', string='Number of Leaves (current month)'),
-        'approved_leaves_count': fields.function(_leaves_count, multi='_leaves_count', type='integer', string='Approved Leaves not in Payslip', help="These leaves are approved but not taken into account for payslip"),
+        'leaves_count': fields.function(_leaves_count, multi='_leaves_count', type='integer', string='Remaining leaves'),
+        'approved_leaves_count': fields.function(_leaves_count, multi='_leaves_count', type='integer', string='Leaves to Process', help="These leaves are approved but not taken into account for payslip"),
     }
