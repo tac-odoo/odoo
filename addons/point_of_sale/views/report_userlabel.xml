@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+<template id="report_userlabel">
+    <t t-call="report.html_container">
+        <div class="page">
+            <t t-foreach="docs" t-as="user">
+                <div class="col-xs-6" align="center" style="height:170px">
+                    <table class="table table-bordered" style="width:90%;">
+                        <tr>
+                            <td width="35%">
+                                <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', user.ean13, 600, 100)" style="width:100%"/>
+                            </td>
+                            <td>
+                                <span t-field="user.name"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </t>
+        </div>
+    </t>
+</template>
+</data>
+</openerp>
