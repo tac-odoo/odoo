@@ -28,10 +28,11 @@ class event_track(models.Model):
     _inherit = ['mail.thread', 'ir.needaction_mixin', 'website.seo.metadata', 'website.website_published.mixin']
 
     @api.multi
-    def _website_url(self, name, arg):
-        res = super(event_track, self)._website_url(name, arg)
+    @api.depends('name')
+    def _website_url(self, field_name, arg):
+        res = super(event_track, self)._website_url(field_name, arg)
         for track in self:
-            res[track.id] = "/event/%s/track/%s" % (slug(self.event_id), slug(self))
+            res[track.id] = "/event/%s/track/%s" % (slug(track.event_id), slug(track))
         return res
 
     name = fields.Char('Title', required=True, translate=True)

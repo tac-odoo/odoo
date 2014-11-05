@@ -10,8 +10,8 @@ class res_partner_grade(osv.osv):
         'website_published': True,
     }
 
-    def _website_url(self, cr, uid, ids, name, arg, context=None):
-        res = super(res_partner_grade, self)._website_url(cr, uid, ids, name, arg, context=context)
+    def _website_url(self, cr, uid, ids, field_name, arg, context=None):
+        res = super(res_partner_grade, self)._website_url(cr, uid, ids, field_name, arg, context=context)
         for grade in self.browse(cr, uid, ids, context=context):
             res[grade.id] = "/partners/grade/%s" % (slug(grade))
         return res

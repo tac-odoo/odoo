@@ -40,8 +40,8 @@ class BlogPost(osv.Model):
     _inherit = ['mail.thread', 'website.seo.metadata', 'website.website_published.mixin']
     _order = 'id DESC'
 
-    def _website_url(self, cr, uid, ids, name, arg, context=None):
-        res = super(BlogPost, self)._get_website_url(cr, uid, ids, name, arg, context=context)
+    def _website_url(self, cr, uid, ids, field_name, arg, context=None):
+        res = super(BlogPost, self)._website_url(cr, uid, ids, field_name, arg, context=context)
         for blog_post in self.browse(cr, uid, ids, context=context):
             res[blog_post.id] = "/blog/%s/post/%s" % (slug(blog_post.blog_id), slug(blog_post))
         return res

@@ -41,7 +41,7 @@ class event(models.Model):
             if isinstance(e.id, NewId):
                 res[e.id] = ''
             else:
-                res[e.id] = "/event/" + slug(self)
+                res[e.id] = "/event/" + slug(e)
         return res
 
     def _default_hashtag(self):

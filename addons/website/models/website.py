@@ -882,7 +882,7 @@ class website_published_mixin(osv.AbstractModel):
         'website_published': False,
     }
 
-    def _website_url(self, cr, uid, ids, name, arg, context=None):
+    def _website_url(self, cr, uid, ids, field_name, arg, context=None):
         return dict.fromkeys(ids, '#')
 
     def open_website_url(self, cr, uid, id, context=None):
