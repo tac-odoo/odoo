@@ -33,5 +33,5 @@ class WebsitePartnerPage(http.Controller):
                     'current_grade': current_grade,
                     'current_country': current_country
                 }
-                return request.website.render("website_crm_partner_assign.partner", values)
+                return request.website.render("website_partner.partner_page", values)
         return request.not_found()

@@ -144,7 +144,8 @@
     </xpath>
 </template>
 
-<template id="partner" name="Partner Detail">
+<template id="partner" name="Partner Detail" inherit_id="website_partner.partner_page">
+    <xpath expr="//t[@t-call='website.layout']" position="replace">
     <t t-call="website_crm_partner_assign.layout">
         <t t-set="ref_content">
             <div class="col-md-5">
@@ -160,6 +161,7 @@
             </t>
         </t>
     </t>
+    </xpath>
 </template>
 
 <template id="grade_in_detail" inherit_id="website_partner.partner_detail">
