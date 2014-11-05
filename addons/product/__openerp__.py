@@ -60,6 +60,7 @@ Print product labels with barcode.
         'product_view.xml',
         'pricelist_view.xml',
         'partner_view.xml',
+        'views/report_productlabel.xml',
         'views/report_pricelist.xml',
     ],
     'test': [
