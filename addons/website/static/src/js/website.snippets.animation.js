@@ -40,6 +40,19 @@
         });
     };
 
+    // FAQ Roller snippet function
+    $(document).ready(function () {
+        $('.oe_faq_default').find('.oe_faq_body').slideUp(1);
+        $('button[data-action=edit]').on("click", function(){
+            $('.oe_faq_default').find('.oe_faq_body').attr('style','display:block');
+        });
+        $('.oe_faq_heading').on('click', function(e){
+            $('.oe_faq_body').slideUp(300);
+            var $toggle = $('.oe_faq_body', $(this).parent().parent());
+            if (!$toggle.is(":visible"))$toggle.slideDown(300);
+        });
+    });
+
 
     $(document).ready(function () {
         if ($(".o_gallery:not(.oe_slideshow)").size()) {

@@ -409,6 +409,18 @@ ul.nav-stacked > li > a {
   margin-right: 32px;
 }
 
+/* ---- FAQ Roller Snippet ---- */
+.oe_faq_group .oe_faq_default{
+  margin-bottom: -6px !important;
+}
+.oe_faq_group .oe_faq_sec .oe_faq_heading {
+  cursor: pointer;
+}
+.oe_faq_group .oe_faq_sec .oe_faq_heading h3{
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
 /* gallery */
 .o_gallery.o_grid.o_spc-none div.row, .o_gallery.o_masonry.o_spc-none div.row {
   margin: 0;
