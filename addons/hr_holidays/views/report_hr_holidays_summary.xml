@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+<template id="report_holidayssummary">
+    <t t-call="report.html_container">
+        <t t-call="report.internal_layout">
+            <div class="page">
+                <div class="row"><h4>Leaves Summary</h4></div>
+                <p class="text-center">
+                    Analyze from <u><t t-esc="get_start_date(data['form']['date_from'])"/></u> to <u><t t-esc="get_end_date(data['form']['date_from'])"/></u> of the <u><t t-esc="get_leave_type(data['form']['holiday_type'])"/></u> Leaves.
+                </p>
+                <div class="row">
+                    <table class="table table-bordered">
+                            <tr style="font-size:9px !important">
+                                <th style="width:120px !important">Month</th>
+                                <t t-foreach="get_months(data['form']['date_from'])" t-as="month">
+                                    &lt;th class="text-center" colspan=<t t-esc="month['days']"/>&gt;
+                                    <t t-esc="month['month_name']"/> &lt;/th&gt;
+                                </t>
+                                <td/>
+                            </tr>
+                            <tr style="font-size:8px !important">
+                                <td/>
+                                <t t-foreach="get_day(data['form']['date_from'])" t-as="days">
+                                    &lt;td class="text-center" style=padding:1px;background-color:<t t-esc="days['color']"/>!important &gt; <t t-esc="days['day_str']"/> &lt;/td&gt;
+                                </t>
+                                <td/>
+                            </tr>
+                            <tr>
+                                <td style="font-size:9px;padding:3px !important">
+                                    <strong><t t-if="'depts' in data['form']">Departments and&#160;</t>Employees</strong>
+                                </td>
+                                <t t-foreach="get_day(data['form']['date_from'])" t-as="days">
+                                    &lt;td class="text-center" style=font-size:8px;padding:1px;background-color:<t t-esc="days['color']"/>!important &gt; <t t-esc="days['day']"/> &lt;/td&gt;
+                                </t>
+                                <td class="text-center" style="font-size:8px;padding:1px !important">Sum</td>
+                            </tr>
+                            <t t-foreach="get_data_from_report(data['form'])" t-as="obj">
+                                <t t-if="'dept' in obj">
+                                    <tr style="font-size:8px !important">
+                                        <td style="padding:3px;background-color:#ababab !important">
+                                            <strong><t t-esc="obj['dept']"/></strong>
+                                        </td>
+                                        <t t-foreach="obj['color']" t-as="c">
+                                            &lt;td style=padding:1px;background-color:<t t-esc="c['color']"/> !important/&gt;
+                                        </t>
+                                        <td style="padding:1px !important"/>
+                                    </tr>
+                                </t>
+                                <t t-foreach="obj['data']" t-as="emp">
+                                    <tr>
+                                        <td style="font-size:10px !important;padding:3px !important"><t t-esc="emp['emp']"/></td>
+                                        <t t-foreach="emp['display']" t-as="details">
+                                            &lt;td style=font-size:8px;padding:1px;background-color:<t t-esc="details['color']"/> !important /&gt;
+                                        </t>
+                                        <td class="text-center" style="font-size:8px;padding:1px !important"><strong><t t-esc="emp['sum']"/></strong></td>
+                                    </tr>
+                                </t>
+                            </t>
+                    </table>
+                </div>
+                <div class="col-xs-4 col-xs-offset-4">
+                    <table class="table table-bordered" style="font-size:11px !important">
+                        <tr>
+                            <td style="width:15px !important;">Color</td>
+                            <td class="text-center">Leave Type</td>
+                        </tr>
+                        <t t-foreach="get_holidays_status()" t-as="status">
+                            <tr>
+                                &lt;td style=background-color:<t t-esc="status['color']"/>!important &gt; &lt;/td&gt;
+                                <td><t t-esc="status['name']"/></td>
+                            </tr>
+                        </t>
+                    </table>
+                </div>
+            </div>
+        </t>
+    </t>
+</template>
+</data>
+</openerp>

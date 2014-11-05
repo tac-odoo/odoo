@@ -19,239 +19,128 @@
 #
 ##############################################################################
 
-import datetime
-import time
-
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 import openerp
 from openerp.osv import fields, osv
-from openerp.report.interface import report_rml
-from openerp.report.interface import toxml
-
 from openerp.report import report_sxw
-from openerp.tools import ustr
-from openerp.tools.translate import _
-from openerp.tools import to_xml
 
-def lengthmonth(year, month):
-    if month == 2 and ((year % 4 == 0) and ((year % 100 != 0) or (year % 400 == 0))):
-        return 29
-    return [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month]
+class report_custom(report_sxw.rml_parse):
 
-def strToDate(dt):
-    if dt:
-        dt_date=datetime.date(int(dt[0:4]),int(dt[5:7]),int(dt[8:10]))
-        return dt_date
-    else:
-        return
+    def __init__(self, cr, uid, name, context):
+        super(report_custom, self).__init__(cr, uid, name, context)
+        self.localcontext.update({
+            'get_start_date': lambda start_date: datetime.strptime(start_date, "%Y-%m-%d").strftime('%m/%d/%Y'),
+            'get_end_date': lambda start_date: (datetime.strptime(start_date, "%Y-%m-%d").date() + relativedelta(days=59)).strftime('%m/%d/%Y'),
+            'get_leave_type': lambda holiday_type: 'Confirmed and Approved' if holiday_type == 'both' else 'Approved' if holiday_type == 'Approved' else 'Confirmed',
+            'get_day': self._get_day,
+            'get_months': self._get_months,
+            'get_data_from_report': self._get_data_from_report,
+            'get_holidays_status': self._get_holidays_status,
+        })
 
+    def _get_day(self, start_date):
+        res = []
+        # find the date and which day.
+        start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+        end_date = start_date + relativedelta(days=59)
+        total_days = (end_date - start_date).days + 1
+        for x in range(0, total_days):
+            color = ' '
+            if start_date.strftime('%a') == 'Sat' or start_date.strftime('%a') == 'Sun':
+                color = '#ababab'
+            res.append({'day_str': start_date.strftime('%a'), 'day': start_date.day , 'color': color})
+            start_date = start_date + relativedelta(days=1)
+        return res
 
-def emp_create_xml(self, cr, uid, dept, holiday_type, row_id, empid, name, som, eom):
-    display={}
-    if dept==0:
-        count=0
-        registry = openerp.registry(cr.dbname)
-        holidays_ids = registry['hr.holidays'].search(cr, uid, [('employee_id','in',[empid,False]), ('type', '=', 'remove')])
-        ids_date = registry['hr.holidays'].read(cr, uid, holidays_ids, ['date_from','date_to','holiday_status_id','state'])
+    def _get_months(self, start_date):
+        res = []
+        # it work for get month last date and different between two date.
+        start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+        end_date = start_date + relativedelta(days=59)
+        ld = start_date
+        while ld <= end_date:
+            temp = ld + relativedelta(day=1, months=+1, days=-1)
+            if temp > end_date:
+                temp = end_date
+            res.append({'month_name': ld.strftime('%B'), 'days': (temp - ld).days + 1})
+            ld = ld + relativedelta(day=1, months=+1)
+        return res
 
-        for index in range(1,61):
-            diff=index-1
-            current=som+datetime.timedelta(diff)
-
-            for item in ids_date:
-                if current >= strToDate(item['date_from']) and current <= strToDate(item['date_to']):
-                    if item['state'] in holiday_type:
-                        display[index]=item['holiday_status_id'][0]
-                        count=count +1
-                    else:
-                        display[index]=' '
-                    break
-                else:
-                    display[index]=' '
-    else:
-         for index in range(1,61):
-              display[index]=' '
-              count=''
-              
-    data_xml=['<info id="%d" number="%d" val="%s" />' % (row_id,x,display[x]) for x in range(1,len(display)+1) ]
-    
-    # Computing the xml
-    xml = '''
-    %s
-    <employee row="%d" id="%d" name="%s" sum="%s">
-    </employee>
-    ''' % (data_xml,row_id,dept, ustr(toxml(name)),count)
-
-    return xml
-
-class report_custom(report_rml):
-    def create_xml(self, cr, uid, ids, data, context):
-        registry = openerp.registry(cr.dbname)
-        obj_dept = registry['hr.department']
-        obj_emp = registry['hr.employee']
-        depts=[]
-        emp_id={}
-        rpt_obj = registry['hr.holidays']
-        rml_obj=report_sxw.rml_parse(cr, uid, rpt_obj._name,context)
-        cr.execute("SELECT name FROM res_company")
-        res=cr.fetchone()[0]
-        date_xml=[]
-        date_today=time.strftime('%Y-%m-%d %H:%M:%S')
-        date_xml +=['<res name="%s" today="%s" />' % (to_xml(res),date_today)]
-
-        cr.execute("SELECT id, name, color_name FROM hr_holidays_status ORDER BY id")
-        legend=cr.fetchall()
-        today=datetime.datetime.today()
-
-        first_date=data['form']['date_from']
-        som = strToDate(first_date)
-        eom = som+datetime.timedelta(59)
-        day_diff=eom-som
-
-        name = ''
-        if len(data['form'].get('emp', ())) == 1:
-            name = obj_emp.read(cr, uid, data['form']['emp'][0], ['name'])['name']
-
-        if data['form']['holiday_type']!='both':
-            type=data['form']['holiday_type']
-            if data['form']['holiday_type']=='Confirmed':
-                holiday_type=('confirm')
+    def _get_leaves_summary(self, start_date, empid, holiday_type):
+        display = []
+        count = 0
+        start_date = datetime.strptime(start_date, "%Y-%m-%d")
+        end_date = start_date + relativedelta(days=59)
+        total_days = (end_date - start_date).days + 1
+        holidays_obj = self.pool['hr.holidays']
+        if holiday_type != 'both':
+            if holiday_type == 'Confirmed':
+                holiday_type = ['confirm']
             else:
-                holiday_type=('validate')
+                holiday_type = ['validate']
         else:
-            type="Confirmed and Approved"
-            holiday_type=('confirm','validate')
-        date_xml.append('<from>%s</from>\n'% (str(rml_obj.formatLang(som.strftime("%Y-%m-%d"),date=True))))
-        date_xml.append('<to>%s</to>\n' %(str(rml_obj.formatLang(eom.strftime("%Y-%m-%d"),date=True))))
-        date_xml.append('<type>%s</type>'%(type))
-        date_xml.append('<name>%s</name>'%(name))
+            holiday_type = ['confirm','validate']
 
-#        date_xml=[]
-        for l in range(0,len(legend)):
-            date_xml += ['<legend row="%d" id="%d" name="%s" color="%s" />' % (l+1,legend[l][0],_(legend[l][1]),legend[l][2])]
-        date_xml += ['<date month="%s" year="%d" />' % (ustr(som.strftime('%B')), som.year),'<days>']
+        holidays_ids = holidays_obj.search(self.cr, self.uid, ['&', ('employee_id', 'in', [empid,False]), ('state', 'in', holiday_type), ('type', '=', 'remove'), ('date_from', '<=', str(end_date)), ('date_to', '>=', str(start_date))])
 
-        cell=1
-        if day_diff.days>=30:
-            date_xml += ['<dayy number="%d" name="%s" cell="%d"/>' % (x, _(som.replace(day=x).strftime('%a')),x-som.day+1) for x in range(som.day, lengthmonth(som.year, som.month)+1)]
-        else:
-            if day_diff.days>=(lengthmonth(som.year, som.month)-som.day):
-                date_xml += ['<dayy number="%d" name="%s" cell="%d"/>' % (x, _(som.replace(day=x).strftime('%a')),x-som.day+1) for x in range(som.day, lengthmonth(som.year, som.month)+1)]
-            else:
-                date_xml += ['<dayy number="%d" name="%s" cell="%d"/>' % (x, _(som.replace(day=x).strftime('%a')),x-som.day+1) for x in range(som.day, eom.day+1)]
+        # count and get leave summary details.
+        for index in range(0, total_days):
+            current = start_date + timedelta(index)
+            display.append({'day': current.day, 'color': ''})
+            if current.strftime('%a') == 'Sat' or current.strftime('%a') == 'Sun':
+                display[index].update({'color': '#ababab'})
 
-        cell=x-som.day+1
-        day_diff1=day_diff.days-cell+1
+        holidays_data = holidays_obj.browse(self.cr, self.uid, holidays_ids)
+        for holiday in holidays_data:
+            date_from = datetime.strptime(holiday.date_from, '%Y-%m-%d %H:%M:%S')
+            date_to = datetime.strptime(holiday.date_to, '%Y-%m-%d %H:%M:%S')
+            for index in range(0, ((date_to - date_from).days + 1)):
+                tmp = date_from + timedelta(index)
+                if tmp >= start_date and tmp <= end_date:
+                    display[(tmp-start_date).days].update({'color': holiday.holiday_status_id.color_name})
+                    count+=1
+        self.sum = count
+        return display
 
-        width_dict={}
-        month_dict={}
+    def _get_data_from_report(self, data):
+        res = []
+        if 'depts' in data:
+            departments = self.pool['hr.department'].browse(self.cr, self.uid, data['depts'])
+            for department in departments:
+                res.append({'dept' : department.name, 'data': [], 'color': self._get_day(data['date_from'])})
+                employee_ids = self.pool['hr.employee'].search(self.cr, self.uid, [('department_id', '=', department.id)])
+                employees = self.pool['hr.employee'].browse(self.cr, self.uid, employee_ids)
+                for emp in employees:
+                    res[len(res)-1]['data'].append({
+                        'emp': emp.name,
+                        'display': self._get_leaves_summary(data['date_from'], emp.id, data['holiday_type']),
+                        'sum': self.sum
+                    })
+        elif 'emp' in data:
+            employees = self.pool['hr.employee'].browse(self.cr, self.uid, data['emp'])
+            res.append({'data':[]})
+            for emp in employees:
+                res[0]['data'].append({
+                    'emp': emp.name,
+                    'display': self._get_leaves_summary(data['date_from'], emp.id, data['holiday_type']),
+                    'sum': self.sum
+                })
+        return res
 
-        i=1
-        j=1
-        year=som.year
-        month=som.month
-        month_dict[j]=som.strftime('%B')
-        width_dict[j]=cell
+    def _get_holidays_status(self):
+        res = []
+        holiday_obj = self.pool['hr.holidays.status']
+        holiday_ids = self.pool['hr.holidays.status'].search(self.cr, self.uid, [])
+        for holiday in self.pool['hr.holidays.status'].browse(self.cr, self.uid, holiday_ids):
+            res.append({'color': holiday.color_name, 'name': holiday.name})
+        return res
 
-        while day_diff1>0:
-            if month+i<=12:
-                if day_diff1 > lengthmonth(year,i+month): # Not on 30 else you have problems when entering 01-01-2009 for example
-                    som1=datetime.date(year,month+i,1)
-                    date_xml += ['<dayy number="%d" name="%s" cell="%d"/>' % (x, _(som1.replace(day=x).strftime('%a')),cell+x) for x in range(1, lengthmonth(year,i+month)+1)]
-                    i=i+1
-                    j=j+1
-                    month_dict[j]=som1.strftime('%B')
-                    cell=cell+x
-                    width_dict[j]=x
 
-                else:
-                    som1=datetime.date(year,month+i,1)
-                    date_xml += ['<dayy number="%d" name="%s" cell="%d"/>' % (x, _(som1.replace(day=x).strftime('%a')),cell+x) for x in range(1, eom.day+1)]
-                    i=i+1
-                    j=j+1
-                    month_dict[j]=som1.strftime('%B')
-                    cell=cell+x
-                    width_dict[j]=x
-
-                day_diff1=day_diff1-x
-            else:
-                years=year+1
-                year=years
-                month=0
-                i=1
-                if day_diff1>=30:
-                    som1=datetime.date(years,i,1)
-                    date_xml += ['<dayy number="%d" name="%s" cell="%d"/>' % (x, _(som1.replace(day=x).strftime('%a')),cell+x) for x in range(1, lengthmonth(years,i)+1)]
-                    i=i+1
-                    j=j+1
-                    month_dict[j]=som1.strftime('%B')
-                    cell=cell+x
-                    width_dict[j]=x
-
-                else:
-                    som1=datetime.date(years,i,1)
-                    i=i+1
-                    j=j+1
-                    month_dict[j]=som1.strftime('%B')
-                    date_xml += ['<dayy number="%d" name="%s" cell="%d"/>' % (x, _(som1.replace(day=x).strftime('%a')),cell+x) for x in range(1, eom.day+1)]
-                    cell=cell+x
-                    width_dict[j]=x
-
-                day_diff1=day_diff1-x
-
-        date_xml.append('</days>')
-        date_xml.append('<cols>3.5cm%s,0.4cm</cols>\n' % (',0.4cm' * (60)))
-        date_xml = ''.join(date_xml)
-
-        st='<cols_months>3.5cm'
-        for m in range(1,len(width_dict)+1):
-            st+=',' + str(0.4 *width_dict[m])+'cm'
-        st+=',0.4cm</cols_months>\n'
-
-        months_xml =['<months  number="%d" name="%s"/>' % (x, _(month_dict[x])) for x in range(1,len(month_dict)+1) ]
-        months_xml.append(st)
-        
-        emp_xml=''
-        row_id=1
-        
-        if data['model'] == 'hr.employee':
-            for items in obj_emp.read(cr, uid, data['form']['emp'], ['id', 'name']):
-                emp_xml += emp_create_xml(self, cr, uid, 0, holiday_type, row_id, items['id'], items['name'], som, eom)
-                row_id = row_id +1
-
-        elif data['model']=='ir.ui.menu':
-            for dept in obj_dept.browse(cr, uid, data['form']['depts'], context=context):
-                emp_ids = obj_emp.search(cr, uid, [('department_id', '=', dept.id)], context=context)
-                if emp_ids==[]:
-                    continue
-                dept_done=0
-                for item in obj_emp.read(cr, uid, emp_ids, ['id', 'name']):
-                    if dept_done==0:
-                        emp_xml += emp_create_xml(self, cr, uid, 1, holiday_type, row_id, dept.id, dept.name, som, eom)
-                        row_id = row_id +1
-                    dept_done=1
-                    emp_xml += emp_create_xml(self, cr, uid, 0, holiday_type, row_id, item['id'], item['name'], som, eom)
-                    row_id = row_id +1
-                    
-        header_xml = '''
-        <header>
-        <date>%s</date>
-        <company>%s</company>
-        </header>
-        ''' % (str(rml_obj.formatLang(time.strftime("%Y-%m-%d"),date=True))+' ' + str(time.strftime("%H:%M")),to_xml(registry['res.users'].browse(cr,uid,uid).company_id.name))
-
-        # Computing the xml
-        xml='''<?xml version="1.0" encoding="UTF-8" ?>
-        <report>
-        %s
-        %s
-        %s
-        %s
-        </report>
-        ''' % (header_xml,months_xml,date_xml, ustr(emp_xml))
-
-        return xml
-
-report_custom('report.holidays.summary', 'hr.holidays', '', 'addons/hr_holidays/report/holidays_summary.xsl')
+class wrapped_report_holidays_summary(osv.AbstractModel):
+    _name = 'report.hr_holidays.report_holidayssummary'
+    _inherit = 'report.abstract_report'
+    _template = 'hr_holidays.report_holidayssummary'
+    _wrapped_report_class = report_custom
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
-

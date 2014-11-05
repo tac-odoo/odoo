@@ -44,11 +44,6 @@ class hr_holidays_summary_employee(osv.osv_memory):
              'model': 'hr.employee',
              'form': data
             }
-        return {
-            'type': 'ir.actions.report.xml',
-            'report_name': 'holidays.summary',
-            'datas': datas,
-            }
-
+        return self.pool['report'].get_action(cr, uid, data['emp'], 'hr_holidays.report_holidayssummary', data=datas, context=context)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
