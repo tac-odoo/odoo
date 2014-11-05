@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+<template id="report_irmodeloverview">
+    <t t-call="report.html_container">
+        <div class="page">
+            <t t-foreach="docs" t-as="o">
+                <div class="oe_structure"/>
+                <table class="table table-bordered" style="font-size:11px">
+                    <tbody>
+                        <tr>
+                            <td colspan="12" width="50%" style="font-size:14px">
+                                <strong>Object: <t t-esc="o.model"/><br/>Name: <t t-esc="o.name"/></strong>
+                            </td>
+                            <td colspan="8" width="50%">
+                                Type: <t t-esc="o.state"/><br/>
+                                In-memory: <t t-esc="str(o.osv_memory)"/><br/>
+                                Modules: <t t-esc="o.modules"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="20"><u><strong>Security</strong></u></td>
+                        </tr>
+                        <tr>
+                            <td colspan="7" width="35%">Group</td>
+                            <td width="3%">R</td>
+                            <td width="3%">W</td>
+                            <td width="3%">C</td>
+                            <td width="3%">U</td>
+                            <td colspan="9">Name</td>
+                        </tr>
+                        <t t-foreach="o.access_ids" t-as="access">
+                            <tr>
+                                <td colspan="7" width="35%"><t t-esc="access.group_id.name"/></td>
+                                <td width="3%"><t t-if="access.perm_read">X</t></td>
+                                <td width="3%"><t t-if="access.perm_write">X</t></td>
+                                <td width="3%"><t t-if="access.perm_create">X</t></td>
+                                <td width="3%"><t t-if="access.perm_unlink">X</t></td>
+                                <td colspan="9"><t t-esc="access.name"/></td>
+                            </tr>
+                        </t>
+                        <tr>
+                            <td colspan="20"><u><strong>Fields</strong></u></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Name</td>
+                            <td colspan="2" width="13%">Label</td>
+                            <td colspan="2" width="10%">Type</td>
+                            <td colspan="9">Attribute</td>
+                            <td width="3%">Rq</td>
+                            <td width="3%">Ro</td>
+                            <td width="3%">Tr</td>
+                            <td width="3%">Sel</td>
+                            <td>Modules</td>
+                        </tr>
+                        <t t-foreach="o.field_id" t-as="field">
+                            <tr>
+                                <td colspan="2"><t t-esc="field.name"/></td>
+                                <td colspan="2" width="13%"><t t-esc="field.field_description"/></td>
+                                <td colspan="2" width="10%"><t t-esc="field.ttype"/></td>
+                                <td colspan="9">
+                                    <t t-if="field.relation"><span>- relation = <t t-esc="field.relation"/></span></t>
+                                    <t t-if="field.relation_field"><span>- field = <t t-esc="field.relation_field"/></span></t>
+                                    <t t-if="field.ttype in ['reference','selection']"><span>- selection = <t t-esc="field.selection"/></span></t>
+                                    <t t-if="field.ttype in ['reference','char'] and field.size"><span>- size = <t t-esc="field.size"/></span></t>
+                                    <t t-if="field.ttype in ['many2one']"><span>- ondelete = <t t-esc="field.on_delete"/></span></t>
+                                    <t t-if="field.domain"><span>- domain = <t t-esc="field.domain"/></span></t>
+                                    <t t-if="field.groups"><span>- groups = <t t-esc="[g.name for g in field.groups]"/></span></t>
+                                </td>
+                                <td width="3%"><t t-if="field.required">X</t></td>
+                                <td width="3%"><t t-if="field.readonly">X</t></td>
+                                <td width="3%"><t t-if="field.translate">X</t></td>
+                                <td width="3%"><t t-esc="field.select_level"/></td>
+                                <td><t t-esc="field.modules"/></td>
+                            </tr>
+                        </t>
+                        <tr>
+                            <td colspan="20"><u><strong>Views</strong></u></td>
+                        </tr>
+                        <tr>
+                            <td width="3%">Seq</td>
+                            <td width="3%">Type</td>
+                            <td colspan="4">Name</td>
+                            <td colspan="13">XML ID</td>
+                            <td width="30%">Inherited</td>
+                        </tr>
+                        <t t-foreach="o.view_ids" t-as="view">
+                            <tr>
+                                <td width="3%"><t t-esc="view.priority"/></td>
+                                <td width="3%"><t t-esc="view.type"/></td>
+                                <td colspan="4"><t t-esc="view.name"/></td>
+                                <td colspan="13"><t t-esc="view.xml_id"/></td>
+                                <td width="30%"><t t-esc="view.inherit_id.xml_id or view.inherit_id.name"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </t>
+        </div>
+    </t>
+</template>
+</data>
+</openerp>
