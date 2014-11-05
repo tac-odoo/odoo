@@ -10,7 +10,7 @@
             <field name="arch" type="xml">
                 <tree string="Expense Lines">
                     <field name="sequence" invisible="1"/>
-                    <field name="date_value"/>
+                    <field name="date"/>
                     <field name="name"/>
                     <field name="ref"/>
                     <field domain="[('type','in',['normal','contract']), ('parent_id','!=',False)]" name="analytic_account" groups="analytic.group_analytic_accounting"/>
@@ -110,14 +110,14 @@
                                                 <field name="unit_quantity" class="oe_inline"/> 
                                                 <field name="uom_id" on_change="onchange_uom(product_id, uom_id, context)" class="oe_inline"/>
                                             </div>
-                                            <field name="date_value" />
+                                            <field name="date" />
                                         </group>
                                     </group>
                                 </form>
                                 <tree string="Expense Lines" editable="bottom">
                                     <field name="sequence" invisible="1"/>
                                     <field name="product_id" on_change="onchange_product_id(product_id, context)" context="{'default_hr_expense_ok':1}"/>
-                                    <field name="date_value" string="Expense Date"/>
+                                    <field name="date" string="Expense Date"/>
                                     <field name="name" string="Description"/>
                                     <field name="ref"/>
                                     <field domain="[('type','in',['normal','contract'])]" name="analytic_account" groups="analytic.group_analytic_accounting"/>
@@ -147,6 +147,7 @@
             </field>
         </record>
 
+    
 
         <record id="view_hr_expense_filter" model="ir.ui.view">
             <field name="name">hr.expense.expense.filter</field>
@@ -247,12 +248,120 @@
               </p>
             </field>
         </record>
+
+        <record id="view_hr_crete_expense_filter" model="ir.ui.view">
+            <field name="name">hr.create.expense.filter</field>
+            <field name="model">hr.expense.line</field>
+            <field name="arch" type="xml">
+                <search string="Create Expense">
+                    <field name="name" string="Expenses"/>
+                    <field name="date"/>
+                    <field name="employee_id"/>
+                    <filter domain="[('state','=','draft')]" string="New" help="New Expense"/>
+                    <filter domain="[('state','=','confirm')]" string="To Approve" name="confirm" help="Confirmed Expenses"/>
+                    <filter domain="[('state','=','accepted')]" string="To Pay" name="approved" help="Expenses to Invoice"/>
+                    <separator />
+                    <filter domain="[('employee_id.user_id', '=', uid)]" string="My Expenses"/>
+                    <separator />
+                    <group expand="0" string="Group By">
+                        <filter string="Employee" domain="[]" context="{'group_by':'employee_id'}"/>
+                        <filter string="Expenses Month" domain="[]" context="{'group_by':'date'}" help="Expenses by Month"/>
+                    </group>
+                </search>
+            </field>
+        </record>
         
+        <record id="view_create_expenses_tree" model="ir.ui.view">
+            <field name="name">hr.create.expense.tree</field>
+            <field name="model">hr.expense.line</field>
+            <field name="arch" type="xml">
+                <tree string="Expenses" colors="blue:state=='draft'">
+                    <field name="employee_id"/>
+                    <field name="date"/>
+                    <field name="name" string="Expense Sheet"/>
+                    <field name="total_amount" sum="Total Amount"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="view_create_expenses_form" model="ir.ui.view">
+            <field name="name">hr.cretae.expense.form</field>
+            <field name="model">hr.expense.line</field>
+            <field name="arch" type="xml">
+                <form string="Create Expenses">
+                <header>
+                    <button name="confirm" states="draft" string="Submit" type="workflow" class="oe_highlight"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirm,accepted,cancel" statusbar_colors='{"confirm":"blue","cancelled":"red"}'/>
+                </header>
+                <sheet>
+                    <form string="Expense Lines">
+                        <div class="oe_title">
+                        <label for="name"  string="Description" class="oe_edit_only"/>
+                            <h1>
+                                <field name="name" class="oe_inline"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="date" />
+                                <field name="ref"/>
+                                <field name="employee_id"/>
+                                <field domain="[('type','=','normal')]" name="analytic_account" string="Contract" groups="analytic.group_analytic_accounting"/>
+                            </group>
+                            <group>
+                                <field name="product_id" on_change="onchange_product_id(product_id, context)" context="{'default_hr_expense_ok':1}"/>
+                                <field name="unit_amount"/>
+                                <label for="unit_quantity"/>
+                                <div>
+                                    <field name="unit_quantity" class="oe_inline"/> 
+                                    <field name="uom_id" on_change="onchange_uom(product_id, uom_id, context)" class="oe_inline"/>
+                                </div>
+                                <label for="expense_line_tax_id" groups="account.group_account_user"/>
+                                <div>
+                                    <field name="expense_line_tax_id" widget="many2many_tags" groups="account.group_account_user"/>
+                                </div>
+                                <label for="total_amount"/>
+                                <div>
+                                    <field name="total_amount"/>
+                                </div>
+                            </group>
+                        </group>
+                    </form>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+                </form>
+            </field>
+        </record>
+        
+
+        <record id="create_expenses" model="ir.actions.act_window">
+            <field name="name">Create Expenses</field>
+            <field name="res_model">hr.expense.line</field>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref="view_hr_crete_expense_filter"/>
+            <field name="view_id" ref="view_create_expenses_tree"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to register new expenses. 
+              </p><p>
+                Odoo will ensure the whole process is followed; the expense
+                sheet is submited to manager(s), the employee is reimbursed
+                from his expenses, some expenses must be re-invoiced to the
+                customers.
+              </p>
+            </field>
+        </record>
+
         <menuitem id="menu_expense_approved" parent="account.menu_finance_payables" action="action_approved_expense" sequence="8"/> 
         <menuitem id="menu_hr_product" name="Expense Products" parent="hr.menu_hr_configuration_expenses" action="hr_expense_product" groups="base.group_hr_manager"/>
         <menuitem id="next_id_49" name="Expenses" sequence="15" parent="hr.menu_hr_root"/>
-        <menuitem action="expense_all" id="menu_expense_all" name="Expenses" parent="next_id_49"/>
-        <menuitem action="action_request_approve_expense" id="menu_expense_to_approve" name="Expenses to Approve" parent="next_id_49" groups="base.group_hr_user"/>
+        <menuitem action="create_expenses" id="menu_create_expense" name="Create Expenses" parent="next_id_49" sequence="1"/>
+        <menuitem action="expense_all" id="menu_expense_to_submit" name="Expenses to Submit" parent="next_id_49" sequence="2"/>
+        <menuitem action="action_request_approve_expense" id="menu_expense_to_approve" name="Expenses to Approve" parent="next_id_49" groups="base.group_hr_user" sequence="3"/>
         
     </data>
 </openerp>

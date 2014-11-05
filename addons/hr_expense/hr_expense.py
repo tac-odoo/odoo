@@ -399,6 +399,7 @@ class product_template(osv.osv):
 class hr_expense_line(osv.osv):
     _name = "hr.expense.line"
     _description = "Expense Line"
+    _inherit = ['mail.thread', 'ir.needaction_mixin']
 
     def _amount(self, cr, uid, ids, field_name, arg, context=None):
         if not ids:
@@ -413,7 +414,7 @@ class hr_expense_line(osv.osv):
 
     _columns = {
         'name': fields.char('Expense Note', required=True),
-        'date_value': fields.date('Date', required=True),
+        'date': fields.date('Date', required=True),
         'expense_id': fields.many2one('hr.expense.expense', 'Expense', ondelete='cascade', select=True),
         'total_amount': fields.function(_amount, string='Total', digits_compute=dp.get_precision('Account')),
         'unit_amount': fields.float('Unit Price', digits_compute=dp.get_precision('Product Price')),
@@ -424,13 +425,23 @@ class hr_expense_line(osv.osv):
         'analytic_account': fields.many2one('account.analytic.account','Analytic account'),
         'ref': fields.char('Reference'),
         'sequence': fields.integer('Sequence', select=True, help="Gives the sequence order when displaying a list of expense lines."),
+        'employee_id': fields.many2one('hr.employee', "Employee"),
+        'state': fields.selection([
+            ('draft', 'New'),
+            ('confirm', 'Submitted'),
+            ('accepted', 'Approved'),
+            ('cancel', 'Cancelled'),
+            ],
+            'Status', readonly=True, track_visibility='onchange', copy=False),
+        'expense_line_tax_id': fields.many2many('account.tax','expense_line_tax', 'expense_line_id', 'tax_id',string='Taxes'),
         }
     _defaults = {
         'unit_quantity': 1,
-        'date_value': lambda *a: time.strftime('%Y-%m-%d'),
+        'date': lambda *a: time.strftime('%Y-%m-%d'),
         'uom_id': _get_uom_id,
+        'state': 'draft',
     }
-    _order = "sequence, date_value desc"
+    _order = "sequence, date desc"
 
     def onchange_product_id(self, cr, uid, ids, product_id, context=None):
         res = {}
