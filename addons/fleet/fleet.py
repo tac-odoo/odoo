@@ -19,7 +19,6 @@
 #
 ##############################################################################
 
-from collections import defaultdict
 import datetime
 from dateutil.relativedelta import relativedelta
 from openerp import models, fields, api
@@ -210,38 +209,40 @@ class fleet_vehicle(models.Model):
             return self.env['fleet.vehicle.odometer'].create(data)
 
     @api.model
-    def _search_get_overdue_contract_reminder(self, args):
-        res = []
-        for field, operator, value in args:
-            if (operator in ('=', '!=', '<>') and value in (True, False)): 
-                raise Exception("Operation not supported")
-            if (operator == '=' and value == True) or (operator in ('<>', '!=') and value == False):
-                search_operator = 'in'
-            else:
-                search_operator = 'not in'
-            today = fields.Date.today()
-            self._cr.execute('select cost.vehicle_id, count(contract.id) as contract_number FROM fleet_vehicle_cost cost left join fleet_vehicle_log_contract contract on contract.cost_id = cost.id WHERE contract.expiration_date is not null AND contract.expiration_date < %s AND contract.state IN (\'open\', \'toclose\') GROUP BY cost.vehicle_id', (today,))
-            res_ids = [x[0] for x in self._cr.fetchall()]
-            res.append(('id', search_operator, res_ids))
-        return res
+    def _search_get_overdue_contract_reminder(self, operator, value):
+        contract = self.env['fleet.vehicle.log.contract']
+        if not (operator in ('=', '!=', '<>') and value in (True, False)): 
+            raise Exception("Operation not supported")
+        if (operator == '=' and value == True) or (operator in ('<>', '!=') and value == False):
+            search_operator = 'in'
+        else:
+            search_operator = 'not in'
+        today = fields.Date.today()
+        res = contract.read_group([('expiration_date', '<', today)], fields=['vehicle_id'], groupby=['vehicle_id'])
+        list = []
+        for x in res:
+            vehicle_id = str( x['vehicle_id'][0] )
+            list.append(vehicle_id)
+        return [('id', search_operator, list)]
 
     @api.model
-    def _search_contract_renewal_due_soon(self, args):
-        res = []
-        for field, operator, value in args:
-            if (operator in ('=', '!=', '<>') and value in (True, False)):
-                raise Exception("Operation not supported")
-            if (operator == '=' and value == True) or (operator in ('<>', '!=') and value == False):
-                search_operator = 'in'
-            else:
-                search_operator = 'not in'
-            today = fields.Date.today()
-            datetime_today = datetime.datetime.strptime(today, tools.DEFAULT_SERVER_DATE_FORMAT)
-            limit_date = str((datetime_today + relativedelta(days=+15)).strftime(tools.DEFAULT_SERVER_DATE_FORMAT))
-            self._cr.execute('select cost.vehicle_id, count(contract.id) as contract_number FROM fleet_vehicle_cost cost left join fleet_vehicle_log_contract contract on contract.cost_id = cost.id WHERE contract.expiration_date is not null AND contract.expiration_date > %s AND contract.expiration_date < %s AND contract.state IN (\'open\', \'toclose\') GROUP BY cost.vehicle_id', (today, limit_date))
-            res_ids = [x[0] for x in self._cr.fetchall()]
-            res.append(('id', search_operator, res_ids))
-        return res
+    def _search_contract_renewal_due_soon(self, operator, value):
+        contract = self.env['fleet.vehicle.log.contract']
+        if not (operator in ('=', '!=', '<>') and value in (True, False)):
+            raise Exception("Operation not supported")
+        if (operator == '=' and value == True) or (operator in ('<>', '!=') and value == False):
+            search_operator = 'in'
+        else:
+            search_operator = 'not in'
+        today = fields.Date.today()
+        datetime_today = datetime.datetime.strptime(today, tools.DEFAULT_SERVER_DATE_FORMAT)
+        limit_date = str((datetime_today + relativedelta(days=+15)).strftime(tools.DEFAULT_SERVER_DATE_FORMAT))
+        res = contract.read_group([('expiration_date', '>', today), ('expiration_date', '<', limit_date)], fields=['vehicle_id'], groupby=['vehicle_id'])
+        list = []
+        for x in res:
+            vehicle_id = str( x['vehicle_id'][0] )
+            list.append(vehicle_id)
+        return [('id', search_operator, list)]
 
     @api.multi
     def _get_contract_reminder_fnc(self):
@@ -330,8 +331,8 @@ class fleet_vehicle(models.Model):
     image = fields.Binary(related='model_id.make_id.image', string="Logo")
     image_medium = fields.Binary(related='model_id.make_id.image_medium', string="Logo (medium)")
     image_small = fields.Binary(related='model_id.make_id.image_small', string="Logo (small)")
-    contract_renewal_due_soon = fields.Boolean(compute='_get_contract_reminder_fnc', fnct_search='_search_contract_renewal_due_soon', string='Has Contracts to renew')
-    contract_renewal_overdue = fields.Boolean(compute='_get_contract_reminder_fnc', fnct_search='_search_get_overdue_contract_reminder', string='Has Contracts Overdued')
+    contract_renewal_due_soon = fields.Boolean(compute='_get_contract_reminder_fnc', search='_search_contract_renewal_due_soon', string='Has Contracts to renew')
+    contract_renewal_overdue = fields.Boolean(compute='_get_contract_reminder_fnc', search='_search_get_overdue_contract_reminder', string='Has Contracts Overdued')
     contract_renewal_name = fields.Text(compute='_get_contract_reminder_fnc', string='Name of contract to renew soon')
     contract_renewal_total = fields.Integer(compute='_get_contract_reminder_fnc', string='Total of contracts due or overdue minus one')
     car_value = fields.Float('Car Value', help='Value of the bought vehicle')
@@ -564,9 +565,13 @@ class fleet_vehicle_log_contract(models.Model):
         today = datetime.datetime.strptime(fields.Date.today(), tools.DEFAULT_SERVER_DATE_FORMAT)
         limit_date = (today + relativedelta(days=+15)).strftime(tools.DEFAULT_SERVER_DATE_FORMAT)
         ids = self.search(['&', ('state', '=', 'open'), ('expiration_date', '<', limit_date)])
-        res = defaultdict(int)
+        res = {}
         for contract in ids:
-            res[contract.vehicle_id.id] += 1
+            if contract.vehicle_id.id in res:
+                res[contract.vehicle_id.id] += 1
+            else:
+                res[contract.vehicle_id.id] = 1
+
         for vehicle, value in res.items():
             self.env['fleet.vehicle'].browse(vehicle).message_post(body=_('%s contract(s) need(s) to be renewed and/or closed!') % (str(value)))
         return self.write({'state': 'toclose'})
@@ -615,7 +620,7 @@ class fleet_vehicle_log_contract(models.Model):
 
     @api.one
     def act_renew_contract(self):
-        if (len(self._ids) == 1): 
+        if not (len(self._ids) == 1): 
             raise Exception("This operation should only be done for 1 single contract at a time, as it it suppose to open a window as result")
         #compute end date
         startdate = str_to_datetime(self.start_date)
