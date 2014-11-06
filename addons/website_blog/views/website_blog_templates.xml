@@ -130,33 +130,62 @@
                   </p>
                 </div>
 
-                <div t-foreach="blog_posts" t-as="blog_post" class="mb32">
-                  <span t-field="blog_post.author_avatar" t-field-options='{"widget": "image", "class": "img-circle pull-right mt16 media-object"}' />
+                <div t-foreach="blog_posts" t-as="blog_post" class="mb128 mt32">
+             
+                    <div name='blog_post_image'>
+                    </div>
+
                   <a t-attf-href="/blog/#{ slug(blog_post.blog_id) }/post/#{ slug(blog_post) }">
+                    <!--<img src="/website/image/ir.attachment/32_21efbc1/datas" class="img-responsive"/>-->
                       <h2 t-field="blog_post.name" class="mb4"/>
                   </a>
+              
+              
+
+                  
 
                   <div class="text-muted">
-                      <h4
-                        t-field="blog_post.subtitle"
-                        class="mb4 mt4"/>
-                    <div name='blog_post_data' class='mb0'>
-                         <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
+                      <h4 t-field="blog_post.subtitle" class="mb8 lead"/>
+                  </div>
+
+                  <div name='blog_post_summary'>
+
+                  </div>
+                <!--      
+                    <div>
+                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt orem ipsum dolor sit amet
+                            ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam...
+                  <a t-attf-href="/blog/#{ slug(blog_post.blog_id) }/post/#{ slug(blog_post) }">
+                    <em>Read more</em>
+                  </a>
+                        </p>
+                    </div>
+                -->
+                     <hr/>   
+
+                    <div name='blog_post_data'>
+                       <!-- 
+                            <span t-field="blog_post.author_avatar" t-field-options='{"widget": "image", "class": "img-circle pull-right media-object"}'/>
+                    <div class="mt16">
+                    <em>
+                         by <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
                                 "widget": "contact",
                                 "fields": ["name"]
                             }'/>
-                        &#5760; <span t-field="blog_post.create_date" t-field-options='{"format": "MMMM yyyy"}'/>
+                        on <span t-field="blog_post.create_date" t-field-options='{"format": "MMMM dd yyyy"}'/>
                         <span t-if="len(blog_post.message_ids) &gt; 0">
-                            &#5760; <t t-esc="len(blog_post.message_ids)"/>
+                            - <t t-esc="len(blog_post.message_ids)"/>
                             <t t-if="len(blog_post.message_ids) &lt;= 1" >comment</t>
                             <t t-if="len(blog_post.message_ids) > 1">comments</t>
                         </span>
 
-                        <span t-if="not blog_post.website_published" class="label label-danger">not published</span>
+                        <span t-if="not blog_post.website_published" class="label label-danger">not published</span></em>
+                    </div>
+                -->
                     </div>
                   </div>
 
-                </div>
+
               </div>
             </div>
         </div>
@@ -165,11 +194,21 @@
     </t>
 </template>
 
+<!-- Option: Blog Post List: show images -->
+<template id="opt_blog_post_short_images" name="Images"
+        customize_show="True" inherit_id="website_blog.blog_post_short">
+    <xpath expr="//*[@name='blog_post_image']" position="inside">
+        <a t-attf-href="/blog/#{ slug(blog_post.blog_id) }/post/#{ slug(blog_post) }">
+        <img src="/website/image/ir.attachment/32_21efbc1/datas" class="img-responsive"/>
+        </a>
+    </xpath>
+</template>
+
 <!-- Option: Blog Post List: show tags -->
 <template id="opt_blog_post_short_tags" name="Tags"
         customize_show="True" inherit_id="website_blog.blog_post_short">
     <xpath expr="//*[@name='blog_post_data']" position="inside">
-        <p class="post-meta text-muted text-center" t-if="len(blog_post.tag_ids)">
+        <p class="post-meta text-muted mt8" t-if="len(blog_post.tag_ids)">
             <span class="fa fa-tags"/>
             <t t-foreach="blog_post.tag_ids" t-as="tag">
                 <a t-attf-href="#{blog_url(tag=tag)}" t-esc="tag.name"/> &amp;nbsp;
@@ -178,10 +217,135 @@
     </xpath>
 </template>
 
+<!-- Option: Blog Post List: show summary -->
+<template id="opt_blog_post_short_summary" name="Summary"
+        customize_show="True" inherit_id="website_blog.blog_post_short">
+    <xpath expr="//*[@name='blog_post_summary']" position="inside">
+        <p class="mt16">
+            <t t-foreach="blog_post" t-as="summary">
+                        Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt orem ipsum dolor sit amet
+                            ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam...
+                            <a t-attf-href="/blog/#{ slug(blog_post.blog_id) }/post/#{ slug(blog_post) }">
+                            <em>Read more</em>
+                            </a>
+                        
+            </t>
+        </p>
+    </xpath>
+</template>
+
+<!-- Option: Blog Post List: show share buttons -->
+<template id="opt_blog_post_short_share" name="Share"
+        customize_show="True" active="False" inherit_id="website_blog.blog_post_short">
+    <xpath expr="//*[@name='blog_post_summary']" position="inside">
+        <p class="mt8">
+            <t t-foreach="blog_post" t-as="share">
+                <a href="#"> 
+                        <span class="fa-stack fa-lg">
+                          <i class="fa fa-circle fa-stack-2x"></i>
+                          <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                        </span>
+                </a>
+                <a href="#"> 
+                        <span class="fa-stack fa-lg">
+                          <i class="fa fa-circle fa-stack-2x"></i>
+                          <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                        </span>
+                </a>
+                <a href="#"> 
+                        <span class="fa-stack fa-lg">
+                          <i class="fa fa-circle fa-stack-2x"></i>
+                          <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                        </span>
+                </a>
+                <a href="#"> 
+                        <span class="fa-stack fa-lg">
+                          <i class="fa fa-circle fa-stack-2x"></i>
+                          <i class="fa fa-google-plus fa-stack-1x fa-inverse"></i>
+                        </span>
+                </a>
+                        
+            </t>
+        </p>
+    </xpath>
+</template>
+
+
+<!-- Option: Blog Post List: show meta -->
+<template id="opt_blog_post_short_meta" name="Meta"
+        customize_show="True" active="False" inherit_id="website_blog.blog_post_short">
+    <xpath expr="//*[@name='blog_post_data']" position="inside">
+        <div class="mt16">
+            <t t-foreach="blog_post" t-as="meta">
+                        
+                        <span t-field="blog_post.author_avatar" t-field-options='{"widget": "image", "class": "img-circle pull-right media-object"}'/>
+                    <div class="mt16">
+                    <em>
+                         by <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
+                                "widget": "contact",
+                                "fields": ["name"]
+                            }'/>
+                        on <span t-field="blog_post.create_date" t-field-options='{"format": "MMMM dd yyyy"}'/>
+                        <span t-if="len(blog_post.message_ids) &gt; 0">
+                            - <t t-esc="len(blog_post.message_ids)"/>
+                            <t t-if="len(blog_post.message_ids) &lt;= 1" >comment</t>
+                            <t t-if="len(blog_post.message_ids) > 1">comments</t>
+                        </span>
+
+                        <span t-if="not blog_post.website_published" class="label label-danger">not published</span></em>
+                    </div>
+                        
+            </t>
+        </div>
+    </xpath>
+</template>
+
 <!-- Blog Post Complete -->
 <template id="blog_post_complete" name="Blog Post">
   <t t-call="website_blog.index">
 
+<div name='post_cover'>
+</div>
+
+    <div id="title" style="height:450px;" class="cover col-md-8 col-md-offset-2 mt32" t-attf-style="background-image: url(#{blog_post.background_image})" t-ignore="True">
+        <div class="container">
+          <div class="container text-right mt16">
+            <div class="btn-group css_non_editable_mode_hidden">
+                <a id="change_cover" class="btn btn-primary">
+                    Change Cover
+                </a>
+                <a id="clear_cover" class="btn btn-danger">
+                    <span class="fa fa-times"/>
+                </a>
+            </div>
+            <t t-call="website.publish_management">
+                <t t-set="object" t-value="blog_post"/>
+                <t t-set="publish_edit" t-value="True"/>
+                <li>
+                    <form class="duplicate hidden" action="/blogpost/duplicate">
+                        <input name="blog_post_id" t-att-value="blog_post.id"/>
+                    </form>
+                    <a href="#" class="duplicate" onclick="$(this).prev('form').submit()">Duplicate</a>
+                </li>
+            </t>
+          </div>
+        </div>
+        <div class="blog_title text-center mt48">
+            <h1 t-field="blog_post.name" id="blog_post_name" t-att-data-blog-id="blog_post.id"/>
+            <h2 t-field="blog_post.subtitle"/>
+            <p class="post-meta text-muted" name="blog_post_data"/>
+            <div>
+                <img class="img-circle" t-att-src="website.image_url(blog_post.author_id, 'image_small')" style="width: 30px; margin-right: 10px;"/>
+                <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
+                    "widget": "contact",
+                    "fields": ["name"]
+                }'/>
+            </div>
+
+        </div>
+    </div>
+
+<!--
     <div class="cover js_fullheight" id="title" t-attf-style="background-image: url(#{blog_post.background_image})" t-ignore="True">
         <div class="container">
           <div class="container text-right mt16">
@@ -222,8 +386,17 @@
             </div>
         </div>
     </div>
+-->
+<section>
+    <div class="container">
+        <div class="row">
+<div name='post_lead' class="mt64"></div>
+</div>
+</div>
+</section>
 
     <div id="blog_content" t-field="blog_post.content" class="mt32"/>
+    
 
     <section id="comments" class="read_width">
         <hr/>
@@ -267,6 +440,76 @@
     </t>
 
   </t>
+</template>
+
+<!-- Options: Blog Post: Post Lead -->
+<template id="blog_post_lead" name="Post Lead"
+        inherit_id="website_blog.blog_post_complete" customize_show="True">
+    <xpath expr="//*[@name='post_lead']" position="inside">
+        <p class="lead">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</p>
+
+    </xpath>
+</template>
+
+<!-- Option: Blog Post: show share buttons -->
+<template id="opt_blog_post_share" name="Share"
+        customize_show="True" active="False" inherit_id="website_blog.blog_post_complete">
+    <xpath expr="//*[@name='post_lead']" position="before">
+        <p class="mt16">
+            <t t-foreach="blog_post" t-as="share">
+                <a href="#"> 
+                        <span class="fa-stack fa-lg">
+                          <i class="fa fa-circle fa-stack-2x"></i>
+                          <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                        </span>
+                </a>
+                <a href="#"> 
+                        <span class="fa-stack fa-lg">
+                          <i class="fa fa-circle fa-stack-2x"></i>
+                          <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                        </span>
+                </a>
+                <a href="#"> 
+                        <span class="fa-stack fa-lg">
+                          <i class="fa fa-circle fa-stack-2x"></i>
+                          <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                        </span>
+                </a>
+                <a href="#"> 
+                        <span class="fa-stack fa-lg">
+                          <i class="fa fa-circle fa-stack-2x"></i>
+                          <i class="fa fa-google-plus fa-stack-1x fa-inverse"></i>
+                        </span>
+                </a>
+                        
+            </t>
+        </p>
+    </xpath>
+</template>
+
+<!-- Option: Blog Post: show meta -->
+<template id="opt_blog_post_meta" name="Meta"
+        customize_show="True" active="False" inherit_id="website_blog.blog_post_complete">
+    <xpath expr="//div[@id='blog_content']" position="after">
+        <div class="col-md-6 col-md-offset-3 mt16">
+                        <span t-field="blog_post.author_avatar" t-field-options='{"widget": "image", "class": "img-circle pull-right media-object"}'/>
+                    <div class="mt16">
+                    <em>
+                         by <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
+                                "widget": "contact",
+                                "fields": ["name"]
+                            }'/>
+                        on <span t-field="blog_post.create_date" t-field-options='{"format": "MMMM dd yyyy"}'/>
+                        <span t-if="len(blog_post.message_ids) &gt; 0">
+                            - <t t-esc="len(blog_post.message_ids)"/>
+                            <t t-if="len(blog_post.message_ids) &lt;= 1" >comment</t>
+                            <t t-if="len(blog_post.message_ids) > 1">comments</t>
+                        </span>
+
+                        <span t-if="not blog_post.website_published" class="label label-danger">not published</span></em>
+                    </div>
+        </div>
+    </xpath>
 </template>
 
 <!-- Options: Blog Post: breadcrumb -->
@@ -404,7 +647,7 @@
     <xpath expr="//div[@id='blog_right_column']" position="inside">
         <section class="mt32">
         <h4>About us</h4>
-        <p>
+        <p class="lead">
             Write a small text here for when <b>new visitors</b> find your website
             through your <b>blog entries</b>, referenced in Google.
         </p>
@@ -453,6 +696,25 @@
                 <li t-att-class="nav_blog.id == blog.id and 'active' or ''">
                     <a t-attf-href="#{blog_url(blog=nav_blog)}">
                         <span t-field="nav_blog.name"/>
+                    </a>
+                </li>
+            </t>
+        </ul>
+        </section>
+    </xpath>
+</template>
+
+<!-- Option:Right Column: latest posts -->
+<template id="opt_blog_rc_latestposts" name="Latest Posts" priority="8"
+        inherit_id="website_blog.index_right" active="False" customize_show="True">
+    <xpath expr="//div[@id='blog_right_column']" position="inside">
+        <section class="mt32 mb32">
+        <h4>Latest Posts</h4>
+        <ul>
+            <t t-foreach="blog_posts" t-as="blog_post">
+                <li t-att-class="blog_post.id == blog_post.id and 'active' or ''">
+                    <a t-attf-href="/blog/#{ slug(blog_post.blog_id) }/post/#{ slug(blog_post) }">
+                        <span t-field="blog_post.name"/>
                     </a>
                 </li>
             </t>

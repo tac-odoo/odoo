@@ -1,0 +1,8 @@
+./run-blog.sh
+./run-themes.sh
+
+http://localhost:8069/web/database/manager
+	drop blog
+	create blog 
+
+http://127.0.0.1:8069/
