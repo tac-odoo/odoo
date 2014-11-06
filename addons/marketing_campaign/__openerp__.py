@@ -61,7 +61,8 @@ input segments, workflow.
         'marketing_campaign_workflow.xml',
         'report/campaign_analysis_view.xml',
         'security/marketing_campaign_security.xml',
-        'security/ir.model.access.csv'
+        'security/ir.model.access.csv',
+				'mail_template.xml',
     ],
     'demo': ['marketing_campaign_demo.xml'],
     'test': ['test/marketing_campaign.yml'],
