@@ -31,6 +31,20 @@
 }
 /* button */
 
+.oe_kanban_draghandle:hover .oe_dial_hidden_button{
+    visibility: visible;
+}
+.oe_dial_hidden_button{
+    visibility: hidden;
+}
+
+.oe_dial_kanban_icon{
+    width: 20% ;
+    left: 13px;
+    bottom: 3px;
+    font-size: 10px;
+}
+
 .oe_dial_content{
     position: relative;
     text-align: center;
@@ -66,44 +80,48 @@
 
 .oe_dial_callbutton{
     position: relative;
+    margin-bottom: 2px;
     width: 90%;
 }
 
 .oe_dial_hangupbutton{
     position: relative;
+    margin-bottom: 2px;
     width: 44%;
 }
 .oe_dial_nextcallbutton{
     position: relative;
+    margin-bottom: 2px;
     width: 90%;
 }
 
 .oe_dial_transferbutton{
     position: relative;
-    width: 44%;
-}
-
-.oe_dial_buttons{
     margin-bottom: 2px;
+    width: 44%;
 }
 
 .oe_dial_changelog{
     position: relative;
+    margin-bottom: 2px;
     width: 44%;
 }
 
 .oe_dial_email{
     position: relative;
+    margin-bottom: 2px;
     width: 44%;
 }
 
 .oe_dial_to_lead{
     position: relative;
+    margin-bottom: 2px;
     width: 44%;
 }
 
 .oe_dial_to_client{
     position: relative;
+    margin-bottom: 2px;
     width: 44%;
 }
 
@@ -204,6 +222,3 @@
     margin-top: 7px;
 }
 
-.oe_dial_hidden_button{
-    visibility: hidden;
-}

@@ -72,13 +72,13 @@ class crm_lead(models.Model):
 
 	@api.one
 	def compute_is_call_center(self):
-		phonecall = self.env['crm.phonecall'].search([('opportunity_id','=',self.id),('to_call','=',True)])
+		phonecall = self.env['crm.phonecall'].search([('opportunity_id','=',self.id),('to_call','=',True),('user_id','=',self.env.user[0].id)])
 		if phonecall:
 			self.in_call_center_queue = True
 		else:
 			self.in_call_center_queue = False	
 
-	@api.one
+	@api.multi
 	def create_call_center_call(self):
 		phonecall = self.env['crm.phonecall'].create({
 				'name' : self.name
@@ -88,12 +88,19 @@ class crm_lead(models.Model):
 		phonecall.opportunity_id = self.id
 		phonecall.partner_id = self.partner_id
 		phonecall.state = 'pending'
+		return {
+			'type': 'ir.actions.client',
+			'tag': 'reload_panel',
+		}
 
-	@api.one
+	@api.multi
 	def delete_call_center_call(self):
-		#TODO correct the delete action, find a way to get the right phonecall id to delete
-		phonecall = self.env['crm.phonecall'].search([('opportunity_id','=',self.id)])
+		phonecall = self.env['crm.phonecall'].search([('opportunity_id','=',self.id),('to_call','=',True),('user_id','=',self.env.user[0].id)])
 		phonecall.unlink()
+		return {
+			'type': 'ir.actions.client',
+			'tag': 'reload_panel',
+		}
 
 class crm_phonecall_log_wizard(models.TransientModel):
 	_name = 'crm.phonecall.log.wizard'

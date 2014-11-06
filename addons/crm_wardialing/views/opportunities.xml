@@ -38,13 +38,17 @@
             <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
             <field name="arch" type="xml">
                 <div class="oe_kanban_content">
-                     <a href="#" title="Add to Call Center Queue" class="oe_dial_link_icon">
-                        <i class="text-muted oe_dial_hidden_button oe_dial_lead_to_call_center_button fa fa-plus-square"></i>
+                    <a type="object" name="create_call_center_call" t-if="record.in_call_center_queue.raw_value == false" title="Add to Call Center Queue" class="oe_dial_kanban_button oe_dial_hidden_button text-muted fa-stack">
+                        <i class="fa fa-phone fa-stack-1x"></i>
+                        <i class="fa fa-plus fa-stack-1x oe_dial_kanban_icon text-success"></i>
                     </a>
-                    <span style="visibility:hidden;" class="call_center" >
-                        <field name="in_call_center_queue"/>
-                    </span>
+                    <a type="object" name="delete_call_center_call" t-if="record.in_call_center_queue.raw_value" title="Remove from Call Center Queue" class="oe_dial_kanban_button text-muted fa-stack">
+                        <i class="fa fa-phone fa-stack-1x"></i>
+                        <i class="fa fa-minus fa-stack-1x oe_dial_kanban_icon text-danger"></i>
+                    </a>
+                    <field name="in_call_center_queue" invisible="1"/>
                 </div>
+
             </field>
         </record>
     </data>
