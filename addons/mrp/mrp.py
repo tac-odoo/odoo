@@ -353,6 +353,14 @@ class mrp_bom(osv.osv):
             }
         return res
 
+    def onchange_product_id(self, cr, uid, ids, product_id, context=None):
+        res = {}
+        if product_id:
+            res['value'] = {
+                'product_tmpl_id': self.pool["product.product"].browse(cr, uid, product_id, context).product_tmpl_id.id,
+            }
+        return res
+
 class mrp_bom_line(osv.osv):
     _name = 'mrp.bom.line'
     _order = "sequence"
@@ -566,12 +574,12 @@ class mrp_production(osv.osv):
                 ('ready', 'Ready to Produce'), ('in_production', 'Production Started'), ('done', 'Done')],
             string='Status', readonly=True,
             track_visibility='onchange', copy=False,
-            help="When the production order is created the status is set to 'Draft'.\n\
-                If the order is confirmed the status is set to 'Waiting Goods'.\n\
-                If any exceptions are there, the status is set to 'Picking Exception'.\n\
-                If the stock is available then the status is set to 'Ready to Produce'.\n\
-                When the production gets started then the status is set to 'In Production'.\n\
-                When the production is over, the status is set to 'Done'."),
+            help="When the production order is created the status is set to 'Draft'.\n"
+                "If the order is confirmed the status is set to 'Waiting Goods.\n"
+                "If any exceptions are there, the status is set to 'Picking Exception.\n"
+                "If the stock is available then the status is set to 'Ready to Produce.\n"
+                "When the production gets started then the status is set to 'In Production.\n"
+                "When the production is over, the status is set to 'Done'."),
         'hour_total': fields.function(_production_calc, type='float', string='Total Hours', multi='workorder', store=True),
         'cycle_total': fields.function(_production_calc, type='float', string='Total Cycles', multi='workorder', store=True),
         'user_id': fields.many2one('res.users', 'Responsible'),
@@ -841,7 +849,7 @@ class mrp_production(osv.osv):
         production_qty = uom_obj._compute_qty(cr, uid, production.product_uom.id, production.product_qty, production.product_id.uom_id.id)
 
         scheduled_qty = {}
-        for scheduled in production.product_lines:
+        for scheduled in production.move_lines:
             if scheduled.product_id.type == 'service':
                 continue
             qty = uom_obj._compute_qty(cr, uid, scheduled.product_uom.id, scheduled.product_qty, scheduled.product_id.uom_id.id)

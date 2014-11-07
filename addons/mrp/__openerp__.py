@@ -27,7 +27,7 @@
     'website': 'https://www.odoo.com/page/manufacturing',
     'category': 'Manufacturing',
     'sequence': 18,
-    'summary': 'Manufacturing Orders, Bill of Materials, Routing',
+    'summary': 'Manufacturing Orders, Bill of Materials, Work Order Operations',
     'images': ['images/bill_of_materials.jpeg', 'images/manufacturing_order.jpeg', 'images/planning_manufacturing_order.jpeg', 'images/manufacturing_analysis.jpeg', 'images/routings.jpeg','images/work_centers.jpeg'],
     'depends': ['product', 'procurement', 'stock_account', 'resource', 'report'],
     'description': """
