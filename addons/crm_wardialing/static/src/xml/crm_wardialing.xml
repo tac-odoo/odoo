@@ -131,16 +131,14 @@
 </t>
 
 <t t-name="crm_wardialing_Tooltip_title">
-    <div>
-        <span><t t-esc="opportunity"/></span>
-        <div>
-            <t t-foreach="priority" t-as="prior">
-                <i class="fa fa-star"></i>
-            </t>
-            <t t-foreach="empty_star" t-as="empty">
-                <i class="fa fa-star-o"></i>
-            </t>
-        </div>
-    </div>
+            <span style="display:inline-block; max-width: 210px"><t t-esc="opportunity"/></span>
+            <span class="pull-right">
+                <t t-foreach="priority" t-as="prior">
+                    <i class="fa fa-star"></i>
+                </t>
+                <t t-foreach="empty_star" t-as="empty">
+                    <i class="fa fa-star-o"></i>
+                </t>
+            </span>
 </t>
 </templates>

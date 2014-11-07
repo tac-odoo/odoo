@@ -75,6 +75,7 @@ openerp.crm_wardialing = function(instance) {
             this.widgets = {};
             this.formatCurrency;
             this.phonecall_channel;
+            this.buttonAnimated = false;
         },
 
         start: function() {
@@ -130,6 +131,9 @@ openerp.crm_wardialing = function(instance) {
                 if(result.phonecalls.length > 0){
                     $(".oe_dial_callbutton").removeAttr('disabled');
                 }
+                self.$el.find(".oe_dial_content").animate({
+                    bottom: 0,
+                });
                 _.each(result.phonecalls, function(phonecall){     
                     var widget = new openerp.crm_wardialing.PhonecallWidget(self, phonecall,phonecall.partner_image_small, phonecall.partner_email);
                     widget.appendTo(self.$(".oe_dial_phonecalls"));
@@ -202,6 +206,7 @@ openerp.crm_wardialing = function(instance) {
                     views: [[data[1], 'form']],
                     target: 'current',
                     context: {},
+                    flags: {initial_mode: "edit",},
                 });
             })
             
@@ -219,30 +224,40 @@ openerp.crm_wardialing = function(instance) {
                 views: [[false, 'form']],
                 target: 'current',
                 context: {},
+                flags: {initial_mode: "edit",},
             });
         },
 
         //action to select a call and display the specific actions
         select_call: function(phonecall_widget){
-            var classes = phonecall_widget.$()[0].className.split(" ");
-            self.$(".oe_dial_selected_phonecall").removeClass("oe_dial_selected_phonecall");
-            if(classes.indexOf("oe_dial_selected_phonecall") == -1){
-                phonecall_widget.$()[0].className += " oe_dial_selected_phonecall";
-                this.$el.find(".oe_dial_content").animate({
-                    bottom: this.$el.find(".oe_dial_optionalbuttons").outerHeight(),
-                });
-                this.$el.find(".oe_dial_email").css("display","none");
-                if(phonecall_widget.get('email')){
-                    this.$el.find(".oe_dial_email").css("display","inline");
-                    this.$el.find(".oe_dial_changelog").css("width", "44%");
+            if(!this.buttonAnimated){
+                var self = this;
+                this.buttonAnimated = true;
+                var classes = phonecall_widget.$()[0].className.split(" ");
+                self.$(".oe_dial_selected_phonecall").removeClass("oe_dial_selected_phonecall");
+                if(classes.indexOf("oe_dial_selected_phonecall") == -1){
+                    phonecall_widget.$()[0].className += " oe_dial_selected_phonecall";
+                    console.log(this.buttonAnimated);
+                    this.$el.find(".oe_dial_phonecalls").animate({
+                        height: (this.$el.find(".oe_dial_phonecalls").height() - this.$el.find(".oe_dial_optionalbuttons").outerHeight()),
+                    }, 500,function(){
+                        self.buttonAnimated = false;
+                    });
+                    this.$el.find(".oe_dial_email").css("display","none");
+                    if(phonecall_widget.get('email')){
+                        this.$el.find(".oe_dial_email").css("display","inline");
+                        this.$el.find(".oe_dial_changelog").css("width", "44%");
+                    }else{
+                        this.$el.find(".oe_dial_changelog").css("width", "90%");
+                    }
                 }else{
-                    this.$el.find(".oe_dial_changelog").css("width", "90%");
+                    this.$el.find(".oe_dial_phonecalls").animate({
+                        height: (this.$el.find(".oe_dial_phonecalls").height() + this.$el.find(".oe_dial_optionalbuttons").outerHeight()),
+                    }, 500,function(){
+                        self.buttonAnimated = false;
+                    });
                 }
-            }else{
-                this.$el.find(".oe_dial_content").animate({
-                    bottom: 0,
-                });
-            }    
+            } 
         },
 
         //action done when the button "call" is clicked

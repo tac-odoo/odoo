@@ -113,12 +113,16 @@ class crm_phonecall_log_wizard(models.TransientModel):
 			return self._context.get('phonecall').get('description')		
 	
 	@api.multi
-	def _default_phonecall(self):
+	def _default_opportunity_name(self):
 		return self._context.get('phonecall').get('opportunity_name')
 
+	@api.multi
+	def _default_duration(self):
+		return self._context.get('phonecall').get('duration')
+		
 	description = fields.Text('Description', default = _default_description)
-	opportunity_name = fields.Char(default = _default_phonecall, readonly=True)
-
+	opportunity_name = fields.Char(default = _default_opportunity_name, readonly=True)
+	duration = fields.Float('Duration', default = _default_duration, readonly=True)
 	@api.multi
 	def save(self):
 		phonecall = self.env['crm.phonecall'].browse(self._context.get('phonecall').get('id'))

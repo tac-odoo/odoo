@@ -114,16 +114,7 @@ openerp.sip_js = function(instance) {
 
 	this.transfer = function(){
 		if(this.session){
-			console.log(this.session)
-			this.transferSession = this.session.refer(this.config.physicalPhone);
-
-			console.log(this.transferSession);
-			this.transferSession.on('bye',function(){
-				console.log("BYE TRANSFER");
-			});
-			this.transferSession.on('accepted',function(){
-				console.log("ACCEPTED TRANSFER");
-			});
+			this.session.refer(this.config.physicalPhone);
 		}
 	}
 }

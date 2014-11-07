@@ -112,8 +112,10 @@
             <field name="model">crm.phonecall.log.wizard</field>
             <field name="arch" type="xml">
                 <form string="Edit the log">
-                    <h2 style="display: inline;"> Log the call: <field style="display: inline !important" name="opportunity_name"/></h2>
-
+                    <h2 style="display: inline;"> Log the call: <field style="display: inline !important" name="opportunity_name"/></h2><br/>
+                    <div>
+                        <label for="duration"/> <field name="duration"/>
+                    </div>
                     <group>
                         <field name="description" placeholder="Description..."/>
                     </group>
