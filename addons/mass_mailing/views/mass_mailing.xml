@@ -371,7 +371,6 @@
                                         on_change="on_change_model_and_list(mailing_model, contact_list_ids)"/>
                                 </div>
                             </div>
-                            <field name="keep_archives"/>
                         </group>
                         <notebook>
                             <page string="Mail Body">
@@ -390,6 +389,7 @@
                             <page string="Options">
                                 <group>
                                     <group string="Mailing">
+                                        <field name="keep_archives"/>
                                         <label for="reply_to"/>
                                         <div>
                                             <p class="alert alert-danger"
