@@ -18,7 +18,6 @@ class crm_phonecall(models.Model):
 
 	_order = "sequence, id"
 
-	to_call = fields.Boolean("Call Center Call", default = False)
 	sequence = fields.Integer('Sequence', select=True, help="Gives the sequence order when displaying a list of Phonecalls.")
 	start_time = fields.Integer("Start time")
 
@@ -32,7 +31,6 @@ class crm_phonecall(models.Model):
 		duration = float(stop_time - self.start_time)
 		self.duration = float(duration/60.0)	
 		self.state = "done"
-		self.to_call = False
 
 	@api.one
 	def get_info(self):
@@ -56,7 +54,7 @@ class crm_phonecall(models.Model):
 
 	@api.model
 	def get_list(self, current_search):
-		return {"phonecalls": self.search([('to_call','=',True),('user_id','=',self.env.user[0].id)], order='sequence, id').get_info()}
+		return {"phonecalls": self.search([('state','=','pending'),('user_id','=',self.env.user[0].id)], order='sequence, id').get_info()}
 
 	@api.model
 	def get_pbx_config(self):
@@ -72,7 +70,7 @@ class crm_lead(models.Model):
 
 	@api.one
 	def compute_is_call_center(self):
-		phonecall = self.env['crm.phonecall'].search([('opportunity_id','=',self.id),('to_call','=',True),('user_id','=',self.env.user[0].id)])
+		phonecall = self.env['crm.phonecall'].search([('opportunity_id','=',self.id),('state','=','pending'),('user_id','=',self.env.user[0].id)])
 		if phonecall:
 			self.in_call_center_queue = True
 		else:
@@ -84,7 +82,6 @@ class crm_lead(models.Model):
 				'name' : self.name
 		});
 		phonecall.user_id = self.env.user[0].id
-		phonecall.to_call = True
 		phonecall.opportunity_id = self.id
 		phonecall.partner_id = self.partner_id
 		phonecall.state = 'pending'
@@ -95,7 +92,7 @@ class crm_lead(models.Model):
 
 	@api.multi
 	def delete_call_center_call(self):
-		phonecall = self.env['crm.phonecall'].search([('opportunity_id','=',self.id),('to_call','=',True),('user_id','=',self.env.user[0].id)])
+		phonecall = self.env['crm.phonecall'].search([('opportunity_id','=',self.id),('state','=','pending'),('user_id','=',self.env.user[0].id)])
 		phonecall.unlink()
 		return {
 			'type': 'ir.actions.client',
@@ -104,28 +101,20 @@ class crm_lead(models.Model):
 
 class crm_phonecall_log_wizard(models.TransientModel):
 	_name = 'crm.phonecall.log.wizard'
-
-	@api.multi
-	def _default_description(self):
-		if(self._context.get('phonecall').get('description') == "There is no description"):
-			return ""
-		else:
-			return self._context.get('phonecall').get('description')		
-	
-	@api.multi
-	def _default_opportunity_name(self):
-		return self._context.get('phonecall').get('opportunity_name')
-
-	@api.multi
-	def _default_duration(self):
-		return self._context.get('phonecall').get('duration')
 		
-	description = fields.Text('Description', default = _default_description)
-	opportunity_name = fields.Char(default = _default_opportunity_name, readonly=True)
-	duration = fields.Float('Duration', default = _default_duration, readonly=True)
+	description = fields.Text('Description')
+	opportunity_name = fields.Char(readonly=True)
+	opportunity_planned_revenue = fields.Char(readonly=True)
+	opportunity_title_action = fields.Char(readonly=True)
+	opportunity_probability = fields.Float(readonly=True)
+	partner_name = fields.Char(readonly=True)
+	partner_phone = fields.Char(readonly=True)
+	partner_mobile = fields.Char(readonly=True)
+	partner_email = fields.Char(readonly=True)
+	partner_image_small = fields.Char(readonly=True)
 	@api.multi
 	def save(self):
-		phonecall = self.env['crm.phonecall'].browse(self._context.get('phonecall').get('id'))
+		phonecall = self.env['crm.phonecall'].browse(self._context.get('phonecall_id'))
 		phonecall.description = self.description
 		return {
 			'type': 'ir.actions.client',

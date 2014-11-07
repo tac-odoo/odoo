@@ -111,13 +111,13 @@
         </div>
     </t>
     <t t-if="description">
-        <div style="margin-top:5px;margin-bottom:5px;">
+        <div style="margin-top:7px;margin-bottom:7px;">
             <span class=" oe_form_label oe_align_right"> Description: </span><br/>
             <span class="oe_form_field oe_form_field_char"><t t-esc="description"/></span>
         </div>
     </t>
     <t t-if="title_action">
-        <div style="margin-top:5px;margin-bottom:5px;">
+        <div style="margin-top:7px;margin-bottom:7px;">
             <span class=" oe_form_label oe_align_right"> Next Action: </span><br/>
             <span class="oe_form_field oe_form_field_char"><t t-esc="title_action"/></span>
         </div>

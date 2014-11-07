@@ -2,6 +2,7 @@ openerp.sip_js = function(instance) {
 
 	this.init = function() {
 		var self = this;
+		
 		new openerp.web.Model("crm.phonecall").call("get_pbx_config").then(function(result){
 			console.log(result)
 			self.config = result;
@@ -77,6 +78,7 @@ openerp.sip_js = function(instance) {
 			this.session.on('rejected',function(){
 				console.log("REJECTED");
 				self.session = false;
+				$('.oe_dial_callbutton').html("Call");
 				$(".oe_dial_inCallButton").attr('disabled','disabled');
 			});
 
@@ -97,8 +99,8 @@ openerp.sip_js = function(instance) {
 				self.onCall = false;
 				$('.oe_dial_callbutton').html("Call");
 				$(".oe_dial_inCallButton").attr('disabled','disabled');
+				self.loggedCallOption();
 			});
-			
 		}
 	}
 	this.hangup = function(){
@@ -116,5 +118,30 @@ openerp.sip_js = function(instance) {
 		if(this.session){
 			this.session.refer(this.config.physicalPhone);
 		}
+	}
+
+	this.loggedCallOption = function(){
+
+		console.log(this.phonecall);
+		openerp.client.action_manager.do_action({
+                type: 'ir.actions.act_window',
+                key2: 'client_action_multi',
+                src_model: "crm.phonecall",
+                res_model: "crm.phonecall.log.wizard",
+                multi: "True",
+                target: 'new',
+                context: {'phonecall_id': this.phonecall.id,
+                'default_description' : this.phonecall.description,
+                'default_opportunity_name' : this.phonecall.opportunity_name,
+                'default_opportunity_planned_revenue' : this.phonecall.opportunity_planned_revenue,
+                'default_opportunity_title_action' : this.phonecall.opportunity_title_action,
+                'default_opportunity_probability' : this.phonecall.opportunity_probability,
+                'default_partner_name' : this.phonecall.partner_name,
+                'default_partner_phone' : this.phonecall.partner_phone,
+                'default_partner_mobile' : this.phonecall.partner_mobile,
+                'default_partner_email' : this.phonecall.partner_email,
+                'default_partner_image_small' : this.phonecall.partner_image_small,},
+                views: [[false, 'form']],
+            });
 	}
 }

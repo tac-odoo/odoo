@@ -48,7 +48,6 @@
             <field name="inherit_id" ref="crm.crm_case_phone_form_view"/>
             <field name="arch" type="xml">
                 <group>
-                    <field name="to_call"/>
                     <field name="sequence"/>
                 </group>
             </field>
@@ -75,7 +74,6 @@
             <field name="inherit_id" ref="crm_call_center_phonecall_tree_view"/>
             <field name="arch" type="xml">
                 <tree string="Phone Calls" editable="top">
-                    <field name="to_call"/>
                     <field name="sequence"/>
                 </tree>
             </field>
@@ -112,12 +110,24 @@
             <field name="model">crm.phonecall.log.wizard</field>
             <field name="arch" type="xml">
                 <form string="Edit the log">
-                    <h2 style="display: inline;"> Log the call: <field style="display: inline !important" name="opportunity_name"/></h2><br/>
+                    <h1> Log the call: <field style="display: inline !important" name="opportunity_name"/></h1><br/>
+                    <separator colspan="6" string="Opportunity Details"/>
                     <div>
-                        <label for="duration"/> <field name="duration"/>
+                        <field name="partner_image_small" widget="image" class="oe_avatar oe_left"/>
+                        <div style="display: inline-block;">
+                            <field name="partner_name"/>
+                            <field name="partner_phone"/>
+                            <field name="partner_mobile"/>
+                            <field name="partner_email"/>
+                        </div>
                     </div>
+                    <div>
+                        <span><field name="opportunity_planned_revenue" class="oe_inline"/> at <field name="opportunity_probability" class="oe_inline"/>%</span>
+                        <field name="opportunity_title_action"/>
+                    </div>
+                    <separator colspan="6" string="Call Description"/>
                     <group>
-                        <field name="description" placeholder="Description..."/>
+                        <field name="description" nolabel="1" placeholder="Description..."/>
                     </group>
                     <footer>
                         <button name="save" type="object"

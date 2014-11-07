@@ -35,12 +35,14 @@ openerp.crm_wardialing = function(instance) {
             }
             this.set("image_small", image_small);
             this.set("email", email);
-            if(phonecall.opportunity_name.length < 24){
-                this.set("opportunity", phonecall.opportunity_name);
-            }else{
-                var opportunity = phonecall.opportunity_name.substring(0,23) + '...';
-                this.set("opportunity", opportunity);
-            }             
+            if(phonecall.opportunity_name){
+                if(phonecall.opportunity_name.length < 24){
+                    this.set("opportunity", phonecall.opportunity_name);
+                }else{
+                    var opportunity = phonecall.opportunity_name.substring(0,23) + '...';
+                    this.set("opportunity", opportunity);
+                } 
+            }       
         },
         start: function() {
             this.$el.data("phonecall", {id:this.get("id"), partner:this.get("partner")});
@@ -94,7 +96,7 @@ openerp.crm_wardialing = function(instance) {
                 .call("get_format_currencies_js_function")
                 .then(function(data) {
                     self.formatCurrency = new Function("amount, currency_id", data);
-                    //update of the pannel's list
+                    //update of the panel's list
                     
                     self.search_phonecalls_status();
                 });
@@ -140,7 +142,7 @@ openerp.crm_wardialing = function(instance) {
                     
                     widget.on("select_call", self, self.select_call);
                     self.widgets[phonecall.id] = widget;
-                    
+                    phonecall.opportunity_planned_revenue = self.formatCurrency(phonecall.opportunity_planned_revenue, phonecall.opportunity_company_currency);
                     if(phonecall.partner_name){
                         if(! phonecall.partner_title){
                             var partner_name = phonecall.partner_name;
@@ -163,7 +165,7 @@ openerp.crm_wardialing = function(instance) {
                             description: phonecall.description,
                             email: phonecall.partner_email,
                             title_action: phonecall.opportunity_title_action,
-                            planned_revenue: self.formatCurrency(phonecall.opportunity_planned_revenue, phonecall.opportunity_company_currency),
+                            planned_revenue: phonecall.opportunity_planned_revenue,
                             probability: phonecall.opportunity_probability
                         }),
                     });
@@ -232,17 +234,20 @@ openerp.crm_wardialing = function(instance) {
         select_call: function(phonecall_widget){
             if(!this.buttonAnimated){
                 var self = this;
-                this.buttonAnimated = true;
                 var classes = phonecall_widget.$()[0].className.split(" ");
                 self.$(".oe_dial_selected_phonecall").removeClass("oe_dial_selected_phonecall");
                 if(classes.indexOf("oe_dial_selected_phonecall") == -1){
                     phonecall_widget.$()[0].className += " oe_dial_selected_phonecall";
                     console.log(this.buttonAnimated);
-                    this.$el.find(".oe_dial_phonecalls").animate({
-                        height: (this.$el.find(".oe_dial_phonecalls").height() - this.$el.find(".oe_dial_optionalbuttons").outerHeight()),
-                    }, 500,function(){
-                        self.buttonAnimated = false;
-                    });
+                    if(!self.buttonUp){
+                        this.buttonAnimated = true;
+                        this.$el.find(".oe_dial_phonecalls").animate({
+                            height: (this.$el.find(".oe_dial_phonecalls").height() - this.$el.find(".oe_dial_optionalbuttons").outerHeight()),
+                        }, 300,function(){
+                            self.buttonAnimated = false;
+                            self.buttonUp = true;
+                        });
+                    }
                     this.$el.find(".oe_dial_email").css("display","none");
                     if(phonecall_widget.get('email')){
                         this.$el.find(".oe_dial_email").css("display","inline");
@@ -251,10 +256,12 @@ openerp.crm_wardialing = function(instance) {
                         this.$el.find(".oe_dial_changelog").css("width", "90%");
                     }
                 }else{
+                    this.buttonAnimated = true;
                     this.$el.find(".oe_dial_phonecalls").animate({
                         height: (this.$el.find(".oe_dial_phonecalls").height() + this.$el.find(".oe_dial_optionalbuttons").outerHeight()),
-                    }, 500,function(){
+                    }, 300,function(){
                         self.buttonAnimated = false;
+                        self.buttonUp = false;
                     });
                 }
             } 
@@ -351,7 +358,17 @@ openerp.crm_wardialing = function(instance) {
                 res_model: "crm.phonecall.log.wizard",
                 multi: "True",
                 target: 'new',
-                context: {'phonecall_id': id, 'phonecall' : this.phonecalls[id]},
+                context: {'phonecall_id': id,
+                'default_description' : this.phonecalls[id].description,
+                'default_opportunity_name' : this.phonecalls[id].opportunity_name,
+                'default_opportunity_planned_revenue' : this.phonecalls[id].opportunity_planned_revenue,
+                'default_opportunity_title_action' : this.phonecalls[id].opportunity_title_action,
+                'default_opportunity_probability' : this.phonecalls[id].opportunity_probability,
+                'default_partner_name' : this.phonecalls[id].partner_name,
+                'default_partner_phone' : this.phonecalls[id].partner_phone,
+                'default_partner_mobile' : this.phonecalls[id].partner_mobile,
+                'default_partner_email' : this.phonecalls[id].partner_email,
+                'default_partner_image_small' : this.phonecalls[id].partner_image_small,},
                 views: [[false, 'form']],
             });
         },
