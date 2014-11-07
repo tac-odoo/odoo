@@ -23,7 +23,7 @@
                     <group>
                         <field name="pos_config" />
                         <field name="pos_security_pin" />
-                        <field name="ean13" />
+                        <field name="barcode" />
                         <button name="%(action_edit_ean)d" type="action" string="Set a Custom EAN" class="oe_edit_only" />
                     </group>
                 </page>
