@@ -19,7 +19,8 @@
 #
 ##############################################################################
 
-from openerp import models, fields, api
+from openerp import models, fields, api, exceptions
+from openerp.tools.safe_eval import safe_eval
 import re
 
 
@@ -32,10 +33,17 @@ class account_financial_report(models.Model):
                                    'Target Moves', default='posted', required=True)
     date_from = fields.Date("Start Date")
     date_to = fields.Date("End Date")
-    group_by = fields.Char('Group By')
     debit_credit = fields.Boolean('Show Credit and Debit Columns')
+    balance = fields.Boolean('Show Balance Column')
+    cash_basis = fields.Boolean('Allow Cash Basis Method')
     comparison = fields.Boolean('Enable Comparison')
     line = fields.Many2one('account.financial.report.line', 'First/Top Line')
+
+    @api.one
+    @api.constrains('debit_credit', 'balance', 'comparison')
+    def _check_columns(self):
+        if not (self.debit_credit or self.balance or self.comparison):
+            raise exceptions.ValidationError("Report needs at least one column")
 
 
 class account_financial_report_line(models.Model):
@@ -76,11 +84,11 @@ class account_financial_report_line(models.Model):
                     if len(split_block) == 2 and split_block[1] not in ['balance', 'credit', 'debit', 'comparison']:
                         raise exceptions.ValidationError("Second argument must be a column name in " + block)
                 formula.replace(block, '1')
-            formula.replace('#Days', '1')
-            formula.replace('#Months', '1')
+            formula.replace(' #Days ', ' 1 ')
+            formula.replace(' #Months ', ' 1 ')
             try:
                 int(safe_eval(formula))
-            except Exception, e:
+            except Exception:
                 raise exceptions.ValidationError("Invalid formula")
 
     @api.one
@@ -113,9 +121,13 @@ class account_financial_report_line(models.Model):
             blocks = re.findall('\[.*\]', self.formula)
             for block in blocks:
                 split_block = block.split(',')
-                
-
-
+                report_code = split_block[0]
+                column = 'balance'
+                if len(split_block) == 2:
+                    column = split_block[1]
+                target_report = self.search([('code', '=', report_code)], limit=1)
+                value = target_report._get_balance(column, args)
+        return res
 
     name = fields.Char('Line Name')
     code = fields.Char('Line Code')
@@ -158,6 +170,7 @@ class account_financial_report_line(models.Model):
             "Expense account. The same applies for accounts that are typically more credited than debited "
             "and that you would like to print as positive amounts in your reports; e.g.: Income account.")
     ir_filter_id = fields.Many2one('ir.filters', 'Domain', ondelete='cascade')
+    group_by = fields.Char('Group By')
 
     def get_lines(self, data):
         lines = []
