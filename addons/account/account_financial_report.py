@@ -100,7 +100,7 @@ class account_financial_report_line(models.Model):
                'sum' : it's the sum of the children of this record (aka a 'view' record)'''
         account_obj = self.env['account.account']
         res = dict((fn, 0.0) for fn in field_names)
-        if self.type == 'account_type':
+        if self.type == 'types':
             # it's the sum the leaf accounts with such an account type
             report_types = [x.id for x in self.account_type_ids]
             account_ids = account_obj.search([('user_type', 'in', report_types), ('type', '!=', 'view')])
@@ -160,7 +160,8 @@ class account_financial_report_line(models.Model):
     financial_report = fields.Many2one('account.financial.report', 'Financial Report')
     level = fields.Integer(compute='_get_level', string='Level', store=True)
     sequence = fields.Integer('Sequence')
-    account_type_ids = fields.Many2many('account.account.type', 'account_account_financial_report_line_type', 'line_id', 'account_type_id', 'Account Types')
+    account_type_ids = fields.Many2many('account.account.type', 'account_account_financial_report_line_type',
+                                        'line_id', 'account_type_id', 'Account Types')
     sign = fields.Selection([
         (-1, 'Reverse balance sign'),
         (1, 'Preserve balance sign')
@@ -179,11 +180,12 @@ class account_financial_report_line(models.Model):
         for line in self.with_context(data['form']['used_context'])._get_children_by_order():
             vals = {
                 'name': line.name,
-                'balance': line.balance * line.sign or 0.0,
                 'type': 'line',
                 'level': line.level,
-                'account_type': line.type =='sum' and 'view' or False,#used to underline the financial line balances
+                'account_type': line.type == 'sum' and 'view' or False,#used to underline the financial line balances
             }
+            if self.financial_report.balance:
+                vals['balance'] = line.balance * line.sign or 0.0
             if self.financial_report.debit_credit:
                 vals['debit'] = line.debit
                 vals['credit'] = line.credit
@@ -196,8 +198,6 @@ class account_financial_report_line(models.Model):
                 continue
             # if line.type == 'accounts' and line.account_ids:
             #     account_ids = account_obj._get_children_and_consol(self.cr, self.uid, [x.id for x in line.account_ids])
-            # elif line.type == 'account_type' and line.account_type_ids:
-            #     account_ids = account_obj.search(self.cr, self.uid, [('user_type', 'in', [x.id for x in line.account_type_ids])])
             if line.type == 'types':
                 account_ids = account_obj.search([('user_type', 'in', [x.id for x in line.account_type_ids])])
             if account_ids:
@@ -216,11 +216,11 @@ class account_financial_report_line(models.Model):
                     if self.financial_report.debit_credit:
                         vals['debit'] = account.debit
                         vals['credit'] = account.credit
-                    if not currency_obj.is_zero(self.cr, self.uid, account.company_id.currency_id, vals['balance']):
+                    if not currency_obj.is_zero(account.company_id.currency_id, vals['balance']):
                         flag = True
                     if self.financial_report.comparison:
-                        vals['balance_cmp'] = account_obj.browse(self.cr, self.uid, account.id, context=data['form']['comparison_context']).balance * line.sign or 0.0
-                        if not currency_obj.is_zero(self.cr, self.uid, account.company_id.currency_id, vals['balance_cmp']):
+                        vals['balance_cmp'] = account_obj.with_context(data['form']['comparison_context']).browse(account.id).balance * line.sign or 0.0
+                        if not currency_obj.is_zero(account.company_id.currency_id, vals['balance_cmp']):
                             flag = True
                     if flag:
                         lines.append(vals)
