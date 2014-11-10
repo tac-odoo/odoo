@@ -10,17 +10,15 @@ openerp.report = function(instance) {
         });
     }
     var show_pdf = function(session, response, c, options, self) {
-        response.push("pdf_viewer")
+        response.push("pdf_viewer");
         session.show_pdf({
             url: '/report/download',
             data: {data: JSON.stringify(response)},
             complete: function(){
                 openerp.web.unblockUI();
-                if (!self.dialog) {
-                    options.on_close();
+                if (self.dialog) {
+                    self.dialog_stop();
                 }
-                self.dialog_stop();
-                window.scrollTo(0,0);
             },
             error: c.rpc_error.bind(c)
         });
