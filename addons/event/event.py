@@ -183,7 +183,7 @@ class event_event(models.Model):
     @api.one
     @api.constrains('seats_max', 'seats_available')
     def _check_seats_limit(self):
-        if self.seats_max and self.seats_available < 0:
+        if self.seats_availability == 'limited' and self.seats_max and self.seats_available < 0:
             raise Warning(_('No more available seats.'))
 
     @api.one
@@ -195,8 +195,17 @@ class event_event(models.Model):
     @api.model
     def create(self, vals):
         res = super(event_event, self).create(vals)
+        if res.organizer_id not in res.message_follower_ids:
+            res.message_subscribe([res.organizer_id.id])
         if res.auto_confirm:
             res.button_confirm()
+        return res
+
+    @api.multi
+    def write(self, vals):
+        res = super(event_event, self).write(vals)
+        if 'organizer_id' in vals:
+            self.message_subscribe([vals.get('organizer_id')])
         return res
 
     @api.one
@@ -274,21 +283,21 @@ class event_registration(models.Model):
     @api.one
     @api.constrains('event_id', 'state')
     def _check_seats_limit(self):
-        if self.event_id.seats_max and self.event_id.seats_available < (1 if self.state == 'draft' else 0):
+        if self.event_id.seats_availability == 'limited' and self.event_id.seats_max and self.event_id.seats_available < (1 if self.state == 'draft' else 0):
             raise Warning(_('No more seats available for this event.'))
 
     @api.one
     def _check_auto_confirmation(self):
         if self._context.get('registration_force_draft'):
             return False
-        if self.event_id and self.event_id.state == 'confirm' and self.event_id.auto_confirm and self.event_id.seats_available:
+        if self.event_id and self.event_id.state == 'confirm' and self.event_id.auto_confirm and (self.event_id.seats_available or self.event_id.seats_availability == 'unlimited'):
             return True
         return False
 
     @api.model
     def create(self, vals):
         registration = super(event_registration, self).create(vals)
-        if registration._check_auto_confirmation():
+        if registration._check_auto_confirmation()[0]:
             registration.sudo().confirm_registration()
         return registration
 
