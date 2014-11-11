@@ -16,6 +16,15 @@
         <script type="text/javascript" src="/website_blog/static/lib/contentshare.js"/>
         <script type="text/javascript" src="/website_blog/static/src/js/website_blog.inline.discussion.js"></script>
         <script type="text/javascript" src="/website_blog/static/src/js/website_blog.js"/>
+
+                <!-- chd custom -->
+        <link rel='stylesheet' href='/website_blog/static/src/css/chd_website_blog.css'/>
+        
+        <script type="text/javascript">var switchTo5x=true;</script>
+        <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+        <script type="text/javascript">stLight.options({publisher: "36b06164-f105-41bb-882b-8083d1136dbb", doNotHash: true, doNotCopy: false, hashAddressBar: false});
+        </script>
+
     </xpath>
 </template>
 
@@ -111,7 +120,8 @@
                         </t>
                         <div class="col-md-12 mb32 mt16 text-center">
                             <h1 t-field="blog.name"/>
-                            <h3 class="text-muted" t-field="blog.subtitle"/>
+                            <h3 class="text-muted mb32" t-field="blog.subtitle"/>
+                            <hr/>
                         </div>
                     </div>
                 </div>
@@ -130,59 +140,31 @@
                   </p>
                 </div>
 
-                <div t-foreach="blog_posts" t-as="blog_post" class="mb128 mt32">
+                <div t-foreach="blog_posts" t-as="blog_post" class="mb32 mt32">
              
-                    <div name='blog_post_image'>
-                    </div>
+                  <div>
+                      <a t-attf-href="/blog/#{ slug(blog_post.blog_id) }/post/#{ slug(blog_post) }">
+                        <!--<img src="/website/image/ir.attachment/32_21efbc1/datas" class="img-responsive"/>-->
+                          <h2 t-field="blog_post.name"/>                     
+                          <h4 t-field="blog_post.subtitle" class="lead"/>
+                      </a>
+                  </div>
 
-                  <a t-attf-href="/blog/#{ slug(blog_post.blog_id) }/post/#{ slug(blog_post) }">
-                    <!--<img src="/website/image/ir.attachment/32_21efbc1/datas" class="img-responsive"/>-->
-                      <h2 t-field="blog_post.name" class="mb4"/>
-                  </a>
-              
-              
+                  <div name='blog_post_data'/>
+                  <div name='blog_post_tags'/>
+
+                  <div name='blog_post_summary'/>
+
+
+
+                  <div name='blog_post_image'/>         
 
                   
 
-                  <div class="text-muted">
-                      <h4 t-field="blog_post.subtitle" class="mb8 lead"/>
-                  </div>
+                  <div name='blog_post_share' class="col-md-12 mt8 mb8"/>
 
-                  <div name='blog_post_summary'>
+                  <div class="col-md-12 no-padding mb16"><hr/></div>
 
-                  </div>
-                <!--      
-                    <div>
-                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt orem ipsum dolor sit amet
-                            ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam...
-                  <a t-attf-href="/blog/#{ slug(blog_post.blog_id) }/post/#{ slug(blog_post) }">
-                    <em>Read more</em>
-                  </a>
-                        </p>
-                    </div>
-                -->
-                     <hr/>   
-
-                    <div name='blog_post_data'>
-                       <!-- 
-                            <span t-field="blog_post.author_avatar" t-field-options='{"widget": "image", "class": "img-circle pull-right media-object"}'/>
-                    <div class="mt16">
-                    <em>
-                         by <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
-                                "widget": "contact",
-                                "fields": ["name"]
-                            }'/>
-                        on <span t-field="blog_post.create_date" t-field-options='{"format": "MMMM dd yyyy"}'/>
-                        <span t-if="len(blog_post.message_ids) &gt; 0">
-                            - <t t-esc="len(blog_post.message_ids)"/>
-                            <t t-if="len(blog_post.message_ids) &lt;= 1" >comment</t>
-                            <t t-if="len(blog_post.message_ids) > 1">comments</t>
-                        </span>
-
-                        <span t-if="not blog_post.website_published" class="label label-danger">not published</span></em>
-                    </div>
-                -->
-                    </div>
                   </div>
 
 
@@ -199,7 +181,7 @@
         customize_show="True" inherit_id="website_blog.blog_post_short">
     <xpath expr="//*[@name='blog_post_image']" position="inside">
         <a t-attf-href="/blog/#{ slug(blog_post.blog_id) }/post/#{ slug(blog_post) }">
-        <img src="/website/image/ir.attachment/32_21efbc1/datas" class="img-responsive"/>
+            <div class="js_maxheight cover cover-thumb col-md-12" t-attf-style="background-image: url(#{blog_post.background_image})" t-ignore="True"/>
         </a>
     </xpath>
 </template>
@@ -207,8 +189,8 @@
 <!-- Option: Blog Post List: show tags -->
 <template id="opt_blog_post_short_tags" name="Tags"
         customize_show="True" inherit_id="website_blog.blog_post_short">
-    <xpath expr="//*[@name='blog_post_data']" position="inside">
-        <p class="post-meta text-muted mt8" t-if="len(blog_post.tag_ids)">
+    <xpath expr="//*[@name='blog_post_tags']" position="inside">
+        <p class="post-meta text-muted" t-if="len(blog_post.tag_ids)">
             <span class="fa fa-tags"/>
             <t t-foreach="blog_post.tag_ids" t-as="tag">
                 <a t-attf-href="#{blog_url(tag=tag)}" t-esc="tag.name"/> &amp;nbsp;
@@ -221,12 +203,11 @@
 <template id="opt_blog_post_short_summary" name="Summary"
         customize_show="True" inherit_id="website_blog.blog_post_short">
     <xpath expr="//*[@name='blog_post_summary']" position="inside">
-        <p class="mt16">
+        <p class="mt8 mb8">
             <t t-foreach="blog_post" t-as="summary">
-                        Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt orem ipsum dolor sit amet
-                            ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam...
+                        Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt orem ipsum dolor sit amet ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam. Consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt orem ipsum dolor sit...
                             <a t-attf-href="/blog/#{ slug(blog_post.blog_id) }/post/#{ slug(blog_post) }">
-                            <em>Read more</em>
+                            <br/>Read more <span class="fa fa-angle-double-right"/>
                             </a>
                         
             </t>
@@ -237,36 +218,20 @@
 <!-- Option: Blog Post List: show share buttons -->
 <template id="opt_blog_post_short_share" name="Share"
         customize_show="True" active="False" inherit_id="website_blog.blog_post_short">
-    <xpath expr="//*[@name='blog_post_summary']" position="inside">
-        <p class="mt8">
+    <xpath expr="//*[@name='blog_post_share']" position="inside">
             <t t-foreach="blog_post" t-as="share">
-                <a href="#"> 
-                        <span class="fa-stack fa-lg">
-                          <i class="fa fa-circle fa-stack-2x"></i>
-                          <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
-                        </span>
-                </a>
-                <a href="#"> 
-                        <span class="fa-stack fa-lg">
-                          <i class="fa fa-circle fa-stack-2x"></i>
-                          <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
-                        </span>
-                </a>
-                <a href="#"> 
-                        <span class="fa-stack fa-lg">
-                          <i class="fa fa-circle fa-stack-2x"></i>
-                          <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
-                        </span>
-                </a>
-                <a href="#"> 
-                        <span class="fa-stack fa-lg">
-                          <i class="fa fa-circle fa-stack-2x"></i>
-                          <i class="fa fa-google-plus fa-stack-1x fa-inverse"></i>
-                        </span>
-                </a>
+               
+<div class="chd_sharethis_list">
+<span class='st_facebook_hcount' displayText='Facebook'></span>
+<span class='st_twitter_hcount' displayText='Tweet'></span>
+<span class='st_linkedin_hcount' displayText='LinkedIn'></span>
+<span class='st_reddit_hcount' displayText='Reddit'></span>
+<span class='st_digg_hcount' displayText='Digg'></span>
+<span class='st_delicious_hcount' displayText='Delicious'></span>
+<span class='st_email_hcount' displayText='Email'></span>
+</div>  
                         
             </t>
-        </p>
     </xpath>
 </template>
 
@@ -275,78 +240,39 @@
 <template id="opt_blog_post_short_meta" name="Meta"
         customize_show="True" active="False" inherit_id="website_blog.blog_post_short">
     <xpath expr="//*[@name='blog_post_data']" position="inside">
-        <div class="mt16">
+        
             <t t-foreach="blog_post" t-as="meta">
-                        
-                        <span t-field="blog_post.author_avatar" t-field-options='{"widget": "image", "class": "img-circle pull-right media-object"}'/>
-                    <div class="mt16">
-                    <em>
-                         by <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
+
+                    
+                    <div class="col-md-12 no-padding">
+                     <div class="col-md-10 mt8 no-padding">  
+                    <em>by <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
                                 "widget": "contact",
                                 "fields": ["name"]
                             }'/>
-                        on <span t-field="blog_post.create_date" t-field-options='{"format": "MMMM dd yyyy"}'/>
+                        on</em> <span t-field="blog_post.create_date" t-field-options='{"format": "MMMM dd, yyyy"}'/>
                         <span t-if="len(blog_post.message_ids) &gt; 0">
                             - <t t-esc="len(blog_post.message_ids)"/>
                             <t t-if="len(blog_post.message_ids) &lt;= 1" >comment</t>
                             <t t-if="len(blog_post.message_ids) > 1">comments</t>
-                        </span>
-
-                        <span t-if="not blog_post.website_published" class="label label-danger">not published</span></em>
+                        </span><span t-if="not blog_post.website_published" class="label label-danger">not published</span>
                     </div>
-                        
+
+                    <div class="col-md-2 mt8 no-padding">
+                    <span t-field="blog_post.author_avatar" t-field-options='{"widget": "image", "class": "img-circle pull-right media-object", "style":"width: 30px; display:inline"}'/>
+                     </div>
+               </div>
             </t>
-        </div>
+      
     </xpath>
 </template>
 
 <!-- Blog Post Complete -->
 <template id="blog_post_complete" name="Blog Post">
   <t t-call="website_blog.index">
+<div name='blog_post_view'>
 
-<div name='post_cover'>
-</div>
-
-    <div id="title" style="height:450px;" class="cover col-md-8 col-md-offset-2 mt32" t-attf-style="background-image: url(#{blog_post.background_image})" t-ignore="True">
-        <div class="container">
-          <div class="container text-right mt16">
-            <div class="btn-group css_non_editable_mode_hidden">
-                <a id="change_cover" class="btn btn-primary">
-                    Change Cover
-                </a>
-                <a id="clear_cover" class="btn btn-danger">
-                    <span class="fa fa-times"/>
-                </a>
-            </div>
-            <t t-call="website.publish_management">
-                <t t-set="object" t-value="blog_post"/>
-                <t t-set="publish_edit" t-value="True"/>
-                <li>
-                    <form class="duplicate hidden" action="/blogpost/duplicate">
-                        <input name="blog_post_id" t-att-value="blog_post.id"/>
-                    </form>
-                    <a href="#" class="duplicate" onclick="$(this).prev('form').submit()">Duplicate</a>
-                </li>
-            </t>
-          </div>
-        </div>
-        <div class="blog_title text-center mt48">
-            <h1 t-field="blog_post.name" id="blog_post_name" t-att-data-blog-id="blog_post.id"/>
-            <h2 t-field="blog_post.subtitle"/>
-            <p class="post-meta text-muted" name="blog_post_data"/>
-            <div>
-                <img class="img-circle" t-att-src="website.image_url(blog_post.author_id, 'image_small')" style="width: 30px; margin-right: 10px;"/>
-                <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
-                    "widget": "contact",
-                    "fields": ["name"]
-                }'/>
-            </div>
-
-        </div>
-    </div>
-
-<!--
-    <div class="cover js_fullheight" id="title" t-attf-style="background-image: url(#{blog_post.background_image})" t-ignore="True">
+    <div id="title" class="js_maxheight cover col-md-8 col-md-offset-2 mt32 cover-classic" t-attf-style="background-image: url(#{blog_post.background_image})" t-ignore="True">
         <div class="container">
           <div class="container text-right mt16">
             <div class="btn-group css_non_editable_mode_hidden">
@@ -370,33 +296,46 @@
             </t>
           </div>
         </div>
-        <div class="blog_title">
-            <h1 t-field="blog_post.name" id="blog_post_name" t-att-data-blog-id="blog_post.id"/>
-            <h2 t-field="blog_post.subtitle"/>
-            <p class="post-meta text-muted text-center" name="blog_post_data"/>
-            <div>
-                <span t-field="blog_post.author_avatar" t-field-options='{"widget": "image", "class": "img-circle", "style":"width: 30px; margin-right: 10px; display:inline"}' />
-                <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
-                    "widget": "contact",
-                    "fields": ["name"]
-                }'/>
-            </div>
-            <div t-if="blog_post.background_image" id="blog_angle_down">
-                <strong><a href="#blog_content" class="fa fa-angle-down fa-3x fa-inverse mt32"/></strong>
-            </div>
-        </div>
     </div>
--->
+
+        <div class="blog_title text-center col-md-12 mt16">
+            <h1 t-field="blog_post.name" id="blog_post_name" t-att-data-blog-id="blog_post.id"/>
+            <h2 t-field="blog_post.subtitle" class="text-muted"/>
+            <p class="post-meta text-muted" name='blog_post_data'/>
+        </div>
+
+</div>
+
+    
+
 <section>
     <div class="container">
         <div class="row">
-<div name='post_lead' class="mt64"></div>
+            <div name='post_data' class="pull-left mt16"/>
+            <div name='post_tags' class="pull-right mt16"/>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="container">
+        <div class="row">
+<div name='post_lead' class="col-md-12 mt32"/>
 </div>
 </div>
 </section>
 
-    <div id="blog_content" t-field="blog_post.content" class="mt32"/>
+<div name='post_share'/>
+
+    <div id="blog_content" t-field="blog_post.content"/>
     
+    <section>
+    <div class="container">
+    <div class="row">
+    <div name='post_bio'></div>
+    </div>
+    </div>
+    </section>
 
     <section id="comments" class="read_width">
         <hr/>
@@ -421,25 +360,124 @@
         </ul>
     </section>
 
+    
+
     <t t-if="next_post">
-        <div class="cover cover_footer mb0 text-center" t-attf-style="background-image: url(#{next_post.background_image})" t-ignore="True">
+
+        <div name='blog_post_next' class="blog_title mb48 mt32">
+<section>
+    <div class="container">
+        <div class="row">
+            
+            <hr/>
+        <div class="mt32">
+            <a class="hidden js_next" t-attf-href="/blog/#{ slug(next_post.blog_id) }/post/#{ slug(next_post) }/#wrap"/>
+                <a t-attf-href="/blog/#{ slug(next_post.blog_id) }/post/#{ slug(next_post) }/#wrap"> 
+                    <div class="js_maxheight cover cover-next col-md-4" t-attf-style="background-image: url(#{blog_post.background_image})" t-ignore="True"/>
+                </a>
+                    <div class="col-md-7 col-md-offset-1">
+                        <p class="text-muted">Read Next <span class="fa fa-angle-double-right"/></p>
+                             <a t-attf-href="/blog/#{ slug(next_post.blog_id) }/post/#{ slug(next_post) }/#wrap"> 
+                            <h2 t-field="next_post.name"/>
+                            </a>
+                        <p class="lead" t-field="next_post.subtitle"/>
+
+                        <span class="text-muted"> by <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
+                                "widget": "contact",
+                                "fields": ["name"]
+                            }'/>
+                        on <span t-field="blog_post.create_date" t-field-options='{"format": "MMMM dd, yyyy"}'/>
+                    </span>
+                    </div>
+                
+            </div>    
+          
+        </div>
+    </div>
+</section>
+</div>
+    </t>
+  </t>
+</template>
+
+<!-- Options: Blog Post: Medium like view -->
+
+<template id="blog_post_wide" name="Wide View"
+        inherit_id="website_blog.blog_post_complete" active="False" customize_show="True">
+    <xpath expr="//*[@name='blog_post_view']" position="replace">
+
+    <div class="cover js_fullheight" id="title" t-attf-style="background-image: url(#{blog_post.background_image})" t-ignore="True"> 
+        <div class="container">
+          <div class="container text-right mt16">
+            <div class="btn-group css_non_editable_mode_hidden">
+                <a id="change_cover" class="btn btn-primary">
+                    Change Cover
+                </a>
+                <a id="clear_cover" class="btn btn-danger">
+                    <span class="fa fa-times"/>
+                </a>
+            </div>
+            <div class="cover-storage oe_hidden"></div>
+            <t t-call="website.publish_management">
+                <t t-set="object" t-value="blog_post"/>
+                <t t-set="publish_edit" t-value="True"/>
+                <li>
+                    <form class="duplicate hidden" action="/blogpost/duplicate">
+                        <input name="blog_post_id" t-att-value="blog_post.id"/>
+                    </form>
+                    <a href="#" class="duplicate" onclick="$(this).prev('form').submit()">Duplicate</a>
+                </li>
+            </t>
+          </div>
+        </div>
+
+        <div class="blog_title">
+            <h1 t-field="blog_post.name" id="blog_post_name" t-att-data-blog-id="blog_post.id" class="wide_blog_post_name"/>
+            <h2 t-field="blog_post.subtitle" id="blog_post_subname" class="wide_blog_post_subname"/>
+            <br/>by <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
+                                "widget": "contact",
+                                "fields": ["name"]
+                            }'/>
+                        on <span t-field="blog_post.create_date" t-field-options='{"format": "MMMM dd, yyyy"}'/>
+
+            <div t-if="blog_post.background_image" id="blog_angle_down">
+                <strong><a href="#blog_content" class="fa fa-angle-down fa-3x fa-inverse mt32"/></strong>
+            </div>
+        </div>
+
+    </div>
+    </xpath>
+
+<xpath expr="//*[@name='blog_post_next']" position="replace">   
+    <t t-if="next_post">
+<div class="cover cover_footer mb0 mt64 text-center" t-attf-style="background-image: url(#{next_post.background_image})" t-ignore="True">
+<section>
+    <div class="container">
+        <div class="row">
             <div class="blog_title">
+                
+                
                 <a class="hidden js_next" t-attf-href="/blog/#{ slug(next_post.blog_id) }/post/#{ slug(next_post) }/#wrap"/>
-                <h1 t-field="next_post.name"/>
-                <h2 t-field="next_post.subtitle"/>
+                <p class="read_next">Read Next <span class="fa fa-angle-double-right"/></p>
+                <h1 t-field="next_post.name" id="next_blog_post_name" class="wide_blog_post_name"/>
+                <h2 t-field="next_post.subtitle" id="next_blog_post_subname" class="wide_blog_post_subname"/>
                 <div>
                     <span t-field="next_post.author_avatar" t-field-options='{"widget": "image", "class": "img-circle", "style":"width: 30px; margin-right: 10px; display:inline"}' />
                     <span t-field="next_post.author_id" style="display: inline-block;" t-field-options='{
                             "widget": "contact",
                             "fields": ["name"]
                         }'/>
-                </div>
-                <p class="mt32">Read Next <span class="fa fa-long-arrow-right"/></p>
             </div>
-        </div>
+</div>
+</div>
+
+</div>
+</section>
+
+</div>
     </t>
 
-  </t>
+    </xpath>
 </template>
 
 <!-- Options: Blog Post: Post Lead -->
@@ -451,64 +489,85 @@
     </xpath>
 </template>
 
+
 <!-- Option: Blog Post: show share buttons -->
 <template id="opt_blog_post_share" name="Share"
         customize_show="True" active="False" inherit_id="website_blog.blog_post_complete">
-    <xpath expr="//*[@name='post_lead']" position="before">
-        <p class="mt16">
-            <t t-foreach="blog_post" t-as="share">
-                <a href="#"> 
-                        <span class="fa-stack fa-lg">
-                          <i class="fa fa-circle fa-stack-2x"></i>
-                          <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
-                        </span>
-                </a>
-                <a href="#"> 
-                        <span class="fa-stack fa-lg">
-                          <i class="fa fa-circle fa-stack-2x"></i>
-                          <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
-                        </span>
-                </a>
-                <a href="#"> 
-                        <span class="fa-stack fa-lg">
-                          <i class="fa fa-circle fa-stack-2x"></i>
-                          <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
-                        </span>
-                </a>
-                <a href="#"> 
-                        <span class="fa-stack fa-lg">
-                          <i class="fa fa-circle fa-stack-2x"></i>
-                          <i class="fa fa-google-plus fa-stack-1x fa-inverse"></i>
-                        </span>
-                </a>
-                        
-            </t>
-        </p>
+    <xpath expr="//*[@name='post_share']" position="inside">
+<div class="chd_sharethis col-md-12">
+<span class='st_facebook_hcount share_btn' displayText='Facebook'></span>
+<span class='st_twitter_hcount share_btn' displayText='Tweet'></span>
+<span class='st_linkedin_hcount share_btn' displayText='LinkedIn'></span>
+<span class='st_reddit_hcount share_btn' displayText='Reddit'></span>
+<span class='st_digg_hcount share_btn' displayText='Digg'></span>
+<span class='st_delicious_hcount share_btn' displayText='Delicious'></span>
+<span class='st_email_hcount share_btn' displayText='Email'></span>
+</div>  
+    </xpath>
+
+    <xpath expr="//div[@id='blog_content']" position="after">
+<div class="chd_sharethis col-md-12">
+<span class='st_facebook_hcount share_btn' displayText='Facebook'></span>
+<span class='st_twitter_hcount share_btn' displayText='Tweet'></span>
+<span class='st_linkedin_hcount share_btn' displayText='LinkedIn'></span>
+<span class='st_reddit_hcount share_btn' displayText='Reddit'></span>
+<span class='st_digg_hcount share_btn' displayText='Digg'></span>
+<span class='st_delicious_hcount share_btn' displayText='Delicious'></span>
+<span class='st_email_hcount share_btn' displayText='Email'></span>
+</div>  
+    </xpath>
+
+</template>
+
+<!-- Options: Blog Post: Author Bio -->
+<template id="blog_post_bio" name="Author Bio"
+        inherit_id="website_blog.blog_post_complete" customize_show="True">
+    <xpath expr="//*[@name='post_bio']" position="inside">
+<div class="media col-md-12 well well-lg mt32 mb48">
+    <div class="media-left post_bio_img">
+        <span t-field="blog_post.author_avatar" t-field-options='{"widget": "image", "class": "img-circle pull-left media-object"}'/>
+    </div>
+  <div class="media-body bio_content">
+    <h4 class="media-heading">About the author</h4>
+    <p class="lead" t-field="blog_post.author_id" />
+     <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.</p>
+  </div>
+</div>
     </xpath>
 </template>
 
 <!-- Option: Blog Post: show meta -->
 <template id="opt_blog_post_meta" name="Meta"
         customize_show="True" active="False" inherit_id="website_blog.blog_post_complete">
-    <xpath expr="//div[@id='blog_content']" position="after">
-        <div class="col-md-6 col-md-offset-3 mt16">
-                        <span t-field="blog_post.author_avatar" t-field-options='{"widget": "image", "class": "img-circle pull-right media-object"}'/>
-                    <div class="mt16">
-                    <em>
-                         by <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
+    <xpath expr="//*[@name='post_data']" position="inside">
+        <div id="blog_content_meta" class="col-md-12">
+                       
+                    <em>by <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
                                 "widget": "contact",
                                 "fields": ["name"]
                             }'/>
-                        on <span t-field="blog_post.create_date" t-field-options='{"format": "MMMM dd yyyy"}'/>
+                        on</em> <span t-field="blog_post.create_date" t-field-options='{"format": "MMMM dd, yyyy"}'/>
                         <span t-if="len(blog_post.message_ids) &gt; 0">
                             - <t t-esc="len(blog_post.message_ids)"/>
                             <t t-if="len(blog_post.message_ids) &lt;= 1" >comment</t>
                             <t t-if="len(blog_post.message_ids) > 1">comments</t>
                         </span>
 
-                        <span t-if="not blog_post.website_published" class="label label-danger">not published</span></em>
-                    </div>
+                        <span t-if="not blog_post.website_published" class="label label-danger">not published</span>
         </div>
+    </xpath>
+</template>
+
+<!-- Options: Blog Post: show tags -->
+<template id="opt_blog_post_complete_tags" name="Tags"
+        customize_show="True" inherit_id="website_blog.blog_post_complete">
+    <xpath expr="//*[@name='post_tags']" position="inside">
+        <p class="post-meta text-muted text-center" t-if="len(blog_post.tag_ids)">
+            <span class="fa fa-tags"/>
+            <t t-foreach="blog_post.tag_ids" t-as="tag">
+                <a t-attf-href="#{blog_url(tag=tag)}" t-esc="tag.name"/> &amp;nbsp;
+            </t>
+        </p>
     </xpath>
 </template>
 
@@ -560,9 +619,11 @@
     <xpath expr="//div[@id='blog_content']" position="attributes">
         <attribute name="class">js_tweet mt32</attribute>
     </xpath>
+    <!--
     <xpath expr="//div[@id='title']//div[@class='blog_title']" position="attributes">
         <attribute name="class">blog_title js_tweet</attribute>
     </xpath>
+-->
 </template>
 
 <!-- Options: Blog Post: user can add Inline Discussion -->
@@ -570,19 +631,6 @@
         inherit_id="website_blog.blog_post_complete" active="False" customize_show="True">
     <xpath expr="//div[@id='blog_content']" position="attributes">
         <attribute name="enable_chatter_discuss">True</attribute>
-    </xpath>
-</template>
-
-<!-- Options: Blog Post: show tags -->
-<template id="opt_blog_post_complete_tags" name="Tags"
-        customize_show="True" inherit_id="website_blog.blog_post_complete">
-    <xpath expr="//p[@name='blog_post_data']" position="after">
-        <p class="post-meta text-muted text-center" t-if="len(blog_post.tag_ids)">
-            <span class="fa fa-tags"/>
-            <t t-foreach="blog_post.tag_ids" t-as="tag">
-                <a t-attf-href="#{blog_url(tag=tag)}" t-esc="tag.name"/> &amp;nbsp;
-            </t>
-        </p>
     </xpath>
 </template>
 

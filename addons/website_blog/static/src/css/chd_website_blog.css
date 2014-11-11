@@ -1,0 +1,80 @@
+.chd_sharethis {
+
+    text-align: center;
+}
+
+.chd_sharethis_list {
+    margin-top: 24px;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+
+.stButton .stButton_gradient {
+height: 24px !important;
+}
+
+.stButton .stFb, .stButton .stTwbutton, .stButton .stMainServices {
+height: 24px !important;
+}
+
+/* --- */
+
+.post_bio_img {
+    margin-left: 40px;
+      }
+
+.bio_content {
+    padding-left: 40px;
+    padding-right: 40px;
+}
+
+.cover-classic {
+    height: 300px;
+}
+
+.cover-footer-classic {
+    max-height: 200px;
+}
+
+
+.cover-thumb {
+    height: 250px;
+}
+
+.cover-next {
+    height: 150px;
+}
+
+.cover-mask {
+    background-color: rgba(0,0,0,0.3);
+    min-height: 100%;
+
+}
+
+#blog_post_name {
+    font-size: 5em;
+}
+
+#blog_post_subname {
+    font-size: 2em;
+}
+
+.wide_blog_post_name {
+    color: white;
+    font-size: 4em;
+}
+
+.wide_blog_post_subname {
+    color: #f5f5f5;
+    font-size: 2em;
+}
+
+.read_next {
+    color: white;
+    text-transform: uppercase;
+}
+
+.no-padding {
+    padding: 0;
+}

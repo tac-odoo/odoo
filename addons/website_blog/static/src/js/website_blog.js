@@ -33,6 +33,7 @@ $(document).ready(function() {
         }
 
         $('.js_fullheight').css('min-height', $(window).height());
+        $('.js_maxheight').css('max-height', $(window).height());
         $(".js_tweet").share({'author_name':$('#blog_author').text()});
         $('.cover_footer').on('click',page_transist);
         $('a[href^="#blog_content"]').on('click', animate);

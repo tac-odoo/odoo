@@ -41,6 +41,7 @@ $(document).ready(function() {
             },
             clean_bg : function(vHeight) {
                 $('.js_fullheight').css({"background-image":'none', 'min-height': vHeight});
+                $('.js_maxheight').css({"background-image":'none', 'max-height': vHeight});
             },
             change_bg : function(vHeight) {
                 var self  = this;
@@ -49,6 +50,7 @@ $(document).ready(function() {
                 $(document.body).on('media-saved', self, function (o) {
                     var url = $('.cover-storage').attr('src');
                     $('.js_fullheight').css({"background-image": !_.isUndefined(url) ? 'url(' + url + ')' : "", 'min-height': vHeight});
+                    $('.js_maxheight').css({"background-image": !_.isUndefined(url) ? 'url(' + url + ')' : "", 'max-height': vHeight});
                     $('.cover-storage').hide();
                 });
                 editor.appendTo('body');
