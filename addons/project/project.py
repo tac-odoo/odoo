@@ -258,13 +258,13 @@ class project(models.Model):
                 if leave['date_start'] > leave['date']:
                     raise except_orm(_('Error!'), _('project start-date must be lower then project end-date.'))
 
-    @api.model
-    def set_template(self, ids):
-        return self.setActive(ids, value=False)
+    @api.multi
+    def set_template(self):
+        return self.setActive(value=False)
 
-    @api.model
-    def reset_project(self, ids):
-        return self.setActive(ids, value=True)
+    @api.multi
+    def reset_project(self):
+        return self.setActive(value=True)
 
     @api.model
     def map_tasks(self, old_project_id):
@@ -277,7 +277,7 @@ class project(models.Model):
             defaults = {'stage_id': task.stage_id.id,
                         'name': task.name + (_(' (copy)'))}
             map_task_id[task.id] =  task.copy(defaults).id
-        print self.write({'tasks':[(6,0, map_task_id.values())]})
+        self.write({'tasks':[(6,0, map_task_id.values())]})
         task_obj.duplicate_task(map_task_id)
         return True
 
@@ -290,22 +290,21 @@ class project(models.Model):
        res.map_tasks(self.id)
        return res
 
-    @api.v7
-    def duplicate_template(self, cr, uid, ids, context=None):
-        context = dict(context or {})
-        data_obj = self.pool.get('ir.model.data')
+    @api.multi
+    def duplicate_template(self):
+        data_obj = self.env['ir.model.data']
         result = []
-        for proj in self.browse(cr, uid, ids, context=context):
-            parent_id = context.get('parent_id', False)
-            context.update({'analytic_project_copy': True})
+        for proj in self:
+            parent_id = self._context.get('parent_id', False)
+            self._context.update({'analytic_project_copy': True})
             new_date_start = time.strftime('%Y-%m-%d')
             new_date_end = False
             if proj.date_start and proj.date:
-                start_date = date(*time.strptime(proj.date_start,'%Y-%m-%d')[:3])
-                end_date = date(*time.strptime(proj.date,'%Y-%m-%d')[:3])
-                new_date_end = (datetime(*time.strptime(new_date_start,'%Y-%m-%d')[:3])+(end_date-start_date)).strftime('%Y-%m-%d')
-            context.update({'copy':True})
-            new_id = self.copy(cr, uid, proj.id, default = {
+                start_date = date(*time.strptime(proj.date_start, '%Y-%m-%d')[:3])
+                end_date = date(*time.strptime(proj.date, '%Y-%m-%d')[:3])
+                new_date_end = (datetime(*time.strptime(new_date_start, '%Y-%m-%d')[:3])+(end_date-start_date)).strftime('%Y-%m-%d')
+            self._context.update({'copy': True})
+            new_id = proj.copy(default = {
                                     'name':_("%s (copy)") % (proj.name),
                                     'state':'open',
                                     'date_start':new_date_start,
@@ -313,19 +312,20 @@ class project(models.Model):
                                     'parent_id':parent_id}, context=context)
             result.append(new_id)
 
-            child_ids = self.search(cr, uid, [('parent_id','=', proj.analytic_account_id.id)], context=context)
-            parent_id = self.read(cr, uid, new_id, ['analytic_account_id'])['analytic_account_id'][0]
+            child_ids = self.search([('parent_id','=', proj.analytic_account_id.id)])
+            parent_id = new_id.read(['analytic_account_id'])['analytic_account_id'][0]
             if child_ids:
-                self.duplicate_template(cr, uid, child_ids, context={'parent_id': parent_id})
+                self._context.update({'parent_id': parent_id})
+                child_ids.duplicate_template()
 
         if result and len(result):
             res_id = result[0]
-            form_view_id = data_obj._get_id(cr, uid, 'project', 'edit_project')
-            form_view = data_obj.read(cr, uid, form_view_id, ['res_id'])
-            tree_view_id = data_obj._get_id(cr, uid, 'project', 'view_project')
-            tree_view = data_obj.read(cr, uid, tree_view_id, ['res_id'])
-            search_view_id = data_obj._get_id(cr, uid, 'project', 'view_project_project_filter')
-            search_view = data_obj.read(cr, uid, search_view_id, ['res_id'])
+            form_view_id = data_obj._get_id('project', 'edit_project')
+            form_view = form_view_id.read(['res_id'])
+            tree_view_id = data_obj._get_id('project', 'view_project')
+            tree_view = tree_view_id.read(['res_id'])
+            search_view_id = data_obj._get_id('project', 'view_project_project_filter')
+            search_view = search_view_id.read(['res_id'])
             return {
                 'name': _('Projects'),
                 'view_type': 'form',
@@ -333,43 +333,42 @@ class project(models.Model):
                 'res_model': 'project.project',
                 'view_id': False,
                 'res_id': res_id,
-                'views': [(form_view['res_id'],'form'),(tree_view['res_id'],'tree')],
+                'views': [(form_view['res_id'], 'form'), (tree_view['res_id'], 'tree')],
                 'type': 'ir.actions.act_window',
                 'search_view_id': search_view['res_id'],
                 'nodestroy': True
             }
 
     # set active value for a project, its sub projects and its tasks
-    @api.v7
-    def setActive(self, cr, uid, ids, value=True, context=None):
-        task_obj = self.pool.get('project.task')
-        for proj in self.browse(cr, uid, ids, context=None):
-            self.write(cr, uid, [proj.id], {'state': value and 'open' or 'template'}, context)
-            cr.execute('select id from project_task where project_id=%s', (proj.id,))
-            tasks_id = [x[0] for x in cr.fetchall()]
+    @api.multi
+    def setActive(self, value=True):
+        task_obj = self.env['project.task']
+        for proj in self:
+            proj.write({'state': value and 'open' or 'template'})
+            val = (False if value else True)
+            tasks_id = task_obj.search([('project_id', '=', proj.id), ('active', '=', val)])
             if tasks_id:
-                task_obj.write(cr, uid, tasks_id, {'active': value}, context=context)
-            child_ids = self.search(cr, uid, [('parent_id','=', proj.analytic_account_id.id)])
+                tasks_id.write({'active': value})
+            child_ids = self.search([('parent_id', '=', proj.analytic_account_id.id)])
             if child_ids:
-                self.setActive(cr, uid, child_ids, value, context=None)
+                child_ids.setActive(value)
         return True
 
-    @api.v7
-    def _schedule_header(self, cr, uid, ids, force_members=True, context=None):
-        context = context or {}
+    @api.model
+    def _schedule_header(self, ids, force_members=True):
         if type(ids) in (long, int,):
             ids = [ids]
-        projects = self.browse(cr, uid, ids, context=context)
+        projects = self.browse(ids)
 
         for project in projects:
             if (not project.members) and force_members:
                 raise osv.except_osv(_('Warning!'),_("You must assign members on the project '%s'!") % (project.name,))
 
-        resource_pool = self.pool.get('resource.resource')
+        resource_pool = self.env['resource.resource']
 
         result = "from openerp.addons.resource.faces import *\n"
         result += "import datetime\n"
-        for project in self.browse(cr, uid, ids, context=context):
+        for project in self.browse(ids):
             u_ids = [i.id for i in project.members]
             if project.user_id and (project.user_id.id not in u_ids):
                 u_ids.append(project.user_id.id)
@@ -377,7 +376,7 @@ class project(models.Model):
                 if task.user_id and (task.user_id.id not in u_ids):
                     u_ids.append(task.user_id.id)
             calendar_id = project.resource_calendar_id and project.resource_calendar_id.id or False
-            resource_objs = resource_pool.generate_resources(cr, uid, u_ids, calendar_id, context=context)
+            resource_objs = resource_pool.generate_resources(u_ids, calendar_id)
             for key, vals in resource_objs.items():
                 result +='''
 class User_%s(Resource):
@@ -389,10 +388,11 @@ def Project():
         '''
         return result
 
-    def _schedule_project(self, cr, uid, project, context=None):
-        resource_pool = self.pool.get('resource.resource')
+    @api.model
+    def _schedule_project(self, project):
+        resource_pool = self.env['resource.resource']
         calendar_id = project.resource_calendar_id and project.resource_calendar_id.id or False
-        working_days = resource_pool.compute_working_calendar(cr, uid, calendar_id, context=context)
+        working_days = resource_pool.compute_working_calendar(calendar_id)
         # TODO: check if we need working_..., default values are ok.
         puids = [x.id for x in project.members]
         if project.user_id:
@@ -407,7 +407,7 @@ def Project():
             project.date_start or time.strftime('%Y-%m-%d'), working_days,
             '|'.join(['User_'+str(x) for x in puids]) or 'None'
         )
-        vacation = calendar_id and tuple(resource_pool.compute_vacation(cr, uid, calendar_id, context=context)) or False
+        vacation = calendar_id and tuple(resource_pool.compute_vacation(calendar_id)) or False
         if vacation:
             result+= """
     vacation = %s
@@ -422,16 +422,15 @@ def Project():
         allocation = {}
         return allocation
 
-    @api.v7
-    def schedule_tasks(self, cr, uid, ids, context=None):
-        context = context or {}
+    @api.model
+    def schedule_tasks(self, ids):
         if type(ids) in (long, int,):
             ids = [ids]
-        projects = self.browse(cr, uid, ids, context=context)
-        result = self._schedule_header(cr, uid, ids, False, context=context)
+        projects = self.browse(ids)
+        result = self._schedule_header(ids, False)
         for project in projects:
-            result += self._schedule_project(cr, uid, project, context=context)
-            result += self.pool.get('project.task')._generate_task(cr, uid, project.tasks, ident=4, context=context)
+            result += self._schedule_project(project)
+            result += self.env['project.task']._generate_task(project.tasks, ident=4)
 
         local_dict = {}
         exec result in local_dict
@@ -445,14 +444,14 @@ def Project():
 
                 p = getattr(project_gantt, 'Task_%d' % (task.id,))
 
-                self.pool.get('project.task').write(cr, uid, [task.id], {
+                task.write({
                     'date_start': p.start.strftime('%Y-%m-%d %H:%M:%S'),
                     'date_end': p.end.strftime('%Y-%m-%d %H:%M:%S')
-                }, context=context)
+                })
                 if (not task.user_id) and (p.booked_resource):
-                    self.pool.get('project.task').write(cr, uid, [task.id], {
+                    task.write({
                         'user_id': int(p.booked_resource[0].name[5:]),
-                    }, context=context)
+                    })
         return True
 
     @api.v7
@@ -797,9 +796,9 @@ class task(models.Model):
             new_attachment_ids.append(attachment.copy(cr, uid, attachment_id, default={'res_id': delegated_task_id}, context=context))
         return new_attachment_ids
 
-    @api.v7
-    def _get_effective_hours(self, task):
-        return  0.0
+    @api.returns('self')
+    def _get_effective_hours(self):
+        return 0.0
 
     @api.v7
     def do_delegate(self, cr, uid, ids, delegate_data=None, context=None):
@@ -898,13 +897,12 @@ class task(models.Model):
         res = super(task, self).unlink()
         return res
 
-    @api.v7
-    def _get_total_hours(self, task):
-        return self._get_effective_hours(task) + task.remaining_hours
+    @api.returns('self')
+    def _get_total_hours(self):
+        return self._get_effective_hours() + self.remaining_hours
 
-    @api.v7
-    def _generate_task(self, cr, uid, tasks, ident=4, context=None):
-        context = context or {}
+    @api.model
+    def _generate_task(self, tasks, ident=4):
         result = ""
         ident = ' '*ident
         for task in tasks:
@@ -913,7 +911,7 @@ class task(models.Model):
             result += '''
 %sdef Task_%s():
 %s  todo = \"%.2fH\"
-%s  effort = \"%.2fH\"''' % (ident,task.id, ident,task.remaining_hours, ident, self._get_total_hours(task))
+%s  effort = \"%.2fH\"''' % (ident,task.id, ident,task.remaining_hours, ident, task._get_total_hours())
             start = []
             for t2 in task.parent_ids:
                 start.append("up.Task_%s.end" % (t2.id,))
