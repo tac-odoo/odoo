@@ -8,7 +8,7 @@
             <field name="inherit_id" ref="account.account_common_report_view"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='target_move']" position="after">
-                    <field name="account_report_id" domain="[('parent_id','=',False)]"/>
+                    <field name="account_report_id"/>
                     <field name="enable_filter"/>
                     <field name="debit_credit" attrs="{'invisible': [('enable_filter','=',True)]}"/>
                 </xpath>
@@ -35,18 +35,6 @@
         </record>
 
         <menuitem parent="account.menu_finance_legal_statement" id="final_accounting_reports" name="Accounting Reports"/>
-
-        <record id="action_account_report_bs" model="ir.actions.act_window">
-             <field name="name">Balance Sheet</field>
-             <field name="res_model">accounting.report</field>
-             <field name="type">ir.actions.act_window</field>
-             <field name="view_type">form</field>
-             <field name="view_mode">form</field>
-             <field name="view_id" ref="accounting_report_view"/>
-             <field name="target">new</field>
-             <field name="context" eval="{'default_account_report_id':ref('account.account_financial_report_balancesheet0')}"/>
-        </record>
-        <menuitem icon="STOCK_PRINT" name="Balance Sheet" action="action_account_report_bs" id="menu_account_report_bs" parent="final_accounting_reports"/>
 
         <record id="action_account_report_pl" model="ir.actions.act_window">
              <field name="name">Profit and Loss</field>
