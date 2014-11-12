@@ -49,21 +49,20 @@ DT_FMT = '%Y-%m-%d %H:%M:%S'
 class marketing_campaign(osv.osv):
     _name = "marketing.campaign"
     _description = "Marketing Campaign"
-    
+
     def _count_segments(self, cr, uid, ids, field_name, arg, context=None):
         res = {}
         try:
             for segments in self.browse(cr, uid, ids, context=context):
                 res[segments.id] = len(segments.segment_ids)
-        except: 
+        except:
             pass
         return res
 
     _columns = {
         'name': fields.char('Name', required=True),
         'object_id': fields.many2one('ir.model', 'Resource', required=True,
-                                      help="Choose the resource on which you want \
-this campaign to be run"),
+                                      help="Choose the resource on which you want this campaign to be run"),
         'partner_field_id': fields.many2one('ir.model.fields', 'Partner Field',
                                             domain="[('model_id', '=', object_id), ('ttype', '=', 'many2one'), ('relation', '=', 'res.partner')]",
                                             help="The generated workitems will be linked to the partner related to the record. "\
@@ -81,11 +80,10 @@ this campaign to be run"),
                                 ('test_realtime', 'Test in Realtime'),
                                 ('manual', 'With Manual Confirmation'),
                                 ('active', 'Normal')],
-                                 'Mode', required=True, help= \
-"""Test - It creates and process all the activities directly (without waiting for the delay on transitions) but does not send emails or produce reports.
-Test in Realtime - It creates and processes all the activities directly but does not send emails or produce reports.
-With Manual Confirmation - the campaigns runs normally, but the user has to validate all workitem manually.
-Normal - the campaign runs normally and automatically sends all emails and reports (be very careful with this mode, you're live!)"""),
+                                 'Mode', required=True, help= """Test - It creates and process all the activities directly (without waiting for the delay on transitions) but does not send emails or produce reports.
+																																	Test in Realtime - It creates and processes all the activities directly but does not send emails or produce reports.
+																																	With Manual Confirmation - the campaigns runs normally, but the user has to validate all workitem manually.
+																																	Normal - the campaign runs normally and automatically sends all emails and reports (be very careful with this mode, you're live!)"""),
         'state': fields.selection([('draft', 'New'),
                                    ('running', 'Running'),
                                    ('cancelled', 'Cancelled'),
@@ -210,7 +208,6 @@ Normal - the campaign runs normally and automatically sends all emails and repor
                     duplicate_workitem_domain = [('res_id','in', similar_res_ids),
                                                  ('campaign_id','=', campaign_rec.id)]
         return Workitems.search(cr, uid, duplicate_workitem_domain, context=context)
-
 
 
 class marketing_campaign_segment(osv.osv):
@@ -411,7 +408,7 @@ class marketing_campaign_activity(osv.osv):
                                             'Previous Activities'),
         'variable_cost': fields.float('Variable Cost', help="Set a variable cost if you consider that every campaign item that has reached this point has entailed a certain cost. You can get cost statistics in the Reporting section", digits_compute=dp.get_precision('Product Price')),
         'revenue': fields.float('Revenue', help="Set an expected revenue if you consider that every campaign item that has reached this point has generated a certain revenue. You can get revenue statistics in the Reporting section", digits_compute=dp.get_precision('Account')),
-        'signal': fields.char('Signal', 
+        'signal': fields.char('Signal',
                               help='An activity with a signal can be called programmatically. Be careful, the workitem is always created when a signal is sent'),
         'keep_if_condition_not_met': fields.boolean("Don't Delete Workitems",
                                                     help="By activating this option, workitems that aren't executed because the condition is not met are marked as cancelled instead of being deleted.")

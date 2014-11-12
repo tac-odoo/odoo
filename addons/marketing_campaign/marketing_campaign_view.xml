@@ -222,7 +222,7 @@
                        <field name="date_next_sync"/>
                     </group>
                     <group>
-                        <field name="ir_filter_id"/>
+                        <field name="ir_filter_id" domain="[('model_id','=',object_id)]"/>
                         <field name="date_run" readonly="1"/>
                         <field name="date_done" readonly="1"/>
                     </group>
