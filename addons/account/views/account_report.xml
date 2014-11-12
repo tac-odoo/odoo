@@ -73,7 +73,7 @@
 
         <report 
             id="action_report_financial"
-            model="account.financial.report"
+            model="account.financial.report.line"
             string="Financial report"
             report_type="qweb-pdf"
             name="account.report_financial"
