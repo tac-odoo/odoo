@@ -117,10 +117,7 @@ class account_journal(models.Model):
     @api.multi
     def get_journal_dashboard_datas(self):
         balance, date = self._get_last_statement()
-        journal_ids = self.id
-        if self.type in ('sale', 'purchase') and self.refund_journal_id:
-            journal_ids = [self.id, self.refund_journal_id.id]
-        values = self.env['account.invoice'].get_stats(journal_ids)
+        values = self.env['account.invoice'].get_stats(self.id)
         currency_symbol = self.company_id.currency_id.symbol
         if self.currency:
             currency_symbol = self.currency.symbol
@@ -176,9 +173,6 @@ class account_journal(models.Model):
         fiscalyear_id = self.find_fiscalyear(self.company_id.id)
         months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         state = ['draft','posted']
-        journal_ids = [self.id]
-        if self.type == 'purchase':
-            journal_ids = [self.id, self.refund_journal_id.id]
         """
             Get amount of moves related to the particular journals per month
             left join on account_move if we want only posted entries then we can use.
@@ -186,10 +180,10 @@ class account_journal(models.Model):
         """
         self._cr.execute("SELECT to_char(line.date, 'MM') as month, SUM(line.debit) as amount\
                     FROM account_move_line AS line LEFT JOIN account_move AS move ON line.move_id=move.id\
-                    WHERE line.journal_id in %s AND line.period_id in (SELECT account_period.id from account_period WHERE fiscalyear_id in %s) \
+                    WHERE line.journal_id = %s AND line.period_id in (SELECT account_period.id from account_period WHERE fiscalyear_id in %s) \
                     AND move.state in %s\
                     GROUP BY to_char(line.date, 'MM') \
-                    ORDER BY to_char(line.date, 'MM')", (tuple(journal_ids), tuple(fiscalyear_id.ids), tuple(state)))
+                    ORDER BY to_char(line.date, 'MM')", (self.id, tuple(fiscalyear_id.ids), tuple(state)))
         values = []
         for month, amount in self._cr.fetchall():
             values.append({
@@ -255,10 +249,10 @@ class account_journal(models.Model):
         """
         self._cr.execute("SELECT to_char(line.date, 'dd') as day, to_char(line.date,'MM') as month, SUM(line.debit) as amount, line.journal_id\
                     FROM account_move_line AS line LEFT JOIN account_move AS move ON line.move_id=move.id\
-                    WHERE line.journal_id in %s \
+                    WHERE line.journal_id = %s \
                     AND move.state = 'posted' AND line.date >= %s\
                     GROUP BY day, month, line.journal_id \
-                    ORDER BY day, month, line.journal_id", ((self.id, self.refund_journal_id.id), previous_month_date))
+                    ORDER BY day, month, line.journal_id", (self.id, previous_month_date))
 
         total_amount_this_month = 0
         total_amount_last_month = 0
@@ -335,13 +329,9 @@ class account_journal(models.Model):
             'default_journal_id': self.id,
             'search_default_journal_id': self.id,
             'default_type': invoice_type,
-            # 'target': 'new',
             'type': invoice_type
         })
-        if self.type in ('sale', 'purchase'):
-            domain = [('journal_id.type', 'in', (self.type, self.refund_journal_id.type)),('journal_id', 'in', (self.id, self.refund_journal_id.id))]
-        else:
-            domain = [('journal_id.type', '=', self.type),('journal_id', '=', self.id)]
+        domain = [('journal_id.type', '=', self.type),('journal_id', '=', self.id)]
         ir_model_obj = self.pool['ir.model.data']
         model, action_id = ir_model_obj.get_object_reference(self._cr, self._uid, 'account', action_name)
         action = self.pool[model].read(self._cr, self._uid, action_id, context=self._context)
