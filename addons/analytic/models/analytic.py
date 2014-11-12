@@ -33,9 +33,12 @@ class account_analytic_account(osv.osv):
     _description = 'Analytic Account'
     _track = {
         'state': {
-            'analytic.mt_account_pending': lambda self, cr, uid, obj, ctx=None: obj.state == 'pending',
-            'analytic.mt_account_closed': lambda self, cr, uid, obj, ctx=None: obj.state == 'close',
-            'analytic.mt_account_opened': lambda self, cr, uid, obj, ctx=None: obj.state == 'open',
+            'analytic.mt_analytic_pending': lambda self, cr, uid, obj, ctx=None: obj.state == 'pending' and obj.type == 'normal',
+            'analytic.mt_analytic_closed': lambda self, cr, uid, obj, ctx=None: obj.state == 'close' and obj.type == 'normal',
+            'analytic.mt_analytic_opened': lambda self, cr, uid, obj, ctx=None: obj.state == 'open' and obj.type == 'normal',
+            'analytic.mt_contract_pending': lambda self, cr, uid, obj, ctx=None: obj.state == 'pending' and obj.type in ['contract', 'template'],
+            'analytic.mt_contract_closed': lambda self, cr, uid, obj, ctx=None: obj.state == 'close' and obj.type in ['contract', 'template'],
+            'analytic.mt_contract_opened': lambda self, cr, uid, obj, ctx=None: obj.state == 'open' and obj.type in ['contract', 'template'],
         },
     }
 
@@ -210,6 +213,18 @@ class account_analytic_account(osv.osv):
                 'res.company': (_get_analytic_account, ['currency_id'], 10),
             }, string='Currency', type='many2one', relation='res.currency'),
     }
+
+    def create(self, cr, uid, vals, context=None):
+        context = dict(context or {}, mail_create_nolog=True)
+        if vals.get('type') == 'template' or vals.get('type') == 'contract':
+            body = _('Contract Created')
+        elif vals.get('type') == 'view':
+            body = _('Analytic View Created')
+        else:
+            body = _('Analytic Account Created')
+        analytic_account_id = super(account_analytic_account, self).create(cr, uid, vals, context=context)
+        self.message_post(cr, uid, [analytic_account_id], body=body, context=context)
+        return analytic_account_id
 
     def on_change_template(self, cr, uid, ids, template_id, date_start=False, context=None):
         if not template_id:

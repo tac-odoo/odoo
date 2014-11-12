@@ -3,24 +3,42 @@
     <data noupdate="1">
 
         <!-- Analytic-account-related subtypes for messaging / Chatter -->
-        <record id="mt_account_pending" model="mail.message.subtype">
+        <record id="mt_contract_pending" model="mail.message.subtype">
             <field name="name">Contract to Renew</field>
             <field name="res_model">account.analytic.account</field>
             <field name="default" eval="False"/>
             <field name="description">Contract pending</field>
         </record>
-        <record id="mt_account_closed" model="mail.message.subtype">
+        <record id="mt_contract_closed" model="mail.message.subtype">
             <field name="name">Contract Finished</field>
             <field name="res_model">account.analytic.account</field>
             <field name="default" eval="False"/>
             <field name="description">Contract closed</field>
         </record>
-        <record id="mt_account_opened" model="mail.message.subtype">
+        <record id="mt_contract_opened" model="mail.message.subtype">
             <field name="name">Contract Opened</field>
             <field name="res_model">account.analytic.account</field>
             <field name="default" eval="False"/>
             <field name="description">Contract opened</field>
         </record>
 
+        <record id="mt_analytic_pending" model="mail.message.subtype">
+            <field name="name">Analytic Account to Renew</field>
+            <field name="res_model">account.analytic.account</field>
+            <field name="default" eval="False"/>
+            <field name="description">Analytic Account pending</field>
+        </record>
+        <record id="mt_analytic_closed" model="mail.message.subtype">
+            <field name="name">Analytic Account Finished</field>
+            <field name="res_model">account.analytic.account</field>
+            <field name="default" eval="False"/>
+            <field name="description">Analytic Account closed</field>
+        </record>
+        <record id="mt_analytic_opened" model="mail.message.subtype">
+            <field name="name">Analytic Account Opened</field>
+            <field name="res_model">account.analytic.account</field>
+            <field name="default" eval="False"/>
+            <field name="description">Analytic Account opened</field>
+        </record>
     </data>
 </openerp>
