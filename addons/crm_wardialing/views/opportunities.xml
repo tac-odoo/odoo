@@ -21,10 +21,10 @@
             </field>
         </record>
 
-        <!-- insertion of the action "Add to Call Center" in the "more" menu in the lead's list view -->
+        <!-- insertion of the action "Add to Call Queue" in the "more" menu in the lead's list view -->
         <record model="ir.values" id="ir_create_call_center_call">
             <field name="model_id" ref="crm.model_crm_lead" />
-            <field name="name">Add to Call Center Queue</field>
+            <field name="name">Add to Call Queue</field>
             <field name="key2">client_action_multi</field>
             <field eval="'ir.actions.server,%d'%action_create_call_center_call" name="value"/>
             <field name="key">action</field>
@@ -38,11 +38,11 @@
             <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
             <field name="arch" type="xml">
                 <div class="oe_kanban_content">
-                    <a type="object" name="create_call_center_call" t-if="record.in_call_center_queue.raw_value == false" title="Add to Call Center Queue" class="oe_dial_kanban_button oe_dial_hidden_button text-muted fa-stack">
+                    <a type="object" name="create_call_center_call" t-if="record.in_call_center_queue.raw_value == false" title="Add to Call Queue" class="oe_dial_kanban_button oe_dial_hidden_button text-muted fa-stack">
                         <i class="fa fa-phone fa-stack-1x"></i>
                         <i class="fa fa-plus fa-stack-1x oe_dial_kanban_icon text-success"></i>
                     </a>
-                    <a type="object" name="delete_call_center_call" t-if="record.in_call_center_queue.raw_value" title="Remove from Call Center Queue" class="oe_dial_kanban_button text-muted fa-stack">
+                    <a type="object" name="delete_call_center_call" t-if="record.in_call_center_queue.raw_value" title="Remove from Call Queue" class="oe_dial_kanban_button text-muted fa-stack">
                         <i class="fa fa-phone fa-stack-1x"></i>
                         <i class="fa fa-minus fa-stack-1x oe_dial_kanban_icon text-danger"></i>
                     </a>

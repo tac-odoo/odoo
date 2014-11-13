@@ -47,7 +47,6 @@
 
 .oe_dial_content{
     position: relative;
-    text-align: center;
     bottom: 0px;
 }
 .oe_systray #oe_topbar_dialbutton_icon {
@@ -78,51 +77,54 @@
     background: transparent;
 }
 
-.oe_dial_callbutton{
+.oe_dial_split_callbutton{
     position: relative;
     margin-bottom: 2px;
-    width: 90%;
+    width: 100%;
 }
 
+.oe_dial_big_callbutton{
+    width: 88%;
+}
 .oe_dial_hangupbutton{
     position: relative;
     margin-bottom: 2px;
-    width: 44%;
+    width: 49%;
 }
 .oe_dial_nextcallbutton{
     position: relative;
     margin-bottom: 2px;
-    width: 90%;
+    width: 100%;
 }
 
 .oe_dial_transferbutton{
     position: relative;
     margin-bottom: 2px;
-    width: 44%;
+    width: 49%;
 }
 
-.oe_dial_changelog{
+.oe_dial_schedule_call{
     position: relative;
     margin-bottom: 2px;
-    width: 44%;
+    width: 49%;
 }
 
 .oe_dial_email{
     position: relative;
     margin-bottom: 2px;
-    width: 44%;
+    width: 49%;
 }
 
 .oe_dial_to_lead{
     position: relative;
     margin-bottom: 2px;
-    width: 44%;
+    width: 49%;
 }
 
 .oe_dial_to_client{
     position: relative;
     margin-bottom: 2px;
-    width: 44%;
+    width: 49%;
 }
 
 /* search stuff */
@@ -171,7 +173,7 @@
 
 .oe_dial_phonecalls {
     overflow-y: scroll !important;
-    height: 270px; 
+    height: 298px; 
 }
 .oe_dial_phonecall {
     position: relative;
@@ -199,7 +201,6 @@
 }
 .oe_dial_phonecall_name {
     width: 162px;
-    line-height: 26px;
     padding-right: 15px;
     text-overflow: ellipsis;
     white-space: nowrap;

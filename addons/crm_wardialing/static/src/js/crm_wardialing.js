@@ -10,6 +10,7 @@ openerp.crm_wardialing = function(instance) {
         "template": "crm_wardialing.PhonecallWidget",
         events: {
             "click": "select_call",
+            "click .oe_dial_remove_phonecall": "remove_phonecall"
         },
         init: function(parent, phonecall, image_small, email) {
             this._super(parent);
@@ -20,7 +21,8 @@ openerp.crm_wardialing = function(instance) {
                 this.set("partner", "Unknown");
             }
             
-
+            this.set("state",phonecall.state);
+            
             if(phonecall.description){
                 this.set("description", phonecall.description);
             }else{
@@ -53,6 +55,11 @@ openerp.crm_wardialing = function(instance) {
         select_call: function(){
             this.trigger("select_call", this)
         },
+
+        remove_phonecall: function(e){
+            e.stopPropagation();
+            this.trigger("remove_phonecall",this);
+        },
     });
     
     crm_wardialing.DialingPanel = openerp.Widget.extend({
@@ -61,12 +68,13 @@ openerp.crm_wardialing = function(instance) {
             "keyup .oe_dial_searchbox": "input_change",
             "click .oe_dial_callbutton": "call_button",
             "click .oe_dial_hangupbutton": "hangup_button",
-            "click .oe_dial_changelog": "change_log",
+            "click .oe_dial_schedule_call": "schedule_call",
             "click .oe_dial_email": "send_email",
             "click .oe_dial_to_client": "to_client",
             "click .oe_dial_to_lead": "to_lead",
             "click .oe_dial_transferbutton": "transfer_button",
-            "click .oe_dial_nextcallbutton": "nextCall_button",
+            //"click .oe_dial_nextcallbutton": "nextCall_button",
+            "click .oe_dial_auto_callbutton": "auto_call_button",
         },
 
         init: function(parent) {    
@@ -123,24 +131,38 @@ openerp.crm_wardialing = function(instance) {
             var phonecall_model = new openerp.web.Model("crm.phonecall");
             var self = this;
 
+            //Hide the optional buttons
+            if(this.buttonUp && !this.buttonAnimated){
+                this.buttonAnimated = true;
+                this.$el.find(".oe_dial_phonecalls").animate({
+                    height: (this.$el.find(".oe_dial_phonecalls").height() + this.$el.find(".oe_dial_optionalbuttons").outerHeight()),
+                }, 300,function(){
+                    self.buttonUp = false;
+                    self.buttonAnimated = false;
+                });
+            }
+
             new openerp.web.Model("crm.phonecall").call("get_list",[this.get("current_search")]).then(function(result){
                 var old_widgets = self.widgets;                   
                 self.widgets = {};
                 self.phonecalls = {};
 
                 $(".oe_dial_callbutton").attr('disabled','disabled');
+                $(".oe_call_dropdown").attr('disabled','disabled');
                 $(".oe_dial_inCallButton").attr('disabled','disabled');
                 if(result.phonecalls.length > 0){
                     $(".oe_dial_callbutton").removeAttr('disabled');
+                    $(".oe_call_dropdown").removeAttr('disabled');
                 }
                 self.$el.find(".oe_dial_content").animate({
                     bottom: 0,
                 });
                 _.each(result.phonecalls, function(phonecall){     
-                    var widget = new openerp.crm_wardialing.PhonecallWidget(self, phonecall,phonecall.partner_image_small, phonecall.partner_email);
+                    var widget = new openerp.crm_wardialing.PhonecallWidget(self, phonecall,phonecall.partner_image_small, phonecall.partner_email, phonecall.state);
                     widget.appendTo(self.$(".oe_dial_phonecalls"));
                     
                     widget.on("select_call", self, self.select_call);
+                    widget.on("remove_phonecall",self,self.remove_phonecall);
                     self.widgets[phonecall.id] = widget;
                     phonecall.opportunity_planned_revenue = self.formatCurrency(phonecall.opportunity_planned_revenue, phonecall.opportunity_company_currency);
                     if(phonecall.partner_name){
@@ -152,21 +174,24 @@ openerp.crm_wardialing = function(instance) {
                     }else{
                         var partner_name = "Unknown";
                     }
+                    if(!phonecall.opportunity_name){
+                        phonecall.opportunity_name = "No opportunity linked";
+                    }
                     var empty_star = parseInt(phonecall.max_priority) - parseInt(phonecall.opportunity_priority);
                     $("[rel='popover']").popover({
                         placement : 'right', // top, bottom, left or right
                         title : QWeb.render("crm_wardialing_Tooltip_title", {
-                            opportunity: phonecall.opportunity_name, priority: parseInt(phonecall.opportunity_priority), empty_star:empty_star}), 
+                            name: phonecall.name, priority: parseInt(phonecall.opportunity_priority), empty_star:empty_star}), 
                         html: 'true', 
                         content :  QWeb.render("crm_wardialing_Tooltip",{
+                            opportunity: phonecall.opportunity_name,
                             partner_name: partner_name,
                             phone: phonecall.partner_phone,
-                            mobile: phonecall.partner_mobile,
                             description: phonecall.description,
                             email: phonecall.partner_email,
                             title_action: phonecall.opportunity_title_action,
                             planned_revenue: phonecall.opportunity_planned_revenue,
-                            probability: phonecall.opportunity_probability
+                            probability: phonecall.opportunity_probability,
                         }),
                     });
                     self.phonecalls[phonecall.id] = phonecall;
@@ -199,19 +224,26 @@ openerp.crm_wardialing = function(instance) {
         to_lead: function() {
             var id = this.$el.find(".oe_dial_selected_phonecall").find(".phonecall_id").text();
             var phonecall = this.phonecalls[id];
-            //Call of the function xmlid_to_res_model_res_id to get the id of the opportunity's form view and not the lead's form view
-            new instance.web.Model("ir.model.data").call("xmlid_to_res_model_res_id",["crm.crm_case_form_view_oppor"]).then(function(data){
-                openerp.client.action_manager.do_action({
-                    type: 'ir.actions.act_window',
-                    res_model: "crm.lead",
-                    res_id: phonecall.opportunity_id,
-                    views: [[data[1], 'form']],
-                    target: 'current',
-                    context: {},
-                    flags: {initial_mode: "edit",},
+            if(phonecall.opportunity_id){
+                //Call of the function xmlid_to_res_model_res_id to get the id of the opportunity's form view and not the lead's form view
+                new instance.web.Model("ir.model.data").call("xmlid_to_res_model_res_id",["crm.crm_case_form_view_oppor"]).then(function(data){
+                    openerp.client.action_manager.do_action({
+                        type: 'ir.actions.act_window',
+                        res_model: "crm.lead",
+                        res_id: phonecall.opportunity_id,
+                        views: [[data[1], 'form']],
+                        target: 'current',
+                        context: {},
+                        flags: {initial_mode: "edit",},
+                    });
+                })
+            }else{
+                var phonecall_model = new openerp.web.Model("crm.phonecall");
+                phonecall_model.call("action_button_convert2opportunity", [[phonecall.id]]).then(function(result){
+                    result.flags= {initial_mode: "edit",};
+                    openerp.client.action_manager.do_action(result);
                 });
-            })
-            
+            }
         },
 
         //action to change the main view to go to the client's view
@@ -238,7 +270,6 @@ openerp.crm_wardialing = function(instance) {
                 self.$(".oe_dial_selected_phonecall").removeClass("oe_dial_selected_phonecall");
                 if(classes.indexOf("oe_dial_selected_phonecall") == -1){
                     phonecall_widget.$()[0].className += " oe_dial_selected_phonecall";
-                    console.log(this.buttonAnimated);
                     if(!self.buttonUp){
                         this.buttonAnimated = true;
                         this.$el.find(".oe_dial_phonecalls").animate({
@@ -251,9 +282,9 @@ openerp.crm_wardialing = function(instance) {
                     this.$el.find(".oe_dial_email").css("display","none");
                     if(phonecall_widget.get('email')){
                         this.$el.find(".oe_dial_email").css("display","inline");
-                        this.$el.find(".oe_dial_changelog").css("width", "44%");
+                        this.$el.find(".oe_dial_schedule_call").css("width", "49%");
                     }else{
-                        this.$el.find(".oe_dial_changelog").css("width", "90%");
+                        this.$el.find(".oe_dial_schedule_call").css("width", "100%");
                     }
                 }else{
                     this.buttonAnimated = true;
@@ -267,14 +298,21 @@ openerp.crm_wardialing = function(instance) {
             } 
         },
 
+        remove_phonecall: function(phonecall_widget){
+            var phonecall_model = new openerp.web.Model("crm.phonecall");
+            var phonecall_id = phonecall_widget.$().find(".phonecall_id").text();
+            var self = this;
+            phonecall_model.call("remove_from_queue", [this.phonecalls[phonecall_id].id]).then(function(action){
+                openerp.client.action_manager.do_action(action);
+                self.$().find(".popover").remove();
+            });
+        },
+
         //action done when the button "call" is clicked
         call_button: function(){
-            
-            var phonecall_model = new openerp.web.Model("crm.phonecall");
             var self = this;
             if(this.$el.find(".oe_dial_selected_phonecall").find(".phonecall_id").text() != ''){
                 var phonecall_id = this.$el.find(".oe_dial_selected_phonecall").find(".phonecall_id").text();
-                phonecall_model.call("init_call", [this.phonecalls[phonecall_id].id]);
                 /*
                 //JS Ari lib
                 this.ari_client.call(this.phonecalls[phonecall_id],function(channel){
@@ -287,7 +325,6 @@ openerp.crm_wardialing = function(instance) {
             }else{
                 var phonecall_id = this.$el.find(".oe_dial_phonecalls > div:first-child").find(".phonecall_id").text();
                 if(phonecall_id){
-                    phonecall_model.call("init_call", [this.phonecalls[phonecall_id].id]);
                     /*
                     //JS Ari lib
                     this.ari_client.call(this.phonecalls[phonecall_id],function(channel){
@@ -300,6 +337,9 @@ openerp.crm_wardialing = function(instance) {
             }
         },
 
+        auto_call_button: function(){
+
+        },
         //action done when the button "Hang Up" is clicked
         hangup_button: function(){
             this.sip_js.hangup();
@@ -347,10 +387,22 @@ openerp.crm_wardialing = function(instance) {
             }*/
         },
 
-        //action done when the button "Call Log" is clicked
-        change_log: function(){
+        //action done when the button "Reschedule Call" is clicked
+        schedule_call: function(){
             var id = this.$el.find(".oe_dial_selected_phonecall").find(".phonecall_id").text();
             var self = this;
+            openerp.client.action_manager.do_action({
+                type: 'ir.actions.act_window',
+                key2: 'client_action_multi',
+                src_model: "crm.phonecall",
+                res_model: "crm.phonecall2phonecall",
+                multi: "True",
+                target: 'new',
+                context: {'active_id': this.phonecalls[id].id, 'active_ids': [this.phonecalls[id].id]},
+                views: [[false, 'form']],
+            });
+            /*
+            //Launch the Log Call wizard
             openerp.client.action_manager.do_action({
                 type: 'ir.actions.act_window',
                 key2: 'client_action_multi',
@@ -370,7 +422,7 @@ openerp.crm_wardialing = function(instance) {
                 'default_partner_email' : this.phonecalls[id].partner_email,
                 'default_partner_image_small' : this.phonecalls[id].partner_image_small,},
                 views: [[false, 'form']],
-            });
+            });*/
         },
 
         //action done when the button "Send Email" is clicked
@@ -425,6 +477,7 @@ openerp.crm_wardialing = function(instance) {
     
     //Trigger "reload_panel" that will be catch by the widget to reload the panel
     openerp.crm_wardialing.reload_panel = function () {
+        console.log("TRIGGER RELOAD PANEL")
         openerp.web.bus.trigger('reload_panel');
         //Return an action to close the wizard after the reload of the panel
         return { type: 'ir.actions.act_window_close' };

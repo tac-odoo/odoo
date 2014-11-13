@@ -52,6 +52,7 @@ openerp.sip_js = function(instance) {
 	}
 
 	this.call = function(phonecall){
+		console.log("CALL FUNCTION")
 		if(!this.session){
 			var self = this;
 			var number;
@@ -65,7 +66,7 @@ openerp.sip_js = function(instance) {
 				console.log("NO NUMBER");
 				return {};
 			}
-			$('.oe_dial_callbutton').html("Calling...");
+			$('.oe_dial_big_callbutton').html("Calling...");
 			$(".oe_dial_inCallButton").removeAttr('disabled');
 			//Make the call
 			this.session = this.ua.invite(number,this.call_options);
@@ -73,12 +74,15 @@ openerp.sip_js = function(instance) {
 			this.session.on('accepted',function(){
 				console.log("ACCEPTED");
 				self.onCall = true;
+				new openerp.web.Model("crm.phonecall").call("init_call", [self.phonecall.id]);
 			});
 
 			this.session.on('rejected',function(){
 				console.log("REJECTED");
 				self.session = false;
-				$('.oe_dial_callbutton').html("Call");
+				var phonecall_model = new openerp.web.Model("crm.phonecall");
+				phonecall_model.call("rejected_call",[self.phonecall.id]);
+				$('.oe_dial_big_callbutton').html("Call");
 				$(".oe_dial_inCallButton").attr('disabled','disabled');
 			});
 
@@ -86,20 +90,24 @@ openerp.sip_js = function(instance) {
 				console.log("CANCEL");
 				self.session = false;
 				console.log("cancel - disable button");
-				$('.oe_dial_callbutton').html("Call");
+				$('.oe_dial_big_callbutton').html("Call");
 				$(".oe_dial_inCallButton").attr('disabled','disabled');
 			});
 			this.session.on('bye',function(){
 				console.log("BYE");
 				var phonecall_model = new openerp.web.Model("crm.phonecall");
-				phonecall_model.call("hangup_call", [self.phonecall.id]).then(function(phonecall){
+				phonecall_model.call("hangup_call", [self.phonecall.id]).then(function(result){
 					openerp.web.bus.trigger('reload_panel');
-				});
-				self.session = false;
-				self.onCall = false;
-				$('.oe_dial_callbutton').html("Call");
-				$(".oe_dial_inCallButton").attr('disabled','disabled');
-				self.loggedCallOption();
+					self.session = false;
+					self.onCall = false;
+					console.log(result.duration)
+					self.phonecall.duration = parseFloat(result.duration).toFixed(2);
+					console.log("Hangup");
+					console.log(self.phonecall.duration);
+					$('.oe_dial_big_callbutton').html("Call");
+					$(".oe_dial_inCallButton").attr('disabled','disabled');
+					self.loggedCallOption();
+				});	
 			});
 		}
 	}
@@ -121,7 +129,21 @@ openerp.sip_js = function(instance) {
 	}
 
 	this.loggedCallOption = function(){
-
+		var value = this.phonecall.duration;
+		var pattern = '%02d:%02d';
+        if (value < 0) {
+            value = Math.abs(value);
+            pattern = '-' + pattern;
+        }
+        var hour = Math.floor(value);
+        var min = Math.round((value % 1) * 60);
+        if (min == 60){
+            min = 0;
+            hour = hour + 1;
+        }
+		if(this.phonecall.description == ""){
+			this.phonecall.description = "Call " + _.str.sprintf(pattern, hour, min) + " min(s) about " + this.phonecall.name;
+		}
 		console.log(this.phonecall);
 		openerp.client.action_manager.do_action({
                 type: 'ir.actions.act_window',
@@ -131,14 +153,17 @@ openerp.sip_js = function(instance) {
                 multi: "True",
                 target: 'new',
                 context: {'phonecall_id': this.phonecall.id,
+                'opportunity_id': this.phonecall.opportunity_id,
+                'default_name': this.phonecall.name,
+                'default_duration': this.phonecall.duration,
                 'default_description' : this.phonecall.description,
                 'default_opportunity_name' : this.phonecall.opportunity_name,
                 'default_opportunity_planned_revenue' : this.phonecall.opportunity_planned_revenue,
                 'default_opportunity_title_action' : this.phonecall.opportunity_title_action,
+                'default_opportunity_date_action' : this.phonecall.opportunity_date_action,
                 'default_opportunity_probability' : this.phonecall.opportunity_probability,
                 'default_partner_name' : this.phonecall.partner_name,
                 'default_partner_phone' : this.phonecall.partner_phone,
-                'default_partner_mobile' : this.phonecall.partner_mobile,
                 'default_partner_email' : this.phonecall.partner_email,
                 'default_partner_image_small' : this.phonecall.partner_image_small,},
                 views: [[false, 'form']],
