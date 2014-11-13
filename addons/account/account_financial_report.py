@@ -105,13 +105,11 @@ class account_financial_report_line(models.Model):
     @api.one
     @api.depends('parent_id')
     def _get_level(self):
-        '''Returns the level of a record in the tree structure'''
+        '''Sets the level of a record in the tree structure'''
         level = 0
         if self.parent_id:
             level = self.parent_id.level + 1
-        print self.name
-        print level
-        return level
+        self.level = level
 
     @api.multi
     def _get_children_by_order(self):
@@ -125,12 +123,7 @@ class account_financial_report_line(models.Model):
         return res
 
     @api.one
-    def _get_balance(self, field_names, args):
-        '''returns the balance (or other fields) computed for this record. If the record is of type :
-               'accounts' : it's the sum of the linked accounts
-               'account_type' : it's the sum of leaf accoutns with such an account_type
-               'account_report' : it's the amount of the related report
-               'sum' : it's the sum of the children of this record (aka a 'view' record)'''
+    def _get_balance(self, field_names):
         account_obj = self.env['account.account']
         res = dict((fn, 0.0) for fn in field_names)
         if self.type == 'types':
@@ -142,7 +135,7 @@ class account_financial_report_line(models.Model):
                     res[field] += getattr(a, field)
         elif self.type == 'sum':
             # it's the sum of the children of this account.report
-            res2 = self.children_ids._get_balance(field_names, False)
+            res2 = self.children_ids._get_balance(field_names)
             for value in res2:
                 for field in field_names:
                     res[field] += value[field]
@@ -164,7 +157,7 @@ class account_financial_report_line(models.Model):
                     if len(split_block) == 2:
                         column = split_block[1]
                     target_report = self.search([('code', '=', report_code)], limit=1)
-                    value = target_report._get_balance(column, args)
+                    value = target_report._get_balance(column)
                     formula.replace(block, value)
                 res[field] += safe_eval(formula)
         return res
@@ -192,9 +185,6 @@ class account_financial_report_line(models.Model):
         ('sum', 'Sum Of Children'),
         ('formula', 'Formula'),
     ], 'Type', required=True, default='sum')
-    balance = fields.Integer(compute='_get_balance', string='Balance', multi='balance')
-    debit = fields.Integer(compute='_get_balance', string='Debit', multi='balance')
-    credit = fields.Integer(compute='_get_balance', string='Credit', multi="balance")
     action = fields.Many2one('ir.actions.actions', 'Action',
                              help='Action triggered when clicking on the line')
     figures_type = fields.Selection([
@@ -230,6 +220,7 @@ class account_financial_report_line(models.Model):
     def get_lines(self, data):
         lines = []
         account_obj = self.env['account.account']
+        financial_report = self.env['report.account.report_financial'].browse(data['form']['account_report_id'][0])[0]
         for line in self.with_context(data['form']['used_context'])._get_children_by_order():
             vals = {
                 'name': line.name,
@@ -237,11 +228,16 @@ class account_financial_report_line(models.Model):
                 'level': line.level,
                 'account_type': line.type == 'sum' and 'view' or False,  # used to underline the financial line balances
             }
-            if self.financial_report.balance:
-                vals['balance'] = line.balance * line.sign or 0.0
-            if self.financial_report.debit_credit:
-                vals['debit'] = line.debit
-                vals['credit'] = line.credit
+            columns = []
+            if financial_report.balance:
+                columns.append('balance')
+            if financial_report.debit_credit:
+                columns.append('credit', 'debit')
+            for key, value in line._get_balance(columns)[0].items():
+                if key == 'balance':
+                    vals[key] = value * line.sign or 0.0
+                else:
+                    vals[key] = value
             #if self.financial_report.comparison:
                 #vals['balance_cmp'] = self.pool.get('account.financial.report').browse(self.cr, self.uid, line.id, context=data['form']['comparison_context']).balance * line.sign or 0.0
             lines.append(vals)
@@ -252,7 +248,7 @@ class account_financial_report_line(models.Model):
             # if line.type == 'accounts' and line.account_ids:
             #     account_ids = account_obj._get_children_and_consol(self.cr, self.uid, [x.id for x in line.account_ids])
             if line.type == 'types':
-                account_ids = account_obj.search([('user_type', 'in', [x.id for x in line.account_type_ids])])
+                account_ids = account_obj.with_context(data['form']['used_context']).search([('user_type', 'in', [x.id for x in line.account_type_ids])])
             if account_ids:
                 for account in account_ids:
                     #if there are accounts to display, we add them to the lines with a level equals to their level in
@@ -261,17 +257,18 @@ class account_financial_report_line(models.Model):
                     flag = False
                     vals = {
                         'name': account.code + ' ' + account.name,
-                        'balance':  account.balance != 0 and account.balance * line.sign or account.balance,
                         'type': 'account',
-                        'level': line.display_detail == 'detail_with_hierarchy' and min(account.level + 1, 6) or 6,  # account.level + 1
+                        'level': min(account.level + 1, 6),  # account.level + 1
                         'account_type': account.type,
                     }
-                    if self.financial_report.debit_credit:
+                    if financial_report.balance:
+                        vals['balance'] = account.balance != 0 and account.balance * line.sign or account.balance
+                    if financial_report.debit_credit:
                         vals['debit'] = account.debit
                         vals['credit'] = account.credit
                     if not account.company_id.currency_id.is_zero(vals['balance']):
                         flag = True
-                    if self.financial_report.comparison:
+                    if financial_report.comparison:
                         account_id = account_obj.with_context(data['form']['comparison_context']).browse(account.id)
                         vals['balance_cmp'] = account_id.balance * line.sign or 0.0
                         if not account.company_id.currency_id.is_zero(vals['balance_cmp']):
