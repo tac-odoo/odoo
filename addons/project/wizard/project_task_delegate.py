@@ -104,23 +104,23 @@ class project_task_delegate(models.TransientModel):
                 res['fields'][field]['string'] = res['fields'][field]['string'].replace('Hours', tm)
         return res
 
-    @api.model
-    def delegate(self, ids):
-        task_id = self._context.get('active_id', False)
-        task_pool = self.env['project.task']
-        delegate_data = self.read(ids)[0]
-        delegated_tasks = task_pool.do_delegate([task_id], delegate_data)
-        models_data = self.pool.get('ir.model.data')
+    @api.multi
+    def delegate(self):
+        task_id = self.env['project.task'].search([('id', '=', self._context.get('active_id'))])
+        delegate_data = self.read()
+        delegated_tasks = task_id.do_delegate(delegate_data[0])
+        models_data = self.env['ir.model.data']
 
-        action_model, action_id = models_data.get_object_reference(cr, uid, 'project', 'action_view_task')
-        view_model, task_view_form_id = models_data.get_object_reference(cr, uid, 'project', 'view_task_form2')
-        view_model, task_view_tree_id = models_data.get_object_reference(cr, uid, 'project', 'view_task_tree2')
-        action = self.pool[action_model].read(cr, uid, [action_id], context=context)[0]
-        action['res_id'] = delegated_tasks[task_id]
+        action_model, action_id = models_data.get_object_reference('project', 'action_view_task')
+        view_model, task_view_form_id = models_data.get_object_reference('project', 'view_task_form2')
+        view_model, task_view_tree_id = models_data.get_object_reference('project', 'view_task_tree2')
+        action_id = self.env[action_model].search([('id', '=', action_id)])
+        action = action_id.read()[0]
+        action['res_id'] = delegated_tasks[task_id.id]
         action['view_id'] = False
         action['views'] = [(task_view_form_id, 'form'), (task_view_tree_id, 'tree')]
         action['help'] = False
-        return action
+        return [action]
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

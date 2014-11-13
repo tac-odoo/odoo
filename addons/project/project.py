@@ -610,14 +610,11 @@ class task(models.Model):
                 task.write({'parent_ids': [(6,0,list(new_parent_ids))],
                             'child_ids':  [(6,0,list(new_child_ids))]})
 
-    @api.v7
-    def copy_data(self, cr, uid, id, default=None, context=None):
-        if default is None:
-            default = {}
+    @api.one
+    def copy_data(self, default=None):
         if not default.get('name'):
-            current = self.browse(cr, uid, id, context=context)
-            default['name'] = _("%s (copy)") % current.name
-        return super(task, self).copy_data(cr, uid, id, default, context)
+            default['name'] = _("%s (copy)") % self.name
+        return super(task, self).copy_data(default)
 
     @api.multi
     def _is_template(self):
@@ -699,30 +696,26 @@ class task(models.Model):
         obj_task = self
         start = obj_task.date_start or False
         end = obj_task.date_end or False
-        if start and end :
+        if start and end:
             if start > end:
                 raise Warning(_('Error ! \n Task end-date must be greater then task start-date'))
 
 #     # Override view according to the company definition
-    @api.v7
-    def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
-        users_obj = self.pool.get('res.users')
-        if context is None: context = {}
+    @api.model
+    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
         # read uom as admin to avoid access rights issues, e.g. for portal/share users,
         # this should be safe (no context passed to avoid side-effects)
-        obj_tm = users_obj.browse(cr, SUPERUSER_ID, uid, context=context).company_id.project_time_mode_id
+        obj_tm = self.env['res.users'].browse(self._uid).company_id.project_time_mode_id
         tm = obj_tm and obj_tm.name or 'Hours'
-
-        res = super(task, self).fields_view_get(cr, uid, view_id, view_type, context, toolbar, submenu=submenu)
-
-        if tm in ['Hours','Hour']:
+        res = super(task, self).fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
+        if tm in ['Hours', 'Hour']:
             return res
 
         eview = etree.fromstring(res['arch'])
 
         def _check_rec(eview):
-            if eview.attrib.get('widget','') == 'float_time':
-                eview.set('widget','float')
+            if eview.attrib.get('widget', '') == 'float_time':
+                eview.set('widget', 'float')
             for child in eview:
                 _check_rec(child)
             return True
@@ -733,16 +726,17 @@ class task(models.Model):
 
         for f in res['fields']:
             if 'Hours' in res['fields'][f]['string']:
-                res['fields'][f]['string'] = res['fields'][f]['string'].replace('Hours',tm)
+                res['fields'][f]['string'] = res['fields'][f]['string'].replace('Hours', tm)
         return res
 
-    @api.v7
-    def get_empty_list_help(self, cr, uid, help, context=None):
-        context = dict(context or {})
+    @api.model
+    def get_empty_list_help(self, help):
+        context = dict(self._context or {})
         context['empty_list_help_id'] = context.get('default_project_id')
         context['empty_list_help_model'] = 'project.project'
         context['empty_list_help_document_name'] = _("tasks")
-        return super(task, self).get_empty_list_help(cr, uid, help, context=context)
+        self.with_context(context)
+        return super(task, self).get_empty_list_help(help)
 
 #     # ----------------------------------------
 #     # Case management
@@ -787,21 +781,21 @@ class task(models.Model):
                         raise Warning(_("Warning!"), _("Child task still open.\nPlease cancel or complete child task first."))
         return True
 
-    @api.v7
-    def _delegate_task_attachments(self, cr, uid, task_id, delegated_task_id, context=None):
-        attachment = self.pool.get('ir.attachment')
-        attachment_ids = attachment.search(cr, uid, [('res_model', '=', self._name), ('res_id', '=', task_id)], context=context)
+    @api.multi
+    def _delegate_task_attachments(self, delegated_task_id):
+        attachment = self.env['ir.attachment']
+        attachment_ids = attachment.search([('res_model', '=', self._name), ('res_id', '=', self.id)])
         new_attachment_ids = []
         for attachment_id in attachment_ids:
-            new_attachment_ids.append(attachment.copy(cr, uid, attachment_id, default={'res_id': delegated_task_id}, context=context))
+            new_attachment_ids.append(attachment.copy(attachment_id, default={'res_id': delegated_task_id}))
         return new_attachment_ids
 
     @api.returns('self')
     def _get_effective_hours(self):
         return 0.0
 
-    @api.v7
-    def do_delegate(self, cr, uid, ids, delegate_data=None, context=None):
+    @api.multi
+    def do_delegate(self, delegate_data=None):
         """
         Delegate Task to another users.
         """
@@ -809,8 +803,8 @@ class task(models.Model):
             delegate_data = {}
         assert delegate_data['user_id'], _("Delegated User should be specified")
         delegated_tasks = {}
-        for task in self.browse(cr, uid, ids, context=context):
-            delegated_task_id = self.copy(cr, uid, task.id, {
+        for task in self:
+            delegated_task_id = task.copy({
                 'name': delegate_data['name'],
                 'project_id': delegate_data['project_id'] and delegate_data['project_id'][0] or False,
                 'stage_id': delegate_data.get('stage_id') and delegate_data.get('stage_id')[0] or False,
@@ -819,14 +813,14 @@ class task(models.Model):
                 'parent_ids': [(6, 0, [task.id])],
                 'description': delegate_data['new_task_description'] or '',
                 'child_ids': [],
-            }, context=context)
-            self._delegate_task_attachments(cr, uid, task.id, delegated_task_id, context=context)
+            })
+            task._delegate_task_attachments(delegated_task_id)
             newname = delegate_data['prefix'] or ''
             task.write({
                 'remaining_hours': delegate_data['planned_hours_me'],
-                'planned_hours': delegate_data['planned_hours_me'] + self._get_effective_hours(task),
+                'planned_hours': delegate_data['planned_hours_me'] + task._get_effective_hours(),
                 'name': newname,
-            }, context=context)
+            })
             delegated_tasks[task.id] = delegated_task_id
         return delegated_tasks
 
@@ -850,6 +844,8 @@ class task(models.Model):
     @api.model
     def create(self, vals):
         # for default stage
+        if type(vals) == list:
+            vals = vals[0][0]
         if vals.get('project_id') and not self._context.get('default_project_id'):
             create_context = dict(self._context, default_project_id=vals.get('project_id'))
         # user_id change: update date_start
@@ -932,16 +928,16 @@ class task(models.Model):
 #     # Mail gateway
 #     # ---------------------------------------------------
 
-    @api.v7
-    def message_get_reply_to(self, cr, uid, ids, context=None):
+    @api.multi
+    def message_get_reply_to(self):
         """ Override to get the reply_to of the parent project. """
-        tasks = self.browse(cr, SUPERUSER_ID, ids, context=context)
+        tasks = self
         project_ids = set([task.project_id.id for task in tasks if task.project_id])
-        aliases = self.pool['project.project'].message_get_reply_to(cr, uid, list(project_ids), context=context)
+        aliases = project_ids.message_get_reply_to()
         return dict((task.id, aliases.get(task.project_id and task.project_id.id or 0, False)) for task in tasks)
 
-    @api.v7
-    def message_new(self, cr, uid, msg, custom_values=None, context=None):
+    @api.model
+    def message_new(self, msg, custom_values=None):
         """ Override to updates the document according to the email. """
         if custom_values is None:
             custom_values = {}
@@ -950,17 +946,17 @@ class task(models.Model):
             'planned_hours': 0.0,
         }
         defaults.update(custom_values)
-        res = super(task, self).message_new(cr, uid, msg, custom_values=defaults, context=context)
+        res = super(task, self).message_new(msg, custom_values=defaults)
         email_list = tools.email_split(msg.get('to', '') + ',' + msg.get('cc', ''))
-        new_task = self.browse(cr, uid, res, context=context)
+        new_task = res.browse()
         if new_task.project_id and new_task.project_id.alias_name:  # check left-part is not already an alias
             email_list = filter(lambda x: x.split('@')[0] != new_task.project_id.alias_name, email_list)
-        partner_ids = filter(lambda x: x, self._find_partner_from_emails(cr, uid, None, email_list, context=context, check_followers=False))
-        self.message_subscribe(cr, uid, [res], partner_ids, context=context)
+        partner_ids = filter(lambda x: x, self._find_partner_from_emails(None, email_list, check_followers=False))
+        res.message_subscribe(partner_ids)
         return res
 
-    @api.v7
-    def message_update(self, cr, uid, ids, msg, update_vals=None, context=None):
+    @api.model
+    def message_update(self, ids, msg, update_vals=None):
         """ Override to update the task according to the email. """
         if update_vals is None:
             update_vals = {}
@@ -978,7 +974,7 @@ class task(models.Model):
                         update_vals[field] = float(res.group(2).lower())
                     except (ValueError, TypeError):
                         pass
-        return super(task, self).message_update(cr, uid, ids, msg, update_vals=update_vals, context=context)
+        return super(task, self).message_update(ids, msg, update_vals=update_vals)
 
 class account_analytic_account(models.Model):
     _inherit = 'account.analytic.account'
@@ -1008,7 +1004,7 @@ class account_analytic_account(models.Model):
         This function is called at the time of analytic account creation and is used to create a project automatically linked to it if the conditions are meet.
         '''
         project_pool = self.env['project.project']
-        project_id = project_pool.search([('analytic_account_id','=', analytic_account_id if isinstance(analytic_account_id, (int)) else analytic_account_id.id)])
+        project_id = project_pool.search([('analytic_account_id', '=', analytic_account_id if isinstance(analytic_account_id, (int)) else analytic_account_id.id)])
         if not project_id and self._trigger_project_creation(vals):
             project_values = {
                 'name': vals.get('name'),
