@@ -146,6 +146,7 @@ class crm_phonecall_log_wizard(models.TransientModel):
 		phonecall.in_queue = False
 		opportunity.title_action = self.opportunity_title_action
 		opportunity.date_action = self.opportunity_date_action
+		opportunity.message_post("Log Call: " + phonecall.description)
 		return {
 			'type': 'ir.actions.client',
 			'tag': 'reload_panel',
@@ -158,6 +159,7 @@ class crm_phonecall_log_wizard(models.TransientModel):
 		phonecall.description = self.description
 		opportunity.title_action = self.opportunity_title_action
 		opportunity.date_action = self.opportunity_date_action
+		opportunity.message_post("Log Call: " + phonecall.description)
 		return {
 			'type': 'ir.actions.client',
 			'tag': 'reload_panel',
