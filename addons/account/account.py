@@ -752,6 +752,7 @@ class account_journal(osv.osv):
         'internal_account_id' : fields.many2one('account.account', 'Internal Transfers Account', select=1),
         'cash_control' : fields.boolean('Cash Control', help='If you want the journal should be control at opening/closing, check this option'),
         'analytic_journal_id':fields.many2one('account.analytic.journal','Analytic Journal', help="Journal for analytic entries"),
+        'dashboard_star': fields.boolean('Dashboard favorite', help="Add/Remove this dashboard journal from favorite"),
     }
 
     _defaults = {
@@ -759,6 +760,7 @@ class account_journal(osv.osv):
         'with_last_closing_balance' : True,
         'user_id': lambda self, cr, uid, context: uid,
         'company_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).company_id.id,
+        'dashboard_star': False,
     }
     _sql_constraints = [
         ('code_company_uniq', 'unique (code, company_id)', 'The code of the journal must be unique per company !'),

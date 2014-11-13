@@ -1,7 +1,4 @@
-/*.openerp .oe_kanban_view .oe_kanban_record {
-  width: 50%;
-}*/
-.openerp .oe_kanban_view .oe_journal_title {
+.oe_journal_dashboard_kanban .oe_journal_title {
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 3px;
@@ -9,14 +6,20 @@
   background: #f0eeee;
   color: #666666;
 }
-.openerp .oe_kanban_view .oe_journal_title p{
+.oe_journal_dashboard_kanban .oe_journal_title p{
   margin: 0px;
 }
-.openerp .oe_kanban_view .oe_journal_data {
+.oe_journal_dashboard_kanban .panel-heading p{
+  margin: 10px 0 0 0;
+}
+.oe_journal_dashboard_kanban .oe_journal_data {
   margin-left:10px;
 }
-.openerp .oe_kanban_view .oe_journal_card_title {
+.oe_journal_dashboard_kanban .oe_journal_card_title {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+.oe_journal_dashboard_kanban .oe_kanban_groups {
+  width: 100%;
 }

@@ -5,11 +5,12 @@
             <field name="name">account.journal.dashboard.kanban</field>
             <field name="model">account.journal</field>
             <field name="arch" type="xml">
-                <kanban create="false">
+                <kanban create="false" class="oe_journal_dashboard_kanban">
                     <field name="name"/>
                     <field name="type"/>
                     <field name="kanban_graph"/>
                     <field name="kanban_dashboard"/>
+                    <field name="dashboard_star"/>
                     <templates>
                         <t t-name="kanban-box">
                             <t t-value="JSON.parse(record.kanban_dashboard.raw_value)" t-set="dashboard"/>
@@ -25,14 +26,18 @@
                                 <div class="row">
                                     <t t-call="JournalBottom"/>
                                 </div>
-                                <div class="row">
+                                <div class="row" groups="account.group_account_user">
                                     <t t-call="JournalDetails"/>
                                 </div>
                             </div>
                         </t>
                         <t t-name="JournalTop">   
                             <div class="text-center">
-                                <p class="mt0" style="font-size: 16px;" t-att-title="record.name.raw_value"><strong><field name="name"/></strong></p>
+                                <p style="font-size: 16px;" t-att-title="record.name.raw_value">
+                                    <strong><field name="name"/></strong>
+                                    <a type="object" name="add_remove_journal_favorite">
+                                    <span t-att-class="record.dashboard_star.raw_value == true and 'oe_e oe_star_on' or 'oe_e oe_star_off'">7</span></a>
+                                </p>
                             </div>
                         </t>
                         <t t-name="JournalDetails">
@@ -144,7 +149,7 @@
             <field name="inherit_id" ref="view_account_journal_search"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='user_id']" position="before">
-                    <filter domain="[]" string="Current Year" name="fiscal_year" context="{'current_year':1}"/>
+                    <filter domain="[('dashboard_star', '=', True)]" string="Favorite" name="dashboard_favorite" context="{}"/>
                 </xpath>
             </field>
         </record>
@@ -156,7 +161,7 @@
             <field name="view_mode">kanban</field>
             <field name="usage">menu</field>
             <field name="search_view_id" ref="view_account_journal_search_inherit"/>
-            <field name="context">{'search_default_fiscal_year':1}</field>
+            <field name="context">{'search_default_dashboard_favorite':1}</field>
             <field name="domain">[('type','not in',['general','situation','sale_refund','purchase_refund'])]</field>
             <field name="help" type="html">
                 <p style="margin-left: -90px;">

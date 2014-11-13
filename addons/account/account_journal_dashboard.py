@@ -9,16 +9,9 @@ class account_invoice(models.Model):
     @api.multi
     def _prepare_where_clause_dashboard(self, journal_id):
         journal_id_clause_operator = '='
-        journal_ids = journal_id
-        if type(journal_id) == list:
-            journal_id_clause_operator = 'in'
-            journal_ids = tuple(journal_id)
-            journal_browse = self.env['account.journal'].browse(journal_id[0])
-        else:
-            journal_browse = self.env['account.journal'].browse(journal_id)
-        company_id = journal_browse.company_id.id
+        company_id = self.env['account.journal'].browse(journal_id).company_id.id
         fiscalyear_id = self.env['account.journal'].find_fiscalyear(company_id)
-        where_clause = "journal_id %s %s AND company_id = %s" % (journal_id_clause_operator, journal_ids, company_id)
+        where_clause = "journal_id = %s AND company_id = %s" % (journal_id, company_id)
         fiscalyear_id = set(fiscalyear.id for fiscalyear in fiscalyear_id)
         if fiscalyear_id:
             where_clause += " AND period_id in \
@@ -63,16 +56,11 @@ class account_invoice(models.Model):
                     GROUP BY state" % (where_clause))
         invoice_stats = self._cr.fetchall()
         # query will return sum of all draft invoices which has no period_id
-        journal_id_clause_operator = '='
-        journal_ids = journal_id
-        if type(journal_id) == list:
-            journal_id_clause_operator = 'in'
-            journal_ids = tuple(journal_id)
         self._cr.execute("SELECT sum(amount_total)\
                     FROM account_invoice\
                     WHERE state in ('draft', 'proforma', 'proforma2')\
-                    AND journal_id %s %s\
-                    GROUP BY state" % (journal_id_clause_operator, journal_ids))
+                    AND journal_id = %s\
+                    GROUP BY state" % (journal_id))
 
         res = {'draft_invoice_amount': 0, 'open_invoice_amount': 0, 'paid_invoice_amount': 0}
         for amount in self._cr.fetchall():
@@ -338,3 +326,8 @@ class account_journal(models.Model):
         action['context'] = ctx
         action['domain'] = domain
         return action
+
+    @api.multi
+    def add_remove_journal_favorite(self):
+        """set or remove a journal from favorite kanban view"""
+        self.write({'dashboard_star': False if self.dashboard_star else True,})
