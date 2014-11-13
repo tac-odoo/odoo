@@ -224,7 +224,7 @@ class marketing_campaign_segment(osv.osv):
     _columns = {
         'name': fields.char('Name', required=True),
         'campaign_id': fields.many2one('marketing.campaign', 'Campaign', required=True, select=1, ondelete="cascade"),
-        'object_id': fields.related('campaign_id','object_id', type='many2one', relation='ir.model', string='Resource'),
+        'object_id': fields.related('campaign_id','object_id', type='many2one', relation='ir.model', string='Resource',store=True),
         'ir_filter_id': fields.many2one('ir.filters', 'Filter', ondelete="restrict",
                             help="Filter to select the matching resource records that belong to this segment. "\
                                  "New filters can be created and saved using the advanced search on the list view of the Resource. "\
@@ -265,6 +265,7 @@ class marketing_campaign_segment(osv.osv):
     _constraints = [
         (_check_model, 'Model of filter must be same as resource model of Campaign ', ['ir_filter_id,campaign_id']),
     ]
+
 
     def onchange_campaign_id(self, cr, uid, ids, campaign_id):
         res = {'domain':{'ir_filter_id':[]}}
