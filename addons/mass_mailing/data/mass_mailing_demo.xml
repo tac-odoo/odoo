@@ -33,7 +33,7 @@
 
         <!-- Demo newsletter template -->
        <!--Email template -->
-        <record id="newsletter_template" model="email.template">
+        <record id="newsletter_template" model="mail.template">
             <field name="name">Newsletter</field>
             <field name="subject">Newsletter</field>
             <field name="model_id" ref="mass_mailing.model_mail_mass_mailing_contact"/>

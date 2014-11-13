@@ -59,7 +59,7 @@ class mail_compose_message(osv.TransientModel):
         return res
 
     _columns = {
-        'template_id': fields.many2one('email.template', 'Use template', select=True),
+        'template_id': fields.many2one('mail.template', 'Use template', select=True),
     }
 
     def send_mail(self, cr, uid, ids, context=None):
@@ -90,7 +90,7 @@ class mail_compose_message(osv.TransientModel):
             - normal mode: return rendered values """
         if template_id and composition_mode == 'mass_mail':
             fields = ['subject', 'body_html', 'email_from', 'reply_to', 'mail_server_id']
-            template = self.pool['email.template'].browse(cr, uid, template_id, context=context)
+            template = self.pool['mail.template'].browse(cr, uid, template_id, context=context)
             values = dict((field, getattr(template, field)) for field in fields if getattr(template, field))
             if template.attachment_ids:
                 values['attachment_ids'] = [att.id for att in template.attachment_ids]
@@ -126,7 +126,7 @@ class mail_compose_message(osv.TransientModel):
     def save_as_template(self, cr, uid, ids, context=None):
         """ hit save as template button: current form value will be a new
             template attached to the current document. """
-        email_template = self.pool.get('email.template')
+        email_template = self.pool.get('mail.template')
         ir_model_pool = self.pool.get('ir.model')
         for record in self.browse(cr, uid, ids, context=context):
             model_ids = ir_model_pool.search(cr, uid, [('model', '=', record.model)], context=context)
@@ -164,7 +164,7 @@ class mail_compose_message(osv.TransientModel):
         values = dict.fromkeys(res_ids, False)
 
         ctx = dict(context, tpl_partners_only=True)
-        template_values = self.pool.get('email.template').generate_email_batch(cr, uid, template_id, res_ids, fields=fields, context=ctx)
+        template_values = self.pool.get('mail.template').generate_email_batch(cr, uid, template_id, res_ids, fields=fields, context=ctx)
         for res_id in res_ids:
             res_id_values = dict((field, template_values[res_id][field]) for field in returned_fields if template_values[res_id].get(field))
             res_id_values['body'] = res_id_values.pop('body_html', '')
@@ -200,7 +200,7 @@ class mail_compose_message(osv.TransientModel):
         return template_values
 
     def render_template_batch(self, cr, uid, template, model, res_ids, context=None, post_process=False):
-        return self.pool.get('email.template').render_template_batch(cr, uid, template, model, res_ids, context=context, post_process=post_process)
+        return self.pool.get('mail.template').render_template_batch(cr, uid, template, model, res_ids, context=context, post_process=post_process)
 
     # Compatibility methods
     def generate_email_for_composer(self, cr, uid, template_id, res_id, context=None):

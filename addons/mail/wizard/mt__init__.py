@@ -19,9 +19,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 ##############################################################################
-import email_template
-import wizard
-import res_partner
-import ir_actions
+import mt_email_template_preview
+import mt_mail_compose_message
+
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

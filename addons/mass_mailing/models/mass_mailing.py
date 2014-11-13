@@ -615,7 +615,7 @@ class MassMailing(osv.Model):
         author_id = self.pool['res.users'].browse(cr, uid, uid, context=context).partner_id.id
         for mailing in self.browse(cr, uid, ids, context=context):
             # instantiate an email composer + send emails
-            res_ids = self.get_recipients(cr, uid, mailing, context=context)
+            res_ids = self.get_recipients(cr, uid, mailing, context=context)  # Stock this in mail_compose_message if res_id < 100 (res_id -> res_ids ?)
             if not res_ids:
                 raise Warning('Please select recipients.')
             comp_ctx = dict(context, active_ids=res_ids)
@@ -634,6 +634,10 @@ class MassMailing(osv.Model):
             if mailing.reply_to_mode == 'email':
                 composer_values['reply_to'] = mailing.reply_to
             composer_id = self.pool['mail.compose.message'].create(cr, uid, composer_values, context=comp_ctx)
-            self.pool['mail.compose.message'].send_mail(cr, uid, [composer_id], context=comp_ctx)
+            self.pool['mail.compose.message'].send_mail(cr, uid, [composer_id], context=comp_ctx)  # Only if res_ids < 100
             self.write(cr, uid, [mailing.id], {'sent_date': fields.datetime.now(), 'state': 'done'}, context=context)
         return True
+
+    # Add a cron job to send all the transient models 'mail_compose_message' in background
+    # -> composer_ids = mail_compose_messages with mass_mailing_id != NULL
+    # -> self.pool['mail.compose.message'].send_mail(cr, uid, composer_ids, context=comp_ctx)

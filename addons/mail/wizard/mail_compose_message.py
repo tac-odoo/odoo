@@ -226,7 +226,7 @@ class mail_compose_message(osv.TransientModel):
                 all_mail_values = self.get_mail_values(cr, uid, wizard, res_ids, context=context)
                 for res_id, mail_values in all_mail_values.iteritems():
                     if wizard.composition_mode == 'mass_mail':
-                        self.pool['mail.mail'].create(cr, uid, mail_values, context=context)
+                        self.pool['mail.mail'].create(cr, uid, mail_values, context=context)  # Direct send
                     else:
                         subtype = 'mail.mt_comment'
                         if context.get('mail_compose_log') or (wizard.composition_mode == 'mass_post' and not wizard.notify):  # log a note: subtype is False

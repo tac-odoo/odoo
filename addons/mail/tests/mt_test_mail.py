@@ -56,7 +56,7 @@ class test_message_compose(TestMail):
 
         # Create template on mail.group, with attachments
         group_model_id = self.registry('ir.model').search(cr, uid, [('model', '=', 'mail.group')])[0]
-        email_template = self.registry('email.template')
+        email_template = self.registry('mail.template')
         email_template_id = email_template.create(cr, uid, {
             'model_id': group_model_id,
             'name': 'Pigs Template',
@@ -207,9 +207,9 @@ class test_message_compose(TestMail):
         """ Tests designed for the mail.compose.message wizard updated by email_template. """
         cr, uid, context = self.cr, self.uid, {}
 
-        # create the email.template on mail.group model
+        # create the mail.template on mail.group model
         group_model_id = self.registry('ir.model').search(cr, uid, [('model', '=', 'mail.group')])[0]
-        email_template = self.registry('email.template')
+        email_template = self.registry('mail.template')
         email_template_id = email_template.create(cr, uid, {
             'model_id': group_model_id,
             'name': 'Pigs Template',

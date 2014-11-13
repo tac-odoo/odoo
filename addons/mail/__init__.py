@@ -27,6 +27,7 @@ import mail_message
 import mail_mail
 import mail_thread
 import mail_group
+import mail_template
 import res_partner
 import res_users
 import report
@@ -35,5 +36,9 @@ import res_config
 import mail_group_menu
 import update
 import controllers
+
+import mt_html2text
+import mt_ir_actions
+import mt_res_partner
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

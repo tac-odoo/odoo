@@ -33,7 +33,6 @@ professional emails and reuse templates in a few clicks.
     'category': 'Marketing',
     'depends': [
         'mail',
-        'email_template',
         'marketing',
         'web_kanban_gauge',
         'web_kanban_sparkline',
