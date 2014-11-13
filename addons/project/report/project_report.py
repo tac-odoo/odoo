@@ -43,9 +43,9 @@ class report_project_task_user(models.Model):
                                    help="Number of Days to Open the task")
     delay_endings_days = fields.Float(string='Overpassed Deadline', digits_compute=dp.get_precision('Product Price'), readonly=True)
     nbr = fields.Integer(string='# of Tasks', readonly=True)  # TDE FIXME master: rename into nbr_tasks
-    priority = fields.Selection([('0','Low'), ('1','Normal'), ('2','High')],
+    priority = fields.Selection([('0', 'Low'), ('1', 'Normal'), ('2', 'High')],
         string='Priority', readonly=True)
-    state = fields.Selection([('normal', 'In Progress'),('blocked', 'Blocked'),('done', 'Ready for next stage')], string='Status', readonly=True)
+    state = fields.Selection([('normal', 'In Progress'), ('blocked', 'Blocked'), ('done', 'Ready for next stage')], string='Status', readonly=True)
     company_id = fields.Many2one('res.company', string='Company', readonly=True)
     partner_id = fields.Many2one('res.partner', string='Contact', readonly=True)
     stage_id = fields.Many2one('project.task.type', string='Stage')
@@ -104,4 +104,4 @@ class report_project_task_user(models.Model):
               FROM project_task t
                 WHERE t.active = 'true'
                 %s
-        """% (self._select(), self._group_by()))
+        """ % (self._select(), self._group_by()))

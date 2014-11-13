@@ -75,6 +75,6 @@ class project_configuration(models.TransientModel):
     @api.model
     def set_default_generate_project_alias(self, ids):
         config_value = self.browse(ids).generate_project_alias
-        self.env['ir.values'].set_default( 'project.config.settings', 'generate_project_alias', config_value)
+        self.env['ir.values'].set_default('project.config.settings', 'generate_project_alias', config_value)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

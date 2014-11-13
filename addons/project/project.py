@@ -32,6 +32,7 @@ from openerp.addons.resource.faces import task as Task
 
 from openerp import models, fields, api, _
 from openerp.exceptions import except_orm, Warning
+import openerp.addons.decimal_precision as dp
 
 class project_task_type(models.Model):
     _name = 'project.task.type'
@@ -47,7 +48,7 @@ class project_task_type(models.Model):
 
     name = fields.Char(string='Stage Name', required=True, translate=True)
     description = fields.Text(string='Description')
-    sequence= fields.Integer(string='Sequence', default=1)
+    sequence = fields.Integer(string='Sequence', default=1)
     case_default = fields.Boolean(string='Default for New Projects',
                     help="If you check this field, this stage will be proposed by default on each new project. It will not assign this stage to existing projects.")
     project_ids = fields.Many2many('project.project', 'project_task_type_rel', 'type_id', 'project_id', string='Projects', default=_get_default_project_ids)
@@ -205,8 +206,8 @@ class project(models.Model):
     members = fields.Many2many('res.users', 'project_user_rel', 'project_id', 'uid', string='Project Members',
         help="Project's members are users who can have an access to the tasks related to this project.", states={'close': [('readonly', True)], 'cancelled': [('readonly', True)]})
     tasks = fields.One2many('project.task', 'project_id', string="Task Activities")
-    resource_calendar_id = fields.Many2one('resource.calendar', string='Working Time', help="Timetable working hours to adjust the gantt diagram report", states={'close':[('readonly',True)]} )
-    type_ids = fields.Many2many('project.task.type', 'project_task_type_rel', 'project_id', 'type_id', string='Tasks Stages', states={'close':[('readonly',True)], 'cancelled':[('readonly',True)]}, default=_get_type_common)
+    resource_calendar_id = fields.Many2one('resource.calendar', string='Working Time', help="Timetable working hours to adjust the gantt diagram report", states={'close': [('readonly', True)]})
+    type_ids = fields.Many2many('project.task.type', 'project_task_type_rel', 'project_id', 'type_id', string='Tasks Stages', states={'close': [('readonly', True)], 'cancelled': [('readonly', True)]}, default=_get_type_common)
     task_count = fields.Integer(compute='_task_count', string="Tasks",)
     task_ids = fields.One2many('project.task', 'project_id',
                                 domain=[('stage_id.fold', '=', False)])
@@ -247,7 +248,7 @@ class project(models.Model):
         for data in self:
             if data.partner_id:
                 reason = _('Customer Email') if data.partner_id.email else _('Customer')
-                self._message_add_suggested_recipient(recipients, data, partner=data.partner_id, reason= '%s' % reason)
+                self._message_add_suggested_recipient(recipients, data, partner=data.partner_id, reason='%s' % reason)
         return recipients
 
     # TODO: Why not using a SQL contraints ?# TODO: Why not using a SQL contraints ?
@@ -276,19 +277,19 @@ class project(models.Model):
             # preserve task name and stage, normally altered during copy
             defaults = {'stage_id': task.stage_id.id,
                         'name': task.name + (_(' (copy)'))}
-            map_task_id[task.id] =  task.copy(defaults).id
-        self.write({'tasks':[(6,0, map_task_id.values())]})
+            map_task_id[task.id] = task.copy(defaults).id
+        self.write({'tasks': [(6, 0, map_task_id.values())]})
         task_obj.duplicate_task(map_task_id)
         return True
 
     @api.one
     def copy(self, default=None):
-       if default is None:
-           default = {}
-       default.update({'name': self.name + _(' (copy)')})
-       res = super(project, self).copy(default)
-       res.map_tasks(self.id)
-       return res
+        if default is None:
+            default = {}
+        default.update({'name': self.name + _(' (copy)')})
+        res = super(project, self).copy(default)
+        res.map_tasks(self.id)
+        return res
 
     @api.multi
     def duplicate_template(self):
@@ -304,15 +305,15 @@ class project(models.Model):
                 end_date = date(*time.strptime(proj.date, '%Y-%m-%d')[:3])
                 new_date_end = (datetime(*time.strptime(new_date_start, '%Y-%m-%d')[:3])+(end_date-start_date)).strftime('%Y-%m-%d')
             self._context.update({'copy': True})
-            new_id = proj.copy(default = {
+            new_id = proj.copy(default={
                                     'name':_("%s (copy)") % (proj.name),
                                     'state':'open',
                                     'date_start':new_date_start,
                                     'date':new_date_end,
-                                    'parent_id':parent_id}, context=context)
+                                    'parent_id':parent_id})
             result.append(new_id)
 
-            child_ids = self.search([('parent_id','=', proj.analytic_account_id.id)])
+            child_ids = self.search([('parent_id', '=', proj.analytic_account_id.id)])
             parent_id = new_id.read(['analytic_account_id'])['analytic_account_id'][0]
             if child_ids:
                 self._context.update({'parent_id': parent_id})
@@ -362,7 +363,7 @@ class project(models.Model):
 
         for project in projects:
             if (not project.members) and force_members:
-                raise osv.except_osv(_('Warning!'),_("You must assign members on the project '%s'!") % (project.name,))
+                raise except_orm(_('Warning!'), _("You must assign members on the project '%s'!") % (project.name,))
 
         resource_pool = self.env['resource.resource']
 
@@ -378,7 +379,7 @@ class project(models.Model):
             calendar_id = project.resource_calendar_id and project.resource_calendar_id.id or False
             resource_objs = resource_pool.generate_resources(u_ids, calendar_id)
             for key, vals in resource_objs.items():
-                result +='''
+                result += '''
 class User_%s(Resource):
     efficiency = %s
 ''' % (key,  vals.get('efficiency', False))
@@ -402,16 +403,16 @@ def Project():
     start = \'%s\'
     working_days = %s
     resource = %s
-"""       % (
+""" % (
             project.id,
             project.date_start or time.strftime('%Y-%m-%d'), working_days,
             '|'.join(['User_'+str(x) for x in puids]) or 'None'
         )
         vacation = calendar_id and tuple(resource_pool.compute_vacation(calendar_id)) or False
         if vacation:
-            result+= """
+            result += """
     vacation = %s
-""" %   ( vacation, )
+""" % (vacation, )
         return result
 
     #TODO: DO Resource allocation and compute availability
@@ -540,7 +541,7 @@ class task(models.Model):
         stage_ids = stage_obj._search(cr, uid, search_domain, order=order, access_rights_uid=access_rights_uid, context=context)
         result = stage_obj.name_get(cr, access_rights_uid, stage_ids, context=context)
         # restore order of the search
-        result.sort(lambda x,y: cmp(stage_ids.index(x[0]), stage_ids.index(y[0])))
+        result.sort(lambda x, y: cmp(stage_ids.index(x[0]), stage_ids.index(y[0])))
 
         fold = {}
         for stage in stage_obj.browse(cr, access_rights_uid, stage_ids, context=context):
@@ -559,10 +560,10 @@ class task(models.Model):
             if read_group_order == 'user_id desc':
                 order = '%s desc' % order
             # de-duplicate and apply search order
-            ids = res_users._search(cr, uid, [('id','in',ids)], order=order, access_rights_uid=access_rights_uid, context=context)
+            ids = res_users._search(cr, uid, [('id', 'in', ids)], order=order, access_rights_uid=access_rights_uid, context=context)
         result = res_users.name_get(cr, access_rights_uid, ids, context=context)
         # restore order of the search
-        result.sort(lambda x,y: cmp(ids.index(x[0]), ids.index(y[0])))
+        result.sort(lambda x, y: cmp(ids.index(x[0]), ids.index(y[0])))
         return result, {}
 
     _group_by_full = {
@@ -607,8 +608,8 @@ class task(models.Model):
             new_child_ids = set(map(mapper, task.child_ids))
             new_parent_ids = set(map(mapper, task.parent_ids))
             if new_child_ids or new_parent_ids:
-                task.write({'parent_ids': [(6,0,list(new_parent_ids))],
-                            'child_ids':  [(6,0,list(new_child_ids))]})
+                task.write({'parent_ids': [(6, 0, list(new_parent_ids))],
+                            'child_ids':  [(6, 0, list(new_child_ids))]})
 
     @api.one
     def copy_data(self, default=None):
@@ -621,43 +622,43 @@ class task(models.Model):
         for task in self:
             task.active = True
             if task.project_id:
-                if task.project_id.active == False or task.project_id.state == 'template':
+                if task.project_id.active is False or task.project_id.state == 'template':
                     task.active = False
 
     active = fields.Boolean(compute='_is_template', store=True, string='Not a Template Task', help="This field is computed automatically and have the same behavior than the boolean 'active' field: if the task is linked to a template or unactivated project, it will be hidden unless specifically asked.", default=True)
-    name = fields.Char('Task Summary', track_visibility='onchange', size=128, required=True, select=True)
-    description = fields.Html('Description')
-    priority = fields.Selection([('0','Low'), ('1','Normal'), ('2','High')], 'Priority', select=True, default='0')
-    sequence = fields.Integer('Sequence', select=True, help="Gives the sequence order when displaying a list of tasks.", default=10)
-    stage_id = fields.Many2one('project.task.type', 'Stage', track_visibility='onchange', select=True,
+    name = fields.Char(string='Task Summary', track_visibility='onchange', size=128, required=True, select=True)
+    description = fields.Html(string='Description')
+    priority = fields.Selection([('0', 'Low'), ('1', 'Normal'), ('2', 'High')], 'Priority', select=True, default='0')
+    sequence = fields.Integer(string='Sequence', select=True, help="Gives the sequence order when displaying a list of tasks.", default=10)
+    stage_id = fields.Many2one('project.task.type', string='Stage', track_visibility='onchange', select=True,
                     domain="[('project_ids', '=', project_id)]", copy=False, default=_get_default_stage_id)
     tag_ids = fields.Many2many('project.tags', string='Tags')
-    kanban_state = fields.Selection([('normal', 'In Progress'),('done', 'Ready for next stage'),('blocked', 'Blocked')], 'Kanban State',
+    kanban_state = fields.Selection([('normal', 'In Progress'),('done', 'Ready for next stage'),('blocked', 'Blocked')], string='Kanban State',
                                      track_visibility='onchange',
                                      help="A task's kanban state indicates special situations affecting it:\n"
                                           " * Normal is the default situation\n"
                                           " * Blocked indicates something is preventing the progress of this task\n"
                                           " * Ready for next stage indicates the task is ready to be pulled to the next stage",
                                      required=False, copy=False, default='normal')
-    create_date = fields.Datetime('Create Date', readonly=True, select=True)
-    write_date = fields.Datetime('Last Modification Date', readonly=True, select=True) #not displayed in the view but it might be useful with base_action_rule module (and it needs to be defined first for that)
-    date_start = fields.Datetime('Starting Date', select=True, copy=False, default=fields.Datetime.now)
-    date_end = fields.Datetime('Ending Date', select=True, copy=False)
-    date_deadline = fields.Date('Deadline', select=True, copy=False)
-    date_last_stage_update = fields.Datetime('Last Stage Update', select=True, copy=False, default=fields.Datetime.now)
-    project_id = fields.Many2one('project.project', 'Project', ondelete='set null', select=True, track_visibility='onchange', change_default=True, default=_get_default_project_id)
-    parent_ids = fields.Many2many('project.task', 'project_task_parent_rel', 'task_id', 'parent_id', 'Parent Tasks')
-    child_ids = fields.Many2many('project.task', 'project_task_parent_rel', 'parent_id', 'task_id', 'Delegated Tasks')
-    notes = fields.Text('Notes')
-    planned_hours = fields.Float('Initially Planned Hours', help='Estimated time to do the task, usually set by the project manager when the task is in draft state.')
-    remaining_hours = fields.Float('Remaining Hours', digits=(16,2), help="Total remaining time, can be re-estimated periodically by the assignee of the task.")
-    user_id = fields.Many2one('res.users', 'Assigned to', select=True, track_visibility='onchange', default=lambda self: self._uid)
+    create_date = fields.Datetime(string='Create Date', readonly=True, select=True)
+    write_date = fields.Datetime(string='Last Modification Date', readonly=True, select=True)#not displayed in the view but it might be useful with base_action_rule module (and it needs to be defined first for that)
+    date_start = fields.Datetime(string='Starting Date', select=True, copy=False, default=fields.Datetime.now)
+    date_end = fields.Datetime(string='Ending Date', select=True, copy=False)
+    date_deadline = fields.Date(string='Deadline', select=True, copy=False)
+    date_last_stage_update = fields.Datetime(string='Last Stage Update', select=True, copy=False, default=fields.Datetime.now)
+    project_id = fields.Many2one('project.project', string='Project', ondelete='set null', select=True, track_visibility='onchange', change_default=True, default=_get_default_project_id)
+    parent_ids = fields.Many2many('project.task', 'project_task_parent_rel', 'task_id', 'parent_id', string='Parent Tasks')
+    child_ids = fields.Many2many('project.task', 'project_task_parent_rel', 'parent_id', 'task_id', string='Delegated Tasks')
+    notes = fields.Text(string='Notes')
+    planned_hours = fields.Float(string='Initially Planned Hours', help='Estimated time to do the task, usually set by the project manager when the task is in draft state.')
+    remaining_hours = fields.Float(string='Remaining Hours', digits_compute=dp.get_precision('Product Price'), help="Total remaining time, can be re-estimated periodically by the assignee of the task.")
+    user_id = fields.Many2one('res.users', string='Assigned to', select=True, track_visibility='onchange', default=lambda self: self._uid)
     delegated_user_id = fields.Many2one(related='child_ids.user_id', comodel_name='res.users', string='Delegated To')
-    partner_id = fields.Many2one('res.partner', 'Customer', default=lambda self: self._get_default_partner())
+    partner_id = fields.Many2one('res.partner', string='Customer', default=lambda self: self._get_default_partner())
     manager_id = fields.Many2one(related='project_id.analytic_account_id.user_id', comodel_name='res.users', string='Project Manager')
-    company_id = fields.Many2one('res.company', 'Company', default=lambda self: self.env['res.company']._company_default_get('project.task'))
-    id = fields.Integer('ID', readonly=True)
-    color = fields.Integer('Color Index')
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env['res.company']._company_default_get('project.task'))
+    id = fields.Integer(string='ID', readonly=True)
+    color = fields.Integer(string='Color Index')
     user_email = fields.Char(related='user_id.email', string='User Email', readonly=True)
 
     _order = "priority desc, sequence, date_start, name, id"
@@ -684,14 +685,14 @@ class task(models.Model):
         #visit child using DFS
         task = self.browse(id.id)
         for child in task.child_ids:
-            res = self._check_cycle(child.id, visited_branch, visited_nod)
+            res = self._check_cycle(child.id, visited_branch, visited_node)
             if not res:
                 return False
 
         visited_branch.remove(id.id)
         return True
 
-    @api.constrains('date_start','date_end')
+    @api.constrains('date_start', 'date_end')
     def _check_dates(self):
         obj_task = self
         start = obj_task.date_start or False
@@ -861,9 +862,6 @@ class task(models.Model):
 
     @api.multi
     def write(self, vals):
-        if isinstance(self._ids, (int, long)):
-            ids = self._ids
-
         # stage change: update date_last_stage_update
         if 'stage_id' in vals:
             vals['date_last_stage_update'] = fields.datetime.now()
@@ -907,14 +905,14 @@ class task(models.Model):
             result += '''
 %sdef Task_%s():
 %s  todo = \"%.2fH\"
-%s  effort = \"%.2fH\"''' % (ident,task.id, ident,task.remaining_hours, ident, task._get_total_hours())
+%s  effort = \"%.2fH\"''' % (ident, task.id, ident, task.remaining_hours, ident, task._get_total_hours())
             start = []
             for t2 in task.parent_ids:
                 start.append("up.Task_%s.end" % (t2.id,))
             if start:
                 result += '''
 %s  start = max(%s)
-''' % (ident,','.join(start))
+''' % (ident, ', '.join(start))
 
             if task.user_id:
                 result += '''
@@ -1009,7 +1007,7 @@ class account_analytic_account(models.Model):
             project_values = {
                 'name': vals.get('name'),
                 'analytic_account_id': analytic_account_id,
-                'type': vals.get('type','contract'),
+                'type': vals.get('type', 'contract'),
             }
             return project_pool.create(project_values)
         return False
@@ -1037,9 +1035,9 @@ class account_analytic_account(models.Model):
     def unlink(self):
         proj_ids = self.env['project.project'].search([('analytic_account_id', 'in', self._ids)])
         if proj_ids:
-            has_tasks = self.evn['project.task'].search(cr, uid, [('project_id', 'in', [ids for ids in proj_ids])], count=True)
+            has_tasks = self.evn['project.task'].search([('project_id', 'in', [ids for ids in proj_ids])], count=True)
             if has_tasks:
-                raise osv.except_osv(_('Warning!'), _('Please remove existing tasks in the project linked to the accounts you want to delete.'))
+                raise except_orm(_('Warning!'), _('Please remove existing tasks in the project linked to the accounts you want to delete.'))
         return super(account_analytic_account, self).unlink()
 
     @api.model
@@ -1049,7 +1047,7 @@ class account_analytic_account(models.Model):
         if self._context.get('current_model') == 'project.project':
             project_ids = self.search(args + [('name', operator, name)], limit=limit)
             return project_ids.name_get()
-        return super(account_analytic_account, self).name_search(name, args=args, operator=operator, limit=limit) 
+        return super(account_analytic_account, self).name_search(name, args=args, operator=operator, limit=limit)
 
 class project_task_history(models.Model):
     """
@@ -1083,8 +1081,8 @@ class project_task_history(models.Model):
     kanban_state = fields.Selection([('normal', 'Normal'), ('blocked', 'Blocked'), ('done', 'Ready for next stage')], string='Kanban State', required=False)
     date = fields.Date(string='Date', select=True, default=date.today())
     end_date = fields.Date(string='End Date', compute="_get_date", store=True)
-    remaining_hours = fields.Float(string='Remaining Time', digits=(16, 2))
-    planned_hours = fields.Float(string='Planned Time', digits=(16, 2))
+    remaining_hours = fields.Float(string='Remaining Time', digits_compute=dp.get_precision('Product Price'))
+    planned_hours = fields.Float(string='Planned Time', digits_compute=dp.get_precision('Product Price'))
     user_id = fields.Many2one('res.users', string='Responsible')
 
 class project_task_history_cumulative(models.Model):

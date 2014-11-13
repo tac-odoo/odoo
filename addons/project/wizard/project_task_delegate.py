@@ -35,7 +35,7 @@ class project_task_delegate(models.TransientModel):
     new_task_description = fields.Text(string='New Task Description', help="Reinclude the description of the task in the task of the user")
     planned_hours = fields.Float(string='Planned Hours',  help="Estimated time to close this task by the delegated user")
     planned_hours_me = fields.Float(string='Hours to Validate', help="Estimated time for you to validate the work done by the user to whom you delegate this task", default=1.0)
-    state = fields.Selection([('pending','Pending'), ('done','Done'), ], string='Validation State', help="New state of your own task. Pending will be reopened automatically when the delegated task is closed", default='pending')
+    state = fields.Selection([('pending', 'Pending'), ('done', 'Done'), ], string='Validation State', help="New state of your own task. Pending will be reopened automatically when the delegated task is closed", default='pending')
 
     @api.onchange('project_id')
     def onchange_project_id(self):
