@@ -443,8 +443,9 @@ class stock_quant(osv.osv):
             if self.search(cr, uid, [('product_id', '=', move.product_id.id), ('qty','<', 0)], limit=1, context=context):
                 new_quants_reconcile = []
                 for quant in quants_reconcile:
-                    reconcile_result = self._quant_reconcile_negative(cr, uid, quant, move, context=context)
-                    for quant_old,
+                    solving_quant, quants_from_reconciled = self._quant_reconcile_negative(cr, uid, quant, move, context=context)
+                    new_quants_reconcile += (solving_quant and [solving_quant] or []) + quants_from_reconciled
+                quants_reconcile = new_quants_reconcile
 
         return quants_reconcile
 
@@ -599,7 +600,7 @@ class stock_quant(osv.osv):
                 solved_quant_ids.append(to_solve_quant.id)
                 self._quant_split(cr, uid, to_solve_quant, min(solving_qty, to_solve_quant.qty), context=context)
                 solving_qty -= min(solving_qty, to_solve_quant.qty)
-                quants_reconciled += [(to_solve_quant, min(solving_qty, to_solve_quant.qty))]
+                quants_reconciled += [to_solve_quant]
             remaining_solving_quant = self._quant_split(cr, uid, solving_quant, qty, context=context)
             remaining_neg_quant = self._quant_split(cr, uid, quant_neg, -qty, context=context)
             #if the reconciliation was not complete, we need to link together the remaining parts
@@ -615,7 +616,7 @@ class stock_quant(osv.osv):
             self._quants_merge(cr, uid, solved_quant_ids, solving_quant, context=context)
             self.unlink(cr, SUPERUSER_ID, [solving_quant.id], context=context)
             solving_quant = remaining_solving_quant
-            return quants_reconciled
+        return solving_quant, quants_reconciled
 
     def _price_update(self, cr, uid, ids, newprice, context=None):
         self.write(cr, SUPERUSER_ID, ids, {'cost': newprice}, context=context)
@@ -2294,18 +2295,10 @@ class stock_move(osv.osv):
         quant_obj = self.pool.get("stock.quant")
         for ops, move in quants_moved.keys():
             for quant in quants_moved[(ops, move)]:
-                if quant.qty > 0:
-                    link_obj.create(cr, uid, {'move_id': move.id,
-                                              'operation_id': ops.id,
-                                              'reserved_quant_id': quant.id,
-                                              'qty': quant.qty}, context=context)
-                else:
-                    quants = quant_obj.search(cr, uid, [('propagated_from_id', '=', quant.id)], context=context)
-                    if quants:
-                        link_obj.create(cr, uid, {'move_id': move.id,
-                                              'operation_id': ops.id,
-                                              'reserved_quant_id': quants[0],
-                                              'qty': - quant.qty}, context=context)
+                link_obj.create(cr, uid, {'move_id': move.id,
+                                          'operation_id': ops.id,
+                                          'reserved_quant_id': quant.id,
+                                          'qty': quant.qty}, context=context)
 
 
     def action_done(self, cr, uid, ids, context=None):
