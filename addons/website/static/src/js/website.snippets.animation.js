@@ -37,7 +37,14 @@
             }
         });
     };
+
+
     $(document).ready(function () {
+        if ($(".o_gallery:not(.oe_slideshow)").size()) {
+            // load gallery modal template
+            website.add_template_file('/website/static/src/xml/website.gallery.xml');
+        }
+
         website.snippet.start_animation();
     });
 
@@ -69,7 +76,7 @@
     website.snippet.animationRegistry.slider = website.snippet.Animation.extend({
         selector: ".carousel",
         start: function () {
-            this.$target.carousel({interval: 10000});
+            this.$target.carousel();
         },
         stop: function () {
             this.$target.carousel('pause');
