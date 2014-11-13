@@ -936,6 +936,18 @@
         });
     }
     website.snippet.Option.include({
+        onFocus : function () {
+            this._bind_li_menu();
+        },
+        onBlur : function () {
+        },
+        on_focus : function () {
+            this.onFocus();
+        },
+        on_blur : function () {
+            this.onBlur();
+        },
+
         value: function (type, value, $li) {
             if (this.scroll) {
                 this.scroll(type, value, $li);
