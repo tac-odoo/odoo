@@ -75,10 +75,11 @@
             id="action_report_financial"
             model="account.financial.report.line"
             string="Financial report"
-            report_type="qweb-pdf"
+            report_type="qweb-html"
             name="account.report_financial"
             file="account.report_financial"
             menu="False"
+            auto="False"
         />
 
         <report 

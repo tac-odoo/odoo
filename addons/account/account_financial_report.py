@@ -21,14 +21,17 @@
 
 from openerp import models, fields, api, exceptions
 from openerp.tools.safe_eval import safe_eval
+from openerp.tools.translate import _
 import re
 import time
 
 
 class report_account_financial_report(models.Model):
-    _name = "account.financial.report"
+    _name = "report.account.report_financial"
     _description = "Account Report"
+    _template = "account.report_financial"
 
+    name = fields.Char("Name")
     title = fields.Char("Report Title")
     target_move = fields.Selection([('posted', 'All Posted Entries'), ('all', 'All Entries')],
                                    'Target Moves', default='posted', required=True)
@@ -46,16 +49,51 @@ class report_account_financial_report(models.Model):
         if not (self.debit_credit or self.balance or self.comparison):
             raise exceptions.ValidationError("Report needs at least one column")
 
+    def _get_account(self, data):
+        if data.get('form', False) and data['form'].get('chart_account_id', False):
+            return self.env['account.account'].browse(data['form']['chart_account_id']).name
+        return ''
+
+    def _get_fiscalyear(self, data):
+        if data.get('form', False) and data['form'].get('fiscalyear_id', False):
+            return self.env['account.fiscalyear'].browse(data['form']['fiscalyear_id']).name
+        return ''
+
+    def _get_start_period(self, data):
+        if data.get('form', False) and data['form'].get('period_from', False):
+            return self.env['account.period'].browse(data['form']['period_from']).name
+        return ''
+
+    def _get_end_period(self, data):
+        if data.get('form', False) and data['form'].get('period_to', False):
+            return self.env['account.period'].browse(data['form']['period_to']).name
+        return ''
+
+    def _get_target_move(self, data):
+        if data.get('form', False) and data['form'].get('target_move', False):
+            if data['form']['target_move'] == 'all':
+                return _('All Entries')
+            return _('All Posted Entries')
+        return ''
+
     @api.multi
     def render_html(self, data=None):
         report_obj = self.env['report']
         report = report_obj._get_report_from_name('account.report_financial')
+        report_id = self.browse(data['form']['account_report_id'][0])
         docargs = {
-            'doc_ids': self._ids,
+            'doc_ids': report_id.id,
             'doc_model': report.model,
-            'docs': self,
-            'get_lines': self.line.get_lines,
+            'docs': report_id,
+            'get_lines': report_id.line.get_lines,
+            'get_account': self._get_account,
+            'get_fiscalyear': self._get_fiscalyear,
+            'get_start_period': self._get_start_period,
+            'get_end_period': self._get_end_period,
+            'get_target_move': self._get_target_move,
             'time': time,
+            'data': data,
+            'formatLang': lambda val, currency_obj=None: val,
         }
         return report_obj.render('account.report_financial', docargs)
 
@@ -65,21 +103,25 @@ class account_financial_report_line(models.Model):
     _description = "Account Report Line"
 
     @api.one
+    @api.depends('parent_id')
     def _get_level(self):
         '''Returns the level of a record in the tree structure'''
         level = 0
         if self.parent_id:
             level = self.parent_id.level + 1
+        print self.name
+        print level
         return level
 
-    @api.one
+    @api.multi
     def _get_children_by_order(self):
         '''returns a dictionary with the key= the ID of a record and value = all its children,
            computed recursively, and sorted by sequence. Ready for the printing'''
         res = []
-        res.append(self)
-        children = self.search([('parent_id', '=', self.id)], order='sequence ASC')
-        res += children._get_children_by_order()
+        for line in self:
+            res.append(line)
+            children = line.search([('parent_id', '=', line.id)], order='sequence ASC')
+            res += children._get_children_by_order()
         return res
 
     @api.one
@@ -168,7 +210,7 @@ class account_financial_report_line(models.Model):
     ], 'Display Details')
     parent_id = fields.Many2one('account.financial.report.line', 'Parent')
     children_ids = fields.One2many('account.financial.report.line', 'parent_id', 'Children')
-    financial_report = fields.Many2one('account.financial.report', 'Financial Report')
+    financial_report = fields.Many2one('report.account.report_financial', 'Financial Report')
     level = fields.Integer(compute='_get_level', string='Level', store=True)
     sequence = fields.Integer('Sequence')
     account_type_ids = fields.Many2many('account.account.type', 'account_account_financial_report_line_type',
@@ -236,7 +278,8 @@ class account_financial_report_line(models.Model):
                             flag = True
                     if flag:
                         lines.append(vals)
-        return line
+        print lines
+        return lines
 
 
 class account_financial_report_line_formula(models.Model):
