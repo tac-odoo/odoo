@@ -62,14 +62,12 @@ class account_invoice(models.Model):
                     AND journal_id = %s\
                     GROUP BY state" % (journal_id))
 
-        res = {'draft_invoice_amount': 0, 'open_invoice_amount': 0, 'paid_invoice_amount': 0}
+        res = {'draft_invoice_amount': 0, 'open_invoice_amount': 0}
         for amount in self._cr.fetchall():
             res['draft_invoice_amount'] = amount
         for state, amount_total in invoice_stats:
             if state == 'open':   
                 res['open_invoice_amount'] = amount_total
-            elif state == 'paid':
-                res['paid_invoice_amount'] = amount_total
         remaining_payment_stats = self._get_remaining_payment_stats(journal_id)
         res.update(remaining_payment_stats)
         return res

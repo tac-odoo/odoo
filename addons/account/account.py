@@ -753,6 +753,7 @@ class account_journal(osv.osv):
         'cash_control' : fields.boolean('Cash Control', help='If you want the journal should be control at opening/closing, check this option'),
         'analytic_journal_id':fields.many2one('account.analytic.journal','Analytic Journal', help="Journal for analytic entries"),
         'dashboard_star': fields.boolean('Dashboard favorite', help="Add/Remove this dashboard journal from favorite"),
+        'members': fields.many2many('res.users', 'journal_user_rel', 'journal_id', 'uid', 'Journal Followers', help="journal's follower are users that will see the journal in the journal dashboard view.")
     }
 
     _defaults = {
