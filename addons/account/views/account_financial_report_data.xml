@@ -56,6 +56,13 @@
             <field name="balance" eval="True"/>
             <field name="line" ref="account_financial_report_profitandloss_line0"/>
         </record>
+        <record id="account_financial_report_profitandloss0" model="report.account.report_financial">
+            <field name="name">Profit and Loss</field>
+            <field name="title">Profit and Loss</field>
+            <field name="target_move">all</field>
+            <field name="balance" eval="True"/>
+            <field name="line" ref="account_financial_report_profitandloss_line0"/>
+        </record>
         <record id="account_financial_report_balancesheet0" model="report.account.report_financial">
             <field name="name">Balance Sheet</field>
             <field name="title">Balance Sheet</field>
