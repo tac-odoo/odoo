@@ -705,7 +705,7 @@ class task(models.Model):
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
         # read uom as admin to avoid access rights issues, e.g. for portal/share users,
         # this should be safe (no context passed to avoid side-effects)
-        obj_tm = self.env['res.users'].browse(self._uid).company_id.project_time_mode_id
+        obj_tm = self.env['res.users'].sudo().browse(self._uid).company_id.project_time_mode_id
         tm = obj_tm and obj_tm.name or 'Hours'
         res = super(task, self).fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
         if tm in ['Hours', 'Hour']:
