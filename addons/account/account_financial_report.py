@@ -54,26 +54,19 @@ class report_account_financial_report(models.Model):
             return self.env['account.account'].browse(data['form']['chart_account_id']).name
         return ''
 
-    def _get_fiscalyear(self, data):
-        if data.get('form', False) and data['form'].get('fiscalyear_id', False):
-            return self.env['account.fiscalyear'].browse(data['form']['fiscalyear_id']).name
-        return ''
-
-    def _get_start_period(self, data):
-        if data.get('form', False) and data['form'].get('period_from', False):
-            return self.env['account.period'].browse(data['form']['period_from']).name
-        return ''
-
-    def _get_end_period(self, data):
-        if data.get('form', False) and data['form'].get('period_to', False):
-            return self.env['account.period'].browse(data['form']['period_to']).name
-        return ''
-
     def _get_target_move(self, data):
-        if data.get('form', False) and data['form'].get('target_move', False):
-            if data['form']['target_move'] == 'all':
-                return _('All Entries')
-            return _('All Posted Entries')
+        if self.target_move == 'all':
+            return _('All Entries')
+        return _('All Posted Entries')
+
+    def _get_start_date(self, data):
+        if data.get('form', False) and data['form'].get('date_from', False):
+            return data['form']['date_from']
+        return ''
+
+    def _get_end_date(self, data):
+        if data.get('form', False) and data['form'].get('date_to', False):
+            return data['form']['date_to']
         return ''
 
     @api.multi
@@ -87,13 +80,12 @@ class report_account_financial_report(models.Model):
             'docs': report_id,
             'get_lines': report_id.line.get_lines,
             'get_account': self._get_account,
-            'get_fiscalyear': self._get_fiscalyear,
-            'get_start_period': self._get_start_period,
-            'get_end_period': self._get_end_period,
             'get_target_move': self._get_target_move,
+            'get_start_date': self._get_start_date,
+            'get_end_date': self._get_end_date,
             'time': time,
             'data': data,
-            'formatLang': lambda val, currency_obj=None: val,
+            'formatLang': lambda val, currency_obj=None, date=None: val,
         }
         return report_obj.render('account.report_financial', docargs)
 
@@ -185,8 +177,9 @@ class account_financial_report_line(models.Model):
         ('sum', 'Sum Of Children'),
         ('formula', 'Formula'),
     ], 'Type', required=True, default='sum')
-    action = fields.Many2one('ir.actions.actions', 'Action',
-                             help='Action triggered when clicking on the line')
+    action = fields.Selection([
+        ('linked', 'Open linked object'),
+    ], 'Onclick Action')
     figures_type = fields.Selection([
         ('currency', 'Currency'),
         ('percent', 'Percent'),
@@ -215,12 +208,15 @@ class account_financial_report_line(models.Model):
             "and that you would like to print as positive amounts in your reports; e.g.: Income account.")
     ir_filter_id = fields.Many2one('ir.filters', 'Domain', ondelete='cascade')
     group_by = fields.Char('Group By')
-    formulas = fields.Many2many('account.financial.report.line.formula', 'account_formula_line', 'line_id', 'formula_id', 'Formulas')
+    formulas = fields.Many2many('account.financial.report.line.formula', 'account_formula_line',
+                                'line_id', 'formula_id', 'Formulas')
+    show = fields.Boolean('Show Content', default=False)
 
     def get_lines(self, data):
         lines = []
         account_obj = self.env['account.account']
         financial_report = self.env['report.account.report_financial'].browse(data['form']['account_report_id'][0])[0]
+        data['form']['used_context'].update(state=financial_report.target_move)
         for line in self.with_context(data['form']['used_context'])._get_children_by_order():
             vals = {
                 'name': line.name,
@@ -248,7 +244,8 @@ class account_financial_report_line(models.Model):
             # if line.type == 'accounts' and line.account_ids:
             #     account_ids = account_obj._get_children_and_consol(self.cr, self.uid, [x.id for x in line.account_ids])
             if line.type == 'types':
-                account_ids = account_obj.with_context(data['form']['used_context']).search([('user_type', 'in', [x.id for x in line.account_type_ids])])
+                domain = [('user_type', 'in', [x.id for x in line.account_type_ids])]
+                account_ids = account_obj.with_context(data['form']['used_context']).search(domain)
             if account_ids:
                 for account in account_ids:
                     #if there are accounts to display, we add them to the lines with a level equals to their level in

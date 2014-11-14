@@ -11,7 +11,6 @@
                 <group col="4">
                    <field name="chart_account_id" widget='selection'/>
                    <field name="company_id" invisible="1"/>
-                   <field name="fiscalyear_id" domain="[('company_id','=',company_id)]"/>
                    <field name="target_move" widget="radio" nolable="1"/>
                 </group>
                 <notebook tabpos="up" colspan="4">
@@ -22,10 +21,6 @@
                         <group string="Dates"  attrs="{'invisible':[('filter', '!=', 'filter_date')], 'required':[('filter', '=', 'filter_date')]}">
                             <field name="date_from" />
                             <field name="date_to" />
-                        </group>
-                        <group string="Periods" attrs="{'invisible':[('filter','!=','filter_period')], 'required':[('filter', '=', 'filter_period')]}">
-                            <field name="period_from" domain="[('fiscalyear_id', '=', fiscalyear_id)]"/>
-                            <field name="period_to" domain="[('fiscalyear_id', '=', fiscalyear_id)]"/>
                         </group>
                     </page>
                     <page string="Journals" name="journal_ids">
