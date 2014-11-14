@@ -148,7 +148,8 @@ class website_sale(http.Controller):
             domain += [('product_variant_ids.public_categ_ids', 'child_of', int(category))]
 
         attrib_list = request.httprequest.args.getlist('attrib')
-        attrib_values = [map(int,v.split("-")) for v in attrib_list if v]
+        values = ','.join ([l for l in attrib_list if l])
+        attrib_values = [map(int,v.split("-")) for v in values.split(",") if v]
         attrib_set = set([v[1] for v in attrib_values])
 
         if attrib_values:
@@ -237,7 +238,8 @@ class website_sale(http.Controller):
             category = category_obj.browse(cr, uid, int(category), context=context)
 
         attrib_list = request.httprequest.args.getlist('attrib')
-        attrib_values = [map(int,v.split("-")) for v in attrib_list if v]
+        values = ','.join ([l for l in attrib_list if l])
+        attrib_values = [map(int,v.split("-")) for v in values.split(",") if v]
         attrib_set = set([v[1] for v in attrib_values])
 
         keep = QueryURL('/shop', category=category and category.id, search=search, attrib=attrib_list)
