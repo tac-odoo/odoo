@@ -149,45 +149,8 @@ class account_journal(models.Model):
         elif self.type in ['sale']:
             res = json.dumps(self._get_moves_2_months())
         else:
-            res = json.dumps(self._get_moves_per_month())
+            res = json.dumps(self._get_moves_forecast())
         return res
-
-    @api.multi
-    def _get_moves_per_month(self):
-        total = {}
-        fiscalyear_obj = self.env['account.fiscalyear']
-        fiscalyear_id = self.find_fiscalyear(self.company_id.id)
-        months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        state = ['draft','posted']
-        """
-            Get amount of moves related to the particular journals per month
-            left join on account_move if we want only posted entries then we can use.
-            query will return sum of line.debit and month for related sale,purchase,sale_refund,purchase_refund type journal based on period id
-        """
-        self._cr.execute("SELECT to_char(line.date, 'MM') as month, SUM(line.debit) as amount\
-                    FROM account_move_line AS line LEFT JOIN account_move AS move ON line.move_id=move.id\
-                    WHERE line.journal_id = %s AND line.period_id in (SELECT account_period.id from account_period WHERE fiscalyear_id in %s) \
-                    AND move.state in %s\
-                    GROUP BY to_char(line.date, 'MM') \
-                    ORDER BY to_char(line.date, 'MM')", (self.id, tuple(fiscalyear_id.ids), tuple(state)))
-        values = []
-        for month, amount in self._cr.fetchall():
-            values.append({
-                'x': months[int(month) - 1],
-                'y': amount
-            })
-        data = {
-            'values': [],
-            'bar': True,
-            'color': '#ff7f0e',
-        }
-        for month in months:
-            amount = 0
-            for value in values:
-                if month == value['x']:
-                    amount = value['y']
-            data['values'].append({'x': month, 'y': amount})
-        return [data]
 
     @api.multi
     def _get_moves_per_day(self):
@@ -220,9 +183,36 @@ class account_journal(models.Model):
             })
         return [data]
 
+    def _get_moves_forecast(self):
+        data_forecast_sure = {'values': [], 'key': 'Sure Forecast', 'show_legend': True}
+        data_forecast_draft = {'values': [], 'key': 'Draft Forecast', 'show_legend': True}
+        start_day = date.today()
+        self._cr.execute("SELECT to_char(line.date, 'dd') as day, to_char(line.date, 'MM') as month, SUM(line.debit) as amount, line.journal_id, line.state\
+                    FROM account_move_line AS line LEFT JOIN account_move AS move ON line.move_id=move.id\
+                    WHERE line.journal_id = %s \
+                    AND move.state in ('draft','posted') AND line.date >= %s AND line.date <= %s\
+                    GROUP BY day, month, line.journal_id, line.state\
+                    ORDER BY day, month, line.journal_id, line.state", (self.id, start_day, start_day + timedelta(days=31)))
+        total_posted = 0
+        total_draft = 0
+        for value in self._cr.dictfetchall():
+            if value['state'] == 'draft':
+                total_draft += value['amount']
+                data_forecast_draft['values'].append({
+                    'x': value['day']+'/'+value['month'],
+                    'y': total_draft,
+                    })
+            else:
+                total_posted += value['amount']
+                data_forecast_sure['values'].append({
+                    'x': value['day']+'/'+value['month'],
+                    'y': total_posted,
+                    })
+        return [data_forecast_draft, data_forecast_sure]
+
+
     @api.multi
     def _get_moves_2_months(self):
-        context = self._context
         data_this_month = {'values': [], 'key': 'Current Month', 'color': '#ff7f0e', 'show_legend': True}
         data_last_month = {'values': [], 'key': 'Last Month', 'color': '#2ca02c', 'show_legend': True}
         first_of_this_month = date(day=1, month=date.today().month, year=date.today().year)
@@ -244,6 +234,7 @@ class account_journal(models.Model):
         total_amount_last_month = 0
         this_month = {}
         last_month = {}
+        #TODO to remove or refactor
         for value in self._cr.dictfetchall():
             if int(value['month']) == first_of_this_month.month:
                 if (value['journal_id'] == self.id):

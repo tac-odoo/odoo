@@ -43,7 +43,7 @@
                         <t t-name="JournalDetails">
                             <div class="col-md-12">
                                 <div class="oe_graph">
-                                    <field name="kanban_graph" t-att-graph_type="_.contains(['cash','bank','sale'],journal_type) ? 'line' : 'bar'" widget="dashboard_graph"></field>
+                                    <field name="kanban_graph" t-att-graph_type="_.contains(['cash','bank','sale','purchase'],journal_type) ? 'line' : 'bar'" widget="dashboard_graph"></field>
                                 </div>
                             </div>
                         </t>
@@ -88,15 +88,6 @@
                                             </div>
                                         </div>
                                     </div>
-<!--                                     <div class="col-md-3">
-                                        <div class="oe_journal_title">
-                                            <p t-if="journal_type == 'sale' or journal_type == 'purchase'"><a type="object" name="open_action" context="{'search_default_state':'paid'}">Paid</a></p>
-                                        </div>
-                                        <div class="oe_journal_data">
-                                            <span t-esc="dashboard.paid_invoice_amount"/>
-                                            <span t-esc="dashboard.currency_symbol"/>
-                                        </div>
-                                    </div> -->
                                     <div class="col-md-4">
                                         <div class="oe_journal_title">
                                             <p t-if="journal_type == 'sale'"><a t-attf-href="{dashboard.open_action}" type="object" name="open_action" context="{'search_default_state':'open'}">Receivable</a></p>
