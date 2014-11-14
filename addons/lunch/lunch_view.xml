@@ -372,13 +372,14 @@
                     <sheet>
                         <group>
                             <group>
-                                <field name='user_id'
+                                <field name='user_id' 
                                 context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'lunch.group_lunch_user']}"/>
                             </group>
                             <group> 
                                 <field name='date'/>
                             </group>
                         </group>
+                        <widget type="lunch_widget"></widget>
                         <field name='alerts' attrs="{'invisible': ['|',('state','!=','new'),('alerts','=',False)]}" class="oe_inline oe_lunch_alert"/> 
                         <div name="preferences">
                         </div>

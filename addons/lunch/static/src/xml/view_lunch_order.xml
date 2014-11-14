@@ -1,0 +1,27 @@
+<templates id="template" xml:space="preserve">
+    <t t-name="lunchwidget">
+        <div>
+            <span>hello</span>
+                <t t-esc="widget.pref_ids"/>
+                <t t-if="widget.pref_ids == 0">
+                    <div class="oe_inline oe_lunch_intro">
+                        <h3>
+                            This is the first time you order a meal
+                        </h3>
+                        <p class="oe_grey">
+                            Select a product and put your order comments on the note.
+                        </p>
+                        <p class="oe_grey">
+                            Your favorite meals will be created based on your last orders.
+                        </p>
+                        <p class="oe_grey">
+                            Don't forget the alerts displayed in the reddish area
+                        </p>
+                    </div>
+                </t>
+                <t t-if="widget.categories">
+                    
+                </t>
+        </div>
+    </t>
+</templates>

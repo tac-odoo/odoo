@@ -171,6 +171,36 @@ class lunch_order(osv.Model):
             return specific_function
         return super(lunch_order, self).__getattr__(attr)
 
+    def get_lunch_order(self, cr, uid, context=None):
+        line_ref = self.pool.get("lunch.order.line")
+        pref_ids = line_ref.search(cr, uid, [('user_id', '=', uid)], order='id desc', context=context)
+        data={}
+        if len(pref_ids)==0:
+            data['pref_ids']=0
+        else:
+            preferences = line_ref.browse(cr, uid, pref_ids, context=context)
+            categories = {}
+            count = 0
+            for pref in preferences:
+                #For each preference
+                categories.setdefault(pref.product_id.category_id.name, {})
+                #if this product has already been added to the categories dictionnary
+                if pref.product_id.id in categories[pref.product_id.category_id.name]:
+                    #we check if for the same product the note has already been added
+                    if pref.note not in categories[pref.product_id.category_id.name][pref.product_id.id]:
+                        #if it's not the case then we add this to preferences
+                        detail={'name':pref.product_id.name,'price':pref.product_id.price}
+                        categories[pref.product_id.category_id.name][pref.product_id.id][pref.note] = detail
+                #if this product is not in the dictionnay, we add it
+                else:
+                    categories[pref.product_id.category_id.name][pref.product_id.id] = {}
+                    detail={'name':pref.product_id.name,'price':pref.product_id.price}
+                    categories[pref.product_id.category_id.name][pref.product_id.id][pref.note] = detail
+            data['categories']=categories
+            currency = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.currency_id
+            data['currency']=currency.name
+        return data
+
     def fields_view_get(self, cr, uid, view_id=None, view_type=False, context=None, toolbar=False, submenu=False):
         """ 
         Add preferences in the form view of order.line 

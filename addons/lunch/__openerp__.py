@@ -52,6 +52,7 @@ If you want to save your employees' time and avoid them to always have coins in 
         'views/report_lunchorder.xml',
         'views/lunch.xml',
     ],
+    'qweb': ['static/src/xml/*.xml',],
     'images': ['images/new_order.jpeg','images/lunch_account.jpeg','images/order_by_supplier_analysis.jpeg','images/alert.jpeg'],
     'demo': ['lunch_demo.xml',],
     'installable': True,

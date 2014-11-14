@@ -6259,6 +6259,7 @@ instance.web.form.widgets = new instance.web.Registry({
     'priority':'instance.web.form.Priority',
     'kanban_state_selection':'instance.web.form.KanbanSelection',
     'statinfo': 'instance.web.form.StatInfo',
+    'lunch_Widget':'instance.web.form.lunch_widget',
 });
 
 /**
