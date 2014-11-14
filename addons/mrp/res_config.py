@@ -71,6 +71,9 @@ class mrp_config_settings(osv.osv_memory):
                     * Manufacturer Product Code
                     * Product Attributes.
                 This installs the module product_manufacturer."""),
+         'module_mrp_product_cost': fields.boolean("Compute product cost price based on manufacturing cost",
+            implied_group='product.group_mrp_properties',
+            help='This module allows to compute product cost by taking into account cost of components and routing'),
     }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -1,0 +1,64 @@
+-
+  In order to test mrp_product_cost with OpenERP, I create a bill of materials with 5 different products and routing.
+-
+  I create product 'Bicycle' and it's sub products.
+-
+  !record {model: product.product, id: product_product_bicycle}:
+    name: Bicycle
+    list_price: 800.0
+-
+  !record {model: product.product, id:  product_product_frame}:
+    name: Bicycle Frame
+    standard_price: 600.0
+-
+  !record {model: product.product, id:  product_product_pedals}:
+    name: Pedals
+    standard_price: 10.0
+-
+  !record {model: product.product, id:  product_product_seat}:
+    name: Bicycle Seat
+    standard_price: 40.0
+-
+  !record {model: product.product, id:  product_product_teaser_tire}:
+    name: Teaser Tire
+    standard_price: 20.0
+-
+  !record {model: product.product, id:  product_product_bolts}:
+    name: Bolts
+    standard_price: 0.50
+-
+  I create Bill of materials for product 'Bicycle' with it's sub products and routing.
+-
+  !record {model: mrp.bom, id: mrp.mrp_bom_bicycle}:
+    product_id: product_product_bicycle
+    name: Bicycle
+    bom_lines:
+      - product_id: product_product_frame
+        product_qty: 1.0
+      - product_id: product_product_pedals
+        product_qty: 2.0
+      - product_id: product_product_seat
+        product_qty: 1.0
+      - product_id: product_product_teaser_tire
+        product_qty: 2.0
+      - product_id: product_product_bolts
+        product_qty: 10.0
+    routing_id: mrp.mrp_routing_2
+-
+  To calculate price based on manufacturing cost, I set "Compute Price Based on Manufacturing Cost" field of product 'Bicycle' to True.
+-
+  !record {model: product.product, id: product_product_bicycle}:
+    manufacturing_cost: True
+-
+  I compute the cost price of product based on manufacturing cost.
+-
+  !python {model: product.product}: |
+    product = self.browse(cr, uid, ref("product_product_bicycle"), context=context)
+    self.button_compute_cost_price(cr, uid, [product.id], context=context)
+-
+  I check that the standard price is updated successfully.
+-
+  !python {model: product.product}: |
+    from openerp.tools import float_compare
+    product = self.browse(cr, uid, ref("product_product_bicycle"), context=context)
+    assert float_compare(product.standard_price, 705.00, precision_digits=2) == 0, "Standard price of product should be 705.00 instead found %f" % (product.standard_price)

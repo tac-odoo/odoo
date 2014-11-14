@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_product_standard_price_form_inherit" model="ir.ui.view">
+            <field name="name">product.product.form.inherit</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="stock.view_product_standard_price_form"/>
+            <field name="arch" type="xml">
+            <data>
+                <xpath expr="//group[@name='general']" position="inside">
+                    <label for="manufacturing_cost" style="width: 50px;white-space: normal;"/>
+                    <field name="manufacturing_cost" nolabel="1"/>
+                </xpath>
+            </data>
+            </field>
+        </record>
+
+        <record id="action_compute_cost_price_action" model="ir.actions.server">
+            <field name="name">Compute Cost Prices Based on Manufacturing Cost</field>
+            <field name="model_id" ref="model_product_product"/>
+            <field name="state">code</field>
+            <field name="code">
+                if context.get('active_model') == 'product.product' and context.get('active_ids'):
+                    self.button_compute_cost_price(cr, uid, context['active_ids'], context=context)
+            </field>
+        </record>
+
+        <record id="action_compute_cost_price" model="ir.values">
+            <field name="name">Compute Cost Price</field>
+            <field name="key2">client_action_multi</field>
+            <field name="model">product.product</field>
+            <field name="value" eval="'ir.actions.server,%d'%action_compute_cost_price_action"/>
+        </record>
+
+    </data>
+</openerp>

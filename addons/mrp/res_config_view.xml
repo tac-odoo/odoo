@@ -56,6 +56,10 @@
                                 <field name="module_mrp_operations" class="oe_inline"/>
                                 <label for="module_mrp_operations" />
                             </div>
+                            <div>
+                                <field name="module_mrp_product_cost" class="oe_inline"/>
+                                <label for="module_mrp_product_cost"/>
+                            </div>
                         </div>
                     </group>
                     <separator string="Master Data"/>
