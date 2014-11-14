@@ -292,7 +292,9 @@ class stock_quant(osv.osv):
     def _get_pack_ops(self, cr, uid, ids, name, args, context=None):
         res = {}
         for quant in ids:
-            cr.execute("""select operation_id from stock_move_operation_link where reserved_quant_id = %s
+            cr.execute("""select operation_id from stock_move_operation_link, stock_pack_operation, stock_picking
+                        where stock_pack_operation.picking_id = stock_picking.id and stock_pack_operation.id = operation_id
+                                and stock_picking.state = 'done' and reserved_quant_id = %s
             """, (quant,))
             res[quant] = [x[0] for x in cr.fetchall()]
         return res
@@ -1557,6 +1559,27 @@ class stock_production_lot(osv.osv):
                     }
         return False
 
+    def action_view_lot_pack_history(self, cr, uid, ids, context=None):
+        '''
+        This function returns an action that display the history of the quant, which
+        mean all the stock moves that lead to this quant creation with this quant quantity.
+        '''
+        mod_obj = self.pool.get('ir.model.data')
+        act_obj = self.pool.get('ir.actions.act_window')
+        quant_obj = self.pool.get('stock.quant')
+
+        result = mod_obj.get_object_reference(cr, uid, 'stock', 'action_packop')
+        id = result and result[1] or False
+        result = act_obj.read(cr, uid, [id], context={})[0]
+
+        quants = quant_obj.search(cr, uid, [('lot_id', 'in', ids)], context=context)
+
+        op_ids = []
+        for quant in quant_obj.browse(cr, uid, quants, context=context):
+            op_ids += [ops.id for ops in quant.related_pack_operation_ids]
+
+        result['domain'] = "[('id','in',[" + ','.join(map(str, op_ids)) + "])]"
+        return result
 
 # ----------------------------------------------------
 # Move
