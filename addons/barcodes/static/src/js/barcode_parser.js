@@ -4,107 +4,43 @@ openerp.barcodes = function(instance) {
     instance.barcodes = {};
     var module = instance.barcodes;
 
+    // The BarcodeParser is used to detect what is the category
+    // of a barcode (product, partner, ...) and extract an encoded value
+    // (like weight, price, etc.)
     module.BarcodeParser = instance.web.Class.extend({
         init: function(attributes) {
             var self = this;
             this.nomenclature_id = attributes.nomenclature_id;
-            this.loaded = this.load_server_data();
+            this.loaded = this.load();
         },
 
+        // This loads the barcode nomenclature and barcode rules which are
+        // necessary to parse the barcodes. The BarcodeParser is operational
+        // only when those data have been loaded
+        load: function(){
+            var self = this;
+            return new instance.web.Model('barcode.nomenclature')
+                .query(['name','rule_ids','strict_ean'])
+                .filter([['id','=',this.nomenclature_id[0]]])
+                .first()
+                .then(function(nomenclature){
+                    self.nomenclature = nomenclature;
+
+                    return new instance.web.Model('barcode.rule')
+                        .query(['name','sequence','type','encoding','pattern','alias'])
+                        .filter([['barcode_nomenclature_id','=',self.nomenclature.id ]])
+                        .all()
+                }).then(function(rules){
+                    rules = rules.sort(function(a,b){ return a.sequence - b.sequence; });
+                    self.nomenclature.rules = rules;
+                });
+        },
+
+        // resolves when the barcode parser is operational.
         is_loaded: function() {
             return self.loaded;
         },
 
-        models: [
-        {
-            model: 'barcode.nomenclature',
-            fields: ['name','rule_ids', 'strict_ean'],
-            domain: function(self){ return [] },
-            loaded: function(self,nomenclatures){
-                if (self.nomenclature_id) {
-                    for (var i = 0; i < nomenclatures.length; i++) {
-                        if (nomenclatures[i].id === self.nomenclature_id[0]) {
-                            self.nomenclature = nomenclatures[i];
-                        }
-                    }
-                }
-                self.nomenclature = self.nomenclature || null;
-            },
-        }, {
-            model: 'barcode.rule',
-            fields: ['name','sequence','type','encoding','pattern','alias'],
-            domain: function(self){ return [['barcode_nomenclature_id','=',self.nomenclature ? self.nomenclature.id : 0]]; },
-            loaded: function(self,rules){
-                if (self.nomenclature) {
-                    rules = rules.sort(function(a,b){ return a.sequence - b.sequence; });
-                    self.nomenclature.rules = rules;
-                }
-            },
-        },
-        ],
-
-        // loads all the needed data on the sever. returns a deferred indicating when all the data has loaded. 
-        load_server_data: function(){
-            var self = this;
-            var loaded = new $.Deferred();
-            var progress = 0;
-            var progress_step = 1.0 / self.models.length;
-            var tmp = {}; // this is used to share a temporary state between models loaders
-
-            function load_model(index){
-                if(index >= self.models.length){
-                    loaded.resolve();
-                }else{
-                    var model = self.models[index];
-                    //self.pos_widget.loading_message(_t('Loading')+' '+(model.label || model.model || ''), progress);
-
-                    var cond = typeof model.condition === 'function'  ? model.condition(self,tmp) : true;
-                    if (!cond) {
-                        load_model(index+1);
-                        return;
-                    }
-
-                    var fields =  typeof model.fields === 'function'  ? model.fields(self,tmp)  : model.fields;
-                    var domain =  typeof model.domain === 'function'  ? model.domain(self,tmp)  : model.domain;
-                    var context = typeof model.context === 'function' ? model.context(self,tmp) : model.context; 
-                    progress += progress_step;
-                    
-                    if( model.model ){
-                        new instance.web.Model(model.model).query(fields).filter(domain).context(context).all()
-                            .then(function(result){
-                                try{    // catching exceptions in model.loaded(...)
-                                    $.when(model.loaded(self,result,tmp))
-                                        .then(function(){ load_model(index + 1); },
-                                              function(err){ loaded.reject(err); });
-                                }catch(err){
-                                    console.error(err.stack);
-                                    loaded.reject(err);
-                                }
-                            },function(err){
-                                loaded.reject(err);
-                            });
-                    }else if( model.loaded ){
-                        try{    // catching exceptions in model.loaded(...)
-                            $.when(model.loaded(self,tmp))
-                                .then(  function(){ load_model(index +1); },
-                                        function(err){ loaded.reject(err); });
-                        }catch(err){
-                            loaded.reject(err);
-                        }
-                    }else{
-                        load_model(index + 1);
-                    }
-                }
-            }
-
-            try{
-                load_model(0);
-            }catch(err){
-                loaded.reject(err);
-            }
-            return loaded;
-        },
- 
         // returns the checksum of the ean13, or -1 if the ean has not the correct length, ean must be a string
         ean_checksum: function(ean){
             var code = ean.split('');
@@ -237,3 +173,4 @@ openerp.barcodes = function(instance) {
         },
     });
 }
+
