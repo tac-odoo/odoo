@@ -10,7 +10,6 @@
                     <field name="type"/>
                     <field name="kanban_graph"/>
                     <field name="kanban_dashboard"/>
-                    <field name="dashboard_star"/>
                     <templates>
                         <t t-name="kanban-box">
                             <t t-value="JSON.parse(record.kanban_dashboard.raw_value)" t-set="dashboard"/>
@@ -35,8 +34,6 @@
                             <div class="text-center">
                                 <p style="font-size: 16px;" t-att-title="record.name.raw_value">
                                     <strong><field name="name"/></strong>
-                                    <a type="object" name="add_remove_journal_favorite">
-                                    <span t-att-class="record.dashboard_star.raw_value == true and 'oe_e oe_star_on' or 'oe_e oe_star_off'">7</span></a>
                                 </p>
                             </div>
                         </t>
@@ -141,7 +138,6 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='user_id']" position="before">
                     <filter string="Follower" name="dashboard_follower" domain="[('members', '=', uid)]"/>
-                    <filter domain="[('dashboard_star', '=', True)]" string="Favorite" name="dashboard_favorite" context="{}"/>
                 </xpath>
             </field>
         </record>
@@ -153,7 +149,7 @@
             <field name="view_mode">kanban</field>
             <field name="usage">menu</field>
             <field name="search_view_id" ref="view_account_journal_search_inherit"/>
-            <field name="context">{'search_default_dashboard_follower':1, 'search_default_dashboard_favorite':1}</field>
+            <field name="context">{}</field>
             <field name="domain">[('type','not in',['general','situation','sale_refund','purchase_refund'])]</field>
             <field name="help" type="html">
                 <p style="margin-left: -90px;">

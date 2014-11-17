@@ -315,8 +315,3 @@ class account_journal(models.Model):
         action['context'] = ctx
         action['domain'] = domain
         return action
-
-    @api.multi
-    def add_remove_journal_favorite(self):
-        """set or remove a journal from favorite kanban view"""
-        self.write({'dashboard_star': False if self.dashboard_star else True,})
