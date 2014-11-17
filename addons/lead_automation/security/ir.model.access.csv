@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_addons/lead_automation_addons/lead_automation,addons/lead_automation.addons/lead_automation,model_addons/lead_automation_addons/lead_automation,,1,0,0,0

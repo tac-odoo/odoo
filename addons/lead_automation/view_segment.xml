@@ -1,0 +1,99 @@
+<openerp>
+	<data>
+		<!-- Lead Automation Segments -->
+		<record model="ir.ui.view" id="view_lead_automation_segment_form">
+			<field name="name">lead.automation.segment.form</field>
+			<field name="model">lead.automation.segment</field>
+			<field name="arch" type="xml">
+				<form string="Lead Automation Segment">
+					<header>
+						<button name="running" type="workflow" string="Run" states="draft" class="oe_highlight"/>
+						<button name="done" type="workflow" string="Close" states="running" class="oe_highlight"/>
+						<button name="draft" type="workflow" string="Set to Draft" states="done,cancelled"/>
+						<button name="cancelled" type="workflow" string="Cancel Segment" states="running"/>
+						<field name="state" readonly="1" widget="statusbar" statusbar_visible="draft,running,done"/>
+					</header>
+					<sheet string="Segments" >
+						<group>
+							<group>
+								<field name="name"/>
+								<field name="campaign_id" />
+								<field name="object_id" readonly="1"/>
+								<field name="sync_mode" required="True"/>
+								<label for="sync_last_date"/>
+								<div>
+									<field name="sync_last_date" class="oe_inline"/>
+									<button string="Synchronize Manually" states="running" name="synchronize" type="object"/>
+								</div>
+								<field name="date_next_sync"/>
+							</group>
+							<group>
+								<field name="ir_filter_id" domain="[('model_id','=',object_id)]" context="{'form_view_ref': 'marketing_campaign.ir_filters_form_view1','default_name':'Test','default_model_id': 'object_id'}" /><!-- THIS NEEDS TO CHANGE -->
+								<field name="date_run" readonly="1"/>
+								<field name="date_done" readonly="1"/>
+								<!--<field name='model_name' readonly="1"/>-->
+							</group>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="view_lead_automation_segment_tree">
+			<field name="name">lead.automation.segment.tree</field>
+			<field name="model">lead.automation.segment</field>
+			<field name="arch" type="xml">
+				<tree colors="blue:state == 'draft';black:state == 'running';gray:state in ('done','cancelled')" string="Segments">
+					<field name="name"/>
+					<!--<field name="campaign_id"/>-->
+					<field name="date_run"/>
+					<!--<field name="sync_last_date"/>-->
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="view_lead_automation_segment_search" model="ir.ui.view">
+			<field name="name">lead.automation.segment.search</field>
+			<field name="model">lead.automation.segment</field>
+			<field name="arch" type="xml">
+				<search string="Segments">
+					<field name="name" string="Segment"/>
+					<field name="date_run"/>
+					<filter icon="terp-check" string="Running" name="running" domain="[('state','=','running')]"/>
+					<filter icon="terp-document-new" string="Draft" domain="[('state','=','draft')]"/>
+					<separator/>
+					<filter icon="terp-gtk-jump-to-ltr" string="Newly Created" help="Sync mode: only records created after last sync" domain="[('sync_mode','=','create_date')]"/>
+					<filter icon="terp-stock_effects-object-colorize" string="Newly Modified" help="Sync mode: only records updated after last sync" domain="[('sync_mode','=','write_date')]"/>
+					<filter icon="terp-emblem-documents" string="All" help="Sync mode: all records" domain="[('sync_mode','=','all')]"/>
+					<!--<field name="campaign_id"/>
+					<field name="object_id"/>-->
+					<group expand="0" string="Group By">
+						<!--<filter string="Campaign" name="Campaign" icon="terp-gtk-jump-to-rtl" context="{'group_by':'campaign_id'}"/>-->
+						<filter string="Status" name="Status" icon="terp-stock_effects-object-colorize" context="{'group_by':'state'}"/>
+						<filter string="Launch Month" name="Launch Date" icon="terp-go-month" context="{'group_by':'date_run'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="action_lead_automation_segment_form">
+			<field name="name">Segments</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">lead.automation.segment</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_id" ref="view_lead_automation_segment_tree"/>
+			<field name="search_view_id" ref="view_lead_automation_segment_search"/>
+			<field name="context">{'group_by': []}</field>
+		</record>
+
+		<menuitem name="Lead Automation" id="menu_lead_automation" parent="base.marketing_menu" groups="marketing.group_marketing_user,marketing.group_marketing_manager"
+							sequence="3"/>
+		<menuitem id="menu_lead_automation_form" parent="menu_lead_automation" action="action_lead_automation_campaign_form" sequence="30"/>
+
+		<menuitem id="menu_lead_automation_segment_form" parent="menu_lead_automation" action="action_lead_automation_segment_form" sequence="20"/>
+
+
+	</data>
+</openerp>
