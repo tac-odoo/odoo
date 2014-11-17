@@ -1961,7 +1961,7 @@
 </t>
 <button t-name="toggle_button" type="button"
     t-att-title="widget.string"
-    style="box-shadow: none; white-space:nowrap;">
+    style="box-shadow: none; white-space:nowrap;background:transparent;outline:none;border:none;">
     <img t-attf-src="#{prefix}/web/static/src/img/icons/#{widget.icon}.png"
     t-att-alt="widget.string"/>
 </button>

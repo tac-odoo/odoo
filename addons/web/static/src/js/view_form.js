@@ -6243,6 +6243,40 @@ instance.web.form.StatInfo = instance.web.form.AbstractField.extend({
 
 });
 
+instance.web.form.toggle_button = instance.web.form.AbstractField.extend({
+    init: function (field_manager, node) {
+        this._super.apply(this, arguments);
+        this.icon = "";
+    },
+    render_value: function () {
+        var self = this;
+        self.icon = self.get_value() ? 'gtk-yes' : 'gtk-normal';
+        self.$el.html(QWeb.render("toggle_button", {'widget': self, 'prefix': instance.session.prefix,}));
+        self.$el.find('button').on('click', self.set_toggle_button.bind(self));
+    },
+    set_toggle_button: function () {
+        var self = this;
+        var toggle_value = "";
+        this.toggle_value = self.get_value() == false ? true : false;
+        if(this.view.get('actual_mode') == 'view'){
+            var write_values = {};
+            write_values[self.node.attrs.name]=this.toggle_value;
+            return this.view.dataset._model.call(
+                    'write', [
+                        [this.view.datarecord.id],
+                        write_values,
+                        self.view.dataset.get_context()
+                    ]).done(function(){self.reload_record(self);});
+        }
+        else{
+            this.set_value(this.toggle_value);
+        }
+        
+    },
+   reload_record: function() {
+       this.view.reload();
+   },
+});
 
 /**
  * Registry of form fields, called by :js:`instance.web.FormView`.
@@ -6251,6 +6285,7 @@ instance.web.form.StatInfo = instance.web.form.AbstractField.extend({
  * will substitute to the <field> tags as defined in OpenERP's views.
  */
 instance.web.form.widgets = new instance.web.Registry({
+    'toggle_button' : 'instance.web.form.toggle_button',
     'char' : 'instance.web.form.FieldChar',
     'id' : 'instance.web.form.FieldID',
     'email' : 'instance.web.form.FieldEmail',
