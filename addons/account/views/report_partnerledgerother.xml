@@ -60,7 +60,7 @@
                                 <th>Debit</th>
                                 <th>Credit</th>
                                 <th>Balance</th>
-                                <th t-if="amount_currency">Currency</th>
+                                <th t-if="data['form'].get('amount_currency')">Currency</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -70,30 +70,30 @@
                                         - <strong t-esc="partner.name"/>
                                 </td>
                                 <td class="text-right">
-                                    <strong t-esc="sum_debit_partner(partner)"/>
+                                    <strong t-esc="partner.sum_debit_credit_partner(data['form'])['debit']"/>
                                 </td>
                                 <td class="text-right">
-                                    <strong t-esc="sum_credit_partner(partner)"/>
+                                    <strong t-esc="partner.sum_debit_credit_partner(data['form'])['credit']"/>
                                 </td>
                                 <td class="text-right">
-                                    <strong t-esc="formatLang((sum_debit_partner(partner) - sum_credit_partner(partner)), currency_obj=res_company.currency_id)"/>
+                                    <strong t-esc="(partner.sum_debit_credit_partner(data['form'])['debit'] - partner.sum_debit_credit_partner(data['form'])['credit'])"  t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
                                 </td>
                             </tr>
-                            <tr t-if="initial_balance">
+                            <tr t-if="data['form'].get('initial_balance')">
                                 <td colspan="5">Initial Balance</td>
                                 <td>
-                                    <span t-esc="formatLang(get_intial_balance(partner)[0][0])"/>
+                                    <span t-esc="partner.sum_debit_credit_partner(data['form'])['init_bal_sum']['debit']"/>
                                 </td>
                                 <td>
-                                    <span t-esc="formatLang(get_intial_balance(partner)[0][1])"/>
+                                    <span t-esc="partner.sum_debit_credit_partner(data['form'])['init_bal_sum']['credit']"/>
                                 </td>
                                 <td>
-                                    <span t-esc="formatLang(get_intial_balance(partner)[0][2], currency_obj=res_company.currency_id)"/>
+                                    <span t-esc="partner.sum_debit_credit_partner(data['form'])['init_bal_sum']['init_balance']" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}' />
                                 </td>
                             </tr>
-                            <tr t-foreach="lines(partner)" t-as="line">
+                            <tr t-foreach="partner.lines(data['form'])" t-as="line">
                                 <td>
-                                    <span t-esc="formatLang(line['date'], date=True)"/>
+                                    <span t-esc="line['date']"/>
                                 </td>
                                 <td>
                                     <span t-esc="line['code']"/>
@@ -108,16 +108,16 @@
                                     <span t-esc="line['ref']"/>-<span t-esc="line['name']"/>
                                 </td>
                                 <td class="text-right">
-                                    <span t-esc="formatLang((line['debit']))"/>
+                                    <span t-esc="(line['debit'])"/>
                                 </td>
                                 <td class="text-right">
-                                    <span t-esc="formatLang((line['credit']))"/>
+                                    <span t-esc="(line['credit'])"/>
                                 </td>
                                 <td class="text-right">
-                                    <span t-esc="formatLang(line['progress'], currency_obj=res_company.currency_id)"/>
+                                    <span t-esc="line['progress']" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
                                 </td>
-                                <td t-if="amount_currency">
-                                    <span t-esc="formatLang(line['amount_currency'])"/>
+                                <td t-if="data['form'].get('amount_currency')">
+                                    <span t-esc="line['amount_currency']"/>
                                 </td>
                             </tr>
                         </tbody>

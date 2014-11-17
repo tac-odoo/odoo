@@ -68,17 +68,18 @@ class aged_trial_report(report_sxw.rml_parse, common_report_header):
             move_state = ['posted']
         self.cr.execute('SELECT DISTINCT res_partner.id AS id,\
                     res_partner.name AS name \
-                FROM res_partner,account_move_line AS l, account_account, account_move am\
+                FROM res_partner,account_move_line AS l, account_account, account_move am, account_account_type at\
                 WHERE (l.account_id=account_account.id) \
                     AND (l.move_id=am.id) \
+                    AND (account_account.user_type=at.id) \
                     AND (am.state IN %s)\
-                    AND (account_account.type IN %s)\
-                    AND account_account.active\
+                    AND (at.type IN %s)\
+                    AND account_account.deprecated is False\
                     AND ((reconcile_id IS NULL)\
                        OR (reconcile_id IN (SELECT recon.id FROM account_move_reconcile AS recon WHERE recon.create_date > %s )))\
                     AND (l.partner_id=res_partner.id)\
                     AND (l.date <= %s)\
-                    AND ' + self.query + ' \
+                    ' + self.query + ' \
                 ORDER BY res_partner.name', (tuple(move_state), tuple(self.ACCOUNT_TYPE), self.date_from, self.date_from,))
         partners = self.cr.dictfetchall()
         ## mise a 0 du total
@@ -93,15 +94,16 @@ class aged_trial_report(report_sxw.rml_parse, common_report_header):
 
         totals = {}
         self.cr.execute('SELECT l.partner_id, SUM(l.debit-l.credit) \
-                    FROM account_move_line AS l, account_account, account_move am \
+                    FROM account_move_line AS l, account_account, account_move am, account_account_type at \
                     WHERE (l.account_id = account_account.id) AND (l.move_id=am.id) \
                     AND (am.state IN %s)\
-                    AND (account_account.type IN %s)\
+                    AND (account_account.user_type = at.id)\
+                    AND (at.type IN %s)\
                     AND (l.partner_id IN %s)\
                     AND ((l.reconcile_id IS NULL)\
                     OR (l.reconcile_id IN (SELECT recon.id FROM account_move_reconcile AS recon WHERE recon.create_date > %s )))\
-                    AND ' + self.query + '\
-                    AND account_account.active\
+                     ' + self.query + '\
+                    AND account_account.deprecated\
                     AND (l.date <= %s)\
                     GROUP BY l.partner_id ', (tuple(move_state), tuple(self.ACCOUNT_TYPE), tuple(partner_ids), self.date_from, self.date_from,))
         t = self.cr.fetchall()
@@ -112,16 +114,17 @@ class aged_trial_report(report_sxw.rml_parse, common_report_header):
         future_past = {}
         if self.direction_selection == 'future':
             self.cr.execute('SELECT l.partner_id, SUM(l.debit-l.credit) \
-                        FROM account_move_line AS l, account_account, account_move am \
+                        FROM account_move_line AS l, account_account, account_move am, account_account_type at \
                         WHERE (l.account_id=account_account.id) AND (l.move_id=am.id) \
                         AND (am.state IN %s)\
-                        AND (account_account.type IN %s)\
+                        AND (account_account.user_type = at.id)\
+                        AND (at.type IN %s)\
                         AND (COALESCE(l.date_maturity, l.date) < %s)\
                         AND (l.partner_id IN %s)\
                         AND ((l.reconcile_id IS NULL)\
                         OR (l.reconcile_id IN (SELECT recon.id FROM account_move_reconcile AS recon WHERE recon.create_date > %s )))\
-                        AND '+ self.query + '\
-                        AND account_account.active\
+                        '+ self.query + '\
+                        AND account_account.deprecated\
                     AND (l.date <= %s)\
                         GROUP BY l.partner_id', (tuple(move_state), tuple(self.ACCOUNT_TYPE), self.date_from, tuple(partner_ids),self.date_from, self.date_from,))
             t = self.cr.fetchall()
@@ -129,16 +132,17 @@ class aged_trial_report(report_sxw.rml_parse, common_report_header):
                 future_past[i[0]] = i[1]
         elif self.direction_selection == 'past': # Using elif so people could extend without this breaking
             self.cr.execute('SELECT l.partner_id, SUM(l.debit-l.credit) \
-                    FROM account_move_line AS l, account_account, account_move am \
+                    FROM account_move_line AS l, account_account, account_move am, account_account_type at \
                     WHERE (l.account_id=account_account.id) AND (l.move_id=am.id)\
                         AND (am.state IN %s)\
-                        AND (account_account.type IN %s)\
+                        AND (account_account.user_type = at.id)\
+                        AND (at.type IN %s)\
                         AND (COALESCE(l.date_maturity,l.date) > %s)\
                         AND (l.partner_id IN %s)\
                         AND ((l.reconcile_id IS NULL)\
                         OR (l.reconcile_id IN (SELECT recon.id FROM account_move_reconcile AS recon WHERE recon.create_date > %s )))\
-                        AND '+ self.query + '\
-                        AND account_account.active\
+                         '+ self.query + '\
+                        AND account_account.deprecated\
                     AND (l.date <= %s)\
                         GROUP BY l.partner_id', (tuple(move_state), tuple(self.ACCOUNT_TYPE), self.date_from, tuple(partner_ids), self.date_from, self.date_from,))
             t = self.cr.fetchall()
@@ -162,15 +166,16 @@ class aged_trial_report(report_sxw.rml_parse, common_report_header):
                 args_list += (form[str(i)]['stop'],)
             args_list += (self.date_from,)
             self.cr.execute('''SELECT l.partner_id, SUM(l.debit-l.credit), l.reconcile_partial_id
-                    FROM account_move_line AS l, account_account, account_move am 
+                    FROM account_move_line AS l, account_account, account_move am, account_account_type at 
                     WHERE (l.account_id = account_account.id) AND (l.move_id=am.id)
                         AND (am.state IN %s)
-                        AND (account_account.type IN %s)
+                        AND (account_account.user_type = at.id)\
+                        AND (at.type IN %s)\
                         AND (l.partner_id IN %s)
                         AND ((l.reconcile_id IS NULL)
                           OR (l.reconcile_id IN (SELECT recon.id FROM account_move_reconcile AS recon WHERE recon.create_date > %s )))
-                        AND ''' + self.query + '''
-                        AND account_account.active
+                        ''' + self.query + '''
+                        AND account_account.deprecated
                         AND ''' + dates_query + '''
                     AND (l.date <= %s)
                     GROUP BY l.partner_id, l.reconcile_partial_id''', args_list)
@@ -248,47 +253,50 @@ class aged_trial_report(report_sxw.rml_parse, common_report_header):
             self.total_account.append(0)
         totals = {}
         self.cr.execute('SELECT SUM(l.debit-l.credit) \
-                    FROM account_move_line AS l, account_account, account_move am \
+                    FROM account_move_line AS l, account_account, account_move am, account_account_type at \
                     WHERE (l.account_id = account_account.id) AND (l.move_id=am.id)\
                     AND (am.state IN %s)\
                     AND (l.partner_id IS NULL)\
-                    AND (account_account.type IN %s)\
+                    AND (account_account.user_type = at.id)\
+                    AND (at.type IN %s)\
                     AND ((l.reconcile_id IS NULL) \
                     OR (l.reconcile_id IN (SELECT recon.id FROM account_move_reconcile AS recon WHERE recon.create_date > %s )))\
-                    AND ' + self.query + '\
+                    ' + self.query + '\
                     AND (l.date <= %s)\
-                    AND account_account.active ',(tuple(move_state), tuple(self.ACCOUNT_TYPE), self.date_from, self.date_from,))
+                    AND account_account.deprecated ',(tuple(move_state), tuple(self.ACCOUNT_TYPE), self.date_from, self.date_from,))
         t = self.cr.fetchall()
         for i in t:
             totals['Unknown Partner'] = i[0]
         future_past = {}
         if self.direction_selection == 'future':
             self.cr.execute('SELECT SUM(l.debit-l.credit) \
-                        FROM account_move_line AS l, account_account, account_move am\
+                        FROM account_move_line AS l, account_account, account_move am, account_account_type at\
                         WHERE (l.account_id=account_account.id) AND (l.move_id=am.id)\
                         AND (am.state IN %s)\
                         AND (l.partner_id IS NULL)\
-                        AND (account_account.type IN %s)\
+                        AND (account_account.user_type = at.id)\
+                        AND (at.type IN %s)\
                         AND (COALESCE(l.date_maturity, l.date) < %s)\
                         AND ((l.reconcile_id IS NULL)\
                         OR (l.reconcile_id IN (SELECT recon.id FROM account_move_reconcile AS recon WHERE recon.create_date > %s )))\
-                        AND '+ self.query + '\
-                        AND account_account.active ', (tuple(move_state), tuple(self.ACCOUNT_TYPE), self.date_from, self.date_from))
+                        '+ self.query + '\
+                        AND account_account.deprecated ', (tuple(move_state), tuple(self.ACCOUNT_TYPE), self.date_from, self.date_from))
             t = self.cr.fetchall()
             for i in t:
                 future_past['Unknown Partner'] = i[0]
         elif self.direction_selection == 'past': # Using elif so people could extend without this breaking
             self.cr.execute('SELECT SUM(l.debit-l.credit) \
-                    FROM account_move_line AS l, account_account, account_move am \
+                    FROM account_move_line AS l, account_account, account_move am, account_account_type at \
                     WHERE (l.account_id=account_account.id) AND (l.move_id=am.id)\
                         AND (am.state IN %s)\
                         AND (l.partner_id IS NULL)\
-                        AND (account_account.type IN %s)\
+                        AND (account_account.user_type = at.id)\
+                        AND (at.type IN %s)\
                         AND (COALESCE(l.date_maturity,l.date) > %s)\
                         AND ((l.reconcile_id IS NULL)\
                         OR (l.reconcile_id IN (SELECT recon.id FROM account_move_reconcile AS recon WHERE recon.create_date > %s )))\
-                        AND '+ self.query + '\
-                        AND account_account.active ', (tuple(move_state), tuple(self.ACCOUNT_TYPE), self.date_from, self.date_from))
+                        '+ self.query + '\
+                        AND account_account.deprecated ', (tuple(move_state), tuple(self.ACCOUNT_TYPE), self.date_from, self.date_from))
             t = self.cr.fetchall()
             for i in t:
                 future_past['Unknown Partner'] = i[0]
@@ -308,15 +316,16 @@ class aged_trial_report(report_sxw.rml_parse, common_report_header):
                 args_list += (form[str(i)]['stop'],)
             args_list += (self.date_from,)
             self.cr.execute('SELECT SUM(l.debit-l.credit)\
-                    FROM account_move_line AS l, account_account, account_move am \
+                    FROM account_move_line AS l, account_account, account_move am, account_account_type at \
                     WHERE (l.account_id = account_account.id) AND (l.move_id=am.id)\
                         AND (am.state IN %s)\
-                        AND (account_account.type IN %s)\
+                        AND (account_account.user_type = at.id)\
+                        AND (at.type IN %s)\
                         AND (l.partner_id IS NULL)\
                         AND ((l.reconcile_id IS NULL)\
                         OR (l.reconcile_id IN (SELECT recon.id FROM account_move_reconcile AS recon WHERE recon.create_date > %s )))\
-                        AND '+ self.query + '\
-                        AND account_account.active\
+                        '+ self.query + '\
+                        AND account_account.deprecated\
                         AND ' + dates_query + '\
                     AND (l.date <= %s)\
                     GROUP BY l.partner_id', args_list)

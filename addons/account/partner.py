@@ -144,6 +144,151 @@ class res_partner(models.Model):
     _description = 'Partner'
 
     @api.multi
+    def get_type_account_ids(self, form):
+        move_state = ['draft','posted']
+        if form['target_move'] == 'posted':
+            move_state = ['posted']
+        reconcil = True
+        obj_move = self.env['account.move.line']
+        if form['filter'] == 'unreconciled':
+            reconcil = False
+        if form['result_selection'] == 'supplier':
+            ACCOUNT_TYPE = ['payable']
+        elif form['result_selection'] == 'customer':
+            ACCOUNT_TYPE = ['receivable']
+        else:
+            ACCOUNT_TYPE = ['payable','receivable']
+                    
+        self._cr.execute(
+            "SELECT a.id " \
+            "FROM account_account a " \
+            "LEFT JOIN account_account_type t " \
+                "ON (a.user_type=t.id) " \
+                'WHERE t.type IN %s' \
+                "AND a.deprecated is False", (tuple(ACCOUNT_TYPE), ))
+        account_ids = [a for (a,) in self._cr.fetchall()]        
+        query = obj_move.with_context(form.get('used_context', {}))._query_get(obj='l')
+        if reconcil:
+            RECONCILE_TAG = " "
+        else:
+            RECONCILE_TAG = "AND l.reconcile_id IS NULL"        
+        return move_state, ACCOUNT_TYPE, account_ids, query, RECONCILE_TAG
+
+    @api.multi
+    def lines(self, form):
+        obj_move = self.env['account.move.line']
+        move_state, ACCOUNT_TYPE, account_ids, query, RECONCILE_TAG = self.get_type_account_ids(form)
+        full_account = []
+        self._cr.execute(
+            "SELECT l.id, l.date, j.code, acc.code as a_code, acc.name as a_name, l.ref, m.name as move_name, l.name, l.debit, l.credit, l.amount_currency,l.currency_id, c.symbol AS currency_code " \
+            "FROM account_move_line l " \
+            "LEFT JOIN account_journal j " \
+                "ON (l.journal_id = j.id) " \
+            "LEFT JOIN account_account acc " \
+                "ON (l.account_id = acc.id) " \
+            "LEFT JOIN res_currency c ON (l.currency_id=c.id)" \
+            "LEFT JOIN account_move m ON (m.id=l.move_id)" \
+            "WHERE l.partner_id = %s " \
+                "AND l.account_id IN %s  " + query +" " \
+                "AND m.state IN %s " \
+                " " + RECONCILE_TAG + " "\
+                "ORDER BY l.date",
+                (self.id, tuple(account_ids), tuple(move_state)))
+        res = self._cr.dictfetchall()
+        sum = 0.0
+        ctx2 = form.get('used_context',{}).copy()
+                        
+        if form['initial_balance']:
+            ctx2.update({'initial_bal': True})
+        init_query = obj_move.with_context(ctx2)._query_get(obj='l')        
+        if form['initial_balance']:
+            self._cr.execute(
+                    "SELECT sum(debit), sum(credit), COALESCE(sum(debit-credit), 0.0) " \
+                    "FROM account_move_line AS l, " \
+                    "account_move AS m "
+                    "WHERE l.partner_id = %s" \
+                        "AND m.id = l.move_id " \
+                        "AND m.state IN %s "
+                        "AND account_id IN %s" \
+                        " " + RECONCILE_TAG + " " \
+                        "" + init_query + " ",
+                    (self.id, tuple(move_state), tuple(account_ids)))
+            contemp = self._cr.fetchone()        
+            sum = contemp[2]
+        for r in res:
+            sum += r['debit'] - r['credit']
+            r['progress'] = sum
+            full_account.append(r)
+        return full_account
+
+    @api.multi
+    def sum_debit_credit_partner(self, form):
+        obj_move = self.env['account.move.line']
+        result_tmp_debit = 0.0
+        result_init_debit = 0.0
+        result_tmp_credit = 0.0
+        result_init_credit = 0.0  
+        init_debit = 0.0
+        init_credit = 0.0
+        init_bal_sum = 0.0  
+        res = {}
+        move_state, ACCOUNT_TYPE, account_ids, query,RECONCILE_TAG = self.get_type_account_ids(form)
+        ctx2 = form.get('used_context',{}).copy()
+                        
+        if form['initial_balance']:
+            ctx2.update({'initial_bal': True})
+        init_query = obj_move.with_context(ctx2)._query_get(obj='l')        
+
+        if form['initial_balance']:
+            self._cr.execute(
+                    "SELECT sum(debit), sum(credit), COALESCE(sum(debit-credit), 0.0) " \
+                    "FROM account_move_line AS l, " \
+                    "account_move AS m "
+                    "WHERE l.partner_id = %s" \
+                        "AND m.id = l.move_id " \
+                        "AND m.state IN %s "
+                        "AND account_id IN %s" \
+                        " " + RECONCILE_TAG + " " \
+                        "" + init_query + " ",
+                    (self.id, tuple(move_state), tuple(account_ids)))
+            contemp = self._cr.fetchone()
+            if contemp != None:
+                init_bal_sum = contemp[2]
+                init_debit = contemp[0]
+                init_credit = contemp[1]
+                result_init_debit = contemp[0] or 0.0
+                result_init_credit = contemp[1] or 0.0
+            else:
+                result_init_debit = result_tmp_debit + 0.0
+                result_init_credit = result_tmp_credit + 0.0
+
+        self._cr.execute(
+                "SELECT sum(debit), sum(credit) " \
+                "FROM account_move_line AS l, " \
+                "account_move AS m "
+                "WHERE l.partner_id = %s " \
+                    "AND m.id = l.move_id " \
+                    "AND m.state IN %s "
+                    "AND account_id IN %s" \
+                    " " + RECONCILE_TAG + " " \
+                    " " + query + " ",\
+                (self.id, tuple(move_state), tuple(account_ids),))
+
+        contemp = self._cr.fetchone()
+        if contemp != None:
+            result_tmp_debit = contemp[0] or 0.0
+            result_tmp_credit = contemp[1] or 0.0
+        else:
+            result_tmp_debit = result_tmp_debit + 0.0
+            result_tmp_credit = result_tmp_credit + 0.0
+            
+        res['debit'] = result_tmp_debit  + result_init_debit
+        res['credit'] = result_tmp_credit  + result_init_credit
+        res['init_bal_sum'] = {'init_balance': init_bal_sum, 'debit': init_debit, 'credit': init_credit}
+        return res
+        
+        
+    @api.multi
     def _credit_debit_get(self):
         ctx = dict(self._context or {})
         ctx['all_fiscalyear'] = True
@@ -247,7 +392,22 @@ class res_partner(models.Model):
     @api.multi
     def mark_as_reconciled(self):
         return self.write({'last_time_entries_checked': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
-
+        
+    @api.multi
+    def get_move_line(self):
+        moveline_obj = self.env['account.move.line']
+        return self.env['account.move.line'].search(
+                [('partner_id', '=', self.id),
+                    ('account_id.user_type.type', 'in', ['receivable', 'payable']),
+                    ('reconcile_id', '=', False)])
+    @api.multi
+    def get_due_mat_paid_amount(self):
+        move_line_ids = self.get_move_line()
+        res = {}
+        res['due_amount'] = reduce(lambda x, y: x + ((y.account_id.user_type.type == 'receivable' and y.debit or 0) or (y.account_id.user_type.type == 'payable' and y.credit * -1 or 0)), move_line_ids, 0)
+        res['paid_amount'] = reduce(lambda x, y: x + ((y.account_id.user_type.type == 'receivable' and y.credit or 0) or (y.account_id.user_type.type == 'payable' and y.debit * -1 or 0)),  move_line_ids, 0)
+        res['mat_amount'] = reduce(lambda x, y: x + (y.debit - y.credit), filter(lambda x: x.date_maturity < time.strftime('%Y-%m-%d'), move_line_ids), 0)
+        return res
 
     vat_subjected = fields.Boolean('VAT Legal Statement', 
         help="Check this box if the partner is subjected to the VAT. It will be used for the VAT legal statement.")
@@ -287,7 +447,8 @@ class res_partner(models.Model):
         help='Last time the manual reconciliation was performed for this partner. '
              'It is set either if there\'s not at least an unreconciled debit and an unreconciled credit '
              'or if you click the "Done" button.')
-
+    current_date = fields.Date(string='Current Date', default=fields.Date.context_today)
+    
     @api.model
     def _commercial_fields(self):
         return super(res_partner, self)._commercial_fields() + \
