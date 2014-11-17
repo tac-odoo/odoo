@@ -5,7 +5,6 @@ openerp.account.graph_kanban = function (instance)
     instance.web_kanban.JournalDashboardGraph = instance.web_kanban.AbstractField.extend({
         start: function() {
             var self = this;
-            this.$el.parents('.oe_kanban_record').addClass('col-md-6');
             self.graph_type = self.$node.attr('graph_type')
             self.display_graph(JSON.parse(self.field.raw_value));
         },
@@ -55,5 +54,13 @@ openerp.account.graph_kanban = function (instance)
             
         },
     });
+    instance.web_kanban.JournalDashboard = instance.web_kanban.AbstractField.extend({
+        start: function(){
+            //used to set 2 dashboard per line
+            this.$el.parents('.oe_kanban_record').addClass('col-md-6');
+        },
+    });
+
     instance.web_kanban.fields_registry.add("dashboard_graph", "instance.web_kanban.JournalDashboardGraph");
+    instance.web_kanban.fields_registry.add("dashboard_journal", "instance.web_kanban.JournalDashboard");
 };

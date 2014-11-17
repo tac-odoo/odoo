@@ -12,6 +12,7 @@
                     <field name="kanban_dashboard"/>
                     <templates>
                         <t t-name="kanban-box">
+                            <field name="name" widget="dashboard_journal"/>
                             <t t-value="JSON.parse(record.kanban_dashboard.raw_value)" t-set="dashboard"/>
                             <t t-value="record.type.raw_value" t-set="journal_type"/>
                             <t t-value="dashboard.draft_invoice_amount or dashboard.overdue_invoice_amount or dashboard.todo_payment_amount or dashboard.paid_invoice_amount" t-set="is_invoice_stats"/>
@@ -19,14 +20,16 @@
                                 <div class="panel-heading">
                                     <t t-call="JournalTop" />
                                 </div>
-                                <div class="row">
-                                    <t t-call="JournalCreate"/>
-                                </div>
-                                <div class="row">
-                                    <t t-call="JournalBottom"/>
-                                </div>
-                                <div class="row" groups="account.group_account_user">
-                                    <t t-call="JournalDetails"/>
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <t t-call="JournalCreate"/>
+                                    </div>
+                                    <div class="row">
+                                        <t t-call="JournalBottom"/>
+                                    </div>
+                                    <div class="row" groups="account.group_account_user">
+                                        <t t-call="JournalDetails"/>
+                                    </div>
                                 </div>
                             </div>
                         </t>
