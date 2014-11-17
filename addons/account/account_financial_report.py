@@ -168,6 +168,14 @@ class account_financial_report_line(models.Model):
             if counters[formula.column] > 1:
                 raise exceptions.ValidationError("A report line can only have one formula per column")
 
+    def _get_actions(self):
+        res = [('unclickable', 'Unclickable')]
+        if self.display_detail == 'accounts':
+            res.append(('move_lines', 'Display the move lines for this account'), ('unreconciled', 'Display the unreconciled lines for this account'))
+        elif self.display_detail == 'moves':
+            res.append(('move', 'Display the move in details'))
+        return res
+
     name = fields.Char('Line Name')
     code = fields.Char('Line Code')
     type = fields.Selection([
@@ -177,9 +185,7 @@ class account_financial_report_line(models.Model):
         ('sum', 'Sum Of Children'),
         ('formula', 'Formula'),
     ], 'Type', required=True, default='sum')
-    action = fields.Selection([
-        ('linked', 'Open linked object'),
-    ], 'Onclick Action')
+    action = fields.Selection(_get_actions, 'Onclick Action', default='unclickable')
     figures_type = fields.Selection([
         ('currency', 'Currency'),
         ('percent', 'Percent'),
@@ -253,10 +259,12 @@ class account_financial_report_line(models.Model):
                     #financial reports for Assets, liabilities...)
                     flag = False
                     vals = {
+                        'id': account.id,
                         'name': account.code + ' ' + account.name,
                         'type': 'account',
                         'level': min(account.level + 1, 6),  # account.level + 1
                         'account_type': account.type,
+                        'action': line.action,
                     }
                     if financial_report.balance:
                         vals['balance'] = account.balance != 0 and account.balance * line.sign or account.balance
@@ -272,7 +280,6 @@ class account_financial_report_line(models.Model):
                             flag = True
                     if flag:
                         lines.append(vals)
-        print lines
         return lines
 
 

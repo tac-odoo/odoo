@@ -3,69 +3,75 @@
 <data>
 <template id="report_financial">
     <t t-call="report.html_container">
-        <t t-foreach="docs" t-as="o">
-            <t t-call="report.internal_layout">
-                <div class="page">
-                    <h2 t-esc="o.title"/>
+        <span class="oe_account_report_widgets">
+            <t t-call-assets="web.assets_common" t-css="false" />
+            <script type="text/javascript" src="/account/static/src/js/account_report_widgets.js"></script>
+            <t t-foreach="docs" t-as="o">
+                <t t-call="report.internal_layout">
+                    <div class="page oe_account_report_widgets">
+                        <h2 t-esc="o.title"/>
 
-                    <div class="row mt32 mb32">
-                        <div class="col-xs-3">
-                            <strong>Chart of Accounts:</strong>
-                            <p t-esc="get_account(data)"/>
+                        <div class="row mt32 mb32">
+                            <div class="col-xs-3">
+                                <strong>Chart of Accounts:</strong>
+                                <p t-esc="get_account(data)"/>
+                            </div>
+                            <div class="col-xs-3">
+                                <strong>Filter By:</strong>
+                                <p>
+                                    Date from : <span t-esc="formatLang(get_start_date(data), date=True)"/><br />
+                                    Date to : <span t-esc="formatLang(get_end_date(data), date=True)"/>
+                                </p>
+                            </div>
+                            <div class="col-xs-3">
+                                <strong>Target Moves:</strong>
+                                <p t-esc="get_target_move(data)"/>
+                            </div>
                         </div>
-                        <div class="col-xs-3">
-                            <strong>Filter By:</strong>
-                            <p>
-                                Date from : <span t-esc="formatLang(get_start_date(data), date=True)"/><br />
-                                Date to : <span t-esc="formatLang(get_end_date(data), date=True)"/>
-                            </p>
-                        </p>
-                    </div>
-                    <div class="col-xs-3">
-                        <strong>Target Moves:</strong>
-                        <p t-esc="get_target_move(data)"/>
-                    </div>
-                </div>
 
-                    <table class="table table-condensed">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th class="text-right" t-if="o.debit_credit">Debit</th>
-                                <th class="text-right" t-if="o.debit_credit">Credit</th>
-                                <th class="text-right" t-if="o.balance">Balance</th>
-                                <th class="text-right" t-if="o.comparison">Comparison</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr t-foreach="get_lines(data)" t-as="a">
-                                <t t-if="a['level'] != 0">
-                                    <t t-if="a.get('level') &gt; 3"><t t-set="style" t-value="'font-weight: normal;'"/></t>
-                                    <t t-if="not a.get('level') &gt; 3"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                        <table class="table table-condensed">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th class="text-right" t-if="o.debit_credit">Debit</th>
+                                    <th class="text-right" t-if="o.debit_credit">Credit</th>
+                                    <th class="text-right" t-if="o.balance">Balance</th>
+                                    <th class="text-right" t-if="o.comparison">Comparison</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="get_lines(data)" t-as="a">
+                                    <t t-if="a['level'] != 0">
+                                        <t t-if="a.get('level') &gt; 3"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+                                        <t t-if="not a.get('level') &gt; 3"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                        <t t-if="a.get('id') and a.get('action')"><t t-set="class" t-value="a.['action'] + ' ' + a.['id']"/></t>
+                                        <t t-if="not a.get('id') or not a.get('action')"><t t-set="class" t-value=""/></t>
 
-                                    <td>
-                                        <span style="color: white;" t-esc="'..' * a.get('level', 0)"/>
-                                        <span t-att-style="style" t-esc="a.get('name')"/>
-                                    </td>
-                                    <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
-                                        <span t-att-style="style" t-esc="formatLang(a.get('debit'), currency_obj=res_company.currency_id)"/>
-                                    </td>
-                                    <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
-                                        <span t-att-style="style" t-esc="formatLang(a.get('credit'), currency_obj=res_company.currency_id)"/>
-                                    </td>
-                                    <td class="text-right" style="white-space: nowrap;" t-if="o.balance">
-                                        <span t-att-style="style" t-esc="formatLang(a.get('balance'), currency_obj=res_company.currency_id)"/>
-                                    </td>
-                                    <td class="text-right" style="white-space: nowrap;" t-if="o.comparison">
-                                        <span t-att-style="style" t-esc="formatLang(a.get('balance_cmp'), currency_obj=res_company.currency_id)"/>
-                                    </td>
-                                </t>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                                        <td>
+                                            <span class="foldable">&gt;</span>
+                                            <span class="level" style="color: white;" t-esc="'..' * a.get('level', 0)"/>
+                                            <span t-att-style="style" t-att-class="class" t-esc="a.get('name')"/>
+                                        </td>
+                                        <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
+                                            <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('debit'), currency_obj=res_company.currency_id)"/>
+                                        </td>
+                                        <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
+                                            <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('credit'), currency_obj=res_company.currency_id)"/>
+                                        </td>
+                                        <td class="text-right" style="white-space: nowrap;" t-if="o.balance">
+                                            <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('balance'), currency_obj=res_company.currency_id)"/>
+                                        </td>
+                                        <td class="text-right" style="white-space: nowrap;" t-if="o.comparison">
+                                            <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('balance_cmp'), currency_obj=res_company.currency_id)"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
             </t>
-        </t>
+        </span>
     </t>
 </template>
 </data>
