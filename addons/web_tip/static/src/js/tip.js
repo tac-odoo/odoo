@@ -259,7 +259,6 @@
 
         end_tip: function(tip) {
             var self = this;
-            var Tips = new instance.web.Model('web.tip');
             $('#' + self.$element.attr('aria-describedby')).remove();
             self.$overlay.remove();
             self.$helper.remove();
@@ -268,8 +267,18 @@
                 $(el).removeClass('oe_tip_fix_parent');
             });
             $(document).off('keyup.web_tip');
-            Tips.call('consume', [tip.id], {});
-            tip.is_consumed = true;
+            if (tip) {
+                var Tips = new instance.web.Model('web.tip');
+                Tips.call('consume', [tip.id], {});
+                tip.is_consumed = true;
+            }
+        },
+
+        gc: function() {
+            if (this.tip_mutex.def.state() === 'pending') {
+                this.end_tip();
+                this.tip_mutex.def.resolve();
+            }
         },
 
         reposition: function() {
@@ -295,6 +304,13 @@
         show_application: function() {
             this._super();
             this.tip_handler = new instance.web.Tip();
+        }
+    });
+
+    instance.web.ViewManager =  instance.web.ViewManager.extend({
+        switch_mode: function() {
+            instance.webclient.tip_handler.gc();
+            return this._super.apply(this, arguments);
         }
     });
 
