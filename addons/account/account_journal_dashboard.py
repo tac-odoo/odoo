@@ -315,3 +315,15 @@ class account_journal(models.Model):
         action['context'] = ctx
         action['domain'] = domain
         return action
+
+    @api.multi
+    def import_statement(self):
+        """return action to import bank statements"""
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'import',
+            'params': {
+                'model': 'account.bank.statement',
+                'context': self._context,
+                }
+            }

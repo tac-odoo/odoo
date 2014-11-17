@@ -55,7 +55,11 @@
                                 <a type="object" name="open_action" class="pull-right">Create Invoice</a>
                             </div>
                             <div t-if="journal_type == 'bank' or journal_type == 'cash'" class="col-md-12">
-                                <a type="object" name="open_action" class="pull-right">Create Statement</a>
+                                <span class="pull-right">
+                                <a t-if="dashboard.last_statement_date == 'None'" type='object' name="import_statement" groups="account.group_account_user">Import</a>
+                                <span t-if="dashboard.last_statement_date == 'None'" groups="account.group_account_user"> | </span>
+                                <a type="object" name="open_action">Create Statement</a>
+                                </span>
                             </div>
                         </t>
                         <t t-name="JournalBottom">
