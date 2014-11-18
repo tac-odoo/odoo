@@ -10,10 +10,10 @@ class MailComposeMessage(osv.TransientModel):
 
     _columns = {
         'mass_mailing_campaign_id': fields.many2one(
-            'mail.mass_mailing.campaign', 'Mass Mailing Campaign',
+            'mail.mass_mailing.campaign', 'Mass Mailing Campaign'
         ),
         'mass_mailing_id': fields.many2one(
-            'mail.mass_mailing', 'Mass Mailing'
+            'mail.mass_mailing', 'Mass Mailing', ondelete='cascade'
         ),
         'mass_mailing_name': fields.char('Mass Mailing'),
         'mailing_list_ids': fields.many2many(
@@ -61,3 +61,8 @@ class MailComposeMessage(osv.TransientModel):
                     'auto_delete': not mass_mailing.keep_archives,
                 })
         return res
+
+    def _process_mass_mailing_queue(self, cr, uid, context=None):
+        composer_ids = self.search(cr, uid, [('composition_mode', '=', 'mass_mail'), ('use_active_domain', '=', True)], context=context)
+        self.send_mail(cr, uid, composer_ids, force_send=True, context=context)
+        self.unlink(cr, uid, composer_ids, context=context)

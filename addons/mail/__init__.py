@@ -37,8 +37,8 @@ import mail_group_menu
 import update
 import controllers
 
-import mt_html2text
-import mt_ir_actions
-import mt_res_partner
+import ir_actions
+import html2text
+# import mt_res_partner
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

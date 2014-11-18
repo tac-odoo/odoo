@@ -64,11 +64,11 @@ Main Features
         'mail_alias_view.xml',
         'res_users_view.xml',
         'views/mail.xml',
-        'wizard/mt_email_template_preview_view.xml',
+        'wizard/email_template_preview_view.xml',
         'wizard/mt_mail_compose_message_view.xml',
-        'views/mt_email_template_view.xml',
-        'views/mt_ir_actions_view.xml',
-        'views/mt_res_partner_view.xml'
+        'views/email_template_view.xml',
+        'views/ir_actions_view.xml',
+        'views/res_partner_view.xml'
     ],
     'demo': [
         'data/mail_demo.xml',

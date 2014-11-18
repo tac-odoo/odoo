@@ -115,7 +115,7 @@ class mail_compose_message(osv.TransientModel):
             'mail_compose_message_res_partner_rel',
             'wizard_id', 'partner_id', 'Additional Contacts'),
         'use_active_domain': fields.boolean('Use active domain'),
-        'active_domain': fields.char('Active domain', readonly=True),
+        'active_domain': fields.text('Active domain', readonly=True),
         'attachment_ids': fields.many2many('ir.attachment',
             'mail_compose_message_ir_attachments_rel',
             'wizard_id', 'attachment_id', 'Attachments'),
@@ -196,7 +196,7 @@ class mail_compose_message(osv.TransientModel):
     # Wizard validation and send
     #------------------------------------------------------
 
-    def send_mail(self, cr, uid, ids, context=None):
+    def send_mail(self, cr, uid, ids, force_send=False, context=None):
         """ Process the wizard content and proceed with sending the related
             email(s), rendering any template patterns on the fly if needed. """
         context = dict(context or {})
@@ -221,12 +221,15 @@ class mail_compose_message(osv.TransientModel):
             else:
                 res_ids = [wizard.res_id]
 
+            mail_mail_ids = []
+
             sliced_res_ids = [res_ids[i:i + self._batch_size] for i in range(0, len(res_ids), self._batch_size)]
             for res_ids in sliced_res_ids:
                 all_mail_values = self.get_mail_values(cr, uid, wizard, res_ids, context=context)
                 for res_id, mail_values in all_mail_values.iteritems():
                     if wizard.composition_mode == 'mass_mail':
-                        self.pool['mail.mail'].create(cr, uid, mail_values, context=context)  # Direct send
+                        mail_mail_id = self.pool['mail.mail'].create(cr, uid, mail_values, context=context)
+                        mail_mail_ids.append(mail_mail_id)
                     else:
                         subtype = 'mail.mt_comment'
                         if context.get('mail_compose_log') or (wizard.composition_mode == 'mass_post' and not wizard.notify):  # log a note: subtype is False
@@ -236,6 +239,9 @@ class mail_compose_message(osv.TransientModel):
                                            mail_notify_force_send=False,  # do not send emails directly but use the queue instead
                                            mail_create_nosubscribe=True)  # add context key to avoid subscribing the author
                         active_model_pool.message_post(cr, uid, [res_id], type='comment', subtype=subtype, context=context, **mail_values)
+
+            if force_send:
+                self.pool['mail.mail'].send(cr, uid, mail_mail_ids, context=context)
 
         return {'type': 'ir.actions.act_window_close'}
 
