@@ -88,7 +88,7 @@ class pos_config(osv.osv):
         'group_by' : fields.boolean('Group Journal Items', help="Check this if you want to group the Journal Items by Product while closing a Session"),
         'pricelist_id': fields.many2one('product.pricelist','Pricelist', required=True),
         'company_id': fields.many2one('res.company', 'Company', required=True),
-        'barcode_nomenclature_id':  fields.many2one('barcode.nomenclature','Barcode Nomenclature', help='A barcode nomenclature', required="True"),
+        'barcode_nomenclature_id':  fields.many2one('barcode.nomenclature','Barcode Nomenclature', help='A barcode nomenclature', required=True),
     }
 
     def _check_cash_control(self, cr, uid, ids, context=None):
@@ -168,9 +168,7 @@ class pos_config(osv.osv):
     def _get_default_nomenclature(self, cr, uid, context=None):
         nom_obj = self.pool.get('barcode.nomenclature')
         res = nom_obj.search(cr, uid, [], limit=1, context=context)
-        if res and res[0]:
-            return nom_obj.browse(cr, uid, res[0], context=context).id
-        return False
+        return res and res[0] or False
 
     _defaults = {
         'uuid'  : _generate_uuid,
