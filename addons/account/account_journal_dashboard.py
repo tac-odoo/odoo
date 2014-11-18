@@ -176,11 +176,6 @@ class account_journal(models.Model):
                 'x': date_value,
                 'y': value['sum']
             })
-        if not data['values']:
-            data['values'].append({
-                'x': datetime.strptime(str(date.today()), '%Y-%m-%d').date().strftime(date_format),
-                'y': 0
-            })
         return [data]
 
     def _get_moves_forecast(self):
