@@ -22,7 +22,7 @@
 
 {
     'name': 'Marketing Campaigns',
-    'version': '1.2alpha',
+    'version': '1.1',
     'depends': ['marketing',
                  'document',
                  'email_template',
@@ -61,8 +61,7 @@ input segments, workflow.
         'marketing_campaign_workflow.xml',
         'report/campaign_analysis_view.xml',
         'security/marketing_campaign_security.xml',
-        'security/ir.model.access.csv',
-				'mail_template.xml',
+        'security/ir.model.access.csv'
     ],
     'demo': ['marketing_campaign_demo.xml'],
     'test': ['test/marketing_campaign.yml'],
