@@ -2,8 +2,18 @@
 
 from openerp import models, fields, api, exceptions
 import time
-
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+import re #is this necessary? yes, if activity condition contains regular expression, i suppose
 import pdb
+_intervalTypes = {
+    'hours': lambda interval: relativedelta(hours=interval),
+    'days': lambda interval: relativedelta(days=interval),
+    'months': lambda interval: relativedelta(months=interval),
+    'years': lambda interval: relativedelta(years=interval),
+}
+
+DT_FMT = '%Y-%m-%d %H:%M:%S'
 
 class lead_automation_campaign(models.Model):
 	_name = "lead.automation.campaign"
@@ -152,6 +162,55 @@ class lead_automation_segment(models.Model):
 		# TODO: cancel all workitems related to that segment
 		self.state = 'cancelled'
 
+	@api.one
+	def synchronize(self):
+		self.process_segment()
+		return True
+
+	#def process_segment(self):
+	@api.one
+	def process_segment(self):
+		pdb.set_trace()
+		Workitems = self.env['lead.automation.workitem']
+		Campaigns = self.env['lead.automation.campaign']
+		if self.state!='running' and self.campaign_id.state!='running':
+			return False
+
+		action_date = time.strftime('%Y-%m-%d %H:%M:%S')
+
+		act_ids = self.env['lead.automation.activity'].search([('start', '=', True), ('campaign_id', '=', self.campaign_id.id)])
+
+		model_obj = self.object_id.model
+		criteria = []
+		if self.sync_last_date and self.sync_mode != 'all':
+			criteria += [(self.sync_mode, '>', self.sync_last_date)]
+		if self.ir_filter_id:
+			criteria += eval(self.ir_filter_id.domain)
+		object_ids = self.env[model_obj].search(criteria)
+
+		# XXX TODO: rewrite this loop more efficiently without doing 1 search per record!
+		for record in self.env[model_obj].browse(object_ids):
+			# avoid duplicate workitem for the same resource
+			#if segment.sync_mode in ('write_date','all'):
+			#	if Campaigns._find_duplicate_workitems(cr, uid, record, segment.campaign_id, context=context):
+			#		continue
+
+			wi_vals = {
+				'segment_id': self.id,
+				'date': action_date,
+				'state': 'todo',
+				'res_id': record.id
+			}
+		#	partner = self.env.pool.get('lead.automation.campaign')._get_partner_for(segment.campaign_id, record)
+		#	if partner:
+		#		wi_vals['partner_id'] = partner.id
+
+			for act_id in act_ids:
+				wi_vals['activity_id'] = act_id
+				Workitems.create(wi_vals)
+
+		self.sync_last_date=action_date
+		return True
 
 class lead_automation_activity(models.Model):
 	_name='lead.automation.activity'
@@ -202,9 +261,15 @@ class lead_automation_activity(models.Model):
 	keep_if_condition_not_met= fields.Boolean("Don't Delete Workitems",help="By activating this option, workitems that aren't executed because the condition is not met are marked as cancelled instead of being deleted.")
 
 	@api.one
-	def process():
-		return True
+	def process(self,workitem):
+		#method = '_process_wi_%s' % (self.type)
+		#action = getattr(self, method, None)
+		#if not action:
+		#	raise ValidationError('Method %r is not implemented on %r object.' % (method, self))
 
+		#workitem = self.env['lead.automation.workitem'].browse(cr, uid, wi_id, context=context)
+		#return action(cr, uid, activity, workitem, context=context)
+		return True
 
 class lead_automation_transition(models.Model):
 	_name = 'lead.automation.transition'
@@ -238,17 +303,23 @@ class lead_automation_transition(models.Model):
 		}
 		self.name = formatters[self.trigger]
 
+	@api.one
+	def _delta(self):
+		if self.trigger != 'time':
+			raise ValidationError('Delta is only relevant for timed transition.')
+		return relativedelta(**{str(self.interval_type): self.interval_nbr})
+
 
 class lead_automation_workitem(models.Model):
 	_name = "lead.automation.workitem"
 
-	segment_id= fields.Many2one('lead.automation.segment', 'Segment', readonly=True)
-	activity_id= fields.Many2one('lead.automation.activity','Activity',required=True, readonly=True)
-	campaign_id= fields.Many2one(related='activity_id.campaign_id', string='Campaign', readonly=True, store=True)
-	object_id= fields.Many2one(related='activity_id.campaign_id.object_id', string='Resource', select=1, readonly=True, store=True)
-	res_id= fields.Integer('Resource ID', select=1, readonly=True)
+	segment_id= fields.Many2one('lead.automation.segment', 'Segment', readonly=False)
+	activity_id= fields.Many2one('lead.automation.activity','Activity',required=True, readonly=False)
+	campaign_id= fields.Many2one(related='activity_id.campaign_id', string='Campaign', readonly=False, store=True)
+	object_id= fields.Many2one(related='activity_id.campaign_id.object_id', string='Resource', select=1, readonly=False, store=True)
+	res_id= fields.Integer('Resource ID', select=1, readonly=False)
 	res_name= fields.Char(compute='_res_name_get', string='Resource Name', search='_resource_search', size=64)
-	date= fields.Datetime('Execution Date', default=False, help='If date is not set, this workitem has to be run manually', readonly=True)
+	date= fields.Datetime('Execution Date', default=False, help='If date is not set, this workitem has to be run manually', readonly=False)
 	partner_id= fields.Many2one('res.partner', 'Partner', select=1, readonly=True)
 	state= fields.Selection([ ('todo', 'To Do'),
 															('cancelled', 'Cancelled'),
@@ -259,7 +330,8 @@ class lead_automation_workitem(models.Model):
 
 	@api.one
 	def _res_name_get(self):
-		self.res_name = self.res_id.model
+		temp=self.env['ir.model'].browse(self.res_id)
+		self.res_name = temp.model
 
 	@api.one
 	def _resource_search(self):
@@ -274,3 +346,92 @@ class lead_automation_workitem(models.Model):
 	def action_cancel(self):
 		if slef.state in ['exception','todo']:
 			self.state=cancelled
+
+	def process_all(self,workitem_ids):
+		if not(workitem_ids):
+			workitems_ids = self.env(['lead.automation.workitem']).search([])
+		for wi in workitem_ids:
+			wi.process_one()
+
+	@api.one
+	def process_one(self):
+		pdb.set_trace()
+		if self.state!='todo':
+			return False
+
+		activity = self.activity_id
+		object_id = self.env[self.object_id.model].browse(self.res_id)
+
+		eval_context = {
+			'activity': activity,
+			'workitem': self,
+			'object': object_id,
+			'resource': object_id,
+			'transitions': activity.to_ids,
+			're': re,
+		}
+		try:
+			condition = activity.condition
+			campaign_mode = self.campaign_id.mode
+			if condition:
+				if not eval(condition, eval_context):
+					if activity.keep_if_condition_not_met:
+						self.state='cancelled'
+					else:
+						self.unlink()
+					return
+			result = True
+			if campaign_mode in ('manual', 'active'):
+				result = activity.process(self)
+
+			values = dict(state='done')
+			if not self.date:
+				values['date'] = datetime.now().strftime(DT_FMT)
+			self.write(values)
+
+			if result:
+				# process _chain
+				self.refresh()       # reload
+				date = datetime.strptime(self.date, DT_FMT)
+
+				for transition in activity.to_ids:
+					if transition.trigger == 'cosmetic':
+						continue
+					launch_date = False
+					if transition.trigger == 'auto':
+						launch_date = date
+					elif transition.trigger == 'time':
+						temp=transition._delta()
+						launch_date = date + temp[0]
+
+					if launch_date:
+						launch_date = launch_date.strftime(DT_FMT)
+					values = {
+						'date': launch_date,
+						'segment_id': self.segment_id.id,
+						'activity_id': transition.activity_to_id.id,
+						'partner_id': self.partner_id.id,
+						'res_id': self.res_id,
+						'state': 'todo',
+					}
+					wi_id = self.create(values)
+
+					# Now, depending on the trigger and the campaign mode
+					# we know whether we must run the newly created workitem.
+					#
+					# rows = transition trigger \ colums = campaign mode
+					#
+					#           test    test_realtime     manual      normal (active)
+					# time       Y            N             N           N
+					# cosmetic   N            N             N           N
+					# auto       Y            Y             N           Y
+					#
+
+					run = (transition.trigger == 'auto' and campaign_mode != 'manual') \
+								or (transition.trigger == 'time' and campaign_mode == 'test')
+					if run:
+						wi_id.process_one()
+
+		except Exception:
+			self.state='exception'
+			self.error_msg = Exception.message
