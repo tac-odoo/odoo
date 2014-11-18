@@ -9,6 +9,20 @@ from openerp.tools.translate import _
 import logging
 _logger = logging.getLogger(__name__)
 
+
+class account_bank_statement_line(osv.osv):
+    _inherit = "account.bank.statement.line"
+
+    _columns = {
+        # Ensure transactions can be imported only once (if the import format provides unique transaction ids)
+        'unique_import_id': fields.char('Import ID', readonly=True, copy=False),
+    }
+
+    _sql_constraints = [
+        ('unique_import_id', 'unique (unique_import_id)', 'A bank account transactions can be imported only once !')
+    ]
+
+
 class account_bank_statement_import(osv.TransientModel):
     _name = 'account.bank.statement.import'
     _description = 'Import Bank Statement'
@@ -37,7 +51,7 @@ class account_bank_statement_import(osv.TransientModel):
         stmts_vals = self._complete_stmts_vals(cr, uid, stmts_vals, journal_id, account_number, context=context)
         # Create the bank statements
         statement_ids, notifications = self._create_bank_statements(cr, uid, stmts_vals, context=context)
-        
+
         # Finally dispatch to reconciliation interface
         model, action_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'account', 'action_bank_reconcile_bank_statements')
         action = self.pool[model].browse(cr, uid, action_id, context=context)
@@ -81,7 +95,7 @@ class account_bank_statement_import(osv.TransientModel):
         """ Basic and structural verifications """
         if len(stmts_vals) == 0:
             raise osv.except_osv(_('Error'), _('This file doesn\'t contain any statement.'))
-        
+
         no_st_line = True
         for vals in stmts_vals:
             if vals['transactions'] and len(vals['transactions']) > 0:
@@ -92,7 +106,7 @@ class account_bank_statement_import(osv.TransientModel):
 
     def _find_additional_data(self, cr, uid, currency_code, account_number, context=None):
         """ Get the res.currency ID and the res.partner.bank ID """
-        currency_id = False # So if no currency_code is provided, we'll use the company currency
+        currency_id = False  # So if no currency_code is provided, we'll use the company currency
         if currency_code:
             currency_ids = self.pool.get('res.currency').search(cr, uid, [('name', '=ilike', currency_code)], context=context)
             company_currency_id = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.currency_id.id
@@ -102,7 +116,7 @@ class account_bank_statement_import(osv.TransientModel):
 
         bank_account_id = None
         if account_number and len(account_number) > 4:
-            account_number = account_number.replace(' ','').replace('-','')
+            account_number = account_number.replace(' ', '').replace('-', '')
             cr.execute("select id from res_partner_bank where replace(replace(acc_number,' ',''),'-','') = %s", (account_number,))
             bank_account_ids = [id[0] for id in cr.fetchall()]
             bank_account_ids = self.pool.get('res.partner.bank').search(cr, uid, [('id', 'in', bank_account_ids)], context=context)
@@ -150,12 +164,12 @@ class account_bank_statement_import(osv.TransientModel):
         """ Create a journal and its account """
         wmca_pool = self.pool.get('wizard.multi.charts.accounts')
         company = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id
-        
-        vals_account = {'currency_id': currency_id, 'acc_name': account_number, 'account_type': 'bank', 'currency_id': currency_id }
+
+        vals_account = {'currency_id': currency_id, 'acc_name': account_number, 'account_type': 'bank', 'currency_id': currency_id}
         vals_account = wmca_pool._prepare_bank_account(cr, uid, company, vals_account, context=context)
         account_id = self.pool.get('account.account').create(cr, uid, vals_account, context=context)
-        
-        vals_journal = {'currency_id': currency_id, 'acc_name': _('Bank') + ' ' + account_number, 'account_type': 'bank' }
+
+        vals_journal = {'currency_id': currency_id, 'acc_name': _('Bank') + ' ' + account_number, 'account_type': 'bank'}
         vals_journal = wmca_pool._prepare_bank_journal(cr, uid, company, vals_journal, account_id, context=context)
         return self.pool.get('account.journal').create(cr, uid, vals_journal, context=context)
 
@@ -166,7 +180,7 @@ class account_bank_statement_import(osv.TransientModel):
             bank_code = type_id.code
         except ValueError:
             bank_code = 'bank'
-        account_number = account_number.replace(' ','').replace('-','')
+        account_number = account_number.replace(' ', '').replace('-', '')
         vals_acc = {
             'acc_number': account_number,
             'state': bank_code,
@@ -183,7 +197,7 @@ class account_bank_statement_import(osv.TransientModel):
                 unique_import_id = line_vals.get('unique_import_id', False)
                 if unique_import_id:
                     line_vals['unique_import_id'] = (account_number and account_number + '-' or '') + unique_import_id
-                
+
                 if not 'bank_account_id' in line_vals or not line_vals['bank_account_id']:
                     # Find the partner and his bank account or create the bank account. The partner selected during the
                     # reconciliation process will be linked to the bank when the statement is closed.
