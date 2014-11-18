@@ -31,7 +31,6 @@ from openerp import tools
 from openerp.osv import fields, osv, expression
 from openerp.tools.translate import _
 from openerp.tools.float_utils import float_round as round
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 
 import openerp.addons.decimal_precision as dp
 
@@ -488,10 +487,6 @@ class account_account(osv.osv):
         'unrealized_gain_loss': fields.function(__compute, digits_compute=dp.get_precision('Account'), string='Unrealized Gain or Loss', multi='balance',
                                                 help="Value of Loss or Gain due to changes in exchange rate when doing multi-currency transactions."),
         'reconcile': fields.boolean('Allow Reconciliation', help="Check this box if this account allows reconciliation of journal items."),
-        'last_time_entries_checked': fields.datetime('Latest Manual Reconciliation Date', readonly=True, copy=False,
-            help='Last time the manual reconciliation was performed on this account.'
-                 'It is set either if there\'s not at least an unreconciled debit and an unreconciled credit'
-                 'Or if you click the "Done" button.'),
         'exchange_rate': fields.related('currency_id', 'rate', type='float', string='Exchange Rate', digits=(12,6)),
         'shortcut': fields.char('Shortcut', size=12),
         'tax_ids': fields.many2many('account.tax', 'account_account_tax_default_rel',
@@ -723,28 +718,6 @@ class account_account(osv.osv):
     def unlink(self, cr, uid, ids, context=None):
         self._check_moves(cr, uid, ids, "unlink", context=context)
         return super(account_account, self).unlink(cr, uid, ids, context=context)
-
-    def has_something_to_reconcile(self, cr, uid, account_id, context=None):
-        '''
-        at least a debit, a credit and a line older than the last reconciliation date of the account
-        '''
-        cr.execute('''
-            SELECT l.account_id, SUM(l.debit) AS debit, SUM(l.credit) AS credit
-            FROM account_move_line l
-            RIGHT JOIN account_account a ON (a.id = l.account_id)
-            WHERE a.reconcile IS TRUE
-            AND a.id = %s
-            AND l.reconcile_id IS NULL
-            AND (a.last_time_entries_checked IS NULL OR l.date > a.last_time_entries_checked)
-            AND l.state <> 'draft'
-            GROUP BY l.account_id''', (account_id,))
-        res = cr.dictfetchone()
-        if res:
-            return bool(res['debit'] and res['credit'])
-        return False
-
-    def mark_as_reconciled(self, cr, uid, ids, context=None):
-        return self.write(cr, uid, ids, {'last_time_entries_checked': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)}, context=context)
 
 class account_journal(osv.osv):
     _name = "account.journal"
@@ -3570,37 +3543,6 @@ class account_bank_accounts_wizard(osv.osv_memory):
         'bank_account_id': fields.many2one('wizard.multi.charts.accounts', 'Bank Account', required=True, ondelete='cascade'),
         'currency_id': fields.many2one('res.currency', 'Secondary Currency', help="Forces all moves for this account to have this secondary currency."),
         'account_type': fields.selection([('cash','Cash'), ('check','Check'), ('bank','Bank')], 'Account Type'),
-    }
-
-class account_operation_template(osv.osv):
-    _name = "account.operation.template"
-    _description = "Preset to create move lines during a reconciliation"
-    _columns = {
-        'name': fields.char('Button Label', required=True),
-        'sequence': fields.integer('Sequence', required=True),
-        'account_id': fields.many2one('account.account', 'Account', ondelete='cascade', domain=[('type','!=','view')]),
-        'journal_id': fields.many2one('account.journal', 'Journal', ondelete='cascade', help="This field is ignored in a bank statement reconciliation."),
-        'label': fields.char('Journal Item Label'),
-        'amount_type': fields.selection([('fixed', 'Fixed'),('percentage','Percentage of amount')], 'Amount type', required=True),
-        'amount': fields.float('Amount', digits_compute=dp.get_precision('Account'), help="Fixed amount will count as a debit if it is negative, as a credit if it is positive.", required=True),
-        'tax_id': fields.many2one('account.tax', 'Tax', ondelete='cascade'),
-        'analytic_account_id': fields.many2one('account.analytic.account', 'Analytic Account', ondelete='cascade'),
-        'has_second_line': fields.boolean('Second line'),
-        'second_account_id': fields.many2one('account.account', 'Account', ondelete='cascade', domain=[('type','!=','view')]),
-        'second_journal_id': fields.many2one('account.journal', 'Journal', ondelete='cascade', help="This field is ignored in a bank statement reconciliation."),
-        'second_label': fields.char('Label'),
-        'second_amount_type': fields.selection([('fixed', 'Fixed'),('percentage','Percentage of amount')], 'Amount type', required=True),
-        'second_amount': fields.float('Amount', digits_compute=dp.get_precision('Account'), help="Fixed amount will count as a debit if it is negative, as a credit if it is positive.", required=True),
-        'second_tax_id': fields.many2one('account.tax', 'Tax', ondelete='cascade'),
-        'second_analytic_account_id': fields.many2one('account.analytic.account', 'Analytic Account', ondelete='cascade'),
-    }
-    _defaults = {
-        'sequence': 10,
-        'amount_type': 'percentage',
-        'amount': 100.0,
-        'has_second_line': False,
-        'second_amount_type': 'percentage',
-        'second_amount': 100.0,
     }
 
 

@@ -24,7 +24,6 @@ import time
 
 from openerp.osv import fields, osv
 from openerp import api
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 
 class account_fiscal_position(osv.osv):
     _name = 'account.fiscal.position'
@@ -270,7 +269,7 @@ class res_partner(osv.osv):
             WHERE a.reconcile IS TRUE
             AND p.id = %s
             AND l.reconcile_id IS NULL
-            AND (p.last_time_entries_checked IS NULL OR l.date > p.last_time_entries_checked)
+            AND (p.last_reconciliation_date IS NULL OR l.date > p.last_reconciliation_date)
             AND l.state <> 'draft'
             GROUP BY l.partner_id''', (partner_id,))
         res = cr.dictfetchone()
@@ -279,7 +278,7 @@ class res_partner(osv.osv):
         return False
 
     def mark_as_reconciled(self, cr, uid, ids, context=None):
-        return self.write(cr, uid, ids, {'last_time_entries_checked': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)}, context=context)
+        return self.write(cr, uid, ids, {'last_reconciliation_date': time.strftime('%Y-%m-%d %H:%M:%S')}, context=context)
 
     _columns = {
         'vat_subjected': fields.boolean('VAT Legal Statement', help="Check this box if the partner is subjected to the VAT. It will be used for the VAT legal statement."),
@@ -323,17 +322,20 @@ class res_partner(osv.osv):
              help="This payment term will be used instead of the default one for purchase orders and supplier invoices"),
         'ref_companies': fields.one2many('res.company', 'partner_id',
             'Companies that refers to partner'),
-        'last_time_entries_checked': fields.datetime(
-            'Latest Manual Reconciliation Date', readonly=True, copy=False,
-            help='Last time the manual reconciliation was performed for this partner.'
-                 'It is set either if there\'s not at least an unreconciled debit and an unreconciled credit'
-                 'Or if you click the "Done" button.'),
+        'last_reconciliation_date': fields.datetime(
+            'Latest Full Reconciliation Date', copy=False,
+            help='Date on which the partner accounting entries were fully reconciled last time. '
+                 'It differs from the last date where a reconciliation has been made for this partner, '
+                 'as here we depict the fact that nothing more was to be reconciled at this date. '
+                 'This can be achieved in 2 different ways: either the last unreconciled debit/credit '
+                 'entry of this partner was reconciled, either the user pressed the button '
+                 '"Nothing more to reconcile" during the manual reconciliation process.')
     }
 
     def _commercial_fields(self, cr, uid, context=None):
         return super(res_partner, self)._commercial_fields(cr, uid, context=context) + \
             ['debit_limit', 'property_account_payable', 'property_account_receivable', 'property_account_position',
-             'property_payment_term', 'property_supplier_payment_term', 'last_time_entries_checked']
+             'property_payment_term', 'property_supplier_payment_term', 'last_reconciliation_date']
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

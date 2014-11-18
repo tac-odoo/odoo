@@ -2,6 +2,9 @@
 
 {
     'name': 'Import QIF Bank Statement',
+    # TODO : remove category Technical Settings once the kanban 'dashboard' view is merged
+    # Without it, QIF import won't work (we need to specify the journal_id, which is done via context by the dashboard view)
+    'category' : 'Technical Settings', #'category' : 'Accounting & Finance',
     'version': '1.0',
     'author': 'OpenERP SA',
     'description': '''

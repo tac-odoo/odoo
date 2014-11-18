@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 {
     'name': 'Import OFX Bank Statement',
+    'category' : 'Accounting & Finance',
     'version': '1.0',
     'author': 'OpenERP SA',
     'depends': ['account_bank_statement_import'],
