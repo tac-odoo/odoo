@@ -62,7 +62,7 @@ class mail_compose_message(osv.TransientModel):
         'template_id': fields.many2one('mail.template', 'Use template', select=True),
     }
 
-    def send_mail(self, cr, uid, ids, force_send=False, context=None):
+    def send_mail(self, cr, uid, ids, context=None):
         """ Override of send_mail to duplicate attachments linked to the email.template.
             Indeed, basic mail.compose.message wizard duplicates attachments in mass
             mailing mode. But in 'single post' mode, attachments of an email template
@@ -83,7 +83,7 @@ class mail_compose_message(osv.TransientModel):
                 else:
                     new_attachment_ids.append(attachment.id)
                 self.write(cr, uid, wizard.id, {'attachment_ids': [(6, 0, new_attachment_ids)]}, context=context)
-        return super(mail_compose_message, self).send_mail(cr, uid, ids, force_send=force_send, context=wizard_context)
+        return super(mail_compose_message, self).send_mail(cr, uid, ids, context=wizard_context)
 
     def onchange_template_id(self, cr, uid, ids, template_id, composition_mode, model, res_id, context=None):
         """ - mass_mailing: we cannot render, so return the template values

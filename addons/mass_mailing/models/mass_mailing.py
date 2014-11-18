@@ -642,7 +642,7 @@ class MassMailing(osv.Model):
             composer_id = self.pool['mail.compose.message'].create(cr, uid, composer_values, context=comp_ctx)
 
             if len(res_ids) < self._send_trigger:  # Send directly only if it's a small number of mails
-                self.pool['mail.compose.message'].send_mail(cr, uid, [composer_id], force_send=True, context=comp_ctx)
+                self.pool['mail.compose.message'].send_mail(cr, uid, [composer_id], context=comp_ctx)
 
             self.write(cr, uid, [mailing.id], {'sent_date': fields.datetime.now(), 'state': 'done'}, context=context)
         return True
