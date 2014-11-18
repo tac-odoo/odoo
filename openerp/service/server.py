@@ -9,12 +9,13 @@ import os.path
 import platform
 import psutil
 import random
+import signal
 if os.name == 'posix':
     import resource
 else:
+    signal.SIGHUP = -1
     resource = None
 import select
-import signal
 import socket
 import subprocess
 import sys
