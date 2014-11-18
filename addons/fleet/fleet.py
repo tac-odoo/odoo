@@ -221,7 +221,7 @@ class fleet_vehicle(models.Model):
         res = contract.read_group([('expiration_date', '<', today)], fields=['vehicle_id'], groupby=['vehicle_id'])
         list = []
         for x in res:
-            vehicle_id = str( x['vehicle_id'][0] )
+            vehicle_id = str(x['vehicle_id'][0])
             list.append(vehicle_id)
         return [('id', search_operator, list)]
 
@@ -240,7 +240,7 @@ class fleet_vehicle(models.Model):
         res = contract.read_group([('expiration_date', '>', today), ('expiration_date', '<', limit_date)], fields=['vehicle_id'], groupby=['vehicle_id'])
         list = []
         for x in res:
-            vehicle_id = str( x['vehicle_id'][0] )
+            vehicle_id = str(x['vehicle_id'][0])
             list.append(vehicle_id)
         return [('id', search_operator, list)]
 
@@ -328,9 +328,9 @@ class fleet_vehicle(models.Model):
     horsepower_tax = fields.Float('Horsepower Taxation')
     power = fields.Integer('Power', help='Power in kW of the vehicle')
     co2 = fields.Float('CO2 Emissions', help='CO2 emissions of the vehicle')
-    image = fields.Binary(related='model_id.make_id.image', string="Logo")
-    image_medium = fields.Binary(related='model_id.make_id.image_medium', string="Logo (medium)")
-    image_small = fields.Binary(related='model_id.make_id.image_small', string="Logo (small)")
+    image = fields.Binary(related='model_id.make_id.image', string="Logo", store=True)
+    image_medium = fields.Binary(related='model_id.make_id.image_medium', string="Logo (medium)", store=True)
+    image_small = fields.Binary(related='model_id.make_id.image_small', string="Logo (small)", store=True)
     contract_renewal_due_soon = fields.Boolean(compute='_get_contract_reminder_fnc', search='_search_contract_renewal_due_soon', string='Has Contracts to renew')
     contract_renewal_overdue = fields.Boolean(compute='_get_contract_reminder_fnc', search='_search_get_overdue_contract_reminder', string='Has Contracts Overdued')
     contract_renewal_name = fields.Text(compute='_get_contract_reminder_fnc', string='Name of contract to renew soon')
