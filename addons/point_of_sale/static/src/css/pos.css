@@ -358,6 +358,7 @@ td {
     margin-right:32px;
     line-height: 48px;
     font-style:italic;
+    cursor: pointer;
 }
 
 /*  b) The right part of the top-bar */
@@ -1244,9 +1245,16 @@ td {
     word-wrap: break-word;
 }
 
+@page {
+    margin: 0;
+}
+
 @media print {
     body {
         margin: 0;
+    }
+    * {
+        color: black !important;
     }
     .ui-notify-message,
     .oe_leftbar,
@@ -1918,6 +1926,7 @@ td {
     height: 40px;
     line-height:40px;
     text-align:center;
+    border-radius: 2px;
     margin:3px;
     margin-top:10px;
     margin-right:10px;
@@ -1958,25 +1967,91 @@ td {
     height: 180px;
     line-height:180px;
 }
-.pos .popup input {
-    font-size: 18px;
-    font-family: Lato;
-    padding: 4px;
+.pos .popup input,
+.pos .popup-input {
+    text-align: left;
+    display: inline-block;
+    overflow: hidden;
+    background: white;
+    min-height: 44px;
+    font-family: "Lato";
+    font-size: 20px;
+    color: #444;
+    padding: 10px;
     border-radius: 3px;
-    border: solid 1px #cecece;
+    border: none;
+    box-shadow: 0px 0px 0px 1px rgb(220,220,220) inset;
     box-sizing: border-box;
     width: 80%;
 }
+.pos .popup input:focus,
+.pos .popup-input.active {
+    outline: none;
+    box-shadow: 0px 0px 0px 3px #6EC89B;
+}
+.pos .popup.popup-selection .message {
+    margin-top: 0;
+}
 .pos .popup.popup-selection .selection {
     overflow-y: auto;
-    max-height: 270px;
-}
-.pos .popup.popup-selection .selection .button {
-    float: none;
-    display: block;
+    max-height: 305px;
+    font-size: 16px;
+    margin: 0 -10px;
     width: auto;
-    margin: 8px;
+    line-height: 50px;
+    border-top: dashed 1px rgb(215,215,215);
 }
+.pos .popup.popup-selection .selection-item {
+    width: auto;
+    background: rgb(230,230,230);
+    cursor: pointer;
+    text-align: left;
+    padding: 0px 16px;
+}
+.pos .popup.popup-selection .selection-item:nth-child(even) {
+    background: rgb(247,247,247);
+}
+.pos .popup-numpad {
+    margin: 12px auto;
+    text-align: left;
+    width: 244px;
+}
+.pos .popup-number .message {
+    margin-top: 0;
+}
+.pos .popup-numpad .input-button,
+.pos .popup-numpad .mode-button {
+    background: none;
+    height: 50px;
+    width: 50px;
+    padding: 0;
+    border-radius: 25px;
+    margin: 4px;
+    vertical-align: top;
+    color: #444;
+}
+.pos .popup-numpad .input-button:active,
+.pos .popup-numpad .mode-button:active {
+    background: #444;
+    color: white;
+    border-color: #444;
+}
+
+.pos .popup.popup-password {
+    width: 238px;
+    margin-left: -119px;
+}
+.pos .popup-password .mode-button.add,
+.pos .popup-password .input-button.dot {
+    display: none;
+}
+.pos .popup-password .popup-numpad {
+    width: 182px;
+}
+.pos .popup-password .popup-input {
+    width: 70%;
+    -webkit-text-security: disc;
+ }
 
 /*  ********* The Webkit Scrollbar  ********* */
 

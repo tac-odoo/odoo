@@ -181,7 +181,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             for(var i = 0, len = users.length; i < len; i++){
                 if(users[i].barcode === code.code){
                     this.pos.cashier = users[i];
-                    this.pos_widget.username.refresh();
+                    this.pos_widget.username.renderElement();
                     return true;
                 }
             }
@@ -197,7 +197,6 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             var partner = this.pos.db.get_partner_by_barcode(code.code);
             if(partner){
                 this.pos.get_order().set_client(partner);
-                this.pos_widget.username.refresh();
                 return true;
             }
             this.pos_widget.screen_selector.show_popup('error-barcode',code.code);
@@ -397,7 +396,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 }
             });
 
-            this.$('.button.item').click(function(){
+            this.$('.selection-item').click(function(){
                 self.pos_widget.screen_selector.close_popup();
                 if (options.confirm) {
                     var item = self.list[parseInt($(this).data('item-index'))];
@@ -440,6 +439,89 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
     module.TextAreaPopupWidget = module.TextInputPopupWidget.extend({
         template: 'TextAreaPopupWidget',
+    });
+
+    module.NumberPopupWidget = module.PopUpWidget.extend({
+        template: 'NumberPopupWidget',
+        click_numpad_button: function($el,event){
+            this.numpad_input($el.data('action'));
+        },
+        numpad_input: function(input) { //FIXME -> Deduplicate code
+            var oldbuf = this.inputbuffer.slice(0);
+
+            if (input === '.') {
+                if (this.firstinput) {
+                    this.inputbuffer = "0.";
+                }else if (!this.inputbuffer.length || this.inputbuffer === '-') {
+                    this.inputbuffer += "0.";
+                } else if (this.inputbuffer.indexOf('.') < 0){
+                    this.inputbuffer = this.inputbuffer + '.';
+                }
+            } else if (input === 'CLEAR') {
+                this.inputbuffer = ""; 
+            } else if (input === 'BACKSPACE') { 
+                this.inputbuffer = this.inputbuffer.substring(0,this.inputbuffer.length - 1);
+            } else if (input === '+') {
+                if ( this.inputbuffer[0] === '-' ) {
+                    this.inputbuffer = this.inputbuffer.substring(1,this.inputbuffer.length);
+                }
+            } else if (input === '-') {
+                if ( this.inputbuffer[0] === '-' ) {
+                    this.inputbuffer = this.inputbuffer.substring(1,this.inputbuffer.length);
+                } else {
+                    this.inputbuffer = '-' + this.inputbuffer;
+                }
+            } else if (input[0] === '+' && !isNaN(parseFloat(input))) {
+                this.inputbuffer = '' + ((parseFloat(this.inputbuffer) || 0) + parseFloat(input));
+            } else if (!isNaN(parseInt(input))) {
+                if (this.firstinput) {
+                    this.inputbuffer = '' + input;
+                } else {
+                    this.inputbuffer += input;
+                }
+            }
+
+            this.firstinput = this.inputbuffer.length === 0;
+
+            if (this.inputbuffer !== oldbuf) {
+                this.$('.value').text(this.inputbuffer);
+            }
+        },
+        show: function(options){
+            options = options || {};
+            var self = this;
+            this._super();
+
+            this.message = options.message || '';
+            this.comment = options.comment || '';
+            this.inputbuffer = options.value   || '';
+            this.renderElement();
+            this.firstinput = true;
+            
+            this.$('.input-button,.mode-button').click(function(event){
+                self.click_numpad_button($(this),event);
+            });
+            this.$('.button.cancel').click(function(){
+                self.pos_widget.screen_selector.close_popup();
+                if( options.cancel ){
+                    options.cancel.call(self);
+                }
+            });
+
+            this.$('.button.confirm').click(function(){
+                self.pos_widget.screen_selector.close_popup();
+                if( options.confirm ){
+                    options.confirm.call(self,self.inputbuffer);
+                }
+            });
+        },
+    });
+
+    module.PasswordPopupWidget = module.NumberPopupWidget.extend({
+        renderElement: function(){
+            this._super();
+            this.$('.popup').addClass('popup-password');    // HELLO HACK !
+        },
     });
 
     module.ErrorNoClientPopupWidget = module.ErrorPopupWidget.extend({
@@ -531,7 +613,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             if(!product || !this.pos){
                 return defaultstr;
             }
-            var unit_id = product.uos_id || product.uom_id;
+            var unit_id = product.uom_id;
             if(!unit_id){
                 return defaultstr;
             }
@@ -1137,7 +1219,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 }
             }
 
-            this.firstinput = false;
+            this.firstinput = this.inputbuffer.length === 0;
 
             if (this.inputbuffer !== oldbuf) {
                 var order = this.pos.get_order();
@@ -1240,6 +1322,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         click_set_customer: function(){
             this.pos_widget.screen_selector.set_current_screen('clientlist');
         },
+        click_open_cashbox: function(){
+            this.pos.proxy.open_cashbox();
+        },
         click_back: function(){
             this.pos_widget.screen_selector.set_current_screen('products');
         },
@@ -1268,6 +1353,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             });
             this.$('.js_invoice').click(function(){
                 self.click_invoice();
+            });
+            this.$('.js_cashdrawer').click(function(){
+                self.click_open_cashbox();
             });
 
         },
@@ -1367,7 +1455,6 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             }
 
             if (order.is_paid_with_cash() && this.pos.config.iface_cashdrawer) { 
-            
                     this.pos.proxy.open_cashbox();
             }
 

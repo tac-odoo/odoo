@@ -599,7 +599,7 @@
                             </t>
                         </t>
                         <t t-if='widget.pos.config.iface_cashdrawer'>
-                            <div class='button js_invoice'>
+                            <div class='button js_cashdrawer'>
                                 <i class='fa fa-archive' /> Open Cashbox
                             </div>
                         </t>
@@ -666,8 +666,10 @@
                     <div><t t-esc='receipt.header' /></div>
                 </t>
                 <t t-if='receipt.cashier'>
-                    <div>--------------------------------</div>
-                    <div>Served by <t t-esc='receipt.cashier' /></div>
+                    <div class='cashier'>
+                        <div>--------------------------------</div>
+                        <div>Served by <t t-esc='receipt.cashier' /></div>
+                    </div>
                 </t>
             </div>
             <br /><br />
@@ -938,15 +940,58 @@
     <t t-name="SelectionPopupWidget">
         <div class="modal-dialog">
             <div class="popup popup-selection">
-                <p class="message"><t t-esc=" widget.message || 'Confirm ?' " /></p>
-                <div class='selection'>
+                <p class="message"><t t-esc=" widget.message || 'Select' " /></p>
+                <div class='selection scrollable-y touch-scrollable'>
                     <t t-foreach="widget.list || []" t-as="item">
-                        <div class='button item' t-att-data-item-index='item_index'>
+                        <div class='selection-item' t-att-data-item-index='item_index'>
                             <t t-esc='item.label'/>
                         </div>
                     </t>
                 </div>
                 <div class="footer">
+                    <div class="button cancel">
+                        Cancel 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="NumberPopupWidget">
+        <div class="modal-dialog">
+            <div class="popup popup-number">
+                <p class="message"><t t-esc=" widget.message || '' " /></p>
+                <div class='popup-input value active'>
+                    <t t-esc='widget.inputbuffer' />
+                </div>
+                <div class='popup-numpad'>
+                    <button class="input-button number-char" data-action='1'>1</button>
+                    <button class="input-button number-char" data-action='2'>2</button>
+                    <button class="input-button number-char" data-action='3'>3</button>
+                    <button class="mode-button add" data-action='+10'>+10</button>
+                    <br />
+                    <button class="input-button number-char" data-action='4'>4</button>
+                    <button class="input-button number-char" data-action='5'>5</button>
+                    <button class="input-button number-char" data-action='6'>6</button>
+                    <button class="mode-button add" data-action='+20'>+20</button>
+                    <br />
+                    <button class="input-button number-char" data-action='7'>7</button>
+                    <button class="input-button number-char" data-action='8'>8</button>
+                    <button class="input-button number-char" data-action='9'>9</button>
+                    <button class="mode-button add" data-action='+50'>+50</button>
+                    <br />
+                    <button class="input-button numpad-char" data-action='CLEAR' >C</button>
+                    <button class="input-button number-char" data-action='0'>0</button>
+                    <button class="input-button number-char dot" data-action='.'>.</button>
+                    <button class="input-button numpad-backspace" data-action='BACKSPACE' >
+                        <img src="/point_of_sale/static/src/img/backspace.png" width="24" height="21" />
+                    </button>
+                    <br />
+                </div>
+                <div class="footer">
+                    <div class="button confirm">
+                        Ok
+                    </div>
                     <div class="button cancel">
                         Cancel 
                     </div>
@@ -961,12 +1006,12 @@
                 <img t-att-src='image_url' /> 
                 <t t-if="!product.to_weight">
                     <span class="price-tag">
-                        <t t-esc="widget.format_currency(product.price)"/>
+                        <t t-esc="widget.format_currency(product.price,'Product Price')"/>
                     </span>
                 </t>
                 <t t-if="product.to_weight">
                     <span class="price-tag">
-                        <t t-esc="widget.format_currency(product.price)+'/Kg'"/>
+                        <t t-esc="widget.format_currency(product.price,'Product Price')+'/Kg'"/>
                     </span>
                 </t>
             </div>
@@ -992,7 +1037,7 @@
                         </em>
                         <t t-esc="line.get_unit().name" />
                         at
-                        <t t-esc="widget.format_currency(line.get_unit_price())" />
+                        <t t-esc="widget.format_currency(line.get_unit_display_price(),'Product Price')" />
                         /
                         <t t-esc="line.get_unit().name" />
                     </li>
@@ -1093,7 +1138,7 @@
             <div class='paymentline-name'>
                 <t t-esc="line.name"/>
             </div>
-            <input class='paymentline-input' type="number" step="0.01" t-att-value="line.get_amount().toFixed(2)" />
+            <input class='paymentline-input' type="number" step="0.01" t-att-value="line.get_amount_str()" />
             <span  class='paymentline-delete'>
                 <img src="/point_of_sale/static/src/img/search_reset.gif" />
             </span>
@@ -1106,7 +1151,7 @@
                 <t t-esc="line.name"/>
             </td>
             <td class="paymentline-amount pos-right-align">
-                <input type="number" step="0.01" t-att-value="line.get_amount().toFixed(2)" />
+                <input type="number" step="0.01" t-att-value="line.get_amount_str()" />
                 <span class='delete-payment-line'><img src="/point_of_sale/static/src/img/search_reset.gif" /></span>
             </td>
         </tr>

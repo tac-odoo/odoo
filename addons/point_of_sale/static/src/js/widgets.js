@@ -578,22 +578,32 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
         init: function(parent, options){
             var options = options || {};
             this._super(parent,options);
-            this.mode = options.mode || 'cashier';
         },
         set_user_mode: function(mode){
             this.mode = mode;
-            this.refresh();
-        },
-        refresh: function(){
             this.renderElement();
         },
+        renderElement: function(){
+            var self = this;
+            this._super();
+
+            this.$el.click(function(){
+                self.click_username();
+            });
+        },
+        click_username: function(){
+            var self = this;
+            this.pos_widget.select_user({
+                'security':     true,
+                'current_user': this.pos.get_cashier(),
+                'message':      _t('Change Cashier'),
+            }).then(function(user){
+                self.pos.set_cashier(user);
+                self.renderElement();
+            });
+        },
         get_name: function(){
-            var user;
-            if(this.mode === 'cashier'){
-                user = this.pos.cashier || this.pos.user;
-            }else{
-                user = this.pos.get_order().get_client()  || this.pos.user;
-            }
+            var user = this.pos.cashier || this.pos.user;
             if(user){
                 return user.name;
             }else{
@@ -907,7 +917,6 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
                 $('.oe_web_client').off();
                 $('.openerp_webclient_container').off();
 
-                self.build_currency_template();
                 self.renderElement();
                 
                 self.pos.load_orders();
@@ -925,7 +934,7 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
 
                 instance.webclient.set_content_full_screen(true);
 
-                self.$('.loader').animate({opacity:0},1500,'swing',function(){self.$('.loader').addClass('oe_hidden');});
+                self.loading_hide();
 
                 self.pos.push_order();
 
@@ -965,13 +974,15 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
         },
         loading_progress: function(fac){
             this.$('.loader .loader-feedback').removeClass('oe_hidden');
-            this.$('.loader .progress').css({'width': ''+Math.floor(fac*100)+'%'});
+            this.$('.loader .progress').removeClass('oe_hidden').css({'width': ''+Math.floor(fac*100)+'%'});
         },
         loading_message: function(msg,progress){
             this.$('.loader .loader-feedback').removeClass('oe_hidden');
             this.$('.loader .message').text(msg);
-            if(typeof progress !== 'undefined'){
+            if (typeof progress !== 'undefined') {
                 this.loading_progress(progress);
+            } else {
+                this.$('.loader .progress').addClass('oe_hidden');
             }
         },
         loading_skip: function(callback){
@@ -984,6 +995,90 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
                 this.$('.loader .button.skip').addClass('oe_hidden');
             }
         },
+        loading_hide: function(){
+            this.$('.loader').animate({opacity:0},1500,'swing',function(){self.$('.loader').addClass('oe_hidden');});
+        },
+        loading_show: function(){
+            this.$('.loader').removeClass('oe_hidden').animate({opacity:1},150,'swing');
+        },
+
+        // A Generic UI that allow to select a user from a list.
+        // It returns a deferred that resolves with the selected user 
+        // upon success. Several options are available :
+        // - security: passwords will be asked
+        // - only_managers: restricts the list to managers
+        // - current_user: password will not be asked if this 
+        //                 user is selected.
+        // - message: The title of the user selection list. 
+        select_user: function(options){
+            options = options || {};
+            var self = this;
+            var def  = new $.Deferred();
+
+            var list = [];
+            for (var i = 0; i < this.pos.users.length; i++) {
+                var user = this.pos.users[i];
+                if (!options.only_managers || user.role === 'manager') {
+                    list.push({
+                        'label': user.name,
+                        'item':  user,
+                    });
+                }
+            }
+
+            this.pos_widget.screen_selector.show_popup('selection',{
+                'message': options.message || _t('Select User'),
+                list: list,
+                confirm: function(user){ def.resolve(user); },
+                cancel:  function(){ def.reject(); },
+            });
+
+            return def.then(function(user){
+                if (options.security && user !== options.current_user && user.pos_security_pin) {
+                    var ret = new $.Deferred();
+
+                    self.pos_widget.screen_selector.show_popup('password',{
+                        'message': _t('Password'),
+                        confirm: function(password) {
+                            if (password !== user.pos_security_pin) {
+                                this.pos_widget.screen_selector.show_popup('error',{
+                                    'message':_t('Password Incorrect'),
+                                });
+                                ret.reject();
+                            } else {
+                                ret.resolve(user);
+                            }
+                        },
+                        cancel: function(){ ret.reject(); },
+                    });
+
+                    return ret;
+                } else {
+                    return user;
+                }
+            });
+        },
+
+        // checks if the current user (or the user provided) has manager
+        // access rights. If not, a popup is shown allowing the user to
+        // temporarily login as an administrator. 
+        // This method returns a defferred, that succeeds with the 
+        // manager user when the login is successfull.
+        sudo: function(user){
+            var def = new $.Deferred();
+            user = user || this.pos.get_cashier();
+
+            if (user.role === 'manager') {
+                return new $.Deferred().resolve(user);
+            } else {
+                return this.select_user({
+                    security:       true, 
+                    only_managers:  true,
+                    message:       _t('Login as a Manager'),
+                })
+            }
+        },
+
         // This method instantiates all the screens, widgets, etc. If you want to add new screens change the
         // startup screen, etc, override this method.
         build_widgets: function() {
@@ -1029,6 +1124,12 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
 
             this.textarea_popup = new module.TextAreaPopupWidget(this,{});
             this.textarea_popup.appendTo(this.$el);
+
+            this.number_popup = new module.NumberPopupWidget(this,{});
+            this.number_popup.appendTo(this.$el);
+
+            this.password_popup = new module.PasswordPopupWidget(this,{});
+            this.password_popup.appendTo(this.$el);
 
             this.unsent_orders_popup = new module.UnsentOrdersPopupWidget(this,{});
             this.unsent_orders_popup.appendTo(this.$el);
@@ -1101,15 +1202,17 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
                     'clientlist': this.clientlist_screen,
                 },
                 popup_set:{
-                    'error': this.error_popup,
-                    'error-barcode': this.error_barcode_popup,
-                    'error-traceback': this.error_traceback_popup,
-                    'textinput': this.textinput_popup,
-                    'textarea': this.textarea_popup,
-                    'confirm': this.confirm_popup,
-                    'selection': this.selection_popup,
-                    'unsent-orders': this.unsent_orders_popup,
-                    'unpaid-orders': this.unpaid_orders_popup,
+                    'error':            this.error_popup,
+                    'error-barcode':    this.error_barcode_popup,
+                    'error-traceback':  this.error_traceback_popup,
+                    'textinput':        this.textinput_popup,
+                    'textarea':         this.textarea_popup,
+                    'number':           this.number_popup,
+                    'password':         this.password_popup,
+                    'confirm':          this.confirm_popup,
+                    'selection':        this.selection_popup,
+                    'unsent-orders':    this.unsent_orders_popup,
+                    'unpaid-orders':    this.unpaid_orders_popup,
                 },
                 default_screen: 'products',
                 default_mode: 'cashier',
@@ -1156,25 +1259,15 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
         },
         close: function() {
             var self = this;
+            self.loading_show();
+            self.loading_message(_t('Closing ...'));
 
-            function close(){
-                self.pos.push_order().then(function(){
-                    return new instance.web.Model("ir.model.data").get_func("search_read")([['name', '=', 'action_client_pos_menu']], ['res_id']).pipe(function(res) {
-                        window.location = '/web#action=' + res[0]['res_id'];
-                    });
+            self.pos.push_order().then(function(){
+                return new instance.web.Model("ir.model.data").get_func("search_read")([['name', '=', 'action_client_pos_menu']], ['res_id']).pipe(function(res) {
+                    window.location = '/web#action=' + res[0]['res_id'];
                 });
-            }
-
-            var draft_order = _.find( self.pos.get('orders').models, function(order){
-                return order.get_orderlines().length !== 0 && order.get_paymentlines().length === 0;
             });
-            if(draft_order){
-                if (confirm(_t("Pending orders will be lost.\nAre you sure you want to leave this session?"))) {
-                    close();
-                }
-            }else{
-                close();
-            }
+
         },
         destroy: function() {
             this.pos.destroy();
