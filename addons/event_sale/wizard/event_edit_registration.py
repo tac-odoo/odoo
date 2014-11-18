@@ -16,7 +16,10 @@ class SaleOrderEventRegistration(models.TransientModel):
             sale_order_id = res.get('sale_order_id', self._context.get('active_id'))
             res['sale_order_id'] = sale_order_id
         sale_order = self.env['sale.order'].browse(res.get('sale_order_id'))
-        registrations = self.env['event.registration'].search([('origin', '=', sale_order.name)])
+        # TDE FIXME: check that self.mapped effectively works
+        registrations = self.env['event.registration'].search([
+            ('origin', '=', sale_order.name),
+            ('event_ticket_id', 'in', self.mapped('order_line.event_ticket_id').ids)])
 
         attendee_list = []
         for so_line in [l for l in sale_order.order_line if l.event_id]:

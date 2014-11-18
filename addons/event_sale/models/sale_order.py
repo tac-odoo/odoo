@@ -57,19 +57,32 @@ class sale_order_line(osv.osv):
         return res
 
     @api.multi
-    def _update_registrations(self):
+    def _update_registrations(self, confirm=True, registration_data=None):
         """ Create or update registrations linked to a sale order line. A sale
         order line has a product_uom_qty attribute that will be the number of
         registrations linked to this line. This method update existing registrations
         and create new one for missing one. """
         registrations = self.env['event.registration'].search([('origin', 'in', list(set([so.name for line in self for so in line.order_id if line.event_id])))])
         for so_line in [l for l in self if l.event_id]:
-            existing_registrations = [r for r in registrations if r.event_id == so_line.event_id and r.origin == so_line.order_id.name]
-            for registration in existing_registrations:
-                registration.write({'state': 'open'})
+            existing_registrations = registrations.filtered(
+                lambda self:
+                self.event_id == so_line.event_id and
+                self.origin == so_line.order_id.name and
+                self.event_ticket_id == so_line.event_ticket_id)
+            if confirm:
+                existing_registrations.confirm_registration()
+            else:
+                existing_registrations.filtered(lambda self: self.state == 'cancel').do_draft()
 
             for count in range(int(so_line.product_uom_qty) - len(existing_registrations)):
-                self.env['event.registration'].create({
+                registration = {}
+                if registration_data:
+                    registration = registration_data.pop()
+                # TDE CHECK: auto confirmation
+                self.env['event.registration'].with_context(registration_force_draft=True).create({
+                    'name': registration.get('name', so_line.order_id.partner_id.name),
+                    'phone': registration.get('phone', so_line.order_id.partner_id.phone),
+                    'email': registration.get('email', so_line.order_id.partner_id.email),
                     'event_id': so_line.event_id.id,
                     'event_ticket_id': so_line.event_ticket_id.id,
                     'partner_id': so_line.order_id.partner_id.id,
@@ -84,7 +97,7 @@ class sale_order_line(osv.osv):
         create registration with sales order
         '''
         res = super(sale_order_line, self).button_confirm(cr, uid, ids, context=context)
-        self._update_registrations(cr, uid, ids, context=context)
+        self._update_registrations(cr, uid, ids, confirm=True, context=context)
         return res
 
     def onchange_event_ticket_id(self, cr, uid, ids, event_ticket_id=False, context=None):

@@ -157,12 +157,12 @@ class event_registration(models.Model):
         if self.event_ticket_id.seats_max and self.event_ticket_id.seats_available < 0:
             raise Warning('No more available seats for this ticket')
 
-    @api.one
+    @api.multi
     def _check_auto_confirmation(self):
-        res = super(event_registration, self)._check_auto_confirmation()[0]
-        if res and self.origin:
-            orders = self.env['sale.order'].search([('name', '=', self.origin)], limit=1)
-            if orders and orders[0].state == 'draft':
+        res = super(event_registration, self)._check_auto_confirmation()
+        if res:
+            orders = self.env['sale.order'].search([('state', '=', 'draft'), ('name', 'in', self.mapped('origin'))], limit=1)
+            if orders:
                 res = False
         return res
 

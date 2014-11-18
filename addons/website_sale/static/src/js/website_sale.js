@@ -45,6 +45,15 @@ $('.oe_website_sale').each(function () {
                 $input.val(data.quantity);
                 $('.js_quantity[data-line-id='+line_id+']').val(data.quantity).html(data.quantity);
                 $("#cart_total").replaceWith(data['website_sale.total']);
+                if (data.warning) {
+                    $('.oe_cart').prepend(
+                        '<div class="alert alert-danger alert-dismissable" role="alert" id="data_warning">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' + data.warning + '</div>');
+                    setTimeout( function() {
+                        $('#data_warning').alert('close');
+                    }, 15000);
+                    $input.val(data.quantity);
+                }
             });
     });
 
