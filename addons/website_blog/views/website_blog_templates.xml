@@ -17,7 +17,8 @@
         <script type="text/javascript" src="/website_blog/static/src/js/website_blog.inline.discussion.js"></script>
         <script type="text/javascript" src="/website_blog/static/src/js/website_blog.js"/>
 
-                <!-- chd custom -->
+        <!-- chd custom -->
+
         <link rel='stylesheet' href='/website_blog/static/src/css/chd_website_blog.css'/>
         
         <script type="text/javascript">var switchTo5x=true;</script>
@@ -25,13 +26,15 @@
         <script type="text/javascript">stLight.options({publisher: "36b06164-f105-41bb-882b-8083d1136dbb", doNotHash: true, doNotCopy: false, hashAddressBar: false});
         </script>
 
+        <!-- /chd custom -->
+
     </xpath>
 </template>
 
 <!-- Layout add nav and footer -->
 <template id="header_footer_custom" inherit_id="website.footer_default" name="Footer News Blog Link">
     <xpath expr="//div[@id='info']/ul" position="inside">
-        <li><a t-attf-href="/blog/%(website_blog.blog_blog_1)d">News</a></li>
+        <li><a t-attf-href="/blog/1">News</a></li>
     </xpath>
 </template>
 
