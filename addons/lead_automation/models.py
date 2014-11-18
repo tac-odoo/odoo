@@ -355,7 +355,6 @@ class lead_automation_workitem(models.Model):
 
 	@api.one
 	def process_one(self):
-		pdb.set_trace()
 		if self.state!='todo':
 			return False
 
@@ -435,3 +434,9 @@ class lead_automation_workitem(models.Model):
 		except Exception:
 			self.state='exception'
 			self.error_msg = Exception.message
+
+	@api.multi
+	def process_all(self):
+		workitems = self.search([('state','=','todo')])
+		for wi in workitems:
+			wi.process_one()
