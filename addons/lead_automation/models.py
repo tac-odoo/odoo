@@ -176,7 +176,7 @@ class lead_automation_segment(models.Model):
 		if self.state!='running' and self.campaign_id.state!='running':
 			return False
 
-		action_date = time.strftime('%Y-%m-%d %H:%M:%S')
+		action_date = time.strftime(DT_FMT)
 
 		act_ids = self.env['lead.automation.activity'].search([('start', '=', True), ('campaign_id', '=', self.campaign_id.id)])
 
@@ -199,14 +199,14 @@ class lead_automation_segment(models.Model):
 				'segment_id': self.id,
 				'date': action_date,
 				'state': 'todo',
-				'res_id': record.id
+				'res_id': record.id.id
 			}
 		#	partner = self.env.pool.get('lead.automation.campaign')._get_partner_for(segment.campaign_id, record)
 		#	if partner:
 		#		wi_vals['partner_id'] = partner.id
 
 			for act_id in act_ids:
-				wi_vals['activity_id'] = act_id
+				wi_vals['activity_id'] = act_id.id
 				Workitems.create(wi_vals)
 
 		self.sync_last_date=action_date
@@ -309,7 +309,6 @@ class lead_automation_transition(models.Model):
 			raise ValidationError('Delta is only relevant for timed transition.')
 		return relativedelta(**{str(self.interval_type): self.interval_nbr})
 
-
 class lead_automation_workitem(models.Model):
 	_name = "lead.automation.workitem"
 
@@ -330,8 +329,8 @@ class lead_automation_workitem(models.Model):
 
 	@api.one
 	def _res_name_get(self):
-		temp=self.env['ir.model'].browse(self.res_id)
-		self.res_name = temp.model
+		self.res_name=self.env[self.object_id.model].browse(self.res_id).name
+
 
 	@api.one
 	def _resource_search(self):
