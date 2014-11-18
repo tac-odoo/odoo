@@ -10,11 +10,11 @@
                 <div class="row mt32">
                     <div class="col-xs-3">
                         <strong>Chart of Accounts:</strong>
-                        <p t-esc="get_account(data)"/>
+                        <p t-esc="get_account"/>
                     </div>
                     <div class="col-xs-3">
                         <strong>Fiscal Year:</strong>
-                        <p t-esc="get_fiscalyear(data)"/>
+                        <p t-esc="get_fiscalyear"/>
                     </div>
                     <div class="col-xs-3">
                         <strong>Display Account:</strong>
@@ -23,8 +23,8 @@
                             <span t-if="data['form']['display_account'] == 'movement'">With movements</span>
                             <span t-if="data['form']['display_account'] == 'not_zero'">With balance not equal to zero</span>
                         </p>
-                    </div>
-                    <div class="col-xs-3">
+                    </div-->
+                    <!--div class="col-xs-3">
                         <strong>Filter By:</strong>
                         <p>
                             <span t-if="data['form']['filter'] == 'filter_no'">Not filtered</span>
@@ -39,12 +39,12 @@
                                 Date to : <span t-esc="formatLang(get_end_date(data), date=True)"/>
                             </p>
                         </p>
-                    </div>
+                    </div-->
                 </div>
                 <div class="row mb32">
                     <div class="col-xs-3">
                         <strong>Target Moves:</strong>
-                        <p t-esc="get_target_move(data)"/>
+                        <p t-esc="get_target_move"/>
                     </div>
                 </div>
 
@@ -58,7 +58,7 @@
                             <th class="text-right">Balance</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <!--tbody>
                         <tr t-foreach="lines(data['form'])" t-as="childrenaccount">
                             <t t-if="childrenaccount['type'] == 'view'">
                                 <t t-set="style" t-value="'font-weight:bold;'"/>
@@ -84,7 +84,7 @@
                                 <span t-att-style="style" t-esc="formatLang(childrenaccount['balance'], currency_obj=res_company.currency_id)"/>
                             </td>  
                         </tr>
-                    </tbody>
+                    </tbody-->
                 </table>
             </div>
         </t>
