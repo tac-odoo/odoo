@@ -194,11 +194,6 @@ class lead_automation_segment(models.Model):
         self.state = 'cancelled'
 
     @api.one
-    def synchronize(self):
-        self.process_segment()
-        return True
-
-    @api.one
     def process_segment(self):
         Workitems = self.env['lead.automation.workitem']
         Campaigns = self.env['lead.automation.campaign']

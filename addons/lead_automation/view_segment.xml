@@ -23,7 +23,7 @@
 								<label for="sync_last_date"/>
 								<div>
 									<field name="sync_last_date" class="oe_inline"/>
-									<button string="Synchronize Manually" states="running" name="synchronize" type="object"/>
+									<button string="Synchronize Manually" states="running" name="process_segment" type="object"/>
 								</div>
 								<field name="date_next_sync"/>
 							</group>
