@@ -39,6 +39,7 @@ class res_company(osv.osv):
     _defaults = {
         'expects_chart_of_accounts': True,
         'tax_calculation_rounding_method': 'round_per_line',
+        'accounts_code_digits': 6,
         'overdue_msg': '''Dear Sir/Madam,
 
 Our records indicate that some payments on your account are still due. Please find details below.
