@@ -58,7 +58,10 @@ class Session(models.Model):
                      ('category_id.name', 'ilike', "Teacher")])
     course_id = fields.Many2one('openacademy.course',
         ondelete='cascade', string="Course", required=True)
+
     attendee_ids = fields.Many2many('res.partner', string="Attendees")
+    attendees_count = fields.Integer(
+        string="Attendees count", compute='_get_attendees_count', store=True)
 
     taken_seats = fields.Float(string="Taken seats", compute='_taken_seats')
 
@@ -95,6 +98,11 @@ class Session(models.Model):
     @api.one
     def _set_hours(self):
         self.duration = self.hours / 24
+
+    @api.one
+    @api.depends('attendee_ids')
+    def _get_attendees_count(self):
+        self.attendees_count = len(self.attendee_ids)
 
 
     @api.one
