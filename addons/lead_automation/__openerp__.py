@@ -21,16 +21,16 @@
 
 
 {
-	'name': 'Lead Automation',
-	'version': '0.1',
-	'depends': ['marketing',
-							'document',
-							'email_template',
-							'decimal_precision'
-						],
-	'author': 'OpenERP SA',
-	'category': 'Marketing',
-	'description': """
+    'name': 'Lead Automation',
+    'version': '0.1',
+    'depends': ['marketing',
+                'document',
+                'email_template',
+                'decimal_precision'
+                ],
+    'author': 'OpenERP SA',
+    'category': 'Marketing',
+    'description': """
 This module provides leads automation through marketing campaigns (campaigns can in fact be defined on any resource, not just CRM Leads).
 =========================================================================================================================================
 
@@ -54,17 +54,17 @@ input segments, workflow.
       module, but this will also install the CRM application as it depends on
       CRM Leads.
     """,
-	'website': 'https://www.odoo.com/page/lead-automation',
+    'website': 'https://www.odoo.com/page/lead-automation',
 
-	# always loaded
-	'data': [
-		# 'security/ir.model.access.csv',
-		'templates.xml','view.xml','view_campaign.xml','view_segment.xml','view_activity.xml','view_workitem.xml','data.xml','workflow.xml'
-	],
-	# only loaded in demonstration mode
-	'demo': [
-		'demo.xml',
-	],
-	'installable': True,
-	'auto_install': False,
+    # always loaded
+    'data': [
+            # 'security/ir.model.access.csv',
+                'templates.xml', 'view.xml', 'view_campaign.xml', 'view_segment.xml', 'view_activity.xml', 'view_workitem.xml', 'data.xml', 'workflow.xml'
+    ],
+    # only loaded in demonstration mode
+    'demo': [
+        'demo.xml',
+    ],
+    'installable': True,
+    'auto_install': False,
 }
