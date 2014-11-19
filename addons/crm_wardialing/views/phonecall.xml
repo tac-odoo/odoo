@@ -41,7 +41,7 @@
             </field>
         </record>
 
-        <!-- Add the fields to_call and sequence in the form view of the phonecalls-->
+        <!-- Add the field sequence in the form view of the phonecalls-->
         <record model="ir.ui.view" id="phonecall_tocall_form_view">
             <field name="name">crm.phonecall.tocall</field>
             <field name="model">crm.phonecall</field>
@@ -61,7 +61,7 @@
             <field name="inherit_id" ref="crm.view_crm_case_phonecalls_filter"/>
             <field name="arch" type="xml">
                 <search string="Search Phonecalls">
-                    <filter name="call_center_call_filter" string="Call Center Calls" domain="[('to_call','=',True)]"/>
+                    <filter name="call_center_call_filter" string="Call Center Calls" domain="[('in_queue','=',True)]"/>
                 </search>
             </field>
         </record>
@@ -139,6 +139,8 @@
                                 string="Save and Remove from the Queue" class="oe_highlight"/>
                         <button name="save_keep" type="object"
                             string="Save and Keep in the Queue" class="oe_highlight"/>
+                        <button name="schedule_new_call" type="object"
+                            string="Schedule a New Call" class="oe_highlight"/>
                         or
                         <button class="oe_button oe_form_button oe_link" special="cancel" string="Cancel"/>
                     </footer>
@@ -146,6 +148,26 @@
             </field>
         </record>
 
+        <!-- wizard diplaying the transfer's option -->
+        <record model="ir.ui.view" id="wizard_transfer_call_form_view">
+            <field name="name">wizard.form</field>
+            <field name="model">crm.phonecall.transfer.wizard</field>
+            <field name="arch" type="xml">
+                <form string="transfer Option">
+                    <group string="transfer Option">
+                            <field name="transfer_choice" widget="selection"/>
+                            <field name="transfer_number" attrs="{'invisible': ['|',('transfer_choice', '=', 'physical'), ('transfer_choice','=',False)], 
+                                'required': [('transfer_choice', '=', 'extern')]}"/>
+                    </group>
+                    <footer>
+                        <button name="save" type="object"
+                                string="transfer the Call" class="oe_highlight"/>
+                        or
+                        <button class="oe_button oe_form_button oe_link" special="cancel" string="Cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
 
         <menuitem name="Call Center" id="menu_crm_phone_callcenter"
             parent="crm.menu_crm_case_phone"

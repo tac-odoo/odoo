@@ -31,6 +31,22 @@
 }
 /* button */
 
+.oe_dial_state_icon{
+    display: inline-block;
+}
+
+.oe_dial_phonecall:hover .oe_dial_state_icon{
+    display: none;
+}
+
+.oe_dial_remove_phonecall{
+    display: none;
+}
+
+.oe_dial_phonecall:hover .oe_dial_remove_phonecall{
+    display: inline-block;
+}
+
 .oe_kanban_draghandle:hover .oe_dial_hidden_button{
     visibility: visible;
 }
@@ -86,6 +102,14 @@
 .oe_dial_big_callbutton{
     width: 88%;
 }
+
+.oe_dial_stop_autocall_button{
+    position: relative;
+    margin-bottom: 2px;
+    width: 100%;
+    display: none;
+}
+
 .oe_dial_hangupbutton{
     position: relative;
     margin-bottom: 2px;

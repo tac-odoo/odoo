@@ -131,7 +131,7 @@ class crm_phonecall(osv.osv):
                     'name' : call_summary,
                     'user_id' : user_id or False,
                     'categ_id' : categ_id or False,
-                    'description' : call.description or False,
+                    'description' : False,
                     'date' : schedule_time,
                     'section_id' : section_id or False,
                     'partner_id': call.partner_id and call.partner_id.id or False,

@@ -23,13 +23,18 @@
                     <span class="oe_dial_phonecall_name"><t t-esc="widget.get('partner')"/></span>
                     <span class="pull-right">
                         <t t-if="widget.get('state') == 'done'">
-                            <i class="fa fa-check" style="color:green"></i>
+                            <i class="fa fa-check oe_dial_state_icon" style="color:green"></i>
                         </t>
                         <t t-if="widget.get('state') == 'no_answer'">
-                            <i class="fa fa-exclamation-triangle" style="color:red"></i>
+                            <i class="fa fa-exclamation-triangle oe_dial_state_icon" style="color:LightCoral"></i>
                         </t>
                         <a href="#">
-                            <i title="Remove from the queue" class="oe_dial_remove_phonecall fa fa-times"></i>
+                            <t t-if="widget.get('state') == 'done'">
+                                <i title="Remove from the queue" class="oe_dial_remove_phonecall fa fa-times"></i>
+                            </t>
+                            <t t-if="widget.get('state') != 'done'">
+                                <i title="Cancel the call" class="oe_dial_remove_phonecall fa fa-times"></i>
+                            </t>
                         </a>
                     </span><br/>
                     <span><t t-esc="widget.get('opportunity')"/></span>
@@ -97,8 +102,9 @@
                     <li><a href="#" class="oe_dial_callbutton">Call Once</a></li>
                   </ul>
                 </div>
-                <button type="button" class="btn btn-danger btn-sm oe_dial_hangupbutton oe_dial_inCallButton">Hang Up</button>
-                <button type="button" class="btn btn-info btn-sm oe_dial_transferbutton oe_dial_inCallButton">Transfer</button>
+                <button type="button" class="btn btn-danger oe_dial_stop_autocall_button">Stop Automatic Call</button>
+                <button type="button" class="btn btn-danger btn-sm oe_dial_hangupbutton">Hang Up</button>
+                <button type="button" class="btn btn-info btn-sm oe_dial_transferbutton">Transfer</button>
             </div>
             <div class="oe_dial_optionalbuttons">
                 <div class="oe_dial_actionbuttons">
