@@ -3467,9 +3467,8 @@ class wizard_multi_charts_accounts(osv.osv_memory):
         # Seek the next available number for the account code
         code_digits = company.accounts_code_digits or 0
         bank_account_code_char = company.bank_account_code_char or ''
-        available_digits = code_digits - len(bank_account_code_char)
-        for num in xrange(1, pow(10, available_digits)):
-            new_code = str(bank_account_code_char.ljust(code_digits-len(str(num)), '0')) + str(num)
+        for num in xrange(1, 100):
+            new_code = str(bank_account_code_char.ljust(code_digits - 1, '0')) + str(num)
             ids = obj_acc.search(cr, uid, [('code', '=', new_code), ('company_id', '=', company.id)])
             if not ids:
                 break
@@ -3481,6 +3480,13 @@ class wizard_multi_charts_accounts(osv.osv_memory):
         cash_type = tmp and tmp[1] or False
         tmp = obj_data.get_object_reference(cr, uid, 'account', 'data_account_type_bank')
         bank_type = tmp and tmp[1] or False
+        parent_id = False
+        if acc_template_ref:
+            parent_id = acc_template_ref[ref_acc_bank.id]
+        else:
+            tmp = self.pool.get('account.account').search(cr, uid, [('code', '=', company.bank_account_code_char)], context=context)
+            if tmp:
+                parent_id = tmp[0]
         
         return {
                 'name': line['acc_name'],
@@ -3489,7 +3495,7 @@ class wizard_multi_charts_accounts(osv.osv_memory):
                 'type': 'liquidity',
                 'user_type': line['account_type'] == 'cash' and cash_type or bank_type,
                 # TODO: refactor when parent_id removed from account.account
-                'parent_id': acc_template_ref and acc_template_ref[ref_acc_bank.id] or False,
+                'parent_id': parent_id,
                 'company_id': company.id,
         }
 
