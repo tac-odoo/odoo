@@ -3,6 +3,9 @@ from openerp import models, fields, api, exceptions
 import time
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from openerp.tools.safe_eval import safe_eval as eval
+from openerp.addons.decimal_precision import decimal_precision as dp
+
 import re
 _intervalTypes = {
     'hours': lambda interval: relativedelta(hours=interval),
@@ -21,7 +24,7 @@ class lead_automation_campaign(models.Model):
     object_id = fields.Many2one('ir.model', 'Resource', required=True,
                                 help="Choose the resource on which you want this campaign to be run")
     partner_field_id = fields.Many2one('ir.model.fields', 'Partner Field',
-                                       domain="[('model_id', '=', object_id), ('ttype', '=', 'many2one'), ('relation', '=', 'res.partner')]",
+                                       domain="[('model_id', '=', object_id), ('ttype', '=', 'many2one')]",
                                        help="The generated workitems will be linked to the partner related to the record. "
                                        "If the record is the partner itself leave this field empty. "
                                        "This is useful for reporting purposes, via the Campaign Analysis or Campaign Follow-up views.")
@@ -57,7 +60,7 @@ class lead_automation_campaign(models.Model):
 
     def _get_partner_for(self, record):
         if self.partner_field_id:
-            return self.partner_field_id
+            return getattr(record, self.partner_field_id.name)
         elif self.object_id.model == 'res.partner':
             return record
         return None
@@ -201,13 +204,16 @@ class lead_automation_segment(models.Model):
 
     @api.one
     def action_done(self):
-        # TODO: cancel all workitems related to that segment
+        workitems=self.env['lead.automation.workitem'].search([('segment_id','=',self.id),('state','=','todo')])
+        wi_vals={'state':'cancelled'}
+        workitems.write(wi_vals)
         self.state = 'done'
 
     @api.one
     def action_cancel(self):
-        # TODO: cancel all workitems related to that segment
-        self.state = 'cancelled'
+        workitems=self.env['lead.automation.workitem'].search([('segment_id','=',self.id),('state','=','todo')])
+        wi_vals={'state':'cancelled'}
+        workitems.write(wi_vals)        self.state = 'cancelled'
 
     @api.one
     def process_segment(self):
@@ -299,11 +305,11 @@ class lead_automation_activity(models.Model):
     from_ids = fields.One2many('lead.automation.transition',
                                'activity_to_id',
                                'Previous Activities')
-    # variable_cost: fields.float('Variable Cost', help="Set a variable cost if you consider that every campaign item that has reached this point has entailed a certain cost. You can get cost statistics in the Reporting section", digits_compute=dp.get_precision('Product Price'))
-    # revenue: fields.float('Revenue', help="Set an expected revenue if you
-    # consider that every campaign item that has reached this point has
-    # generated a certain revenue. You can get revenue statistics in the
-    # Reporting section", digits_compute=dp.get_precision('Account'))
+    variable_cost = fields.Float('Variable Cost', help="Set a variable cost if you consider that every campaign item that has reached this point has entailed a certain cost. You can get cost statistics in the Reporting section", digits=dp.get_precision('Product Price'))
+    revenue = fields.Float('Revenue', help="Set an expected revenue if you"
+                           "consider that every campaign item that has reached this point has"
+                           "generated a certain revenue. You can get revenue statistics in the"
+                           "Reporting section", digits=dp.get_precision('Account'))
     signal = fields.Char('Signal',
                          help='An activity with a signal can be called programmatically. Be careful, the workitem is always created when a signal is sent')
     keep_if_condition_not_met = fields.Boolean(
