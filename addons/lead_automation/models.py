@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-
 from openerp import models, fields, api, exceptions
 import time
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-# is this necessary? yes, if activity condition contains regular
-# expression, i suppose
 import re
 import pudb
 _intervalTypes = {
@@ -60,8 +57,7 @@ class lead_automation_campaign(models.Model):
         compute='_count_segments', string='Segments')
 
     def _get_partner_for(self, record):
-        partner_field = self.partner_field_id.name
-        if partner_field:
+        if self.partner_field_id:
             return self.partner_field_id
         elif self.object_id.model == 'res.partner':
             return record
@@ -160,10 +156,8 @@ class lead_automation_segment(models.Model):
         'Last Synchronization', help="Date on which this segment was synchronized last time (automatically or manually)")
 
     def _get_next_sync(self):
-        segment_cron = self.env['ir.cron'].search(
-            [('model', '=', 'lead.automation.segment')])
-        self.date_next_sync = fields.Datetime.from_string(
-            segment_cron.nextcall)
+        segment_cron = self.env['ir.cron'].search([('model', '=', 'lead.automation.segment')])
+        self.date_next_sync = fields.Datetime.from_string(segment_cron.nextcall)
 
     @api.constrains('ir_filter_id', 'campaign_id')
     @api.one
@@ -180,7 +174,7 @@ class lead_automation_segment(models.Model):
     @api.one
     def action_run(self):
         if not(self.date_run):
-            self.date_run = time.strftime('%Y-%m-%d %H:%M:%S')
+            self.date_run = time.strftime(DT_FMT)
         self.state = 'running'
 
     @api.one
@@ -201,17 +195,15 @@ class lead_automation_segment(models.Model):
             return False
 
         action_date = time.strftime(DT_FMT)
-
         activities = self.env['lead.automation.activity'].search(
             [('start', '=', True), ('campaign_id', '=', self.campaign_id.id)])
-
-        model_obj = self.object_id.model
+        obj_model = self.object_id.model
         criteria = []
         if self.sync_last_date and self.sync_mode != 'all':
             criteria += [(self.sync_mode, '>', self.sync_last_date)]
         if self.ir_filter_id:
             criteria += eval(self.ir_filter_id.domain)
-        objects = self.env[model_obj].search(criteria)
+        objects = self.env[obj_model].search(criteria)
         # XXX TODO: rewrite this loop more efficiently without doing 1 search
         # per record!
         for record in objects:
@@ -229,14 +221,13 @@ class lead_automation_segment(models.Model):
             partner = self.campaign_id._get_partner_for(record)
             if partner:
                 wi_vals['partner_id'] = partner.id
-
             for activity in activities:
                 wi_vals['activity_id'] = activity.id
             Workitems.create(wi_vals)
 
         self.sync_last_date = action_date
         workitems = self.env['lead.automation.workitem'].search([('segment_id', '=', self.id)])
-        workitems.process()
+        workitems.process_workitem()
         return True
 
 
@@ -297,7 +288,7 @@ class lead_automation_activity(models.Model):
         "Don't Delete Workitems", help="By activating this option, workitems that aren't executed because the condition is not met are marked as cancelled instead of being deleted.")
 
     @api.one
-    def process(self, workitem):
+    def process_activity(self, workitem):
         # method = '_process_wi_%s' % (self.type)
         # action = getattr(self, method, None)
         # if not action:
@@ -329,15 +320,14 @@ class lead_automation_transition(models.Model):
 
     trigger = fields.Selection([('auto', 'Automatic'),
                                 ('time', 'Time'),
-                                # fake plastic transition
-                                ('cosmetic', 'Cosmetic'),
+                                ('cosmetic', 'Cosmetic'),# fake plastic transition
                                 ],
                                'Trigger', required=True, default='time',
                                help="How is the destination workitem triggered")
 
     @api.one
     def _get_name(self):
-        # name formatters that depend on trigger
+        # name formatters that depends on trigger
         formatters = {
             'auto': _('Automatic transition'),
             'time': _('After %(self.interval_nbr)d %(self.interval_type)s'),
@@ -348,8 +338,7 @@ class lead_automation_transition(models.Model):
     @api.one
     def _delta(self):
         if self.trigger != 'time':
-            raise ValidationError(
-                'Delta is only relevant for timed transition.')
+            raise ValidationError('Delta is only relevant for timed transition.')
         return relativedelta(**{str(self.interval_type): self.interval_nbr})
 
 
@@ -397,13 +386,12 @@ class lead_automation_workitem(models.Model):
             self.state = cancelled
 
     @api.one
-    def process(self):
+    def process_workitem(self):
         if self.state != 'todo':
             return False
 
         activity = self.activity_id
         object_id = self.env[self.object_id.model].browse(self.res_id)
-
         eval_context = {
             'activity': activity,
             'workitem': self,
@@ -424,12 +412,12 @@ class lead_automation_workitem(models.Model):
                     return
             result = True
             if campaign_mode in ('manual', 'active'):
-                result = activity.process(self)
+                result = activity.process_activity(self)
 
-            values = dict(state='done')
+            wi_vals = dict(state='done')
             if not self.date:
-                values['date'] = datetime.now().strftime(DT_FMT)
-            self.write(values)
+                wi_vals['date'] = datetime.now().strftime(DT_FMT)
+            self.write(wi_vals)
 
             if result:
                 # process _chain
@@ -448,7 +436,7 @@ class lead_automation_workitem(models.Model):
 
                     if launch_date:
                         launch_date = launch_date.strftime(DT_FMT)
-                    values = {
+                    wi_vals = {
                         'date': launch_date,
                         'segment_id': self.segment_id.id,
                         'activity_id': transition.activity_to_id.id,
@@ -456,7 +444,7 @@ class lead_automation_workitem(models.Model):
                         'res_id': self.res_id,
                         'state': 'todo',
                     }
-                    wi_id = self.create(values)
+                    wi_id = self.create(wi_vals)
 
                     # Now, depending on the trigger and the campaign mode
                     # we know whether we must run the newly created workitem.
@@ -472,7 +460,7 @@ class lead_automation_workitem(models.Model):
                     run = (transition.trigger == 'auto' and campaign_mode != 'manual') \
                         or (transition.trigger == 'time' and campaign_mode == 'test')
                     if run:
-                        wi_id.process()
+                        wi_id.process_workitem()
 
         except Exception:
             self.state = 'exception'
