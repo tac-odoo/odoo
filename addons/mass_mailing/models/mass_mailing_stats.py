@@ -33,6 +33,22 @@ class MailMailStats(osv.Model):
     _rec_name = 'message_id'
     _order = 'message_id'
 
+    def _compute_state(self, cr, uid, stat_ids, field_names, arg, context=None):
+        stats = self.browse(cr, uid, stat_ids, context=context)
+        res = dict([(stat, False) for stat in stat_ids])
+
+        for stat in stats:
+            if stat.sent:
+                res[stat.id] = 'Sent'
+            if stat.opened:
+                res[stat.id] = 'Opened'
+            if stat.replied:
+                res[stat.id] = 'Replied'
+            if stat.bounced:
+                res[stat.id] = 'Bounced'
+
+        return res
+
     _columns = {
         'mail_mail_id': fields.many2one('mail.mail', 'Mail', ondelete='set null'),
         'mail_mail_id_int': fields.integer(
@@ -63,6 +79,8 @@ class MailMailStats(osv.Model):
         'opened': fields.datetime('Opened', help='Date when the email has been opened the first time'),
         'replied': fields.datetime('Replied', help='Date when this email has been replied for the first time.'),
         'bounced': fields.datetime('Bounced', help='Date when this email has bounced.'),
+        'state': fields.function(_compute_state, string='State', type="char",
+                                 store={'mail.mail.statistics': (lambda self, cr, uid, ids, context=None: ids, ['sent', 'opened', 'replied', 'bounced'], 10)}),
     }
 
     _defaults = {

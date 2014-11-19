@@ -32,6 +32,20 @@ from openerp.tools.translate import _
 # main mako-like expression pattern
 EXPRESSION_PATTERN = re.compile('(\$\{.+?\})')
 
+def _reopen(self, res_id, model):
+    return {'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'view_type': 'form',
+            'res_id': res_id,
+            'res_model': self._name,
+            'target': 'new',
+            # save original model in context, because selecting the list of available
+            # templates requires a model in context
+            'context': {
+                'default_model': model,
+            },
+            }
+
 
 class mail_compose_message(osv.TransientModel):
     """ Generic message composition wizard. You may inherit from this wizard
@@ -100,6 +114,19 @@ class mail_compose_message(osv.TransientModel):
 
         if fields is not None:
             [result.pop(field, None) for field in result.keys() if field not in fields]
+
+        # Override to pre-fill the data when having a template in single-email mode
+        # and not going through the view: the on_change is not called in that case.
+        if result.get('composition_mode') != 'mass_mail' and context.get('default_template_id') and result.get('model') and result.get('res_id'):
+            result.update(
+                self.onchange_template_id(
+                    cr, uid, [], context['default_template_id'], result.get('composition_mode'),
+                    result.get('model'), result.get('res_id'), context=context
+                )['value']
+            )
+        if fields is not None:
+            [result.pop(field, None) for field in result.keys() if field not in fields]
+
         return result
 
     def _get_composition_mode_selection(self, cr, uid, context=None):
@@ -124,6 +151,7 @@ class mail_compose_message(osv.TransientModel):
         # mass mode options
         'notify': fields.boolean('Notify followers',
             help='Notify followers of the document (mass post only)'),
+        'template_id': fields.many2one('mail.template', 'Use template', select=True),
     }
     _defaults = {
         'composition_mode': 'comment',
@@ -200,13 +228,30 @@ class mail_compose_message(osv.TransientModel):
         """ Process the wizard content and proceed with sending the related
             email(s), rendering any template patterns on the fly if needed. """
         context = dict(context or {})
-
-        # clean the context (hint: mass mailing sets some default values that
-        # could be wrongly interpreted by mail_mail)
         context.pop('default_email_to', None)
         context.pop('default_partner_ids', None)
+        # wizard_context = dict(context)
 
         for wizard in self.browse(cr, uid, ids, context=context):
+
+            # Duplicate attachments linked to the email.template.
+            # Indeed, basic mail.compose.message wizard duplicates attachments in mass
+            # mailing mode. But in 'single post' mode, attachments of an email template
+            # also have to be duplicated to avoid changing their ownership.
+            if wizard.template_id:
+                context['mail_notify_user_signature'] = False  # template user_signature is added when generating body_html
+                context['mail_auto_delete'] = wizard.template_id.auto_delete  # mass mailing: use template auto_delete value -> note, for emails mass mailing only
+            if not wizard.attachment_ids or wizard.composition_mode == 'mass_mail' or not wizard.template_id:
+                continue
+            new_attachment_ids = []
+            for attachment in wizard.attachment_ids:
+                if attachment in wizard.template_id.attachment_ids:
+                    new_attachment_ids.append(self.pool.get('ir.attachment').copy(cr, uid, attachment.id, {'res_model': 'mail.compose.message', 'res_id': wizard.id}, context=context))
+                else:
+                    new_attachment_ids.append(attachment.id)
+                self.write(cr, uid, wizard.id, {'attachment_ids': [(6, 0, new_attachment_ids)]}, context=context)
+
+            # Mass Mailing
             mass_mode = wizard.composition_mode in ('mass_mail', 'mass_post')
             active_model_pool = self.pool[wizard.model if wizard.model else 'mail.thread']
             if not hasattr(active_model_pool, 'message_post'):
@@ -221,15 +266,14 @@ class mail_compose_message(osv.TransientModel):
             else:
                 res_ids = [wizard.res_id]
 
-            mail_mail_ids = []
-
             sliced_res_ids = [res_ids[i:i + self._batch_size] for i in range(0, len(res_ids), self._batch_size)]
             for res_ids in sliced_res_ids:
+                batch_mail_mail_ids = []
                 all_mail_values = self.get_mail_values(cr, uid, wizard, res_ids, context=context)
                 for res_id, mail_values in all_mail_values.iteritems():
                     if wizard.composition_mode == 'mass_mail':
                         mail_mail_id = self.pool['mail.mail'].create(cr, uid, mail_values, context=context)
-                        mail_mail_ids.append(mail_mail_id)
+                        batch_mail_mail_ids.append(mail_mail_id)
                     else:
                         subtype = 'mail.mt_comment'
                         if context.get('mail_compose_log') or (wizard.composition_mode == 'mass_post' and not wizard.notify):  # log a note: subtype is False
@@ -240,8 +284,8 @@ class mail_compose_message(osv.TransientModel):
                                            mail_create_nosubscribe=True)  # add context key to avoid subscribing the author
                         active_model_pool.message_post(cr, uid, [res_id], type='comment', subtype=subtype, context=context, **mail_values)
 
-            if wizard.composition_mode == 'mass_mail':
-                self.pool['mail.mail'].send(cr, uid, mail_mail_ids, context=context)
+                if wizard.composition_mode == 'mass_mail':
+                    self.pool['mail.mail'].send(cr, uid, batch_mail_mail_ids, auto_commit=True, context=context)
 
         return {'type': 'ir.actions.act_window_close'}
 
@@ -308,6 +352,74 @@ class mail_compose_message(osv.TransientModel):
         return results
 
     #------------------------------------------------------
+    # Template methods
+    #------------------------------------------------------
+
+    def onchange_template_id(self, cr, uid, ids, template_id, composition_mode, model, res_id, context=None):
+        """ - mass_mailing: we cannot render, so return the template values
+            - normal mode: return rendered values """
+        if template_id and composition_mode == 'mass_mail':
+            fields = ['subject', 'body_html', 'email_from', 'reply_to', 'mail_server_id']
+            template = self.pool['mail.template'].browse(cr, uid, template_id, context=context)
+            values = dict((field, getattr(template, field)) for field in fields if getattr(template, field))
+            if template.attachment_ids:
+                values['attachment_ids'] = [att.id for att in template.attachment_ids]
+            if template.mail_server_id:
+                values['mail_server_id'] = template.mail_server_id.id
+            if template.user_signature and 'body_html' in values:
+                signature = self.pool.get('res.users').browse(cr, uid, uid, context).signature
+                values['body_html'] = tools.append_content_to_html(values['body_html'], signature, plaintext=False)
+        elif template_id:
+            values = self.generate_email_for_composer_batch(cr, uid, template_id, [res_id], context=context)[res_id]
+            # transform attachments into attachment_ids; not attached to the document because this will
+            # be done further in the posting process, allowing to clean database if email not send
+            ir_attach_obj = self.pool.get('ir.attachment')
+            for attach_fname, attach_datas in values.pop('attachments', []):
+                data_attach = {
+                    'name': attach_fname,
+                    'datas': attach_datas,
+                    'datas_fname': attach_fname,
+                    'res_model': 'mail.compose.message',
+                    'res_id': 0,
+                    'type': 'binary',  # override default_type from context, possibly meant for another model!
+                }
+                values.setdefault('attachment_ids', list()).append(ir_attach_obj.create(cr, uid, data_attach, context=context))
+        else:
+            default_context = dict(context, default_composition_mode=composition_mode, default_model=model, default_res_id=res_id)
+            default_values = self.default_get(cr, uid, ['composition_mode', 'model', 'res_id', 'subject', 'body', 'email_from', 'reply_to', 'attachment_ids', 'mail_server_id'], context=default_context)
+            values = dict((key, default_values[key]) for key in ['subject', 'body', 'email_from', 'reply_to', 'attachment_ids', 'mail_server_id'] if key in default_values)
+
+        if values.get('body_html'):
+            values['body'] = values.pop('body_html')
+        return {'value': values}
+
+    def save_as_template(self, cr, uid, ids, context=None):
+        """ hit save as template button: current form value will be a new
+            template attached to the current document. """
+        email_template = self.pool.get('mail.template')
+        ir_model_pool = self.pool.get('ir.model')
+        for record in self.browse(cr, uid, ids, context=context):
+            model_ids = ir_model_pool.search(cr, uid, [('model', '=', record.model)], context=context)
+            model_id = model_ids and model_ids[0] or False
+            model_name = ''
+            if model_id:
+                model_name = ir_model_pool.browse(cr, uid, model_id, context=context).name
+            template_name = "%s: %s" % (model_name, tools.ustr(record.subject))
+            values = {
+                'name': template_name,
+                'subject': record.subject or False,
+                'body_html': record.body or False,
+                'model_id': model_id or False,
+                'attachment_ids': [(6, 0, [att.id for att in record.attachment_ids])],
+            }
+            template_id = email_template.create(cr, uid, values, context=context)
+            # generate the saved template
+            template_values = record.onchange_template_id(template_id, record.composition_mode, record.model, record.res_id)['value']
+            template_values['template_id'] = template_id
+            record.write(template_values)
+            return _reopen(self, record.id, record.model)
+
+    #------------------------------------------------------
     # Template rendering
     #------------------------------------------------------
 
@@ -347,7 +459,30 @@ class mail_compose_message(osv.TransientModel):
                 'reply_to': replies_to[res_id],
             }
             results[res_id].update(default_recipients.get(res_id, dict()))
-        return results
+
+        # generate template-based values
+        if wizard.template_id:
+            template_values = self.generate_email_for_composer_batch(
+                cr, uid, wizard.template_id.id, res_ids,
+                fields=['email_to', 'partner_to', 'email_cc', 'attachment_ids', 'mail_server_id'],
+                context=context)
+        else:
+            template_values = {}
+
+        for res_id in res_ids:
+            if template_values.get(res_id):
+                # recipients are managed by the template
+                results[res_id].pop('partner_ids')
+                results[res_id].pop('email_to')
+                results[res_id].pop('email_cc')
+                # remove attachments from template values as they should not be rendered
+                template_values[res_id].pop('attachment_ids', None)
+            else:
+                template_values[res_id] = dict()
+            # update template values by composer values
+            template_values[res_id].update(results[res_id])
+
+        return template_values
 
     def render_template_batch(self, cr, uid, template, model, res_ids, context=None, post_process=False):
         """ Render the given template text, replace mako-like expressions ``${expr}``
@@ -383,5 +518,34 @@ class mail_compose_message(osv.TransientModel):
     def render_template(self, cr, uid, template, model, res_id, context=None):
         return self.render_template_batch(cr, uid, template, model, [res_id], context)[res_id]
 
+    def render_template_batch(self, cr, uid, template, model, res_ids, context=None, post_process=False):
+        return self.pool.get('mail.template').render_template_batch(cr, uid, template, model, res_ids, context=context, post_process=post_process)
+
     def render_message(self, cr, uid, wizard, res_id, context=None):
         return self.render_message_batch(cr, uid, wizard, [res_id], context)[res_id]
+
+    def generate_email_for_composer(self, cr, uid, template_id, res_id, context=None):
+        return self.generate_email_for_composer_batch(cr, uid, template_id, [res_id], context)[res_id]
+
+
+    #------------------------------------------------------
+    # Wizard validation and send
+    #------------------------------------------------------
+
+    def generate_email_for_composer_batch(self, cr, uid, template_id, res_ids, context=None, fields=None):
+        """ Call email_template.generate_email(), get fields relevant for
+            mail.compose.message, transform email_cc and email_to into partner_ids """
+        if context is None:
+            context = {}
+        if fields is None:
+            fields = ['subject', 'body_html', 'email_from', 'email_to', 'partner_to', 'email_cc',  'reply_to', 'attachment_ids', 'mail_server_id']
+        returned_fields = fields + ['partner_ids', 'attachments']
+        values = dict.fromkeys(res_ids, False)
+
+        ctx = dict(context, tpl_partners_only=True)
+        template_values = self.pool.get('mail.template').generate_email_batch(cr, uid, template_id, res_ids, fields=fields, context=ctx)
+        for res_id in res_ids:
+            res_id_values = dict((field, template_values[res_id][field]) for field in returned_fields if template_values[res_id].get(field))
+            res_id_values['body'] = res_id_values.pop('body_html', '')
+            values[res_id] = res_id_values
+        return values

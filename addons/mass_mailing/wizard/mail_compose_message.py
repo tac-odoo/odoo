@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from openerp.osv import osv, fields
 
 
@@ -61,8 +60,3 @@ class MailComposeMessage(osv.TransientModel):
                     'auto_delete': not mass_mailing.keep_archives,
                 })
         return res
-
-    def _process_mass_mailing_queue(self, cr, uid, context=None):
-        composer_ids = self.search(cr, uid, [('composition_mode', '=', 'mass_mail'), ('use_active_domain', '=', True)], context=context)
-        self.send_mail(cr, uid, composer_ids, context=context)
-        self.unlink(cr, uid, composer_ids, context=context)
