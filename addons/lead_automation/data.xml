@@ -11,7 +11,7 @@
 			<field name="numbercall">-1</field>
 			<field name="doall" eval="False"/>
 			<field name="model" eval="'lead.automation.workitem'"/>
-			<field name="function" eval="'process_all'"/>
+			<field name="function" eval="'process_workitem'"/>
 			<field name="args" eval="'()'"/>
 		</record>
 
