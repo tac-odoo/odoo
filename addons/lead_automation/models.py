@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 # is this necessary? yes, if activity condition contains regular
 # expression, i suppose
 import re
-import pdb
+import pudb
 _intervalTypes = {
     'hours': lambda interval: relativedelta(hours=interval),
     'days': lambda interval: relativedelta(days=interval),
@@ -42,9 +42,9 @@ class lead_automation_campaign(models.Model):
                              ('manual', 'With Manual Confirmation'),
                              ('active', 'Normal')], default='test',
                             string='Mode', required=True, help="""Test - It creates and process all the activities directly (without waiting for the delay on transitions) but does not send emails or produce reports.
-																																	Test in Realtime - It creates and processes all the activities directly but does not send emails or produce reports.
-																																	With Manual Confirmation - the campaigns runs normally, but the user has to validate all workitem manually.
-																																	Normal - the campaign runs normally and automatically sends all emails and reports (be very careful with this mode, you're live!)""")
+                                 Test in Realtime - It creates and processes all the activities directly but does not send emails or produce reports.
+                                 With Manual Confirmation - the campaigns runs normally, but the user has to validate all workitem manually.
+                                 Normal - the campaign runs normally and automatically sends all emails and reports (be very careful with this mode, you're live!)""")
     state = fields.Selection([('draft', 'New'),
                               ('running', 'Running'),
                               ('cancelled', 'Cancelled'),
@@ -59,7 +59,6 @@ class lead_automation_campaign(models.Model):
     segments_count = fields.Integer(
         compute='_count_segments', string='Segments')
 
-    @api.one
     def _get_partner_for(self, record):
         partner_field = self.partner_field_id.name
         if partner_field:
@@ -199,8 +198,6 @@ class lead_automation_segment(models.Model):
         self.process_segment()
         return True
 
-    # def process_segment(self):
-
     @api.one
     def process_segment(self):
         Workitems = self.env['lead.automation.workitem']
@@ -225,8 +222,8 @@ class lead_automation_segment(models.Model):
         for record in objects:
             # avoid duplicate workitem for the same resource
             # if segment.sync_mode in ('write_date','all'):
-            #	if Campaigns._find_duplicate_workitems(cr, uid, record, segment.campaign_id, context=context):
-            #		continue
+            #     if Campaigns._find_duplicate_workitems(cr, uid, record, segment.campaign_id, context=context):
+            #   		    continue
 
             wi_vals = {
                 'segment_id': self.id,
@@ -234,16 +231,16 @@ class lead_automation_segment(models.Model):
                 'state': 'todo',
                 'res_id': record.id
             }
-        #	partner = self.env.pool.get('lead.automation.campaign')._get_partner_for(segment.campaign_id, record)
-        #	if partner:
-        #		wi_vals['partner_id'] = partner.id
+            partner = self.campaign_id._get_partner_for(record)
+            if partner:
+                wi_vals['partner_id'] = partner.id
 
-            for act_id in activities:
-                wi_vals['activity_id'] = act_id.id
-                Workitems.create(wi_vals)
+            for activity in activities:
+                wi_vals['activity_id'] = activity.id
+            Workitems.create(wi_vals)
 
         self.sync_last_date = action_date
-        workitems = self.env['lead.automation.workitem'].search([('segment_id','=',self.id)])
+        workitems = self.env['lead.automation.workitem'].search([('segment_id', '=', self.id)])
         workitems.process()
         return True
 
@@ -257,7 +254,7 @@ class lead_automation_activity(models.Model):
         # TODO implement the subcampaigns.
         # TODO implement the subcampaign out. disallow out transitions from
         # subcampaign activities ?
-        #('subcampaign', 'Sub-Campaign'),
+        # ('subcampaign', 'Sub-Campaign'),
     ]
     name = fields.Char('Name', required=True)
     campaign_id = fields.Many2one('lead.automation.campaign', 'Campaign',
@@ -306,12 +303,12 @@ class lead_automation_activity(models.Model):
 
     @api.one
     def process(self, workitem):
-        #method = '_process_wi_%s' % (self.type)
-        #action = getattr(self, method, None)
+        # method = '_process_wi_%s' % (self.type)
+        # action = getattr(self, method, None)
         # if not action:
-        #	raise ValidationError('Method %r is not implemented on %r object.' % (method, self))
+        # raise ValidationError('Method %r is not implemented on %r object.' % (method, self))
 
-        #workitem = self.env['lead.automation.workitem'].browse(cr, uid, wi_id, context=context)
+        # workitem = self.env['lead.automation.workitem'].browse(cr, uid, wi_id, context=context)
         # return action(cr, uid, activity, workitem, context=context)
         return True
 
