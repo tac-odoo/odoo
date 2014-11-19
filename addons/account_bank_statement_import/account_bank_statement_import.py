@@ -190,6 +190,7 @@ class account_bank_statement_import(osv.TransientModel):
             'state': bank_code,
             'partner_id': uid,
             'journal_id': journal_id,
+            'company_id': self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.id
         }
         return self.pool.get('res.partner.bank').create(cr, uid, vals_acc, context=context)
 
