@@ -4,10 +4,24 @@ import dateutil.parser
 from tempfile import TemporaryFile
 
 from openerp.tools.translate import _
-from openerp.osv import osv
+from openerp.osv import osv, fields
 
 class account_bank_statement_import(osv.TransientModel):
     _inherit = "account.bank.statement.import"
+
+    _columns = {
+        'journal_id': fields.many2one('account.journal', string='Journal', help='Accounting journal related to the current imported bank statement(s). It has be be manually chosen because of a limitation of the .QIF format that does not allow to detect automatically the journal (no information about the bank account). '),
+    }
+
+    def _get_journal(self, cr, uid, currency_id, bank_account_id, account_number, context=None):
+        """ As .QIF format does not allow us to detect the journal, we need to let the user choose it"""
+        if context is None:
+            context = {}
+        if context.get('active_id'):
+            record = self.browse(cr, uid, context.get('active_id'), context=context)
+            if record.journal_id:
+                return record.journal_id.id
+        return super(account_bank_statement_import, self)._get_journal(cr, uid, currency_id, bank_account_id, account_number, context=context)
 
     def _check_qif(self, cr, uid, data_file, context=None):
         return data_file.strip().startswith('!Type:')

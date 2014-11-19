@@ -34,6 +34,10 @@ class account_bank_statement_import(osv.TransientModel):
         """ Process the file chosen in the wizard, create bank statement(s) and go to reconciliation. """
         if context is None:
             context = {}
+        #set the active_id in the context, so that any extension module could
+        #reuse the fields chosen in the wizard if needed (see .QIF for example)
+        context.update({'active_id': ids[0]})
+
         data_file = self.browse(cr, uid, ids[0], context=context).data_file
 
         # The appropriate implementation module returns the required data
