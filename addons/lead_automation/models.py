@@ -54,6 +54,14 @@ class lead_automation_campaign(models.Model):
  	segments_count= fields.Integer(compute='_count_segments', string='Segments')
 
 	@api.one
+	def _get_partner_for(self,record):
+		partner_field = self.partner_field_id.name
+		if partner_field:
+			return self.partner_field_id
+		elif self.object_id.model == 'res.partner':
+			return record
+		return None
+	@api.one
 	def _count_segments(self):
 		self.segments_count = len(self.segment_ids)
 
@@ -99,7 +107,6 @@ class lead_automation_campaign(models.Model):
 	def copy(self, default=None):
 		raise exceptions.ValidationError("You cannot duplicate a campaign, Not supported yet.")
 
-
 class lead_automation_segment(models.Model):
 	_name="lead.automation.segment"
 
@@ -139,8 +146,9 @@ class lead_automation_segment(models.Model):
 	@api.constrains('ir_filter_id','campaign_id')
 	@api.one
 	def check_object_model(self):
-		if self.object_id.model!=self.ir_filter_id.model_id:
-			raise exceptions.ValidationError("Model of filter must be same as resource model of Campaign.")
+		if self.ir_filter_id:
+			if self.object_id.model!=self.ir_filter_id.model_id:
+				raise exceptions.ValidationError("Model of filter must be same as resource model of Campaign.")
 
 	@api.one
 	def action_draft(self):
@@ -168,9 +176,9 @@ class lead_automation_segment(models.Model):
 		return True
 
 	#def process_segment(self):
+
 	@api.one
 	def process_segment(self):
-		pdb.set_trace()
 		Workitems = self.env['lead.automation.workitem']
 		Campaigns = self.env['lead.automation.campaign']
 		if self.state!='running' and self.campaign_id.state!='running':
@@ -186,10 +194,9 @@ class lead_automation_segment(models.Model):
 			criteria += [(self.sync_mode, '>', self.sync_last_date)]
 		if self.ir_filter_id:
 			criteria += eval(self.ir_filter_id.domain)
-		object_ids = self.env[model_obj].search(criteria)
-
+		objects = self.env[model_obj].search(criteria)
 		# XXX TODO: rewrite this loop more efficiently without doing 1 search per record!
-		for record in self.env[model_obj].browse(object_ids):
+		for record in objects:
 			# avoid duplicate workitem for the same resource
 			#if segment.sync_mode in ('write_date','all'):
 			#	if Campaigns._find_duplicate_workitems(cr, uid, record, segment.campaign_id, context=context):
@@ -199,7 +206,7 @@ class lead_automation_segment(models.Model):
 				'segment_id': self.id,
 				'date': action_date,
 				'state': 'todo',
-				'res_id': record.id.id
+				'res_id': record.id
 			}
 		#	partner = self.env.pool.get('lead.automation.campaign')._get_partner_for(segment.campaign_id, record)
 		#	if partner:
@@ -210,6 +217,8 @@ class lead_automation_segment(models.Model):
 				Workitems.create(wi_vals)
 
 		self.sync_last_date=action_date
+		workitems=self.env['lead.automation.workitem'].search([])
+		workitems.process_one()
 		return True
 
 class lead_automation_activity(models.Model):
@@ -343,17 +352,12 @@ class lead_automation_workitem(models.Model):
 
 	@api.one
 	def action_cancel(self):
-		if slef.state in ['exception','todo']:
+		if self.state in ['exception','todo']:
 			self.state=cancelled
-
-	def process_all(self,workitem_ids):
-		if not(workitem_ids):
-			workitems_ids = self.env(['lead.automation.workitem']).search([])
-		for wi in workitem_ids:
-			wi.process_one()
 
 	@api.one
 	def process_one(self):
+		import pudb
 		if self.state!='todo':
 			return False
 
@@ -372,12 +376,16 @@ class lead_automation_workitem(models.Model):
 			condition = activity.condition
 			campaign_mode = self.campaign_id.mode
 			if condition:
-				if not eval(condition, eval_context):
-					if activity.keep_if_condition_not_met:
-						self.state='cancelled'
-					else:
-						self.unlink()
-					return
+				try:
+					if not eval(condition, eval_context):
+						if activity.keep_if_condition_not_met:
+							self.state='cancelled'
+						else:
+							self.unlink()
+						return
+				except Exception:
+					pudb.post_mortem()
+					raise
 			result = True
 			if campaign_mode in ('manual', 'active'):
 				result = activity.process(self)
@@ -434,8 +442,8 @@ class lead_automation_workitem(models.Model):
 			self.state='exception'
 			self.error_msg = Exception.message
 
-	@api.multi
-	def process_all(self):
-		workitems = self.search([('state','=','todo')])
-		for wi in workitems:
-			wi.process_one()
+class email_template(models.Model):
+	_inherit = "email.template"
+	_defaults = {
+		'model_id': lambda obj, cr, uid, context: context.get('object_id',False),
+	}

@@ -1,25 +1,92 @@
 <openerp>
     <data>
-        <!--  -->
-        <!--   <record id="object0" model="addons/lead_automation.addons/lead_automation"> -->
-        <!--     <field name="name">Object 0</field> -->
-        <!--   </record> -->
-        <!--  -->
-        <!--   <record id="object1" model="addons/lead_automation.addons/lead_automation"> -->
-        <!--     <field name="name">Object 1</field> -->
-        <!--   </record> -->
-        <!--  -->
-        <!--   <record id="object2" model="addons/lead_automation.addons/lead_automation"> -->
-        <!--     <field name="name">Object 2</field> -->
-        <!--   </record> -->
-        <!--  -->
-        <!--   <record id="object3" model="addons/lead_automation.addons/lead_automation"> -->
-        <!--     <field name="name">Object 3</field> -->
-        <!--   </record> -->
-        <!--  -->
-        <!--   <record id="object4" model="addons/lead_automation.addons/lead_automation"> -->
-        <!--     <field name="name">Object 4</field> -->
-        <!--   </record> -->
-        <!--  -->
+        <!-- Email tempalte -->
+        <record id="email_template_1" model="email.template">
+            <field name="name">welcome new partner</field>
+            <field name="email_from">info@openerp.com</field>
+            <field name="subject">Welcome to the Odoo Partner Channel!</field>
+            <field name="email_to">${(object.email or '')|safe}</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="body_html">Hello, you will receive your welcome pack via email shortly.</field>
+        </record>
+        <record id="email_template_2" model="email.template">
+            <field name="name">congrats silver partner</field>
+            <field name="email_from">info@openerp.com</field>
+            <field name="subject">Congratulations! You are now a Silver Partner!</field>
+            <field name="email_to">${(object.email or '')|safe}</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="body_html">Hi, we are delighted to welcome you among our Silver Partners as of today!</field>
+        </record>
+
+        <record id="email_template_3" model="email.template">
+            <field name="name">congrats gold partner</field>
+            <field name="email_from">info@openerp.com</field>
+            <field name="subject">Congratulations! You are now one of our Gold Partners!</field>
+            <field name="email_to">${(object.email or '')|safe}</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="body_html">Hi, we are delighted to let you know that you have entered the select circle of our Gold Partners</field>
+        </record>
+
+
+
+    <!-- Campaign -->
+        <record id="lead_automation_openerppartnerchannel" model="lead.automation.campaign">
+            <field name="name">Odoo Partner Channel</field>
+            <field name="object_id" ref="base.model_res_partner"/>
+            <field name="mode">active</field>
+        </record>
+
+            <!-- Activity -->
+
+        <record id="lead_automation_activity_0" model="lead.automation.activity">
+            <field name="name">New Partner</field>
+            <field name="campaign_id" ref="lead_automation_openerppartnerchannel"/>
+            <field name="email_template_id" ref="email_template_1"/>
+            <field name="condition">object.credit_limit &lt; 10000</field>
+            <field name="keep_if_condition_not_met">True</field>
+            <field eval="1" name="start"/>
+        </record>
+        <record id="lead_automation_activity_1" model="lead.automation.activity">
+            <field name="name">Silver Partner</field>
+            <field name="campaign_id" ref="lead_automation_openerppartnerchannel"/>
+            <field name="condition">object.credit_limit &gt;= 10000 and object.credit_limit &lt; 50000</field>
+            <field name="keep_if_condition_not_met">True</field>
+            <field name="email_template_id" ref="email_template_2"/>
+        </record>
+
+        <record id="lead_automation_activity_2" model="lead.automation.activity">
+            <field name="name">Gold Partner</field>
+            <field name="condition">object.credit_limit &gt;= 100000</field>
+            <field name="campaign_id" ref="lead_automation_openerppartnerchannel"/>
+            <field name="keep_if_condition_not_met">True</field>
+            <field name="email_template_id" ref="email_template_3"/>
+        </record>
+
+
+    <!-- Transition -->
+        <record id="lead_automation_transition_0" model="lead.automation.transition">
+            <field name="activity_from_id" ref="lead_automation_activity_0"/>
+            <field name="activity_to_id" ref="lead_automation_activity_1"/>
+        </record>
+
+        <record id="lead_automation_transition_1" model="lead.automation.transition">
+            <field name="activity_from_id" ref="lead_automation_activity_1"/>
+            <field name="activity_to_id" ref="lead_automation_activity_2"/>
+        </record>
+
+    <!-- Segment -->
+        <record id="lead_automation_filter0" model="ir.filters">
+            <field name="name">LA Partners</field>
+            <field name="domain">[('name','like','Agrolait')]</field>
+            <field name="model_id">res.partner</field>
+        </record>
+        <record id="lead_automation_segment0" model="lead.automation.segment">
+            <field eval="time.strftime('%Y-%m-%d %H:%M:%S')" name="date_run"/>
+            <field name="name">Odoo Partner</field>
+            <field name="sync_mode">create_date</field>
+            <field name="ir_filter_id" ref="lead_automation_filter0"/>
+            <field name="campaign_id" ref="lead_automation_openerppartnerchannel"/>
+        </record>
+
     </data>
 </openerp>
