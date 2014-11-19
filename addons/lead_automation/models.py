@@ -4,7 +4,6 @@ import time
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import re
-import pudb
 _intervalTypes = {
     'hours': lambda interval: relativedelta(hours=interval),
     'days': lambda interval: relativedelta(days=interval),
@@ -62,6 +61,29 @@ class lead_automation_campaign(models.Model):
         elif self.object_id.model == 'res.partner':
             return record
         return None
+
+    def _find_duplicate_workitems(self,record):
+        """Finds possible duplicates workitems for a record in this campaign, based on a uniqueness
+           field.
+
+           :param record: browse_record to find duplicates workitems for.
+           :param campaign_rec: browse_record of campaign
+        """
+        Workitems = self.env['lead.automation.workitem']
+        duplicate_workitem_domain = [('res_id','=', record.id),
+                                     ('campaign_id','=', self.id)]
+        unique_field = self.unique_field_id
+        if unique_field:
+            unique_value = getattr(record, unique_field.name, None)
+            if unique_value:
+                if unique_field.ttype == 'Many2one':
+                    unique_value = unique_value.id
+                similar_res_ids = self.pool[self.object_id.model].search(
+                                    [(unique_field.name, '=', unique_value)])
+                if similar_res_ids:
+                    duplicate_workitem_domain = [('res_id','in', similar_res_ids),
+                                                 ('campaign_id','=', self.id)]
+        return Workitems.search(duplicate_workitem_domain)
 
     @api.one
     def _count_segments(self):
@@ -208,9 +230,9 @@ class lead_automation_segment(models.Model):
         # per record!
         for record in objects:
             # avoid duplicate workitem for the same resource
-            # if segment.sync_mode in ('write_date','all'):
-            #     if Campaigns._find_duplicate_workitems(cr, uid, record, segment.campaign_id, context=context):
-            #   		    continue
+            if self.sync_mode in ('write_date','all'):
+                if self.campaign_id._find_duplicate_workitems(record):
+              		    continue
 
             wi_vals = {
                 'segment_id': self.id,
@@ -223,7 +245,7 @@ class lead_automation_segment(models.Model):
                 wi_vals['partner_id'] = partner.id
             for activity in activities:
                 wi_vals['activity_id'] = activity.id
-            Workitems.create(wi_vals)
+                Workitems.create(wi_vals)
 
         self.sync_last_date = action_date
         workitems = self.env['lead.automation.workitem'].search([('segment_id', '=', self.id)])
