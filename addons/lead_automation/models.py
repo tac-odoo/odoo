@@ -213,7 +213,8 @@ class lead_automation_segment(models.Model):
     def action_cancel(self):
         workitems=self.env['lead.automation.workitem'].search([('segment_id','=',self.id),('state','=','todo')])
         wi_vals={'state':'cancelled'}
-        workitems.write(wi_vals)        self.state = 'cancelled'
+        workitems.write(wi_vals)
+        self.state = 'cancelled'
 
     @api.one
     def process_segment(self):
@@ -500,3 +501,17 @@ class email_template(models.Model):
     _defaults = {
         'model_id': lambda obj, cr, uid, context: context.get('object_id', False),
     }
+
+
+
+class report_xml(models.Model):
+    _inherit = 'ir.actions.report.xml'
+    def search(self, cr, uid, args, offset=0, limit=None, order=None, context=None, count=False):
+        if context is None:
+            context = {}
+        object_id = context.get('object_id')
+        if object_id:
+            model = self.pool.get('ir.model').browse(cr, uid, object_id, context=context).model
+            args.append(('model', '=', model))
+        return super(report_xml, self).search(cr, uid, args, offset, limit, order, context, count)
+
