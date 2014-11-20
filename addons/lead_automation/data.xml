@@ -1,30 +1,30 @@
 <?xml version="1.0" ?>
 <openerp>
-	<data noupdate="1">
+    <data noupdate="1">
 
-		<!-- Cron -->
+        <!-- Cron -->
 
-		<record model="ir.cron" id="ir_cron_lead_automation_every_hour">
-			<field name="name">Lead Automation: Campaign workitems processing</field>
-			<field name="interval_number">1</field>
-			<field name="interval_type">hours</field>
-			<field name="numbercall">-1</field>
-			<field name="doall" eval="False"/>
-			<field name="model" eval="'lead.automation.workitem'"/>
-			<field name="function" eval="'process_workitem'"/>
-			<field name="args" eval="'()'"/>
-		</record>
+        <record model="ir.cron" id="ir_cron_lead_automation_every_hour">
+            <field name="name">Lead Automation: Campaign workitems processing</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="model" eval="'lead.automation.workitem'"/>
+            <field name="function" eval="'process_workitem'"/>
+            <field name="args" eval="'()'"/>
+        </record>
 
-		<record model="ir.cron" id="ir_cron_lead_automation_every_day">
-			<field name="name">Lead Automation: Segment Sync</field>
-			<field name="interval_number">1</field>
-			<field name="interval_type">days</field><!-- it s every day -->
-			<field name="numbercall">-1</field>
-			<field name="doall" eval="False"/>
-			<field name="model" eval="'lead.automation.segment'"/>
-			<field name="function" eval="'process_segment'"/>
-			<field name="args" eval="'()'"/>
-		</record>
+        <record model="ir.cron" id="ir_cron_lead_automation_every_day">
+            <field name="name">Lead Automation: Segment Sync</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field><!-- it s every day -->
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="model" eval="'lead.automation.segment'"/>
+            <field name="function" eval="'process_segment'"/>
+            <field name="args" eval="'()'"/>
+        </record>
 
-	</data>
+    </data>
 </openerp>
