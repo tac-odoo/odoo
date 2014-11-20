@@ -9,7 +9,11 @@
             <field name="inherit_id" ref="account_bank_statement_import.account_bank_statement_import_view" />
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='data_file']" position="after">
-                    <field name="journal_id"/>
+                    <field name="hide_journal_field" invisible="1"/>
+                    <field name="journal_id"
+                        domain="[('type', '=', 'bank')]"
+                        attrs="{'invisible': [('hide_journal_field', '=', True)]}"
+                        context="{'default_type':'bank'}"/>
                 </xpath>
             </field>
         </record>

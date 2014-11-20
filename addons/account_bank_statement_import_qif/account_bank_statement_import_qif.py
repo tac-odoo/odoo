@@ -10,17 +10,26 @@ class account_bank_statement_import(osv.TransientModel):
     _inherit = "account.bank.statement.import"
 
     _columns = {
-        'journal_id': fields.many2one('account.journal', string='Journal', help='Accounting journal related to the current imported bank statement(s). It has be be manually chosen because of a limitation of the .QIF format that does not allow to detect automatically the journal (no information about the bank account). '),
+        'journal_id': fields.many2one('account.journal', string='Journal', help='Accounting journal related to the bank statement you\'re importing. It has be be manually chosen for statement formats which doesn\'t allow automatic journal detection (QIF for example).'),
+        'hide_journal_field': fields.boolean('Hide the journal field in the view'),
+    }
+
+    def _get_hide_journal_field(self, cr, uid, context=None):
+        return context and 'journal_id' in context or False
+
+    _defaults = {
+        'hide_journal_field': _get_hide_journal_field,
     }
 
     def _get_journal(self, cr, uid, currency_id, bank_account_id, account_number, context=None):
-        """ As .QIF format does not allow us to detect the journal, we need to let the user choose it"""
+        """ As .QIF format does not allow us to detect the journal, we need to let the user choose it. 
+            We set it in context before to call super so it's the same as calling the widget from a journal """
         if context is None:
             context = {}
         if context.get('active_id'):
             record = self.browse(cr, uid, context.get('active_id'), context=context)
             if record.journal_id:
-                return record.journal_id.id
+                context['journal_id'] = record.journal_id.id
         return super(account_bank_statement_import, self)._get_journal(cr, uid, currency_id, bank_account_id, account_number, context=context)
 
     def _check_qif(self, cr, uid, data_file, context=None):

@@ -160,7 +160,7 @@ class account_bank_statement_import(osv.TransientModel):
 
         # If we couldn't find/create a journal, everything is lost
         if not journal_id:
-            raise osv.except_osv(_('Error'), _('Cannot find in which journal import this statement. Please open this wizard from a journal.'))
+            raise osv.except_osv(_('Error'), _('Cannot find in which journal import this statement. Please manually select a journal.'))
 
         return journal_id
 
@@ -223,6 +223,9 @@ class account_bank_statement_import(osv.TransientModel):
                             bank_account_id = self._create_bank_account(cr, uid, identifying_string, context=context)
                     line_vals['partner_id'] = partner_id
                     line_vals['bank_account_id'] = bank_account_id
+
+                # Remove values that won't be used to create() records
+                line_vals.pop('account_number', None)
 
         return stmts_vals
 
