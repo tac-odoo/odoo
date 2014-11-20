@@ -15,6 +15,7 @@
             <field name="parent_id" ref="account_financial_report_profitandloss_line0"/>
             <field name="display_detail">accounts</field>
             <field name="type">types</field>
+            <field name="action">move_lines</field>
         </record>
         <record id="account_financial_report_expense0" model="account.financial.report.line">
             <field name="name">Expense</field>
@@ -22,6 +23,7 @@
             <field name="parent_id" ref="account_financial_report_profitandloss_line0"/>
             <field name="display_detail">accounts</field>
             <field name="type">types</field>
+            <field name="action">move_lines</field>
         </record>
 
         <record id="account_financial_report_balancesheet_line0" model="account.financial.report.line">
@@ -33,6 +35,7 @@
             <field name="parent_id" ref="account_financial_report_balancesheet_line0"/>
             <field name="display_detail">accounts</field>
             <field name="type">types</field>
+            <field name="action">move_lines</field>
         </record>
         <record id="account_financial_report_liabilitysum0" model="account.financial.report.line">
             <field name="name">Liability</field>
@@ -45,6 +48,7 @@
             <field name="parent_id" ref="account_financial_report_liabilitysum0"/>
             <field name="display_detail">accounts</field>
             <field name="type">types</field>
+            <field name="action">move_lines</field>
         </record>
         <!-- 
             Financial Reports

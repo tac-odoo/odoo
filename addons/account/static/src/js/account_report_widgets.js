@@ -6,16 +6,19 @@
         var _t = openerp._t;
 
 
-
         openerp.reportWidgets = openerp.Widget.extend({
             events: {
                 'click .annotable': 'addFootNote',
                 'click .foldable': 'fold',
                 'click .unfoldable': 'unfold',
                 'click .saveFootNote': 'saveFootNote',
+                'click .move_lines': 'displayMoveLines',
+                'click .unreconciled': 'displayUnreconciled',
+                'click .move': 'displayMove',
             },
             start: function() {
                 this.footNoteSeqNum = 1;
+                openerp.qweb.add_template("/account/static/src/xml/account_report_financial_line.xml")
                 return this._super();
             },
             addFootNote: function(e) {
@@ -30,7 +33,7 @@
             },
             fold: function(e) {
                 e.preventDefault();
-                var level = $(e.target).next().html().length
+                var level = $(e.target).next().html().length;
                 var el;
                 var $el;
                 var $nextEls = $(e.target).parent().parent().nextAll();
@@ -46,32 +49,76 @@
                     }
                 }
                 $(e.target).replaceWith('<span class="unfoldable">^</span>');
+                var active_id = $(e.target).attr("class").split(/\s+/)[1];
+                var model = new openerp.Model('account.financial.report.line');
+                model.call('write', [[parseInt(active_id)], {'show': false}]);
             },
             unfold: function(e) {
                 e.preventDefault();
-                var level = $(e.target).next().html().length
-                var el;
-                var $el;
-                var $nextEls = $(e.target).parent().parent().nextAll();
-                for (el in $nextEls) {
-                    $el = $($nextEls[el]).find("td span.level");
-                    if ($el.html() == undefined)
-                        break;
-                    if ($el.html().length > level){
-                        $el.parent().parent().show();
+                console.log('a');
+                var active_id = $(e.target).attr("class").split(/\s+/)[1];
+                var reportLineObj = new openerp.Model('account.financial.report.line');
+                reportLineObj.call('write', [[parseInt(active_id)], {'show': true}]).then(function (result) {
+                    var level = $(e.target).next().html().length;
+                    var el;
+                    var $el;
+                    var $nextEls = $(e.target).parent().parent().nextAll();
+                    for (el in $nextEls) {
+                        $el = $($nextEls[el]).find("td span.level");
+                        if ($el.html() == undefined)
+                            break;
+                        if ($el.html().length > level){
+                            $el.parent().parent().show();
+                        }
+                        else {
+                            break;
+                        }
                     }
-                    else {
-                        break;
+                    if ($nextEls.length == 0) {
+                        var report_id = window.$("div.page").attr("class").split(/\s+/)[2];
+                        var $cursor = $(e.target).parent().parent();
+                        var reportObj = new openerp.Model('report.account.report_financial');
+                        reportObj.query(['debit_credit', 'balance', 'comparison'])
+                        .filter([['id', '=', report_id]]).first().then(function (report) {
+                            reportLineObj.call('get_lines_from_js', [[parseInt(active_id)], parseInt(report_id)])
+                            .then(function (lines) {
+                                var line;
+                                for (line in lines) {
+                                    $cursor.after(openerp.qweb.render("report_financial_line", {a: lines[line], o: report}));
+                                    $cursor = $cursor.next();
+                                }
+                            });
+                        });
                     }
-                }
-                $(e.target).replaceWith('<span class="foldable">&gt;</span>');                
+                    else{
+                        $(e.target).replaceWith('<span class="foldable">&gt;</span>');
+                    }
+                });
             },
             saveFootNote: function(e) {
                 e.preventDefault();
                 var num = $(e.target).parent().find("label").text();
                 var note = $(e.target).parent().find("textarea").val();
-                $(e.target).parent().replaceWith('<div class="row mt32 mb32">' + num + '. ' + note + '</div>')
-            }
+                $(e.target).parent().replaceWith('<div class="row mt32 mb32">' + num + '. ' + note + '</div>');
+            },
+            displayMoveLines: function(e) {
+                var active_id = $(e.target).attr("class").split(/\s+/)[1];
+                var model = openerp.Model('ir.model.data');
+                model.call('get_object_reference', ['account', 'action_move_line_select']).then(function (result) {
+                    window.open("/web?#page=0&limit=80&view_type=list&model=account.move.line&action=" + result[1] + "&active_id=" + active_id, "_self");
+                });
+            },
+            displayUnreconciled: function(e) {
+                var active_id = $(e.target).attr("class").split(/\s+/)[1];
+                var model = openerp.Model('ir.model.data');
+                model.call('get_object_reference', ['account', 'act_account_acount_move_line_open_unreconciled']).then(function (result) {
+                    window.open("/web?#page=0&limit=80&view_type=list&model=account.move.line&action=" + result[1] + "&active_id=" + active_id, "_self");
+                });
+            },
+            displayMove: function(e) {
+                var active_id = $(e.target).attr("class").split(/\s+/)[1];
+                window.open("/web?#id=" + active_id + "&view_type=form&model=account.move", "_self");
+            },
         });
         var reportWidgets = new openerp.reportWidgets();
         reportWidgets.setElement($('.oe_account_report_widgets'));

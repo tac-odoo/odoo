@@ -1,14 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 <data>
+<template id="report_financial_line">
+    <tr>
+        <t t-if="a.get('level') &gt; 3"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+        <t t-if="not a.get('level') &gt; 3"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+
+        <td>
+            <t t-if="a.get('type') == 'line' and a.get('show')">
+                <span t-att-class="' '.join(['foldable', str(a['id'])])">&gt;</span>
+            </t>
+            <t t-if="a.get('type') == 'line' and not a.get('show')">
+                <span t-att-class="' '.join(['unfoldable', str(a['id'])])">^</span>
+            </t>
+            <span class="level" style="color: white;" t-esc="'..' * a.get('level', 0)"/>
+            <t t-if="a.get('id') and a.get('action') and a['action'] != 'unclickable'">
+                <span t-att-style="style" t-att-class="' '.join([a['action'], str(a['id'])])" t-esc="a.get('name')"/>
+            </t>
+            <t t-if="not a.get('id') or not a.get('action') or a.get('action') == 'unclickable'">
+                <span t-att-style="style" t-esc="a.get('name')"/>
+            </t>
+        </td>
+        <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
+            <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('debit'), currency_obj=res_company.currency_id)"/>
+        </td>
+        <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
+            <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('credit'), currency_obj=res_company.currency_id)"/>
+        </td>
+        <td class="text-right" style="white-space: nowrap;" t-if="o.balance">
+            <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('balance'), currency_obj=res_company.currency_id)"/>
+        </td>
+        <td class="text-right" style="white-space: nowrap;" t-if="o.comparison">
+            <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('balance_cmp'), currency_obj=res_company.currency_id)"/>
+        </td>
+    </tr>
+</template>
 <template id="report_financial">
     <t t-call="report.html_container">
         <span class="oe_account_report_widgets">
             <t t-call-assets="web.assets_common" t-css="false" />
+            <t t-call-assets="web.assets_backend" t-css="false" />
             <script type="text/javascript" src="/account/static/src/js/account_report_widgets.js"></script>
             <t t-foreach="docs" t-as="o">
                 <t t-call="report.internal_layout">
-                    <div class="page oe_account_report_widgets">
+                    <div t-att-class="' '.join(['page', 'oe_account_report_widgets', str(doc_ids)])">
                         <h2 t-esc="o.title"/>
 
                         <div class="row mt32 mb32">
@@ -40,32 +75,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr t-foreach="get_lines(data)" t-as="a">
-                                    <t t-if="a['level'] != 0">
-                                        <t t-if="a.get('level') &gt; 3"><t t-set="style" t-value="'font-weight: normal;'"/></t>
-                                        <t t-if="not a.get('level') &gt; 3"><t t-set="style" t-value="'font-weight: bold;'"/></t>
-                                        <t t-if="a.get('id') and a.get('action')"><t t-set="class" t-value="a.['action'] + ' ' + a.['id']"/></t>
-                                        <t t-if="not a.get('id') or not a.get('action')"><t t-set="class" t-value=""/></t>
-
-                                        <td>
-                                            <span class="foldable">&gt;</span>
-                                            <span class="level" style="color: white;" t-esc="'..' * a.get('level', 0)"/>
-                                            <span t-att-style="style" t-att-class="class" t-esc="a.get('name')"/>
-                                        </td>
-                                        <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
-                                            <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('debit'), currency_obj=res_company.currency_id)"/>
-                                        </td>
-                                        <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
-                                            <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('credit'), currency_obj=res_company.currency_id)"/>
-                                        </td>
-                                        <td class="text-right" style="white-space: nowrap;" t-if="o.balance">
-                                            <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('balance'), currency_obj=res_company.currency_id)"/>
-                                        </td>
-                                        <td class="text-right" style="white-space: nowrap;" t-if="o.comparison">
-                                            <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('balance_cmp'), currency_obj=res_company.currency_id)"/>
-                                        </td>
-                                    </t>
-                                </tr>
+                                <t t-foreach="get_lines(data)" t-as="a">
+                                    <t t-call="account.report_financial_line" />
+                                </t>
                             </tbody>
                         </table>
                     </div>

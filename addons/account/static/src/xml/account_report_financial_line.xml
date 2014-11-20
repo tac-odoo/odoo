@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates>
+    <t t-name="report_financial_line">
+        <tr>
+            <t t-if="a.level &gt; 3"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+            <t t-if="a.level &lt;= 3 "><t t-set="style" t-value="'font-weight: bold;'"/></t>
+
+            <td>
+                <t t-if="a.type == 'line' and a.show">
+                    <span t-att-class="'foldable '+a.id">&gt;</span>
+                </t>
+                <t t-if="a.type == 'line' and !a.show">
+                    <span t-att-class="'unfoldable '+a.id">^</span>
+                </t>
+                <span class="level" style="color: white;">
+                    <t t-esc="Array(a.level + 1).join('..')" />
+                </span>
+                <t t-if="a.id and a.action and a.action !== 'unclickable'">
+                    <span t-att-style="style" t-att-class="a.action + ' ' + a.id" t-esc="a.name"/>
+                </t>
+                <t t-if="!a.id or !a.action or a.action == 'unclickable'">
+                    <span t-att-style="style" t-esc="a.name"/>
+                </t>
+            </td>
+            <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
+                <span class="annotable" t-att-style="style" t-esc="a.debit"/>
+            </td>
+            <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
+                <span class="annotable" t-att-style="style" t-esc="a.credit"/>
+            </td>
+            <td class="text-right" style="white-space: nowrap;" t-if="o.balance">
+                <span class="annotable" t-att-style="style" t-esc="a.balance"/>
+            </td>
+            <td class="text-right" style="white-space: nowrap;" t-if="o.comparison">
+                <span class="annotable" t-att-style="style" t-esc="a.balance_cmp"/>
+            </td>
+        </tr>
+    </t>
+</templates>

@@ -105,13 +105,13 @@ class account_financial_report_line(models.Model):
 
     @api.multi
     def _get_children_by_order(self):
-        '''returns a dictionary with the key= the ID of a record and value = all its children,
-           computed recursively, and sorted by sequence. Ready for the printing'''
+        '''returns a all its children, computed recursively, and sorted by sequence. Ready for the printing'''
         res = []
         for line in self:
             res.append(line)
-            children = line.search([('parent_id', '=', line.id)], order='sequence ASC')
-            res += children._get_children_by_order()
+            if line.show:
+                children = line.search([('parent_id', '=', line.id)], order='sequence ASC')
+                res += children._get_children_by_order()
         return res
 
     @api.one
@@ -168,14 +168,6 @@ class account_financial_report_line(models.Model):
             if counters[formula.column] > 1:
                 raise exceptions.ValidationError("A report line can only have one formula per column")
 
-    def _get_actions(self):
-        res = [('unclickable', 'Unclickable')]
-        if self.display_detail == 'accounts':
-            res.append(('move_lines', 'Display the move lines for this account'), ('unreconciled', 'Display the unreconciled lines for this account'))
-        elif self.display_detail == 'moves':
-            res.append(('move', 'Display the move in details'))
-        return res
-
     name = fields.Char('Line Name')
     code = fields.Char('Line Code')
     type = fields.Selection([
@@ -185,7 +177,12 @@ class account_financial_report_line(models.Model):
         ('sum', 'Sum Of Children'),
         ('formula', 'Formula'),
     ], 'Type', required=True, default='sum')
-    action = fields.Selection(_get_actions, 'Onclick Action', default='unclickable')
+    action = fields.Selection([
+        ('unclickable', 'Unclickable'),
+        ('move_lines', 'Display the move lines for this account'),
+        ('unreconciled', 'Display the unreconciled lines for this account'),
+        ('move', 'Display the move in details'),
+    ], 'Onclick Action', default='unclickable')
     figures_type = fields.Selection([
         ('currency', 'Currency'),
         ('percent', 'Percent'),
@@ -218,6 +215,10 @@ class account_financial_report_line(models.Model):
                                 'line_id', 'formula_id', 'Formulas')
     show = fields.Boolean('Show Content', default=False)
 
+    @api.multi
+    def get_lines_from_js(self, financial_report_id):
+        return self.get_lines({'form': {'used_context': {}, 'account_report_id': [financial_report_id]}})[1:]
+
     def get_lines(self, data):
         lines = []
         account_obj = self.env['account.account']
@@ -225,10 +226,12 @@ class account_financial_report_line(models.Model):
         data['form']['used_context'].update(state=financial_report.target_move)
         for line in self.with_context(data['form']['used_context'])._get_children_by_order():
             vals = {
+                'id': line.id,
                 'name': line.name,
                 'type': 'line',
                 'level': line.level,
                 'account_type': line.type == 'sum' and 'view' or False,  # used to underline the financial line balances
+                'show': line.show
             }
             columns = []
             if financial_report.balance:
@@ -252,7 +255,7 @@ class account_financial_report_line(models.Model):
             if line.type == 'types':
                 domain = [('user_type', 'in', [x.id for x in line.account_type_ids])]
                 account_ids = account_obj.with_context(data['form']['used_context']).search(domain)
-            if account_ids:
+            if account_ids and line.show:
                 for account in account_ids:
                     #if there are accounts to display, we add them to the lines with a level equals to their level in
                     #the COA + 1 (to avoid having them with a too low level that would conflicts with the level of data
@@ -262,7 +265,7 @@ class account_financial_report_line(models.Model):
                         'id': account.id,
                         'name': account.code + ' ' + account.name,
                         'type': 'account',
-                        'level': min(account.level + 1, 6),  # account.level + 1
+                        'level': min(account.level + 1, 6),
                         'account_type': account.type,
                         'action': line.action,
                     }
@@ -273,11 +276,11 @@ class account_financial_report_line(models.Model):
                         vals['credit'] = account.credit
                     if not account.company_id.currency_id.is_zero(vals['balance']):
                         flag = True
-                    if financial_report.comparison:
-                        account_id = account_obj.with_context(data['form']['comparison_context']).browse(account.id)
-                        vals['balance_cmp'] = account_id.balance * line.sign or 0.0
-                        if not account.company_id.currency_id.is_zero(vals['balance_cmp']):
-                            flag = True
+                    # if financial_report.comparison:
+                    #     account_id = account_obj.with_context(data['form']['comparison_context']).browse(account.id)
+                    #     vals['balance_cmp'] = account_id.balance * line.sign or 0.0
+                    #     if not account.company_id.currency_id.is_zero(vals['balance_cmp']):
+                    #         flag = True
                     if flag:
                         lines.append(vals)
         return lines
