@@ -11,6 +11,7 @@ openerp.account = function (instance) {
         className: 'oe_bank_statement_reconciliation',
 
         events: {
+            "click *[rel='do_action']": "doActionClickHandler",
             "click .statement_name span": "statementNameClickHandler",
             "keyup .change_statement_name_field": "changeStatementNameFieldHandler",
             "click .change_statement_name_button": "changeStatementButtonClickHandler",
@@ -254,6 +255,21 @@ openerp.account = function (instance) {
                             }
                         });
                     });
+            });
+        },
+
+        doActionClickHandler: function(e) {
+            var name = e.currentTarget.dataset.action_nam;
+            var model = e.currentTarget.dataset.model;
+            var ids = e.currentTarget.dataset.ids.split(",").map(Number);
+            this.action_manager.do_action({
+                name: name,
+                res_model: model,
+                domain: [['id', 'in', ids]],
+                views: [[false, 'list'], [false, 'form']],
+                type: 'ir.actions.act_window',
+                view_type: "list",
+                view_mode: "list"
             });
         },
 
