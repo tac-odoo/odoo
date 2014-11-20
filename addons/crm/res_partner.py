@@ -27,17 +27,13 @@ class res_partner(osv.osv):
 
     def _opportunity_meeting_phonecall_count(self, cr, uid, ids, field_name, arg, context=None):
         res = dict(map(lambda x: (x,{'opportunity_count': 0, 'meeting_count': 0}), ids))
-        # the user may not have access rights for opportunities or meetings
-        try:
-            for partner in self.browse(cr, uid, ids, context):
-                res[partner.id] = {
-                    'opportunity_count': len(partner.opportunity_ids),
-                    'meeting_count': len(partner.meeting_ids),
-                }
-        except:
-            pass
         for partner in self.browse(cr, uid, ids, context):
-            res[partner.id]['phonecall_count'] = len(partner.phonecall_ids)
+            child_opportunities = sum([len(child.opportunity_ids) for child in partner.child_ids]) if partner.is_company else 0
+            res[partner.id] = {
+                'opportunity_count': len(partner.opportunity_ids) + child_opportunities,
+                'meeting_count': len(partner.meeting_ids),
+                'phonecall_count': len(partner.phonecall_ids)
+            }
         return res
 
     _columns = {
