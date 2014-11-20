@@ -28,7 +28,7 @@
             <field eval="&quot;&quot;&quot;[]&quot;&quot;&quot;" name="domain"/>
             <field name="parent_id" ref="document_directory_marketingcampaign"/>
             <field eval="&quot;&quot;&quot;ressource&quot;&quot;&quot;" name="type"/>
-            <field name="ressource_type_id" ref="marketing_campaign.model_marketing_campaign"/>
+            <field name="ressource_type_id" ref="marketing_campaign.model_marketing_campaign_campaign"/>
         </record>
 
         <!-- Email tempalte -->
@@ -158,7 +158,7 @@
         </record>
 
     <!-- Campaign -->
-        <record id="marketing_campaign_openerpondemandfreetrial0" model="marketing.campaign">
+        <record id="marketing_campaign_openerpondemandfreetrial0" model="marketing.campaign.campaign">
             <field name="name">Odoo OnDemand Free Trial 2010</field>
             <field name="object_id" ref="crm.model_crm_lead"/>
             <field name="mode">active</field>
