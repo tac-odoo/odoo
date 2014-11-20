@@ -890,5 +890,19 @@ class account_analytic_account_summary_month(osv.osv):
                     ') ' \
                 'GROUP BY d.month, d.account_id ' \
                 ')')
+        
+class res_partner(osv.Model):
+    _inherit = 'res.partner'
+    
+    def _contracts_count(self, cr, uid, ids, field_name, arg, context=None):
+        result = dict.fromkeys(ids, 0)
+        AnalyticAccount = self.pool.get('account.analytic.account')
+        for group in AnalyticAccount.read_group(cr, uid, [('partner_id', 'in', ids),('type', '=', 'contract'),('state','in',('open','pending'))], ['partner_id'], ['partner_id'], context=context):
+            result[group['partner_id'][0]] = group['partner_id_count']        
+        return result
+    
+    _columns = {
+        'contracts_count': fields.function(_contracts_count, string="Contracts", type='integer'),
+    }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
