@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from openerp import models, fields, api, exceptions
+from openerp import models, fields, api, exceptions,_
 import time
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -495,6 +495,40 @@ class marketing_campaign_workitem(models.Model):
             self.state = 'exception'
             self.error_msg = Exception.message
 
+    @api.multi
+    def preview(self):
+        import pudb
+        pudb.set_trace()
+        if self.activity_id.type == 'email':
+            view_id = self.env['ir.model.data'].get_object_reference('email_template', 'email_template_preview_form')
+            res = {
+                'name': _('Email Preview'),
+                'view_type': 'form',
+                'view_mode': 'form,tree',
+                'res_model': 'email_template.preview',
+                'view_id': False,
+                'views': [(view_id and view_id[1] or 0, 'form')],
+                'type': 'ir.actions.act_window',
+                'target': 'new',
+                'nodestroy':True,
+                'context': "{'template_id':%d,'default_res_id':%d}"%
+                                (self.activity_id.email_template_id.id,
+                                 self.res_id)
+            }
+
+        elif self.activity_id.type == 'report':
+            datas = {
+                'ids': [self.res_id],
+                'model': self.object_id.model
+            }
+            res = {
+                'type' : 'ir.actions.report.xml',
+                'report_name': self.activity_id.report_id.report_name,
+                'datas' : datas,
+            }
+        else:
+            raise ValidationError('The current step for this item has no email or report to preview.')
+        return res
 
 class email_template(models.Model):
     _inherit = "email.template"
