@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-    <data>
+    <data noupdate="1">
       <record id="brand_abarth" model="fleet.make">
       	<field name="name">Abarth</field>
       	<field name="image" type="base64" file="fleet/static/img/brand_abarth-image.png"/>

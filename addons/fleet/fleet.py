@@ -27,9 +27,6 @@ from openerp.osv.orm import except_orm
 from openerp.tools.translate import _
 import time
 
-def str_to_datetime(strdate):
-    return datetime.datetime.strptime(strdate, tools.DEFAULT_SERVER_DATE_FORMAT)
-
 class fleet_vehicle_cost(models.Model):
     _name = 'fleet.vehicle.cost'
     _description = 'Cost related to a vehicle'
@@ -38,7 +35,7 @@ class fleet_vehicle_cost(models.Model):
     @api.one
     @api.depends('odometer_id')
     def _get_odometer(self):
-        self.odometer = self.odometer_id.value if self.odometer_id else 0.0
+        self.odometer = self.odometer_id and self.odometer_id.value or 0.0
 
     @api.one
     def _set_odometer(self):
@@ -70,12 +67,12 @@ class fleet_vehicle_cost(models.Model):
     @api.model
     def create(self, data):
         #make sure that the data are consistent with values of parent and contract records given
-        if 'parent_id' in data and data['parent_id']:
+        if data.get('parent_id'): 
             parent = self.browse(data['parent_id'])
             data['vehicle_id'] = parent.vehicle_id.id
             data['date'] = parent.date
             data['cost_type'] = parent.cost_type
-        if 'contract_id' in data and data['contract_id']:
+        if data.get('contract_id'): 
             contract = self.env['fleet.vehicle.log.contract'].browse(data['contract_id'])
             data['vehicle_id'] = contract.vehicle_id.id
             data['cost_subtype_id'] = contract.cost_subtype_id.id
@@ -98,7 +95,7 @@ class fleet_vehicle_stage(models.Model):
     name = fields.Char(string='Name', required=True)
     sequence = fields.Integer('Sequence', help="Used to order the note stages")
 
-    _sql_constraints = [('fleet_stage_name_unique','unique(name)', _('Stage name already exists'))]
+    _sql_constraints = [('fleet_stage_name_unique', 'unique(name)', _('Stage name already exists'))]
 
 class fleet_vehicle_model(models.Model):
 
@@ -122,9 +119,9 @@ class fleet_vehicle_model(models.Model):
     modelname = fields.Char('Model name', required=True)
     make_id = fields.Many2one('fleet.make', string='Make', required=True, help='Make of the vehicle')
     vendors = fields.Many2many('res.partner', 'fleet_vehicle_model_vendors', 'model_id', 'partner_id', string='Vendors')
-    image = fields.Binary(related='make_id.image', string="Logo")
-    image_medium = fields.Binary(related='make_id.image_medium', string="Logo (medium)")
-    image_small = fields.Binary(related='make_id.image_small', string="Logo (small)")
+    image = fields.Binary(related='make_id.image', string="Logo", store=True)
+    image_medium = fields.Binary(related='make_id.image_medium', string="Logo (medium)", store=True)
+    image_small = fields.Binary(related='make_id.image_small', string="Logo (small)", store=True)
 
 class fleet_make(models.Model):
     _name = 'fleet.make'
@@ -199,8 +196,9 @@ class fleet_vehicle(models.Model):
     def _get_odometer(self):
         fleet_odo_obj = self.env['fleet.vehicle.odometer']
         for record in self:
-            ids = fleet_odo_obj.search([('vehicle_id', '=', record.id)], limit=1, order='value desc')
-            record.odometer = ids[0].value if len(ids._ids) > 0 else 0.0
+            last_odometer = fleet_odo_obj.search([('vehicle_id', '=', record.id)], limit=1, order='value desc')
+            if last_odometer:
+                record.odometer = last_odometer[0].value
 
     def _set_odometer(self):
         if self.odometer_count:
@@ -218,12 +216,12 @@ class fleet_vehicle(models.Model):
         else:
             search_operator = 'not in'
         today = fields.Date.today()
-        res = contract.read_group([('expiration_date', '<', today)], fields=['vehicle_id'], groupby=['vehicle_id'])
-        list = []
-        for x in res:
-            vehicle_id = str(x['vehicle_id'][0])
-            list.append(vehicle_id)
-        return [('id', search_operator, list)]
+        overdue_contracts = contract.read_group([('expiration_date', '<', today)], fields=['vehicle_id'], groupby=['vehicle_id'])
+        list_overdue_contract = []
+        for overdue_contract in overdue_contracts:
+            vehicle_id = str(overdue_contract['vehicle_id'][0])
+            list_overdue_contract.append(vehicle_id)
+        return [('id', search_operator, list_overdue_contract)]
 
     @api.model
     def _search_contract_renewal_due_soon(self, operator, value):
@@ -235,14 +233,14 @@ class fleet_vehicle(models.Model):
         else:
             search_operator = 'not in'
         today = fields.Date.today()
-        datetime_today = datetime.datetime.strptime(today, tools.DEFAULT_SERVER_DATE_FORMAT)
+        datetime_today = fields.Datetime.from_string(today)
         limit_date = str((datetime_today + relativedelta(days=+15)).strftime(tools.DEFAULT_SERVER_DATE_FORMAT))
-        res = contract.read_group([('expiration_date', '>', today), ('expiration_date', '<', limit_date)], fields=['vehicle_id'], groupby=['vehicle_id'])
-        list = []
-        for x in res:
-            vehicle_id = str(x['vehicle_id'][0])
-            list.append(vehicle_id)
-        return [('id', search_operator, list)]
+        renewal_contracts = contract.read_group([('expiration_date', '>', today), ('expiration_date', '<', limit_date)], fields=['vehicle_id'], groupby=['vehicle_id'])
+        list_renewal_contract = []
+        for renewal_contract in renewal_contracts:
+            vehicle_id = str(renewal_contract['vehicle_id'][0])
+            list_renewal_contract.append(vehicle_id)
+        return [('id', search_operator, list_renewal_contract)]
 
     @api.multi
     def _get_contract_reminder_fnc(self):
@@ -254,8 +252,8 @@ class fleet_vehicle(models.Model):
             name = ''
             for element in record.log_contracts:
                 if element.state in ('open', 'toclose') and element.expiration_date:
-                    current_date = str_to_datetime(fields.Date.today())
-                    due_time = str_to_datetime(element.expiration_date)
+                    current_date = fields.Datetime.from_string(fields.Date.today())
+                    due_time = fields.Datetime.from_string(element.expiration_date)
                     diff_time = (due_time-current_date).days
                     if diff_time < 0:
                         overdue = True
@@ -457,9 +455,9 @@ class fleet_vehicle_log_fuel(models.Model):
 
     liter = fields.Float('Liter')
     price_per_liter = fields.Float('Price Per Liter')
-    purchaser_id = fields.Many2one('res.partner', string='Purchaser', domain="['|',('customer','=',True),('employee','=',True)]")
+    purchaser_id = fields.Many2one('res.partner', string='Purchaser', domain="['|', ('customer', '=', True), ('employee', '=', True)]")
     invoice_reference = fields.Char(string='Invoice Reference', size=64)
-    vendor_id = fields.Many2one('res.partner', string='Supplier', domain="[('supplier','=',True)]")
+    vendor_id = fields.Many2one('res.partner', string='Supplier', domain="[('supplier', '=', True)]")
     notes = fields.Text('Notes')
     cost_id = fields.Many2one('fleet.vehicle.cost', string='Cost', required=True, ondelete='cascade')
     cost_amount = fields.Float(related='cost_id.amount', string='Amount', store=True) #we need to keep this field as a related with store=True because the graph view doesn't support (1) to address fields from inherited table and (2) fields that aren't stored in database
@@ -489,9 +487,9 @@ class fleet_vehicle_log_services(models.Model):
             model_id = False
         return model_id
 
-    purchaser_id = fields.Many2one('res.partner', string='Purchaser', domain="['|',('customer','=',True),('employee','=',True)]")
+    purchaser_id = fields.Many2one('res.partner', string='Purchaser', domain="['|', ('customer', '=', True), ('employee', '=', True)]")
     invoice_reference = fields.Char(string='Invoice Reference')
-    vendor_id = fields.Many2one('res.partner', string='Supplier', domain="[('supplier','=',True)]")
+    vendor_id = fields.Many2one('res.partner', string='Supplier', domain="[('supplier', '=', True)]")
     cost_amount = fields.Float(related='cost_id.amount', string='Amount', store=True) #we need to keep this field as a related with store=True because the graph view doesn't support (1) to address fields from inherited table and (2) fields that aren't stored in database
     notes = fields.Text('Notes')
     cost_id = fields.Many2one('fleet.vehicle.cost', string='Cost', required=True, ondelete='cascade')
@@ -599,7 +597,7 @@ class fleet_vehicle_log_contract(models.Model):
     @api.multi
     def compute_next_year_date(self, strdate):
         oneyear = relativedelta(years=+1)
-        curdate = str_to_datetime(strdate)
+        curdate = fields.Datetime.from_string(strdate)
         return datetime.datetime.strftime(curdate + oneyear, tools.DEFAULT_SERVER_DATE_FORMAT)
  
     @api.multi
@@ -609,10 +607,10 @@ class fleet_vehicle_log_contract(models.Model):
         if contract is in a closed state, return -1
         otherwise return the number of days before the contract expires
         """
-        today = str_to_datetime(time.strftime(tools.DEFAULT_SERVER_DATE_FORMAT))
+        today = fields.Datetime.from_string(time.strftime(tools.DEFAULT_SERVER_DATE_FORMAT))
         for record in self:
             if (record.expiration_date and (record.state in ('open', 'toclose'))):
-                renew_date = str_to_datetime(record.expiration_date)
+                renew_date = fields.Datetime.from_string(record.expiration_date)
                 diff_time = (renew_date - today).days
                 record.days_left = diff_time > 0 and diff_time or 0
             else:
@@ -623,12 +621,12 @@ class fleet_vehicle_log_contract(models.Model):
         if not (len(self._ids) == 1): 
             raise Exception("This operation should only be done for 1 single contract at a time, as it it suppose to open a window as result")
         #compute end date
-        startdate = str_to_datetime(self.start_date)
-        enddate = str_to_datetime(self.expiration_date)
+        startdate = fields.Datetime.from_string(self.start_date)
+        enddate = fields.Datetime.from_string(self.expiration_date)
         diffdate = (enddate - startdate)
         default = {
             'date': fields.Date.today(),
-            'start_date': datetime.datetime.strftime(str_to_datetime(self.expiration_date) + datetime.timedelta(days=1), tools.DEFAULT_SERVER_DATE_FORMAT),
+            'start_date': datetime.datetime.strftime(fields.Datetime.from_string(self.expiration_date) + datetime.timedelta(days=1), tools.DEFAULT_SERVER_DATE_FORMAT),
             'expiration_date': datetime.datetime.strftime(enddate + diffdate, tools.DEFAULT_SERVER_DATE_FORMAT),
         }
         newid = self.copy(default).id
