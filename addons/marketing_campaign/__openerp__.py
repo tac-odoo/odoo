@@ -21,13 +21,13 @@
 
 
 {
-    'name': 'Marketing Campaigns',
-    'version': '1.1',
+    'name': 'Lead Automation',
+    'version': '0.1',
     'depends': ['marketing',
-                 'document',
-                 'email_template',
-                 'decimal_precision'
-    ],
+                'document',
+                'email_template',
+                'decimal_precision'
+                ],
     'author': 'OpenERP SA',
     'category': 'Marketing',
     'description': """
@@ -55,18 +55,16 @@ input segments, workflow.
       CRM Leads.
     """,
     'website': 'https://www.odoo.com/page/lead-automation',
+
+    # always loaded
     'data': [
-        'marketing_campaign_view.xml',
-        'marketing_campaign_data.xml',
-        'marketing_campaign_workflow.xml',
-        'report/campaign_analysis_view.xml',
-        'security/marketing_campaign_security.xml',
-        'security/ir.model.access.csv'
+             'security/ir.model.access.csv',
+                'templates.xml', 'view.xml', 'view_campaign.xml', 'view_segment.xml', 'view_activity.xml', 'view_workitem.xml', 'data.xml', 'workflow.xml','report/campaign_analysis_view.xml'
     ],
-    'demo': ['marketing_campaign_demo.xml'],
-    'test': ['test/marketing_campaign.yml'],
+    # only loaded in demonstration mode
+    'demo': [
+        'demo.xml',
+    ],
     'installable': True,
     'auto_install': False,
-    'images': ['images/campaign.png', 'images/campaigns.jpeg','images/email_account.jpeg','images/email_templates.jpeg','images/segments.jpeg'],
 }
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

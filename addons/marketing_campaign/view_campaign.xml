@@ -2,8 +2,8 @@
     <data>
         <!-- Marketing Campaign -->
 
-        <record id="act_lead_automation_segment_opened" model="ir.actions.act_window">
-            <field name="res_model">lead.automation.segment</field>
+        <record id="act_marketing_campaign_segment_opened" model="ir.actions.act_window">
+            <field name="res_model">marketing.campaign.segment</field>
             <field name="view_type">form</field>
             <field name="name">Segments</field>
             <field name="view_mode">tree,form</field>
@@ -12,8 +12,8 @@
 
         <!-- Campaign Follow-ups -->
 
-        <record id="act_lead_automation_campaign_followup" model="ir.actions.act_window">
-            <field name="res_model">lead.automation.workitem</field>
+        <record id="act_marketing_campaign_campaign_followup" model="ir.actions.act_window">
+            <field name="res_model">marketing.campaign.workitem</field>
             <field name="view_type">form</field>
             <field name="name">Workitems</field>
             <field name="view_mode">tree,form</field>
@@ -22,8 +22,8 @@
 
         <!-- Campaign Statistics -->
 
-        <record id="act_lead_automation_stat" model="ir.actions.act_window" >
-            <field name="res_model">lead.automation.analysis</field>
+        <record id="act_marketing_campaign_stat" model="ir.actions.act_window" >
+            <field name="res_model">marketing.campaign.analysis</field>
             <field name="view_type">form</field>
             <field name="name">Campaign Follow-up</field>
             <field name="view_mode">tree,form</field>
@@ -31,9 +31,9 @@
         </record>
         <!-- Campaign Followups -->
 
-        <record model="ir.ui.view" id="view_lead_automation_campaign_form">
-            <field name="name">lead.automation.campaign.form</field>
-            <field name="model">lead.automation.campaign</field>
+        <record model="ir.ui.view" id="view_marketing_campaign_campaign_form">
+            <field name="name">marketing.campaign.campaign.form</field>
+            <field name="model">marketing.campaign.campaign</field>
             <field name="arch" type="xml">
                 <form string="Lead Automation Campaign">
                     <header>
@@ -46,20 +46,20 @@
                     <sheet string="Campaign">
                         <div class="oe_right oe_button_box" name="button_box">
                             <button type="action"
-                                    name="%(act_lead_automation_stat)d"
+                                    name="%(act_marketing_campaign_stat)d"
                                     class="oe_stat_button"
                                     icon="fa-keyboard-o"
                                     help="Campaign Statistics">
                                 <div>Campaign<br/>Statistics</div>
                             </button>
                             <button type="action"
-                                    name="%(act_lead_automation_segment_opened)d"
+                                    name="%(act_marketing_campaign_segment_opened)d"
                                     class="oe_stat_button"
                                     icon="fa-table">
                                 <field name="segments_count" widget="statinfo" string="Segments"/>
                             </button>
                             <button type="action"
-                                    name="%(act_lead_automation_campaign_followup)d"
+                                    name="%(act_marketing_campaign_campaign_followup)d"
                                     class="oe_stat_button"
                                     icon="fa-thumbs-up"
                                     string="Follow-Up"/>$
@@ -86,9 +86,9 @@
             </field>
         </record>
 
-        <record model="ir.ui.view" id="view_lead_automation_campaign_tree">
-            <field name="name">lead.automation.campaign.tree</field>
-            <field name="model">lead.automation.campaign</field>
+        <record model="ir.ui.view" id="view_marketing_campaign_campaign_tree">
+            <field name="name">marketing.campaign.campaign.tree</field>
+            <field name="model">marketing.campaign.campaign</field>
             <field name="arch" type="xml">
                 <tree colors="blue:state == 'draft';black:state == 'running';gray:state in ('done','cancelled')" string="Campaigns">
                     <field name="name"/>
@@ -100,15 +100,15 @@
             </field>
         </record>
 
-        <record model="ir.actions.act_window" id="action_lead_automation_campaign_form">
+        <record model="ir.actions.act_window" id="action_marketing_campaign_campaign_form">
             <field name="name">Campaigns</field>
             <field name="type">ir.actions.act_window</field>
-            <field name="res_model">lead.automation.campaign</field>
+            <field name="res_model">marketing.campaign.campaign</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="view_lead_automation_campaign_tree"/>
+            <field name="view_id" ref="view_marketing_campaign_campaign_tree"/>
             <field name="context">{'group_by': []}</field>
-            <!-- 			<field name="search_view_id" ref="view_lead_automation_campaign_search"/> -->
+            <!-- 			<field name="search_view_id" ref="view_marketing_campaign_campaign_search"/> -->
             <field name="help" type="html">
                 <p class="oe_view_nocontent_create">
                     Click to create a marketing campaign.

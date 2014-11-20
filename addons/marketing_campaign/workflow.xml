@@ -3,7 +3,7 @@
 		<!-- Campaign Workflow -->
 		<record model="workflow" id="wkf_campaign">
 			<field name="name">Lead Automation Campaign workflow</field>
-			<field name="osv">lead.automation.campaign</field>
+			<field name="osv">marketing.campaign.campaign</field>
 			<field name="on_create">True</field>
 		</record>
 
@@ -62,7 +62,7 @@
 		<!-- Segment Workflow -->
 		<record model="workflow" id="wkf_segment">
 			<field name="name">Lead Automation Segment workflow</field>
-			<field name="osv">lead.automation.segment</field>
+			<field name="osv">marketing.campaign.segment</field>
 			<field name="on_create">True</field>
 		</record>
 

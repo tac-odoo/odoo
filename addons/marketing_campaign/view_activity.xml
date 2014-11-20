@@ -6,8 +6,8 @@
  These views are not intended to be used outside the campaign context.
  -->
 		<record model="ir.ui.view" id="view_leud_automation_activity_form">
-			<field name="name">lead.automation.activity.form</field>
-			<field name="model">lead.automation.activity</field>
+			<field name="name">marketing.campaign.activity.form</field>
+			<field name="model">marketing.campaign.activity</field>
 			<field name="arch" type="xml">
 				<form string="Activities">
 					<group>
@@ -75,9 +75,9 @@
 			</field>
 		</record>
 
-		<record model="ir.ui.view" id="view_lead_automation_activity_tree">
-			<field name="name">lead.automation.activity.tree</field>
-			<field name="model">lead.automation.activity</field>
+		<record model="ir.ui.view" id="view_marketing_campaign_activity_tree">
+			<field name="name">marketing.campaign.activity.tree</field>
+			<field name="model">marketing.campaign.activity</field>
 			<field name="arch" type="xml">
 				<tree string="Activities">
 					<field name="name"/>

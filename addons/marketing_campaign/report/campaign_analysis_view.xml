@@ -2,9 +2,9 @@
 <openerp>
     <data>
 
-    <record id="view_report_campaign_analysis_graph" model="ir.ui.view">
-        <field name="name">campaign.analysis.graph</field>
-        <field name="model">campaign.analysis</field>
+    <record id="view_report_marketing_campaign_analysis_graph" model="ir.ui.view">
+        <field name="name">marketing.campaign.analysis.graph</field>
+        <field name="model">marketing.campaign.analysis</field>
         <field name="arch" type="xml">
             <graph string="Marketing Reports" type="pivot" stacked="True">
                 <field name="segment_id" type="row"/>
@@ -13,9 +13,9 @@
         </field>
     </record>
 
-    <record id="view_campaign_analysis_tree" model="ir.ui.view">
-        <field name="name">campaign.analysis.tree</field>
-        <field name="model">campaign.analysis</field>
+    <record id="view_marketing_campaign_analysis_tree" model="ir.ui.view">
+        <field name="name">marketing.campaign.analysis.tree</field>
+        <field name="model">marketing.campaign.analysis</field>
         <field name="arch" type="xml">
             <tree string="Marketing Reports" create="false">
                 <field name="year" invisible="1"/>
@@ -36,9 +36,9 @@
         </field>
     </record>
 
-    <record id="view_campaign_analysis_search" model="ir.ui.view">
-        <field name="name">campaign.analysis.search</field>
-        <field name="model">campaign.analysis</field>
+    <record id="view_marketing_campaign_analysis_search" model="ir.ui.view">
+        <field name="name">marketing.campaign.analysis.search</field>
+        <field name="model">marketing.campaign.analysis</field>
         <field name="arch" type="xml">
             <search string="Campaign Analysis">
                 <field name="date"/>
@@ -62,16 +62,16 @@
         </field>
     </record>
 
-    <record id="action_campaign_analysis_all" model="ir.actions.act_window">
+    <record id="action_marketing_campaign_analysis_all" model="ir.actions.act_window">
         <field name="name">Campaign Analysis</field>
-        <field name="res_model">campaign.analysis</field>
+        <field name="res_model">marketing.campaign.analysis</field>
         <field name="view_type">form</field>
         <field name="view_mode">graph,tree</field>
         <field name="context">{'group_by': [], 'group_by_no_leaf':1}</field>
-        <field name="search_view_id" ref="view_campaign_analysis_search"/>
+        <field name="search_view_id" ref="view_marketing_campaign_analysis_search"/>
     </record>
 
-    <menuitem action="action_campaign_analysis_all" id="menu_action_campaign_analysis_all" parent="base.marketing_reporting_menu" sequence="20"/>
+    <menuitem action="action_marketing_campaign_analysis_all" id="menu_action_marketing_campaign_analysis_all" parent="base.marketing_reporting_menu" sequence="20"/>
 
     </data>
 </openerp>

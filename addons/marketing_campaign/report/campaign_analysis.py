@@ -18,62 +18,54 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import tools
-from openerp.osv import fields, osv
+from openerp import tools, models, fields
 from openerp.addons.decimal_precision import decimal_precision as dp
 
 
-class campaign_analysis(osv.osv):
-    _name = "campaign.analysis"
+class marketing_campaign_analysis(models.Model):
+    _name = "marketing.campaign.analysis"
     _description = "Campaign Analysis"
     _auto = False
     _rec_name = 'date'
-    def _total_cost(self, cr, uid, ids, field_name, arg, context=None):
-        """
-            @param cr: the current row, from the database cursor,
-            @param uid: the current user’s ID for security checks,
-            @param ids: List of case and section Data’s IDs
-            @param context: A standard dictionary for contextual values
-        """
+
+    def _total_cost(self):
         result = {}
-        for ca_obj in self.browse(cr, uid, ids, context=context):
-            wi_ids = self.pool.get('marketing.campaign.workitem').search(cr, uid,
+        for ca_obj in self.search([]):
+            wi_ids = self.env['marketing.campaign.workitem'].search(
                         [('segment_id.campaign_id', '=', ca_obj.campaign_id.id)])
             total_cost = ca_obj.activity_id.variable_cost + \
-                                ((ca_obj.campaign_id.fixed_cost or 1.00) / len(wi_ids))
+                                ((ca_obj.campaign_id.fixed_cost or 1.00) / len(wi_ids)) #why 1.00???
             result[ca_obj.id] = total_cost
         return result
-    _columns = {
-        'res_id' : fields.integer('Resource', readonly=True),
-        'year': fields.char('Year', size=4, readonly=True),
-        'month': fields.selection([('01','January'), ('02','February'),
-                                     ('03','March'), ('04','April'),('05','May'), ('06','June'),
-                                     ('07','July'), ('08','August'), ('09','September'),
-                                     ('10','October'), ('11','November'), ('12','December')],
-                                  'Month', readonly=True),
-        'day': fields.char('Day', size=10, readonly=True),
-        'date': fields.date('Date', readonly=True, select=True),
-        'campaign_id': fields.many2one('marketing.campaign', 'Campaign',
-                                                                readonly=True),
-        'activity_id': fields.many2one('marketing.campaign.activity', 'Activity',
-                                                                 readonly=True),
-        'segment_id': fields.many2one('marketing.campaign.segment', 'Segment',
-                                                                readonly=True),
-        'partner_id': fields.many2one('res.partner', 'Partner', readonly=True),
-        'country_id': fields.related('partner_id', 'country_id',
-                    type='many2one', relation='res.country',string='Country'),
-        'total_cost' : fields.function(_total_cost, string='Cost',
-                                    type="float", digits_compute=dp.get_precision('Account')),
-        'revenue': fields.float('Revenue', readonly=True, digits_compute=dp.get_precision('Account')),
-        'count' : fields.integer('# of Actions', readonly=True),
-        'state': fields.selection([('todo', 'To Do'),
-                                   ('exception', 'Exception'), ('done', 'Done'),
-                                   ('cancelled', 'Cancelled')], 'Status', readonly=True),
-    }
-    def init(self, cr):
+
+    res_id = fields.Integer('Resource', readonly=True)
+    year = fields.Char('Year', size=4, readonly=True)
+    month = fields.Selection([('01','January'), ('02','February'),
+                              ('03','March'), ('04','April'),('05','May'), ('06','June'),
+                              ('07','July'), ('08','August'), ('09','September'),
+                              ('10','October'), ('11','November'), ('12','December')],
+                             'Month', readonly=True)
+    day = fields.Char('Day', size=10, readonly=True)
+    date = fields.Date('Date', readonly=True, select=True)
+    campaign_id = fields.Many2one('marketing.campaign.campaign', 'Campaign',
+                                  readonly=True)
+    activity_id = fields.Many2one('marketing.campaign.activity', 'Activity',
+                                  readonly=True)
+    segment_id = fields.Many2one('marketing.campaign.segment', 'Segment',
+                                 readonly=True)
+    partner_id = fields.Many2one('res.partner', 'Partner', readonly=True)
+    country_id = fields.Many2one(related='partner_id.country_id', string='Country')
+    total_cost = fields.Float(compute='_total_cost', string='Cost', digits=dp.get_precision('Account'))
+    revenue = fields.Float('Revenue', readonly=True, digits=dp.get_precision('Account'))
+    count = fields.Integer('# of Actions', readonly=True)
+    state = fields.Selection([('todo', 'To Do'),
+                              ('exception', 'Exception'), ('done', 'Done'),
+                              ('cancelled', 'Cancelled')], 'Status', readonly=True)
+
+    def init(self,cr):
         tools.drop_view_if_exists(cr, 'campaign_analysis')
         cr.execute("""
-            create or replace view campaign_analysis as (
+            create or replace view marketing_campaign_analysis as (
             select
                 min(wi.id) as id,
                 min(wi.res_id) as res_id,
@@ -98,5 +90,3 @@ class campaign_analysis(osv.osv):
                 wi.date::date
             )
         """)
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

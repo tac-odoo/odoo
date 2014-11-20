@@ -17,8 +17,8 @@ _intervalTypes = {
 DT_FMT = '%Y-%m-%d %H:%M:%S'
 
 
-class lead_automation_campaign(models.Model):
-    _name = "lead.automation.campaign"
+class marketing_campaign_campaign(models.Model):
+    _name = "marketing.campaign.campaign"
 
     name = fields.Char('Name', required=True)
     object_id = fields.Many2one('ir.model', 'Resource', required=True,
@@ -50,11 +50,11 @@ class lead_automation_campaign(models.Model):
                               ('done', 'Done')],
                              'Status', copy=False, default='draft')
     activity_ids = fields.One2many(
-        'lead.automation.activity', 'campaign_id', 'Activities')
+        'marketing.campaign.activity', 'campaign_id', 'Activities')
     fixed_cost = fields.Float(
         'Fixed Cost', help="Fixed cost for running this campaign. You may also specify variable cost and revenue on each campaign activity. Cost and Revenue statistics are included in Campaign Reporting.")
     segment_ids = fields.One2many(
-        'lead.automation.segment', 'campaign_id', 'Segments', readonly=False)
+        'marketing.campaign.segment', 'campaign_id', 'Segments', readonly=False)
     segments_count = fields.Integer(
         compute='_count_segments', string='Segments')
 
@@ -72,7 +72,7 @@ class lead_automation_campaign(models.Model):
            :param record: browse_record to find duplicates workitems for.
            :param campaign_rec: browse_record of campaign
         """
-        Workitems = self.env['lead.automation.workitem']
+        Workitems = self.env['marketing.campaign.workitem']
         duplicate_workitem_domain = [('res_id','=', record.id),
                                      ('campaign_id','=', self.id)]
         unique_field = self.unique_field_id
@@ -141,12 +141,12 @@ class lead_automation_campaign(models.Model):
             "You cannot duplicate a campaign, Not supported yet.")
 
 
-class lead_automation_segment(models.Model):
-    _name = "lead.automation.segment"
+class marketing_campaign_segment(models.Model):
+    _name = "marketing.campaign.segment"
 
     name = fields.Char('Name', required=True)
     campaign_id = fields.Many2one(
-        'lead.automation.campaign', 'Campaign', required=True, select=1, ondelete="cascade")
+        'marketing.campaign.campaign', 'Campaign', required=True, select=1, ondelete="cascade")
     object_id = fields.Many2one(
         related='campaign_id.object_id', string='Resource', store=True)
     ir_filter_id = fields.Many2one('ir.filters', 'Filter', ondelete="restrict",
@@ -181,7 +181,7 @@ class lead_automation_segment(models.Model):
         'Last Synchronization', help="Date on which this segment was synchronized last time (automatically or manually)")
 
     def _get_next_sync(self):
-        segment_cron = self.env['ir.cron'].search([('model', '=', 'lead.automation.segment')])
+        segment_cron = self.env['ir.cron'].search([('model', '=', 'marketing.campaign.segment')])
         self.date_next_sync = fields.Datetime.from_string(segment_cron.nextcall)
 
     @api.constrains('ir_filter_id', 'campaign_id')
@@ -204,27 +204,27 @@ class lead_automation_segment(models.Model):
 
     @api.one
     def action_done(self):
-        workitems=self.env['lead.automation.workitem'].search([('segment_id','=',self.id),('state','=','todo')])
+        workitems=self.env['marketing.campaign.workitem'].search([('segment_id','=',self.id),('state','=','todo')])
         wi_vals={'state':'cancelled'}
         workitems.write(wi_vals)
         self.state = 'done'
 
     @api.one
     def action_cancel(self):
-        workitems=self.env['lead.automation.workitem'].search([('segment_id','=',self.id),('state','=','todo')])
+        workitems=self.env['marketing.campaign.workitem'].search([('segment_id','=',self.id),('state','=','todo')])
         wi_vals={'state':'cancelled'}
         workitems.write(wi_vals)
         self.state = 'cancelled'
 
     @api.one
     def process_segment(self):
-        Workitems = self.env['lead.automation.workitem']
-        Campaigns = self.env['lead.automation.campaign']
+        Workitems = self.env['marketing.campaign.workitem']
+        Campaigns = self.env['marketing.campaign.campaign']
         if self.state != 'running' and self.campaign_id.state != 'running':
             return False
 
         action_date = time.strftime(DT_FMT)
-        activities = self.env['lead.automation.activity'].search(
+        activities = self.env['marketing.campaign.activity'].search(
             [('start', '=', True), ('campaign_id', '=', self.campaign_id.id)])
         obj_model = self.object_id.model
         criteria = []
@@ -255,13 +255,13 @@ class lead_automation_segment(models.Model):
                 Workitems.create(wi_vals)
 
         self.sync_last_date = action_date
-        workitems = self.env['lead.automation.workitem'].search([('segment_id', '=', self.id)])
+        workitems = self.env['marketing.campaign.workitem'].search([('segment_id', '=', self.id)])
         workitems.process_workitem()
         return True
 
 
-class lead_automation_activity(models.Model):
-    _name = 'lead.automation.activity'
+class marketing_campaign_activity(models.Model):
+    _name = 'marketing.campaign.activity'
     _action_types = [
         ('email', 'Email'),
         ('report', 'Report'),
@@ -272,7 +272,7 @@ class lead_automation_activity(models.Model):
         # ('subcampaign', 'Sub-Campaign'),
     ]
     name = fields.Char('Name', required=True)
-    campaign_id = fields.Many2one('lead.automation.campaign', 'Campaign',
+    campaign_id = fields.Many2one('marketing.campaign.campaign', 'Campaign',
                                   required=True, ondelete='cascade', select=1)
     object_id = fields.Many2one(
         related='campaign_id.object_id', string='Object', readonly=True)
@@ -300,10 +300,10 @@ class lead_automation_activity(models.Model):
                                           help="This folder is used to store the generated reports")
     server_action_id = fields.Many2one('ir.actions.server', string='Action',
                                        help="The action to perform when this activity is activated")
-    to_ids = fields.One2many('lead.automation.transition',
+    to_ids = fields.One2many('marketing.campaign.transition',
                              'activity_from_id',
                              'Next Activities')
-    from_ids = fields.One2many('lead.automation.transition',
+    from_ids = fields.One2many('marketing.campaign.transition',
                                'activity_to_id',
                                'Previous Activities')
     variable_cost = fields.Float('Variable Cost', help="Set a variable cost if you consider that every campaign item that has reached this point has entailed a certain cost. You can get cost statistics in the Reporting section", digits=dp.get_precision('Product Price'))
@@ -323,13 +323,13 @@ class lead_automation_activity(models.Model):
         # if not action:
         # raise ValidationError('Method %r is not implemented on %r object.' % (method, self))
 
-        # workitem = self.env['lead.automation.workitem'].browse(cr, uid, wi_id, context=context)
+        # workitem = self.env['marketing.campaign.workitem'].browse(cr, uid, wi_id, context=context)
         # return action(cr, uid, activity, workitem, context=context)
         return True
 
 
-class lead_automation_transition(models.Model):
-    _name = 'lead.automation.transition'
+class marketing_campaign_transition(models.Model):
+    _name = 'marketing.campaign.transition'
 
     _interval_units = [
         ('hours', 'Hour(s)'),
@@ -340,9 +340,9 @@ class lead_automation_transition(models.Model):
 
     name = fields.Char(compute='_get_name', string='Name', size=128)
     activity_from_id = fields.Many2one(
-        'lead.automation.activity', 'Previous Activity', select=1, required=True, ondelete="cascade")
+        'marketing.campaign.activity', 'Previous Activity', select=1, required=True, ondelete="cascade")
     activity_to_id = fields.Many2one(
-        'lead.automation.activity', 'Next Activity', required=True, ondelete="cascade")
+        'marketing.campaign.activity', 'Next Activity', required=True, ondelete="cascade")
     interval_nbr = fields.Integer('Interval Value', required=True, default=1)
     interval_type = fields.Selection(
         _interval_units, 'Interval Unit', required=True, default="days")
@@ -371,13 +371,13 @@ class lead_automation_transition(models.Model):
         return relativedelta(**{str(self.interval_type): self.interval_nbr})
 
 
-class lead_automation_workitem(models.Model):
-    _name = "lead.automation.workitem"
+class marketing_campaign_workitem(models.Model):
+    _name = "marketing.campaign.workitem"
 
     segment_id = fields.Many2one(
-        'lead.automation.segment', 'Segment', readonly=False)
+        'marketing.campaign.segment', 'Segment', readonly=False)
     activity_id = fields.Many2one(
-        'lead.automation.activity', 'Activity', required=True, readonly=False)
+        'marketing.campaign.activity', 'Activity', required=True, readonly=False)
     campaign_id = fields.Many2one(
         related='activity_id.campaign_id', string='Campaign', readonly=False, store=True)
     object_id = fields.Many2one(
