@@ -188,10 +188,15 @@ class account_bank_statement_import(osv.TransientModel):
         vals_acc = {
             'acc_number': account_number,
             'state': bank_code,
-            'partner_id': uid,
-            'journal_id': journal_id,
-            'company_id': self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.id
         }
+        # Odoo users bank accounts (which we import statement from) have company_id and journal_id set
+        # while 'counterpart' bank accounts (from which statement transactions originate) don't.
+        # Warning : if company_id is set, the method post_write of class bank will create a journal
+        if journal_id:
+            vals_acc['partner_id'] = uid
+            vals_acc['journal_id'] = journal_id
+            vals_acc['company_id'] = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.id
+
         return self.pool.get('res.partner.bank').create(cr, uid, vals_acc, context=context)
 
     def _complete_stmts_vals(self, cr, uid, stmts_vals, journal_id, account_number, context=None):
