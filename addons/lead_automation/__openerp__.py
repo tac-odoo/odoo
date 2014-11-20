@@ -58,7 +58,7 @@ input segments, workflow.
 
     # always loaded
     'data': [
-            # 'security/ir.model.access.csv',
+             'security/ir.model.access.csv',
                 'templates.xml', 'view.xml', 'view_campaign.xml', 'view_segment.xml', 'view_activity.xml', 'view_workitem.xml', 'data.xml', 'workflow.xml','report/campaign_analysis_view.xml'
     ],
     # only loaded in demonstration mode
