@@ -18,7 +18,6 @@
             $('#email_body').addClass('oe_dirty');
             $('#email_body_html').addClass('oe_dirty');
 
-            openerp.website.editor_bar.edit();
             ev.preventDefault();
         });
     });

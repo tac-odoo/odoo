@@ -26,14 +26,14 @@
                             <div class="email_preview js_content"/>
                         </div>
                         <h4>New Template</h4>
-                        <button class="btn btn-primary js_template_set">Select</button>
+                        <button class="btn btn-primary js_template_set" data-action="edit">Select</button>
                     </div>
                     <div t-foreach="templates" t-as="template" class="col-md-3 col-sm-4 text-center">
                         <div class="email_preview_border">
                             <div t-raw="html_sanitize(template.body_html)" class="email_preview js_content"/>
                         </div>
                         <h4 t-field="template.name"/>
-                        <button class="btn btn-primary js_template_set">Select</button>
+                        <button class="btn btn-primary js_template_set" data-action="edit">Select</button>
                     </div>
                 </div>
             </div>
