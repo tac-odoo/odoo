@@ -182,7 +182,7 @@ class hr_holidays(osv.osv):
         'payslip_status': fields.boolean(string='Payslip Status',
             help='Check this field when the leave has been taken into account in the payslip.'),
         'report_note': fields.text('HR Comments'),
-        'user_id':fields.related('employee_id', 'user_id', type='many2one', relation='res.users', string='User', store=True),
+        'user_id':fields.related('employee_id', 'user_id', type='many2one', relation='res.users', string='User', store=True, track_visibility="onchange"),
         'date_from': fields.datetime('Start Date', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}, select=True, copy=False),
         'date_to': fields.datetime('End Date', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}, copy=False),
         'holiday_status_id': fields.many2one("hr.holidays.status", "Leave Type", required=True,readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}),
@@ -263,9 +263,13 @@ class hr_holidays(osv.osv):
 
     def onchange_employee(self, cr, uid, ids, employee_id):
         result = {'value': {'department_id': False}}
+        user_id = False
         if employee_id:
             employee = self.pool.get('hr.employee').browse(cr, uid, employee_id)
+            user_id = employee.user_id.id
             result['value'] = {'department_id': employee.department_id.id}
+        if user_id:
+            result['value'].update({'user_id': user_id})
         return result
 
     # TODO: can be improved using resource calendar method

@@ -71,7 +71,7 @@ class hr_expense_expense(osv.osv):
         'journal_id': fields.many2one('account.journal', 'Force Journal', help = "The journal used when the expense is done."),
         'employee_payable_account_id': fields.many2one('account.account', 'Employee Account', help="Employee payable account"),
         'employee_id': fields.many2one('hr.employee', "Employee", required=True, readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}),
-        'user_id': fields.many2one('res.users', 'User', required=True),
+        'user_id': fields.many2one('res.users', 'User', required=True, track_visibility="onchange"),
         'date_confirm': fields.date('Confirmation Date', select=True, copy=False,
                                     help="Date of the confirmation of the sheet expense. It's filled when the button Confirm is pressed."),
         'date_valid': fields.date('Validation Date', select=True, copy=False,
@@ -129,13 +129,18 @@ class hr_expense_expense(osv.osv):
         department_id = False
         employee_payable_account_id = False
         company_id = False
+        user_id = False
         if employee_id:
             employee = emp_obj.browse(cr, uid, employee_id, context=context)
             department_id = employee.department_id.id
             company_id = employee.company_id.id
+            user_id = employee.user_id.id
             if employee.address_home_id and employee.address_home_id.property_account_payable:
                 employee_payable_account_id = employee.address_home_id.property_account_payable.id
-        return {'value': {'department_id': department_id, 'company_id': company_id, 'employee_payable_account_id': employee_payable_account_id}}
+        values = {'value': {'department_id': department_id, 'company_id': company_id, 'employee_payable_account_id': employee_payable_account_id}}
+        if user_id:
+            values.update({'user_id': user_id})
+        return {'value': values}
 
     def expense_confirm(self, cr, uid, ids, context=None):
         for expense in self.browse(cr, uid, ids):
