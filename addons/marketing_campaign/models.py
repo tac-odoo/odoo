@@ -497,8 +497,6 @@ class marketing_campaign_workitem(models.Model):
 
     @api.multi
     def preview(self):
-        import pudb
-        pudb.set_trace()
         if self.activity_id.type == 'email':
             view_id = self.env['ir.model.data'].get_object_reference('email_template', 'email_template_preview_form')
             res = {
