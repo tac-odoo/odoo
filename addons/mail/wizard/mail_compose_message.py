@@ -32,6 +32,7 @@ from openerp.tools.translate import _
 # main mako-like expression pattern
 EXPRESSION_PATTERN = re.compile('(\$\{.+?\})')
 
+
 def _reopen(self, res_id, model):
     return {'type': 'ir.actions.act_window',
             'view_mode': 'form',
@@ -484,50 +485,6 @@ class mail_compose_message(osv.TransientModel):
 
         return template_values
 
-    def render_template_batch(self, cr, uid, template, model, res_ids, context=None, post_process=False):
-        """ Render the given template text, replace mako-like expressions ``${expr}``
-        with the result of evaluating these expressions with an evaluation context
-        containing:
-
-            * ``user``: browse_record of the current user
-            * ``object``: browse_record of the document record this mail is
-                          related to
-            * ``context``: the context passed to the mail composition wizard
-
-        :param str template: the template text to render
-        :param str model: model name of the document record this mail is related to
-        :param list res_ids: list of record ids
-        """
-        if context is None:
-            context = {}
-        results = dict.fromkeys(res_ids, False)
-
-        for res_id in res_ids:
-            def merge(match):
-                exp = str(match.group()[2:-1]).strip()
-                result = eval(exp, {
-                    'user': self.pool.get('res.users').browse(cr, uid, uid, context=context),
-                    'object': self.pool[model].browse(cr, uid, res_id, context=context),
-                    'context': dict(context),  # copy context to prevent side-effects of eval
-                })
-                return result and tools.ustr(result) or ''
-            results[res_id] = template and EXPRESSION_PATTERN.sub(merge, template)
-        return results
-
-    # Compatibility methods
-    def render_template(self, cr, uid, template, model, res_id, context=None):
-        return self.render_template_batch(cr, uid, template, model, [res_id], context)[res_id]
-
-    def render_template_batch(self, cr, uid, template, model, res_ids, context=None, post_process=False):
-        return self.pool.get('mail.template').render_template_batch(cr, uid, template, model, res_ids, context=context, post_process=post_process)
-
-    def render_message(self, cr, uid, wizard, res_id, context=None):
-        return self.render_message_batch(cr, uid, wizard, [res_id], context)[res_id]
-
-    def generate_email_for_composer(self, cr, uid, template_id, res_id, context=None):
-        return self.generate_email_for_composer_batch(cr, uid, template_id, [res_id], context)[res_id]
-
-
     #------------------------------------------------------
     # Wizard validation and send
     #------------------------------------------------------
@@ -549,3 +506,16 @@ class mail_compose_message(osv.TransientModel):
             res_id_values['body'] = res_id_values.pop('body_html', '')
             values[res_id] = res_id_values
         return values
+
+    def render_template_batch(self, cr, uid, template, model, res_ids, context=None, post_process=False):
+        return self.pool.get('mail.template').render_template_batch(cr, uid, template, model, res_ids, context=context, post_process=post_process)
+
+    # Compatibility methods
+    def render_template(self, cr, uid, template, model, res_id, context=None):
+        return self.render_template_batch(cr, uid, template, model, [res_id], context)[res_id]
+
+    def render_message(self, cr, uid, wizard, res_id, context=None):
+        return self.render_message_batch(cr, uid, wizard, [res_id], context)[res_id]
+
+    def generate_email_for_composer(self, cr, uid, template_id, res_id, context=None):
+        return self.generate_email_for_composer_batch(cr, uid, template_id, [res_id], context)[res_id]
