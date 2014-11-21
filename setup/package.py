@@ -373,36 +373,36 @@ def main():
     try:
         if not o.no_tarball:
             build_tgz(o)
-            if not o.no_testing:
-                try:
+            try:
+                if not o.no_testing:
                     test_tgz(o)
-                    publish(o, 'openerp.tar.gz')
-                except Exception, e:
-                    print("Won't publish the tgz release.\n Exception: %s" % str(e))
+                publish(o, 'odoo.tar.gz')
+            except Exception, e:
+                print("Won't publish the tgz release.\n Exception: %s" % str(e))
         if not o.no_debian:
             build_deb(o)
-            if not o.no_testing:
-                try:
+            try:
+                if not o.no_testing:
                     test_deb(o)
-                    publish(o, ['openerp.deb', 'openerp.dsc', 'openerp_amd64.changes', 'openerp.deb.tar.gz'])
-                except Exception, e:
-                    print("Won't publish the deb release.\n Exception: %s" % str(e))
+                publish(o, ['odoo.deb', 'odoo.dsc', 'odoo_amd64.changes', 'odoo.deb.tar.gz'])
+            except Exception, e:
+                print("Won't publish the deb release.\n Exception: %s" % str(e))
         if not o.no_rpm:
             build_rpm(o)
-            if not o.no_testing:
-                try:
+            try:
+                if not o.no_testing:
                     test_rpm(o)
-                    publish(o, ['openerp.noarch.rpm', 'openerp.src.rpm'])
-                except Exception, e:
-                    print("Won't publish the rpm release.\n Exception: %s" % str(e))
+                publish(o, ['odoo.noarch.rpm', 'odoo.src.rpm'])
+            except Exception, e:
+                print("Won't publish the rpm release.\n Exception: %s" % str(e))
         if not o.no_windows:
             build_exe(o)
-            if not o.no_testing:
-                try:
+            try:
+                if not o.no_testing:
                     test_exe(o)
-                    publish(o, 'openerp.exe')
-                except Exception, e:
-                    print("Won't publish the exe release.\n Exception: %s" % str(e))
+                publish(o, 'odoo.exe')
+            except Exception, e:
+                print("Won't publish the exe release.\n Exception: %s" % str(e))
     except:
         pass
     finally:
