@@ -218,48 +218,50 @@ class marketing_campaign_segment(models.Model):
         for segment in segments:
             segment.process_segment()
 
+    @api.multi
     def process_segment(self):
-        Workitems = self.env['marketing.campaign.workitem']
-        Campaigns = self.env['marketing.campaign.campaign']
-        if self.state != 'running' and self.campaign_id.state != 'running':
-            return False
+        for segment in self:
+            Workitems = segment.env['marketing.campaign.workitem']
+            Campaigns = segment.env['marketing.campaign.campaign']
+            if segment.state != 'running' and segment.campaign_id.state != 'running':
+                return False
 
-        action_date = time.strftime(DT_FMT)
-        activities = self.env['marketing.campaign.activity'].search(
-            [('start', '=', True), ('campaign_id', '=', self.campaign_id.id)])
-        obj_model = self.object_id.model
-        criteria = []
-        if self.sync_last_date and self.sync_mode != 'all':
-            criteria += [(self.sync_mode, '>', self.sync_last_date)]
-        if self.ir_filter_id:
-            criteria += eval(self.ir_filter_id.domain)
-        objects = self.env[obj_model].search(criteria)
-        # XXX TODO: rewrite this loop more efficiently without doing 1 search
-        # per record!
-        for record in objects:
-            # avoid duplicate workitem for the same resource
-            if self.sync_mode in ('write_date','all'):
-                if self.campaign_id._find_duplicate_workitems(record):
-              		    continue
+            action_date = time.strftime(DT_FMT)
+            activities = self.env['marketing.campaign.activity'].search(
+                [('start', '=', True), ('campaign_id', '=', segment.campaign_id.id)])
+            obj_model = segment.object_id.model
+            criteria = []
+            if segment.sync_last_date and segment.sync_mode != 'all':
+                criteria += [(segment.sync_mode, '>', segment.sync_last_date)]
+            if segment.ir_filter_id:
+                criteria += eval(segment.ir_filter_id.domain)
+            objects = self.env[obj_model].search(criteria)
+            # XXX TODO: rewrite this loop more efficiently without doing 1 search
+            # per record!
+            for record in objects:
+                # avoid duplicate workitem for the same resource
+                if segment.sync_mode in ('write_date','all'):
+                    if segment.campaign_id._find_duplicate_workitems(record):
+                        continue
 
-            wi_vals = {
-                'segment_id': self.id,
-                'date': action_date,
-                'state': 'todo',
-                'res_id': record.id
-            }
-            partner = self.campaign_id._get_partner_for(record)
-            if partner:
-                wi_vals['partner_id'] = partner.id
-            for activity in activities:
-                wi_vals['activity_id'] = activity.id
-                Workitems.create(wi_vals)
+                wi_vals = {
+                    'segment_id': segment.id,
+                    'date': action_date,
+                    'state': 'todo',
+                    'res_id': record.id
+                }
+                partner = segment.campaign_id._get_partner_for(record)
+                if partner:
+                    wi_vals['partner_id'] = partner.id
+                for activity in activities:
+                    wi_vals['activity_id'] = activity.id
+                    Workitems.create(wi_vals)
 
-        self.sync_last_date = action_date
-        workitems = self.env['marketing.campaign.workitem'].search([('segment_id', '=', self.id)])
-        for workitem in workitems:
-            workitem.process_workitem()
-        return True
+            segment.sync_last_date = action_date
+            workitems = self.env['marketing.campaign.workitem'].search([('segment_id', '=', segment.id)])
+            for workitem in workitems:
+                workitem.process_workitem()
+            return True
 
 
 class marketing_campaign_activity(models.Model):
@@ -499,7 +501,7 @@ class marketing_campaign_workitem(models.Model):
             self.state = 'exception'
             self.error_msg = Exception.message
 
-    @api.one
+    @api.multi
     def preview(self):
         if self.activity_id.type == 'email':
             view_id = self.env['ir.model.data'].get_object_reference('email_template', 'email_template_preview_form')
