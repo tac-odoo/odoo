@@ -65,7 +65,6 @@ Main Features
         'res_users_view.xml',
         'views/mail.xml',
         'wizard/email_template_preview_view.xml',
-        'wizard/mt_mail_compose_message_view.xml',
         'views/email_template_view.xml',
         'views/ir_actions_view.xml',
         'views/res_partner_view.xml'
