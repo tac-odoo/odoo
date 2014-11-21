@@ -88,7 +88,6 @@ class marketing_campaign_campaign(models.Model):
                                                  ('campaign_id','=', self.id)]
         return Workitems.search(duplicate_workitem_domain)
 
-    @api.one
     def _count_segments(self):
         self.segments_count = len(self.segment_ids)
 
@@ -135,7 +134,6 @@ class marketing_campaign_campaign(models.Model):
 
     # prevent duplication until the server properly duplicates several levels
     # of nested o2m
-    @api.one
     def copy(self, default=None):
         raise exceptions.ValidationError(
             "You cannot duplicate a campaign, Not supported yet.")
@@ -185,13 +183,11 @@ class marketing_campaign_segment(models.Model):
         self.date_next_sync = fields.Datetime.from_string(segment_cron.nextcall)
 
     @api.constrains('ir_filter_id', 'campaign_id')
-    @api.one
     def check_object_model(self):
         if self.ir_filter_id:
             if self.object_id.model != self.ir_filter_id.model_id:
                 raise exceptions.ValidationError(
                     "Model of filter must be same as resource model of Campaign.")
-
     @api.one
     def action_draft(self):
         self.state = 'draft'
@@ -216,7 +212,12 @@ class marketing_campaign_segment(models.Model):
         workitems.write(wi_vals)
         self.state = 'cancelled'
 
-    @api.one
+    @api.model
+    def process_all_segments(self):
+        segments = self.env['marketing.campaign.segment'].search([])
+        for segment in segments:
+            segment.process_segment()
+
     def process_segment(self):
         Workitems = self.env['marketing.campaign.workitem']
         Campaigns = self.env['marketing.campaign.campaign']
@@ -256,7 +257,8 @@ class marketing_campaign_segment(models.Model):
 
         self.sync_last_date = action_date
         workitems = self.env['marketing.campaign.workitem'].search([('segment_id', '=', self.id)])
-        workitems.process_workitem()
+        for workitem in workitems:
+            workitem.process_workitem()
         return True
 
 
@@ -316,7 +318,6 @@ class marketing_campaign_activity(models.Model):
     keep_if_condition_not_met = fields.Boolean(
         "Don't Delete Workitems", help="By activating this option, workitems that aren't executed because the condition is not met are marked as cancelled instead of being deleted.")
 
-    @api.one
     def process_activity(self, workitem):
         # method = '_process_wi_%s' % (self.type)
         # action = getattr(self, method, None)
@@ -354,7 +355,6 @@ class marketing_campaign_transition(models.Model):
                                'Trigger', required=True, default='time',
                                help="How is the destination workitem triggered")
 
-    @api.one
     def _get_name(self):
         # name formatters that depends on trigger
         formatters = {
@@ -364,7 +364,6 @@ class marketing_campaign_transition(models.Model):
         }
         self.name = formatters[self.trigger]
 
-    @api.one
     def _delta(self):
         if self.trigger != 'time':
             raise ValidationError('Delta is only relevant for timed transition.')
@@ -400,7 +399,6 @@ class marketing_campaign_workitem(models.Model):
     def _res_name_get(self):
         self.res_name = self.env[self.object_id.model].browse(self.res_id).name
 
-    @api.one
     def _resource_search(self):
         self.res_name = self.res_id.model
 
@@ -413,6 +411,12 @@ class marketing_campaign_workitem(models.Model):
     def action_cancel(self):
         if self.state in ['exception', 'todo']:
             self.state = cancelled
+
+    @api.model
+    def process_all_workitems(self):
+        workitems = self.env['marketing.campaign.workitem'].search([])
+        for workitem in workitems:
+            workitem.process_workitem()
 
     @api.one
     def process_workitem(self):
@@ -461,7 +465,7 @@ class marketing_campaign_workitem(models.Model):
                         launch_date = date
                     elif transition.trigger == 'time':
                         temp = transition._delta()
-                        launch_date = date + temp[0]
+                        launch_date = date + temp
 
                     if launch_date:
                         launch_date = launch_date.strftime(DT_FMT)
@@ -495,7 +499,7 @@ class marketing_campaign_workitem(models.Model):
             self.state = 'exception'
             self.error_msg = Exception.message
 
-    @api.multi
+    @api.one
     def preview(self):
         if self.activity_id.type == 'email':
             view_id = self.env['ir.model.data'].get_object_reference('email_template', 'email_template_preview_form')
