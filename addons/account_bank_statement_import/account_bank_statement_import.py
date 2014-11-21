@@ -224,9 +224,6 @@ class account_bank_statement_import(osv.TransientModel):
                     line_vals['partner_id'] = partner_id
                     line_vals['bank_account_id'] = bank_account_id
 
-                # Remove values that won't be used to create() records
-                line_vals.pop('account_number', None)
-
         return stmts_vals
 
     def _create_bank_statements(self, cr, uid, stmts_vals, context=None):
@@ -247,6 +244,11 @@ class account_bank_statement_import(osv.TransientModel):
                 else:
                     ignored_statement_lines_import_ids.append(line_vals['unique_import_id'])
             if len(filtered_st_lines) > 0:
+                # Remove values that won't be used to create records 
+                st_vals.pop('transactions', None)
+                for line_vals in filtered_st_lines:
+                    line_vals.pop('account_number', None)
+                # Create the satement
                 st_vals['line_ids'] = [[0, False, line] for line in filtered_st_lines]
                 statement_ids.append(bs_obj.create(cr, uid, st_vals, context=context))
         if len(statement_ids) == 0:
