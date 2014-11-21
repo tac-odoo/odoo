@@ -63,18 +63,20 @@
                     var el;
                     var $el;
                     var $nextEls = $(e.target).parent().parent().nextAll();
+                    var isLoaded = false;
                     for (el in $nextEls) {
                         $el = $($nextEls[el]).find("td span.level");
                         if ($el.html() == undefined)
                             break;
                         if ($el.html().length > level){
                             $el.parent().parent().show();
+                            isLoaded = true;
                         }
                         else {
                             break;
                         }
                     }
-                    if ($nextEls.length == 0) {
+                    if (!isLoaded) {
                         var report_id = window.$("div.page").attr("class").split(/\s+/)[2];
                         var $cursor = $(e.target).parent().parent();
                         var reportObj = new openerp.Model('report.account.report_financial');
@@ -90,9 +92,7 @@
                             });
                         });
                     }
-                    else{
-                        $(e.target).replaceWith('<span class="foldable">&gt;</span>');
-                    }
+                    $(e.target).replaceWith('<span class="foldable">&gt;</span>');
                 });
             },
             saveFootNote: function(e) {
@@ -103,14 +103,14 @@
             },
             displayMoveLines: function(e) {
                 var active_id = $(e.target).attr("class").split(/\s+/)[1];
-                var model = openerp.Model('ir.model.data');
+                var model = new openerp.Model('ir.model.data');
                 model.call('get_object_reference', ['account', 'action_move_line_select']).then(function (result) {
                     window.open("/web?#page=0&limit=80&view_type=list&model=account.move.line&action=" + result[1] + "&active_id=" + active_id, "_self");
                 });
             },
             displayUnreconciled: function(e) {
                 var active_id = $(e.target).attr("class").split(/\s+/)[1];
-                var model = openerp.Model('ir.model.data');
+                var model = new openerp.Model('ir.model.data');
                 model.call('get_object_reference', ['account', 'act_account_acount_move_line_open_unreconciled']).then(function (result) {
                     window.open("/web?#page=0&limit=80&view_type=list&model=account.move.line&action=" + result[1] + "&active_id=" + active_id, "_self");
                 });

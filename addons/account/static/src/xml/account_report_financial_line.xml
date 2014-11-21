@@ -13,27 +13,25 @@
                 <t t-if="a.type == 'line' and !a.show">
                     <span t-att-class="'unfoldable '+a.id">^</span>
                 </t>
-                <span class="level" style="color: white;">
-                    <t t-esc="Array(a.level + 1).join('..')" />
-                </span>
+                <span class="level" style="color: white;"><t t-esc="Array(a.level + 1).join('..')" /></span>
                 <t t-if="a.id and a.action and a.action !== 'unclickable'">
-                    <span t-att-style="style" t-att-class="a.action + ' ' + a.id" t-esc="a.name"/>
+                    <span t-att-style="style" t-att-class="a.action + ' ' + a.id"><t t-esc="a.name"/></span>
                 </t>
                 <t t-if="!a.id or !a.action or a.action == 'unclickable'">
-                    <span t-att-style="style" t-esc="a.name"/>
+                    <span t-att-style="style"><t t-esc="a.name"/></span>
                 </t>
             </td>
             <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
-                <span class="annotable" t-att-style="style" t-esc="a.debit"/>
+                <span class="annotable" t-att-style="style"><t t-esc="a.debit"/></span>
             </td>
             <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
-                <span class="annotable" t-att-style="style" t-esc="a.credit"/>
+                <span class="annotable" t-att-style="style"><t t-esc="a.credit"/></span>
             </td>
             <td class="text-right" style="white-space: nowrap;" t-if="o.balance">
-                <span class="annotable" t-att-style="style" t-esc="a.balance"/>
+                <span class="annotable" t-att-style="style"><t t-esc="a.balance"/></span>
             </td>
             <td class="text-right" style="white-space: nowrap;" t-if="o.comparison">
-                <span class="annotable" t-att-style="style" t-esc="a.balance_cmp"/>
+                <span class="annotable" t-att-style="style"><t t-esc="a.balance_cmp"/></span>
             </td>
         </tr>
     </t>
