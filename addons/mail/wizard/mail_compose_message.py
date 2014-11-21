@@ -242,15 +242,14 @@ class mail_compose_message(osv.TransientModel):
             if wizard.template_id:
                 context['mail_notify_user_signature'] = False  # template user_signature is added when generating body_html
                 context['mail_auto_delete'] = wizard.template_id.auto_delete  # mass mailing: use template auto_delete value -> note, for emails mass mailing only
-            if not wizard.attachment_ids or wizard.composition_mode == 'mass_mail' or not wizard.template_id:
-                continue
-            new_attachment_ids = []
-            for attachment in wizard.attachment_ids:
-                if attachment in wizard.template_id.attachment_ids:
-                    new_attachment_ids.append(self.pool.get('ir.attachment').copy(cr, uid, attachment.id, {'res_model': 'mail.compose.message', 'res_id': wizard.id}, context=context))
-                else:
-                    new_attachment_ids.append(attachment.id)
-                self.write(cr, uid, wizard.id, {'attachment_ids': [(6, 0, new_attachment_ids)]}, context=context)
+            if wizard.attachment_ids and wizard.composition_mode != 'mass_mail' and wizard.template_id:
+                new_attachment_ids = []
+                for attachment in wizard.attachment_ids:
+                    if attachment in wizard.template_id.attachment_ids:
+                        new_attachment_ids.append(self.pool.get('ir.attachment').copy(cr, uid, attachment.id, {'res_model': 'mail.compose.message', 'res_id': wizard.id}, context=context))
+                    else:
+                        new_attachment_ids.append(attachment.id)
+                    self.write(cr, uid, wizard.id, {'attachment_ids': [(6, 0, new_attachment_ids)]}, context=context)
 
             # Mass Mailing
             mass_mode = wizard.composition_mode in ('mass_mail', 'mass_post')
