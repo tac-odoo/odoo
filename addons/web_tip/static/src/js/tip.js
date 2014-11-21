@@ -6,6 +6,7 @@
         init: function() {
             var self = this;
             self.tips = [];
+            self.current_tip = null;
             self.tip_mutex = new $.Mutex();
             self.$overlay = null;
             self.$element = null;
@@ -217,16 +218,10 @@
                     content: tip.description,
                     html: true,
                     container: 'body',
-                }).popover("show");
+                })
 
-                var $cross = $('<button type="button" class="close">&times;</button>');
-                $cross.addClass('oe_tip_close');
-
-                if (tip.title) {
-                    $('.popover-title').prepend($cross);
-                } else {
-                    $('.popover-content').prepend($cross);
-                }
+                self.current_tip = tip;
+                self._show_popover();
 
                 // consume tip
                 tip.end_selector = tip.end_selector ? tip.end_selector : tip.highlight_selector;
@@ -236,10 +231,6 @@
                 });
 
                 // dismiss tip
-                $cross.on('click', function($ev) {
-                    self.end_tip(tip);
-                    def.resolve();
-                });
                 self.$overlay.on('click', function($ev) {
                     self.end_tip(tip);
                     def.resolve();
@@ -272,6 +263,7 @@
                 $(el).removeClass('oe_tip_fix_parent');
             });
             $(document).off('keyup.web_tip');
+            self.current_tip = null;
             Tips.call('consume', [tip.id], {});
             tip.is_consumed = true;
         },
@@ -280,7 +272,7 @@
             var self = this;
             if (self.tip_mutex.def.state() === 'pending') {
                 self._set_helper_position();
-                self.$element.popover('show');
+                self._show_popover();
             }
         },
 
@@ -293,6 +285,22 @@
             this.$helper.offset({top: _top , left: _left});
             this.$helper.width(_width);
             this.$helper.height(_height);
+        },
+
+        _show_popover: function() {
+            var self = this;
+            self.$element.popover('show');
+            var $cross = $('<button type="button" class="close">&times;</button>');
+            $cross.addClass('oe_tip_close');
+            if (self.current_tip.title) {
+                $('.popover-title').prepend($cross);
+            } else {
+                $('.popover-content').prepend($cross);
+            }
+            $cross.on('click', function() {
+                self.end_tip(self.current_tip);
+                self.tip_mutex.def.resolve();
+            });
         }
     });
 
