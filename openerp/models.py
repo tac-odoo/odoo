@@ -2122,6 +2122,7 @@ class BaseModel(object):
                 raise except_orm(_('Invalid group_by'),
                                  _('Invalid group_by specification: "%s".\nA group_by specification must be a list of valid fields.')%(gb,))
 
+
         aggregated_fields = [
             f for f in fields
             if f not in ('id', 'sequence')

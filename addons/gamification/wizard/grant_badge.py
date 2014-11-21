@@ -19,37 +19,38 @@
 #
 ##############################################################################
 
-from openerp.osv import fields, osv
-from openerp.tools.translate import _
+from openerp import api, models, fields, _
+from openerp.exceptions import except_orm, Warning
 
-
-class grant_badge_wizard(osv.TransientModel):
+class grant_badge_wizard(models.TransientModel):
     """ Wizard allowing to grant a badge to a user"""
 
     _name = 'gamification.badge.user.wizard'
-    _columns = {
-        'user_id': fields.many2one("res.users", string='User', required=True),
-        'badge_id': fields.many2one("gamification.badge", string='Badge', required=True),
-        'comment': fields.text('Comment'),
-    }
 
-    def action_grant_badge(self, cr, uid, ids, context=None):
+    user_id = fields.Many2one("res.users", string='User', required=True)
+    badge_id = fields.Many2one("gamification.badge", string='Badge', required=True)
+    comment = fields.Text('Comment')
+
+    @api.multi
+    def action_grant_badge(self):
         """Wizard action for sending a badge to a chosen user"""
 
-        badge_user_obj = self.pool.get('gamification.badge.user')
+        badge_user_obj = self.env['gamification.badge.user']
 
-        for wiz in self.browse(cr, uid, ids, context=context):
-            if uid == wiz.user_id.id:
-                raise osv.except_osv(_('Warning!'), _('You can not grant a badge to yourself'))
-
+        for wiz in self:
+            if self._uid == wiz.user_id.id:
+                raise except_orm(
+                                _('Warning!'), 
+                                _('You can not grant a badge to yourself')
+                                )
             #create the badge
             values = {
                 'user_id': wiz.user_id.id,
-                'sender_id': uid,
+                'sender_id': self._uid,
                 'badge_id': wiz.badge_id.id,
                 'comment': wiz.comment,
             }
-            badge_user = badge_user_obj.create(cr, uid, values, context=context)
-            result = badge_user_obj._send_badge(cr, uid, badge_user, context=context)
-
+            badge_user_rec = badge_user_obj.create(values)
+            result = badge_user_rec._send_badge()
+            print"--------result : ",result
         return result
