@@ -68,7 +68,8 @@ class sale_order_line(osv.osv):
                 lambda self:
                 self.event_id == so_line.event_id and
                 self.origin == so_line.order_id.name and
-                self.event_ticket_id == so_line.event_ticket_id)
+                self.event_ticket_id == so_line.event_ticket_id and
+                self.state == 'draft')
             if confirm:
                 existing_registrations.confirm_registration()
             else:

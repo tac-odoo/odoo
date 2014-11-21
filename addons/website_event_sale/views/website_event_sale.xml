@@ -86,5 +86,24 @@
     </xpath>
 </template>
 
+<template id="no_order_line" inherit_id="website_sale.payment">
+    <xpath expr="//div[@id='payment_method']//form" position="attributes">
+        <attribute name='t-if'>website_sale_order.website_order_line</attribute>
+    </xpath>
+    <xpath expr="//div[@id='payment_method']//form" position="after">
+        <form target="_self" t-if='not website_sale_order.website_order_line and order.amount_total == 0' action="/shop" method="post">
+            <a style="width:175px;" class="btn btn-primary a-submit">
+                <span class="fa fa-long-arrow-left"> Continue Shopping</span>
+            </a>
+        </form>
+    </xpath>
+    <xpath expr="//div[@id='wrap']//form" position="before">
+        <div class="mb64 alert alert-danger alert-dismissible" t-if='not website_sale_order.website_order_line' role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+            Sorry, the tickets you were looking were sold out.
+        </div>
+    </xpath>
+</template>
+
 </data>
 </openerp>

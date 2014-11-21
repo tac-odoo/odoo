@@ -16,14 +16,14 @@ class SaleOrderEventRegistration(models.TransientModel):
             sale_order_id = res.get('sale_order_id', self._context.get('active_id'))
             res['sale_order_id'] = sale_order_id
         sale_order = self.env['sale.order'].browse(res.get('sale_order_id'))
-        # TDE FIXME: check that self.mapped effectively works
         registrations = self.env['event.registration'].search([
             ('origin', '=', sale_order.name),
-            ('event_ticket_id', 'in', self.mapped('order_line.event_ticket_id').ids)])
+            ('event_ticket_id', 'in', sale_order.mapped('order_line.event_ticket_id').ids),
+            ('state', '=', 'open')])
 
         attendee_list = []
-        for so_line in [l for l in sale_order.order_line if l.event_id]:
-            existing_registrations = [r for r in registrations if r.event_id == so_line.event_id]
+        for so_line in [l for l in sale_order.order_line if l.event_ticket_id]:
+            existing_registrations = [r for r in registrations if r.event_ticket_id == so_line.event_ticket_id]
             for reg in existing_registrations:
                 attendee_list.append({
                     'event_id': reg.event_id.id,

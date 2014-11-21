@@ -66,17 +66,20 @@ class sale_order(osv.Model):
         # case: buying tickets for a sold out ticket
         values = {}
         if ticket and ticket.seats_available <= 0:
-            values['warning'] = _('Sorry, ticket %(ticket)s of event %(event)s is sold out') % {
+            values['warning'] = _('Sorry, The %(ticket)s tickets for the %(event)s event are sold out.') % {
                 'ticket': ticket.name,
-                'event': ticket.event.name}
+                'event': ticket.event_id.name}
             new_qty, set_qty, add_qty = 0, 0, 0
         # case: buying tickets, too much attendees
         elif ticket and new_qty > ticket.seats_available:
-            values['warning'] = _('Sorry, only %(remaining_seats)d seats are still available for the ticket %(ticket)s of event %(event)s') % {
+            values['warning'] = _('Sorry, only %(remaining_seats)d seats are still available for the %(ticket)s ticket for the %(event)s event.') % {
                 'remaining_seats': ticket.seats_available,
                 'ticket': ticket.name,
-                'event': ticket.event.name}
+                'event': ticket.event_id.name}
             new_qty, set_qty, add_qty = ticket.seats_available, ticket.seats_available, 0
+
+        if line_id and ticket and ticket.seats_available == 0:
+            OrderLine.write(cr, uid, line_id, {'product_uom_qty': ticket.seats_available}, context=context)
 
         values.update(super(sale_order, self)._cart_update(
             cr, uid, ids, product_id, line_id, add_qty, set_qty, context, **kwargs))
@@ -97,3 +100,22 @@ class sale_order(osv.Model):
             line = OrderLine.browse(cr, uid, values['line_id'], context=context)
             line._update_registrations(confirm=False, registration_data=kwargs.get('registration_data', []))
         return values
+
+
+class sale_order_line(osv.osv):
+    _inherit = 'sale.order.line'
+
+    def unlink(self, cr, uid, ids, context=None):
+        reg_obj = self.pool.get('event.registration')
+        so_line = self.browse(cr, uid, ids, context=context)
+        registrations = reg_obj.search(cr, uid, [('origin', 'in', list(set([so.name for line in so_line for so in line.order_id if line.event_id])))], context=context)
+        for registration in reg_obj.browse(cr, uid, registrations, context=context):
+            for so_line in [l for l in so_line if l.event_id]:
+                existing_registrations = registration.filtered(
+                    lambda self:
+                    self.event_id == so_line.event_id and
+                    self.origin == so_line.order_id.name and
+                    self.event_ticket_id == so_line.event_ticket_id and
+                    self.state == 'draft')
+                existing_registrations.filtered(lambda self: self.state == 'draft').button_reg_cancel()
+        return super(sale_order_line, self).unlink(cr, uid, ids, context=context)
