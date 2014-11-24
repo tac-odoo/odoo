@@ -10,4 +10,11 @@ openerp.mass_mailing = function (instance) {
             }
         },
     });
+
+    openerp.web_kanban.KanbanView.include({
+        on_groups_started: function() {
+            this._super.apply(this, arguments);
+            this.$el.find('.oe_kanban_draghandle').removeClass('oe_kanban_draghandle');
+        },
+    });
 };

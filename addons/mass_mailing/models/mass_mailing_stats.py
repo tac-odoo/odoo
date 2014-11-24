@@ -38,6 +38,8 @@ class MailMailStats(osv.Model):
         res = dict([(stat, False) for stat in stat_ids])
 
         for stat in stats:
+            if stat.exception:
+                res[stat.id] = 'Exception'
             if stat.sent:
                 res[stat.id] = 'Sent'
             if stat.opened:
@@ -80,7 +82,7 @@ class MailMailStats(osv.Model):
         'replied': fields.datetime('Replied', help='Date when this email has been replied for the first time.'),
         'bounced': fields.datetime('Bounced', help='Date when this email has bounced.'),
         'state': fields.function(_compute_state, string='State', type="char",
-                                 store={'mail.mail.statistics': (lambda self, cr, uid, ids, context=None: ids, ['sent', 'opened', 'replied', 'bounced'], 10)}),
+                                 store={'mail.mail.statistics': (lambda self, cr, uid, ids, context=None: ids, ['exception', 'sent', 'opened', 'replied', 'bounced'], 10)}),
     }
 
     _defaults = {

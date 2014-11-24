@@ -225,7 +225,7 @@ class mail_compose_message(osv.TransientModel):
     # Wizard validation and send
     #------------------------------------------------------
 
-    def send_mail(self, cr, uid, ids, context=None):
+    def send_mail(self, cr, uid, ids, auto_commit=False, context=None):
         """ Process the wizard content and proceed with sending the related
             email(s), rendering any template patterns on the fly if needed. """
         context = dict(context or {})
@@ -285,7 +285,7 @@ class mail_compose_message(osv.TransientModel):
                         active_model_pool.message_post(cr, uid, [res_id], type='comment', subtype=subtype, context=context, **mail_values)
 
                 if wizard.composition_mode == 'mass_mail':
-                    self.pool['mail.mail'].send(cr, uid, batch_mail_mail_ids, auto_commit=True, context=context)
+                    self.pool['mail.mail'].send(cr, uid, batch_mail_mail_ids, auto_commit=auto_commit, context=context)
 
         return {'type': 'ir.actions.act_window_close'}
 

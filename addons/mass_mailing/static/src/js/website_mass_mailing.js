@@ -57,4 +57,26 @@
             });
         },
     });
+
+    $("#all_mailing_lists").change(function() {
+      var $input = $( this );
+        if($input.is( ":checked" ) ) {
+            $('.mail_list_checkbox').prop('checked', true);
+        }
+        else {
+            $('.mail_list_checkbox').prop('checked', false);
+        }
+    });
+
+    $(".mail_list_checkbox").change(function() {
+        var all = $(".mail_list_checkbox");
+        var checked = $('input[class="mail_list_checkbox"]:checked');
+
+        if(checked.length < all.length) {
+            $("#all_mailing_lists").prop('checked', false);
+        }
+        else {
+            $("#all_mailing_lists").prop('checked', true);
+        }
+    });
 })();
