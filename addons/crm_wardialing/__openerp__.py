@@ -28,6 +28,7 @@
         'views/crm_wardialing.xml',
         'views/phonecall.xml',
         'views/opportunities.xml',
+        'views/crm_wardialing_tip.xml',
         'views/res_config_view.xml',
         'views/res_users_view.xml',
         'templates.xml',

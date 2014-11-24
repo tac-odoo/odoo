@@ -10676,6 +10676,9 @@ MediaHandler.prototype = Object.create(SIP.MediaHandler.prototype, {
     this.emit('setDescription', rawDescription);
 
     var description = new SIP.WebRTC.RTCSessionDescription(rawDescription);
+    console.log("DESCRIPTION");
+    console.log(description);
+    console.log(description.sdp);
     this.peerConnection.setRemoteDescription(description, onSuccess, onFailure);
   }},
 

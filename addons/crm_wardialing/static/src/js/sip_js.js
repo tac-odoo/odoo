@@ -8,6 +8,11 @@ openerp.sip_js = function(instance) {
 	var in_automatic_mode;
 	var phonecalls_ids;
 	var phonecalls;
+	var onCall = false;
+	var always_transfert;
+	var physical_phone;
+	var ring_number;
+	var timer;
 
 	this.init = function() {
 		var self = this;
@@ -22,12 +27,15 @@ openerp.sip_js = function(instance) {
 					authorizationUser: result.login,
 					password: result.password,
 					hackIpInContact: true,
-					log: {level: "debug"},
+					log: {level: "error"},
 					traceSip: true,
 				};
+				always_transfert = result.always_transfert;
+				physical_phone = result.physical_phone;
+				ring_number = result.ring_number;
+
 			}else{
-				//TODO handle the error
-				return;
+				//new openerp.web.Model("crm.phonecall").call("error_config");
 			}
 
 			ua = new SIP.UA(ua_config);
@@ -86,11 +94,16 @@ openerp.sip_js = function(instance) {
 				session.on('accepted',function(result){
 					console.log("ACCEPTED");
 					console.log(result);
+					console.log(this.remoteIdentity.toString());
 					onCall = true;
+					clearTimeout(timer);
 					new openerp.web.Model("crm.phonecall").call("init_call", [current_phonecall.id]);
 					ringbacktone = document.getElementById("ringbacktone");
 					ringbacktone.pause();
 					$('.oe_dial_transferbutton').removeAttr('disabled');
+					if(always_transfert){
+						session.refer(physical_phone);
+					}
 				});
 				session.on('progress', function (response) {
 					console.log("PROGRESS");console.log(response);
@@ -99,11 +112,18 @@ openerp.sip_js = function(instance) {
 						ringbacktone.play();
 						$('.oe_dial_big_callbutton').html("Calling...");
 						$('.oe_dial_hangupbutton').removeAttr('disabled');
+						timer = setTimeout(function(){
+							console.log("TIMER FUNCTION");
+							var phonecall_model = new openerp.web.Model("crm.phonecall");
+							phonecall_model.call("rejected_call",[current_phonecall.id]);
+							session.cancel();
+						},4000*ring_number);
 					}
 				});
 				session.on('rejected',function(){
 					console.log("REJECTED");
 					session = false;
+					clearTimeout(timer);
 					var phonecall_model = new openerp.web.Model("crm.phonecall");
 					phonecall_model.call("rejected_call",[current_phonecall.id]);
 					ringbacktone = document.getElementById("ringbacktone");
@@ -120,6 +140,7 @@ openerp.sip_js = function(instance) {
 				session.on('cancel',function(){
 					console.log("CANCEL");
 					session = false;
+					clearTimeout(timer);
 					ringbacktone = document.getElementById("ringbacktone");
 					ringbacktone.pause();
 					//TODO if the sale cancel one call, continue the automatic call or not ? 
@@ -319,7 +340,6 @@ openerp.sip_js = function(instance) {
 	}
 
 	this.hangup = function(){
-		console.log(onCall);
 		if(session){
 			if(onCall){
 				session.bye();

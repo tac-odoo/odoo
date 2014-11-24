@@ -380,7 +380,6 @@ openerp.crm_wardialing = function(instance) {
 
         //action done when the button "Transfer" is clicked
         transfer_button: function(){
-            //TODO Add a test to see if in call or not. Add transfer option (which extension, external phone...)
             //this.sip_js.transfer();
 
             //Launch the transfer wizard

@@ -28,7 +28,8 @@ class tip(models.Model):
     @api.one
     @api.depends('user_ids')
     def _is_consumed(self):
-        self.is_consumed = self.env.user in self.user_ids
+        #self.is_consumed = self.env.user in self.user_ids
+        self.is_consumed = False
 
     title = fields.Char('Tip title')
     description = fields.Html('Tip Description', required=True)

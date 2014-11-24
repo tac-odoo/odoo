@@ -13,6 +13,8 @@
                                 <field name="sip_login" class="oe_inline"/>
                                 <field name="sip_password" class="oe_inline" password="True"/>
                                 <field name="sip_physicalPhone" class="oe_inline"/>
+                                <field name="sip_always_transfert" class="oe_inline"/>
+                                <field name="sip_ring_number" class="oe_inline"/>
                             </group>
                         </group>
                 </data>

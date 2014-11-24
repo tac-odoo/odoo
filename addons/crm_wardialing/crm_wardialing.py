@@ -78,7 +78,9 @@ class crm_phonecall(models.Model):
                 'wsServer': self.env['ir.config_parameter'].get_param('crm.wardialing.wsServer'),
                 'login': self.env.user[0].sip_login,
                 'password': self.env.user[0].sip_password,
-                'physicalPhone': self.env.user[0].sip_physicalPhone}
+                'physical_phone': self.env.user[0].sip_physicalPhone,
+                'always_transfert': self.env.user[0].sip_always_transfert,
+                'ring_number': self.env.user[0].sip_ring_number}
 
     @api.model
     def error_config(self):
@@ -202,11 +204,13 @@ class crm_phonecall_transfer_wizard(models.TransientModel):
                 'params': {'number': self.transfer_number},
             }
         else:
-            action = {
-                'type': 'ir.actions.client',
-                'tag': 'transfer_call',
-                'params': {'number': self.env.user[0].sip_physicalPhone},
-            }
+            if self.env.user[0].sip_physicalPhone:
+                action = {
+                    'type': 'ir.actions.client',
+                    'tag': 'transfer_call',
+                    'params': {'number': self.env.user[0].sip_physicalPhone},
+                }
+            # TODO error message if no physical phone ? or do nothing? Weird to have error message during another call
         return action
 
 
@@ -216,3 +220,5 @@ class res_users(models.Model):
     sip_login = fields.Char("SIP Login / Browser's Extension")
     sip_password = fields.Char('SIP Password')
     sip_physicalPhone = fields.Char("Physical Phone's Number")
+    sip_always_transfert = fields.Boolean("Always redirect to physical phone", default=False)
+    sip_ring_number = fields.Integer("Number of rings", default=6)

@@ -54,7 +54,7 @@
     visibility: hidden;
 }
 
-.oe_dial_kanban_icon{
+.oe_dial_stack_icon{
     width: 20% ;
     left: 13px;
     bottom: 3px;
@@ -225,7 +225,6 @@
 }
 .oe_dial_phonecall_name {
     width: 162px;
-    padding-right: 15px;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;

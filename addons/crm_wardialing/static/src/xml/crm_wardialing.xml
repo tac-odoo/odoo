@@ -23,17 +23,21 @@
                     <span class="oe_dial_phonecall_name"><t t-esc="widget.get('partner')"/></span>
                     <span class="pull-right">
                         <t t-if="widget.get('state') == 'done'">
-                            <i class="fa fa-check oe_dial_state_icon" style="color:green"></i>
+                            <i class="fa fa-check oe_dial_state_icon text-muted"></i>
                         </t>
                         <t t-if="widget.get('state') == 'no_answer'">
-                            <i class="fa fa-exclamation-triangle oe_dial_state_icon" style="color:LightCoral"></i>
+                            <!-- <i class="fa fa-exclamation-triangle oe_dial_state_icon" style="color:LightCoral"></i> -->
+                            <i class="fa fa-stack oe_dial_state_icon" style="width:13px; height:15px;line-height: 13px;">
+                                <i class="fa fa-phone fa-stack-1x oe_dial_state_icon text-muted"></i>
+                                <i class="fa fa-times fa-stack-1x oe_dial_state_icon" style="color: LightCoral;font-size: 8px;left: 4px;position: relative;bottom: 4px;"></i>
+                            </i>
                         </t>
                         <a href="#">
                             <t t-if="widget.get('state') == 'done'">
-                                <i title="Remove from the queue" class="oe_dial_remove_phonecall fa fa-times"></i>
+                                <i title="Remove from the queue" class="text-muted oe_dial_remove_phonecall fa fa-times"></i>
                             </t>
                             <t t-if="widget.get('state') != 'done'">
-                                <i title="Cancel the call" class="oe_dial_remove_phonecall fa fa-times"></i>
+                                <i title="Cancel the call" class="text-muted oe_dial_remove_phonecall fa fa-times"></i>
                             </t>
                         </a>
                     </span><br/>
