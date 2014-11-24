@@ -268,6 +268,18 @@ class sale_order(osv.osv):
     ]
     _order = 'date_order desc, id desc'
 
+    def write(self, cr, uid, ids, vals, context=None):
+        if context is None: context = {}
+        fpos_obj = self.pool.get('account.fiscal.position')
+        res = super(sale_order, self).write(cr, uid, ids, vals, context=context)
+        if vals.get('fiscal_position', False):
+            fpos = vals['fiscal_position'] and fpos_obj.browse(cr, uid, vals['fiscal_position']) or False
+            order = self.browse(cr, uid, ids, context=context)
+            for line in order[0].order_line:
+                if line.product_id:
+                    line.write({'tax_id':[(6, 0, list(fpos_obj.map_tax(cr, uid, fpos, line.tax_id, context=context)))]})
+        return res
+
     # Form filling
     def unlink(self, cr, uid, ids, context=None):
         sale_orders = self.read(cr, uid, ids, ['state'], context=context)
