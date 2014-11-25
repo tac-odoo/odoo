@@ -32,6 +32,7 @@ import account_financial_report
 import product
 import company
 import res_config
+import controllers
 
 import wizard
 import report

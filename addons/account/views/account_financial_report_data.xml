@@ -6,71 +6,51 @@
         -->
         <record id="account_financial_report_profitandloss_line0" model="account.financial.report.line">
             <field name="name">Profit and Loss</field>
-            <field name="type">sum</field>
-            <field name="sign" eval="-1" />
+            <field name="formulas">balance = INC.balance + EXP.balance</field>
         </record>
         <record id="account_financial_report_income0" model="account.financial.report.line">
             <field name="name">Income</field>
-            <field name="sign" eval="-1" />
+            <field name="code">INC</field>
+            <field name="formulas">balance = -sum</field>
             <field name="parent_id" ref="account_financial_report_profitandloss_line0"/>
-            <field name="display_detail">accounts</field>
-            <field name="type">types</field>
-            <field name="action">move_lines</field>
+            <field name="domain" eval="[('account_id.user_type.report_type', '=', 'income')]" />
         </record>
         <record id="account_financial_report_expense0" model="account.financial.report.line">
             <field name="name">Expense</field>
-            <field name="sign" eval="-1" />
+            <field name="code">EXP</field>
+            <field name="formulas">balance = -sum</field>
             <field name="parent_id" ref="account_financial_report_profitandloss_line0"/>
-            <field name="display_detail">accounts</field>
-            <field name="type">types</field>
-            <field name="action">move_lines</field>
+            <field name="domain" eval="[('account_id.user_type.report_type', '=', 'expense')]" />
         </record>
 
         <record id="account_financial_report_balancesheet_line0" model="account.financial.report.line">
             <field name="name">Balance Sheet</field>
-            <field name="type">sum</field>
+            <field name="formulas">balance = ASS.balance + LIA.balance</field>
         </record>
         <record id="account_financial_report_assets0" model="account.financial.report.line">
             <field name="name">Assets</field>
+            <field name="code">ASS</field>
             <field name="parent_id" ref="account_financial_report_balancesheet_line0"/>
-            <field name="display_detail">accounts</field>
-            <field name="type">types</field>
-            <field name="action">move_lines</field>
-        </record>
-        <record id="account_financial_report_liabilitysum0" model="account.financial.report.line">
-            <field name="name">Liability</field>
-            <field name="parent_id" ref="account_financial_report_balancesheet_line0"/>
-            <field name="display_detail">no_detail</field>
-            <field name="type">sum</field>
+            <field name="domain" eval="[('account_id.user_type.report_type', '=', 'assets')]" />
+            <field name="formulas">balance = sum</field>
         </record>
         <record id="account_financial_report_liability0" model="account.financial.report.line">
             <field name="name">Liability</field>
-            <field name="parent_id" ref="account_financial_report_liabilitysum0"/>
-            <field name="display_detail">accounts</field>
-            <field name="type">types</field>
-            <field name="action">move_lines</field>
+            <field name="code">LIA</field>
+            <field name="parent_id" ref="account_financial_report_balancesheet_line0"/>
+            <field name="domain" eval="[('account_id.user_type.report_type', '=', 'liability')]" />
+            <field name="formulas">balance = sum</field>
         </record>
         <!-- 
             Financial Reports
         -->
-        <record id="account_financial_report_profitandloss0" model="report.account.report_financial">
+        <record id="account_financial_report_profitandloss0" model="account.financial.report">
             <field name="name">Profit and Loss</field>
-            <field name="title">Profit and Loss</field>
-            <field name="target_move">all</field>
             <field name="balance" eval="True"/>
             <field name="line" ref="account_financial_report_profitandloss_line0"/>
         </record>
-        <record id="account_financial_report_profitandloss0" model="report.account.report_financial">
-            <field name="name">Profit and Loss</field>
-            <field name="title">Profit and Loss</field>
-            <field name="target_move">all</field>
-            <field name="balance" eval="True"/>
-            <field name="line" ref="account_financial_report_profitandloss_line0"/>
-        </record>
-        <record id="account_financial_report_balancesheet0" model="report.account.report_financial">
+        <record id="account_financial_report_balancesheet0" model="account.financial.report">
             <field name="name">Balance Sheet</field>
-            <field name="title">Balance Sheet</field>
-            <field name="target_move">all</field>
             <field name="balance" eval="True"/>
             <field name="line" ref="account_financial_report_balancesheet_line0"/>
         </record>

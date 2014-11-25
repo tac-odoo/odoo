@@ -79,10 +79,10 @@
                     if (!isLoaded) {
                         var report_id = window.$("div.page").attr("class").split(/\s+/)[2];
                         var $cursor = $(e.target).parent().parent();
-                        var reportObj = new openerp.Model('report.account.report_financial');
+                        var reportObj = new openerp.Model('account.financial.report');
                         reportObj.query(['debit_credit', 'balance', 'comparison'])
                         .filter([['id', '=', report_id]]).first().then(function (report) {
-                            reportLineObj.call('get_lines_from_js', [[parseInt(active_id)], parseInt(report_id)])
+                            reportLineObj.call('get_lines', [[parseInt(active_id)], parseInt(report_id)])
                             .then(function (lines) {
                                 var line;
                                 for (line in lines) {
