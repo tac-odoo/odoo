@@ -110,12 +110,14 @@ class crm_lead2opportunity_partner(osv.osv_memory):
             context = {}
         lead = self.pool.get('crm.lead')
         res = False
+        partner_id = False
         lead_ids = vals.get('lead_ids', [])
         team_id = vals.get('team_id', False)
         data = self.browse(cr, uid, ids, context=context)[0]
         leads = lead.browse(cr, uid, lead_ids, context=context)
         for lead_id in leads:
-            partner_id = self._create_partner(cr, uid, lead_id.id, data.action, lead_id.partner_id.id, context=context)
+            if data.action != 'nothing':
+                partner_id = self._create_partner(cr, uid, lead_id.id, data.action, data.partner_id.id, context=context)
             res = lead.convert_opportunity(cr, uid, [lead_id.id], partner_id, [], False, context=context)
         user_ids = vals.get('user_ids', False)
         if context.get('no_force_assignation'):
