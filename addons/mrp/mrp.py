@@ -330,46 +330,37 @@ class mrp_bom(osv.osv):
             factor = bom.product_rounding
         result = []
         result2 = []
-        phantom = False
         if bom.type == 'phantom' and not bom.bom_lines:
-            newbom = self._bom_find(cr, uid, bom.product_id.id, bom.product_uom.id, properties)
-
-            if newbom:
-                res = self._bom_explode(cr, uid, self.browse(cr, uid, [newbom])[0], factor*bom.product_qty, properties, addthis=True, level=level+10)
-                result = result + res[0]
-                result2 = result2 + res[1]
-                phantom = True
-            else:
-                phantom = False
-        if not phantom:
-            if addthis and not bom.bom_lines:
-                result.append(
-                {
-                    'name': bom.product_id.name,
-                    'product_id': bom.product_id.id,
-                    'product_qty': bom.product_qty * factor,
-                    'product_uom': bom.product_uom.id,
-                    'product_uos_qty': bom.product_uos and bom.product_uos_qty * factor or False,
-                    'product_uos': bom.product_uos and bom.product_uos.id or False,
+            raise osv.except_osv(_('Warning!'), _("Cannot find component(s) in the BoM related to the product '%s' which is set as 'Sets / Phantom'." % bom.product_id.name))
+        addthis = True
+        if addthis and not bom.bom_lines:
+            result.append(
+            {
+                'name': bom.product_id.name,
+                'product_id': bom.product_id.id,
+                'product_qty': bom.product_qty * factor,
+                'product_uom': bom.product_uom.id,
+                'product_uos_qty': bom.product_uos and bom.product_uos_qty * factor or False,
+                'product_uos': bom.product_uos and bom.product_uos.id or False,
+            })
+        routing = (routing_id and routing_obj.browse(cr, uid, routing_id)) or bom.routing_id or False
+        if routing:
+            for wc_use in routing.workcenter_lines:
+                wc = wc_use.workcenter_id
+                d, m = divmod(factor, wc_use.workcenter_id.capacity_per_cycle)
+                mult = (d + (m and 1.0 or 0.0))
+                cycle = mult * wc_use.cycle_nbr
+                result2.append({
+                    'name': tools.ustr(wc_use.name) + ' - '  + tools.ustr(bom.product_id.name),
+                    'workcenter_id': wc.id,
+                    'sequence': level+(wc_use.sequence or 0),
+                    'cycle': cycle,
+                    'hour': float(wc_use.hour_nbr*mult + ((wc.time_start or 0.0)+(wc.time_stop or 0.0)+cycle*(wc.time_cycle or 0.0)) * (wc.time_efficiency or 1.0)),
                 })
-            routing = (routing_id and routing_obj.browse(cr, uid, routing_id)) or bom.routing_id or False
-            if routing:
-                for wc_use in routing.workcenter_lines:
-                    wc = wc_use.workcenter_id
-                    d, m = divmod(factor, wc_use.workcenter_id.capacity_per_cycle)
-                    mult = (d + (m and 1.0 or 0.0))
-                    cycle = mult * wc_use.cycle_nbr
-                    result2.append({
-                        'name': tools.ustr(wc_use.name) + ' - '  + tools.ustr(bom.product_id.name),
-                        'workcenter_id': wc.id,
-                        'sequence': level+(wc_use.sequence or 0),
-                        'cycle': cycle,
-                        'hour': float(wc_use.hour_nbr*mult + ((wc.time_start or 0.0)+(wc.time_stop or 0.0)+cycle*(wc.time_cycle or 0.0)) * (wc.time_efficiency or 1.0)),
-                    })
-            for bom2 in bom.bom_lines:
-                res = self._bom_explode(cr, uid, bom2, factor, properties, addthis=True, level=level+10)
-                result = result + res[0]
-                result2 = result2 + res[1]
+        for bom2 in bom.bom_lines:
+            res = self._bom_explode(cr, uid, bom2, factor, properties, addthis=True, level=level+10)
+            result = result + res[0]
+            result2 = result2 + res[1]
         return result, result2
 
     def copy_data(self, cr, uid, id, default=None, context=None):
