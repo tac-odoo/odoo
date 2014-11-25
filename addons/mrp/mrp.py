@@ -332,7 +332,6 @@ class mrp_bom(osv.osv):
         result2 = []
         if bom.type == 'phantom' and not bom.bom_lines:
             raise osv.except_osv(_('Warning!'), _("Cannot find component(s) in the BoM related to the product '%s' which is set as 'Sets / Phantom'." % bom.product_id.name))
-        addthis = True
         if addthis and not bom.bom_lines:
             result.append(
             {
