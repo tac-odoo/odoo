@@ -206,7 +206,7 @@ openerp_mailgate: "|/path/to/openerp-mailgate.py --host=localhost -u %(uid)d -p 
                                                                  strip_attachments=(not server.attach),
                                                                  context=context)
                         except Exception:
-                            _logger.exception('Failed to process mail from %s server %s.', server.type, server.name)
+                            _logger.warning('Failed to process mail from %s server %s.', server.type, server.name)
                             failed += 1
                         if res_id and server.action_id:
                             action_pool.run(cr, uid, [server.action_id.id], {'active_id': res_id, 'active_ids': [res_id], 'active_model': context.get("thread_model", server.object_id.model)})
