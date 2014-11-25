@@ -93,7 +93,7 @@
                         <page string="Description">
                             <field name="description" placeholder="Add an internal note..." groups="base.group_user"/>
                         </page>
-                        <page string="Extra Info" groups="project.group_project_manager,project.group_project_user">
+                        <page string="Extra Info" name="extra_info" groups="project.group_project_manager,project.group_project_user">
                             <group>
                                 <group>
                                     <field name="id"/>

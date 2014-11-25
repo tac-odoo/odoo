@@ -196,7 +196,8 @@ class project_issue(osv.Model):
     def _can_escalate(self, cr, uid, ids, field_name, arg, context=None):
         res = {}
         for issue in self.browse(cr, uid, ids, context=context):
-            if issue.project_id.project_escalation_id.analytic_account_id.type == 'contract':
+            esc_proj = issue.project_id.project_escalation_id
+            if esc_proj and esc_proj.analytic_account_id.type == 'contract':
                 res[issue.id] = True
         return res
 

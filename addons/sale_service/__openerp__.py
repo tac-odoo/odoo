@@ -21,7 +21,7 @@
 
 
 {
-    'name': 'Create Tasks form SO',
+    'name': 'Create Tasks from SO',
     'version': '1.0',
     'category': 'Project Management',
     'description': """
