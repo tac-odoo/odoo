@@ -325,25 +325,27 @@ def test_deb(o):
         wheezy.system('su openerp -s /bin/bash -c "openerp-server -c /etc/openerp/openerp-server.conf -d mycompany &"')
 
 def test_rpm(o):
-    with docker('centos:centos6', o.build_dir, o.pub) as centos6:
-        centos6.release = 'openerp.noarch.rpm'
-        centos6.system('rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm')
-        centos6.system('yum -y -d 0 -e 0 update -y && yum -y -d 0 -e 0 upgrade -y')
-        centos6.system('yum -y -d 0 -e 0 install python-pip gcc python-devel -y')
-        centos6.system('pip install xlwt http://download.gna.org/pychart/PyChart-1.39.tar.gz')
-        centos6.system('yum -y -d 0 -e 0 install postgresql postgresql-server postgresql-libs postgresql-contrib postgresql-devel -y')
-        centos6.system('mkdir -p /var/lib/postgres/data')
-        centos6.system('chown -R postgres:postgres /var/lib/postgres/data')
-        centos6.system('chmod 0700 /var/lib/postgres/data')
-        centos6.system('su postgres -c "initdb -D /var/lib/postgres/data -E UTF-8"')
-        centos6.system('cp /usr/share/pgsql/postgresql.conf.sample /var/lib/postgres/data/postgresql.conf')
-        centos6.system('su postgres -c "/usr/bin/pg_ctl -D /var/lib/postgres/data start"')
-        centos6.system('sleep 5')
-        centos6.system('su postgres -c "createdb mycompany"')
-        centos6.system('export PYTHONPATH=${PYTHONPATH}:/usr/local/lib/python2.6/dist-packages')
-        centos6.system('yum -y -d 0 -e 0 install /opt/release/%s -y' % centos6.release)
-        centos6.system('su openerp -s /bin/bash -c "openerp-server -c /etc/openerp/openerp-server.conf -d mycompany -i base --stop-after-init"')
-        centos6.system('su openerp -s /bin/bash -c "openerp-server -c /etc/openerp/openerp-server.conf -d mycompany &"')
+    with docker('centos:centos7', o.build_dir, o.pub) as centos7:
+        centos7.release = 'odoo.noarch.rpm'
+        # Dependencies
+        centos7.system('yum install -d 0 -e 0 epel-release -y')
+        centos7.system('yum update -d 0 -e 0 -y')
+        centos7.system('yum install -d 0 -e 0 python-pip gcc python-devel -y')
+        centos7.system('pip install pydot pyPdf vatnumber xlwt http://download.gna.org/pychart/PyChart-1.39.tar.gz')
+        # Manual install/start of postgres
+        centos7.system('yum install -d 0 -e 0 postgresql postgresql-server postgresql-libs postgresql-contrib postgresql-devel -y')
+        centos7.system('mkdir -p /var/lib/postgres/data')
+        centos7.system('chown -R postgres:postgres /var/lib/postgres/data')
+        centos7.system('chmod 0700 /var/lib/postgres/data')
+        centos7.system('su postgres -c "initdb -D /var/lib/postgres/data -E UTF-8"')
+        centos7.system('cp /usr/share/pgsql/postgresql.conf.sample /var/lib/postgres/data/postgresql.conf')
+        centos7.system('su postgres -c "/usr/bin/pg_ctl -D /var/lib/postgres/data start"')
+        centos7.system('sleep 5')
+        centos7.system('su postgres -c "createdb mycompany"')
+        # Odoo install
+        centos7.system('yum install -d 0 -e 0 /opt/release/%s -y' % centos7.release)
+        centos7.system('su odoo -s /bin/bash -c "openerp-server -c /etc/odoo/openerp-server.conf -d mycompany -i base --stop-after-init"')
+        centos7.system('su odoo -s /bin/bash -c "openerp-server -c /etc/odoo/openerp-server.conf -d mycompany &"')
 
 def test_exe(o):
     KVMWinTestExe(o, o.vm_winxp_image, o.vm_winxp_ssh_key, o.vm_winxp_login).start()
