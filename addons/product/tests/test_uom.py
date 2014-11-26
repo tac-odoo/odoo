@@ -15,10 +15,10 @@ class TestUom(TransactionCase):
         tonne_id = self.imd.get_object_reference(cr, uid, 'product', 'product_uom_ton')[1]
 
         qty = self.uom._compute_qty(cr, uid, gram_id, 1020000, tonne_id)
-        self.assertEquals(qty, 1.02, "Converted quantity does not correspond.")
+        self.assertAlmostEqual(qty, 1.02, "Converted quantity does not correspond.")
 
         price = self.uom._compute_price(cr, uid, gram_id, 2, tonne_id)
-        self.assertEquals(price, 2000000.0, "Converted price does not correspond.")
+        self.assertAlmostEqual(price, 2000000.0, "Converted price does not correspond.")
 
     def test_20_rounding(self):
         cr, uid = self.cr, self.uid

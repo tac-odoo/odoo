@@ -46,11 +46,11 @@ class TestPricelist(TransactionCase):
 
         usb_adapter_without_pricelist = self.product_product.browse(cr, uid, self.usb_adapter_id, context=public_context)
         usb_adapter_with_pricelist = self.product_product.browse(cr, uid, self.usb_adapter_id, context=pricelist_context)
-        self.assertEqual(usb_adapter_with_pricelist.price, usb_adapter_without_pricelist.price*0.9)
+        self.assertAlmostEqual(usb_adapter_with_pricelist.price, usb_adapter_without_pricelist.price*0.9)
 
         datacard_without_pricelist = self.product_product.browse(cr, uid, self.datacard_id, context=public_context)
         datacard_with_pricelist = self.product_product.browse(cr, uid, self.datacard_id, context=pricelist_context)
-        self.assertEqual(datacard_with_pricelist.price, datacard_without_pricelist.price-0.5)
+        self.assertAlmostEqual(datacard_with_pricelist.price, datacard_without_pricelist.price-0.5)
 
         # Make sure that changing the unit of measure does not break the unit
         # price (after converting)

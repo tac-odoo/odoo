@@ -25,8 +25,8 @@ class TestTax(TransactionCase):
         res = self.tax_model.compute_all(cr, uid, tax_records, 50.0, 2)
 
         tax_detail = res['taxes'][0]
-        self.assertEquals(tax_detail['amount'], 24.0)
-        self.assertEquals(res['total_included'], 124.0)
+        self.assertAlmostEqual(tax_detail['amount'], 24.0)
+        self.assertAlmostEqual(res['total_included'], 124.0)
 
     def test_percent_tax(self):
         """Test computations done by a 10 percent tax."""
@@ -41,9 +41,9 @@ class TestTax(TransactionCase):
         res = self.tax_model.compute_all(cr, uid, tax_records, 50.0, 2)
 
         tax_detail = res['taxes'][0]
-        self.assertEquals(tax_detail['amount'], 10.0)
-        self.assertEquals(res['total_included'], 110.0)
+        self.assertAlmostEqual(tax_detail['amount'], 10.0)
+        self.assertAlmostEqual(res['total_included'], 110.0)
 
         # now the inverse computation
         res = self.tax_model.compute_inv(cr, uid, tax_records, 55.0, 2)
-        self.assertEquals(res[0]['amount'], 10.0)
+        self.assertAlmostEqual(res[0]['amount'], 10.0)

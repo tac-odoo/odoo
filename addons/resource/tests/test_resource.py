@@ -195,7 +195,7 @@ class TestResource(TestResourceCommon):
         self.assertEqual(intervals[0][1], datetime.strptime('2013-02-12 16:00:00', _format), 'resource_calendar: wrong working interval / day computing')
         # Test: hour computation for same interval, should give 5.5
         wh = self.resource_calendar.get_working_hours_of_date(cr, uid, self.calendar_id, start_dt=self.date1.replace(hour=10, minute=30, second=0))
-        self.assertEqual(wh, 5.5, 'resource_calendar: wrong working interval / day time computing')
+        self.assertAlmostEqual(wh, 5.5, 'resource_calendar: wrong working interval / day time computing')
 
         # Test: day1+7 on leave, without leave computation
         intervals = self.resource_calendar.get_working_intervals_of_day(
@@ -290,7 +290,7 @@ class TestResource(TestResourceCommon):
         td = timedelta()
         for item in res:
             td += item[1] - item[0]
-        self.assertEqual(seconds(td) / 3600.0, 40.0, 'resource_calendar: wrong hours scheduling')
+        self.assertAlmostEqual(seconds(td) / 3600.0, 40.0, 'resource_calendar: wrong hours scheduling')
 
         # --------------------------------------------------
         # Test2: schedule hours forward (old interval_get)
@@ -326,7 +326,7 @@ class TestResource(TestResourceCommon):
         td = timedelta()
         for item in res:
             td += item[1] - item[0]
-        self.assertEqual(seconds(td) / 3600.0, 40.0, 'resource_calendar: wrong hours scheduling')
+        self.assertAlmostEqual(seconds(td) / 3600.0, 40.0, 'resource_calendar: wrong hours scheduling')
 
         # res = self.resource_calendar.interval_get(cr, uid, self.calendar_id, self.date1, 40, resource=self.resource1_id, byday=True)
         #   (datetime.datetime(2013, 2, 12, 9, 0), datetime.datetime(2013, 2, 12, 16, 0))
@@ -364,7 +364,7 @@ class TestResource(TestResourceCommon):
         td = timedelta()
         for item in res:
             td += item[1] - item[0]
-        self.assertEqual(seconds(td) / 3600.0, 40.0, 'resource_calendar: wrong hours scheduling')
+        self.assertAlmostEqual(seconds(td) / 3600.0, 40.0, 'resource_calendar: wrong hours scheduling')
 
         # --------------------------------------------------
         # Test3: working hours (old _interval_hours_get)
@@ -377,7 +377,7 @@ class TestResource(TestResourceCommon):
             self.date1.replace(hour=6, minute=0),
             self.date2.replace(hour=23, minute=0) + relativedelta(days=7),
             resource_id=self.resource1_id, exclude_leaves=True)
-        self.assertEqual(res, 40.0, 'resource_calendar: wrong _interval_hours_get compatibility computation')
+        self.assertAlmostEqual(res, 40.0, 'resource_calendar: wrong _interval_hours_get compatibility computation')
 
         # new API: resource without leaves
         # res: 2 weeks -> 40 hours
@@ -386,7 +386,7 @@ class TestResource(TestResourceCommon):
             self.date1.replace(hour=6, minute=0),
             self.date2.replace(hour=23, minute=0) + relativedelta(days=7),
             compute_leaves=False, resource_id=self.resource1_id)
-        self.assertEqual(res, 40.0, 'resource_calendar: wrong get_working_hours computation')
+        self.assertAlmostEqual(res, 40.0, 'resource_calendar: wrong get_working_hours computation')
 
         # old API: resource and leaves
         # res: 2 weeks -> 40 hours - (3+4) leave hours
@@ -395,7 +395,7 @@ class TestResource(TestResourceCommon):
             self.date1.replace(hour=6, minute=0),
             self.date2.replace(hour=23, minute=0) + relativedelta(days=7),
             resource_id=self.resource1_id, exclude_leaves=False)
-        self.assertEqual(res, 33.0, 'resource_calendar: wrong _interval_hours_get compatibility computation')
+        self.assertAlmostEqual(res, 33.0, 'resource_calendar: wrong _interval_hours_get compatibility computation')
 
         # new API: resource and leaves
         # res: 2 weeks -> 40 hours - (3+4) leave hours
@@ -404,7 +404,7 @@ class TestResource(TestResourceCommon):
             self.date1.replace(hour=6, minute=0),
             self.date2.replace(hour=23, minute=0) + relativedelta(days=7),
             compute_leaves=True, resource_id=self.resource1_id)
-        self.assertEqual(res, 33.0, 'resource_calendar: wrong get_working_hours computation')
+        self.assertAlmostEqual(res, 33.0, 'resource_calendar: wrong get_working_hours computation')
 
         # --------------------------------------------------
         # Test4: misc
@@ -417,7 +417,7 @@ class TestResource(TestResourceCommon):
             self.date2.replace(hour=23, minute=0),
             compute_leaves=True, resource_id=self.resource1_id,
             default_interval=(8, 16))
-        self.assertEqual(res, 32.0, 'resource_calendar: wrong get_working_hours computation')
+        self.assertAlmostEqual(res, 32.0, 'resource_calendar: wrong get_working_hours computation')
 
     def test_50_calendar_schedule_days(self):
         """ Testing calendar days scheduling """
