@@ -56,14 +56,18 @@
                                 <field name="name"/>
                             </h1>
                         </div>
-                        <group col="4">
-                            <field name="employee_id" on_change="1" string="Sender"/>
-                            <field name="user_id" string="Repair Responsible"/>
-                            <field name="material_id"  on_change="1" context="{'default_category_id':category_id}"/>
-                            <field name="priority" widget="priority"/>
-                            <field name="category_id" groups="base.group_hr_manager" on_change="1"/>
-                            <field name="request_date" groups="base.group_no_one"/>
-                            <field name="close_date" groups="base.group_no_one"/>
+                        <group>
+                            <group>
+                                <field name="employee_id" on_change="1" string="Sender"/>
+                                <field name="material_id"  on_change="1" context="{'default_category_id':category_id}"/>
+                                <field name="category_id" groups="base.group_hr_manager" on_change="1"/>
+                                <field name="request_date" groups="base.group_no_one"/>
+                                <field name="close_date" groups="base.group_no_one"/>
+                            </group>
+                            <group>
+                                <field name="user_id" string="Repair Responsible"/>
+                                <field name="priority" widget="priority"/>
+                            </group>
                         </group>
                         <field name='description' placeholder="Internal Note ......."/>
                     </sheet>

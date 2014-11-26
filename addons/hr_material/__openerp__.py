@@ -3,10 +3,9 @@
     'version': '1.0',
     'description': """
         Track material's employees and manage material allocation """,
-    'author': 'OpenERP SA',
+    'author': 'Odoo S.A.',
     'depends': ['hr'],
     'demo': ['data/hr_material_demo.xml'],
-    'test': [],
     'data': [
         'security/ir.model.access.csv',
         'security/ir_rule.xml',
