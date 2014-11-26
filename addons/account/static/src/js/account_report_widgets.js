@@ -24,10 +24,8 @@
             addFootNote: function(e) {
                 e.preventDefault();
                 if ($(e.target).find("sup").length == 0) {
-                    $(e.target).append(' <sup>' + this.footNoteSeqNum + '</sup>');
-                    this.$("table").after('<div class="row mt32 mb32"><label for="footnote' + 
-                        this.footNoteSeqNum + '">' + this.footNoteSeqNum + '</label><textarea name="footnote' + this.footNoteSeqNum + 
-                        '" rows=4 class="form-control">Insert foot note here</textarea><button class="btn btn-primary saveFootNote">Save</button></div>');
+                    $(e.target).append(openerp.qweb.render("supFootNoteSeqNum", {footNoteSeqNum: this.footNoteSeqNum}));
+                    this.$("table").after(openerp.qweb.render("footNoteTextarea", {footNoteSeqNum: this.footNoteSeqNum}));
                     this.footNoteSeqNum++;
                 }
             },
@@ -93,14 +91,14 @@
                             });
                         });
                     }
-                    $(e.target).replaceWith('<span class="foldable">&gt;</span>');
+                    $(e.target).replaceWith(openerp.qweb.render("foldable"));
                 });
             },
             saveFootNote: function(e) {
                 e.preventDefault();
                 var num = $(e.target).parent().find("label").text();
                 var note = $(e.target).parent().find("textarea").val();
-                $(e.target).parent().replaceWith('<div class="row mt32 mb32">' + num + '. ' + note + '</div>');
+                $(e.target).parent().replaceWith(openerp.qweb.render("savedFootNote", {num: num, note: note}));
             },
             displayMoveLines: function(e) {
                 var active_id = $(e.target).attr("class").split(/\s+/)[1];

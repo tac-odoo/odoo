@@ -21,6 +21,7 @@
 
 from openerp import models, fields, api, exceptions
 from openerp.tools.safe_eval import safe_eval
+from openerp.report import report_sxw
 
 
 class FormulaLine(object):
@@ -121,6 +122,8 @@ class account_financial_report_line(models.Model):
     @api.multi
     def get_lines(self, financial_report_id, used_context={}):
         lines = []
+        rml_parser = report_sxw.rml_parse(self.env.cr, self.env.uid, 'financial_report', context=self.env.context)
+        currency_id = self.env.user.company_id.currency_id
         if isinstance(financial_report_id, int):
             financial_report_id = self.env['account.financial.report'].browse(financial_report_id)
         for line in self.with_context(used_context)._get_children_by_order():
@@ -129,7 +132,7 @@ class account_financial_report_line(models.Model):
                 'name': line.name,
                 'type': 'line',
                 'level': line.level,
-                'unfolded': line.unfolded
+                'unfolded': line.unfolded,
             }
             columns = []
             if financial_report_id.balance:
@@ -137,7 +140,7 @@ class account_financial_report_line(models.Model):
             if financial_report_id.debit_credit:
                 columns.append('credit', 'debit')
             for key, value in line._get_balance(columns)[0].items():
-                vals[key] = value
+                vals[key] = rml_parser.formatLang(value, currency_obj=currency_id)
             #if self.financial_report_id.comparison:
                 #vals['balance_cmp'] = self.pool.get('account.financial.report').browse(self.cr, self.uid, line.id, context=data['form']['comparison_context']).balance * line.sign or 0.0
             lines.append(vals)
@@ -154,10 +157,10 @@ class account_financial_report_line(models.Model):
                         vals = {
                             'name': gb[1],
                             'level': line.level + 1,
-                            'type': line.groupby
+                            'type': line.groupby,
                         }
                         for column in columns:
-                            vals[column] = gb_vals[gb[0]][column]
+                            vals[column] = rml_parser.formatLang(gb_vals[gb[0]][column], currency_obj=currency_id)
                         lines.append(vals)
                 else:
                     for aml in amls:
@@ -166,13 +169,10 @@ class account_financial_report_line(models.Model):
                             'type': 'aml',
                             'level': line.level + 1,
                         }
-                        if financial_report_id.balance:
-                            vals['balance'] = aml.balance
-                        if financial_report_id.debit_credit:
-                            vals['credit'] = aml.credit
-                            vals['debit'] = aml.debit
+                        for column in columns:
+                            vals[column] = rml_parser.formatLang(getattr(aml, column), currency_obj=currency_id)
                         flag = False
-                        if not aml.company_id.currency_id.is_zero(vals['balance']):
+                        if not aml.company_id.currency_id.is_zero(aml.balance):
                             flag = True
                         if flag:
                             lines.append(vals)

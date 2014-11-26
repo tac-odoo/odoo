@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <templates>
+    <t t-name="footNoteTextarea">
+        <div class="row mt32 mb32">
+            <label t-att-for="'footnote' + footNoteSeqNum"><t t-esc="footNoteSeqNum"/></label>
+            <textarea t-att-name="'footnote' + footNoteSeqNum" rows='4' class="form-control">Insert foot note here</textarea>
+            <button class="btn btn-primary saveFootNote">Save</button>
+        </div>
+    </t>
+    <t t-name="supFootNoteSeqNum">
+         <sup><t t-esc="footNoteSeqNum"/></sup>
+    </t>
+    <t t-name="savedFootNote">
+        <div class="row mt32 mb32"><t t-esc="num+'. '+note"/></div>
+    </t>
+    <t t-name="foldable">
+        <span class="foldable">&gt;</span>
+    </t>
     <t t-name="unfoldable">
         <span class="unfoldable">^</span>
     </t>

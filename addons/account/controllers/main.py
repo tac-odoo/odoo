@@ -1,5 +1,6 @@
 from openerp import http
 from openerp.http import request
+from openerp.report import report_sxw
 
 
 class FinancialReportController(http.Controller):
@@ -8,4 +9,9 @@ class FinancialReportController(http.Controller):
     def financial_report(self, report_id, **kw):
         financial_report_id = request.env['account.financial.report'].sudo().browse(int(report_id))
         lines = financial_report_id.line.get_lines(financial_report_id)
-        return request.render("account.report_financial", {'o': financial_report_id, 'lines': lines})
+        rcontext = {
+            'o': financial_report_id,
+            'lines': lines,
+            'formatLang': report_sxw.rml_parse(request.env.cr, request.env.uid, 'financial_report', context=request.env.context).formatLang,
+        }
+        return request.render("account.report_financial", rcontext)
