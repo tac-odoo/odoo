@@ -34,4 +34,4 @@ class TestUom(TransactionCase):
         })
 
         qty = self.uom._compute_qty(cr, uid, unit_id, 2, score_id)
-        self.assertEquals(qty, 1, "Converted quantity should be rounded up.")
+        self.assertEqual(qty, 1, "Converted quantity should be rounded up.")
