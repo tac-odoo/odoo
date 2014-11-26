@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <templates>
+    <t t-name="unfoldable">
+        <span class="unfoldable">^</span>
+    </t>
     <t t-name="report_financial_line">
         <tr>
             <t t-if="a.level &gt; 3"><t t-set="style" t-value="'font-weight: normal;'"/></t>
             <t t-if="a.level &lt;= 3 "><t t-set="style" t-value="'font-weight: bold;'"/></t>
 
             <td>
-                <t t-if="a.type == 'line' and a.show">
+                <t t-if="a.type == 'line' and a.unfolded">
                     <span t-att-class="'foldable '+a.id">&gt;</span>
                 </t>
-                <t t-if="a.type == 'line' and !a.show">
+                <t t-if="a.type == 'line' and !a.unfolded">
                     <span t-att-class="'unfoldable '+a.id">^</span>
                 </t>
                 <span class="level" style="color: white;"><t t-esc="Array(a.level + 1).join('..')" /></span>

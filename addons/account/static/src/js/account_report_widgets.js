@@ -48,17 +48,17 @@
                         break;
                     }
                 }
-                $(e.target).replaceWith('<span class="unfoldable">^</span>');
+                $(e.target).replaceWith(openerp.qweb.render("unfoldable"));
                 var active_id = $(e.target).attr("class").split(/\s+/)[1];
                 var model = new openerp.Model('account.financial.report.line');
-                model.call('write', [[parseInt(active_id)], {'show': false}]);
+                model.call('write', [[parseInt(active_id)], {'unfolded': false}]);
             },
             unfold: function(e) {
                 e.preventDefault();
                 console.log('a');
                 var active_id = $(e.target).attr("class").split(/\s+/)[1];
                 var reportLineObj = new openerp.Model('account.financial.report.line');
-                reportLineObj.call('write', [[parseInt(active_id)], {'show': true}]).then(function (result) {
+                reportLineObj.call('write', [[parseInt(active_id)], {'unfolded': true}]).then(function (result) {
                     var level = $(e.target).next().html().length;
                     var el;
                     var $el;
@@ -80,11 +80,12 @@
                         var report_id = window.$("div.page").attr("class").split(/\s+/)[2];
                         var $cursor = $(e.target).parent().parent();
                         var reportObj = new openerp.Model('account.financial.report');
-                        reportObj.query(['debit_credit', 'balance', 'comparison'])
+                        reportObj.query(['debit_credit', 'balance'])
                         .filter([['id', '=', report_id]]).first().then(function (report) {
                             reportLineObj.call('get_lines', [[parseInt(active_id)], parseInt(report_id)])
                             .then(function (lines) {
                                 var line;
+                                lines.shift();
                                 for (line in lines) {
                                     $cursor.after(openerp.qweb.render("report_financial_line", {a: lines[line], o: report}));
                                     $cursor = $cursor.next();

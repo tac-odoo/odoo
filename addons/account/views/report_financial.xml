@@ -7,10 +7,10 @@
         <t t-if="not a.get('level') &gt; 3"><t t-set="style" t-value="'font-weight: bold;'"/></t>
 
         <td>
-            <t t-if="a.get('type') == 'line' and a.get('show')">
+            <t t-if="a.get('type') == 'line' and a.get('unfolded')">
                 <span t-att-class="' '.join(['foldable', str(a['id'])])">&gt;</span>
             </t>
-            <t t-if="a.get('type') == 'line' and not a.get('show')">
+            <t t-if="a.get('type') == 'line' and not a.get('unfolded')">
                 <span t-att-class="' '.join(['unfoldable', str(a['id'])])">^</span>
             </t>
             <span class="level" style="color: white;" t-esc="'..' * a.get('level', 0)"/>

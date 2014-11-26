@@ -7,6 +7,7 @@
         <record id="account_financial_report_profitandloss_line0" model="account.financial.report.line">
             <field name="name">Profit and Loss</field>
             <field name="formulas">balance = INC.balance + EXP.balance</field>
+            <field name="sequence" eval="1"/>
         </record>
         <record id="account_financial_report_income0" model="account.financial.report.line">
             <field name="name">Income</field>
@@ -14,6 +15,8 @@
             <field name="formulas">balance = -sum</field>
             <field name="parent_id" ref="account_financial_report_profitandloss_line0"/>
             <field name="domain" eval="[('account_id.user_type.report_type', '=', 'income')]" />
+            <field name="groupby">account_id</field>
+            <field name="sequence" eval="2"/>
         </record>
         <record id="account_financial_report_expense0" model="account.financial.report.line">
             <field name="name">Expense</field>
@@ -21,25 +24,32 @@
             <field name="formulas">balance = -sum</field>
             <field name="parent_id" ref="account_financial_report_profitandloss_line0"/>
             <field name="domain" eval="[('account_id.user_type.report_type', '=', 'expense')]" />
+            <field name="groupby">account_id</field>
+            <field name="sequence" eval="3"/>
         </record>
 
         <record id="account_financial_report_balancesheet_line0" model="account.financial.report.line">
             <field name="name">Balance Sheet</field>
             <field name="formulas">balance = ASS.balance + LIA.balance</field>
+            <field name="sequence" eval="4"/>
         </record>
         <record id="account_financial_report_assets0" model="account.financial.report.line">
             <field name="name">Assets</field>
             <field name="code">ASS</field>
             <field name="parent_id" ref="account_financial_report_balancesheet_line0"/>
             <field name="domain" eval="[('account_id.user_type.report_type', '=', 'assets')]" />
+            <field name="groupby">account_id</field>
             <field name="formulas">balance = sum</field>
+            <field name="sequence" eval="5"/>
         </record>
         <record id="account_financial_report_liability0" model="account.financial.report.line">
             <field name="name">Liability</field>
             <field name="code">LIA</field>
             <field name="parent_id" ref="account_financial_report_balancesheet_line0"/>
             <field name="domain" eval="[('account_id.user_type.report_type', '=', 'liability')]" />
+            <field name="groupby">account_id</field>
             <field name="formulas">balance = sum</field>
+            <field name="sequence" eval="6"/>
         </record>
         <!-- 
             Financial Reports
@@ -56,4 +66,3 @@
         </record>
     </data>
 </openerp>
-
