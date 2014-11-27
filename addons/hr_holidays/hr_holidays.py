@@ -478,16 +478,10 @@ class resource_calendar_leaves(osv.osv):
 class hr_employee(osv.Model):
     _inherit = "hr.employee"
 
-    def create(self, cr, uid, vals, context=None):
-        # don't pass the value of remaining leave if it's 0 at the creation time, otherwise it will trigger the inverse
-        # function _set_remaining_days and the system may not be configured for. Note that we don't have this problem on
-        # the write because the clients only send the fields that have been modified.
-        if 'remaining_leaves' in vals and not vals['remaining_leaves']:
-            del(vals['remaining_leaves'])
-        return super(hr_employee, self).create(cr, uid, vals, context=context)
-
     def _set_remaining_days(self, cr, uid, empl_id, name, value, arg, context=None):
         employee = self.browse(cr, uid, empl_id, context=context)
+        if not employee.remaining_leaves:
+            return False
         diff = value - employee.remaining_leaves
         type_obj = self.pool.get('hr.holidays.status')
         holiday_obj = self.pool.get('hr.holidays')

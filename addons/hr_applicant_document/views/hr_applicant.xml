@@ -8,7 +8,7 @@
             <field name="inherit_id" ref="hr_recruitment.view_crm_case_jobs_filter" />
             <field name="arch" type="xml">
                 <field name="job_id" position="before">
-                    <field name="index_content" string="Resume Content"/>
+                    <field name="attachment_content" string="Resume Content"/>
                 </field>
             </field>
         </record>
