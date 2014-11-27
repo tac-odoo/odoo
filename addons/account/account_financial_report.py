@@ -22,6 +22,7 @@
 from openerp import models, fields, api, exceptions
 from openerp.tools.safe_eval import safe_eval
 from openerp.report import report_sxw
+from datetime import timedelta
 
 
 class FormulaLine(object):
@@ -143,7 +144,7 @@ class account_financial_report_line(models.Model):
         currency_id = self.env.user.company_id.currency_id
         if isinstance(financial_report_id, int):
             financial_report_id = self.env['account.financial.report'].browse(financial_report_id)
-        for line in self.with_context(used_context)._get_children_by_order():
+        for line in self._get_children_by_order():
             vals = {
                 'id': line.id,
                 'name': line.name,
@@ -202,3 +203,43 @@ class account_financial_report_line(models.Model):
                         if flag:
                             lines.append(vals)
         return lines
+
+
+class account_financial_report_context(models.TransientModel):
+    _name = "account.financial.report.context"
+    _description = "A particular context for a financial report"
+
+    @api.onchange('financial_report_id')
+    def _compute_unfolded_lines(self):
+        self.write({'unfolded_lines': [(5)]})
+        for line in self.financial_report_id.line._get_children_by_order():
+            if line.unfolded:
+                self.write({'unfolded_lines': [(4, line.id)]})
+
+    @api.model
+    def _default_account(self):
+        accounts = self.env['account.account'].search(
+            [('parent_id', '=', False), ('company_id', '=', self.env.user.company_id.id)],
+            limit=1,
+        )
+        return accounts and accounts[0] or False
+
+    @api.model
+    def get_accounts(self):
+        return self.env['account.account'].search([('parent_id', '=', False)])
+
+    name = fields.Char()
+    financial_report_id = fields.Many2one('account.financial.report', 'Linked Financial Report')
+    date_from = fields.Date("Start Date", default=lambda s: fields.Date.today() + timedelta(days=-30))
+    date_to = fields.Date("End Date", default=lambda s: fields.Date.today())
+    target_move = fields.Selection([('posted', 'All Posted Entries'), ('all', 'All Entries')],
+                                   'Target Moves', default='posted', required=True)
+    unfolded_lines = fields.Many2many('account.financial.report.line', 'Unfolded Lines')
+    chart_account_id = fields.Many2one('account.account', 'Chart of Account', required=True,
+                                       domain=[('parent_id', '=', False)], default=_default_account)
+
+    def action_open(self):
+        return {
+            'url': '/account/financial_report/context/' + str(self.id),
+            'type': 'ir.actions.act_url'
+        }

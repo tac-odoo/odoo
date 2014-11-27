@@ -1,6 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 <data>
+
+<record id="view_account_financial_report_context_search" model="ir.ui.view">
+    <field name="name">account.financial.report.context.search</field>
+    <field name="model">account.financial.report.context</field>
+    <field name="arch" type="xml">
+        <search string="Search financial report contexts">
+            <field name="name" filter_domain="[('name', 'ilike', self)]" string="Context"/>
+            <field name="financial_report_id" filter_domain="[('financial_report_id.name', 'ilike', self)]" string="Financial Report"/>
+        </search>
+    </field>
+</record>
+<record id="view_account_financial_report_context_tree" model="ir.ui.view">
+    <field name="name">account.financial.report.context.tree</field>
+    <field name="model">account.financial.report.context</field>
+    <field name="arch" type="xml">
+        <tree string="Saved Configurations" editable="top">
+            <field name="name"/>
+            <field name="financial_report_id"/>
+            <button string="Display" name="action_open" type="object" modifiers="{}"/>
+        </tree>
+    </field>
+</record>
+<record id="action_account_financial_context" model="ir.actions.act_window">
+    <field name="name">Financial Reports Configurations</field>
+    <field name="res_model">account.financial.report.context</field>
+    <field name="view_type">tree</field>
+    <field name="view_mode">tree</field>
+    <field name="help" type="html">
+      <p class="oe_view_nocontent_create">
+        Click to create a new configuration.
+      </p>
+    </field>
+</record>
+<menuitem id="menu_action_account_financial_context" name="Financial Reports" action="action_account_financial_context" parent="account.menu_finance_legal_statement"/>
+
 <template id="report_financial_line">
     <tr>
         <t t-if="a.get('level') &gt; 3"><t t-set="style" t-value="'font-weight: normal;'"/></t>
@@ -38,6 +73,7 @@
 <template id="report_financial">
     <t t-call="report.html_container">
         <span class="oe_account_report_widgets">
+            <t t-call="account.report_financial_configurator"/>
             <t t-call-assets="web.assets_common" t-css="false" />
             <t t-call-assets="web.assets_backend" t-css="false" />
             <script type="text/javascript" src="/account/static/src/js/account_report_widgets.js"></script>
