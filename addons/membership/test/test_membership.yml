@@ -1,17 +1,13 @@
-- |
-  Test Datas
+-
+  Test Data
 -
   !record {model: res.partner, id: test_partner_0}:
         name: Seagate
         free_member: False
-- |
-  Test Datas
 -
   !record {model: res.partner, id: test_partner_1}:
         name: Ms. Jonhson
         free_member: True
-- |
-  Test Datas
 -
   !record {model: res.partner, id: test_partner_2}:
         name: Ms. Smith
