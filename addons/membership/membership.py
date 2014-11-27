@@ -21,6 +21,7 @@
 
 import time
 
+from openerp import tools
 from openerp.osv import fields, osv
 import openerp.addons.decimal_precision as dp
 from openerp.tools.translate import _
@@ -214,7 +215,7 @@ class Partner(osv.osv):
         res = {}
         for id in ids:
             res[id] = 'none'
-        today = time.strftime('%Y-%m-%d')
+        today = time.strftime(tools.DEFAULT_SERVER_DATE_FORMAT)
         for id in ids:
             partner_data = self.browse(cr, uid, id, context=context)
             if partner_data.membership_cancel and today > partner_data.membership_cancel:
@@ -226,9 +227,9 @@ class Partner(osv.osv):
             s = 4
             if partner_data.member_lines:
                 for mline in partner_data.member_lines:
-                    if mline.date_to >= today:
-                        if mline.account_invoice_line and mline.account_invoice_line.invoice_id:
-                            mstate = mline.account_invoice_line.invoice_id.state
+                    if mline.account_invoice_line and mline.account_invoice_line.invoice_id:
+                        mstate = mline.account_invoice_line.invoice_id.state
+                        if mline.date_to >= today:
                             if mstate == 'paid':
                                 s = 0
                                 inv = mline.account_invoice_line.invoice_id
@@ -242,12 +243,11 @@ class Partner(osv.osv):
                                 s = 2
                             elif  (mstate == 'draft' or mstate == 'proforma') and s!=0 and s!=1:
                                 s = 3
-                if s==4:
-                    for mline in partner_data.member_lines:
-                        if mline.date_from < today and mline.date_to < today and mline.date_from <= mline.date_to and (mline.account_invoice_line and mline.account_invoice_line.invoice_id.state) == 'paid':
+                        elif mline.date_from < today and mline.date_to < today and mstate in ['draft', 'paid']:
                             s = 5
-                        else:
-                            s = 6
+                if s==4:
+                    if partner_data.member_lines:
+                        s = 6
                 if s==0:
                     res[id] = 'paid'
                 elif s==1:
@@ -420,11 +420,9 @@ class Partner(osv.osv):
             invoice_id = invoice_obj.create(cr, uid, {
                 'partner_id': partner.id,
                 'account_id': account_id,
-                'fiscal_position': fpos_id or False
-                }, context=context)
-            line_value['invoice_id'] = invoice_id
-            invoice_line_id = invoice_line_obj.create(cr, uid, line_value, context=context)
-            invoice_obj.write(cr, uid, invoice_id, {'invoice_line': [(6, 0, [invoice_line_id])]}, context=context)
+                'fiscal_position': fpos_id or False,
+                'invoice_line': [(0, 0, line_value)]
+            }, context=context)
             invoice_list.append(invoice_id)
             if line_value['invoice_line_tax_id']:
                 tax_value = invoice_tax_obj.compute(cr, uid, invoice_id).values()
