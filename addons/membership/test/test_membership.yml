@@ -15,8 +15,8 @@
 - |
   "Seagate" want to join "Gold Membership", so I'm checking  "Current Membership State" of "Seagate". It is an "Non Member" or not.
 -
-  !assert {model: res.partner, id: base.res_partner_19}:
-      - membership_state == 'none', 'Member should be has "Current Membership State" in "Non Member".'
+  !assert {model: res.partner, id: base.res_partner_19, string: Member should be has Current Membership State in Non Member}:
+      - membership_state == 'none'
 - |
   I'm doing to make membership invoice for "Seagate" on joining "Gold Membership".
 -
@@ -25,8 +25,8 @@
 - |
   I'm checking  "Current Membership State" of "Seagate". It is an "Waiting Member" or not.
 -
-  !assert {model: res.partner, id: base.res_partner_19}:
-      - membership_state == 'waiting', 'Member should be has "Current Membership State" in "Waiting Member".'
+  !assert {model: res.partner, id: base.res_partner_19, string: Member should be has Current Membership State in Waiting Member}:
+      - membership_state == 'waiting'
 - |
   I'm Opening that Invoice which is created for "Seagate".
 -
@@ -45,8 +45,8 @@
 - |
   I'm checking "Current membership state" of "Seagate". It is an "Invoiced Member" or not.
 -
-  !assert {model: res.partner, id: base.res_partner_19}:
-     - membership_state == 'invoiced', 'Member should be has "Current Membership State" in "Invoiced Member".'
+  !assert {model: res.partner, id: base.res_partner_19, string: Member should be has Current Membership State in Invoiced Member}:
+     - membership_state == 'invoiced'
 
 - |
   I'm creating free member "Ms. Johnson" of "Gold Membership".
@@ -64,8 +64,8 @@
 - |
   I'm checking "Current membership state" of "Ms. Johnson". It is an "Free Member" or not.
 -
-  !assert {model: res.partner, id: res_partner_msjohnson0}:
-     - membership_state == 'free', 'Member should be has "Current Membership State" in "Free Member".'
+  !assert {model: res.partner, id: res_partner_msjohnson0, string: Member should be has Current Membership State in Free Member}:
+     - membership_state == 'free'
 
 - |
   I'm set "Seagate" as a associated member of "Ms. Johnson" and also set Non free member.
@@ -76,8 +76,8 @@
 - |
   I'm checking "Current membership state" of "Ms. Johnson". It is an "Paid Member" or not.
 -
-  !assert {model: res.partner, id: res_partner_msjohnson0}:
-     - membership_state == 'paid', 'Member should be has "Current Membership State" in "Paid Member".'
+  !assert {model: res.partner, id: res_partner_msjohnson0, string: Member should be has Current Membership State in Paid Member}:
+     - membership_state == 'paid'
 
 - |
   I'm creating new "Regular Membership" which has Membership fee 50 EURO and It's started from 1st June to 31st Dec.
@@ -98,8 +98,8 @@
 - |
   I'm checking "Current membership state" of "Seagate". It is an "Old Member" or not.
 -
-  !assert {model: res.partner, id: base.res_partner_19}:
-      - membership_state == 'old', 'Member should be has "Current Membership State" in "Old Member".'
+  !assert {model: res.partner, id: base.res_partner_19, string: Member should be has Current Membership State in Old Member}:
+      - membership_state == 'old'
 - |
   I'm doing to make credit note of invoice which is paid by "Seagate" to cancel membership.
 -
@@ -119,6 +119,6 @@
 - |
   I'm checking "Current membership state" of "Seagate". It is an "Cancelled Member" or not.
 -
-  !assert {model: res.partner, id: base.res_partner_19}:
-      - membership_state == 'canceled', 'Member should be has "Current Membership State" in "Cancelled Member".'
+  !assert {model: res.partner, id: base.res_partner_19, string: Member should be has Current Membership State in Cancelled Member}:
+      - membership_state == 'canceled'
 
