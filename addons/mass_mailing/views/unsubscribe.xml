@@ -21,7 +21,7 @@
                                 <ul class="list-group">
                                     <t t-foreach="contacts" t-as="contact">
                                         <li class="list-group-item">
-                                            <input type="checkbox" class="mail_list_checkbox" t-att-name="contact['id']" t-att-value="contact['id']"/> 
+                                            <input type="checkbox" class="mail_list_checkbox" name="contact_ids" t-att-value="contact['id']"/> 
                                             <t t-esc="contact['list_id'][1]"/>
                                         </li>
                                     </t>

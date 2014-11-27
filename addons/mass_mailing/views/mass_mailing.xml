@@ -378,6 +378,10 @@
                                 type="action" class="oe_stat_button">
                                 <field name="replied_ratio" string="Replied" widget="percentpie"/>
                             </button>
+                            <button name="%(action_view_mail_mail_statistics_mailing)d"
+                                type="action" class="oe_stat_button">
+                                <field name="bounced_ratio" string="Bounced" widget="percentpie"/>
+                            </button>
                         </div>
 
                         <group>

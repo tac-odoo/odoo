@@ -343,6 +343,7 @@ class MassMailing(osv.Model):
             row['received_ratio'] = 100.0 * row['delivered'] / total
             row['opened_ratio'] = 100.0 * row['opened'] / total
             row['replied_ratio'] = 100.0 * row['replied'] / total
+            row['bounced_ratio'] = 100.0 * row['bounced'] / total
         return results
 
     def _get_mailing_model(self, cr, uid, context=None):
@@ -476,6 +477,10 @@ class MassMailing(osv.Model):
             _get_statistics, string='Replied Ratio',
             type='integer', multi='_get_statistics',
         ),
+        'bounced_ratio': fields.function(
+            _get_statistics, String='Bouncded Ratio',
+            type='integer', multi='_get_statistics',
+        ),
         'next_departure': fields.function(
             _get_next_departure, string='Next Departure',
             type='datetime'
@@ -540,6 +545,9 @@ class MassMailing(osv.Model):
     #------------------------------------------------------
 
     def on_change_model_and_list(self, cr, uid, ids, mailing_model, list_ids, context=None):
+        print mailing_model
+        print list_ids
+
         value = {}
         if mailing_model == 'mail.mass_mailing.contact':
             mailing_list_ids = set()
