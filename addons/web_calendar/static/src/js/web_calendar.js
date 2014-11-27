@@ -966,6 +966,8 @@ openerp.web_calendar = function(instance) {
         },
         start: function () {
             var self = this;
+            var model = this.dataset.model;
+            var fields = this.getParent().fields;
 
             if (this.options.disable_quick_create) {
                 this.$el.hide();
@@ -974,6 +976,12 @@ openerp.web_calendar = function(instance) {
             }
 
             self.$input = this.$el.find('input');
+            if ('name' in fields){
+                var mod = new instance.web.Model(model, self.dataset.context, self.dataset.domain);
+                mod.call("default_get", [["name"], self.dataset.context])
+                .then(function(result){self.$input.val(result.name)});
+            }
+
             self.$input.keyup(function enterHandler (event) {
                 if(event.keyCode == 13){
                     self.$input.off('keyup', enterHandler);
