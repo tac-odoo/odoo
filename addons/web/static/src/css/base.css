@@ -1588,6 +1588,9 @@
 .openerp .oe_graph {
   height: 100%;
 }
+.openerp .oe_graph > div {
+  height: 100%;
+}
 .openerp .oe_formview {
   background: white;
 }
