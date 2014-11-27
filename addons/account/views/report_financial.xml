@@ -28,7 +28,7 @@
             <span class="annotable" t-att-style="style" t-esc="a.get('credit')"/>
         </td>
         <td class="text-right" style="white-space: nowrap;" t-if="o.balance">
-            <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('balance'), currency_obj=res_company.currency_id)"/>
+            <span class="annotable" t-att-style="style" t-esc="a.get('balance')"/>
         </td>
         <!-- <td class="text-right" style="white-space: nowrap;" t-if="o.comparison">
             <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('balance_cmp'), currency_obj=res_company.currency_id)"/>

@@ -25,35 +25,41 @@ from openerp.report import report_sxw
 
 
 class FormulaLine(object):
-    def __init__(self, line):
-        fields = line._get_balance()[0]
+    def __init__(self, obj, type='balance'):
+        fields = dict((fn, 0.0) for fn in ['balance', 'credit', 'debit'])
+        if type == 'balance':
+            fields = obj.get_balance()[0]
+        elif type == 'sum':
+            if obj._name == 'account.financial.report.line':
+                fields = obj.get_sum()
+            elif obj._name == 'account.move.line':
+                for field in ['balance', 'credit', 'debit']:
+                    fields[field] = getattr(obj, field)
         self.balance = fields['balance']
         self.credit = fields['credit']
         self.debit = fields['debit']
 
 
 class FormulaContext(dict):
-    def __init__(self, reportLineObj, *data):
+    def __init__(self, reportLineObj, curObj, *data):
         self.reportLineObj = reportLineObj
+        self.curObj = curObj
         return super(FormulaContext, self).__init__(data)
 
     def __getitem__(self, item):
-        if super(FormulaContext, self).get(item):
-            return super(FormulaContext, self).__getitem__(item)
-        else:
-            line_id = self.reportLineObj.search([('code', '=', item)], limit=1)
-            if line_id:
-                return FormulaLine(line_id)
-            else:
-                return super(FormulaContext, self).__getitem__(item)
+        if item == 'sum':
+            return FormulaLine(self.curObj, type='sum')
+        line_id = self.reportLineObj.search([('code', '=', item)], limit=1)
+        if line_id:
+            return FormulaLine(line_id)
+        return super(FormulaContext, self).__getitem__(item)
 
 
 class report_account_financial_report(models.Model):
     _name = "account.financial.report"
     _description = "Account Report"
-    _template = "account.report_financial"
 
-    name = fields.Char("Name")
+    name = fields.Char()
     debit_credit = fields.Boolean('Show Credit and Debit Columns')
     balance = fields.Boolean('Show Balance Column')
     line = fields.Many2one('account.financial.report.line', 'First/Top Line')
@@ -88,25 +94,6 @@ class account_financial_report_line(models.Model):
                 res += children._get_children_by_order()
         return res
 
-    @api.one
-    def _get_balance(self, field_names=None):
-        if not field_names:
-            field_names = ['balance', 'credit', 'debit']
-        res = dict((fn, 0.0) for fn in field_names)
-        if self.domain:
-            move_line_ids = self.env['account.move.line'].search(safe_eval(self.domain))
-            for aml in move_line_ids:
-                for field in field_names:
-                    res[field] += getattr(aml, field)
-        c = FormulaContext(self.env['account.financial.report.line'])
-        for f in self.formulas.split(';'):
-            [field, formula] = f.split('=')
-            field = field.strip()
-            if field in field_names:
-                c['sum'] = res[field]
-                res[field] = safe_eval(formula, c, nocopy=True)
-        return res
-
     name = fields.Char('Line Name')
     code = fields.Char('Line Code')
     parent_id = fields.Many2one('account.financial.report.line', 'Parent')
@@ -118,6 +105,36 @@ class account_financial_report_line(models.Model):
     formulas = fields.Char('Formulas')
     groupby = fields.Char('Group By')
     unfolded = fields.Boolean('Unfolded by default', default=False)
+
+    def get_sum(self, field_names=None):
+        ''' Returns the sum of the amls in the domain '''
+        if not field_names:
+            field_names = ['balance', 'credit', 'debit']
+        res = dict((fn, 0.0) for fn in field_names)
+        if self.domain:
+            move_line_ids = self.env['account.move.line'].search(safe_eval(self.domain))
+            for aml in move_line_ids:
+                for field in field_names:
+                    res[field] += getattr(aml, field)
+        return res
+
+    @api.one
+    def get_balance(self, field_names=None):
+        if not field_names:
+            field_names = ['balance', 'credit', 'debit']
+        res = dict((fn, 0.0) for fn in field_names)
+        if self.domain:
+            move_line_ids = self.env['account.move.line'].search(safe_eval(self.domain))
+            for aml in move_line_ids:
+                for field in field_names:
+                    res[field] += getattr(aml, field)
+        c = FormulaContext(self.env['account.financial.report.line'], self)
+        for f in self.formulas.split(';'):
+            [field, formula] = f.split('=')
+            field = field.strip()
+            if field in field_names:
+                res[field] = safe_eval(formula, c, nocopy=True)
+        return res
 
     @api.multi
     def get_lines(self, financial_report_id, used_context={}):
@@ -139,7 +156,7 @@ class account_financial_report_line(models.Model):
                 columns.append('balance')
             if financial_report_id.debit_credit:
                 columns.append('credit', 'debit')
-            for key, value in line._get_balance(columns)[0].items():
+            for key, value in line.get_balance(columns)[0].items():
                 vals[key] = rml_parser.formatLang(value, currency_obj=currency_id)
             #if self.financial_report_id.comparison:
                 #vals['balance_cmp'] = self.pool.get('account.financial.report').browse(self.cr, self.uid, line.id, context=data['form']['comparison_context']).balance * line.sign or 0.0
@@ -151,12 +168,16 @@ class account_financial_report_line(models.Model):
                     gbs = [k[line.groupby] for k in aml_obj.read_group(safe_eval(line.domain), [line.groupby], line.groupby)]
                     gb_vals = dict((gb[0], dict((column, 0.0) for column in columns)) for gb in gbs)
                     for aml in amls:
-                        for column in columns:
-                            gb_vals[getattr(aml, line.groupby).id][column] += getattr(aml, column)
+                        c = FormulaContext(self.env['account.financial.report.line'], aml)
+                        for f in line.formulas.split(';'):
+                            [column, formula] = f.split('=')
+                            column = column.strip()
+                            if column in columns:
+                                gb_vals[getattr(aml, line.groupby).id][column] += safe_eval(formula, c, nocopy=True)
                     for gb in gbs:
                         vals = {
                             'name': gb[1],
-                            'level': line.level + 1,
+                            'level': line.level + 2,
                             'type': line.groupby,
                         }
                         for column in columns:
@@ -167,21 +188,17 @@ class account_financial_report_line(models.Model):
                         vals = {
                             'name': aml.name,
                             'type': 'aml',
-                            'level': line.level + 1,
+                            'level': line.level + 2,
                         }
-                        for column in columns:
-                            vals[column] = rml_parser.formatLang(getattr(aml, column), currency_obj=currency_id)
+                        c = FormulaContext(self.env['account.financial.report.line'], aml)
+                        for f in line.formulas.split(';'):
+                            [column, formula] = f.split('=')
+                            column = column.strip()
+                            if column in columns:
+                                vals[column] = rml_parser.formatLang(safe_eval(formula, c, nocopy=True), currency_obj=currency_id)
                         flag = False
                         if not aml.company_id.currency_id.is_zero(aml.balance):
                             flag = True
                         if flag:
                             lines.append(vals)
-            # if line.display_detail == 'no_detail':
-            #     #the rest of the loop is used to display the details of the financial report, so it's not needed here.
-            #     continue
-            # if line.type == 'accounts' and line.account_ids:
-            #     account_ids = account_obj._get_children_and_consol(self.cr, self.uid, [x.id for x in line.account_ids])
-            # if line.type == 'types':
-            #     #domain = [('user_type', 'in', [x.id for x in line.account_type_ids])]
-            #     account_ids = account_obj.with_context(used_context).search(self.domain)
         return lines
