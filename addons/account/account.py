@@ -454,9 +454,9 @@ class account_account(osv.osv):
         return True
 
     _columns = {
-        'name': fields.char('Name', required=True, select=True),
+        'name': fields.char('Account Name', required=True, select=True),
         'currency_id': fields.many2one('res.currency', 'Secondary Currency', help="Forces all moves for this account to have this secondary currency."),
-        'code': fields.char('Code', size=64, required=True, select=1),
+        'code': fields.char('Account Code', size=64, required=True, select=1),
         'type': fields.selection([
             ('view', 'View'),
             ('other', 'Regular'),
@@ -880,10 +880,12 @@ class account_fiscalyear(osv.osv):
         'end_journal_period_id': fields.many2one(
              'account.journal.period', 'End of Year Entries Journal',
              readonly=True, copy=False),
+         'period_types': fields.selection([('month','Monthly'),('3month','3Months')], 'Generate Period'),
     }
     _defaults = {
         'state': 'draft',
         'company_id': lambda self,cr,uid,c: self.pool.get('res.users').browse(cr, uid, uid, c).company_id.id,
+        'period_types': 'month',
     }
     _order = "date_start, id"
 
@@ -898,12 +900,15 @@ class account_fiscalyear(osv.osv):
         (_check_duration, 'Error!\nThe start date of a fiscal year must precede its end date.', ['date_start','date_stop'])
     ]
 
-    def create_period3(self, cr, uid, ids, context=None):
-        return self.create_period(cr, uid, ids, context, 3)
-
-    def create_period(self, cr, uid, ids, context=None, interval=1):
+    def create(self, cr, uid, vals, context=None):
+        interval = 0
         period_obj = self.pool.get('account.period')
-        for fy in self.browse(cr, uid, ids, context=context):
+        fiscalyear = super(account_fiscalyear, self).create(cr, uid, vals, context=context)
+        if vals.get("period_types") == 'month':
+            interval = 1
+        elif vals.get("period_types") == '3month':
+            interval = 3
+        for fy in self.browse(cr, uid, fiscalyear, context=context):
             ds = datetime.strptime(fy.date_start, '%Y-%m-%d')
             period_obj.create(cr, uid, {
                     'name':  "%s %s" % (_('Opening Period'), ds.strftime('%Y')),
@@ -927,8 +932,42 @@ class account_fiscalyear(osv.osv):
                     'fiscalyear_id': fy.id,
                 })
                 ds = ds + relativedelta(months=interval)
-        return True
-
+        return fiscalyear
+    
+    def write(self, cr, uid, ids, vals, context=None):
+        interval = 0
+        period_obj = self.pool.get('account.period')
+        fiscalyear = super(account_fiscalyear, self).write(cr, uid, ids, vals, context=context)
+        if 'date_start' in vals or 'date_stop' in vals or 'period_types' in vals:
+            for fy in self.browse(cr, uid, ids, context=context):
+                if fy.period_types == 'month':
+                    interval = 1
+                elif fy.period_types == '3month':
+                    interval = 3
+                ds = datetime.strptime(fy.date_start, '%Y-%m-%d')
+                period_obj.create(cr, uid, {
+                        'name':  "%s %s" % (_('Opening Period'), ds.strftime('%Y')),
+                        'code': ds.strftime('00/%Y'),
+                        'date_start': ds,
+                        'date_stop': ds,
+                        'special': True,
+                        'fiscalyear_id': fy.id,
+                    })
+                while ds.strftime('%Y-%m-%d') < fy.date_stop:
+                    de = ds + relativedelta(months=interval, days=-1)
+                    
+                    if de.strftime('%Y-%m-%d') > fy.date_stop:
+                        de = datetime.strptime(fy.date_stop, '%Y-%m-%d')
+                    period_obj.create(cr, uid, {
+                        'name': ds.strftime('%m/%Y'),
+                        'code': ds.strftime('%m/%Y'),
+                        'date_start': ds.strftime('%Y-%m-%d'),
+                        'date_stop': de.strftime('%Y-%m-%d'),
+                        'fiscalyear_id': fy.id,
+                    })
+                    ds = ds + relativedelta(months=interval)
+        return fiscalyear
+    
     def find(self, cr, uid, dt=None, exception=True, context=None):
         res = self.finds(cr, uid, dt, exception, context=context)
         return res and res[0] or False

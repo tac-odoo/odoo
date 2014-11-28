@@ -11,7 +11,7 @@
   I generate periods for the new fiscalyear
 -
   !python {model: account.fiscalyear}: |
-    self.create_period(cr, uid, [ref("account_fiscalyear_fiscalyear0")])
+    self.create(cr, uid, [ref("account_fiscalyear_fiscalyear0")])
 -
   I create a new account invoice in the created fiscalyear
 -

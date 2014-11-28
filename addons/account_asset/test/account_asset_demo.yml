@@ -42,10 +42,3 @@
     date_stop: !eval "'%s-12-31' %(datetime.now().year+5)"
     name: !eval "'Fiscal Year X %s' %(datetime.now().year+5)"
     code: !eval "'FY%s' %(datetime.now().year+5)"
--
-  !python {model: account.fiscalyear}: |
-    self.create_period(cr, uid, [ref("data_fiscalyear_plus1")])
-    self.create_period(cr, uid, [ref("data_fiscalyear_plus2")])
-    self.create_period(cr, uid, [ref("data_fiscalyear_plus3")])
-    self.create_period(cr, uid, [ref("data_fiscalyear_plus4")])
-    self.create_period(cr, uid, [ref("data_fiscalyear_plus5")])
