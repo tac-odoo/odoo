@@ -22,7 +22,7 @@
 from openerp import models, fields, api, exceptions
 from openerp.tools.safe_eval import safe_eval
 from openerp.report import report_sxw
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 
 class FormulaLine(object):
@@ -90,7 +90,7 @@ class account_financial_report_line(models.Model):
         res = []
         for line in self:
             res.append(line)
-            if line.unfolded:
+            if not 'unfolded_lines' in self.env.context or line.id in self.env.context['unfolded_lines']:
                 children = line.search([('parent_id', '=', line.id)], order='sequence ASC')
                 res += children._get_children_by_order()
         return res
@@ -124,11 +124,6 @@ class account_financial_report_line(models.Model):
         if not field_names:
             field_names = ['balance', 'credit', 'debit']
         res = dict((fn, 0.0) for fn in field_names)
-        if self.domain:
-            move_line_ids = self.env['account.move.line'].search(safe_eval(self.domain))
-            for aml in move_line_ids:
-                for field in field_names:
-                    res[field] += getattr(aml, field)
         c = FormulaContext(self.env['account.financial.report.line'], self)
         for f in self.formulas.split(';'):
             [field, formula] = f.split('=')
@@ -138,19 +133,29 @@ class account_financial_report_line(models.Model):
         return res
 
     @api.multi
-    def get_lines(self, financial_report_id, used_context={}):
+    def get_lines_with_context(self, context_id):
+        if isinstance(context_id, int):
+            context_id = self.env['account.financial.report.context'].browse(context_id)
+        return self.with_context(
+            date_from=context_id.date_from,
+            date_to=context_id.date_to,
+            target_move=context_id.target_move,
+            chart_account_id=context_id.chart_account_id.id,
+            unfolded_lines=context_id.unfolded_lines.ids
+        ).get_lines(context_id.financial_report_id)
+
+    @api.multi
+    def get_lines(self, financial_report_id):
         lines = []
         rml_parser = report_sxw.rml_parse(self.env.cr, self.env.uid, 'financial_report', context=self.env.context)
         currency_id = self.env.user.company_id.currency_id
-        if isinstance(financial_report_id, int):
-            financial_report_id = self.env['account.financial.report'].browse(financial_report_id)
         for line in self._get_children_by_order():
             vals = {
                 'id': line.id,
                 'name': line.name,
                 'type': 'line',
                 'level': line.level,
-                'unfolded': line.unfolded,
+                'unfolded': not 'unfolded_lines' in self.env.context or line.id in self.env.context['unfolded_lines'],
             }
             columns = []
             if financial_report_id.balance:
@@ -162,7 +167,7 @@ class account_financial_report_line(models.Model):
             #if self.financial_report_id.comparison:
                 #vals['balance_cmp'] = self.pool.get('account.financial.report').browse(self.cr, self.uid, line.id, context=data['form']['comparison_context']).balance * line.sign or 0.0
             lines.append(vals)
-            if line.domain and line.unfolded:
+            if line.domain and (not 'unfolded_lines' in self.env.context or line.id in self.env.context['unfolded_lines']):
                 aml_obj = self.env['account.move.line']
                 amls = aml_obj.search(safe_eval(line.domain))
                 if line.groupby:
@@ -205,7 +210,7 @@ class account_financial_report_line(models.Model):
         return lines
 
 
-class account_financial_report_context(models.TransientModel):
+class account_financial_report_context(models.Model):
     _name = "account.financial.report.context"
     _description = "A particular context for a financial report"
 
@@ -228,18 +233,20 @@ class account_financial_report_context(models.TransientModel):
     def get_accounts(self):
         return self.env['account.account'].search([('parent_id', '=', False)])
 
+    @api.multi
+    def remove_line(self, line_id):
+        self.write({'unfolded_lines': [(3, line_id)]})
+
+    @api.multi
+    def add_line(self, line_id):
+        self.write({'unfolded_lines': [(4, line_id)]})
+
     name = fields.Char()
     financial_report_id = fields.Many2one('account.financial.report', 'Linked Financial Report')
-    date_from = fields.Date("Start Date", default=lambda s: fields.Date.today() + timedelta(days=-30))
-    date_to = fields.Date("End Date", default=lambda s: fields.Date.today())
+    date_from = fields.Date("Start Date", default=lambda s: datetime.today() + timedelta(days=-30))
+    date_to = fields.Date("End Date", default=lambda s: datetime.today())
     target_move = fields.Selection([('posted', 'All Posted Entries'), ('all', 'All Entries')],
                                    'Target Moves', default='posted', required=True)
-    unfolded_lines = fields.Many2many('account.financial.report.line', 'Unfolded Lines')
+    unfolded_lines = fields.Many2many('account.financial.report.line', 'context_to_line', string='Unfolded Lines')
     chart_account_id = fields.Many2one('account.account', 'Chart of Account', required=True,
                                        domain=[('parent_id', '=', False)], default=_default_account)
-
-    def action_open(self):
-        return {
-            'url': '/account/financial_report/context/' + str(self.id),
-            'type': 'ir.actions.act_url'
-        }

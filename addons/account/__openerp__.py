@@ -81,6 +81,7 @@
         'views/report_partnerledger.xml',
         'views/report_financial.xml',
         'views/report_generalledger.xml',
+        'views/report_configurator.xml',
         'views/account.xml',
     ],
     'qweb' : [

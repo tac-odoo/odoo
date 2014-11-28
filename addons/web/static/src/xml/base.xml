@@ -638,7 +638,6 @@
     <table class="oe_tree_table oe-treeview-table">
         <thead>
             <tr>
-                <t t-debug="true" />
                 <th t-foreach="fields_view" t-as="field"
                     t-if="!field.attrs.modifiers.tree_invisible"
                     class="treeview-header">

@@ -31,6 +31,7 @@
             },
             fold: function(e) {
                 e.preventDefault();
+                var context_id = window.$("div.page").attr("class").split(/\s+/)[2];
                 var level = $(e.target).next().html().length;
                 var el;
                 var $el;
@@ -46,17 +47,17 @@
                         break;
                     }
                 }
-                $(e.target).replaceWith(openerp.qweb.render("unfoldable"));
                 var active_id = $(e.target).attr("class").split(/\s+/)[1];
-                var model = new openerp.Model('account.financial.report.line');
-                model.call('write', [[parseInt(active_id)], {'unfolded': false}]);
+                $(e.target).replaceWith(openerp.qweb.render("unfoldable", {lineId: active_id}));
+                var model = new openerp.Model('account.financial.report.context');
+                model.call('remove_line', [[parseInt(context_id)], parseInt(active_id)]);
             },
             unfold: function(e) {
                 e.preventDefault();
-                console.log('a');
+                var context_id = window.$("div.page").attr("class").split(/\s+/)[2];
                 var active_id = $(e.target).attr("class").split(/\s+/)[1];
-                var reportLineObj = new openerp.Model('account.financial.report.line');
-                reportLineObj.call('write', [[parseInt(active_id)], {'unfolded': true}]).then(function (result) {
+                var contextObj = new openerp.Model('account.financial.report.context');
+                contextObj.call('add_line', [[parseInt(context_id)], parseInt(active_id)]).then(function (result) {
                     var level = $(e.target).next().html().length;
                     var el;
                     var $el;
@@ -75,23 +76,26 @@
                         }
                     }
                     if (!isLoaded) {
-                        var report_id = window.$("div.page").attr("class").split(/\s+/)[2];
                         var $cursor = $(e.target).parent().parent();
                         var reportObj = new openerp.Model('account.financial.report');
-                        reportObj.query(['debit_credit', 'balance'])
-                        .filter([['id', '=', report_id]]).first().then(function (report) {
-                            reportLineObj.call('get_lines', [[parseInt(active_id)], parseInt(report_id)])
-                            .then(function (lines) {
-                                var line;
-                                lines.shift();
-                                for (line in lines) {
-                                    $cursor.after(openerp.qweb.render("report_financial_line", {a: lines[line], o: report}));
-                                    $cursor = $cursor.next();
-                                }
+                        var reportLineObj = new openerp.Model('account.financial.report.line');
+                        contextObj.query(['financial_report_id'])
+                        .filter([['id', '=', context_id]]).first().then(function (context) {
+                            reportObj.query(['debit_credit', 'balance'])
+                            .filter([['id', '=', context.financial_report_id[0]]]).first().then(function (report) {
+                                reportLineObj.call('get_lines_with_context', [[parseInt(active_id)], parseInt(context_id)])
+                                .then(function (lines) {
+                                    var line;
+                                    lines.shift();
+                                    for (line in lines) {
+                                        $cursor.after(openerp.qweb.render("report_financial_line", {a: lines[line], o: report}));
+                                        $cursor = $cursor.next();
+                                    }
+                                });
                             });
                         });
                     }
-                    $(e.target).replaceWith(openerp.qweb.render("foldable"));
+                    $(e.target).replaceWith(openerp.qweb.render("foldable", {lineId: active_id}));
                 });
             },
             saveFootNote: function(e) {

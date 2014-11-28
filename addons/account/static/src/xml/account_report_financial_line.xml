@@ -15,10 +15,10 @@
         <div class="row mt32 mb32"><t t-esc="num+'. '+note"/></div>
     </t>
     <t t-name="foldable">
-        <span class="foldable">&gt;</span>
+        <span t-att-class="'foldable '+lineId">&gt;</span>
     </t>
     <t t-name="unfoldable">
-        <span class="unfoldable">^</span>
+        <span t-att-class="'unfoldable '+lineId">^</span>
     </t>
     <t t-name="report_financial_line">
         <tr>

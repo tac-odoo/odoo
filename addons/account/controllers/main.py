@@ -6,26 +6,27 @@ class FinancialReportController(http.Controller):
 
     @http.route('/account/financial_report/<string:report_id>', type='http', auth='none')
     def financial_report(self, report_id, **kw):
-        financial_report_id = request.env['account.financial.report'].sudo().browse(int(report_id))
-        lines = financial_report_id.line.get_lines(financial_report_id)
+        uid = request.session.uid
+        report_id = int(report_id)
+        context_id = request.env['account.financial.report.context'].sudo(uid).search(
+            [('financial_report_id', '=', report_id), ('create_uid', '=', uid)],
+            limit=1)
+        if not context_id:
+            context_id = request.env['account.financial.report.context'].sudo(uid).create({'financial_report_id': report_id})
+        update = {}
+        if kw.get('date_from'):
+            update['date_from'] = kw['date_from']
+        if kw.get('date_to'):
+            update['date_to'] = kw['date_to']
+        if kw.get('target_move'):
+            update['target_move'] = kw['target_move']
+        if kw.get('chart_account_id'):
+            update['chart_account_id'] = kw['chart_account_id']
+        context_id.write(update)
+        financial_report_id = request.env['account.financial.report'].sudo(uid).browse(report_id)
+        lines = financial_report_id.line.get_lines_with_context(context_id)
         rcontext = {
-            'o': financial_report_id,
-            'lines': lines,
-        }
-        return request.render("account.report_financial", rcontext)
-
-    @http.route('/account/financial_report/context/<string:context_id>', type='http', auth='none')
-    def financial_report_context(self, context_id, **kw):
-        financial_report_context_id = request.env['account.financial.report.context'].sudo().browse(int(context_id))
-        financial_report_id = financial_report_context_id.financial_report_id
-        lines = financial_report_id.line.with_context(
-            date_from=financial_report_context_id.date_from,
-            date_to=financial_report_context_id.date_to,
-            target_move=financial_report_context_id.target_move,
-            chart_account_id=financial_report_context_id.chart_account_id
-        ).get_lines(financial_report_id)
-        rcontext = {
-            'context': financial_report_context_id,
+            'context': context_id,
             'o': financial_report_id,
             'lines': lines,
         }

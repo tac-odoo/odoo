@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+<template id="report_configurator">
+    <h3>Configurator</h3>
+    <form role="form" method="get" name="form">
+        <div class="form-group">
+            <div class="row mt32">
+                <div class="col-xs-3">
+                    <label for="chart_account_id">Chart of account :</label>
+                    <select name="chart_account_id" class="form-control">
+                        <t t-foreach="context.get_accounts()" t-as="a"> 
+                            <option t-if="a == context.chart_account_id" selected="selected" t-att-value="a.id">
+                                <t t-esc="a.name"></t>
+                            </option>
+                            <option t-if="a != context.chart_account_id" t-att-value="a.id">
+                                <t t-esc="a.name"></t>
+                            </option>
+                        </t>   
+                    </select>
+                </div>
+                <div class="col-xs-3">
+                    <label for="target_move">Target move :</label>
+                    <select name="target_move" class="form-control">
+                        <t t-if="context.target_move == 'posted'">
+                            <option selected="selected" value="posted">All Posted Entries</option>
+                            <option value="all">All Entries</option>
+                        </t>
+                        <t t-if="context.target_move != 'posted'">
+                            <option value="posted">All Posted Entries</option>
+                            <option selected="selected" value="all">All Entries</option>
+                        </t>
+                    </select>
+                </div>
+                <div class="col-xs-3">
+                    <label for="date_from">Start Date :</label>
+                    <input type="date" class="form-control" name="date_from" t-att-value="context.date_from"></input>
+                    <label for="date_to">End Date :</label>
+                    <input type="date" class="form-control" name="date_to" t-att-value="context.date_to"></input>
+                </div>
+            </div>
+            <div class="mt32">
+                <input type="submit" class="btn btn-primary" value="Update" />
+                <!-- <input type="submit" name="print" class="btn btn-primary" value="CSV" /> -->
+            </div>
+        </div>
+    </form>
+<!--     <form role="form" method="POST" name="form" action="/account/reportconfigurator/download/account.report_financial">
+        <input type="hidden" name="html" id="js_html"/>
+        <button class="btn btn-primary getPDF">PDF</button>
+    </form> -->
+</template>
+</data>
+</openerp>
