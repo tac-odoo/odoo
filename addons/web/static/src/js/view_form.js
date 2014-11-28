@@ -3066,7 +3066,6 @@ instance.web.form.FieldBarChart = instance.web.form.AbstractField.extend({
     }
 });
 
-
 instance.web.form.FieldSelection = instance.web.form.AbstractField.extend(instance.web.form.ReinitializeFieldMixin, {
     template: 'FieldSelection',
     events: {
@@ -3171,6 +3170,28 @@ instance.web.form.FieldSelection = instance.web.form.AbstractField.extend(instan
             width: width
         });
     }
+});
+
+instance.web.form.LabelSelection = instance.web.form.AbstractField.extend(instance.web.form.ReinitializeFieldMixin, {
+    template: 'FieldSelection',
+    init: function(field_manager, node) {
+        this._super(field_manager, node);
+        this.selection = _.clone(this.field.selection) || [];
+        this.classes = this.options && this.options.classes || 'success';
+    },
+    initialize_content: function () {
+        this.on("change:effective_readonly", this, this.render_value);
+    },
+    set_value: function(value_) {
+        value_ = value_ === null ? false : value_;
+        value_ = value_ instanceof Array ? value_[0] : value_;
+        this._super(value_);
+    },
+    render_value: function() {
+        var found = _.find(this.selection, function(el) { return el[0] === this.get("value"); }, this);
+        console.log("found is ::: ", found);
+        this.$el.html(QWeb.render("FieldLabelSelection", {widget: this, value: found}));
+    },
 });
 
 instance.web.form.FieldRadio = instance.web.form.AbstractField.extend(instance.web.form.ReinitializeFieldMixin, {
@@ -6244,16 +6265,6 @@ instance.web.form.StatInfo = instance.web.form.AbstractField.extend({
     },
 
 });
-
-openerp.web.form.LabelSelection = openerp.web.form.FieldSelection.extend({
-    render_value: function(){
-        this._super();
-        var label = this.options;
-        var found = _.find(this.get("values"), function(el) { return el[0] === this.get("value"); }, this);
-        this.$el.html(QWeb.render("Widget_label_selection", {'value': found, 'state': label}));
-    },
-});
-
 
 /**
  * Registry of form fields, called by :js:`instance.web.FormView`.

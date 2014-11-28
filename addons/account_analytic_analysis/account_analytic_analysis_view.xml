@@ -8,7 +8,7 @@
             <field name="arch" type="xml">
                 <xpath expr='//field[@name="project_id"]' position='after'>
                     <field name="contract_state" class='sale_project' widget="label_selection" attrs="{'invisible': [('project_id','=',False)]}" 
-                    options="{'template': 'default', 'draft': 'info', 'open': 'success', 'pending': 'danger', 'close': 'warning', 'cancelled': 'warning'}"/>
+                    options="{'classes': {'template': 'default', 'draft': 'info', 'open': 'success', 'pending': 'danger', 'close': 'warning', 'cancelled': 'warning'}}"/>
                 </xpath>
             </field>
         </record>
