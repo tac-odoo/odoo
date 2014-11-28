@@ -14,14 +14,9 @@ class FinancialReportController(http.Controller):
         if not context_id:
             context_id = request.env['account.financial.report.context'].sudo(uid).create({'financial_report_id': report_id})
         update = {}
-        if kw.get('date_from'):
-            update['date_from'] = kw['date_from']
-        if kw.get('date_to'):
-            update['date_to'] = kw['date_to']
-        if kw.get('target_move'):
-            update['target_move'] = kw['target_move']
-        if kw.get('chart_account_id'):
-            update['chart_account_id'] = kw['chart_account_id']
+        for field in context_id.fields_get():
+            if kw.get(field):
+                update[field] = kw[field]
         context_id.write(update)
         financial_report_id = request.env['account.financial.report'].sudo(uid).browse(report_id)
         lines = financial_report_id.line.get_lines_with_context(context_id)

@@ -2,14 +2,18 @@
 <openerp>
 <data>
 
-<record id="action_account_financial_context" model="ir.actions.act_window">
-    <field name="name">Financial Reports Configurations</field>
-    <field name="res_model">account.financial.report.context</field>
-    <field name="view_type">form</field>
-    <field name="view_mode">tree,form</field>
+<record model="ir.actions.act_url" id="action_pnl">
+    <field name="name">Profit And Loss</field>
+    <field name="url" eval="'/account/financial_report/'+str(ref('account_financial_report_profitandloss0'))"/>
+    <field name="target">self</field>
 </record>
-<menuitem id="menu_action_account_financial_context" name="Profit And Loss" action="action_account_financial_context" parent="account.menu_finance_legal_statement"/>
-<menuitem id="menu_action_account_financial_context" name="Balance Sheet" action="action_account_financial_context" parent="account.menu_finance_legal_statement"/>
+<record model="ir.actions.act_url" id="action_bs">
+    <field name="name">Balance Sheet</field>
+    <field name="url" eval="'/account/financial_report/'+str(ref('account_financial_report_balancesheet0'))"/>
+    <field name="target">self</field>
+</record>
+<menuitem id="menu_action_pnl" name="Profit And Loss" action="action_pnl" parent="account.menu_finance_legal_statement"/>
+<menuitem id="menu_action_bs" name="Balance Sheet" action="action_bs" parent="account.menu_finance_legal_statement"/>
 
 <template id="report_financial_line">
     <tr>
@@ -40,9 +44,9 @@
         <td class="text-right" style="white-space: nowrap;" t-if="o.balance">
             <span class="annotable" t-att-style="style" t-esc="a.get('balance')"/>
         </td>
-        <!-- <td class="text-right" style="white-space: nowrap;" t-if="o.comparison">
-            <span class="annotable" t-att-style="style" t-esc="formatLang(a.get('balance_cmp'), currency_obj=res_company.currency_id)"/>
-        </td> -->
+        <td class="text-right" style="white-space: nowrap;" t-if="context.comparison">
+            <span class="annotable" t-att-style="style" t-esc="a.get('comparison')"/>
+        </td>
     </tr>
 </template>
 <template id="report_financial">
@@ -61,7 +65,7 @@
                             <th class="text-right" t-if="o.debit_credit">Debit</th>
                             <th class="text-right" t-if="o.debit_credit">Credit</th>
                             <th class="text-right" t-if="o.balance">Balance</th>
-                            <!-- <th class="text-right" t-if="o.comparison">Comparison</th> -->
+                            <th class="text-right" t-if="context.comparison">Comparison</th>
                         </tr>
                     </thead>
                     <tbody>

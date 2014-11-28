@@ -31,12 +31,25 @@
                             <option selected="selected" value="all">All Entries</option>
                         </t>
                     </select>
+                    <div class="checkbox">
+                        <label> 
+                            <input t-if="context.comparison == False" type="checkbox" name="comparison" value="True" />
+                            <input t-if="context.comparison == True" type="checkbox" name="comparison" value="True" checked="checked" />
+                            Enable Comparison
+                        </label>
+                    </div>
                 </div>
                 <div class="col-xs-3">
                     <label for="date_from">Start Date :</label>
                     <input type="date" class="form-control" name="date_from" t-att-value="context.date_from"></input>
                     <label for="date_to">End Date :</label>
                     <input type="date" class="form-control" name="date_to" t-att-value="context.date_to"></input>
+                </div>
+                <div t-if="context.comparison" class="col-xs-3">
+                    <label for="date_from_cmp">Start Date :</label>
+                    <input type="date" class="form-control" name="date_from_cmp" t-att-value="context.date_from_cmp"></input>
+                    <label for="date_to_cmp">End Date :</label>
+                    <input type="date" class="form-control" name="date_to_cmp" t-att-value="context.date_to_cmp"></input>
                 </div>
             </div>
             <div class="mt32">
