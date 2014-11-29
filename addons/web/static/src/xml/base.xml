@@ -1155,7 +1155,7 @@
 </t>
 <t t-name="FieldLabelSelection">
     <t t-if="value">
-        <span t-attf-class="label label-#{widget.classes[value[0]]}"><t t-esc="value[1]"/></span>
+        <span t-attf-class="label label-#{widget.classes[value[0]] or 'success'}"><t t-esc="value[1]"/></span>
     </t>
 </t>
 <t t-name="FieldRadio">

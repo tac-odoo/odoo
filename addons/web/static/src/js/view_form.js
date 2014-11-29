@@ -3177,7 +3177,7 @@ instance.web.form.LabelSelection = instance.web.form.AbstractField.extend(instan
     init: function(field_manager, node) {
         this._super(field_manager, node);
         this.selection = _.clone(this.field.selection) || [];
-        this.classes = this.options && this.options.classes || 'success';
+        this.classes = this.options && this.options.classes  || {};
     },
     initialize_content: function () {
         this.on("change:effective_readonly", this, this.render_value);
