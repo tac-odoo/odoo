@@ -14,10 +14,10 @@ from openerp.tools.translate import _
 from openerp.osv import osv, fields
 
 
-class MassMailingCategory(osv.Model):
+class MassMailingTag(osv.Model):
     """Model of categories of mass mailing, i.e. marketing, newsletter, ... """
-    _name = 'mail.mass_mailing.category'
-    _description = 'Mass Mailing Category'
+    _name = 'mail.mass_mailing.tag'
+    _description = 'Mass Mailing Tag'
     _order = 'name'
 
     _columns = {
@@ -180,6 +180,7 @@ class MassMailingCampaign(osv.Model):
             row['received_ratio'] = 100.0 * row['delivered'] / total
             row['opened_ratio'] = 100.0 * row['opened'] / total
             row['replied_ratio'] = 100.0 * row['replied'] / total
+            row['bounced_ratio'] = 100.0 * row['bounced'] / total
         return results
 
     _columns = {
@@ -189,9 +190,9 @@ class MassMailingCampaign(osv.Model):
             'res.users', 'Responsible',
             required=True,
         ),
-        'category_ids': fields.many2many(
-            'mail.mass_mailing.category', 'mail_mass_mailing_category_rel',
-            'category_id', 'campaign_id', string='Categories'),
+        'tag_ids': fields.many2many(
+            'mail.mass_mailing.tag', 'mail_mass_mailing_tag_rel',
+            'tag_id', 'campaign_id', string='Tags'),
         'mass_mailing_ids': fields.one2many(
             'mail.mass_mailing', 'mass_mailing_campaign_id',
             'Mass Mailings',
@@ -247,6 +248,10 @@ class MassMailingCampaign(osv.Model):
             _get_statistics, string='Replied Ratio',
             type='integer', multi='_get_statistics',
         ),
+        'bounced_ratio': fields.function(
+            _get_statistics, string='Bounced Ratio',
+            type='integer', multi='_get_statistics',
+        ),
     }
 
     def _get_default_stage_id(self, cr, uid, context=None):
@@ -270,6 +275,32 @@ class MassMailingCampaign(osv.Model):
             stat_ids = Statistics.search(cr, uid, domain, context=context)
             res[cid] = set(stat.res_id for stat in Statistics.browse(cr, uid, stat_ids, context=context))
         return res
+
+    def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False, lazy=True):
+        """ Override read_group to always display all states. """
+        if groupby and groupby[0] == "stage_id":
+            # Default result structure
+            states_read = self.pool['mail.mass_mailing.stage'].search_read(cr, uid, [], ['name'], context=context)
+            states = [(state['id'], state['name']) for state in states_read]
+            read_group_all_states = [{
+                '__context': {'group_by': groupby[1:]},
+                '__domain': domain + [('stage_id', '=', state_value)],
+                'stage_id': state_value,
+                'state_count': 0,
+            } for state_value, state_name in states]
+            # Get standard results
+            read_group_res = super(MassMailingCampaign, self).read_group(cr, uid, domain, fields, groupby, offset=offset, limit=limit, context=context, orderby=orderby)
+            # Update standard results with default results
+            result = []
+            for state_value, state_name in states:
+                res = filter(lambda x: x['stage_id'] == (state_value, state_name), read_group_res)
+                if not res:
+                    res = filter(lambda x: x['stage_id'] == state_value, read_group_all_states)
+                res[0]['stage_id'] = [state_value, state_name]
+                result.append(res[0])
+            return result
+        else:
+            return super(MassMailingCampaign, self).read_group(cr, uid, domain, fields, groupby, offset=offset, limit=limit, context=context, orderby=orderby)
 
 
 class MassMailing(osv.Model):
@@ -388,7 +419,7 @@ class MassMailing(osv.Model):
         'email_from': fields.char('From', required=True),
         'create_date': fields.datetime('Creation Date'),
         'sent_date': fields.datetime('Sent Date', oldname='date', copy=False),
-        'schedule_date': fields.datetime('Schedule Date'),
+        'schedule_date': fields.datetime('Scheduled Send Date'),
         'body_html': fields.html('Body'),
         'attachment_ids': fields.many2many(
             'ir.attachment', 'mass_mailing_ir_attachments_rel',
@@ -400,7 +431,7 @@ class MassMailing(osv.Model):
             ondelete='set null',
         ),
         'state': fields.selection(
-            [('draft', 'Draft'), ('test', 'Tested'), ('in_queue', 'In Queue'), ('sending', 'Sending'), ('done', 'Sent')],
+            [('draft', 'Draft'), ('in_queue', 'In Queue'), ('sending', 'Sending'), ('done', 'Sent')],
             string='Status', required=True, copy=False,
         ),
         'color': fields.related(
@@ -409,7 +440,7 @@ class MassMailing(osv.Model):
         ),
         # mailing options
         'reply_to_mode': fields.selection(
-            [('thread', 'In Document'), ('email', 'Specified Email Address')],
+            [('thread', 'Followers of leads/applicants'), ('email', 'Specified Email Address')],
             string='Reply-To Mode', required=True,
         ),
         'reply_to': fields.char('Reply To', help='Preferred Reply-To Address'),
@@ -421,7 +452,7 @@ class MassMailing(osv.Model):
             string='Mailing Lists',
         ),
         'contact_ab_pc': fields.integer(
-            'AB Testing percentage',
+            'A/B Testing percentage',
             help='Percentage of the contacts that will be mailed. Recipients will be taken randomly.'
         ),
         # statistics data
@@ -519,7 +550,7 @@ class MassMailing(osv.Model):
         if groupby and groupby[0] == "state":
             # Default result structure
             # states = self._get_state_list(cr, uid, context=context)
-            states = [('draft', 'Draft'), ('test', 'Tested'), ('in_queue', 'In Queue'), ('sending', 'Sending'), ('done', 'Sent')]
+            states = [('draft', 'Draft'), ('in_queue', 'In Queue'), ('sending', 'Sending'), ('done', 'Sent')]
             read_group_all_states = [{
                 '__context': {'group_by': groupby[1:]},
                 '__domain': domain + [('state', '=', state_value)],
@@ -545,9 +576,6 @@ class MassMailing(osv.Model):
     #------------------------------------------------------
 
     def on_change_model_and_list(self, cr, uid, ids, mailing_model, list_ids, context=None):
-        print mailing_model
-        print list_ids
-
         value = {}
         if mailing_model == 'mail.mass_mailing.contact':
             mailing_list_ids = set()
@@ -601,6 +629,7 @@ class MassMailing(osv.Model):
             'url': url,
             'target': 'self',
         }
+
 
     #------------------------------------------------------
     # Email Sending
