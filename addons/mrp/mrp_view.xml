@@ -391,7 +391,7 @@
                                 <tree string="Components" editable="bottom">
                                     <field name="sequence" widget="handle"/>
                                     <field name="product_id" on_change="onchange_product_id(product_id, product_qty)"/>
-                                    <field name="type"/>
+                                    <field name="is_phantom"/>
                                     <field name="product_qty"/>
                                     <field name="product_uom" on_change="onchange_uom(product_id, product_uom)" groups="product.group_uom"/>
                                     <field name="product_rounding" groups="mrp.group_rounding_efficiency"/>
@@ -458,7 +458,7 @@
                     <field name="sequence" invisible="1"/>
                     <field name="product_id"/>
                     <field name="product_uom" groups="product.group_uom"/>
-                    <field name="type"/>
+                    <field name="is_phantom"/>
                     <field name="routing_id" groups="mrp.group_mrp_routings"/>
                     <field name="date_start"/>
                     <field name="date_stop"/>
@@ -495,7 +495,7 @@
                     <field name="sequence" widget="handle"/>
                     <field name="bom_id"/>
                     <field name="product_id" on_change="onchange_product_id(product_id)"/>
-                    <field name="type"/>
+                    <field name="is_phantom"/>
                     <field name="product_qty"/>
                     <field name="product_rounding"/>
                     <field name="product_efficiency"/>
@@ -523,7 +523,7 @@
                         <filter string="Product" icon="terp-accessories-archiver" domain="[]" context="{'group_by':'product_id'}"/>
                         <filter string='Default Unit of Measure' icon="terp-mrp" domain="[]" context="{'group_by' : 'product_uom'}"/>
                         <filter string="Routing" icon="terp-stock_align_left_24" domain="[]" context="{'group_by':'routing_id'}"/>
-                        <filter string='Type' icon="terp-stock_symbol-selection" domain="[]" context="{'group_by' : 'type'}"/>
+                        <filter string='Is Phantom?' domain="[]" context="{'group_by' : 'is_phantom'}"/>
                         <filter string=" Valid From Month" icon="terp-go-month" domain="[]" context="{'group_by':'date_start'}" help="Valid From Date by Month"/>
                    </group>
                 </search>

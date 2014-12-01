@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
+#    Copyright (C) 2004-TODAY Odoo S.A. (<https://www.odoo.com/).
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -292,7 +292,7 @@ class mrp_bom(osv.osv):
             bom_id = self._bom_find(cr, uid, product_id=bom_line_id.product_id.id, properties=properties, context=context)
 
             #If BoM should not behave like PhantoM, just add the product, otherwise explode further
-            if bom_line_id.type != "phantom" and (not bom_id or self.browse(cr, uid, bom_id, context=context).type != "phantom"):
+            if (not bom_line_id.is_phantom) and (not bom_id or self.browse(cr, uid, bom_id, context=context).type != "phantom"):
                 result.append({
                     'name': bom_line_id.product_id.name,
                     'product_id': bom_line_id.product_id.id,
@@ -373,10 +373,10 @@ class mrp_bom_line(osv.osv):
         return res
 
     _columns = {
-        'type': fields.selection([('normal', 'Normal'), ('phantom', 'Phantom')], 'BoM Line Type', required=True,
-                help="Phantom: this product line will not appear in the raw materials of manufacturing orders,"
+        'is_phantom': fields.boolean('Phantom',
+                help="If checked, this product line will not appear in the raw materials of manufacturing orders,"
                      "it will be directly replaced by the raw materials of its own BoM, without triggering"
-                     "an extra manufacturing order."),
+                     "an extra manufacturing order.", oldname='type'),
         'product_id': fields.many2one('product.product', 'Product', required=True),
         'product_uos_qty': fields.float('Product UOS Qty'),
         'product_uos': fields.many2one('product.uom', 'Product UOS', help="Product UOS (Unit of Sale) is the unit of measurement for the invoicing and promotion of stock."),
@@ -403,7 +403,6 @@ class mrp_bom_line(osv.osv):
         'product_qty': lambda *a: 1.0,
         'product_efficiency': lambda *a: 1.0,
         'product_rounding': lambda *a: 0.0,
-        'type': lambda *a: 'normal',
         'product_uom': _get_uom_id,
     }
     _sql_constraints = [
