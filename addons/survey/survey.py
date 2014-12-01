@@ -940,6 +940,23 @@ class survey_user_input(osv.Model):
             'url': self.read(cr, uid, ids, ['result_url'], context=context)[0]['result_url']
         }
 
+    def export_line(self, cr, uid, ids, questions_ids=None, context=None):
+        context = context if context else {}
+        questions_ids = questions_ids if questions_ids else self.pool['survey.survey'].export_questions_ids(cr, uid, context=context)
+
+        #liste d'ids des questions, avec eventuellement liste des sous questions matrices (1, [45,4,6,8)
+
+        lines_for_export = []
+        for line in self.browse(cr, uid, ids, context=context):
+            line_data = [line.date_create, line.token, line.partner_id.name, line.email]
+            # pour chacune des questions dans le truc, ajouter un truc à la fin de la ligne
+            # si c'est une valeur simple, on la met
+            # si c'es du choix multiple, on fait un ','.join([les réponses])
+            # si c'est une matrice, chaque ligne compte comme une question dans questions_ids => on fait comme le reste
+            lines_for_export.append( line_data )
+
+        return lines_for_export
+
 
 class survey_user_input_line(osv.Model):
     _name = 'survey.user_input_line'

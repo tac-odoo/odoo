@@ -19,11 +19,14 @@
 #
 ##############################################################################
 
+import csv
 import json
 import logging
+import StringIO
 import werkzeug
 import werkzeug.utils
 from datetime import datetime
+from itertools import chain
 from math import ceil
 
 from openerp import SUPERUSER_ID
@@ -413,6 +416,37 @@ class WebsiteSurvey(http.Controller):
                     values.append({'text': data['rows'].get(row), 'count': data['result'].get((row, answer))})
                 result.append({'key': data['answers'].get(answer), 'values': values})
         return json.dumps(result)
+
+    @http.route(['/survey/results_csv/<model("survey.survey"):survey>'],
+                type='http', auth='user')
+    def survey_export_csv(self, survey, **post):
+        '''Exports all the answers of the survey to a CSV-file'''
+        cr, uid, context = request.cr, request.uid, request.context
+
+        # ordered_questions = chain.from_iterable([page.question_ids for page in survey.page_ids])
+        # column_headers = ['Date', 'Token', 'Partner', 'Email'] + [question.id for question in ordered_questions]
+        # row_template = dict.fromkeys(column_headers, '')
+
+        # buff = StringIO.StringIO()
+        # csv_writer = csv.DictWriter(buff, column_headers)
+        # csv_writer.writeheader()
+
+        # for user_input in survey.user_input_ids:
+        #     row = row_template.copy()
+        #     a = {
+        #             'Date': user_input.date_create,
+        #             'Token': user_input.token,
+        #             'Partner': user_input.partner_id.name or '',
+        #             'Email': user_input.email or '',
+        #         }
+        #     csv_writer.writerow(a)
+
+        # result = buff.getvalue()
+        # buff.close()
+
+        return result
+
+
 
 def dict_soft_update(dictionary, key, value):
     ''' Insert the pair <key>: <value> into the <dictionary>. If <key> is
