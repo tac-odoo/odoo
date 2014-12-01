@@ -413,7 +413,7 @@
                             <label for="name" class="oe_edit_only"/>
                             <h1><field name="name" placeholder="e.g. Product Pricing"/></h1>
                             <label for="planned_revenue" style="padding-right: 50px" class="oe_edit_only"/>
-                            <label for="probability" class="oe_edit_only"/>
+                            <label for="probability" class="oe_edit_only" string="Probability"/>
                             <h2>
                                 <field name="company_currency" invisible="1"/>
                                 <field name="planned_revenue" class="oe_inline" widget='monetary' options="{'currency_field': 'company_currency'}"/>
@@ -558,7 +558,7 @@
                     <field name="tag_ids" string="Tag" filter_domain="[('tag_ids', 'ilike', self)]"/>
                     <field name="team_id" groups="base.group_multi_salesteams"/>
                     <field name="user_id"/>
-                    <field name="partner_id" operator="child_of"/>
+                    <field name="partner_id" operator="child_of" string="Customer"/>
                     <field name="stage_id" domain="[]"/>
                     <field name="probability"/>
                     <field name="lost_reason"/>
