@@ -5,8 +5,9 @@ from openerp.tools import html2plaintext
 
 
 class HrMaterialStage(models.Model):
-
-    """Stages for Kanban view of Maintenance Request"""
+    """Model for case stages. This models the main stages of a Maintenance Request management flow.
+       Stages are for example used to display the kanban view of records.
+    """
 
     _name = 'hr.material.stage'
     _description = 'Maintenance Request Stage'
@@ -26,6 +27,7 @@ class HrMaterialCategory(models.Model):
     @api.one
     def _compute_material_count(self):
         self.material_count = len(self.material_ids)
+        self.fold = False if self.material_count else True
 
     @api.one
     def _compute_maintenance_count(self):
@@ -43,6 +45,7 @@ class HrMaterialCategory(models.Model):
         'mail.alias', 'Alias', ondelete="restrict", required=True,
         help="Email alias for this material category. New emails will automatically "
         "create new maintenance request for this material category.")
+    fold = fields.Boolean(compute='_compute_material_count', string='Folded in Kanban View')
 
     @api.model
     def create(self, vals):
@@ -137,6 +140,30 @@ class HrMaterial(models.Model):
             self.message_subscribe_users(user_ids=user_ids)
         return super(HrMaterial, self).write(vals)
 
+    @api.multi
+    def _read_group_category_ids(self, domain, read_group_order=None, access_rights_uid=None):
+        """ Read group customization in order to display all the category in the
+        kanban view, even if they are empty """
+        category_obj = self.env['hr.material.category']
+        order = category_obj._order
+        access_rights_uid = access_rights_uid or self._uid
+        if read_group_order == 'category_id desc':
+            order = '%s desc' % order
+
+        category_ids = category_obj._search([], order=order, access_rights_uid=access_rights_uid)
+        result = [category.name_get()[0] for category in category_obj.browse(category_ids)]
+        # restore order of the search
+        result.sort(lambda x, y: cmp(category_ids.index(x[0]), category_ids.index(y[0])))
+
+        fold = {}
+        for category in category_obj.browse(category_ids):
+            fold[category.id] = category.fold
+        return result, fold
+
+    _group_by_full = {
+        'category_id': _read_group_category_ids
+    }
+
     @api.onchange('material_assign_to')
     def _onchange_material_assign_to(self):
         if self.material_assign_to == 'employee':
@@ -194,25 +221,25 @@ class HrMaterialRequest(models.Model):
         default='normal',
         track_visibility='onchange')
 
-    @api.v7
-    def _read_group_stage_ids(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
+    @api.multi
+    def _read_group_stage_ids(self, domain, read_group_order=None, access_rights_uid=None):
         """ Read group customization in order to display all the stages in the
         kanban view, even if they are empty """
-        stage_obj = self.pool.get('hr.material.stage')
+        stage_obj = self.env['hr.material.stage']
         order = stage_obj._order
-        access_rights_uid = access_rights_uid or uid
+        access_rights_uid = access_rights_uid or self._uid
 
         if read_group_order == 'stage_id desc':
             order = '%s desc' % order
 
-        stage_ids = stage_obj._search(cr, uid, [], order=order, access_rights_uid=access_rights_uid, context=context)
-        result = stage_obj.name_get(cr, access_rights_uid, stage_ids, context=context)
+        stage_ids = stage_obj._search([], order=order, access_rights_uid=access_rights_uid)
+        result = [stage.name_get()[0] for stage in stage_obj.browse(stage_ids)]
 
         # restore order of the search
         result.sort(lambda x, y: cmp(stage_ids.index(x[0]), stage_ids.index(y[0])))
 
         fold = {}
-        for stage in stage_obj.browse(cr, access_rights_uid, stage_ids, context=context):
+        for stage in stage_obj.browse(stage_ids):
             fold[stage.id] = stage.fold or False
         return result, fold
 
