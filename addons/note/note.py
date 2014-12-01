@@ -20,31 +20,29 @@
 ##############################################################################
 
 from openerp import SUPERUSER_ID
-from openerp.osv import osv, fields
+import openerp
+from openerp.osv import osv
+from openerp import models, fields, api, exceptions, _
 from openerp.tools import html2plaintext
 
-class note_stage(osv.osv):
+class note_stage(models.Model):
     """ Category of Note """
     _name = "note.stage"
     _description = "Note Stage"
-    _columns = {
-        'name': fields.char('Stage Name', translate=True, required=True),
-        'sequence': fields.integer('Sequence', help="Used to order the note stages"),
-        'user_id': fields.many2one('res.users', 'Owner', help="Owner of the note stage.", required=True, ondelete='cascade'),
-        'fold': fields.boolean('Folded by Default'),
-    }
+
+    name = fields.Char('Stage Name', translate=True, required=True)
+    sequence = fields.Integer('Sequence', help="Used to order the note stages", default=1)
+    user_id = fields.Many2one('res.users', 'Owner', help="Owner of the note stage.", required=True, ondelete='cascade', default=lambda self: self.env.user)
+    fold = fields.Boolean('Folded by Default', default=0)
+
     _order = 'sequence asc'
-    _defaults = {
-        'fold': 0,
-        'user_id': lambda self, cr, uid, ctx: uid,
-        'sequence' : 1,
-    }
+
 
 class note_tag(osv.osv):
     _name = "note.tag"
     _description = "Note Tag"
     _columns = {
-        'name' : fields.char('Tag Name', required=True),
+        'name' : openerp.osv.fields.char('Tag Name', required=True),
     }
 
 class note_note(osv.osv):
@@ -67,7 +65,7 @@ class note_note(osv.osv):
         return res
 
     def onclick_note_is_done(self, cr, uid, ids, context=None):
-        return self.write(cr, uid, ids, {'open': False, 'date_done': fields.date.today()}, context=context)
+        return self.write(cr, uid, ids, {'open': False, 'date_done': openerp.osv.fields.date.today()}, context=context)
 
     def onclick_note_not_done(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'open': True}, context=context)
@@ -92,22 +90,22 @@ class note_note(osv.osv):
         return result
 
     _columns = {
-        'name': fields.function(_get_note_first_line,
+        'name': openerp.osv.fields.function(_get_note_first_line,
             string='Note Summary',
             type='text', store=True),
-        'user_id': fields.many2one('res.users', 'Owner'),
-        'memo': fields.html('Note Content'),
-        'sequence': fields.integer('Sequence'),
-        'stage_id': fields.function(_get_stage_per_user,
+        'user_id': openerp.osv.fields.many2one('res.users', 'Owner'),
+        'memo': openerp.osv.fields.html('Note Content'),
+        'sequence': openerp.osv.fields.integer('Sequence'),
+        'stage_id': openerp.osv.fields.function(_get_stage_per_user,
             fnct_inv=_set_stage_per_user,
             string='Stage',
             type='many2one',
             relation='note.stage'),
-        'stage_ids': fields.many2many('note.stage','note_stage_rel','note_id','stage_id','Stages of Users'),
-        'open': fields.boolean('Active', track_visibility='onchange'),
-        'date_done': fields.date('Date done'),
-        'color': fields.integer('Color Index'),
-        'tag_ids' : fields.many2many('note.tag','note_tags_rel','note_id','tag_id','Tags'),
+        'stage_ids': openerp.osv.fields.many2many('note.stage','note_stage_rel','note_id','stage_id','Stages of Users'),
+        'open': openerp.osv.fields.boolean('Active', track_visibility='onchange'),
+        'date_done': openerp.osv.fields.date('Date done'),
+        'color': openerp.osv.fields.integer('Color Index'),
+        'tag_ids' : openerp.osv.fields.many2many('note.tag','note_tags_rel','note_id','tag_id','Tags'),
     }
     _defaults = {
         'user_id': lambda self, cr, uid, ctx=None: uid,
@@ -176,8 +174,8 @@ class note_note(osv.osv):
 class note_base_config_settings(osv.osv_memory):
     _inherit = 'base.config.settings'
     _columns = {
-        'module_note_pad': fields.boolean('Use collaborative pads (etherpad)'),
-        'group_note_fancy': fields.boolean('Use fancy layouts for notes', implied_group='note.group_note_fancy'),
+        'module_note_pad': openerp.osv.fields.boolean('Use collaborative pads (etherpad)'),
+        'group_note_fancy': openerp.osv.fields.boolean('Use fancy layouts for notes', implied_group='note.group_note_fancy'),
     }
 
 class res_users(osv.Model):
