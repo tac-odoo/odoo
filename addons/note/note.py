@@ -38,12 +38,10 @@ class note_stage(models.Model):
     _order = 'sequence asc'
 
 
-class note_tag(osv.osv):
+class note_tag(models.Model):
     _name = "note.tag"
     _description = "Note Tag"
-    _columns = {
-        'name' : openerp.osv.fields.char('Tag Name', required=True),
-    }
+    name = fields.Char('Tag Name', required=True)
 
 class note_note(osv.osv):
     """ Note """
