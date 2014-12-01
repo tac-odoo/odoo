@@ -6223,6 +6223,9 @@ instance.web.form.StatInfo = instance.web.form.AbstractField.extend({
         this.internal_set_value(0);
     },
     set_value: function(value_) {
+        if (value_ instanceof Array) {
+            value_ = value_[1];
+        }
         if (value_ === false || value_ === undefined) {
             value_ = 0;
         }
