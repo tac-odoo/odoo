@@ -10,7 +10,7 @@ class HrMaterialStage(models.Model):
     """
 
     _name = 'hr.material.stage'
-    _description = 'Maintenance Request Stage'
+    _description = 'Material Stage'
     _order = 'sequence asc'
 
     name = fields.Char('Name', required=True, translate=True)
@@ -89,7 +89,7 @@ class HrMaterial(models.Model):
     user_id = fields.Many2one('res.users', string='Technician', track_visibility='onchange')
     employee_id = fields.Many2one('hr.employee', string='Assigned to Employee', track_visibility='onchange')
     department_id = fields.Many2one('hr.department', string='Assigned to Department', track_visibility='onchange')
-    category_id = fields.Many2one('hr.material.category', string='Category', track_visibility='onchange')
+    category_id = fields.Many2one('hr.material.category', string='Material Category', track_visibility='onchange')
     partner_id = fields.Many2one('res.partner', string='Supplier', domain="[('supplier', '=', 1)]")
     model = fields.Char('Model')
     serial_no = fields.Char('Serial Number', copy=False)
@@ -180,7 +180,7 @@ class HrMaterial(models.Model):
 class HrMaterialRequest(models.Model):
     _name = 'hr.material.request'
     _inherit = ['mail.thread']
-    _description = 'Maintenance Request'
+    _description = 'Material Request'
     _track = {
         'stage_id': {
             'hr_material.mt_req_created': lambda self, cr, uid, obj, ctx = None: obj.stage_id and obj.stage_id.sequence <= 1,
@@ -290,8 +290,11 @@ class HrMaterialRequest(models.Model):
         # Overridden to reset the kanban_state to normal whenever
         # the stage (stage_id) of the Maintenance Request changes.
         if vals and not 'kanban_state' in vals and 'stage_id' in vals:
+            new_stage = vals.get('stage_id')
+            vals_reset_kstate = dict(vals, kanban_state='normal')
             for material_request in self:
-                material_request.kanban_state = 'normal'
+                write_vals = vals_reset_kstate if material_request.stage_id.id != new_stage else vals
+                material_request.write(write_vals)
         if vals.get('employee_id'):
             user_id = self.env['hr.employee'].browse(vals['employee_id'])['user_id']
             if user_id:

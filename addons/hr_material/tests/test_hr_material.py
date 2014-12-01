@@ -8,10 +8,10 @@ class TestHrMaterial(TransactionCase):
 
     def setUp(self):
         super(TestHrMaterial, self).setUp()
-        self.maintenance_request_stage_obj = self.env['maintenance.request.stage']
+        self.maintenance_request_stage_obj = self.env['hr.material.stage']
         self.material_category_obj = self.env['hr.material.category']
         self.material_obj = self.env['hr.material']
-        self.maintenance_request_obj = self.env['hr.material.maintenance_request']
+        self.maintenance_request_obj = self.env['hr.material.request']
         self.res_user_model = self.env['res.users']
         self.main_company = self.env.ref('base.main_company')
         res_hr_user = self.env.ref('base.group_user')
