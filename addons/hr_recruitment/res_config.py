@@ -31,7 +31,7 @@ class hr_applicant_settings(osv.TransientModel):
         'module_document': fields.boolean('Allow the automatic indexation of resumes',
             help='Manage your CV\'s and motivation letter related to all applicants.\n'
                  '-This installs the module document_ftp. This will install the knowledge management  module in order to allow you to search using specific keywords through  the content of all documents (PDF, .DOCx...)'),
-        'job_alias_prefix': fields.char('Default Alias Name for Jobs'),
+        'alias_prefix': fields.char('Default Alias Name for Jobs'),
         'alias_domain': fields.char('Alias Domain'),
     }
 
@@ -53,20 +53,20 @@ class hr_applicant_settings(osv.TransientModel):
             alias_id = alias_ids and alias_ids[0] or False
         return alias_id
 
-    def get_default_job_alias_prefix(self, cr, uid, ids, context=None):
+    def get_default_alias_prefix(self, cr, uid, ids, context=None):
         alias_name = False
         alias_id = self._find_default_job_alias_id(cr, uid, context=context)
         if alias_id:
             alias_name = self.pool['mail.alias'].browse(cr, uid, alias_id, context=context).alias_name
-        return {'job_alias_prefix': alias_name}
+        return {'alias_prefix': alias_name}
 
-    def set_default_job_alias_prefix(self, cr, uid, ids, context=None):
+    def set_default_alias_prefix(self, cr, uid, ids, context=None):
         mail_alias = self.pool.get('mail.alias')
         for record in self.browse(cr, uid, ids, context=context):
             alias_id = self._find_default_job_alias_id(cr, uid, context=context)
             if not alias_id:
                 create_ctx = dict(context, alias_model_name='hr.applicant', alias_parent_model_name='hr.job')
-                alias_id = self.pool['mail.alias'].create(cr, uid, {'alias_name': record.job_alias_prefix}, context=create_ctx)
+                alias_id = self.pool['mail.alias'].create(cr, uid, {'alias_name': record.alias_prefix}, context=create_ctx)
             else:
-                mail_alias.write(cr, uid, alias_id, {'alias_name': record.job_alias_prefix}, context=context)
+                mail_alias.write(cr, uid, alias_id, {'alias_name': record.alias_prefix}, context=context)
         return True
