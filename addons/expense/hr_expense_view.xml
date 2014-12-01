@@ -266,7 +266,7 @@
                 <sheet>
                     <form string="Expense Lines">
                         <div class="oe_title">
-                        <label for="name"  string="Description" class="oe_edit_only"/>
+                        <label for="name" class="oe_edit_only"/>
                             <h1>
                                 <field name="name" class="oe_inline"/>
                             </h1>
@@ -290,11 +290,13 @@
                                 <div>
                                     <field name="expense_tax_id" widget="many2many_tags" groups="account.group_account_user"/>
                                 </div>
-                                <label for="total_amount"/>
-                                <div>
-                                    <field name="total_amount"/>
-                                </div>
                             </group>
+                        </group>
+                        <group class="oe_subtotal_footer oe_right">
+                            <label for="total_amount"  class="oe_subtotal_footer_separator" style="padding-top: 6px !important;"/>
+                                <div>
+                                    <field name="total_amount" nolabel="1" class="oe_subtotal_footer_separator "/>
+                                </div>
                         </group>
                     </form>
                 </sheet>
@@ -398,11 +400,13 @@
                                 <div>
                                     <field name="expense_tax_id" widget="many2many_tags" groups="account.group_account_user"/>
                                 </div>
-                                <label for="total_amount"/>
-                                <div>
-                                    <field name="total_amount"/>
-                                </div>
                             </group>
+                        </group>
+                        <group class="oe_subtotal_footer oe_right">
+                            <label for="total_amount"  class="oe_subtotal_footer_separator" style="padding-top: 6px !important;"/>
+                                <div>
+                                    <field name="total_amount" nolabel="1" class="oe_subtotal_footer_separator "/>
+                                </div>
                         </group>
                     </form>
                 </sheet>

@@ -128,6 +128,12 @@ class expense_sheet(models.Model):
 
     @api.multi
     def expense_accept(self):
+        expense_state = False
+        for expense in self.line_ids:
+            if expense.state == 'accepted':
+                expense_state = True
+        if not expense_state:
+            raise except_orm(_('Error!'), _('You cannot submit expense sheet which has no expense approved by hr manager.'))
         return self.write({'state': 'accepted', 'date_valid': time.strftime('%Y-%m-%d'), 'user_valid': self._uid})
 
     @api.multi
@@ -304,17 +310,22 @@ class expense_sheet(models.Model):
             acc = self.env['ir.property'].with_context({'force_company': company.id}).get('property_account_expense_categ', 'product.category')
             if not acc:
                 raise except_orm(_('Error!'), _('Please configure Default Expense account for Product purchase: `property_account_expense_categ`.'))
-        return {
-            'type':'src',
-            'name': line.name.split('\n')[0][:64],
-            'price_unit':line.unit_amount,
-            'quantity':line.unit_quantity,
-            'price':line.total_amount,
-            'account_id':acc.id,
-            'product_id':line.product_id.id,
-            'uos_id':line.uom_id.id,
-            'account_analytic_id':line.analytic_account.id,
-        }
+        
+        if line.state == 'accepted':
+            return {
+                'type':'src',
+                'name': line.name.split('\n')[0][:64],
+                'price_unit':line.unit_amount,
+                'quantity':line.unit_quantity,
+                'price':line.total_amount,
+                'account_id':acc.id,
+                'product_id':line.product_id.id,
+                'uos_id':line.uom_id.id,
+                'account_analytic_id':line.analytic_account.id,
+            }
+        elif line.state == 'confirm':
+            line.write({'state':'cancel'})
+        
 
     @api.multi
     def action_view_move(self):
@@ -365,7 +376,7 @@ class expense(models.Model):
     def _get_uom_id(self):
         return self.env['ir.model.data'].xmlid_to_res_id('product.product_uom_unit')
 
-    name = fields.Char(string='Expense Note', required=True)
+    name = fields.Char(string='Description', required=True)
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
     expense_id = fields.Many2one('expense.sheet', string='Expense', ondelete='cascade', select=True)
     total_amount = fields.Float(string='Total', store=True, compute='_amount', digits=dp.get_precision('Account'))
@@ -394,7 +405,6 @@ class expense(models.Model):
         res = {}
         if product_id:
             product = self.env['product.product'].browse(product_id)
-            res['name'] = product.name
             amount_unit = product.price_get('standard_price')[product.id]
             res['unit_amount'] = amount_unit
             res['uom_id'] = product.uom_id.id
