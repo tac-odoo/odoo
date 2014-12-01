@@ -34,8 +34,11 @@ class FormulaLine(object):
             if obj._name == 'account.financial.report.line':
                 fields = obj.get_sum()
             elif obj._name == 'account.move.line':
-                for field in ['balance', 'credit', 'debit']:
-                    fields[field] = getattr(obj, field)
+                field_names = ['balance', 'credit', 'debit']
+                res = obj.compute_fields(field_names)
+                if res:
+                    for field in field_names:
+                        fields[field] = res[0][field]
         self.balance = fields['balance']
         self.credit = fields['credit']
         self.debit = fields['debit']
@@ -104,7 +107,7 @@ class account_financial_report_line(models.Model):
     sequence = fields.Integer('Sequence')
     domain = fields.Char('Domain', default=None)  # Example : ['account_id.tags', 'in', [1, 2, 3]]
     formulas = fields.Char('Formulas')
-    groupby = fields.Char('Group By')
+    groupby = fields.Char('Group By', default=False)
     unfolded = fields.Boolean('Unfolded by default', default=False)
 
     def get_sum(self, field_names=None):
@@ -115,8 +118,10 @@ class account_financial_report_line(models.Model):
         if self.domain:
             move_line_ids = self.env['account.move.line'].search(safe_eval(self.domain))
             for aml in move_line_ids:
-                for field in field_names:
-                    res[field] += getattr(aml, field)
+                compute = aml.compute_fields(field_names)
+                if compute:
+                    for field in field_names:
+                        res[field] += compute[0][field]
         return res
 
     @api.one
@@ -145,47 +150,56 @@ class account_financial_report_line(models.Model):
             comparison=context_id.comparison,
             date_from_cmp=context_id.date_from_cmp,
             date_to_cmp=context_id.date_to_cmp,
+            cash_basis=context_id.cash_basis,
         ).get_lines(context_id.financial_report_id)
 
     @api.multi
     def get_lines(self, financial_report_id):
         lines = []
-        rml_parser = report_sxw.rml_parse(self.env.cr, self.env.uid, 'financial_report', context=self.env.context)
+        context = self.env.context
+        rml_parser = report_sxw.rml_parse(self.env.cr, self.env.uid, 'financial_report', context=context)
         currency_id = self.env.user.company_id.currency_id
+        # Computing the lines
         for line in self._get_children_by_order():
             vals = {
                 'id': line.id,
                 'name': line.name,
                 'type': 'line',
                 'level': line.level,
-                'unfolded': not 'unfolded_lines' in self.env.context or line.id in self.env.context['unfolded_lines'],
+                'unfolded': not 'unfolded_lines' in context or line.id in context['unfolded_lines'],
             }
+            # listing the columns
             columns = []
             if financial_report_id.balance:
                 columns.append('balance')
             if financial_report_id.debit_credit:
-                columns.append('credit', 'debit')
+                if not context.get('cash_basis'):
+                    columns += ['credit', 'debit']
+                else:
+                    columns += ['credit_cash_basis', 'debit_cash_basis']
+            # computing the values for the lines
             for key, value in line.get_balance(columns)[0].items():
                 vals[key] = rml_parser.formatLang(value, currency_obj=currency_id)
-            if self.env.context['comparison']:
-                cmp_line = line.with_context(date_from=self.env.context['date_from_cmp'], date_to=self.env.context['date_to_cmp'])
+            if context['comparison']:
+                cmp_line = line.with_context(date_from=context['date_from_cmp'], date_to=context['date_to_cmp'])
                 value = cmp_line.get_balance(['balance'])[0]['balance']
                 vals['comparison'] = rml_parser.formatLang(value, currency_obj=currency_id)
-            #if self.financial_report_id.comparison:
-                #vals['balance_cmp'] = self.pool.get('account.financial.report').browse(self.cr, self.uid, line.id, context=data['form']['comparison_context']).balance * line.sign or 0.0
             lines.append(vals)
-            if line.domain and (not 'unfolded_lines' in self.env.context or line.id in self.env.context['unfolded_lines']):
+            # if the line has a domain, computing its values
+            if line.domain and (not 'unfolded_lines' in context or line.id in context['unfolded_lines']):
                 aml_obj = self.env['account.move.line']
-                if self.env.context['comparison']:
+                if context['comparison']:
                     columns += ['comparison']
-                    aml_cmp_obj = aml_obj.with_context(date_from=self.env.context['date_from_cmp'], date_to=self.env.context['date_to_cmp'])
+                    aml_cmp_obj = aml_obj.with_context(date_from=context['date_from_cmp'], date_to=context['date_to_cmp'])
                 amls = aml_obj.search(safe_eval(line.domain))
+
                 if line.groupby:
                     gbs = [k[line.groupby] for k in aml_obj.read_group(safe_eval(line.domain), [line.groupby], line.groupby)]
-                    if self.env.context['comparison']:
+                    if context['comparison']:
                         gbs_cmp = [k[line.groupby] for k in aml_cmp_obj.read_group(safe_eval(line.domain), [line.groupby], line.groupby)]
                         gbs += list(set(gbs_cmp) - set(gbs))
                     gb_vals = dict((gb[0], dict((column, 0.0) for column in columns)) for gb in gbs)
+
                     for aml in amls:
                         c = FormulaContext(self.env['account.financial.report.line'], aml)
                         for f in line.formulas.split(';'):
@@ -193,18 +207,25 @@ class account_financial_report_line(models.Model):
                             column = column.strip()
                             if column in columns:
                                 gb_vals[getattr(aml, line.groupby).id][column] += safe_eval(formula, c, nocopy=True)
-                            if column == 'balance' and self.env.context['comparison']:
+                            if column == 'balance' and context['comparison']:
                                 c_cmp = FormulaContext(self.env['account.financial.report.line'], aml_cmp_obj.browse(aml.id))
                                 gb_vals[getattr(aml, line.groupby).id]['comparison'] += safe_eval(formula, c_cmp, nocopy=True)
+
                     for gb in gbs:
                         vals = {
                             'name': gb[1],
                             'level': line.level + 2,
                             'type': line.groupby,
                         }
+                        flag = False
                         for column in columns:
-                            vals[column] = rml_parser.formatLang(gb_vals[gb[0]][column], currency_obj=currency_id)
-                        lines.append(vals)
+                            value = gb_vals[gb[0]][column]
+                            vals[column] = rml_parser.formatLang(value, currency_obj=currency_id)
+                            if not aml.company_id.currency_id.is_zero(value):
+                                flag = True
+                        if flag:
+                            lines.append(vals)
+
                 else:
                     for aml in amls:
                         vals = {
@@ -218,20 +239,22 @@ class account_financial_report_line(models.Model):
                             [column, formula] = f.split('=')
                             column = column.strip()
                             if column in columns:
-                                vals[column] = rml_parser.formatLang(safe_eval(formula, c, nocopy=True), currency_obj=currency_id)
-                                if not aml.company_id.currency_id.is_zero(vals['column']):
+                                value = safe_eval(formula, c, nocopy=True)
+                                vals[column] = rml_parser.formatLang(value, currency_obj=currency_id)
+                                if not aml.company_id.currency_id.is_zero(value):
                                     flag = True
-                            if column == 'balance' and self.env.context['comparison']:
+                            if column == 'balance' and context['comparison']:
                                 c_cmp = FormulaContext(self.env['account.financial.report.line'], aml_cmp_obj.browse(aml.id))
-                                vals['comparison'] = rml_parser.formatLang(safe_eval(formula, c_cmp, nocopy=True), currency_obj=currency_id)
-                                if not aml.company_id.currency_id.is_zero(vals['comparison']):
+                                value = safe_eval(formula, c_cmp, nocopy=True)
+                                vals['comparison'] = rml_parser.formatLang(value, currency_obj=currency_id)
+                                if not aml.company_id.currency_id.is_zero(value):
                                     flag = True
                         if flag:
                             lines.append(vals)
         return lines
 
 
-class account_financial_report_context(models.Model):
+class account_financial_report_context(models.TransientModel):
     _name = "account.financial.report.context"
     _description = "A particular context for a financial report"
 
@@ -262,6 +285,7 @@ class account_financial_report_context(models.Model):
     comparison = fields.Boolean('Enable comparison', default=False)
     date_from_cmp = fields.Date("Start date for comparison", default=lambda s: datetime.today() + timedelta(days=-395))
     date_to_cmp = fields.Date("End date for comparison", default=lambda s: datetime.today() + timedelta(days=-365))
+    cash_basis = fields.Boolean('Enable cash basis columns', default=False)
 
     @api.multi
     def remove_line(self, line_id):

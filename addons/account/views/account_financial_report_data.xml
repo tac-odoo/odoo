@@ -6,13 +6,13 @@
         -->
         <record id="account_financial_report_profitandloss_line0" model="account.financial.report.line">
             <field name="name">Profit and Loss</field>
-            <field name="formulas">balance = INC.balance + EXP.balance</field>
+            <field name="formulas">balance = INC.balance + EXP.balance; debit = INC.debit + EXP.debit; credit = INC.credit + EXP.credit</field>
             <field name="sequence" eval="1"/>
         </record>
         <record id="account_financial_report_income0" model="account.financial.report.line">
             <field name="name">Income</field>
             <field name="code">INC</field>
-            <field name="formulas">balance = -sum.balance</field>
+            <field name="formulas">balance = -sum.balance; credit = -sum.credit; debit = -sum.debit</field>
             <field name="parent_id" ref="account_financial_report_profitandloss_line0"/>
             <field name="domain" eval="[('account_id.user_type.report_type', '=', 'income')]" />
             <field name="groupby">account_id</field>
@@ -21,7 +21,7 @@
         <record id="account_financial_report_expense0" model="account.financial.report.line">
             <field name="name">Expense</field>
             <field name="code">EXP</field>
-            <field name="formulas">balance = -sum.balance</field>
+            <field name="formulas">balance = -sum.balance; credit = -sum.credit; debit = -sum.debit</field>
             <field name="parent_id" ref="account_financial_report_profitandloss_line0"/>
             <field name="domain" eval="[('account_id.user_type.report_type', '=', 'expense')]" />
             <field name="groupby">account_id</field>
@@ -30,7 +30,7 @@
 
         <record id="account_financial_report_balancesheet_line0" model="account.financial.report.line">
             <field name="name">Balance Sheet</field>
-            <field name="formulas">balance = ASS.balance + LIA.balance</field>
+            <field name="formulas">balance = ASS.balance + LIA.balance; credit = ASS.credit + LIA.credit; debit = ASS.debit + LIA.debit</field>
             <field name="sequence" eval="4"/>
         </record>
         <record id="account_financial_report_assets0" model="account.financial.report.line">
@@ -39,7 +39,7 @@
             <field name="parent_id" ref="account_financial_report_balancesheet_line0"/>
             <field name="domain" eval="[('account_id.user_type.report_type', '=', 'assets')]" />
             <field name="groupby">account_id</field>
-            <field name="formulas">balance = sum.balance</field>
+            <field name="formulas">balance = sum.balance; credit = sum.credit; debit = sum.debit</field>
             <field name="sequence" eval="5"/>
         </record>
         <record id="account_financial_report_liability0" model="account.financial.report.line">
@@ -48,7 +48,7 @@
             <field name="parent_id" ref="account_financial_report_balancesheet_line0"/>
             <field name="domain" eval="[('account_id.user_type.report_type', '=', 'liability')]" />
             <field name="groupby">account_id</field>
-            <field name="formulas">balance = sum.balance</field>
+            <field name="formulas">balance = sum.balance; credit = sum.credit; debit = sum.debit</field>
             <field name="sequence" eval="6"/>
         </record>
         <!-- 
@@ -57,11 +57,13 @@
         <record id="account_financial_report_profitandloss0" model="account.financial.report">
             <field name="name">Profit and Loss</field>
             <field name="balance" eval="True"/>
+            <field name="debit_credit" eval="True"/>
             <field name="line" ref="account_financial_report_profitandloss_line0"/>
         </record>
         <record id="account_financial_report_balancesheet0" model="account.financial.report">
             <field name="name">Balance Sheet</field>
             <field name="balance" eval="True"/>
+            <field name="debit_credit" eval="True"/>
             <field name="line" ref="account_financial_report_balancesheet_line0"/>
         </record>
     </data>
