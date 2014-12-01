@@ -301,7 +301,7 @@ class expense_sheet(models.Model):
             if not acc:
                 raise except_orm(_('Error!'), _('No purchase account found for the product %s (or for his category), please configure one.') % (line.product_id.name))
         else:
-            acc = self.env['ir.property'].get(cr, uid, 'property_account_expense_categ', 'product.category', context={'force_company': company.id})
+            acc = self.env['ir.property'].with_context({'force_company': company.id}).get('property_account_expense_categ', 'product.category')
             if not acc:
                 raise except_orm(_('Error!'), _('Please configure Default Expense account for Product purchase: `property_account_expense_categ`.'))
         return {
