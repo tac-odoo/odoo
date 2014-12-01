@@ -92,16 +92,16 @@ class note_note(osv.osv):
         return result
 
     _columns = {
-        'name': fields.function(_get_note_first_line, 
-            string='Note Summary', 
+        'name': fields.function(_get_note_first_line,
+            string='Note Summary',
             type='text', store=True),
         'user_id': fields.many2one('res.users', 'Owner'),
         'memo': fields.html('Note Content'),
         'sequence': fields.integer('Sequence'),
-        'stage_id': fields.function(_get_stage_per_user, 
-            fnct_inv=_set_stage_per_user, 
-            string='Stage', 
-            type='many2one', 
+        'stage_id': fields.function(_get_stage_per_user,
+            fnct_inv=_set_stage_per_user,
+            string='Stage',
+            type='many2one',
             relation='note.stage'),
         'stage_ids': fields.many2many('note.stage','note_stage_rel','note_id','stage_id','Stages of Users'),
         'open': fields.boolean('Active', track_visibility='onchange'),
@@ -168,7 +168,7 @@ class note_note(osv.osv):
             return result
 
         else:
-            return super(note_note, self).read_group(self, cr, uid, domain, fields, groupby, 
+            return super(note_note, self).read_group(self, cr, uid, domain, fields, groupby,
                 offset=offset, limit=limit, context=context, orderby=orderby,lazy=lazy)
 
 
