@@ -13,8 +13,8 @@
 
         <!--Maintenance Request Search View-->
         <record id="hr_material_maintenance_request_view_search" model="ir.ui.view">
-            <field name="name">hr.material.maintenance_request.search</field>
-            <field name="model">hr.material.maintenance_request</field>
+            <field name="name">hr.material.request.search</field>
+            <field name="model">hr.material.request</field>
             <field name="arch" type="xml">
                 <search string="maintenance Request Search">
                     <field name="name"/>
@@ -39,8 +39,8 @@
 
         <!--Maintenance Request Form View-->
         <record id="hr_material_maintenance_request_view_form" model="ir.ui.view">
-            <field name="name">hr.material.maintenance_request.form</field>
-            <field name="model">hr.material.maintenance_request</field>
+            <field name="name">hr.material.request.form</field>
+            <field name="model">hr.material.request</field>
             <field name="arch" type="xml">
                 <form string="Maintenance Request">
                     <header>
@@ -81,8 +81,8 @@
 
         <!--Maintenance Request Kanban View-->
         <record model="ir.ui.view" id="hr_material_maintenance_request_view_kanban">
-            <field name="name">hr.material.maintenance_request.kanban</field>
-            <field name="model">hr.material.maintenance_request</field>
+            <field name="name">hr.material.request.kanban</field>
+            <field name="model">hr.material.request</field>
             <field name="arch" type="xml">
                 <kanban default_group_by="stage_id">
                     <field name="stage_id"/>
@@ -138,8 +138,8 @@
 
         <!--Maintenance Request Tree View-->
         <record id="hr_material_maintenance_request_view_tree" model="ir.ui.view">
-            <field name="name">hr.material.maintenance_request.tree</field>
-            <field name="model">hr.material.maintenance_request</field>
+            <field name="name">hr.material.request.tree</field>
+            <field name="model">hr.material.request</field>
             <field name="arch" type="xml">
                 <tree string="maintenance Request" fonts="bold:message_unread==True">
                     <field name="message_unread" invisible="1"/>
@@ -155,7 +155,7 @@
 
         <record model="ir.actions.act_window" id="action_hr_material_maintenance_request_form">
             <field name="name">Maintenance Requests</field>
-            <field name="res_model">hr.material.maintenance_request</field>
+            <field name="res_model">hr.material.request</field>
             <field name="view_mode">kanban,tree,form</field>
             <field name="view_id" ref="hr_material_maintenance_request_view_kanban"/>
             <field name="help" type="html">
@@ -168,7 +168,7 @@
         </record>
         <record model="ir.actions.act_window" id="action_hr_material_maintenance_request_link">
             <field name="name">Maintenance Requests </field>
-            <field name="res_model">hr.material.maintenance_request</field>
+            <field name="res_model">hr.material.request</field>
             <field name="view_mode">kanban,tree,form</field>
             <field name="context">{
                 'search_default_category_id': [active_id], 
@@ -187,7 +187,7 @@
 
         <record model="ir.actions.act_window" id="action_maintenance_request_link">
             <field name="name">Maintenance Requests </field>
-            <field name="res_model">hr.material.maintenance_request</field>
+            <field name="res_model">hr.material.request</field>
             <field name="view_mode">kanban,tree,form</field>
             <field name="context">{
                 'search_default_material_id': [active_id], 
@@ -241,8 +241,8 @@
 	                        </group>
 	                        <group>
 	                            <field name="user_id"/>
-	                            <field name="scrap_date" groups="base.group_no_one"/>
                                 <field name="assign_date" groups="base.group_no_one"/>
+	                            <field name="scrap_date" groups="base.group_no_one"/>
 	                        </group>
                         </group>
                         <notebook>
@@ -422,7 +422,7 @@
         <act_window
             id="act_hr_material_maintenance_request"
             name="Maintenance Request"
-            res_model="hr.material.maintenance_request"
+            res_model="hr.material.request"
             src_model="hr.material"
             view_mode="kanban,form,tree"
             domain="[('material_id', '=', active_id)]"
@@ -532,8 +532,8 @@
 
         <!-- Maintenance Request Stages -->
         <record id="maintenance_request_stage_search" model="ir.ui.view">
-            <field name="name">maintenance.request.stage.search</field>
-            <field name="model">maintenance.request.stage</field>
+            <field name="name">hr.material.stage.search</field>
+            <field name="model">hr.material.stage</field>
             <field name="arch" type="xml">
                 <search string="Maintenance Request Stages">
                    <field name="name" string="Maintenance Request Stages"/>
@@ -543,8 +543,8 @@
 
 
         <record id="maintenance_request_stage_tree" model="ir.ui.view">
-            <field name="name">maintenance.request.stage.tree</field>
-            <field name="model">maintenance.request.stage</field>
+            <field name="name">hr.material.stage.tree</field>
+            <field name="model">hr.material.stage</field>
             <field name="arch" type="xml">
                 <tree string="Maintenance Request Stage" editable="top">
                     <field name="sequence" widget="handle"/>
@@ -556,7 +556,7 @@
 
         <record id="open_maintenance_request_stage" model="ir.actions.act_window">
             <field name="name">Stages</field>
-            <field name="res_model">maintenance.request.stage</field>
+            <field name="res_model">hr.material.stage</field>
             <field name="view_mode">tree</field>
             <field name="view_type">form</field>
             <field name="view_id" ref="maintenance_request_stage_tree"/>

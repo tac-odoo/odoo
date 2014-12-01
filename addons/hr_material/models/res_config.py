@@ -12,16 +12,16 @@ class HrConfigSettings(models.TransientModel):
         alias_id = self.env.ref('hr_material.mail_alias_material')
         if alias_id:
             alias_name = alias_id.alias_name
-        return {'alias_prefix': alias_name}
+        return {'material_alias_prefix': alias_name}
 
     @api.multi
     def set_default_alias_material(self):
         for record in self:
-            default_alias_prefix = record.get_default_alias_material()['alias_prefix']
-            if record.alias_prefix != default_alias_prefix:
+            default_material_alias_prefix = record.get_default_alias_material()['material_alias_prefix']
+            if record.material_alias_prefix != default_material_alias_prefix:
                 alias_id = self.env.ref('hr_material.mail_alias_material')
                 if alias_id:
-                    alias_id.write({'alias_name': record.alias_prefix})
+                    alias_id.write({'alias_name': record.material_alias_prefix})
         return True
 
     @api.multi

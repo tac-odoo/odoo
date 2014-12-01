@@ -4,11 +4,11 @@ from openerp.exceptions import Warning
 from openerp.tools import html2plaintext
 
 
-class MaintenanceRequestStage(models.Model):
+class HrMaterialStage(models.Model):
 
     """Stages for Kanban view of Maintenance Request"""
 
-    _name = 'maintenance.request.stage'
+    _name = 'hr.material.stage'
     _description = 'Maintenance Request Stage'
     _order = 'sequence asc'
 
@@ -24,8 +24,11 @@ class HrMaterialCategory(models.Model):
     _description = 'Material Category'
 
     @api.one
-    def _count(self):
+    def _compute_material_count(self):
         self.material_count = len(self.material_ids)
+
+    @api.one
+    def _compute_maintenance_count(self):
         self.maintenance_count = len(self.maintenance_ids)
 
     name = fields.Char('Category Name', required=True, translate=True)
@@ -33,9 +36,9 @@ class HrMaterialCategory(models.Model):
     color = fields.Integer('Color Index')
     note = fields.Text('Comments', translate=True)
     material_ids = fields.One2many('hr.material', 'category_id', string='Materials', copy=False)
-    material_count = fields.Integer(compute='_count', string="Material")
-    maintenance_ids = fields.One2many('hr.material.maintenance_request', 'category_id', copy=False, domain=[('stage_id.fold', '=', False)])
-    maintenance_count = fields.Integer(compute='_count', string="Maintenance")
+    material_count = fields.Integer(compute='_compute_material_count', string="Material")
+    maintenance_ids = fields.One2many('hr.material.request', 'category_id', copy=False, domain=[('stage_id.fold', '=', False)])
+    maintenance_count = fields.Integer(compute='_compute_maintenance_count', string="Maintenance")
     alias_id = fields.Many2one(
         'mail.alias', 'Alias', ondelete="restrict", required=True,
         help="Email alias for this material category. New emails will automatically "
@@ -43,7 +46,7 @@ class HrMaterialCategory(models.Model):
 
     @api.model
     def create(self, vals):
-        self = self.with_context(alias_model_name='hr.material.maintenance_request', alias_parent_model_name=self._name)
+        self = self.with_context(alias_model_name='hr.material.request', alias_parent_model_name=self._name)
         category_id = super(HrMaterialCategory, self).create(vals)
         category_id.alias_id.write({'alias_parent_thread_id': category_id.id, 'alias_defaults': {'category_id': category_id.id}})
         return category_id
@@ -98,7 +101,7 @@ class HrMaterial(models.Model):
         help='By Employee: Material assigned to individual Employee, By Department: Material assigned to group of employees in department',
         required=True,
         default='employee')
-    maintenance_ids = fields.One2many('hr.material.maintenance_request', 'material_id', domain=[('stage_id.fold', '=', False)])
+    maintenance_ids = fields.One2many('hr.material.request', 'material_id', domain=[('stage_id.fold', '=', False)])
     maintenance_count = fields.Integer(compute='_maintenance_count', string="Maintenance")
 
     _sql_constraints = [
@@ -107,12 +110,9 @@ class HrMaterial(models.Model):
 
     @api.model
     def create(self, vals):
-        user_ids = []
-        if 'employee_id' in vals or 'department_id' in vals:
-            if vals.get('employee_id') or vals.get('department_id'):
-                vals['assign_date'] = fields.Date.context_today(self)
         material = super(HrMaterial, self).create(vals)
         # subscribe employee or department manager when material assign to him.
+        user_ids = []
         if material.employee_id and material.employee_id.user_id:
             user_ids.append(material.employee_id.user_id.id)
         if material.department_id and material.department_id.manager_id and material.department_id.manager_id.user_id:
@@ -143,14 +143,15 @@ class HrMaterial(models.Model):
             self.department_id = False
         if self.material_assign_to == 'department':
             self.employee_id = False
+        self.assign_date = fields.Date.context_today(self)
 
     @api.onchange('category_id')
     def _onchange_category_id(self):
         self.user_id = self.category_id.user_id
 
 
-class HrMaterialMaintenanceRequest(models.Model):
-    _name = 'hr.material.maintenance_request'
+class HrMaterialRequest(models.Model):
+    _name = 'hr.material.request'
     _inherit = ['mail.thread']
     _description = 'Maintenance Request'
     _track = {
@@ -165,7 +166,7 @@ class HrMaterialMaintenanceRequest(models.Model):
 
     @api.returns('self')
     def _default_stage(self):
-        return self.env['maintenance.request.stage'].search([], limit=1)
+        return self.env['hr.material.stage'].search([], limit=1)
 
     name = fields.Char('Subjects', required=True, translate=True)
     description = fields.Text('Description')
@@ -176,7 +177,7 @@ class HrMaterialMaintenanceRequest(models.Model):
     material_id = fields.Many2one('hr.material', string='Material')
     user_id = fields.Many2one('res.users', string='Assigned to', track_visibility='onchange')
     stage_id = fields.Many2one(
-        'maintenance.request.stage',
+        'hr.material.stage',
         string='Stage', ondelete='set null',
         track_visibility='onchange',
         default=_default_stage,
@@ -197,7 +198,7 @@ class HrMaterialMaintenanceRequest(models.Model):
     def _read_group_stage_ids(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
         """ Read group customization in order to display all the stages in the
         kanban view, even if they are empty """
-        stage_obj = self.pool.get('maintenance.request.stage')
+        stage_obj = self.pool.get('hr.material.stage')
         order = stage_obj._order
         access_rights_uid = access_rights_uid or uid
 
@@ -221,7 +222,7 @@ class HrMaterialMaintenanceRequest(models.Model):
 
     @api.model
     def get_empty_list_help(self, help):
-        res = super(HrMaterialMaintenanceRequest, self).get_empty_list_help(help)
+        res = super(HrMaterialRequest, self).get_empty_list_help(help)
         alias_record = self.env.ref('hr_material.mail_alias_material')
         if alias_record.alias_domain and alias_record.alias_name and res:
             alias_name = '<a>' + alias_record.alias_name + '@' + alias_record.alias_domain + '</a>'
@@ -246,24 +247,29 @@ class HrMaterialMaintenanceRequest(models.Model):
             'employee_id': False,
         }
         defaults.update(custom_values)
-        return super(HrMaterialMaintenanceRequest, self).message_new(msg, custom_values=defaults)
+        return super(HrMaterialRequest, self).message_new(msg, custom_values=defaults)
 
     @api.model
     def create(self, vals):
         # context: no_log, because subtype already handle this
         self = self.with_context(mail_create_nolog=True)
-        result = super(HrMaterialMaintenanceRequest, self).create(vals)
+        result = super(HrMaterialRequest, self).create(vals)
         if result.employee_id.user_id:
             result.message_subscribe_users(user_ids=[result.employee_id.user_id.id])
         return result
 
     @api.multi
     def write(self, vals):
+        # Overridden to reset the kanban_state to normal whenever
+        # the stage (stage_id) of the Maintenance Request changes.
+        if vals and not 'kanban_state' in vals and 'stage_id' in vals:
+            for material_request in self:
+                material_request.kanban_state = 'normal'
         if vals.get('employee_id'):
             user_id = self.env['hr.employee'].browse(vals['employee_id'])['user_id']
             if user_id:
                 self.message_subscribe_users(user_ids=[user_id.id])
-        return super(HrMaterialMaintenanceRequest, self).write(vals)
+        return super(HrMaterialRequest, self).write(vals)
 
     @api.onchange('employee_id', 'department_id')
     def onchange_department_or_employee_id(self):

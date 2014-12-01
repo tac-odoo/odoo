@@ -108,8 +108,8 @@
                                 <label for="module_hr_material"/>
                             </div>
                             <div  attrs="{'invisible': [('module_hr_material', '=', False)]}">
-                                <label for="alias_prefix" class="oe_inline"/>
-                                <field name="alias_prefix" class="oe_inline"/>@<field name="alias_domain" class="oe_inline" readonly="1"/>
+                                <label for="material_alias_prefix" class="oe_inline"/>
+                                <field name="material_alias_prefix" class="oe_inline"/>@<field name="alias_domain" class="oe_inline" readonly="1"/>
                             </div>
                         </div>
                     </group>
