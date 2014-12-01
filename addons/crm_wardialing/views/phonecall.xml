@@ -106,43 +106,51 @@
 
         <!-- wizard to change the log of calls -->
         <record model="ir.ui.view" id="wizard_change_log_form_view">
-            <field name="name">wizard.form</field>
+            <field name="name">phonecall.log.wizard.form</field>
             <field name="model">crm.phonecall.log.wizard</field>
             <field name="arch" type="xml">
                 <form string="Edit the log">
-                    <h1> Log the call: <field style="display: inline !important" name="name"/></h1>
-                    <separator colspan="2" string="Client Details" attrs="{'invisible': [('partner_name', '=', False)]}"/>
-                    <div attrs="{'invisible': [('partner_name', '=', False)]}">
-                        <field name="partner_image_small" widget="image" class="oe_avatar oe_left"/>
-                        <div style="display: inline-block;">
-                            <field name="partner_name"/>
-                            <field name="partner_phone"/>
-                            <field name="partner_email"/>
-                        </div>
-                    </div>
-                    <separator colspan="2" string="Opportunity Details" attrs="{'invisible': [('opportunity_name', '=', 'No opportunity linked')]}"/>
-                    <div attrs="{'invisible': [('opportunity_name', '=', 'No opportunity linked')]}">
-                        <field name="opportunity_name"/>
-                        <span><field name="opportunity_planned_revenue" class="oe_inline"/> at <field name="opportunity_probability" class="oe_inline"/>%</span>
-                    </div>
-                    <separator colspan="2" string="Next Action" attrs="{'invisible': [('opportunity_name', '=', 'No opportunity linked')]}"/>
-                    <div attrs="{'invisible': [('opportunity_name', '=', 'No opportunity linked')]}">
-                        <field name="opportunity_title_action" class="oe_inline" nolabel="1" placeholder="e.g. Call for proposal"/>
-                        <field name="opportunity_date_action" nolabel="1" class="oe_inline"/>
-                    </div>
-                    <separator colspan="2" string="Call Description"/>
+                    <group>
+                        <group>
+                            <div attrs="{'invisible': [('partner_name', '=', False)]}">
+                                <field name="partner_image_small" widget="image" class="oe_avatar oe_left"/>
+                                <div style="display: inline-block;">
+                                    <h2><field name="partner_name"/></h2>
+                                    <field attrs="{'invisible': 'partner_email'}" name="partner_email"/>
+                                    <div attrs="{'invisible': [('opportunity_name', '=', 'No opportunity linked')]}">
+                                        <field name="opportunity_name"/>
+                                        <span><field name="opportunity_planned_revenue" class="oe_inline"/> at <field name="opportunity_probability" class="oe_inline"/>%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </group>
+
+                        <group attrs="{'invisible': [('opportunity_name', '=', 'No opportunity linked')]}">
+                            <label for="new_title_action"/>
+                            <div>
+                                <field name="new_date_action" nolabel="1"/>
+                                <field name="new_title_action" placeholder="e.g. Call for proposal" nolabel="1"/>
+                            </div>
+                            <label for="reschedule_option"/>
+                            <div>
+                                <field name="reschedule_option" widget="radio" nolabel="1"/>
+                                <field name="reschedule_date" nolabel="1" attrs="{'invisible': [('reschedule_option', '!=', 'custom')], 'required':[('reschedule_option', '=','custom')]}"/>
+                            </div>
+                        </group>
+                    </group>
+                    <separator colspan="2" string="Call Summary"/>
+                    <field name="show_duration" attrs="{'invisible': True}"/>
+                    <field name="custom_duration" widget="float_time" attrs="{'invisible': [('show_duration', '=', False)], 'required':[('show_duration', '=',True)]}" />
                     <group>
                         <field name="description" nolabel="1" placeholder="Description..."/>
                     </group>
                     <footer>
-                        <button name="save" type="object"
-                                string="Save and Remove from the Queue" class="oe_highlight"/>
                         <button name="save_keep" type="object"
-                            string="Save and Keep in the Queue" class="oe_highlight"/>
-                        <button name="schedule_new_call" type="object"
-                            string="Schedule a New Call" class="oe_highlight"/>
+                            string="Save" class="oe_highlight"/>
+                        <button name="save_go_opportunity" type="object" attrs="{'invisible': [('opportunity_name', '=', 'No opportunity linked')]}"
+                            string="Save and Open the Opportunity" class="oe_highlight"/>
                         or
-                        <button class="oe_button oe_form_button oe_link" special="cancel" string="Cancel"/>
+                        <button class="oe_button oe_form_button oe_link" special="cancel" string="Discard"/>
                     </footer>
                 </form>
             </field>
@@ -150,7 +158,7 @@
 
         <!-- wizard diplaying the transfer's option -->
         <record model="ir.ui.view" id="wizard_transfer_call_form_view">
-            <field name="name">wizard.form</field>
+            <field name="name">Transfer the Call</field>
             <field name="model">crm.phonecall.transfer.wizard</field>
             <field name="arch" type="xml">
                 <form string="transfer Option">
@@ -168,7 +176,7 @@
                 </form>
             </field>
         </record>
-
+        
         <menuitem name="Call Center" id="menu_crm_phone_callcenter"
             parent="crm.menu_crm_case_phone"
             groups="crm.group_scheduled_calls"

@@ -43,7 +43,7 @@
                     <p>I tried to call you on "date of today" concerning the subject: '${object.name}'.
                         Can you please give me your availability in order to schedule a new call?</p>
                     <p>Yours Sincerly</p>
-                    <p>""get current user</p>
+                    <p>${user.name}</p>
 
                 </div>
             ]]></field>
@@ -67,7 +67,7 @@
                     <p>It seems that we have been interrupted during our conversation about: '${object.name}'. Can you please give me your availability in oreder to schedule 
                         a new call? </p>
                     <p>Yours Sincerly</p>
-                    <p>""get current user</p>
+                    <p>${user.name}</p>
 
                 </div>
             ]]></field>

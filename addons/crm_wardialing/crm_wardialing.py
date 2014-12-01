@@ -5,6 +5,10 @@ from openerp.exceptions import except_orm, Warning, RedirectWarning
 from openerp.tools.translate import _
 import openerp
 import time
+from datetime import datetime
+from datetime import timedelta
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
+
 # ----------------------------------------------------------
 # Models
 # ----------------------------------------------------------
@@ -51,6 +55,7 @@ class crm_phonecall(models.Model):
                 "description": self.description,
                 "name": self.name,
                 "state": self.state,
+                "date": self.date,
                 "duration": self.duration,
                 "partner_id": self.partner_id.id,
                 "partner_name": self.partner_id.name,
@@ -96,14 +101,14 @@ class crm_lead(models.Model):
 
     @api.one
     def compute_is_call_center(self):
-        phonecall = self.env['crm.phonecall'].search([('opportunity_id','=',self.id),('in_queue','=',True),('state','=','to_do'),('user_id','=',self.env.user[0].id)])
+        phonecall = self.env['crm.phonecall'].search([('opportunity_id','=',self.id),('in_queue','=',True),('user_id','=',self.env.user[0].id)])
         if phonecall:
             self.in_call_center_queue = True
         else:
             self.in_call_center_queue = False
 
     @api.multi
-    def create_call_center_call(self):
+    def create_call_center_call(self):   
         phonecall = self.env['crm.phonecall'].create({
             'name': self.name
         })
@@ -120,6 +125,32 @@ class crm_lead(models.Model):
         }
 
     @api.multi
+    def create_custom_call_center_call(self):
+        phonecall = self.env['crm.phonecall'].create({
+            'name': self.name,
+            'duration': 0,
+            'user_id': self.env.user[0].id,
+            'opportunity_id': self.id,
+            'partner_id': self.partner_id.id,
+            'state': 'to_do',
+            'partner_phone': self.partner_id.phone,
+            'in_queue': True,
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'key2': 'client_action_multi',
+            'src_model': "crm.phonecall",
+            'res_model': "crm.custom.phonecall.wizard",
+            'multi': "True",
+            'target': 'new',
+            'context': {'phonecall_id': phonecall.id,
+                        'default_name': phonecall.name,
+                        'default_partner_id': phonecall.partner_id.id,
+                        },
+            'views': [[False, 'form']],
+        }
+
+    @api.multi
     def delete_call_center_call(self):
         phonecall = self.env['crm.phonecall'].search([('opportunity_id','=',self.id),('in_queue','=',True),('user_id','=',self.env.user[0].id)])
         phonecall.unlink()
@@ -128,23 +159,74 @@ class crm_lead(models.Model):
             'tag': 'reload_panel',
         }
 
+    @api.multi
+    def log_new_phonecall(self):
+        phonecall = self.env['crm.phonecall'].create({
+            'name': self.name
+        })
+        phonecall.user_id = self.env.user[0].id
+        phonecall.opportunity_id = self.id
+        phonecall.partner_id = self.partner_id
+        phonecall.state = 'done'
+        phonecall.partner_phone = self.partner_id.phone
+        phonecall.partner_mobile = self.partner_id.mobile
+        phonecall.in_queue = False
+        return {
+            'name': 'Log a call',
+            'type': 'ir.actions.act_window',
+            'key2': 'client_action_multi',
+            'src_model': "crm.phonecall",
+            'res_model': "crm.phonecall.log.wizard",
+            'multi': "True",
+            'target': 'new',
+            'context': {'phonecall_id': phonecall.id,
+                        'default_opportunity_id': phonecall.opportunity_id.id,
+                        'default_name': phonecall.name,
+                        'default_duration': phonecall.duration,
+                        'default_description' : phonecall.description,
+                        'default_opportunity_name' : phonecall.opportunity_id.name,
+                        'default_opportunity_planned_revenue' : phonecall.opportunity_id.planned_revenue,
+                        'default_opportunity_title_action' : phonecall.opportunity_id.title_action,
+                        'default_opportunity_date_action' : phonecall.opportunity_id.date_action,
+                        'default_opportunity_probability' : phonecall.opportunity_id.probability,
+                        'default_partner_id': phonecall.partner_id.id,
+                        'default_partner_name' : phonecall.partner_id.name,
+                        'default_partner_email' : phonecall.partner_id.email,
+                        'default_partner_phone': phonecall.partner_id.phone,
+                        'default_partner_image_small' : phonecall.partner_id.image_small,},
+                        'default_show_duration': self._context.get('default_show_duration'),
+            'views': [[False, 'form']],
+            'flags': {
+                'headless': True,
+            },
+        }
 
 class crm_phonecall_log_wizard(models.TransientModel):
     _name = 'crm.phonecall.log.wizard'
 
     description = fields.Text('Description')
     name = fields.Char(readonly=True)
+    opportunity_id = fields.Integer(readonly=True)
     opportunity_name = fields.Char(readonly=True)
     opportunity_planned_revenue = fields.Char(readonly=True)
-    opportunity_title_action = fields.Char()
-    opportunity_date_action = fields.Date()
+    opportunity_title_action = fields.Char('Next Action')
+    opportunity_date_action = fields.Date('Next Action Date')
     opportunity_probability = fields.Float(readonly=True)
+    partner_id = fields.Integer(readonly=True)
     partner_name = fields.Char(readonly=True)
-    partner_phone = fields.Char(readonly=True)
     partner_email = fields.Char(readonly=True)
+    partner_phone = fields.Char(readonly=True)
     partner_image_small = fields.Char(readonly=True)
-    duration = fields.Float('Duration', readonly=True)
+    duration = fields.Char('Duration', readonly=True)
+    reschedule_option = fields.Selection([('no_reschedule', "Don't Reschedule"), ('1d', 'Tomorrow'), ('7d', 'In 1 Week'), ('15d', 'In 15 Day'), ('2m', 'In 2 Months'), ('custom', 'Specific Date')],
+                                         'Schedule A New Call', required=True, default="no_reschedule")
+    reschedule_date = fields.Datetime('Specific Date', default=lambda *a: datetime.now() + timedelta(hours=2))
+    new_title_action = fields.Char('Next Action')
+    new_date_action = fields.Date()
+    show_duration = fields.Boolean()
+    custom_duration = fields.Float(default=0)
 
+    #Old function not sure we keep it
     @api.multi
     def save(self):
         phonecall = self.env['crm.phonecall'].browse(self._context.get('phonecall_id'))
@@ -154,39 +236,114 @@ class crm_phonecall_log_wizard(models.TransientModel):
             opportunity = self.env['crm.lead'].browse(self._context.get('opportunity_id'))
             opportunity.title_action = self.opportunity_title_action
             opportunity.date_action = self.opportunity_date_action
-            opportunity.message_post("Log Call: " + phonecall.description)
+            opportunity.message_post(phonecall.description)
         return {
             'type': 'ir.actions.client',
             'tag': 'reload_panel',
         }
+
+    def schedule_again(self):
+        new_phonecall = self.env['crm.phonecall'].create({
+            'name': self.name,
+            'duration': 0,
+            'user_id': self.env.user[0].id,
+            'opportunity_id': self.opportunity_id,
+            'partner_id': self.partner_id,
+            'state': 'to_do',
+            'partner_phone': self.partner_phone,
+            'in_queue': True,
+        })
+        if self.reschedule_option == "7d":
+            new_phonecall.date = datetime.now() + timedelta(weeks=1)
+        elif self.reschedule_option == "1d":
+            new_phonecall.date = datetime.now() + timedelta(days=1)
+        elif self.reschedule_option == "15d":
+            new_phonecall.date = datetime.now() + timedelta(days=15)
+        elif self.reschedule_option == "2m":
+            new_phonecall.date = datetime.now() + timedelta(weeks=8)
+        elif self.reschedule_option == "custom":
+            new_phonecall.date = self.reschedule_date
 
     @api.multi
     def save_keep(self):
         phonecall = self.env['crm.phonecall'].browse(self._context.get('phonecall_id'))
         phonecall.description = self.description
-        if(self._context.get('opportunity_id')):
-            opportunity = self.env['crm.lead'].browse(self._context.get('opportunity_id'))
-            opportunity.title_action = self.opportunity_title_action
-            opportunity.date_action = self.opportunity_date_action
+        if(self.opportunity_id):
+            opportunity = self.env['crm.lead'].browse(self.opportunity_id)
+            if self.new_title_action and self.new_date_action:
+                opportunity.title_action = self.new_title_action
+                opportunity.date_action = self.new_date_action
+            else:
+                opportunity.title_action = self.opportunity_title_action
+                opportunity.date_action = self.opportunity_date_action
+            if (self.show_duration):
+                sec = (self.custom_duration - int(self.custom_duration))*0.6
+                sec = '%.2f' % sec
+                time = str(min) + ":" + sec[-2:]
+                message = "Call " + time + " min(s)"
+            else:
+                message = "Call " + self.duration + " min(s)"
             if(phonecall.description):
-                opportunity.message_post("Log Call: " + phonecall.description)
+                message += " about " + phonecall.description
+            opportunity.message_post(message)
+        if self.reschedule_option != "no_reschedule":
+            self.schedule_again()
         return {
             'type': 'ir.actions.client',
             'tag': 'reload_panel',
         }
 
     @api.multi
-    def schedule_new_call(self):
+    def save_go_opportunity(self):
+        phonecall = self.env['crm.phonecall'].browse(self._context.get('phonecall_id'))
+        phonecall.description = self.description
+        if(self.opportunity_id):
+            opportunity = self.env['crm.lead'].browse(self.opportunity_id)
+            if self.new_title_action and self.new_date_action:
+                opportunity.title_action = self.new_title_action
+                opportunity.date_action = self.new_date_action
+            else:
+                opportunity.title_action = self.opportunity_title_action
+                opportunity.date_action = self.opportunity_date_action
+            if (self.show_duration):
+                sec = (self.custom_duration - int(self.custom_duration))*0.6
+                sec = '%.2f' % sec
+                time = str(min) + ":" + sec[-2:]
+                message = "Call " + time + " min(s)"
+            else:
+                message = "Call " + self.duration + " min(s)"
+            if(phonecall.description):
+                message += " about " + phonecall.description
+            opportunity.message_post(message)
+        if self.reschedule_option != "no_reschedule":
+            self.schedule_again()
         return {
-            'type': 'ir.actions.act_window',
-            'key2': 'client_action_multi',
-            'src_model': "crm.phonecall",
-            'res_model': "crm.phonecall2phonecall",
-            'multi': "True",
-            'target': 'new',
-            'context': {'active_id': self._context.get('phonecall_id'), 'active_ids': [self._context.get('phonecall_id')]},
-            'views': [[False, 'form']],
+            'type': 'ir.actions.client',
+            'tag': 'reload_panel',
+            'params': {'go_to_opp': True,
+                       'opportunity_id': self.opportunity_id},
         }
+
+
+class crm_custom_phonecall_wizard(models.TransientModel):
+    _name = 'crm.custom.phonecall.wizard'
+
+    name = fields.Char('Call summary', required=True)
+    user_id = fields.Many2one('res.users', "Assign To")
+    date = fields.Datetime('Date', required=True, default=lambda *a: datetime.now())
+    partner_id = fields.Many2one('res.partner', "Partner")
+
+    @api.multi
+    def action_schedule(self):
+        phonecall = self.env['crm.phonecall'].browse(self._context.get('phonecall_id'))
+        phonecall.name = self.name
+        phonecall.date = self.date
+        phonecall.partner_id = self.partner_id
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload_panel',
+        }
+
 
 
 class crm_phonecall_transfer_wizard(models.TransientModel):
@@ -221,4 +378,4 @@ class res_users(models.Model):
     sip_password = fields.Char('SIP Password')
     sip_physicalPhone = fields.Char("Physical Phone's Number")
     sip_always_transfert = fields.Boolean("Always redirect to physical phone", default=False)
-    sip_ring_number = fields.Integer("Number of rings", default=6)
+    sip_ring_number = fields.Integer("Number of ringing", default=6, help="The number of ringing before cancelling the call")

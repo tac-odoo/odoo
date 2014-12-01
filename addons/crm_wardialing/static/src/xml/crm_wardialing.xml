@@ -3,11 +3,10 @@
 -->
 <templates xml:space="preserve">
 <t t-name="crm_wardialing.PhonecallWidget">
-    <div rel='popover' data-trigger="hover" data-placement='right' class="oe_dial_phonecall ui-draggable">
+    <div rel='popover' data-trigger="hover" data-placement='right' class="oe_dial_phonecall" t-att-data-state="widget.get('state')" t-att-data-id="widget.get('id')">
          <table class="oe_form_group">
             <tr class="oe_form_group_row">
                 <td class="oe_form_group_cell oe_form_group_cell_label">
-                    <span class="phonecall_id" style="display:none"><t t-esc="widget.get('id')"/></span>
                     <t t-if="widget.get('partner') != 'Unknown'">
                         <span class="oe_dial_phonecall_clip">
                             <img t-att-src="'data:image/jpg;base64,'+widget.get('image_small')" class="oe_dial_phonecall_avatar"/>
@@ -20,7 +19,10 @@
                     </t>
                 </td>
                 <td style="width: 100%;" class="oe_form_group_cell">
-                    <span class="oe_dial_phonecall_name"><t t-esc="widget.get('partner')"/></span>
+                    <span class="oe_dial_phonecall_partner_name" t-att-data-id="widget.get('id')"><t t-esc="widget.get('partner')"/></span>
+                    <t t-if="widget.get('inCall')">
+                        <i style='margin-left:2px;' class='fa fa-microphone oe_dial_icon_inCall'></i>
+                    </t>
                     <span class="pull-right">
                         <t t-if="widget.get('state') == 'done'">
                             <i class="fa fa-check oe_dial_state_icon text-muted"></i>
@@ -41,7 +43,7 @@
                             </t>
                         </a>
                     </span><br/>
-                    <span><t t-esc="widget.get('opportunity')"/></span>
+                    <span><t t-esc="widget.get('name')"/></span>
 
                 </td>
             </tr>
@@ -102,8 +104,8 @@
                     <span class="sr-only">Toggle Dropdown</span>
                   </button>
                   <ul class="dropdown-menu" role="menu">
-                    <li><a href="#" class="oe_dial_auto_callbutton">Automatic Call</a></li>
-                    <li><a href="#" class="oe_dial_callbutton">Call Once</a></li>
+                    <li><a href="#" class="oe_dial_auto_callbutton">Call All</a></li>
+                    <li><a href="#" class="oe_dial_callbutton">Call Next One</a></li>
                   </ul>
                 </div>
                 <button type="button" class="btn btn-danger oe_dial_stop_autocall_button">Stop Automatic Call</button>

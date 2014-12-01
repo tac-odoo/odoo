@@ -62,8 +62,12 @@ class crm_phonecall2phonecall(osv.osv_memory):
                     this.section_id and this.section_id.id or False, \
                     this.categ_id and this.categ_id.id or False, \
                     action=this.action, context=context)
-
-        return phonecall.redirect_phonecall_view(cr, uid, phocall_ids[phonecall_ids[0]], context=context)
+        #redirect to the new phonecall
+        #return phonecall.redirect_phonecall_view(cr, uid, phocall_ids[phonecall_ids[0]], context=context)
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload_panel',
+        }
     
     def default_get(self, cr, uid, fields, context=None):
         """
