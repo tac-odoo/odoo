@@ -19,7 +19,7 @@
                 </field>
                 <xpath expr='//div[@name="project"]' position='after'>
                     <field name="contract_state" widget="label_selection" attrs="{'invisible': ['|',('contract_state', '=', False), ('project_id', '=', False)]}"
-                    options="{'classes': {'template': 'default', 'draft': 'info', 'open': 'success', 'pending': 'danger', 'close': 'warning', 'cancelled': 'warning'}}"/>
+                    options="{'classes': {'template': 'default', 'draft': 'info', 'open': 'success', 'pending': 'danger', 'close': 'danger', 'cancelled': 'warning'}}"/>
                 </xpath>
                 <xpath expr="//notebook/page[@string='Extra Info']" position="before">
                     <page string="Worklogs">

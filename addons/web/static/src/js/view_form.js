@@ -3189,7 +3189,6 @@ instance.web.form.LabelSelection = instance.web.form.AbstractField.extend(instan
     },
     render_value: function() {
         var found = _.find(this.selection, function(el) { return el[0] === this.get("value"); }, this);
-        console.log("found is ::: ", found);
         this.$el.html(QWeb.render("FieldLabelSelection", {widget: this, value: found}));
     },
 });

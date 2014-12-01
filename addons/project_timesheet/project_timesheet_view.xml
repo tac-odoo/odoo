@@ -148,7 +148,7 @@
                 </field>
                 <xpath expr='//field[@name="project_id"]' position='after'>
                     <field name="contract_state" widget="label_selection" attrs="{'invisible': ['|',('project_id', '=', False), ('contract_state', '=', False)]}"
-                    options="{'classes': {'template': 'default', 'draft': 'info', 'open': 'success', 'pending': 'danger', 'close': 'warning', 'cancelled': 'warning'}}"/>
+                    options="{'classes': {'template': 'default', 'draft': 'info', 'open': 'success', 'pending': 'danger', 'close': 'danger', 'cancelled': 'warning'}}"/>
                 </xpath>
             </field>
         </record>
