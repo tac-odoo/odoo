@@ -33,7 +33,7 @@ def _employee_get(self):
         return employee.id
     return False
     
-class hr_expense_expense(models.Model):
+class expense_sheet(models.Model):
 
     @api.multi
     @api.depends('line_ids.unit_amount','line_ids.unit_quantity')
@@ -45,9 +45,9 @@ class hr_expense_expense(models.Model):
     def _get_currency(self):
         return self.env.user.company_id.currency_id.id
 
-    _name = "hr.expense.expense"
+    _name = "expense.sheet"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
-    _description = "Expense"
+    _description = "Expense Sheet"
     _order = "id desc"
     _track = {
         'state': {
@@ -71,7 +71,7 @@ class hr_expense_expense(models.Model):
     user_valid = fields.Many2one('res.users', string='Validation By', readonly=True, copy=False,
                                   states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]})
     account_move_id = fields.Many2one('account.move', string='Ledger Posting', copy=False, track_visibility="onchange")
-    line_ids = fields.One2many('hr.expense.line', 'expense_id', string='Expense Lines', copy=True,
+    line_ids = fields.One2many('expense', 'expense_id', string='Expense Lines', copy=True,
                                 readonly=True, states={'draft':[('readonly',False)]} )
     note = fields.Text('Note')
     amount = fields.Float(compute='_amount', string='Total Amount', digits=dp.get_precision('Account'), store=True)
@@ -94,7 +94,7 @@ class hr_expense_expense(models.Model):
     def unlink(self):
         if self.state != 'draft':
             raise Warning(_('You can only delete draft expenses!'))
-        return super(hr_expense_expense, self).unlink()
+        return super(expense_sheet, self).unlink()
 
     @api.multi
     def onchange_currency_id(self, currency_id=False, company_id=False):
@@ -347,9 +347,9 @@ class product_template(models.Model):
     hr_expense_ok = fields.Boolean(string='Can be Expensed', help="Specify if the product can be selected in an HR expense line.")
     
 
-class hr_expense_line(models.Model):
-    _name = "hr.expense.line"
-    _description = "Expense Line"
+class expense(models.Model):
+    _name = "expense"
+    _description = "Expense"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
 
     @api.one
@@ -357,7 +357,7 @@ class hr_expense_line(models.Model):
     def _amount(self):
         if not self.ids:
             return {}
-        self._cr.execute("SELECT l.id,COALESCE(SUM(l.unit_amount*l.unit_quantity),0) AS amount FROM hr_expense_line l WHERE id IN %s GROUP BY l.id ",(tuple(self.ids),))
+        self._cr.execute("SELECT l.id,COALESCE(SUM(l.unit_amount*l.unit_quantity),0) AS amount FROM expense l WHERE id IN %s GROUP BY l.id ",(tuple(self.ids),))
         for id, amount in self._cr.fetchall():
             self.total_amount = amount
 
@@ -367,7 +367,7 @@ class hr_expense_line(models.Model):
 
     name = fields.Char(string='Expense Note', required=True)
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
-    expense_id = fields.Many2one('hr.expense.expense', string='Expense', ondelete='cascade', select=True)
+    expense_id = fields.Many2one('expense.sheet', string='Expense', ondelete='cascade', select=True)
     total_amount = fields.Float(string='Total', store=True, compute='_amount', digits=dp.get_precision('Account'))
     unit_amount = fields.Float(string='Unit Price', digits=dp.get_precision('Product Price'))
     unit_quantity = fields.Float(string='Quantity', digits= dp.get_precision('Product Unit of Measure'), default=1)
@@ -385,7 +385,7 @@ class hr_expense_line(models.Model):
         ('cancel', 'Cancelled'),
         ],
         string='Status', readonly=True, track_visibility='onchange', copy=False, default='draft')
-    expense_line_tax_id = fields.Many2many('account.tax','expense_line_tax', 'expense_line_id', 'tax_id',string='Taxes')
+    expense_tax_id = fields.Many2many('account.tax','expense_line_tax', 'expense_line_id', 'tax_id',string='Taxes')
 
     _order = "sequence, date"
 
@@ -414,12 +414,12 @@ class hr_expense_line(models.Model):
 
     @api.multi
     def expense_line_new_to_confirm_status(self):
-        hr_expense_expense = self.env['hr.expense.expense']
-        hr_expense_ids = hr_expense_expense.search([('state','in', ['draft','confirm'])])
-        if not hr_expense_ids :
-            self.write({'expense_id': hr_expense_expense.create({}).id, 'state':'confirm'})
+        expense_sheet = self.env['expense.sheet']
+        expense_sheet_ids = expense_sheet.search([('state','in', ['draft','confirm'])])
+        if not expense_sheet_ids :
+            self.write({'expense_id': expense_sheet.create({}).id, 'state':'confirm'})
         else :
-            self.write({'expense_id':hr_expense_ids.id, 'state':'confirm'})
+            self.write({'expense_id':expense_sheet_ids.id, 'state':'confirm'})
 
     @api.multi
     def expense_line_submit_to_approved_status(self):
@@ -438,7 +438,7 @@ class account_move_line(models.Model):
         res = super(account_move_line, self).reconcile(type=type, writeoff_acc_id=writeoff_acc_id, writeoff_period_id=writeoff_period_id, writeoff_journal_id=writeoff_journal_id)
         #when making a full reconciliation of account move lines 'ids', we may need to recompute the state of some hr.expense
         if self.move_id.ids:
-            expense = self.env['hr.expense.expense'].search([('account_move_id', 'in', self.move_id.ids)])
+            expense = self.env['expense.sheet'].search([('account_move_id', 'in', self.move_id.ids)])
             if expense.state == 'done':
                 #making the postulate it has to be set paid, then trying to invalidate it
                 new_status_is_paid = True
