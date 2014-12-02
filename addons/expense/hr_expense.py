@@ -255,7 +255,6 @@ class expense_sheet(models.Model):
     @api.multi
     def move_line_get(self):
         res = []
-        tax_obj = self.env['account.tax']
         for line in self.line_ids:
             mres = {}
             if line.state == 'accepted':
@@ -265,20 +264,17 @@ class expense_sheet(models.Model):
             if not mres:
                 continue
             res.append(mres)
-            #Taken from product_id_onchange in account.invoice
-            
-            if line.product_id:
-                fpos_obj = self.env['account.fiscal.position']
             tax_l = []
             base_tax_amount = line.total_amount
-            #Calculating tax on the line and creating move?
-            for tax in tax_obj.compute_all(line.unit_amount, line.unit_quantity, line.product_id, self.user_id.partner_id)['taxes']:
+            taxes = line.expense_tax_id.compute_all(line.unit_amount, line.unit_quantity, line.product_id, self.user_id.partner_id)['taxes']
+            for tax in taxes:
                 tax_code_id = tax['base_code_id']
                 if not tax_code_id:
                     continue
                 res[-1]['tax_code_id'] = tax_code_id
-                ## 
-                is_price_include = tax_obj.read(tax['id'],['price_include'])['price_include']
+                is_price_include = False
+                for tax_price in line.expense_tax_id:
+                    is_price_include = tax_price.price_include
                 if is_price_include:
                     ## We need to deduce the price for the tax
                     res[-1]['price'] = res[-1]['price']  - (tax['amount'] * tax['base_sign'] or 0.0)
@@ -425,12 +421,14 @@ class expense(models.Model):
 
     @api.multi
     def expense_line_new_to_confirm_status(self):
-        expense_sheet = self.env['expense.sheet']
-        expense_sheet_ids = expense_sheet.search([('state','in', ['draft','confirm'])])
-        if not expense_sheet_ids :
-            self.write({'expense_id': expense_sheet.create({}).id, 'state':'confirm'})
-        else :
-            self.write({'expense_id':expense_sheet_ids.id, 'state':'confirm'})
+        for expense in self:
+            if expense.state == 'draft':
+                expense_sheet = self.env['expense.sheet']
+                expense_sheet_ids = expense_sheet.search([('state','in', ['draft','confirm'])])
+                if not expense_sheet_ids :
+                    expense.write({'expense_id': expense_sheet.create({}).id, 'state':'confirm'})
+                else :
+                    expense.write({'expense_id':expense_sheet_ids.id, 'state':'confirm'})
 
     @api.multi
     def expense_line_submit_to_approved_status(self):
