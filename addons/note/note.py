@@ -63,6 +63,8 @@ class note_note(models.Model):
     @api.one
     @api.depends('memo')
     def _get_note_first_line(self):
+        import pudb
+        pudb.set_trace()
         self.name = (self.memo and html2plaintext(self.memo) or "").strip().replace('*','').split("\n")[0]
 
     @api.one
