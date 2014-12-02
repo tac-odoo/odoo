@@ -15,7 +15,7 @@
             <field name="formulas">balance = -sum.balance; credit = -sum.credit; debit = -sum.debit</field>
             <field name="parent_id" ref="account_financial_report_profitandloss_line0"/>
             <field name="domain" eval="[('account_id.user_type.report_type', '=', 'income')]" />
-            <field name="groupby">account_id</field>
+
             <field name="sequence" eval="2"/>
         </record>
         <record id="account_financial_report_expense0" model="account.financial.report.line">
@@ -24,7 +24,7 @@
             <field name="formulas">balance = -sum.balance; credit = -sum.credit; debit = -sum.debit</field>
             <field name="parent_id" ref="account_financial_report_profitandloss_line0"/>
             <field name="domain" eval="[('account_id.user_type.report_type', '=', 'expense')]" />
-            <field name="groupby">account_id</field>
+
             <field name="sequence" eval="3"/>
         </record>
 

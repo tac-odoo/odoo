@@ -79,7 +79,7 @@
                         var $cursor = $(e.target).parent().parent();
                         var reportObj = new openerp.Model('account.financial.report');
                         var reportLineObj = new openerp.Model('account.financial.report.line');
-                        contextObj.query(['financial_report_id'])
+                        contextObj.query(['financial_report_id', 'comparison'])
                         .filter([['id', '=', context_id]]).first().then(function (context) {
                             reportObj.query(['debit_credit', 'balance'])
                             .filter([['id', '=', context.financial_report_id[0]]]).first().then(function (report) {
@@ -88,7 +88,7 @@
                                     var line;
                                     lines.shift();
                                     for (line in lines) {
-                                        $cursor.after(openerp.qweb.render("report_financial_line", {a: lines[line], o: report}));
+                                        $cursor.after(openerp.qweb.render("report_financial_line", {l: lines[line], o: report, c: context}));
                                         $cursor = $cursor.next();
                                     }
                                 });

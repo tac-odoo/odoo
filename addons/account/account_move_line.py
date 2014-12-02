@@ -4,8 +4,8 @@ import time
 from datetime import datetime
 
 from openerp import workflow
-from openerp import models, fields, api, _
-from openerp.exceptions import Warning, RedirectWarning
+from openerp import api, fields, models, _
+from openerp.exceptions import RedirectWarning, Warning
 import openerp.addons.decimal_precision as dp
 from openerp import tools
 from openerp.report import report_sxw
@@ -18,26 +18,13 @@ class account_move_line(models.Model):
 
     @api.model
     def _query_get(self, obj='l'):
-        fiscalyear_obj = self.env['account.fiscalyear']
         account_obj = self.env['account.account']
-        fiscalyear_ids = []
         context = dict(self._context or {})
         initial_bal = context.get('initial_bal', False)
         company_clause = " "
-        query = ''
         if context.get('company_id', False):
             company_clause = " AND " +obj+".company_id = %s" % context.get('company_id', False)
-        if not context.get('fiscalyear', False):
-            if context.get('all_fiscalyear', False):
-                #this option is needed by the aged balance report because otherwise, if we search only the draft ones, an open invoice of a closed fiscalyear won't be displayed
-                fiscalyear_ids = fiscalyear_obj.search([]).ids
-            else:
-                fiscalyear_ids = fiscalyear_obj.search([('state', '=', 'draft')]).ids
-        else:
-            #for initial balance as well as for normal query, we check only the selected FY because the best practice is to generate the FY opening entries
-            fiscalyear_ids = [context['fiscalyear']]
 
-        fiscalyear_clause = (','.join([str(x) for x in fiscalyear_ids])) or '0'
         state = context.get('state', False)
         where_move_state = ''
         where_move_lines_by_date = ''
@@ -51,16 +38,17 @@ class account_move_line(models.Model):
         if state:
             if state.lower() not in ['all']:
                 where_move_state= " AND "+obj+".move_id IN (SELECT id FROM account_move WHERE account_move.state = '"+state+"')"
-        if initial_bal and not context.get('periods', False) and not where_move_lines_by_date:
+        if initial_bal and not where_move_lines_by_date:
             #we didn't pass any filter in the context, and the initial balance can't be computed using only the fiscalyear otherwise entries will be summed twice
             #so we have to invalidate this query
             raise Warning(_("You have not supplied enough arguments to compute the initial balance, please select a period and a journal in the context."))
 
+        query = obj+".move_id IN (SELECT id FROM account_move WHERE state <> 'draft') %s %s" % (where_move_lines_by_date, where_move_state)
 
         if context.get('journal_ids', False):
             query += ' AND '+obj+'.journal_id IN (%s)' % ','.join(map(str, context['journal_ids']))
 
-        if context.get('chart_account_id', False):
+        if context.get('chart_account_id', False): #  Deprecated ?
             child_ids = account_obj.browse(context['chart_account_id'])._get_children_and_consol()
             if child_ids:
                 query += ' AND '+obj+'.account_id IN (%s)' % ','.join(map(str, child_ids))
@@ -207,6 +195,8 @@ class account_move_line(models.Model):
     product_id = fields.Many2one('product.product', string='Product')
     debit = fields.Float(string='Debit', digits=dp.get_precision('Account'), default=0.0)
     credit = fields.Float(string='Credit', digits=dp.get_precision('Account'), default=0.0)
+    debit_cash_basis = fields.Float('Debit with cash basis method', default=0)
+    credit_cash_basis = fields.Float('Credit with cash basis method', default=0)
     amount_currency = fields.Float(string='Amount Currency', default=0.0,  digits=dp.get_precision('Account'),
         help="The amount expressed in an optional other currency if it is a multi-currency entry.")
     currency_id = fields.Many2one('res.currency', string='Currency', default=_get_currency, 
@@ -265,7 +255,22 @@ class account_move_line(models.Model):
         ('credit_debit2', 'CHECK (credit+debit>=0)', 'Wrong credit or debit value in accounting entry !'),
     ]
 
-<<<<<<< HEAD
+    def compute_fields(self, field_names):
+        select = ','.join(['l.'+k for k in field_names])
+        if 'balance' in field_names:
+            select = select.replace('l.balance', 'COALESCE(SUM(l.debit-l.credit), 0)')
+        sql = "SELECT " + select + \
+                    """ FROM account_move_line l
+                    WHERE """ + \
+                self._query_get() + \
+                " AND l.id IN %s GROUP BY l.id"
+
+        self.env.cr.execute(sql, [tuple(self.ids)])
+        results = self.env.cr.fetchall()
+        for idx, l in enumerate(results):
+            results[idx] = dict([(field_names[i], k) for i, k in enumerate(l)])
+        return results
+
     @api.multi
     @api.constrains('account_id')
     def _check_account_type(self):
@@ -332,203 +337,6 @@ class account_move_line(models.Model):
         if self.account_id:
             if self.account_id.tax_ids and self.partner_id:
                 self.account_tax_id = self.env['account.fiscal.position'].map_tax(self.partner_id and self.partner_id.property_account_position or False, self.account_id.tax_ids)
-=======
-    def _auto_init(self, cr, context=None):
-        res = super(account_move_line, self)._auto_init(cr, context=context)
-        cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = \'account_move_line_journal_id_period_id_index\'')
-        if not cr.fetchone():
-            cr.execute('CREATE INDEX account_move_line_journal_id_period_id_index ON account_move_line (journal_id, period_id)')
-        cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = %s', ('account_move_line_date_id_index',))
-        if not cr.fetchone():
-            cr.execute('CREATE INDEX account_move_line_date_id_index ON account_move_line (date DESC, id desc)')
-        return res
-
-    def _check_no_view(self, cr, uid, ids, context=None):
-        lines = self.browse(cr, uid, ids, context=context)
-        for l in lines:
-            if l.account_id.type in ('view', 'consolidation'):
-                return False
-        return True
-
-    def _check_no_closed(self, cr, uid, ids, context=None):
-        lines = self.browse(cr, uid, ids, context=context)
-        for l in lines:
-            if l.account_id.type == 'closed':
-                raise osv.except_osv(_('Error!'), _('You cannot create journal items on a closed account %s %s.') % (l.account_id.code, l.account_id.name))
-        return True
-
-    def _check_company_id(self, cr, uid, ids, context=None):
-        lines = self.browse(cr, uid, ids, context=context)
-        for l in lines:
-            if l.company_id != l.account_id.company_id or l.company_id != l.period_id.company_id:
-                return False
-        return True
-
-    def _check_date(self, cr, uid, ids, context=None):
-        for l in self.browse(cr, uid, ids, context=context):
-            if l.journal_id.allow_date:
-                if not time.strptime(l.date[:10],'%Y-%m-%d') >= time.strptime(l.period_id.date_start, '%Y-%m-%d') or not time.strptime(l.date[:10], '%Y-%m-%d') <= time.strptime(l.period_id.date_stop, '%Y-%m-%d'):
-                    return False
-        return True
-
-    def _check_currency(self, cr, uid, ids, context=None):
-        for l in self.browse(cr, uid, ids, context=context):
-            if l.account_id.currency_id:
-                if not l.currency_id or not l.currency_id.id == l.account_id.currency_id.id:
-                    return False
-        return True
-
-    def _check_currency_and_amount(self, cr, uid, ids, context=None):
-        for l in self.browse(cr, uid, ids, context=context):
-            if (l.amount_currency and not l.currency_id):
-                return False
-        return True
-
-    def _check_currency_amount(self, cr, uid, ids, context=None):
-        for l in self.browse(cr, uid, ids, context=context):
-            if l.amount_currency:
-                if (l.amount_currency > 0.0 and l.credit > 0.0) or (l.amount_currency < 0.0 and l.debit > 0.0):
-                    return False
-        return True
-
-    def _check_currency_company(self, cr, uid, ids, context=None):
-        for l in self.browse(cr, uid, ids, context=context):
-            if l.currency_id.id == l.company_id.currency_id.id:
-                return False
-        return True
-
-    _constraints = [
-        (_check_no_view, 'You cannot create journal items on an account of type view or consolidation.', ['account_id']),
-        (_check_no_closed, 'You cannot create journal items on closed account.', ['account_id']),
-        (_check_company_id, 'Account and Period must belong to the same company.', ['company_id']),
-        (_check_date, 'The date of your Journal Entry is not in the defined period! You should change the date or remove this constraint from the journal.', ['date']),
-        (_check_currency, 'The selected account of your Journal Entry forces to provide a secondary currency. You should remove the secondary currency on the account or select a multi-currency view on the journal.', ['currency_id']),
-        (_check_currency_and_amount, "You cannot create journal items with a secondary currency without recording both 'currency' and 'amount currency' field.", ['currency_id','amount_currency']),
-        (_check_currency_amount, 'The amount expressed in the secondary currency must be positive when account is debited and negative when account is credited.', ['amount_currency']),
-        (_check_currency_company, "You cannot provide a secondary currency if it is the same than the company one." , ['currency_id']),
-    ]
-
-    def compute_fields(self, cr, uid, ids, field_names, context=None):
-        if context is None:
-            context = {}
-        c = context.copy()
-
-        select = ','.join(['l.'+k for k in field_names])
-        if 'balance' in field_names:
-            select = select.replace('l.balance', 'COALESCE(SUM(l.debit-l.credit), 0)')
-        sql = "SELECT " + select + \
-                    """ FROM account_move_line l
-                    WHERE """ + \
-                self._query_get(cr, uid, context=c) + \
-                " AND l.id IN %s GROUP BY l.id"
-
-        cr.execute(sql, [tuple(ids)])
-        results = cr.fetchall()
-        for idx, l in enumerate(results):
-            results[idx] = dict([(field_names[i], k) for i, k in enumerate(l)])
-        return results
-
-    #TODO: ONCHANGE_ACCOUNT_ID: set account_tax_id
-    def onchange_currency(self, cr, uid, ids, account_id, amount, currency_id, date=False, journal=False, context=None):
-        if context is None:
-            context = {}
-        account_obj = self.pool.get('account.account')
-        journal_obj = self.pool.get('account.journal')
-        currency_obj = self.pool.get('res.currency')
-        if (not currency_id) or (not account_id):
-            return {}
-        result = {}
-        acc = account_obj.browse(cr, uid, account_id, context=context)
-        if (amount>0) and journal:
-            x = journal_obj.browse(cr, uid, journal).default_credit_account_id
-            if x: acc = x
-        context = dict(context)
-        context.update({
-                'date': date,
-                'res.currency.compute.account': acc,
-            })
-        v = currency_obj.compute(cr, uid, currency_id, acc.company_id.currency_id.id, amount, context=context)
-        result['value'] = {
-            'debit': v > 0 and v or 0.0,
-            'credit': v < 0 and -v or 0.0
-        }
-        return result
-
-    def onchange_partner_id(self, cr, uid, ids, move_id, partner_id, account_id=None, debit=0, credit=0, date=False, journal=False, context=None):
-        partner_obj = self.pool.get('res.partner')
-        payment_term_obj = self.pool.get('account.payment.term')
-        journal_obj = self.pool.get('account.journal')
-        fiscal_pos_obj = self.pool.get('account.fiscal.position')
-        val = {}
-        val['date_maturity'] = False
-
-        if not partner_id:
-            return {'value':val}
-        if not date:
-            date = datetime.now().strftime('%Y-%m-%d')
-        jt = False
-        if journal:
-            jt = journal_obj.browse(cr, uid, journal, context=context).type
-        part = partner_obj.browse(cr, uid, partner_id, context=context)
-
-        payment_term_id = False
-        if jt and jt in ('purchase', 'purchase_refund') and part.property_supplier_payment_term:
-            payment_term_id = part.property_supplier_payment_term.id
-        elif jt and part.property_payment_term:
-            payment_term_id = part.property_payment_term.id
-        if payment_term_id:
-            res = payment_term_obj.compute(cr, uid, payment_term_id, 100, date)
-            if res:
-                val['date_maturity'] = res[0][0]
-        if not account_id:
-            id1 = part.property_account_payable.id
-            id2 =  part.property_account_receivable.id
-            if jt:
-                if jt in ('sale', 'purchase_refund'):
-                    val['account_id'] = fiscal_pos_obj.map_account(cr, uid, part and part.property_account_position or False, id2)
-                elif jt in ('purchase', 'sale_refund'):
-                    val['account_id'] = fiscal_pos_obj.map_account(cr, uid, part and part.property_account_position or False, id1)
-                elif jt in ('general', 'bank', 'cash'):
-                    if part.customer:
-                        val['account_id'] = fiscal_pos_obj.map_account(cr, uid, part and part.property_account_position or False, id2)
-                    elif part.supplier:
-                        val['account_id'] = fiscal_pos_obj.map_account(cr, uid, part and part.property_account_position or False, id1)
-                if val.get('account_id', False):
-                    d = self.onchange_account_id(cr, uid, ids, account_id=val['account_id'], partner_id=part.id, context=context)
-                    val.update(d['value'])
-        return {'value':val}
-
-    def onchange_account_id(self, cr, uid, ids, account_id=False, partner_id=False, context=None):
-        account_obj = self.pool.get('account.account')
-        partner_obj = self.pool.get('res.partner')
-        fiscal_pos_obj = self.pool.get('account.fiscal.position')
-        val = {}
-        if account_id:
-            res = account_obj.browse(cr, uid, account_id, context=context)
-            tax_ids = res.tax_ids
-            if tax_ids and partner_id:
-                part = partner_obj.browse(cr, uid, partner_id, context=context)
-                tax_id = fiscal_pos_obj.map_tax(cr, uid, part and part.property_account_position or False, tax_ids)[0]
-            else:
-                tax_id = tax_ids and tax_ids[0].id or False
-            val['account_tax_id'] = tax_id
-        return {'value': val}
-    #
-    # type: the type if reconciliation (no logic behind this field, for info)
-    #
-    # writeoff; entry generated for the difference between the lines
-    #
-    def search(self, cr, uid, args, offset=0, limit=None, order=None, context=None, count=False):
-        if context is None:
-            context = {}
-        if context.get('fiscalyear'):
-            args.append(('period_id.fiscalyear_id', '=', context.get('fiscalyear', False)))
-        if context and context.get('next_partner_only', False):
-            if not context.get('partner_id', False):
-                partner = self.list_partners_to_reconcile(cr, uid, context=context)
-                if partner:
-                    partner = partner[0]
->>>>>>> [WIP] account : financial reports : context and fixed debit credit
             else:
                 self.account_tax_id = self.account_id.tax_ids or False
 

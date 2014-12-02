@@ -7,17 +7,19 @@
         <div class="form-group">
             <div class="row mt32">
                 <div class="col-xs-3">
-                    <label for="chart_account_id">Chart of account :</label>
-                    <select name="chart_account_id" class="form-control">
-                        <t t-foreach="context.get_accounts()" t-as="a"> 
-                            <option t-if="a == context.chart_account_id" selected="selected" t-att-value="a.id">
-                                <t t-esc="a.name"></t>
-                            </option>
-                            <option t-if="a != context.chart_account_id" t-att-value="a.id">
-                                <t t-esc="a.name"></t>
-                            </option>
-                        </t>   
-                    </select>
+                    <t t-if="context.multi_company">
+                        <label for="company_id">Company :</label>
+                        <select name="company_id" class="form-control">
+                            <t t-foreach="context.get_companies()" t-as="c"> 
+                                <option t-if="c == context.company_id" selected="selected" t-att-value="c.id">
+                                    <t t-esc="c.name"></t>
+                                </option>
+                                <option t-if="c != context.company_id" t-att-value="c.id">
+                                    <t t-esc="c.name"></t>
+                                </option>
+                            </t>   
+                        </select>
+                    </t>
                 </div>
                 <div class="col-xs-3">
                     <label for="target_move">Target move :</label>

@@ -145,7 +145,6 @@ class account_financial_report_line(models.Model):
             date_from=context_id.date_from,
             date_to=context_id.date_to,
             target_move=context_id.target_move,
-            chart_account_id=context_id.chart_account_id.id,
             unfolded_lines=context_id.unfolded_lines.ids,
             comparison=context_id.comparison,
             date_from_cmp=context_id.date_from_cmp,
@@ -258,20 +257,20 @@ class account_financial_report_context(models.TransientModel):
     _name = "account.financial.report.context"
     _description = "A particular context for a financial report"
 
+    @api.depends('create_uid')
+    @api.one
+    def _get_multi_company(self):
+        group_multi_company = self.env['ir.model.data'].xmlid_to_object('base.group_multi_company')
+        if self.create_uid in group_multi_company.users.ids:
+            return True
+        return False
+
     @api.onchange('financial_report_id')
     def _compute_unfolded_lines(self):
         self.write({'unfolded_lines': [(5)]})
         for line in self.financial_report_id.line._get_children_by_order():
             if line.unfolded:
                 self.write({'unfolded_lines': [(4, line.id)]})
-
-    @api.model
-    def _default_account(self):
-        accounts = self.env['account.account'].search(
-            [('parent_id', '=', False), ('company_id', '=', self.env.user.company_id.id)],
-            limit=1,
-        )
-        return accounts and accounts[0] or False
 
     name = fields.Char()
     financial_report_id = fields.Many2one('account.financial.report', 'Linked financial report')
@@ -280,12 +279,16 @@ class account_financial_report_context(models.TransientModel):
     target_move = fields.Selection([('posted', 'All posted entries'), ('all', 'All entries')],
                                    'Target moves', default='posted', required=True)
     unfolded_lines = fields.Many2many('account.financial.report.line', 'context_to_line', string='Unfolded lines')
-    chart_account_id = fields.Many2one('account.account', 'Chart of Account', required=True,
-                                       domain=[('parent_id', '=', False)], default=_default_account)
     comparison = fields.Boolean('Enable comparison', default=False)
     date_from_cmp = fields.Date("Start date for comparison", default=lambda s: datetime.today() + timedelta(days=-395))
     date_to_cmp = fields.Date("End date for comparison", default=lambda s: datetime.today() + timedelta(days=-365))
     cash_basis = fields.Boolean('Enable cash basis columns', default=False)
+    multi_company = fields.Boolean('Allow multi-company', compute=_get_multi_company, store=True)
+    company_id = fields.Many2one('res.company', 'Company', default=lambda s: s.env.user.company_id)
+
+    @api.model
+    def get_companies(self):
+        return self.env['res.company'].search([])
 
     @api.multi
     def remove_line(self, line_id):
@@ -294,7 +297,3 @@ class account_financial_report_context(models.TransientModel):
     @api.multi
     def add_line(self, line_id):
         self.write({'unfolded_lines': [(4, line_id)]})
-
-    @api.model
-    def get_accounts(self):
-        return self.env['account.account'].search([('parent_id', '=', False)])

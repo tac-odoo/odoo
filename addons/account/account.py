@@ -13,10 +13,11 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 
 import openerp.addons.decimal_precision as dp
 
-from openerp import models, fields, api, _
+from openerp import api, fields, models, _
 from openerp.exceptions import Warning
 
 _logger = logging.getLogger(__name__)
+
 
 class res_company(models.Model):
     _inherit = "res.company"
@@ -101,6 +102,22 @@ class account_account_type(models.Model):
     name = fields.Char(string='Account Type', required=True, translate=True)
     close_method = fields.Selection([('none', 'None'), ('balance', 'Balance')],
         string='Deferral Method', required=True, default='none')
+        # ('revenue', _('Revenue (P&L Income account)')),
+        # ('sales', _('Sales (P&L Income account)')),
+        # ('direct_costs', _('Direct Costs (P&L Cost Of Sales account)')),
+        # ('other_income', _('Other Income (P&L Other Income account)')),
+        # ('expenses', _('Expenses (P&L Expenses account)')),
+        # ('depreciation', _('Depreciation (P&L Expenses account)')),
+        # ('overheads', _('Overheads (P&L Expenses account)')),
+        # ('current_assets', _('Current Assets (BS Current Assets account)')),
+        # ('prepayments', _('Prepayments (BS Current Assets account)')),
+        # ('bank_accounts', _('Bank (BS Bank account)')),
+        # ('fixed_assets', _('Fixed Assets (BS Fixed Assets account)')),
+        # ('non_current_assets', _('Non-Current Assets (BS Non-Current Assets account)')),
+        # ('current_liabilities', _('Current Liabilities (BS Current Liabilities account)')),
+        # ('liabilities', _('Liabilities (BS Non-Current Liabilities account)')),
+        # ('non_current_liabilities', _('Non-Current Liabilities (BS Non-Current Liabilities account)')),
+        # ('equity', _('Equity (BS Equity account)')),
     report_type = fields.Selection([
         ('none','/'),
         ('income', _('Profit & Loss (Income account)')),
@@ -126,7 +143,6 @@ class account_account_type(models.Model):
 #----------------------------------------------------------
 # Accounts
 #----------------------------------------------------------
-
 class account_account(models.Model):
     _name = "account.account"
     _description = "Account"
@@ -378,6 +394,7 @@ class account_journal(models.Model):
             res += [(journal.id, name)]
         return res
 
+
 class account_fiscalyear(models.Model):
     _name = "account.fiscalyear"
     _description = "Fiscal Year"
@@ -395,6 +412,7 @@ class account_fiscalyear(models.Model):
     def _check_duration(self):
         if self.date_stop < self.date_start:
             raise Warning(_('Error!\nThe start date of a fiscal year must precede its end date.'))
+
 
 #----------------------------------------------------------
 # Entries
@@ -621,7 +639,6 @@ class account_tax_code(models.Model):
                 where_params = (date_start, date_stop, move_state)
         self._sum(where=where, where_params=where_params)
 
-
     _name = 'account.tax.code'
     _description = 'Tax Code'
     _rec_name = 'code'
@@ -680,6 +697,7 @@ class account_tax(models.Model):
             return result in the context
             Ex: result=round(price_unit*0.21,4)
     """
+
     @api.one
     def copy_data(self, default=None):
         if default is None:
@@ -1078,7 +1096,6 @@ class account_tax(models.Model):
 #  ---------------------------------------------------------------
 #   Account Templates: Account, Tax, Tax Code and chart. + Wizard
 #  ---------------------------------------------------------------
-
 class account_tax_template(models.Model):
     _name = 'account.tax.template'
 
@@ -1471,7 +1488,6 @@ class account_fiscal_position_account_template(models.Model):
 # ---------------------------------------------------------
 # Account generation from template wizards
 # ---------------------------------------------------------
-
 class wizard_multi_charts_accounts(models.TransientModel):
     """
     Create a new account chart for a company.
@@ -1485,6 +1501,7 @@ class wizard_multi_charts_accounts(models.TransientModel):
         * generates all taxes and tax codes, changing account assignations
         * generates all accounting properties and assigns them correctly
     """
+
     _name='wizard.multi.charts.accounts'
     _inherit = 'res.config'
 
@@ -2032,18 +2049,19 @@ class account_operation_template(models.Model):
     has_second_line = fields.Boolean(string='Second line', default=False)
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
 
-    account_id = fields.Many2one('account.account', string='Account', ondelete='cascade', domain=[('deprecated', '=', False), ('user_type.type','!=','consolidation')])
+    account_id = fields.Many2one('account.account', string='Account', ondelete='cascade', domain=[('deprecated', '=', False), ('user_type.type', '!=', 'consolidation')])
     journal_id = fields.Many2one('account.journal', string='Journal', ondelete='cascade', help="This field is ignored in a bank statement reconciliation.")
     label = fields.Char(string='Journal Item Label')
-    amount_type = fields.Selection(selection=[('fixed', 'Fixed'),('percentage','Percentage of amount')], string='Amount type', required=True, default='percentage')
+    amount_type = fields.Selection(selection=[('fixed', 'Fixed'), ('percentage', 'Percentage of amount')], string='Amount type',
+        required=True, default='percentage')
     amount = fields.Float(digits=dp.get_precision('Account'), required=True, default=100.0, help="Fixed amount will count as a debit if it is negative, as a credit if it is positive.")
-    tax_id = fields.Many2one('account.tax', string='Tax', ondelete='restrict', domain=[('type_tax_use','!=','as_child')])
-    analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', ondelete='set null', domain=[('state','not in',('close','cancelled'))])
-    
-    second_account_id = fields.Many2one('account.account', string='Account', ondelete='cascade', domain=[('deprecated', '=', False), ('user_type.type','!=','consolidation')])
+    tax_id = fields.Many2one('account.tax', string='Tax', ondelete='restrict', domain=[('type_tax_use', '!=', 'as_child')])
+    analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', ondelete='set null', domain=[('state', 'not in', ('close', 'cancelled'))])
+
+    second_account_id = fields.Many2one('account.account', string='Account', ondelete='cascade', domain=[('deprecated', '=', False), ('user_type.type', '!=', 'consolidation')])
     second_journal_id = fields.Many2one('account.journal', string='Journal', ondelete='cascade', help="This field is ignored in a bank statement reconciliation.")
     second_label = fields.Char(string='Journal Item Label')
-    second_amount_type = fields.Selection(selection=[('fixed', 'Fixed'),('percentage','Percentage of amount')], string='Amount type', required=True, default='percentage')
+    second_amount_type = fields.Selection(selection=[('fixed', 'Fixed'), ('percentage', 'Percentage of amount')], string='Amount type', required=True, default='percentage')
     second_amount = fields.Float(string='Amount', digits=dp.get_precision('Account'), required=True, default=100.0, help="Fixed amount will count as a debit if it is negative, as a credit if it is positive.")
-    second_tax_id = fields.Many2one('account.tax', string='Tax', ondelete='restrict', domain=[('type_tax_use','!=','as_child')])
-    second_analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', ondelete='set null', domain=[('state','not in',('close','cancelled'))])
+    second_tax_id = fields.Many2one('account.tax', string='Tax', ondelete='restrict', domain=[('type_tax_use', '!=', 'as_child')])
+    second_analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', ondelete='set null', domain=[('state', 'not in', ('close', 'cancelled'))])

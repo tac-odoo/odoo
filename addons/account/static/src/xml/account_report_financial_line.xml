@@ -22,35 +22,35 @@
     </t>
     <t t-name="report_financial_line">
         <tr>
-            <t t-if="a.level &gt; 3"><t t-set="style" t-value="'font-weight: normal;'"/></t>
-            <t t-if="a.level &lt;= 3 "><t t-set="style" t-value="'font-weight: bold;'"/></t>
+            <t t-if="l.level &gt; 3"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+            <t t-if="l.level &lt;= 3 "><t t-set="style" t-value="'font-weight: bold;'"/></t>
 
             <td>
-                <t t-if="a.type == 'line' and a.unfolded">
-                    <span t-att-class="'foldable '+a.id">&gt;</span>
+                <t t-if="l.type == 'line' and l.unfolded">
+                    <span t-att-class="'foldable '+l.id">&gt;</span>
                 </t>
-                <t t-if="a.type == 'line' and !a.unfolded">
-                    <span t-att-class="'unfoldable '+a.id">^</span>
+                <t t-if="l.type == 'line' and !l.unfolded">
+                    <span t-att-class="'unfoldable '+l.id">^</span>
                 </t>
-                <span class="level" style="color: white;"><t t-esc="Array(a.level + 1).join('..')" /></span>
-                <t t-if="a.id and a.action and a.action !== 'unclickable'">
-                    <span t-att-style="style" t-att-class="a.action + ' ' + a.id"><t t-esc="a.name"/></span>
+                <span class="level" style="color: white;"><t t-esc="Array(l.level + 1).join('..')" /></span>
+                <t t-if="l.id and l.action and l.action !== 'unclickable'">
+                    <span t-att-style="style" t-att-class="l.action + ' ' + l.id"><t t-esc="l.name"/></span>
                 </t>
-                <t t-if="!a.id or !a.action or a.action == 'unclickable'">
-                    <span t-att-style="style"><t t-esc="a.name"/></span>
+                <t t-if="!l.id or !l.action or l.action == 'unclickable'">
+                    <span t-att-style="style"><t t-esc="l.name"/></span>
                 </t>
             </td>
             <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
-                <span class="annotable" t-att-style="style"><t t-esc="a.debit"/></span>
+                <span class="annotable" t-att-style="style"><t t-esc="l.debit"/></span>
             </td>
             <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
-                <span class="annotable" t-att-style="style"><t t-esc="a.credit"/></span>
+                <span class="annotable" t-att-style="style"><t t-esc="l.credit"/></span>
             </td>
             <td class="text-right" style="white-space: nowrap;" t-if="o.balance">
-                <span class="annotable" t-att-style="style"><t t-esc="a.balance"/></span>
+                <span class="annotable" t-att-style="style"><t t-esc="l.balance"/></span>
             </td>
-            <td class="text-right" style="white-space: nowrap;" t-if="o.comparison">
-                <span class="annotable" t-att-style="style"><t t-esc="a.balance_cmp"/></span>
+            <td class="text-right" style="white-space: nowrap;" t-if="c.comparison">
+                <span class="annotable" t-att-style="style"><t t-esc="l.balance_cmp"/></span>
             </td>
         </tr>
     </t>
