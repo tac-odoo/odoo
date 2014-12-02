@@ -129,12 +129,15 @@ class expense_sheet(models.Model):
     @api.multi
     def expense_accept(self):
         expense_state = False
-        for expense in self.line_ids:
-            if expense.state == 'accepted':
-                expense_state = True
-        if not expense_state:
-            raise except_orm(_('Error!'), _('You cannot submit expense sheet which has no expense approved by hr manager.'))
-        return self.write({'state': 'accepted', 'date_valid': time.strftime('%Y-%m-%d'), 'user_valid': self._uid})
+        for expense in self:
+            expense.signal_workflow('confirm')
+            for expense_line in expense.line_ids:
+                if expense_line.state == 'accepted':
+                    expense_state = True
+                    expense.signal_workflow('validate')
+            if not expense_state:
+                raise except_orm(_('Error!'), _('You cannot submit expense sheet which has no expense approved by hr manager.'))
+        return expense.write({'state': 'accepted', 'date_valid': time.strftime('%Y-%m-%d'), 'user_valid': expense._uid})
 
     @api.multi
     def expense_canceled(self):

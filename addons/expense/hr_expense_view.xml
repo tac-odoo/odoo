@@ -156,6 +156,30 @@
             </field>
         </record>
 
+        <record id="action_run_expense_sheet" model="ir.actions.server">
+            <field name="name">Approve expenses</field>
+            <field name="condition">True</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="model_expense_sheet"/>
+            <field name="state">code</field>
+            <field name="code">
+                self.expense_accept(cr, uid, context.get('active_ids', []), context=context)
+            </field>
+        </record>
+
+        <record model="ir.values" id="action_module_expense_sheet">
+            <field name="name">action_module_expense_sheet</field>
+            <field name="action_id" ref="action_run_expense_sheet" />
+            <field name="value" eval="'ir.actions.server,' + str(ref('action_run_expense_sheet'))" />
+            <field name="key">action</field>
+            <field name="model_id" ref="model_expense_sheet" />
+            <field name="model">expense.sheet</field>
+            <field name="key2">client_action_multi</field>
+        </record>
+
+        
+        
+        
         <record id="hr_expense_product" model="ir.actions.act_window">
             <field name="name">Expense Products</field>
             <field name="res_model">product.product</field>
