@@ -81,7 +81,6 @@ class TestNote(common.TransactionCase):
                 'stage_ids': [(6,0,[self.stage12.id, self.stage22.id])]
                 })
 
-
         # TODO TEST
         # note.note:  V title from first line of content
         #             V done/not done
@@ -102,9 +101,8 @@ class TestNote(common.TransactionCase):
     def test_user_stage(self):
         """ Test: Note stage is user dependent """
         stage1 = self.env['note.note'].sudo(self.user1).browse(self.note1.id).stage_id
-        stage2 = self.env['note.note'].sudo(self.user2).browse(self.note2.id).stage_id
+        stage2 = self.env['note.note'].sudo(self.user2).browse(self.note1.id).stage_id
         self.assertTrue(stage1 != stage2)
-
 
     # Old test, I don't know why it's here
 #     def test_bug_lp_1156215(self):
