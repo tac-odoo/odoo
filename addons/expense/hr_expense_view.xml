@@ -90,6 +90,7 @@
                                     <field name="uom_id" on_change="onchange_uom(product_id, uom_id)"/>
                                     <field name="unit_amount"/>
                                     <field name="unit_quantity"/>
+                                    <field name="expense_tax_id" widget="many2many_tags" groups="account.group_account_user"/>
                                     <field name="total_amount" sum="Total"/>
                                     <field name="state"/>
                                     <button name="expense_line_submit_to_approved_status" states="confirm" string="Approved by hr manager" type="object" icon="gtk-apply"/>

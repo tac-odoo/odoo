@@ -36,7 +36,7 @@ def _employee_get(self):
 class expense_sheet(models.Model):
 
     @api.multi
-    @api.depends('line_ids.unit_amount','line_ids.unit_quantity')
+    @api.depends('line_ids.state')
     def _amount(self):
         for expense in self.line_ids:
             self.amount += expense.unit_amount * expense.unit_quantity
@@ -257,11 +257,16 @@ class expense_sheet(models.Model):
         res = []
         tax_obj = self.env['account.tax']
         for line in self.line_ids:
-            mres = self.move_line_get_item(line)
+            mres = {}
+            if line.state == 'accepted':
+                mres = self.move_line_get_item(line)
+            elif line.state == 'confirm':
+                line.write({'state':'cancel'})
             if not mres:
                 continue
             res.append(mres)
             #Taken from product_id_onchange in account.invoice
+            
             if line.product_id:
                 fpos_obj = self.env['account.fiscal.position']
             tax_l = []
@@ -311,21 +316,17 @@ class expense_sheet(models.Model):
             if not acc:
                 raise except_orm(_('Error!'), _('Please configure Default Expense account for Product purchase: `property_account_expense_categ`.'))
         
-        if line.state == 'accepted':
-            return {
-                'type':'src',
-                'name': line.name.split('\n')[0][:64],
-                'price_unit':line.unit_amount,
-                'quantity':line.unit_quantity,
-                'price':line.total_amount,
-                'account_id':acc.id,
-                'product_id':line.product_id.id,
-                'uos_id':line.uom_id.id,
-                'account_analytic_id':line.analytic_account.id,
-            }
-        elif line.state == 'confirm':
-            line.write({'state':'cancel'})
-        
+        return {
+            'type':'src',
+            'name': line.name.split('\n')[0][:64],
+            'price_unit':line.unit_amount,
+            'quantity':line.unit_quantity,
+            'price':line.total_amount,
+            'account_id':acc.id,
+            'product_id':line.product_id.id,
+            'uos_id':line.uom_id.id,
+            'account_analytic_id':line.analytic_account.id,
+        }
 
     @api.multi
     def action_view_move(self):
