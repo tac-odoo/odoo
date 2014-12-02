@@ -13,9 +13,9 @@
             <field name="default_code">CarTRA</field>
             <field name="uom_id" ref="product.product_uom_km"/>
             <field name="uom_po_id" ref="product.product_uom_km"/>
-            <field name="categ_id" ref="hr_expense.cat_expense"/>
+            <field name="categ_id" ref="expense.cat_expense"/>
             <field name="hr_expense_ok" eval="True" />
-            <field name="image" type="base64" file="hr_expense/static/img/car_travel-image.jpg"/>
+            <field name="image" type="base64" file="expense/static/img/car_travel-image.jpg"/>
         </record>
 
         <record id="air_ticket" model="product.product">
@@ -24,9 +24,9 @@
             <field name="type">service</field>
             <field name="name">Air Ticket</field>
             <field name="default_code">AT</field>
-            <field name="categ_id" ref="hr_expense.cat_expense"/>
+            <field name="categ_id" ref="expense.cat_expense"/>
             <field name="hr_expense_ok" eval="True" />
-            <field name="image" type="base64" file="hr_expense/static/img/air_ticket-image.jpg"/>
+            <field name="image" type="base64" file="expense/static/img/air_ticket-image.jpg"/>
         </record>
 
         <record id="hotel_rent" model="product.product">
@@ -34,15 +34,15 @@
             <field name="type">service</field>
             <field name="name">Hotel Accommodation</field>
             <field name="default_code">HA0</field>
-            <field name="categ_id" ref="hr_expense.cat_expense"/>
+            <field name="categ_id" ref="expense.cat_expense"/>
             <field name="hr_expense_ok" eval="True" />
-            <field name="image" type="base64" file="hr_expense/static/img/hotel_rent-image.jpg"/>
+            <field name="image" type="base64" file="expense/static/img/hotel_rent-image.jpg"/>
         </record>
-        <record id="expenses0" model="hr.expense.expense">
+        <record id="expenses0" model="expense.sheet">
             <field name="name">Expenses</field>
             <field name="date" eval="time.strftime('%Y-08-25')"/>
         </record>
-        <record id="expenses_line0" model="hr.expense.line">
+        <record id="expenses_line0" model="expense">
             <field name="name">Travel Expenses</field>
             <field name="date_value" eval="time.strftime('%Y-08-10')"/>
             <field name="analytic_account" ref="analytic.analytic_consultancy"/>
@@ -52,13 +52,13 @@
             <field eval="1.0" name="unit_quantity"/>
         </record>
 
-        <record id="sep_expenses" model="hr.expense.expense">
+        <record id="sep_expenses" model="expense.sheet">
             <field name="employee_id" ref="hr.employee_mit"/>
             <field name="name">September Expenses</field>
             <field name="date" eval="time.strftime('%Y-09-28')"/>
         </record>
 
-        <record id="travel_by_air_sep" model="hr.expense.line">
+        <record id="travel_by_air_sep" model="expense">
             <field name="name">Travel by Air</field>
             <field name="date_value" eval="time.strftime('%Y-09-03')"/>
             <field name="analytic_account" ref="analytic.analytic_consultancy"/>
@@ -69,7 +69,7 @@
             <field eval="1.0" name="unit_quantity"/>
         </record>
 
-        <record id="hotel_bill_sep" model="hr.expense.line">
+        <record id="hotel_bill_sep" model="expense">
             <field name="name">Hotel Expenses - Thymbra</field>
             <field name="date_value" eval="time.strftime('%Y-09-20')"/>
             <field name="analytic_account" ref="analytic.analytic_nebula"/>
@@ -80,7 +80,7 @@
             <field eval="5.0" name="unit_quantity"/>
         </record>
 
-        <record id="car_travel_sep" model="hr.expense.line">
+        <record id="car_travel_sep" model="expense">
                 <field name="name">Bruxelles - Paris</field>
                 <field name="date_value" eval="time.strftime('%Y-09-15')"/>
                 <field name="analytic_account" ref="analytic.analytic_nebula"/>
