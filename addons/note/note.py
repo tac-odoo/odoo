@@ -63,8 +63,6 @@ class note_note(models.Model):
     @api.one
     @api.depends('memo')
     def _get_note_first_line(self):
-        import pudb
-        pudb.set_trace()
         self.name = (self.memo and html2plaintext(self.memo) or "").strip().replace('*','').split("\n")[0]
 
     @api.one
@@ -77,7 +75,6 @@ class note_note(models.Model):
         self.open = 1
 
     #return the default stage for the uid user
-    @api.one
     def _get_default_stage_id(self):
         ids = self.env['note.stage'].search([('user_id','=',self.env.uid)])
         return ids and ids[0] or False
