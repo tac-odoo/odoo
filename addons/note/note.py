@@ -21,7 +21,6 @@
 
 from openerp import SUPERUSER_ID
 import openerp
-from openerp.osv import osv
 from openerp import models, fields, api, exceptions, _
 from openerp.tools import html2plaintext
 from datetime import datetime
@@ -171,7 +170,7 @@ class note_base_config_settings(models.TransientModel):
     module_note_pad = fields.Boolean('Use collaborative pads (etherpad)')
     group_note_fancy = fields.Boolean('Use fancy layouts for notes', implied_group='note.group_note_fancy')
 
-class res_users(osv.Model):
+class res_users(models.Model):
     _name = 'res.users'
     _inherit = ['res.users']
     def create(self, cr, uid, data, context=None):
