@@ -24,5 +24,16 @@
             <field name="placement">bottom</field>
         </record>
 
+        <record model="web.tip" id="expense_tip_3">
+            <field name="title"></field>
+            <field name="description">Click here and submit lines to your manager.</field>
+            <field name="action_id" ref="expense.action_expense_to_submit"/>
+            <field name="model">expense</field>
+            <field name="mode">list</field>
+            <field name="trigger_selector">div.oe_form_dropdown_section.btn-group.btn-group-sm:visible</field>
+            <field name="highlight_selector">div.oe_form_dropdown_section.btn-group.btn-group-sm:visible</field>
+            <field name="placement">bottom</field>
+        </record>
+
     </data>
 </openerp>

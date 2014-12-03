@@ -57,8 +57,7 @@ class expense_sheet(models.Model):
         },
     }
 
-    name = fields.Char(string='Description', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]})
-    #id = fields.Integer(string='Sheet ID', readonly=True)
+    name = fields.Char(string='Expense Sheet', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]})
     date = fields.Date(string='Date', select=True, readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}, default=fields.Date.context_today)
     journal_id = fields.Many2one('account.journal', string='Force Journal', help = "The journal used when the expense is done.")
     employee_payable_account_id = fields.Many2one('account.account', string='Employee Account', help="Employee payable account")
@@ -128,16 +127,17 @@ class expense_sheet(models.Model):
 
     @api.multi
     def expense_accept(self):
-        expense_state = False
         for expense in self:
-            expense.signal_workflow('confirm')
-            for expense_line in expense.line_ids:
-                if expense_line.state == 'accepted':
-                    expense_state = True
-                    expense.signal_workflow('validate')
-            if not expense_state:
-                raise except_orm(_('Error!'), _('You cannot submit expense sheet which has no expense approved by hr manager.'))
-        return expense.write({'state': 'accepted', 'date_valid': time.strftime('%Y-%m-%d'), 'user_valid': expense._uid})
+            if expense.state not in ['done','paid']:
+                expense.signal_workflow('confirm')
+                expense_state = False
+                for expense_line in expense.line_ids:
+                    if expense_line.state == 'accepted':
+                        expense_state = True
+                expense.signal_workflow('validate')
+                if not expense_state:
+                    raise except_orm(_('Error!'), _('You cannot submit expense sheet which has no expense approved by hr manager.'))
+                return expense.write({'state': 'accepted', 'date_valid': time.strftime('%Y-%m-%d'), 'user_valid': expense._uid})
 
     @api.multi
     def expense_canceled(self):
@@ -357,7 +357,6 @@ class product_template(models.Model):
     
     hr_expense_ok = fields.Boolean(string='Can be Expensed', help="Specify if the product can be selected in an HR expense line.")
     
-
 class expense(models.Model):
     _name = "expense"
     _description = "Expense"

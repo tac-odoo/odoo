@@ -4,10 +4,10 @@
         <report
             id="action_report_hr_expense"
             string="HR Expense"
-            model="hr.expense.expense"
+            model="expense.sheet"
             report_type="qweb-pdf"
-            name="hr_expense.report_expense"
-            file="hr_expense.report_expense"
+            name="expense.report_expense"
+            file="expense.report_expense"
         />
     </data>
 </openerp>
