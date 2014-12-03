@@ -30,7 +30,7 @@ import openerp.addons.decimal_precision as dp
 def _employee_get(self):
     employee = self.env['hr.employee'].search([('user_id', '=', self._uid)])
     if employee:
-        return employee.id
+        return employee[0]
     return False
     
 class expense_sheet(models.Model):

@@ -53,8 +53,8 @@
                                 <label for="module_hr_holidays"/>
                             </div>
                             <div>
-                                <field name="module_expense" class="oe_inline"/>
-                                <label for="module_expense"/>
+                                <!--<field name="module_expense" class="oe_inline"/>
+                                <label for="module_expense"/>-->
                             </div>
                             <div>
                                 <field name="module_hr_gamification" class="oe_inline"/>
