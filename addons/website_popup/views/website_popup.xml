@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <template id="assets_frontend" inherit_id="website.assets_frontend" name="Website Bounceexchange Theme">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/website_popup/static/src/js/website_popup.js"/>
+            </xpath>
+        </template>
+
+        <template id="assets_editor" inherit_id="website.assets_editor" name="wesbite_popup Editor assets">
+            <xpath expr="/t" position="inside">
+                <script type="text/javascript" src="/website_popup/static/src/js/website.popup.editor.js" groups="base.group_website_publisher"></script>
+            </xpath>
+        </template>
+
+        <template id="website_popup_snippet" name="popup snippet" inherit_id="website.snippets">
+            <xpath expr="//div[@id='snippet_feature']" position="inside">
+                <div>
+                    <div class="oe_snippet_thumbnail">
+                        <img class="oe_snippet_thumbnail_img" src="/website_popup/static/src/img/bounce.png" />
+                        <span class="oe_snippet_thumbnail_title">Banner Popup</span>
+                    </div>
+
+                    <div class="banner_popup" data-list-id="0">
+                        <div class="alert alert-warning alert-dismissible fade in css_editable_mode_display" style="display: none;" role="alert" contenteditable="false">
+                            <strong>Banner Popup! </strong>Banner popup snippet effect is active on this page. Click Here To <a id="edit_dialog" href="#"> Edit Dialog Content</a>
+                        </div>
+                        <div class="modal modal-dialog modal-md fade fade-custom" id="banner_popup" tabindex="-1" role="dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&amp;times;</span></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <div class="popup_content"/>
+                                    <div class="input-group">
+                                        <input type="email" name="email" class="popup_subscribe_email form-control" placeholder="your email..."/>
+                                        <span class="input-group-btn">
+                                            <a href="#" class="btn btn-primary popup_subscribe_btn">Subscribe</a>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="website_popup_options" name="Popup Options" inherit_id="website.snippet_options">
+            <xpath expr="//div" position="after">
+                <div data-js='banner_popup'
+                    data-selector=".banner_popup"
+                    data-drop-in=".oe_structure, [data-oe-type=html]">
+                    <li data-select_mailing_list=""><a>Change Newsletter</a></li>
+                </div>
+            </xpath>
+        </template>
+    </data>
+</openerp>
