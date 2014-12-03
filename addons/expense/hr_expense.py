@@ -383,7 +383,6 @@ class expense(models.Model):
     unit_quantity = fields.Float(string='Quantity', digits= dp.get_precision('Product Unit of Measure'), default=1)
     product_id = fields.Many2one('product.product', string='Product', domain=[('hr_expense_ok','=',True)])
     uom_id = fields.Many2one('product.uom', string='Unit of Measure', required=True, default=_get_uom_id)
-    description = fields.Text(string='Description')
     analytic_account = fields.Many2one('account.analytic.account', string='Analytic account')
     ref = fields.Char(string='Reference')
     sequence = fields.Integer(string='Sequence', select=True, help="Gives the sequence order when displaying a list of expense lines.")
