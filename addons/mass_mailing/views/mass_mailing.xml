@@ -25,12 +25,15 @@
                     <field name="mail_mail_id_int"/>
                     <field name="message_id"/>
                     <field name="mass_mailing_id"/>
-
+                    <filter help="Sent" domain="[('sent', '!=', False)]"/>
+                    <filter help="Opened" domain="[('opened', '!=', False)]"/>
+                    <filter help="Replied" domain="[('replied', '!=', False)]"/>
+                    <filter help="Bounced" domain="[('bounced', '!=', False)]"/>
                     <group expand="0" string="Group By">
-                        <filter string="Opened" domain="[('opened', '!=', False)]"
-                            context="{'group_by':'opened'}"/>
                         <filter string="State" domain="[]"
                             context="{'group_by':'state'}"/>
+                        <filter string="Last State Update" domain="[]"
+                            context="{'group_by':'state_update'}"/>
                     </group>
                 </search>
             </field>
@@ -91,7 +94,7 @@
             <field name="res_model">mail.mail.statistics</field>
             <field name="view_type">form</field>
             <field name="view_mode">graph,tree,form</field>
-            <field name="domain">[('opened', '!=', False)]</field>
+            <field name="domain">[]</field>
             <field name="context">{'search_default_mass_mailing_id': active_id}</field>
         </record>
 
@@ -99,9 +102,13 @@
             <field name="name">Mail Statistics Graph</field>
             <field name="model">mail.mail.statistics</field>
             <field name="arch" type="xml">
-                <graph string="Mail Statistics" type="bar">
-                    <field name="opened" type="row" interval="day"/>
+                <graph string="Mail Statistics" type="bar" stacked="True" interval="day">
+                    <field name="state_update" type="row" interval="day"/>
                     <field name="state" type="row"/>
+
+                    <!-- <field name="opened" type="row" interval="day"/>
+                    <field name="sent" type="row" interval="day"/> -->
+                    <!-- <field name="state" type="row"/> -->
                 </graph>
             </field>
         </record>
@@ -322,15 +329,15 @@
             <field name="arch" type="xml">
                 <form string="Mass Mailing">
                     <header>
-                        <button name="action_test_mailing" type="object" class="oe_highlight" 
-                            attrs="{'invisible': [('body_html', '=', False)]}" string="Test Mailing"/>
-                        <button name="put_in_queue" type="object" 
-                            attrs="{'invisible': ['|', ('state', 'in', ('in_queue', 'done')), ('body_html', '=', False)]}" class="oe_highlight" string="Send to All"/>
-                        <button name="cancel_mass_mailing" type="object" 
-                            attrs="{'invisible': [('state', '!=', 'in_queue')]}" class="oe_highlight" string="Cancel"/>
-                        <button name="retry_failed_mail" type="object" 
-                            attrs="{'invisible': ['|', ('state', '!=', 'done'), ('failed', '=', 0)]}" class="oe_highlight" string="Retry"/>
-                        <field name="state" widget="statusbar"/>
+                        
+                        <button name="action_test_mailing" type="object" class="oe_highlight" attrs="{'invisible': [('body_html', '=', False)]}" string="Test Mailing"/>
+                        <button name="put_in_queue" type="object" attrs="{'invisible': ['|', ('state', 'in', ('in_queue', 'done')), ('body_html', '=', False)]}" class="oe_highlight" string="Send to All"/>
+                        <button name="cancel_mass_mailing" type="object" attrs="{'invisible': [('state', '!=', 'in_queue')]}" class="oe_highlight" string="Cancel"/>
+                        <button name="retry_failed_mail" type="object" attrs="{'invisible': ['|', ('state', '!=', 'done'), ('failed', '=', 0)]}" class="oe_highlight" string="Retry"/>
+
+                        <!-- Note : the statusbar is between <span> because of a Chrome CSS interpretation bug,
+                        which render the statusbar on two lines instead of one -->
+                        <span><field name="state" readonly="1" widget="statusbar"/></span>
                     </header>
                     <div class="oe_form_box_info oe_text_center" attrs="{'invisible': [('scheduled', '=', 0)]}">
                         <p><strong>
@@ -352,11 +359,11 @@
                     </div>
                     <sheet>
                         <div class="oe_button_box pull-right" attrs="{'invisible': [('state', 'in', ('draft','test'))]}">
-<!--                             <button name="%(action_view_mail_mail_statistics_mailing)d" type="action"
+                            <button name="%(action_view_mail_mail_statistics_mailing)d" type="action"
                                 icon="fa-envelope-o" class="oe_stat_button"
-                                attrs="{'invisible': [('total', '=', 0)]}" >
-                                <field name="total" string="Emails" widget="statinfo"/>
-                            </button> -->
+                                attrs="{'invisible': [('sent', '=', 0)]}" >
+                                <field name="sent" string="Emails Sent" widget="statinfo"/>
+                            </button>
                             <button name="%(action_view_mail_mail_statistics_mailing)d"
                                 type="action" class="oe_stat_button">
                                 <field name="received_ratio" string="Received" widget="percentpie"/>
@@ -644,10 +651,15 @@
                     <header>
                         <button name="%(action_create_mass_mailings_from_campaign)d" type="action" class="oe_highlight" string="Send new Mass Mailing"/>
                         <button name="%(action_create_ab_mass_mailings_from_campaign)d" type="action" class="oe_highlight" string="Send new A/B Testing Mass Mailing"/>
-                        <field name="stage_id" widget="statusbar" clickable="True"/>
+                        <span><field name="stage_id" widget="statusbar" clickable="True"/></span>
                     </header>
                     <sheet>
                         <div class="oe_button_box pull-right">
+                            <button name="%(action_view_mail_mail_statistics_mailing)d" type="action"
+                                icon="fa-envelope-o" class="oe_stat_button"
+                                attrs="{'invisible': [('sent', '=', 0)]}" >
+                                <field name="sent" string="Emails Sent" widget="statinfo"/>
+                            </button>
                             <button name="%(action_view_mass_mailing_contacts)d"
                                 type="action" class="oe_stat_button oe_inline">
                                 <field name="received_ratio" widget="percentpie" string="Received"/>

@@ -432,7 +432,7 @@ class MassMailing(osv.Model):
         ),
         'state': fields.selection(
             [('draft', 'Draft'), ('in_queue', 'In Queue'), ('sending', 'Sending'), ('done', 'Sent')],
-            string='Status', required=True, copy=False,
+            string='Status', required=True, copy=False, help="fdfsdf"
         ),
         'color': fields.related(
             'mass_mailing_campaign_id', 'color',
@@ -583,9 +583,14 @@ class MassMailing(osv.Model):
                 if isinstance(item, (int, long)):
                     mailing_list_ids.add(item)
                 elif len(item) == 3:
+                    # print list(set(item[2]))
+                    # result = set(self.pool[mailing_model].search(cr, uid, [('list_id', 'in', list(set(item[2]))), ('opt_out', '=', False)], context=context))
+                    # print result
+                    # mailing_list_ids |= result
                     mailing_list_ids |= set(item[2])
             if mailing_list_ids:
-                value['mailing_domain'] = "[('list_id', 'in', %s)]" % list(mailing_list_ids)
+                print mailing_list_ids
+                value['mailing_domain'] = "[('list_id', 'in', %s), ('opt_out', '=', False)]" % list(mailing_list_ids)
             else:
                 value['mailing_domain'] = "[('list_id', '=', False)]"
         else:

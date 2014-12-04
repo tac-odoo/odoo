@@ -37,6 +37,8 @@ class MailMailStats(osv.Model):
         stats = self.browse(cr, uid, stat_ids, context=context)
         res = dict([(stat, False) for stat in stat_ids])
 
+        self.write(cr, uid, stat_ids, {'state_update': fields.datetime.now()}, context=context)
+
         for stat in stats:
             if stat.exception:
                 res[stat.id] = 'Exception'
@@ -83,6 +85,7 @@ class MailMailStats(osv.Model):
         'bounced': fields.datetime('Bounced', help='Date when this email has bounced.'),
         'state': fields.function(_compute_state, string='State', type="char",
                                  store={'mail.mail.statistics': (lambda self, cr, uid, ids, context=None: ids, ['exception', 'sent', 'opened', 'replied', 'bounced'], 10)}),
+        'state_update': fields.datetime('State Update', help='Last state update of the mail'),
     }
 
     _defaults = {
