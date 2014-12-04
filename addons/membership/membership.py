@@ -561,7 +561,7 @@ class account_invoice_refund(osv.osv_memory):
 
     def invoice_refund(self, cr, uid, ids, context=None):
         invoice_refund = super(account_invoice_refund, self).invoice_refund(cr, uid, ids, context=context)
-        member_line_ids = self.pool.get('membership.membership_line').search(cr, uid, [('account_invoice_line.invoice_id', '=', context.get('active_ids'))])
+        member_line_ids = self.pool.get('membership.membership_line').search(cr, uid, [('account_invoice_line.invoice_id', 'in', context.get('active_ids'))])
         self.pool.get('membership.membership_line').write(cr, uid, member_line_ids, {'state' : 'canceled', 'date_cancel': time.strftime('%Y-%m-%d')})
         return invoice_refund
 
