@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
+#    OpenERP, Open Source Business Applications
+#    Copyright (C) 2004-2012 OpenERP S.A. (<http://openerp.com>).
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,9 +18,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from openerp import models, fields, api, _
+from openerp.tools.translate import _
 
-import account_analytic_analysis
-import res_config
-import product_template
-import sale_order
-import account_config
+class account_config_settings(models.Model): 
+    _inherit = 'account.config.settings'
+    
+    @api.model
+    def onchange_sale_analytic_plans(self, group_analytic_account_for_sales): 
+        is_user = self.env['res.users'].has_group('account.group_account_manager') 
+        if is_user:  
+            return {'value': {'group_analytic_account_for_sales': True}}
