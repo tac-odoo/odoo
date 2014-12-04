@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import openerp
 import simplejson
 import urllib2
 import werkzeug
@@ -69,7 +68,7 @@ class Linkedin(http.Controller):
 
 
 class Binary(http.Controller):
-    @openerp.http.route('/web_linkedin/binary/url2binary', type='json', auth='user')
+    @http.route('/web_linkedin/binary/url2binary', type='json', auth='user')
     def url2binary(self, url):
         """Used exclusively to load images from LinkedIn profiles, must not be used for anything else."""
         return request.env['linkedin'].url2binary(url)
