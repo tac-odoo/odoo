@@ -94,7 +94,35 @@ class hr_holidays_status(osv.osv):
         'color_name': 'red',
         'active': True,
     }
+    
+    def _search(self, cr, uid, args, offset=0, limit=None, order=None, context=None, count=False, access_rights_uid=None):
+        """ Override to get leave types in such manner so employee have 
+            better choice to select their leaves.
 
+            If employee create leave request then leave types displayed in following order
+            - Override limit False
+                - max allocated leave (greater to smaller)
+                - If max allocated leave are same then sort according to leaves taken (greater to smaller)
+            - Override limit True
+            - If leave taken and max leaves are same means no leaves available, so display them in last
+        """
+        if context is None:
+            context = {}
+        ids = super(hr_holidays_status, self)._search(cr, uid, args, offset=offset, limit=limit, order=order, context=context, count=False, access_rights_uid=access_rights_uid)
+        if context.get('employee_id', False):
+            to_consume_ids = []
+            consumed_leave_ids = []
+            for leave_type in self.browse(cr, uid, ids, context=context):
+                if leave_type.max_leaves <= leave_type.leaves_taken and not leave_type.limit:
+                    consumed_leave_ids.append((leave_type.id, leave_type.max_leaves, leave_type.leaves_taken))
+                else:
+                    to_consume_ids.append((leave_type.id, leave_type.max_leaves, leave_type.leaves_taken, int(not leave_type.limit)))
+            to_consume_ids = [x[0] for x in sorted(to_consume_ids, key=lambda res_values: (res_values[1], res_values[2], res_values[3]), reverse=True)]
+            consumed_leave_ids = [x[0] for x in sorted(consumed_leave_ids, key=lambda res_values: (res_values[1], res_values[2]), reverse=True)]
+            to_consume_ids.extend(consumed_leave_ids)
+            return to_consume_ids
+        return ids
+    
     def name_get(self, cr, uid, ids, context=None):
 
         if not context.get('employee_id',False):
