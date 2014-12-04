@@ -137,6 +137,11 @@ class membership_line(osv.osv):
             res[line.id] = state
         return res
 
+    def _set_state(self, cr, uid, ids, field_name, field_value, args, context=None):
+        cr.execute('UPDATE membership_membership_line '\
+                       'SET state=%s '\
+                       'WHERE id IN %s', (field_value, tuple([ids]),))
+        return True
 
     _description = __doc__
     _name = 'membership.membership_line'
@@ -150,7 +155,7 @@ class membership_line(osv.osv):
         'member_price': fields.float('Membership Fee', digits_compute= dp.get_precision('Product Price'), required=True, help='Amount for the membership'),
         'account_invoice_line': fields.many2one('account.invoice.line', 'Account Invoice line', readonly=True),
         'account_invoice_id': fields.related('account_invoice_line', 'invoice_id', type='many2one', relation='account.invoice', string='Invoice', readonly=True),
-        'state': fields.function(_state,
+        'state': fields.function(_state, fnct_inv=_set_state,
                         string='Membership Status', type='selection',
                         selection=STATE, store = {
                         'account.invoice': (_get_membership_lines, ['state'], 10),
@@ -227,7 +232,9 @@ class Partner(osv.osv):
             s = 4
             if partner_data.member_lines:
                 for mline in partner_data.member_lines:
-                    if mline.account_invoice_line and mline.account_invoice_line.invoice_id:
+                    if mline.state == 'canceled':
+                        s = 2
+                    elif mline.account_invoice_line and mline.account_invoice_line.invoice_id:
                         mstate = mline.account_invoice_line.invoice_id.state
                         if mline.date_to >= today:
                             if mstate == 'paid':
@@ -548,5 +555,14 @@ class account_invoice_line(osv.osv):
                         }, context=context)
         return result
 
+class account_invoice_refund(osv.osv_memory):
+    """Refunds invoice"""
+    _inherit = "account.invoice.refund"
+
+    def invoice_refund(self, cr, uid, ids, context=None):
+        invoice_refund = super(account_invoice_refund, self).invoice_refund(cr, uid, ids, context=context)
+        member_line_ids = self.pool.get('membership.membership_line').search(cr, uid, [('account_invoice_line.invoice_id', '=', context.get('active_ids'))])
+        self.pool.get('membership.membership_line').write(cr, uid, member_line_ids, {'state' : 'canceled', 'date_cancel': time.strftime('%Y-%m-%d')})
+        return invoice_refund
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
