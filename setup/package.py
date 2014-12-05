@@ -300,34 +300,40 @@ def build_exe(o):
 #----------------------------------------------------------
 # Stage: testing
 #----------------------------------------------------------
+def _prepare_testing(o):
+    if not o.no_tarball or not o.no_debian:
+        subprocess.call(["mkdir", "docker_debian"], cwd=o.build_dir)
+        subprocess.call(["cp", "package.dfdebian", os.path.join(o.build_dir, "docker_debian", "Dockerfile")],
+                        cwd=os.path.join(o.odoo_dir, "setup"))
+        # Use rsync to copy requirements.txt in order to keep original permissions
+        subprocess.call(["rsync", "-a", "requirements.txt", os.path.join(o.build_dir, "docker_debian")],
+                        cwd=os.path.join(o.odoo_dir))
+        subprocess.call(["docker", "build", "-t", "odoo-debian-nightly-tests", "."],
+                        cwd=os.path.join(o.build_dir, "docker_debian"))
+    if not o.no_rpm:
+        subprocess.call(["mkdir", "docker_centos"], cwd=o.build_dir)
+        subprocess.call(["cp", "package.dfcentos", os.path.join(o.build_dir, "docker_centos", "Dockerfile")],
+                        cwd=os.path.join(o.odoo_dir, "setup"))
+        subprocess.call(["docker", "build", "-t", "odoo-centos-nightly-tests", "."],
+                        cwd=os.path.join(o.build_dir, "docker_centos"))
+
 def test_tgz(o):
-    with docker('debian:squeeze', o.build_dir, o.pub) as squeeze:
-        squeeze.release = 'openerp.tar.gz'
-        squeeze.system('apt-get update -qq')
-        squeeze.system('apt-get install apt-utils')
-        squeeze.system('apt-get upgrade -qq -y')
-        squeeze.system("apt-get install libpq-dev postgresql python-dev python-setuptools python-reportlab postgresql-server-dev-all build-essential libxml2-dev libxslt1-dev libldap2-dev libsasl2-dev libssl-dev libjpeg-dev python-pip -y")
-        squeeze.system("pip install Pillow")
-        squeeze.system("service postgresql start")
-        squeeze.system('su postgres -s /bin/bash -c "pg_dropcluster --stop 8.4 main"')
-        squeeze.system('su postgres -s /bin/bash -c "pg_createcluster --start -e UTF-8 8.4 main"')
-        squeeze.system('pip install /opt/release/%s' % squeeze.release)
-        squeeze.system("cd && useradd --system --no-create-home openerp")
-        squeeze.system('su postgres -s /bin/bash -c "createuser -s openerp"')
-        squeeze.system('su postgres -s /bin/bash -c "createdb mycompany"')
-        squeeze.system('mkdir /var/lib/openerp')
-        squeeze.system('chown openerp:openerp /var/lib/openerp')
-        squeeze.system('su openerp -s /bin/bash -c "openerp-server --addons-path=/usr/local/lib/python2.6/dist-packages/openerp/addons/ -d mycompany -i base --stop-after-init"')
-        squeeze.system('su openerp -s /bin/bash -c "openerp-server --addons-path=/usr/local/lib/python2.6/dist-packages/openerp/addons/ -d mycompany &"')
+    with docker('odoo-debian-nightly-tests', o.build_dir, o.pub) as wheezy:
+        wheezy.release = 'odoo.tar.gz'
+        wheezy.system("service postgresql start")
+        wheezy.system('/usr/local/bin/pip install /opt/release/%s' % wheezy.release)
+        wheezy.system("useradd --system --no-create-home odoo")
+        wheezy.system('su postgres -s /bin/bash -c "createuser -s odoo"')
+        wheezy.system('su postgres -s /bin/bash -c "createdb mycompany"')
+        wheezy.system('mkdir /var/lib/odoo')
+        wheezy.system('chown odoo:odoo /var/lib/odoo')
+        wheezy.system('su odoo -s /bin/bash -c "odoo.py --addons-path=/usr/local/lib/python2.7/dist-packages/openerp/addons -d mycompany -i base --stop-after-init"')
+        wheezy.system('su odoo -s /bin/bash -c "odoo.py --addons-path=/usr/local/lib/python2.7/dist-packages/openerp/addons -d mycompany &"')
 
 def test_deb(o):
-    with docker('debian:stable', o.build_dir, o.pub) as wheezy:
+    with docker('odoo-debian-nightly-tests', o.build_dir, o.pub) as wheezy:
         wheezy.release = '*.deb'
-        wheezy.system('/usr/bin/apt-get update -qq && /usr/bin/apt-get upgrade -qq -y')
-        wheezy.system("apt-get install postgresql -y")
         wheezy.system("service postgresql start")
-        wheezy.system('su postgres -s /bin/bash -c "pg_dropcluster --stop 9.1 main"')
-        wheezy.system('su postgres -s /bin/bash -c "pg_createcluster --start -e UTF-8 9.1 main"')
         wheezy.system('su postgres -s /bin/bash -c "createdb mycompany"')
         wheezy.system('dpkg -i /opt/release/%s' % wheezy.release)
         wheezy.system('apt-get install -f -y')
@@ -335,18 +341,9 @@ def test_deb(o):
         wheezy.system('su openerp -s /bin/bash -c "openerp-server -c /etc/openerp/openerp-server.conf -d mycompany &"')
 
 def test_rpm(o):
-    with docker('centos:centos7', o.build_dir, o.pub) as centos7:
+    with docker('odoo-centos-nightly-tests', o.build_dir, o.pub) as centos7:
         centos7.release = 'odoo.noarch.rpm'
-        # Dependencies
-        centos7.system('yum install -d 0 -e 0 epel-release -y')
-        centos7.system('yum update -d 0 -e 0 -y')
-        # Manual install/start of postgres
-        centos7.system('yum install -d 0 -e 0 postgresql postgresql-server postgresql-libs postgresql-contrib postgresql-devel -y')
-        centos7.system('mkdir -p /var/lib/postgres/data')
-        centos7.system('chown -R postgres:postgres /var/lib/postgres/data')
-        centos7.system('chmod 0700 /var/lib/postgres/data')
-        centos7.system('su postgres -c "initdb -D /var/lib/postgres/data -E UTF-8"')
-        centos7.system('cp /usr/share/pgsql/postgresql.conf.sample /var/lib/postgres/data/postgresql.conf')
+        # Start postgresql
         centos7.system('su postgres -c "/usr/bin/pg_ctl -D /var/lib/postgres/data start"')
         centos7.system('sleep 5')
         centos7.system('su postgres -c "createdb mycompany"')
@@ -451,6 +448,8 @@ def options():
 def main():
     o = options()
     _prepare_build_dir(o)
+    if not o.no_testing:
+        _prepare_testing(o)
     try:
         if not o.no_tarball:
             build_tgz(o)
