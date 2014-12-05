@@ -19,9 +19,10 @@
 #
 ##############################################################################
 
-from . import test_project_flow
+from . import test_project_base , test_project_flow 
 
 checks = [
+    test_project_base,
     test_project_flow,
 ]
 
