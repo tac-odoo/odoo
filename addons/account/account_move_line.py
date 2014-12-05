@@ -195,8 +195,8 @@ class account_move_line(models.Model):
     product_id = fields.Many2one('product.product', string='Product')
     debit = fields.Float(string='Debit', digits=dp.get_precision('Account'), default=0.0)
     credit = fields.Float(string='Credit', digits=dp.get_precision('Account'), default=0.0)
-    debit_cash_basis = fields.Float('Debit with cash basis method', default=0)
-    credit_cash_basis = fields.Float('Credit with cash basis method', default=0)
+    debit_cash_basis = fields.Float('Debit with cash basis method', default=0.0)
+    credit_cash_basis = fields.Float('Credit with cash basis method', default=0.0)
     amount_currency = fields.Float(string='Amount Currency', default=0.0,  digits=dp.get_precision('Account'),
         help="The amount expressed in an optional other currency if it is a multi-currency entry.")
     currency_id = fields.Many2one('res.currency', string='Currency', default=_get_currency, 
@@ -256,10 +256,12 @@ class account_move_line(models.Model):
     ]
 
     def compute_fields(self, field_names):
+        if len(self) == 0:
+            return []
         select = ','.join(['l.'+k for k in field_names])
         if 'balance' in field_names:
             select = select.replace('l.balance', 'COALESCE(SUM(l.debit-l.credit), 0)')
-        sql = "SELECT " + select + \
+        sql = "SELECT l.id," + select + \
                     """ FROM account_move_line l
                     WHERE """ + \
                 self._query_get() + \
@@ -267,8 +269,9 @@ class account_move_line(models.Model):
 
         self.env.cr.execute(sql, [tuple(self.ids)])
         results = self.env.cr.fetchall()
-        for idx, l in enumerate(results):
-            results[idx] = dict([(field_names[i], k) for i, k in enumerate(l)])
+        results = dict([(k[0], k[1:]) for k in results])
+        for id, l in results.items():
+            results[id] = dict([(field_names[i], k) for i, k in enumerate(l)])
         return results
 
     @api.multi

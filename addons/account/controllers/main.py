@@ -13,14 +13,20 @@ class FinancialReportController(http.Controller):
             limit=1)
         if not context_id:
             context_id = request.env['account.financial.report.context'].sudo(uid).create({'financial_report_id': report_id})
-        update = {}
+        if 'print' in kw:
+            response = request.make_response(None,
+                headers=[('Content-Type', 'application/vnd.ms-excel'),
+                         ('Content-Disposition', 'attachment; filename=table.xls;')])
+            context_id.get_csv(response)
+            return response
         if kw:
+            update = {}
             for field in context_id._fields:
                 if kw.get(field):
                     update[field] = kw[field]
                 elif field in ['cash_basis', 'comparison']:
                     update[field] = False
-        context_id.write(update)
+            context_id.write(update)
         financial_report_id = request.env['account.financial.report'].sudo(uid).browse(report_id)
         lines = financial_report_id.line.get_lines_with_context(context_id)
         rcontext = {

@@ -12,28 +12,37 @@
     <field name="url" eval="'/account/financial_report/'+str(ref('account_financial_report_balancesheet0'))"/>
     <field name="target">self</field>
 </record>
+<record model="ir.actions.act_url" id="action_cs">
+    <field name="name">Cash Summary</field>
+    <field name="url" eval="'/account/financial_report/'+str(ref('account_financial_report_cashsummary0'))"/>
+    <field name="target">self</field>
+</record>
 <menuitem id="menu_action_pnl" name="Profit And Loss" action="action_pnl" parent="account.menu_finance_legal_statement"/>
 <menuitem id="menu_action_bs" name="Balance Sheet" action="action_bs" parent="account.menu_finance_legal_statement"/>
+<menuitem id="menu_action_cs" name="Cash Summary" action="action_cs" parent="account.menu_finance_legal_statement"/>
 
 <template id="report_financial_line">
-    <tr>
-        <t t-if="a.get('level') &gt; 3"><t t-set="style" t-value="'font-weight: normal;'"/></t>
-        <t t-if="not a.get('level') &gt; 3"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+    <t t-if="a.get('level') == 1 or a.get('level') == 0"><tr style="border-width: 2px; border-style: solid; border-left-style: hidden; border-right-style: hidden;"><td height="22"></td><td t-if="o.debit_credit"></td><td t-if="o.debit_credit"></td><td t-if="o.balance"></td><td t-if="context.comparison"></td></tr></t>
+    <t t-set="trstyle" t-value="'border-width: 0; border-style: solid;'"/>
+    <t t-if="a.get('level') == 0"><t t-set="trstyle" t-value="'border-width: 2px; border-style: solid; background-color:#eee; border-left-style: hidden; border-right-style: hidden;'"/></t>
+    <t t-if="a.get('level') == 1"><t t-set="trstyle" t-value="'border-width: 2px; border-style: solid; border-left-style: hidden; border-right-style: hidden;'"/></t>
+    <t t-if="a.get('level') == 2"><t t-set="trstyle" t-value="'border-width: 1px; border-style: solid; border-left-style: hidden; border-right-style: hidden;'"/></t>
+    <tr t-att-style="trstyle">
+
+        <t t-if="a.get('level') &gt; 2"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+        <t t-if="not a.get('level') &gt; 2"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+        <t t-if="a.get('total')"><t t-set="style" t-value="'font-weight: bold;'"/></t>
 
         <td>
-            <t t-if="a.get('type') == 'line' and a.get('unfolded')">
+            <t t-if="a.get('unfoldable') and a.get('unfolded')">
                 <span t-att-class="' '.join(['foldable', str(a.get('id'))])">&gt;</span>
             </t>
-            <t t-if="a.get('type') == 'line' and not a.get('unfolded')">
+            <t t-if="a.get('unfoldable') and not a.get('unfolded')">
                 <span t-att-class="' '.join(['unfoldable', str(a.get('id'))])">^</span>
             </t>
-            <span class="level" style="color: white;" t-esc="'..' * a.get('level', 0)"/>
-            <t t-if="a.get('id') and a.get('action') and a['action'] != 'unclickable'">
-                <span t-att-style="style" t-att-class="' '.join([a['action'], str(a['id'])])" t-esc="a.get('name')"/>
-            </t>
-            <t t-if="not a.get('id') or not a.get('action') or a.get('action') == 'unclickable'">
-                <span t-att-style="style" t-esc="a.get('name')"/>
-            </t>
+            <t  t-if="a['type'] != 'line'"><span class="level" style="color: white;" t-esc="'................................'"/><t t-set="style" t-value="'font-style: italic;'"/></t>
+            <t  t-if="a['type'] == 'line'"><span class="level" style="color: white;" t-esc="'........' * max(a.get('level', 0) - 1, 0)"/></t>
+            <span t-att-style="style" t-att-class="' '.join([a['type'], str(a['id'])])" t-esc="a.get('name')"/>
         </td>
         <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
             <span class="annotable" t-att-style="style" t-esc="a.get('debit')"/> <!-- TODO : FormatLang -->

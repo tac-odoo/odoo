@@ -22,35 +22,21 @@
     </t>
     <t t-name="report_financial_line">
         <tr>
-            <t t-if="l.level &gt; 3"><t t-set="style" t-value="'font-weight: normal;'"/></t>
-            <t t-if="l.level &lt;= 3 "><t t-set="style" t-value="'font-weight: bold;'"/></t>
-
             <td>
-                <t t-if="l.type == 'line' and l.unfolded">
-                    <span t-att-class="'foldable '+l.id">&gt;</span>
-                </t>
-                <t t-if="l.type == 'line' and !l.unfolded">
-                    <span t-att-class="'unfoldable '+l.id">^</span>
-                </t>
-                <span class="level" style="color: white;"><t t-esc="Array(l.level + 1).join('..')" /></span>
-                <t t-if="l.id and l.action and l.action !== 'unclickable'">
-                    <span t-att-style="style" t-att-class="l.action + ' ' + l.id"><t t-esc="l.name"/></span>
-                </t>
-                <t t-if="!l.id or !l.action or l.action == 'unclickable'">
-                    <span t-att-style="style"><t t-esc="l.name"/></span>
-                </t>
+                <span class="level" style="color: white;">................................</span>
+                <span style="font-style: italic;" t-att-class="l.type + ' ' + l.id"><t t-esc="l.name"/></span>
             </td>
             <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
-                <span class="annotable" t-att-style="style"><t t-esc="l.debit"/></span>
+                <span class="annotable" style="font-style: italic;"><t t-esc="l.debit"/></span>
             </td>
             <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
-                <span class="annotable" t-att-style="style"><t t-esc="l.credit"/></span>
+                <span class="annotable" style="font-style: italic;"><t t-esc="l.credit"/></span>
             </td>
             <td class="text-right" style="white-space: nowrap;" t-if="o.balance">
-                <span class="annotable" t-att-style="style"><t t-esc="l.balance"/></span>
+                <span class="annotable" style="font-style: italic;"><t t-esc="l.balance"/></span>
             </td>
             <td class="text-right" style="white-space: nowrap;" t-if="c.comparison">
-                <span class="annotable" t-att-style="style"><t t-esc="l.balance_cmp"/></span>
+                <span class="annotable" style="font-style: italic;"><t t-esc="l.comparison"/></span>
             </td>
         </tr>
     </t>

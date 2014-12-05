@@ -63,7 +63,7 @@
             </div>
             <div class="mt32">
                 <input type="submit" class="btn btn-primary" value="Update" />
-                <!-- <input type="submit" name="print" class="btn btn-primary" value="CSV" /> -->
+                <input type="submit" name="print" class="btn btn-primary" value="CSV" />
             </div>
         </div>
     </form>

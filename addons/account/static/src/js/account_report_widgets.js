@@ -12,9 +12,8 @@
                 'click .foldable': 'fold',
                 'click .unfoldable': 'unfold',
                 'click .saveFootNote': 'saveFootNote',
-                'click .move_lines': 'displayMoveLines',
-                'click .unreconciled': 'displayUnreconciled',
-                'click .move': 'displayMove',
+                'click .account_id': 'displayMoveLines',
+                'click .aml': 'displayMoveLine',
             },
             start: function() {
                 this.footNoteSeqNum = 1;
@@ -83,7 +82,7 @@
                         .filter([['id', '=', context_id]]).first().then(function (context) {
                             reportObj.query(['debit_credit', 'balance'])
                             .filter([['id', '=', context.financial_report_id[0]]]).first().then(function (report) {
-                                reportLineObj.call('get_lines_with_context', [[parseInt(active_id)], parseInt(context_id)])
+                                reportLineObj.call('get_lines_with_context', [[parseInt(active_id)], parseInt(context_id), level/2])
                                 .then(function (lines) {
                                     var line;
                                     lines.shift();
@@ -111,16 +110,9 @@
                     window.open("/web?#page=0&limit=80&view_type=list&model=account.move.line&action=" + result[1] + "&active_id=" + active_id, "_self");
                 });
             },
-            displayUnreconciled: function(e) {
+            displayMoveLine: function(e) {
                 var active_id = $(e.target).attr("class").split(/\s+/)[1];
-                var model = new openerp.Model('ir.model.data');
-                model.call('get_object_reference', ['account', 'act_account_acount_move_line_open_unreconciled']).then(function (result) {
-                    window.open("/web?#page=0&limit=80&view_type=list&model=account.move.line&action=" + result[1] + "&active_id=" + active_id, "_self");
-                });
-            },
-            displayMove: function(e) {
-                var active_id = $(e.target).attr("class").split(/\s+/)[1];
-                window.open("/web?#id=" + active_id + "&view_type=form&model=account.move", "_self");
+                window.open("/web?#id=" + active_id + "&view_type=form&model=account.move.line", "_self");
             },
         });
         var reportWidgets = new openerp.reportWidgets();
