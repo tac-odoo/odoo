@@ -138,6 +138,7 @@ class Post(models.Model):
     name = fields.Char('Title')
     forum_id = fields.Many2one('forum.forum', string='Forum', required=True)
     content = fields.Html('Content')
+    plain_content = fields.Text('Plain Content', compute='_get_plain_content', store = True)
     content_link = fields.Char('URL', help="URL of Link Articles")
     tag_ids = fields.Many2many('forum.tag', 'forum_tag_rel', 'forum_id', 'forum_tag_id', string='Tags')
     state = fields.Selection([('active', 'Active'), ('close', 'Close'), ('offensive', 'Offensive')], string='Status', default='active')
@@ -159,6 +160,22 @@ class Post(models.Model):
     write_date = fields.Datetime('Update on', select=True, readonly=True)
     write_uid = fields.Many2one('res.users', string='Updated by', select=True, readonly=True)
     relevancy = fields.Float('Relevancy', compute="_compute_relevancy", store=True)
+
+    # we need to trigger an update on write_date, but the orm won't let us do it manually.
+    # we rewrite a field to update it 'manually'
+    @api.one
+    def post_bump(self):
+        # let's avoid someone bumping their post continually by enforcing the 10 days limit
+        days = (datetime.today() - datetime.strptime(self.write_date, tools.DEFAULT_SERVER_DATETIME_FORMAT)).days
+        if days > 9: 
+            vals = {}
+            vals['name'] = self.name
+            super(Post, self).sudo().write(vals)
+
+    @api.one
+    @api.depends('content')
+    def _get_plain_content(self):
+        self.plain_content = 'Can you help answering this question? \n'+ tools.html2plaintext(self.content)[0:500]
 
     @api.one
     @api.depends('vote_count', 'forum_id.relevancy_post_vote', 'forum_id.relevancy_time_decay')
