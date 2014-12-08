@@ -143,7 +143,6 @@ class Report(osv.Model):
             user=user,
             res_company=user.company_id,
             website=website,
-            hidden_print=True,
         )
         return view_obj.render(cr, uid, template, values, context=context)
 

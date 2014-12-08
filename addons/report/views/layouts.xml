@@ -41,11 +41,8 @@
     .zero_min_height {
         min-height: 0px !important;
     }
-    .oe-avoid-page-break{
+    .oe-avoid-page-breakKKKK{
         page-break-inside:avoid;
-    }
-    .hidden-print{
-        display:none;
     }
 </template>
 
@@ -78,7 +75,7 @@
         </div>
         <div class="row">
             <div class="col-xs-3">
-                <div t-field="company.partner_id" 
+                <div t-field="company.partner_id"
                     t-field-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'
                     style="border-bottom: 1px solid black;"/>
             </div>
@@ -113,7 +110,7 @@
                 <li><span class="topage"/></li>
             </ul>
         </div>
-    </div>      
+    </div>
 </template>
 
 <template id="internal_layout">
