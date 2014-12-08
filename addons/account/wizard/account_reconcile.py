@@ -12,9 +12,9 @@ class account_move_line_reconcile(models.TransientModel):
     _description = 'Account move line reconcile'
 
     trans_nbr = fields.Integer(string='# of Transaction', readonly=True)
-    credit = fields.Float(string='Credit amount', readonly=True, digits=dp.get_precision('Account'))
-    debit = fields.Float(string='Debit amount', readonly=True, digits=dp.get_precision('Account'))
-    writeoff = fields.Float(string='Write-Off amount', readonly=True, digits=dp.get_precision('Account'))
+    credit = fields.Float(string='Credit amount', readonly=True, digits=0)
+    debit = fields.Float(string='Debit amount', readonly=True, digits=0)
+    writeoff = fields.Float(string='Write-Off amount', readonly=True, digits=0)
 
     @api.model
     def default_get(self, fields):
