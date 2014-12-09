@@ -21,6 +21,7 @@ class account_move_line(models.Model):
         account_obj = self.env['account.account']
         context = dict(self._context or {})
         initial_bal = context.get('initial_bal', False)
+        closing_bal = context.get('closing_bal', False)
         company_clause = " "
         if context.get('company_id', False):
             company_clause = " AND " +obj+".company_id = %s" % context.get('company_id', False)
@@ -32,6 +33,8 @@ class account_move_line(models.Model):
         if context.get('date_from', False) and context.get('date_to', False):
             if initial_bal:
                 where_move_lines_by_date = " AND " +obj+".move_id IN (SELECT id FROM account_move WHERE date < '" +context['date_from']+"')"
+            elif closing_bal:
+                where_move_lines_by_date = " AND " +obj+".move_id IN (SELECT id FROM account_move WHERE date < '" +context['date_to']+"')"
             else:
                 where_move_lines_by_date = " AND " +obj+".move_id IN (SELECT id FROM account_move WHERE date >= '" +context['date_from']+"' AND date <= '"+context['date_to']+"')"
 

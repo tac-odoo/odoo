@@ -32,7 +32,7 @@
             <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
                 <span class="annotable" style="font-style: italic;"><t t-esc="l.credit"/></span>
             </td>
-            <td class="text-right" style="white-space: nowrap;" t-if="o.balance">
+            <td class="text-right" style="white-space: nowrap;">
                 <span class="annotable" style="font-style: italic;"><t t-esc="l.balance"/></span>
             </td>
             <td class="text-right" style="white-space: nowrap;" t-if="c.comparison">

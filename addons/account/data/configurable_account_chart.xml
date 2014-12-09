@@ -95,7 +95,7 @@
                     <record id="conf_bnk" model="account.account.template">
                         <field name="code">1104</field>
                         <field name="name">Bank Current Account</field>
-                        <field name="user_type" ref="account_type_view"/> <!-- bank accounts view -->
+                        <field name="user_type" ref="data_account_type_view"/> <!-- bank accounts view -->
                     </record>
 
                     <record id="conf_o_income" model="account.account.template">

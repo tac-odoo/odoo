@@ -2,27 +2,33 @@
 <openerp>
 <data>
 
-<record model="ir.actions.act_url" id="action_pnl">
+<record model="ir.actions.act_url" id="action_account_report_pnl">
     <field name="name">Profit And Loss</field>
     <field name="url" eval="'/account/financial_report/'+str(ref('account_financial_report_profitandloss0'))"/>
     <field name="target">self</field>
 </record>
-<record model="ir.actions.act_url" id="action_bs">
+<record model="ir.actions.act_url" id="action_account_report_bs">
     <field name="name">Balance Sheet</field>
     <field name="url" eval="'/account/financial_report/'+str(ref('account_financial_report_balancesheet0'))"/>
     <field name="target">self</field>
 </record>
-<record model="ir.actions.act_url" id="action_cs">
+<record model="ir.actions.act_url" id="action_account_report_cs">
     <field name="name">Cash Summary</field>
     <field name="url" eval="'/account/financial_report/'+str(ref('account_financial_report_cashsummary0'))"/>
     <field name="target">self</field>
 </record>
-<menuitem id="menu_action_pnl" name="Profit And Loss" action="action_pnl" parent="account.menu_finance_legal_statement"/>
-<menuitem id="menu_action_bs" name="Balance Sheet" action="action_bs" parent="account.menu_finance_legal_statement"/>
-<menuitem id="menu_action_cs" name="Cash Summary" action="action_cs" parent="account.menu_finance_legal_statement"/>
+<record model="ir.actions.act_url" id="action_account_report_es">
+    <field name="name">Executive Summary</field>
+    <field name="url" eval="'/account/financial_report/'+str(ref('account_financial_report_executivesummary0'))"/>
+    <field name="target">self</field>
+</record>
+<menuitem id="menu_action_account_report_pnl" name="Profit And Loss" action="action_account_report_pnl" parent="account.menu_finance_legal_statement"/>
+<menuitem id="menu_action_account_report_bs" name="Balance Sheet" action="action_account_report_bs" parent="account.menu_finance_legal_statement"/>
+<menuitem id="menu_action_account_report_cs" name="Cash Summary" action="action_account_report_cs" parent="account.menu_finance_legal_statement"/>
+<menuitem id="menu_action_account_report_es" name="Executive Summary" action="action_account_report_es" parent="account.menu_finance_legal_statement"/>
 
 <template id="report_financial_line">
-    <t t-if="a.get('level') == 1 or a.get('level') == 0"><tr style="border-width: 2px; border-style: solid; border-left-style: hidden; border-right-style: hidden;"><td height="22"></td><td t-if="o.debit_credit"></td><td t-if="o.debit_credit"></td><td t-if="o.balance"></td><td t-if="context.comparison"></td></tr></t>
+    <t t-if="a.get('level') == 1 or a.get('level') == 0"><tr style="border-width: 2px; border-style: solid; border-left-style: hidden; border-right-style: hidden;"><td height="22"></td><td t-if="o.debit_credit"></td><td t-if="o.debit_credit"></td><td></td><td t-if="context.comparison"></td></tr></t>
     <t t-set="trstyle" t-value="'border-width: 0; border-style: solid;'"/>
     <t t-if="a.get('level') == 0"><t t-set="trstyle" t-value="'border-width: 2px; border-style: solid; background-color:#eee; border-left-style: hidden; border-right-style: hidden;'"/></t>
     <t t-if="a.get('level') == 1"><t t-set="trstyle" t-value="'border-width: 2px; border-style: solid; border-left-style: hidden; border-right-style: hidden;'"/></t>
@@ -50,7 +56,7 @@
         <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
             <span class="annotable" t-att-style="style" t-esc="a.get('credit')"/>
         </td>
-        <td class="text-right" style="white-space: nowrap;" t-if="o.balance">
+        <td class="text-right" style="white-space: nowrap;">
             <span class="annotable" t-att-style="style" t-esc="a.get('balance')"/>
         </td>
         <td class="text-right" style="white-space: nowrap;" t-if="context.comparison">
@@ -73,7 +79,7 @@
                             <th>Name</th>
                             <th class="text-right" t-if="o.debit_credit">Debit</th>
                             <th class="text-right" t-if="o.debit_credit">Credit</th>
-                            <th class="text-right" t-if="o.balance">Balance</th>
+                            <th class="text-right">Balance</th>
                             <th class="text-right" t-if="context.comparison">Comparison</th>
                         </tr>
                     </thead>

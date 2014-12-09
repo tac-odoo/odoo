@@ -80,7 +80,7 @@
                         var reportLineObj = new openerp.Model('account.financial.report.line');
                         contextObj.query(['financial_report_id', 'comparison'])
                         .filter([['id', '=', context_id]]).first().then(function (context) {
-                            reportObj.query(['debit_credit', 'balance'])
+                            reportObj.query(['debit_credit'])
                             .filter([['id', '=', context.financial_report_id[0]]]).first().then(function (report) {
                                 reportLineObj.call('get_lines_with_context', [[parseInt(active_id)], parseInt(context_id), level/2])
                                 .then(function (lines) {

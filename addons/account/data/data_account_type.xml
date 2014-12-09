@@ -28,16 +28,6 @@
           <field name="close_method">balance</field>
           <field name="report_type">bank_accounts</field>
         </record>
-<!--         <record model="account.account.type" id="data_account_type_bank_accounts"> To normal bank type
-          <field name="name">Bank Accounts</field>
-          <field name="type">other</field>
-          <field name="close_method">balance</field>
-          <field name="report_type">bank_accounts</field>
-        </record>
-        <record model="account.account.type" id="account_type_bank_view1"> To view type
-            <field name="name">Bank View</field>
-            <field name="report_type">bank_accounts</field>
-        </record> -->
         <record model="account.account.type" id="data_account_type_cash">
           <field name="name">Cash</field>
           <field name="type">liquidity</field>
@@ -62,24 +52,12 @@
           <field name="close_method">balance</field>
           <field name="report_type">fixed_assets</field>
         </record>
-<!--         <record model="account.account.type" id="data_account_type_asset">
-          <field name="name">Asset</field>
-          <field name="type">other</field>
-          <field name="close_method">balance</field>
-          <field name="report_type">asset</field>
-        </record> -->
         <record model="account.account.type" id="data_account_type_current_liabilities">
           <field name="name">Current Liabilities</field>
           <field name="type">other</field>
           <field name="close_method">balance</field>
           <field name="report_type">current_liabilities</field>
         </record>
-<!--         <record model="account.account.type" id="data_account_type_liability">
-          <field name="name">Liability</field>
-          <field name="type">other</field>
-          <field name="close_method">balance</field>
-          <field name="report_type">liability</field>
-        </record> -->
         <record model="account.account.type" id="data_account_type_other_income">
           <field name="name">Other Income</field>
           <field name="type">other</field>
@@ -98,12 +76,6 @@
           <field name="close_method">none</field>
           <field name="report_type">revenue</field>
         </record>
-<!--         <record model="account.account.type" id="data_account_type_income">
-          <field name="name">Income</field>
-          <field name="type">other</field>
-          <field name="close_method">none</field>
-          <field name="report_type">income</field>
-        </record> -->
         <record model="account.account.type" id="data_account_type_overheads">
           <field name="name">Overheads</field>
           <field name="type">other</field>
