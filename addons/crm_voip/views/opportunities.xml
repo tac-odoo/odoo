@@ -52,8 +52,8 @@
             </field>
         </record>
 
-        <record model="ir.ui.view" id="lead_button_wardialing_view">
-            <field name="name">crm.lead_button_wardialing</field>
+        <record model="ir.ui.view" id="lead_button_voip_view">
+            <field name="name">crm.lead_button_voip</field>
             <field name="model">crm.lead</field>
             <field name="inherit_id" ref="crm.crm_case_form_view_oppor"/>
             <field name="arch" type="xml">

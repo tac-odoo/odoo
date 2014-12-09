@@ -79,8 +79,8 @@ class crm_phonecall(models.Model):
 
     @api.model
     def get_pbx_config(self):
-        return {'pbx_ip': self.env['ir.config_parameter'].get_param('crm.wardialing.pbx_ip'),
-                'wsServer': self.env['ir.config_parameter'].get_param('crm.wardialing.wsServer'),
+        return {'pbx_ip': self.env['ir.config_parameter'].get_param('crm.voip.pbx_ip'),
+                'wsServer': self.env['ir.config_parameter'].get_param('crm.voip.wsServer'),
                 'login': self.env.user[0].sip_login,
                 'password': self.env.user[0].sip_password,
                 'physical_phone': self.env.user[0].sip_physicalPhone,
@@ -108,17 +108,18 @@ class crm_lead(models.Model):
             self.in_call_center_queue = False
 
     @api.multi
-    def create_call_center_call(self):   
-        phonecall = self.env['crm.phonecall'].create({
-            'name': self.name
-        })
-        phonecall.user_id = self.env.user[0].id
-        phonecall.opportunity_id = self.id
-        phonecall.partner_id = self.partner_id
-        phonecall.state = 'to_do'
-        phonecall.partner_phone = self.partner_id.phone
-        phonecall.partner_mobile = self.partner_id.mobile
-        phonecall.in_queue = True
+    def create_call_center_call(self):
+        for opp in self:
+            phonecall = self.env['crm.phonecall'].create({
+                'name': opp.name
+            })
+            phonecall.user_id = self.env.user[0].id
+            phonecall.opportunity_id = opp.id
+            phonecall.partner_id = opp.partner_id
+            phonecall.state = 'to_do'
+            phonecall.partner_phone = opp.partner_id.phone
+            phonecall.partner_mobile = opp.partner_id.mobile
+            phonecall.in_queue = True
         return {
             'type': 'ir.actions.client',
             'tag': 'reload_panel',
@@ -146,6 +147,7 @@ class crm_lead(models.Model):
             'context': {'phonecall_id': phonecall.id,
                         'default_name': phonecall.name,
                         'default_partner_id': phonecall.partner_id.id,
+                        'default_user_id': self.env.user[0].id,
                         },
             'views': [[False, 'form']],
         }
@@ -200,6 +202,7 @@ class crm_lead(models.Model):
                 'headless': True,
             },
         }
+
 
 class crm_phonecall_log_wizard(models.TransientModel):
     _name = 'crm.phonecall.log.wizard'
@@ -277,9 +280,10 @@ class crm_phonecall_log_wizard(models.TransientModel):
                 opportunity.title_action = self.opportunity_title_action
                 opportunity.date_action = self.opportunity_date_action
             if (self.show_duration):
-                sec = (self.custom_duration - int(self.custom_duration))*0.6
+                mins = int(self.custom_duration)
+                sec = (self.custom_duration - mins)*0.6
                 sec = '%.2f' % sec
-                time = str(min) + ":" + sec[-2:]
+                time = str(mins) + ":" + sec[-2:]
                 message = "Call " + time + " min(s)"
             else:
                 message = "Call " + self.duration + " min(s)"
@@ -306,9 +310,10 @@ class crm_phonecall_log_wizard(models.TransientModel):
                 opportunity.title_action = self.opportunity_title_action
                 opportunity.date_action = self.opportunity_date_action
             if (self.show_duration):
-                sec = (self.custom_duration - int(self.custom_duration))*0.6
+                mins = int(self.custom_duration)
+                sec = (self.custom_duration - mins)*0.6
                 sec = '%.2f' % sec
-                time = str(min) + ":" + sec[-2:]
+                time = str(mins) + ":" + sec[-2:]
                 message = "Call " + time + " min(s)"
             else:
                 message = "Call " + self.duration + " min(s)"

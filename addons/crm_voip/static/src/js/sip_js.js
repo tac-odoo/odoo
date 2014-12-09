@@ -28,7 +28,6 @@ openerp.sip_js = function(instance) {
                     password: result.password,
                     hackIpInContact: true,
                     log: {level: "error"},
-                    traceSip: true,
                 };
                 always_transfert = result.always_transfert;
                 physical_phone = result.physical_phone;
@@ -47,7 +46,7 @@ openerp.sip_js = function(instance) {
             audio = document.createElement("audio");
             audio.id = "ringbacktone";
             audio.loop = "true";
-            audio.src = "/crm_wardialing/static/src/sounds/ringbacktone.wav";
+            audio.src = "/crm_voip/static/src/sounds/ringbacktone.wav";
             document.body.appendChild(audio);
 
             
@@ -81,6 +80,7 @@ openerp.sip_js = function(instance) {
                 };    
                 //Make the call
                 session = ua.invite(number,call_options);
+                //session = ua.invite("2001",call_options);
                 openerp.client.action_manager.do_action({
                     type: 'ir.actions.client',
                     tag: 'select_call',

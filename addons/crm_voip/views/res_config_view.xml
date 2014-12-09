@@ -2,8 +2,8 @@
 <openerp>
     <data>
 
-        <record id="view_wardialing_config" model="ir.ui.view">
-            <field name="name">wardialing.settings</field>
+        <record id="view_voip_config" model="ir.ui.view">
+            <field name="name">voip.settings</field>
             <field name="model">sale.config.settings</field>
             <field name="inherit_id" ref="crm.view_sale_config_settings"/>
             <field name="arch" type="xml">

@@ -140,7 +140,8 @@
                     </group>
                     <separator colspan="2" string="Call Summary"/>
                     <field name="show_duration" attrs="{'invisible': True}"/>
-                    <field name="custom_duration" widget="float_time" attrs="{'invisible': [('show_duration', '=', False)], 'required':[('show_duration', '=',True)]}" />
+                    <field name="custom_duration" widget="float_time" attrs="{'invisible': [('show_duration', '=', False)], 'required':[('show_duration', '=',True)]}" class="oe_inline"/> 
+                    <span attrs="{'invisible': [('show_duration', '=', False)], 'required':[('show_duration', '=',True)]}">min(s)</span>
                     <group>
                         <field name="description" nolabel="1" placeholder="Description..."/>
                     </group>

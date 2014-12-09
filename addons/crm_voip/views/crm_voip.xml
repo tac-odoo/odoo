@@ -12,14 +12,14 @@
                 </li>
             </xpath>
         </template>
-        <template id="assets_backend" name="crm_wardialing assets" inherit_id="web.assets_backend">
+        <template id="assets_backend" name="crm_voip assets" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
-                <link rel="stylesheet" href="/crm_wardialing/static/src/css/crm_wardialing.css"/>
-                <!-- <script type="text/javascript" src="/crm_wardialing/static/src/js/SIPml-api.js"></script> -->
-                <script type="text/javascript" src="/crm_wardialing/static/src/js/sip-0.6.3.js"></script>
-                <script type="text/javascript" src="/crm_wardialing/static/src/js/sip_js.js"></script>
-                <!-- <script type="text/javascript" src="/crm_wardialing/static/src/js/ari_client.js"></script> -->
-                <script type="text/javascript" src="/crm_wardialing/static/src/js/crm_wardialing.js"></script>
+                <link rel="stylesheet" href="/crm_voip/static/src/css/crm_voip.css"/>
+                <!-- <script type="text/javascript" src="/crm_voip/static/src/js/SIPml-api.js"></script> -->
+                <script type="text/javascript" src="/crm_voip/static/src/js/sip-0.6.3.js"></script>
+                <script type="text/javascript" src="/crm_voip/static/src/js/sip_js.js"></script>
+                <!-- <script type="text/javascript" src="/crm_voip/static/src/js/ari_client.js"></script> -->
+                <script type="text/javascript" src="/crm_voip/static/src/js/crm_voip.js"></script>
                 
             </xpath>
         </template>
@@ -27,7 +27,7 @@
 
     <!-- Mail template are declared in a NOUPDATE block
          so users can freely customize/delete them -->
-    <data  noupdate="1">
+    <data noupdate="1">
         <!--Email template -->
         <record id="email_template_call_client_notAvailable" model="email.template">
             <field name="name">Client not available</field>
@@ -40,7 +40,7 @@
 
                     <p>Hello ${object.partner_id.name},</p>
 
-                    <p>I tried to call you on "date of today" concerning the subject: '${object.name}'.
+                    <p>I just tried to call you on concerning the subject: '${object.name}'.
                         Can you please give me your availability in order to schedule a new call?</p>
                     <p>Yours Sincerly</p>
                     <p>${user.name}</p>
@@ -51,7 +51,7 @@
     </data>
     <!-- Mail template are declared in a NOUPDATE block
          so users can freely customize/delete them -->
-    <data  noupdate="1">
+    <data noupdate="1">
         <!--Email template -->
         <record id="email_template_call_interrupted" model="email.template">
             <field name="name">Call interrupted</field>

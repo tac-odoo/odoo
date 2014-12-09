@@ -5,7 +5,7 @@
 <openerp>
     <data>
 
-        <record model="web.tip" id="wardialing_tip_1">
+        <record model="web.tip" id="voip_tip_1">
             <field name="title"></field>
             <field name="description">Changing the phone number will not change the phone numbers already in the call queue</field>
             <field name="action_id" ref="base.action_partner_form"/>

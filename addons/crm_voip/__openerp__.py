@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "crm_wardialing",
+    'name': "crm_voip",
 
     'summary': """
         Short (1 phrase/line) summary of the module's purpose, used as
@@ -25,10 +25,10 @@
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
-        'views/crm_wardialing.xml',
+        'views/crm_voip.xml',
         'views/phonecall.xml',
         'views/opportunities.xml',
-        'views/crm_wardialing_tip.xml',
+        'views/crm_voip_tip.xml',
         'views/res_config_view.xml',
         'views/res_users_view.xml',
         'templates.xml',
