@@ -107,7 +107,8 @@ class account_financial_report_line(models.Model):
     unfolded = fields.Boolean('Unfolded by default', default=False)
     figure_type = fields.Selection([('float', 'Float'), ('percents', 'Percents'), ('no_unit', 'No Unit')],
                                    'Type of the figure', default='float', required=True)
-    closing_balance = fields.Boolean('Closing Balance', default=False, required=True)
+    closing_balance = fields.Boolean('Closing balance', default=False, required=True)
+    opening_year_balance = fields.Boolean('Opening year balance', default=False, required=True)
     hidden = fields.Boolean('Should this line be hidden', default=False, required=True)
     show_domain = fields.Boolean('Show the domain', default=True, required=True)
 
@@ -157,7 +158,7 @@ class account_financial_report_line(models.Model):
             level=level,
         ).get_lines(context_id.financial_report_id)[0]
 
-    def format(self, value):
+    def _format(self, value):
         if self.figure_type == 'float':
             currency_id = self.env.user.company_id.currency_id
             return formatLang(self.env, value, currency_obj=currency_id)
@@ -165,24 +166,32 @@ class account_financial_report_line(models.Model):
             return str(round(value * 100, 1)) + '%'
         return round(value, 1)
 
+    def _get_gb_name(self, gb_id):
+        if self.groupby == 'account_id':
+            return self.env['account.account'].browse(gb_id).name_get()[0][1]
+        if self.groupby == 'user_type':
+            return self.env['account.account.type'].browse(gb_id).name
+        return gb_id
+
     @api.one
     def get_lines(self, financial_report_id):
         lines = []
         context = self.env.context
-        line = self
         level = context['level']
         currency_id = self.env.user.company_id.currency_id
-        if line.closing_balance:
+        if self.closing_balance:
             self = self.with_context(closing_bal=True)
+        if self.opening_year_balance:
+            self = self.with_context(opening_year_bal=True)
 
         # Computing the lines
         vals = {
-            'id': line.id,
-            'name': line.name,
+            'id': self.id,
+            'name': self.name,
             'type': 'line',
             'level': level,
-            'unfolded': not 'unfolded_lines' in context or line.id in context['unfolded_lines'],
-            'unfoldable': line.domain and line.show_domain or False,
+            'unfolded': not 'unfolded_lines' in context or self.id in context['unfolded_lines'],
+            'unfoldable': self.domain and self.show_domain or False,
         }
 
         # listing the columns
@@ -195,49 +204,48 @@ class account_financial_report_line(models.Model):
 
         # computing the values for the lines
         if self.formulas:
-            for key, value in line.get_balance(columns)[0].items():
-                vals[key] = line.format(value)
+            for key, value in self.get_balance(columns)[0].items():
+                vals[key] = self._format(value)
             if context['comparison']:
-                cmp_line = line.with_context(date_from=context['date_from_cmp'], date_to=context['date_to_cmp'])
+                cmp_line = self.with_context(date_from=context['date_from_cmp'], date_to=context['date_to_cmp'])
                 value = cmp_line.get_balance(['balance'])[0]['balance']
-                vals['comparison'] = line.format(value)
+                vals['comparison'] = self._format(value)
         if not self.hidden:
             lines.append(vals)
 
         # if the line has a domain, computing its values
-        if line.domain and (not 'unfolded_lines' in context or line.id in context['unfolded_lines']) and line.groupby and line.show_domain:
+        if self.domain and (not 'unfolded_lines' in context or self.id in context['unfolded_lines']) and self.groupby and self.show_domain:
             aml_obj = self.env['account.move.line']
-            amls = aml_obj.search(report_safe_eval(line.domain))
+            amls = aml_obj.search(report_safe_eval(self.domain))
 
-            if line.groupby:
+            if self.groupby:
                 if len(amls) > 0:
                     select = ',COALESCE(SUM(l.debit-l.credit), 0)'
                     if financial_report_id.debit_credit:
                         select += ',SUM(l.credit),SUM(l.debit)'
-                    sql = "SELECT l." + line.groupby + "%s FROM account_move_line l WHERE %s AND l.id IN %s GROUP BY l." + line.groupby
+                    sql = "SELECT l." + self.groupby + "%s FROM account_move_line l WHERE %s AND l.id IN %s GROUP BY l." + self.groupby
                     query = sql % (select, amls._query_get(), str(tuple(amls.ids)))
                     self.env.cr.execute(query)
                     gbs = self.env.cr.fetchall()
+                    gbs_cmp = False
                     if context['comparison']:
                         aml_cmp_obj = aml_obj.with_context(date_from=context['date_from_cmp'], date_to=context['date_to_cmp'])
-                        aml_cmp_ids = aml_cmp_obj.search(report_safe_eval(line.domain))
+                        aml_cmp_ids = aml_cmp_obj.search(report_safe_eval(self.domain))
                         select = ',COALESCE(SUM(l.debit-l.credit), 0)'
                         query = sql % (select, aml_cmp_ids._query_get(), str(tuple(aml_cmp_ids.ids)))
                         self.env.cr.execute(query)
                         gbs_cmp = dict(self.env.cr.fetchall())
 
                     for gb in gbs:
-                        vals = {'id': gb[0], 'name': gb[0], 'level': level + 2, 'type': line.groupby}
-                        if line.groupby == 'account_id':
-                            vals['name'] = self.env['account.account'].browse(gb[0]).name_get()[0][1]
+                        vals = {'id': gb[0], 'name': self._get_gb_name(gb[0]), 'level': level + 2, 'type': self.groupby}
                         flag = False
                         for column in xrange(1, len(columns) + 1):
                             value = gb[column]
-                            vals[columns[column - 1]] = line.format(value)
+                            vals[columns[column - 1]] = self._format(value)
                             if not currency_id.is_zero(value):
                                 flag = True
                         if gbs_cmp and gbs_cmp.get(gb[0]):
-                            vals['comparison'] = line.format(gbs_cmp[gb[0]])
+                            vals['comparison'] = self._format(gbs_cmp[gb[0]])
                             if not currency_id.is_zero(gbs_cmp[gb[0]]):
                                 flag = True
                             del gbs_cmp[gb[0]]
@@ -246,12 +254,8 @@ class account_financial_report_line(models.Model):
 
                     if gbs_cmp:
                         for gb, value in gbs_cmp.items():
-                            vals = {'id': gb, 'name': gb, 'level': level + 2, 'type': line.groupby,
-                                    'comparison': line.format(value), 'balance': line.format(0)}
-                            if financial_report_id.debit_credit:
-                                vals['debit'] = vals['credit'] = line.format(0)
-                            if line.groupby == 'account_id':
-                                vals['name'] = self.env['account.account'].browse(gb).name_get()[0][1]
+                            vals = {'id': gb, 'name': self._get_gb_name(gb), 'level': level + 2, 'type': self.groupby,
+                                    'comparison': self._format(value), 'balance': self._format(0)}
                             if not currency_id.is_zero(gb):
                                 lines.append(vals)
 
@@ -264,18 +268,18 @@ class account_financial_report_line(models.Model):
                     c = FormulaContext(self.env['account.financial.report.line'], aml)
                     flag = False
                     if self.formulas:
-                        for f in line.formulas.split(';'):
+                        for f in self.formulas.split(';'):
                             [column, formula] = f.split('=')
                             column = column.strip()
                             if column in columns:
                                 value = report_safe_eval(formula, c, nocopy=True)
-                                vals[column] = line.format(value)
+                                vals[column] = self._format(value)
                                 if not aml.company_id.currency_id.is_zero(value):
                                     flag = True
                             if column == 'balance' and context['comparison']:
                                 c_cmp = FormulaContext(self.env['account.financial.report.line'], aml_cmp_obj.browse(aml.id))
                                 value = report_safe_eval(formula, c_cmp, nocopy=True)
-                                vals['comparison'] = line.format(value)
+                                vals['comparison'] = self._format(value)
                                 if not aml.company_id.currency_id.is_zero(value):
                                     flag = True
                     if flag:

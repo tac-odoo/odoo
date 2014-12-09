@@ -20,8 +20,6 @@ class account_move_line(models.Model):
     def _query_get(self, obj='l'):
         account_obj = self.env['account.account']
         context = dict(self._context or {})
-        initial_bal = context.get('initial_bal', False)
-        closing_bal = context.get('closing_bal', False)
         company_clause = " "
         if context.get('company_id', False):
             company_clause = " AND " +obj+".company_id = %s" % context.get('company_id', False)
@@ -31,22 +29,21 @@ class account_move_line(models.Model):
         where_move_lines_by_date = ''
 
         if context.get('date_from', False) and context.get('date_to', False):
-            if initial_bal:
-                where_move_lines_by_date = " AND " +obj+".move_id IN (SELECT id FROM account_move WHERE date < '" +context['date_from']+"')"
-            elif closing_bal:
-                where_move_lines_by_date = " AND " +obj+".move_id IN (SELECT id FROM account_move WHERE date < '" +context['date_to']+"')"
+            if context.get('initial_bal', False):
+                where_move_lines_by_date = obj+".move_id IN (SELECT id FROM account_move WHERE date < '" +context['date_from']+"')"
+            elif context.get('closing_bal', False):
+                where_move_lines_by_date = obj+".move_id IN (SELECT id FROM account_move WHERE date < '" +context['date_to']+"')"
+            elif context.get('opening_year_bal', False):
+                dt = context['date_from'][:4] + '-01-01'
+                where_move_lines_by_date = obj+".move_id IN (SELECT id FROM account_move WHERE date < '" +dt+"')"
             else:
-                where_move_lines_by_date = " AND " +obj+".move_id IN (SELECT id FROM account_move WHERE date >= '" +context['date_from']+"' AND date <= '"+context['date_to']+"')"
+                where_move_lines_by_date = obj+".move_id IN (SELECT id FROM account_move WHERE date >= '" +context['date_from']+"' AND date <= '"+context['date_to']+"')"
 
         if state:
             if state.lower() not in ['all']:
-                where_move_state= " AND "+obj+".move_id IN (SELECT id FROM account_move WHERE account_move.state = '"+state+"')"
-        if initial_bal and not where_move_lines_by_date:
-            #we didn't pass any filter in the context, and the initial balance can't be computed using only the fiscalyear otherwise entries will be summed twice
-            #so we have to invalidate this query
-            raise Warning(_("You have not supplied enough arguments to compute the initial balance, please select a period and a journal in the context."))
+                where_move_state = " AND "+obj+".move_id IN (SELECT id FROM account_move WHERE account_move.state = '"+state+"')"
 
-        query = obj+".move_id IN (SELECT id FROM account_move WHERE state <> 'draft') %s %s" % (where_move_lines_by_date, where_move_state)
+        query = "%s %s" % (where_move_lines_by_date, where_move_state)
 
         if context.get('journal_ids', False):
             query += ' AND '+obj+'.journal_id IN (%s)' % ','.join(map(str, context['journal_ids']))
@@ -252,6 +249,7 @@ class account_move_line(models.Model):
     # TODO: put the invoice link and partner_id on the account_move
     invoice = fields.Many2one('account.invoice', string='Invoice')
     partner_id = fields.Many2one('res.partner', string='Partner', index=True, ondelete='restrict')
+    user_type = fields.Many2one('account.account.type', related='account_id.user_type', string='User Type', index=True, store=True)
 
     _sql_constraints = [
         ('credit_debit1', 'CHECK (credit*debit=0)',  'Wrong credit or debit value in accounting entry !'),
