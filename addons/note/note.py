@@ -171,17 +171,13 @@ class note_base_config_settings(models.TransientModel):
 class res_users(models.Model):
     _name = 'res.users'
     _inherit = ['res.users']
-    def create(self, cr, uid, data, context=None):
-        user_id = super(res_users, self).create(cr, uid, data, context=context)
-        note_obj = self.pool['note.stage']
-        data_obj = self.pool['ir.model.data']
-        is_employee = self.has_group(cr, user_id, 'base.group_user')
+
+    @api.model
+    def create(self, data):
+        user = super(res_users, self).create(data)
+        note_obj = self.env['note.stage'].search([('user_id','=',SUPERUSER_ID)])
+        data_obj = self.env['ir.model.data']
+        is_employee = self.has_group('base.group_user')
         if is_employee:
-            for n in range(5):
-                xmlid = 'note_stage_%02d' % (n,)
-                try:
-                    _model, stage_id = data_obj.get_object_reference(cr, SUPERUSER_ID, 'note', xmlid)
-                except ValueError:
-                    continue
-                note_obj.copy(cr, SUPERUSER_ID, stage_id, default={'user_id': user_id}, context=context)
-        return user_id
+            note_obj.copy(default={'user_id': user.id})
+        return user
