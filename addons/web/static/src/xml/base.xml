@@ -573,8 +573,8 @@
         <t t-raw="0"/>
     </div>
     <div class="btn-group btn-group-sm oe-pager-buttons">
-        <a class="fa fa-chevron-left btn btn-default oe-pager-button" type="button" data-pager-action="previous"></a>
-        <a class="fa fa-chevron-right btn btn-default oe-pager-button" type="button" data-pager-action="next"></a>
+        <a class="fa fa-chevron-left btn btn-default oe-pager-button" type="button" data-pager-action="previous" accesskey="p" data-content="Previous (p)" data-placement="top" ></a>
+        <a class="fa fa-chevron-right btn btn-default oe-pager-button" type="button" data-pager-action="next" accesskey="n"  data-placement="bottom" data-content="Next (n)"></a>
     </div>
 </span>
 
@@ -716,7 +716,7 @@
 <t t-name="ListView.buttons">
     <div class="oe_list_buttons">
     <t t-if="!widget.no_leaf and widget.options.action_buttons !== false and widget.options.addable and widget.is_action_enabled('create')">
-        <button type="button" class="oe_list_add btn btn-primary btn-sm">
+        <button type="button" class="oe_list_add btn btn-primary btn-sm" accesskey="c">
             <t t-esc="widget.options.addable"/>
         </button>
     </t>
@@ -757,10 +757,10 @@
 <t t-extend="ListView.buttons">
     <t t-jquery="button.oe_list_add" t-operation="after">
         <button class="oe_button oe_list_save oe_highlight"
-                type="button">Save</button>
+                type="button" accesskey="s">Save</button>
         <span class="oe_alternative">
             <span class="oe_fade">or</span>
-            <a href="#" class="oe_bold oe_list_discard">Discard</a>
+            <a href="#" class="oe_bold oe_list_discard" accesskey="d">Discard</a>
         </span>
     </t>
 </t>
@@ -796,19 +796,20 @@
         <div class="oe_form_buttons_view">
             <button t-if="widget.is_action_enabled('edit')" 
                     type="button" 
-                    class="oe_form_button_edit btn btn-default btn-sm" accesskey="E">
+                    class="oe_form_button_edit btn btn-default btn-sm" accesskey="e"
+                    data-placement="top">
                 Edit
             </button>
             <button t-if="widget.is_action_enabled('create')"
                     type="button" class="oe_form_button_create btn btn-default btn-sm"
-                    accesskey="C">
+                    accesskey="c" data-placement="bottom">
                 Create
             </button>
         </div>
         <span class="oe_form_buttons_edit">
-            <button type="button" class="oe_form_button_save btn btn-primary btn-sm" accesskey="S">Save</button>
+            <button type="button" class="oe_form_button_save btn btn-primary btn-sm" accesskey="s" data-placement="top">Save</button>
             <span class="oe_fade">or</span>
-            <a href="#" class="oe_bold oe_form_button_cancel" accesskey="D">Discard</a>
+            <a href="#" class="oe_bold oe_form_button_cancel" accesskey="d" data-placement="bottom">Discard</a>
         </span>
     </t>
 </div>

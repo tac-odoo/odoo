@@ -2288,9 +2288,14 @@ instance.web.form.FieldChar = instance.web.form.AbstractField.extend(instance.we
         return this._super();
     },
     render_value: function() {
-        var show_value = this.format_value(this.get('value'), '');
+        var show_value = this.format_value(this.get('value'), ''),
+            $input;
         if (!this.get("effective_readonly")) {
-            this.$el.find('input').val(show_value);
+            $input = this.$el.find('input');
+            $input.val(show_value);
+            if (this.node.attrs.accesskey) {
+                $input.attr('accesskey', this.node.attrs.accesskey);
+            }
         } else {
             if (this.password) {
                 show_value = new Array(show_value.length + 1).join('*');

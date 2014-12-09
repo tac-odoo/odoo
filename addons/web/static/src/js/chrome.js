@@ -1214,6 +1214,7 @@ instance.web.WebClient = instance.web.Client.extend({
         this.on("change:title_part", this, this._title_changed);
         this._title_changed();
 
+        this.activate_shortcuts();
         return $.when(this._super()).then(function() {
             if (jQuery.deparam !== undefined && jQuery.deparam(jQuery.param.querystring()).kitten !== undefined) {
                 self.to_kitten();
@@ -1224,6 +1225,77 @@ instance.web.WebClient = instance.web.Client.extend({
             if (self.client_options.action) {
                 self.action_manager.do_action(self.client_options.action);
                 delete(self.client_options.action);
+            }
+        });
+    },
+    activate_shortcuts: function () {
+        var clear_timer, 
+            current_shortcuts = {};
+
+        function get_active_nodes () {
+            return $('a[accesskey],button[accesskey],input[accesskey]').filter(':visible');
+        }
+        function make_timer(activate, deactivate) {
+            var activated = false,
+                deactivate_timeout;
+
+            var activate_timeout = setTimeout(function () {
+                deactivate_timeout = setTimeout(deactivate, 3000);
+                activate();
+                activated = true;
+            }, 200);
+
+            return function clear_timer () {
+                clearTimeout(activate_timeout);
+                clearTimeout(deactivate_timeout);
+                if (activated) deactivate();
+            };
+        }
+        function showPopovers () {
+            var $nodes = get_active_nodes();
+            $nodes.each(function (index, node) {
+                var $node = $(node);
+                $node.data('content', 'Ctrl+' + $node.attr('accesskey'));
+            });
+            $nodes.popover({container: 'body'});
+            $nodes.popover('show');
+        }
+        function destroyPopovers () {
+            // get_active_nodes().popover('destroy');
+            $('.popover').remove();
+        }
+        function get_shortcuts () {
+            var accesskeys = {};
+            get_active_nodes().each(function (index, node) {
+                var $node = $(node);
+                accesskeys[$node.attr('accesskey').toLowerCase()] = $node;
+            });
+            return accesskeys;
+        }
+        this.$el.keydown(function (event) {
+            var key, $node, shortcuts;
+            if (event.which === 17) {
+                // $nodes = $('a[accesskey],button[accesskey],input[accesskey]').filter(':visible');
+                // prepareShortcuts();
+                clear_timer = make_timer(showPopovers, destroyPopovers);
+            } else if (event.ctrlKey) {
+                shortcuts = get_shortcuts();
+                key = String.fromCharCode(event.which).toLowerCase();
+                if (key in shortcuts) {
+                    destroyPopovers();
+                    $node = shortcuts[key];
+                    if ($node.is('input')) 
+                        $node.focus();
+                    else 
+                        $node.click();
+                    // event.stopPropagation;
+                    // event.preventDefault();
+                }
+            }
+        });
+        this.$el.keyup(function (event) {
+            if (event.which === 17) {
+                if (clear_timer) clear_timer()
             }
         });
     },
