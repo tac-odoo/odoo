@@ -78,7 +78,6 @@ class note_note(models.Model):
         ids = self.env['note.stage'].search([('user_id','=',self.env.uid)])
         return ids and ids[0] or False
 
-    @api.one
     def _set_stage_per_user(self):
         self.stage_ids = [(6,0, [self.stage_id.id] + [stage.id for stage in self.stage_ids if stage.user_id.id != self.env.uid ])]
 
@@ -116,7 +115,7 @@ class note_note(models.Model):
             #search all stages
             stages = self.env['note.stage'].search([('user_id','=',self.env.uid)])
 
-            if stages: #if the user have some stages
+            if stages: #if the user has some stages
 
                 result = [{ #notes by stage for stages user
                         '__context': {'group_by': groupby[1:]},
