@@ -24,8 +24,7 @@ import openerp
 from openerp import models, fields, api, exceptions, _
 from openerp.tools import html2plaintext
 from datetime import datetime
-
-DT_FMT = '%Y-%m-%d %H:%M:%S'
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 
 class note_stage(models.Model):
     """ Category of Note """
@@ -67,7 +66,7 @@ class note_note(models.Model):
     @api.one
     def onclick_note_is_done(self):
         self.open = 0
-        self.date_done = datetime.now().strftime(DT_FMT)
+        self.date_done = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
     @api.one
     def onclick_note_not_done(self):
