@@ -161,7 +161,7 @@ class hr_evaluation(models.Model):
         emp_obj = self.env['hr.employee']
         for evl_rec in self:
             if self.state == 'new' and vals.get('state') == 'done':
-                raise Warning(_("You can not move directly in done state."))
+                raise Warning(_("""Sorry ! You cannot drag this card from the "To Start" column to the "Done" column. You have to drag it to the "Appraisal Sent" column first."""))
             #avoid recursive process
             if vals.get('state') == 'pending' and not evl_rec._context.get('send_mail_status'):
                 evl_rec.button_sent_appraisal()
@@ -217,6 +217,7 @@ class hr_evaluation(models.Model):
                     partner_id = mail_obj._find_partner_from_emails(email) or emp.user_id.partner_id or None
                     token = self.create_token(email, record['survey_id'], partner_id)[0]
                     self.update_appraisal_url(record['survey_id'].public_url, email, token)
+                    self.mail_template.write({'subject': record['survey_id'].title})
                     self.mail_template.send_mail(self.id, force_send=False)
         return True
 

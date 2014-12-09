@@ -16,6 +16,9 @@
                     <field name="state" widget="statusbar" options="{'fold_field': 'fold'}"/>
                 </header>
                 <sheet>
+                    <div class="oe_right oe_button_box">
+                        <button class="oe_inline oe_stat_button" name="get_result_appraisal" string="Answers" type="object" icon="fa-reply"/>
+                    </div>
                     <label for="employee_id" class="oe_edit_only"/>
                     <h1>
                         <field name="employee_id" class="oe_inline"  on_change="1" attrs="{'readonly':[('state','not in',('new'))]}"/>
@@ -48,7 +51,7 @@
                                         <field name="appraisal_self" attrs="{'readonly':[('state','not in',('new'))]}"/>
                                         <label string="Employee"/>
                                     </div>
-                                    <field name="apprasial_employee" nolabel="1" attrs="{'invisible':[('appraisal_self','=',False)]}"/>
+                                    <field name="apprasial_employee" nolabel="1" attrs="{'invisible':[('appraisal_self','=',False)], 'readonly':[('state','not in',('new'))]}"/>
                                     <field name="appraisal_self_survey_id" nolabel="1" on_change="1" placeholder="Appraisal Form..." attrs="{'invisible':[('appraisal_self','=',False)], 'required':[('appraisal_self','=',True)], 'readonly':[('state','not in',('new'))]}"/>
                                     <div class="address_format">
                                         <field name="appraisal_subordinates" attrs="{'readonly':[('state','not in',('new'))]}"/>
@@ -174,12 +177,9 @@
               <p class="oe_view_nocontent_create">
                 Click to create a new appraisal.
               </p><p>
-                Each employee may be assigned an Appraisal Plan. Such a plan
-                defines the frequency and the way you manage your periodic
-                personnel evaluation. You will be able to define steps and
-                attach interviews to each step. Odoo manages all kinds of
-                evaluations: bottom-up, top-down, self-evaluation and final
-                evaluation by the manager.
+                You will be able to choose which forms will be sent(Employee,Managers,Collaborators or Colleagues),
+                to whom and the evaluation deadline. Once you have defined it,
+                change the stage to send it and view the results.
               </p>
             </field>
         </record>
