@@ -17,7 +17,7 @@ openerp_mail_followers = function(session, mail) {
      */
 
     /* Add the widget to registry */
-    session.web.form.widgets.add('mail_followers', 'openerp.mail_followers.Followers');
+    session.web.form.widgets.add('old_mail_followers', 'openerp.mail_followers.Followers');
 
     mail_followers.Followers = session.web.form.AbstractField.extend({
         template: 'mail.followers',

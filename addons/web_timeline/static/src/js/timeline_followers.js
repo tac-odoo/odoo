@@ -17,7 +17,7 @@ openerp_timeline_followers = function(session, mail) {
      */
 
     /* Add the widget to registry */
-    session.web.form.widgets.add('timeline_mail_followers', 'openerp.timeline_followers.Followers');
+    session.web.form.widgets.add('mail_followers', 'openerp.timeline_followers.Followers');
 
     openerp.timeline_followers.Followers = session.web.form.AbstractField.extend({
         template: 'timeline_followers',

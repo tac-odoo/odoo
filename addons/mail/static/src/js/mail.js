@@ -24,7 +24,6 @@ openerp.mail = function (session) {
 
         /** parse text to find email: Tagada <address@mail.fr> -> [Tagada, address@mail.fr] or False */
         parse_email: function (text) {
-            //console.log("chatter utils parse_email");
             var result = text.match(/(.*)<(.*@.*)>/);
             if (result) {
                 return [_.str.trim(result[1]), _.str.trim(result[2])];
@@ -59,7 +58,6 @@ openerp.mail = function (session) {
          * - :name - shortcut to an image
          */
         do_replace_expressions: function (string) {
-            //console.log("chatter utils do_replace_expressions");
             var icon_list = ['al', 'pinky']
             /* special shortcut: :name, try to find an icon if in list */
             var regex_login = new RegExp(/(^|\s):((\w)*)/g);
@@ -78,7 +76,6 @@ openerp.mail = function (session) {
          * TDE note : should be done server-side, in Python -> use mail.compose.message ?
          */
         get_text2html: function (text) {
-            //console.log("chatter utils get_text2html");
             return text
                 .replace(/((?:https?|ftp):\/\/[\S]+)/g,'<a href="$1">$1</a> ')
                 .replace(/[\n\r]/g,'<br/>')                
@@ -88,7 +85,6 @@ openerp.mail = function (session) {
          * TDE note: please add some comments to explain how/why
          */
         expand_domain: function (domain) {
-            //console.log("chatter utils expand_domain");
             var new_domain = [];
             var nb_and = -1;
             // TDE note: smarted code maybe ?
@@ -154,10 +150,7 @@ openerp.mail = function (session) {
      */
         
         init: function (parent, datasets, options) {
-            //console.log("message common init");
             this._super(parent, options);
-
-			//console.log("dataset mail", datasets);
 
             // record options
             this.options = datasets.options || options || {};
@@ -196,9 +189,6 @@ openerp.mail = function (session) {
             this.user_pid = datasets.user_pid || false;
             this.format_data();
 
-
-            console.log("author", this.author_id);
-
             // update record_name: Partner profile
             if (this.model == 'res.partner') {
                 this.record_name = 'Partner Profile of ' + this.record_name;
@@ -220,26 +210,13 @@ openerp.mail = function (session) {
                 this.options.rerender = true;
                 this.options.toggle_read = true;
             }
-            console.log("parent", parent);
-            console.log("root", this.options.root_thread);
-            this.parent_thread; // = typeof parent.on_message_detroy == 'function' ? parent : this.options.root_thread;
-            if (typeof parent.on_message_detroy == 'function') {
-                console.log("on message destroy is function");
-                this.parent_thread = parent;
-            }
-            else {
-                console.log("else this.option.root");
-                this.parent_thread = this.options.root_thread;
-            }
+
+            this.parent_thread = typeof parent.on_message_detroy == 'function' ? parent : this.options.root_thread;
             this.thread = false;
-            
-             console.log("thread message", this);
-           
         },
 
         /* Convert date, timerelative and avatar in displayable data. */
         format_data: function () {
-
             //formating and add some fields for render
             this.date = this.date ? session.web.str_to_datetime(this.date) : false;
             this.display_date = moment(new Date(this.date)).format('ddd MMM DD YYYY LT');
@@ -255,14 +232,11 @@ openerp.mail = function (session) {
             } else {
                 this.avatar = mail.ChatterUtils.get_image(this.session, 'res.users', 'image_small', this.session.uid);
             }
-            console.log("author format data", this.author_id);
 
             if (this.author_id && this.author_id[1]) {
                 var parsed_email = mail.ChatterUtils.parse_email(this.author_id[1]);
                 this.author_id.push(parsed_email[0], parsed_email[1]);
             }
-            
-            console.log("author format data", this.author_id);
         
             if (this.partner_ids && this.partner_ids.length > 3) {
                 this.extra_partners_nbr = this.partner_ids.length - 3;
@@ -299,17 +273,13 @@ openerp.mail = function (session) {
          * @return array of id
         */
         get_child_ids: function () {
-            //console.log("message common get childs ids");
-			var tmp = _.map(this.get_childs(), function (val) { return val.id; });
-			//console.log("get child id mail common", tmp);
-            return tmp ;
+			return _.map(this.get_childs(), function (val) { return val.id; });
         },
 
         /* get all child message linked.
          * @return array of message object
         */
         get_childs: function (nb_thread_level) {
-            //console.log("message common get childs");
             var res=[];
             if (arguments[1] && this.id) res.push(this);
             if ((isNaN(nb_thread_level) || nb_thread_level>0) && this.thread) {
@@ -330,7 +300,6 @@ openerp.mail = function (session) {
          * @return thread object
          */
         browse_message: function (options) {
-            console.log("message common browse message");
             // goto the wall thread for launch browse
             if (!options._go_thread_wall) {
                 options._go_thread_wall = true;
@@ -357,7 +326,6 @@ openerp.mail = function (session) {
          * call on_message_delete on his parent thread
         */
         destroy: function () {
-            console.log("message common destroy");
             this._super();
             this.parent_thread.on_message_detroy(this);
 
@@ -397,7 +365,6 @@ openerp.mail = function (session) {
          */
 
         init: function (parent, datasets, options) {
-            //console.log("compose message init");
             this._super(parent, datasets, options);
             this.show_compact_message = false;
             this.show_delete_attachment = true;
@@ -407,7 +374,6 @@ openerp.mail = function (session) {
         },
 
         start: function () {
-            //console.log("compose message start");
             this._super.apply(this, arguments);
 
             this.ds_attachment = new session.web.DataSetSearch(this, 'ir.attachment');
@@ -421,7 +387,6 @@ openerp.mail = function (session) {
         /* when a user click on the upload button, send file read on_attachment_loaded
         */
         on_attachment_change: function (event) {
-            console.log("on attachement change");
             event.stopPropagation();
             var self = this;
             var $target = $(event.target);
@@ -462,7 +427,6 @@ openerp.mail = function (session) {
         /* when the file is uploaded 
         */
         on_attachment_loaded: function (event, result) {
-            console.log("on attachement loaded");
             if (result.erorr || !result.id ) {
                 this.do_warn( session.web.qweb.render('mail.error_upload'), result.error);
                 this.attachment_ids = _.filter(this.attachment_ids, function (val) { return !val.upload; });
@@ -487,7 +451,6 @@ openerp.mail = function (session) {
         /* unlink the file on the server and reload display
          */
         on_attachment_delete: function (event) {
-            console.log("on attachement delete");
             event.stopPropagation();
             var attachment_id=$(event.target).data("id");
             if (attachment_id) {
@@ -506,7 +469,6 @@ openerp.mail = function (session) {
         },
 
         bind_events: function () {
-            //console.log("compose message biend events");
             var self = this;
             this.$('.oe_compact_inbox').on('click', self.on_toggle_quick_composer);
             this.$('.oe_compose_post').on('click', self.on_toggle_quick_composer);
@@ -533,7 +495,6 @@ openerp.mail = function (session) {
         },
 
         on_compose_fullmail: function (default_composition_mode) {
-            
             var self = this;
             if(!this.do_check_attachment_upload()) {
                 return false;
@@ -578,7 +539,6 @@ openerp.mail = function (session) {
         },
 
         reinit: function() {
-            console.log("compose message reinit");
             var $render = $( session.web.qweb.render('mail.compose_message', {'widget': this}) );
 
             $render.insertAfter(this.$el.last());
@@ -590,7 +550,6 @@ openerp.mail = function (session) {
         },
 
         on_cancel: function (event) {
-            console.log("compose message on_cancel");
             if (event) event.stopPropagation();
             this.attachment_ids=[];
             this.stay_open = false;
@@ -600,7 +559,6 @@ openerp.mail = function (session) {
 
         /* return true if all file are complete else return false and make an alert */
         do_check_attachment_upload: function () {
-            
             if (_.find(this.attachment_ids, function (file) {return file.upload;})) {
                 this.do_warn(session.web.qweb.render('mail.error_upload'), session.web.qweb.render('mail.error_upload_please_wait'));
                 return false;
@@ -610,7 +568,6 @@ openerp.mail = function (session) {
         },
 
         check_recipient_partners: function () {
-            console.log("compose message check_recipient_partners");
             var self = this;
             var check_done = $.Deferred();
             var recipients = _.filter(this.recipients, function (recipient) { return recipient.checked });
@@ -692,7 +649,6 @@ openerp.mail = function (session) {
         },
 
         on_message_post: function (event) {
-            console.log("compose message on_message_post");
             var self = this;
             if (self.flag_post) {
                 return;
@@ -712,7 +668,6 @@ openerp.mail = function (session) {
 
         /* do post a message and fetch the message */
         do_send_message_post: function (partner_ids, log) {
-            console.log("compose message do_send_message post");
             var self = this;
             var values = {
                 'body': this.$('textarea').val(),
@@ -757,7 +712,6 @@ openerp.mail = function (session) {
          *  - compute email_from list (list of unknown email_from to propose to create partners)
          */
         on_toggle_quick_composer: function (event) {
-            console.log("compose message on_toggle_quick_composer");
             var self = this;
             var $input = $(event.target);
             this.compute_emails_from();
@@ -766,11 +720,9 @@ openerp.mail = function (session) {
 
             // if clicked: call for suggested recipients
             if (event.type == 'click') {
-                console.log("if click");
                 this.is_log = $input.hasClass('oe_compose_log');
                 suggested_partners = this.parent_thread.ds_thread.call('message_get_suggested_recipients', [[this.context.default_res_id], this.context]).done(function (additional_recipients) {
                     var thread_recipients = additional_recipients[self.context.default_res_id];
-                    console.log(thread_recipients);
                     _.each(thread_recipients, function (recipient) {
                         var parsed_email = mail.ChatterUtils.parse_email(recipient[1]);
                         if (_.indexOf(email_addresses, parsed_email[1]) == -1) {
@@ -795,8 +747,6 @@ openerp.mail = function (session) {
                
                 if ((!self.stay_open || (event && event.type == 'click')) 
                      && (!self.show_composer || !self.$('textarea:not(.oe_compact)').val().match(/\S+/) && !self.attachment_ids.length)) {
-                     console.log('match', self.$('textarea:not(.oe_compact)').val());
-                console.log('match', self.$('textarea:not(.oe_compact)'));
                     self.show_composer = !self.show_composer || self.stay_open;
                     self.reinit();
                 }
@@ -809,7 +759,6 @@ openerp.mail = function (session) {
         },
 
         do_hide_compact: function () {
-            console.log("compose message do_hide_compact");
             this.show_compact_message = false;
             if (!this.show_composer) {
                 this.reinit();
@@ -817,7 +766,6 @@ openerp.mail = function (session) {
         },
 
         do_show_compact: function () {
-            console.log("compose message do_show_compact");
             this.show_compact_message = true;
             if (!this.show_composer) {
                 this.reinit();
@@ -828,7 +776,6 @@ openerp.mail = function (session) {
          * TDE FIXME: seems odd to delegate to the composer
          * TDE TODO: please de-obfuscate and comment your code */
         compute_emails_from: function () {
-            console.log("compose message compute_emails_from");
             var self = this;
             var messages = [];
 
@@ -860,7 +807,6 @@ openerp.mail = function (session) {
         },
 
         on_checked_recipient: function (event) {
-            console.log("compose message on_checked_recipient");
             var $input = $(event.target);
             var full_name = $input.attr("data");
             _.each(this.recipients, function (recipient) {
@@ -888,7 +834,6 @@ openerp.mail = function (session) {
         template: 'mail.thread.expandable',
 
         init: function (parent, datasets, options) {
-            //console.log("thread expandable init");
             this._super(parent, datasets, options);
             this.type = 'expandable';
             this.max_limit = datasets.max_limit;
@@ -897,13 +842,11 @@ openerp.mail = function (session) {
         },
         
         start: function () {
-            //console.log("thread expandable start");
             this._super.apply(this, arguments);
             this.bind_events();
         },
 
         reinit: function () {
-            //console.log("thread expandable reinit");
             var $render = $(session.web.qweb.render('mail.thread.expandable', {'widget': this}));
             this.$el.replaceWith( $render );
             this.$el = $render;
@@ -914,12 +857,10 @@ openerp.mail = function (session) {
          * Bind events in the widget. Each event is slightly described
          * in the function. */
         bind_events: function () {
-            //console.log("thread expandable bind_events");
             this.$('.oe_msg_more_message').on('click', this.on_expandable);
         },
 
         animated_destroy: function (fadeTime) {
-            //console.log("thread expandable animated_destroy");
             var self=this;
             this.$el.fadeOut(fadeTime, function () {
                 self.destroy();
@@ -930,7 +871,6 @@ openerp.mail = function (session) {
         * @param {object} mouse envent
         */
         on_expandable: function (event) {
-            //console.log("thread expandable on_expandable");
             if (event)event.stopPropagation();
             if (this.flag_used) {
                 return false
@@ -961,7 +901,6 @@ openerp.mail = function (session) {
         template: 'mail.thread.message',
         
         start: function () {
-            //console.log("thread message start");
             this._super.apply(this, arguments);
             this.bind_events();
             if(this.thread_level < this.options.display_indented_thread) {
@@ -977,7 +916,6 @@ openerp.mail = function (session) {
          * Bind events in the widget. Each event is slightly described
          * in the function. */
         bind_events: function () {
-            console.log("thread message bind_events");
             var self = this;
             // header icons bindings
             this.$('.oe_read').on('click', this.on_message_read);
@@ -993,7 +931,6 @@ openerp.mail = function (session) {
             this.$('.oe_mail_action_author').on('click', this.on_record_author_clicked);
         },
         on_hover : function(event){
-            console.log("thread message on_hover");
             var self = this;
             var voter = "";
             var limit = 10;
@@ -1029,7 +966,6 @@ openerp.mail = function (session) {
             return true;
         },
         bindTooltipTo: function($el, value) {
-            //console.log("thread message bindTooltipTo");
             $el.tooltip({
                 'title': value,
                 'placement': 'top',
@@ -1046,7 +982,6 @@ openerp.mail = function (session) {
             });
         },
         on_record_clicked: function  (event) {
-            //console.log("thread message on_record_clicked");
             event.preventDefault();
             var self = this;
             var state = {
@@ -1065,7 +1000,6 @@ openerp.mail = function (session) {
         },
 
         on_record_author_clicked: function  (event) {
-            //console.log("thread message on_record_author_clicked");
             event.preventDefault();
             var partner_id = $(event.target).data('partner');
             var state = {
@@ -1087,7 +1021,6 @@ openerp.mail = function (session) {
 
         /* Call the on_compose_message on the thread of this message. */
         on_message_reply:function (event) {
-            //console.log("thread message on_message_reply");
             event.stopPropagation();
             this.create_thread();
             this.thread.on_compose_message(event);
@@ -1095,7 +1028,6 @@ openerp.mail = function (session) {
         },
 
         on_expand: function (event) {
-            //console.log("thread message on_expand");
             event.stopPropagation();
             this.$('.oe_msg_body:first > .oe_msg_body_short:first').toggle();
             this.$('.oe_msg_body:first > .oe_msg_body_long:first').toggle();
@@ -1107,7 +1039,6 @@ openerp.mail = function (session) {
          * Each message have only one thread.
          */
         create_thread: function () {
-            console.log("thread message create thread");
             if (this.thread) {
                 return false;
             }
@@ -1131,7 +1062,6 @@ openerp.mail = function (session) {
          * Then this object is destroyed.
          */
         animated_destroy: function (fadeTime) {
-            //console.log("thread message animated destroy");
             var self=this;
             this.$el.fadeOut(fadeTime, function () {
                 self.parent_thread.message_to_expandable(self);
@@ -1146,7 +1076,6 @@ openerp.mail = function (session) {
          * Make an animate destroy
          */
         on_message_delete: function (event) {
-            //console.log("thread message on_message_delete");
             event.stopPropagation();
             if (! confirm(_t("Do you really want to delete this message?"))) { return false; }
             
@@ -1168,11 +1097,6 @@ openerp.mail = function (session) {
             var domain = mail.ChatterUtils.expand_domain( this.options.root_thread.domain )
                 .concat([["id", "in", message_ids ]]);
 
-            console.log("check for rerender");
-            console.log("  this.parent_thread", this.parent_thread);
-            console.log("  this.parent_thread.ds_message", this.parent_thread.ds_message);
-
-
             return this.parent_thread.ds_message.call('message_read', [undefined, domain, [], !!this.parent_thread.options.display_indented_thread, this.context, this.parent_thread.id])
                 .then( function (records) {
                     // remove message not loaded
@@ -1190,14 +1114,12 @@ openerp.mail = function (session) {
         },
 
         on_message_read: function (event) {
-            //console.log("thread message on_message_read");
             event.stopPropagation();
             this.on_message_read_unread(true);
             return false;
         },
 
         on_message_unread: function (event) {
-            //console.log("thread message on_message_unread");
             event.stopPropagation();
             this.on_message_read_unread(false);
             return false;
@@ -1208,7 +1130,6 @@ openerp.mail = function (session) {
          * @param {boolean} read_value
          */
         on_message_read_unread: function (read_value) {
-            //console.log("thread message on_message_read_unread");
             var self = this;
             var messages = [this].concat(this.get_childs());
 
@@ -1243,7 +1164,6 @@ openerp.mail = function (session) {
          * add or remove a vote for a message and display the result
         */
         on_vote: function (event) {
-            console.log("thread message on_vote");
             event.stopPropagation();
             this.ds_message.call('vote_toggle', [[this.id]])
                 .then(
@@ -1259,7 +1179,6 @@ openerp.mail = function (session) {
          * Display the render of this message's vote
         */
         display_vote: function () {
-            console.log("thread message display_vote");
             var vote_element = session.web.qweb.render('mail.thread.message.vote', {'widget': this});
             this.$(".oe_msg_footer:first .oe_mail_vote_count").remove();
             this.$(".oe_msg_footer:first .oe_msg_vote").replaceWith(vote_element);
@@ -1271,7 +1190,6 @@ openerp.mail = function (session) {
          * add or remove a favorite (or starred) for a message and change class on the DOM
         */
         on_star: function (event) {
-            //console.log("thread message on_star"); 
             event.stopPropagation();
             var self=this;
             var button = self.$('.oe_star:first');
@@ -1328,14 +1246,11 @@ openerp.mail = function (session) {
          *              use with browse, fetch... [O]= top parent
          */
         init: function (parent, datasets, options) {
-            console.log("mail thread init");
             var self = this;
             this._super(parent, options);
             this.MailWidget = parent instanceof mail.Widget ? parent : false;
             this.domain = options.domain || [];
             this.context = _.extend(options.context || {});
-
-			//console.log("thread widget");
 
             this.options = options.options;
             this.options.root_thread = (options.options.root_thread != undefined ? options.options.root_thread : this);
@@ -1369,7 +1284,6 @@ openerp.mail = function (session) {
         },
         
         start: function () {
-            console.log("mail thread start");
             this._super.apply(this, arguments);
             this.bind_events();
             return $.when();
@@ -1379,7 +1293,6 @@ openerp.mail = function (session) {
         * The compose message is display in compact form.
         */
         instantiate_compose_message: function () {
-            console.log("mail thread instantiate_compose_message");
             // add message composition form view
             if (!this.compose_message) {
                 this.compose_message = new mail.ThreadComposeMessage(this, this, {
@@ -1398,7 +1311,6 @@ openerp.mail = function (session) {
          * then the on_expandable function is launch
         */
         on_scroll: function () {
-            console.log("mail thread on_scroll");
             var expandables = 
             _.each( _.filter(this.messages, function (val) {return val.max_limit && !val.parent_id;}), function (val) {
                 var pos = val.$el.position();
@@ -1416,7 +1328,6 @@ openerp.mail = function (session) {
          * Bind events in the widget. Each event is slightly described
          * in the function. */
         bind_events: function () {
-            console.log("mail thread bind_events");
             var self = this;
             self.$('.oe_mail_list_recipients .oe_more').on('click', self.on_show_recipients);
             self.$('.oe_mail_compose_textarea .oe_more_hidden').on('click', self.on_hide_recipients);
@@ -1426,7 +1337,6 @@ openerp.mail = function (session) {
          *show all the partner list of this parent message
         */
         on_show_recipients: function () {
-            console.log("mail thread on_show_recipient");
             var p=$(this).parent(); 
             p.find('.oe_more_hidden, .oe_hidden').show(); 
             p.find('.oe_more').hide(); 
@@ -1437,7 +1347,6 @@ openerp.mail = function (session) {
          *hide a part of the partner list of this parent message
         */
         on_hide_recipients: function () {
-            console.log("mail thread on_hide_recipient");
             var p=$(this).parent(); 
             p.find('.oe_more_hidden, .oe_hidden').hide(); 
             p.find('.oe_more').show(); 
@@ -1448,10 +1357,7 @@ openerp.mail = function (session) {
          * @return array of id
         */
         get_child_ids: function () {
-            console.log("mail thread get childs ids");
-			var tmp = _.map(this.get_childs(), function (val) { return val.id; });
-			//console.log("child ids mail thread", tmp);
-            return tmp;
+			return _.map(this.get_childs(), function (val) { return val.id; });
         },
 
         /* get all child message/thread linked.
@@ -1459,7 +1365,6 @@ openerp.mail = function (session) {
          * @return array of thread object
         */
         get_childs: function (nb_thread_level) {
-            console.log("mail thread get childs");
             var res=[];
             if (arguments[1]) res.push(this);
             if (isNaN(nb_thread_level) || nb_thread_level>0) {
@@ -1484,23 +1389,17 @@ openerp.mail = function (session) {
          * @return thread object
          */
         browse_thread: function (options) {
-            console.log("mail thread browse thread");
-            console.log("parent id", this.id);
-            console.log("option id", options.id);
             // goto the wall thread for launch browse
             if (!options._go_thread_wall) {
-                console.log("!options._go_thread_wall", this);
                 options._go_thread_wall = true;
                 return this.options.root_thread.browse_thread(options);
             }
 
             if (this.id == options.id) {
-                console.log("options.id == this.id");
                 return this;
             }
 
             if (options.id) {
-                console.log("options.id");
                 for (var i in this.messages) {
                     if (this.messages[i].thread) {
                         var res = this.messages[i].thread.browse_thread({'id':options.id, '_go_thread_wall':true});
@@ -1511,7 +1410,6 @@ openerp.mail = function (session) {
 
             //if option default_return_top_thread, return the top if no found thread
             if (options.default_return_top_thread) {
-                console.log("options.default_return_top_thread");
                 return this;
             }
 
@@ -1528,7 +1426,6 @@ openerp.mail = function (session) {
          * @return message object
          */
         browse_message: function (options) {
-            console.log("mail thread browse_message");
             if (this.options.root_thread.messages[0])
                 return this.options.root_thread.messages[0].browse_message(options);
         },
@@ -1539,7 +1436,6 @@ openerp.mail = function (session) {
         * (Is call when a user click on "Reply" button)
         */
         on_compose_message: function (event) {
-            console.log("mail thread on_compose_message");
             this.instantiate_compose_message();
             this.compose_message.on_toggle_quick_composer(event);
             return false;
@@ -1549,7 +1445,6 @@ openerp.mail = function (session) {
          *display the message "there are no message" on the thread
         */
         no_message: function () {
-            console.log("mail thread no_message");
             var no_message = $(session.web.qweb.render('mail.wall_no_message', {}));
             if (this.options.help) {
                 no_message.html(this.options.help);
@@ -1569,7 +1464,6 @@ openerp.mail = function (session) {
          * @param {Array} ids read (if the are some ids, the method don't use the domain)
          */
         message_fetch: function (replace_domain, replace_context, ids, callback) {
-            console.log("mail thread message_fetch");
             return this.ds_message.call('message_read', [
                     // ids force to read
                     ids === false ? undefined : ids && ids.slice(0, this.options.fetch_limit),
@@ -1586,10 +1480,6 @@ openerp.mail = function (session) {
                     this.options.fetch_limit,
                 ]).done(callback ? _.bind(callback, this, arguments) : this.proxy('switch_new_message')
                 ).done(this.proxy('message_fetch_set_read'));
-        },
-
-        display_message: function (records) {
-            console.log("records : ", records);
         },
 
         message_fetch_set_read: function (message_list) {
@@ -1614,7 +1504,6 @@ openerp.mail = function (session) {
          * @param : {object} data from calling RPC to "message_read"
          */
         create_message_object: function (data) {
-			
             var self = this;
 
             data.thread_level = self.thread_level || 0;
@@ -1657,7 +1546,6 @@ openerp.mail = function (session) {
          * @param : {object} ThreadMessage object
          */
         insert_message: function (message, dom_insert_after, prepend) {
-            
             var self=this;
             if (this.options.show_compact_message > this.thread_level) {
                 this.instantiate_compose_message();
@@ -1688,8 +1576,6 @@ openerp.mail = function (session) {
          * @param : {Array} datas from calling RPC to "message_read"
          */
         switch_new_message: function (records, dom_insert_after) {
-            
-            console.log("switch new message records", records);
             var self=this;
             var dom_insert_after = typeof dom_insert_after == 'object' ? dom_insert_after : false;
             _(records).each(function (record) {
@@ -1847,15 +1733,11 @@ openerp.mail = function (session) {
          *     @param {Boolean} [readonly] Read only mode, hide all action buttons and composer
          */
         init: function (parent, action) {
-            console.log("mail widget (root) init");
-            
             this._super(parent, action);
             var self = this;
             this.action = _.clone(action);
             this.domain = this.action.domain || this.action.params.domain || [];
             this.context = this.action.context || this.action.params.context || {};
-            
-            console.log("mail widget message ids 1", this.action.params.message_ids);
 
             this.action.params = _.extend({
                 'display_indented_thread' : -1,
@@ -1876,8 +1758,6 @@ openerp.mail = function (session) {
             }, this.action.params);
 
             this.action.params.help = this.action.help || false;
-
-            console.log("mail root action", this.action);
         },
 
         start: function (options) {
@@ -1907,8 +1787,6 @@ openerp.mail = function (session) {
          * of this root thread to display the messages.
          */
         message_render: function (search) {
-            
-
             this.thread = new mail.Thread(this, {}, {
                 'domain' : this.domain,
                 'context' : this.context,
@@ -1923,7 +1801,6 @@ openerp.mail = function (session) {
             }
 
             this.thread.message_fetch(null, null, this.action.params.message_ids);
-
         },
 
     });
@@ -1939,19 +1816,14 @@ openerp.mail = function (session) {
      * fetching and displaying to the Thread widget.
      * Use Help on the field to display a custom "no message loaded"
      */
-    session.web.form.widgets.add('mail_thread', 'openerp.mail.RecordThread');
+    session.web.form.widgets.add('old_mail_thread', 'openerp.mail.RecordThread');
     mail.RecordThread = session.web.form.AbstractField.extend({
         template: 'mail.record_thread',
         
-
         init: function (parent, node) {
-            console.log("mail record thread init");
-            
             this._super.apply(this, arguments);
-            console.log("option", this.options);
             this.ParentViewManager = parent;
             this.node = _.clone(node);
-            console.log("option", this.options);
             this.node.params = _.extend({
                 'display_indented_thread': -1,
                 'show_reply_button': false,
@@ -1961,7 +1833,6 @@ openerp.mail = function (session) {
                 'show_compact_message': 1,
                 'display_log_button' : true,
             }, this.node.params);
-            console.log("option", this.options);
 
             if (this.node.attrs.placeholder) {
                 this.node.params.compose_placeholder = this.node.attrs.placeholder;
@@ -1971,18 +1842,13 @@ openerp.mail = function (session) {
             }
             
             if ('display_log_button' in this.options) {
-                console.log("option !!!");
                 this.node.params.display_log_button = this.options.display_log_button;
             }
             this.domain = (this.node.params && this.node.params.domain) || (this.field && this.field.domain) || [];
 
-            console.log("show compose message ?", this.view.is_action_enabled('edit'));
-
             if (!this.ParentViewManager.is_action_enabled('edit')) {
                 this.node.params.show_link = false;
             }
-            
-            
         },
 
         start: function () {
@@ -1998,9 +1864,7 @@ openerp.mail = function (session) {
 
         render_value: function () {
             var self = this;
-            
-            console.log("mail record thread render_value");
-            
+          
             if (! this.view.datarecord.id || session.web.BufferedDataSet.virtual_id_regex.test(this.view.datarecord.id)) {
                 this.$('oe_mail_thread').hide();
                 return;
@@ -2010,19 +1874,15 @@ openerp.mail = function (session) {
                 'message_ids': this.get_value(),
                 'show_compose_message': this.view.is_action_enabled('edit'),
             });
-            console.log("show comopse message", this.node.params.show_compose_message);
+           
             this.node.context = {
                 'mail_read_set_read': true,  // set messages as read in Chatter
                 'default_res_id': this.view.datarecord.id || false,
                 'default_model': this.view.model || false,
             };
 
-            console.log("node", this.node);
-
-           if (this.root) {
-               // qd on clique sur "record suivant"
+            if (this.root) {
                 $('<span class="oe_mail-placeholder"/>').insertAfter(this.root.$el);
-                console.log("destroy root");
                 this.root.destroy();
             }
             // create and render Thread widget
@@ -2030,7 +1890,6 @@ openerp.mail = function (session) {
                 'domain' : (this.domain || []).concat([['model', '=', this.view.model], ['res_id', '=', this.view.datarecord.id]]),
             }));
 
-            console.log("root", self.root);
             return this.root.replace(this.$('.oe_mail-placeholder'));
         },
     });
@@ -2072,10 +1931,8 @@ openerp.mail = function (session) {
          *      contain default_model, default_res_id, to give it to the threads.
          */
         init: function (parent, action) {
-            console.log("template mail wall");
             this._super(parent, action);
             this.ActionManager = parent;
-
             this.action = _.clone(action);
             this.domain = this.action.params.domain || this.action.domain || [];
             this.context = _.extend(this.action.params.context || {}, this.action.context || {});
@@ -2104,9 +1961,6 @@ openerp.mail = function (session) {
                 'emails_from_on_composer': false,
                 'fetch_limit': 1000   // allow inbox to load all children messages
             }, this.action.params);
-    
-            console.log("mail wall parent", parent);
-            console.log("mail wall action", action);
         },
 
         start: function () {
@@ -2166,7 +2020,6 @@ openerp.mail = function (session) {
          * Create the root thread widget and display this object in the DOM
          */
         message_render: function (search) {
-			console.log("mail wall message render");
             var domain = this.domain.concat(search && search['domain'] ? search['domain'] : []);
             var context = _.extend(this.context, search && search['context'] ? search['context'] : {});
 
@@ -2174,7 +2027,7 @@ openerp.mail = function (session) {
                 'domain' : domain,
                 'context' : context,
             }));
-            console.log("root", this.root);
+
             return this.root.replace(this.$('.oe_mail-placeholder'));
         },
 
