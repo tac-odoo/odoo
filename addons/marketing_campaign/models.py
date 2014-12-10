@@ -321,14 +321,48 @@ class marketing_campaign_activity(models.Model):
         "Don't Delete Workitems", help="By activating this option, workitems that aren't executed because the condition is not met are marked as cancelled instead of being deleted.")
 
     def process_activity(self, workitem):
-        # method = '_process_wi_%s' % (self.type)
-        # action = getattr(self, method, None)
-        # if not action:
-        # raise ValidationError('Method %r is not implemented on %r object.' % (method, self))
+        method = '_process_wi_%s' % (self.type)
+        action = getattr(self, method, None)
+        if not action:
+            raise ValidationError('Method %r is not implemented on %r object.' % (method, self))
 
-        # workitem = self.env['marketing.campaign.workitem'].browse(cr, uid, wi_id, context=context)
-        # return action(cr, uid, activity, workitem, context=context)
+        return action(self, workitem)
         return True
+
+    #dead code
+    def _process_wi_report(self, activity, workitem):
+        report_data, format = render_report(activity.report_id.report_name, {})
+        attach_vals = {
+            'name': '%s_%s_%s'%(activity.report_id.report_name,
+                                activity.name,workitem.partner_id.name),
+            'datas_fname': '%s.%s'%(activity.report_id.report_name,
+                                        activity.report_id.report_type),
+            'parent_id': activity.report_directory_id.id,
+            'datas': base64.encodestring(report_data),
+            'file_type': format
+        }
+        self.env['ir.attachment'].create(attach_vals)
+        return True
+
+    def _process_wi_email(self, activity, workitem):
+        return self.env['email.template'].send_mail(activity.email_template_id.id, workitem.res_id)
+
+    #dead code
+    def _process_wi_action(self, activity, workitem):
+        if self.env.context is None:
+            context = {}
+        server_obj = self.env['ir.actions.server']
+
+        action_context = dict(context,
+                              active_id=workitem.res_id,
+                              active_ids=[workitem.res_id],
+                              active_model=workitem.object_id.model,
+                              workitem=workitem)
+        server_obj.run([activity.server_action_id.id],
+                             context=action_context)
+        return True
+
+    
 
 
 class marketing_campaign_transition(models.Model):
