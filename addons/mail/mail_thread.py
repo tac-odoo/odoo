@@ -105,6 +105,26 @@ class mail_thread(osv.AbstractModel):
     # Mass mailing feature
     _mail_mass_mailing = False
 
+    def _message_subscribe_user_id(self, cr, uid, objects, context=None):
+        return dict(
+            (obj.id, [obj.user_id.partner_id.id])
+            for obj in objects if obj.user_id
+        )
+
+    def _auto_end(self, cr, context=None):
+        """ Hook in module models initialization to automatically add the tracking
+        of user_id fields linked to res.users (functionally considered as responsibles).
+        This is done by checking that the field parameters are not set, therefore
+        set to a default value. """
+        print '_auto_end', self._name
+        for fname, col_info in self._all_columns.iteritems():
+            column = col_info.column
+            if not hasattr(column, 'track_visibility') and fname == 'user_id' and column._obj == 'res.users':
+                setattr(column, 'track_visibility', 'onchange')
+                setattr(column, 'track_subscribe', '_message_subscribe_user_id')
+                print '\t set track_visibility of %s to onchange and track_subscribe to _message_subscribe_user_id' % fname
+        return super(mail_thread, self)._auto_init(cr, context=context)
+
     def get_empty_list_help(self, cr, uid, help, context=None):
         """ Override of BaseModel.get_empty_list_help() to generate an help message
             that adds alias information. """
@@ -1780,6 +1800,12 @@ class mail_thread(osv.AbstractModel):
         if auto_follow_fields is None:
             auto_follow_fields = ['user_id']
         user_field_lst = []
+        # for name, column_info in self._all_columns.items():
+            # column = column_info.column
+        #     if getattr(column, 'track_subscribe', False) and getattr(column)
+        #     if name in auto_follow_fields and name in updated_fields and getattr(column_info.column, 'track_visibility', False) and column_info.column._obj == 'res.users':
+        #         user_field_lst.append(name)
+        # return user_field_lst
         for name, field in self._fields.items():
             if name in auto_follow_fields and name in updated_fields and getattr(field, 'track_visibility', False) and field.comodel_name == 'res.users':
                 user_field_lst.append(name)
@@ -1805,7 +1831,7 @@ class mail_thread(osv.AbstractModel):
                 if msg_ids:
                     self.pool.get('mail.notification')._notify(cr, uid, msg_ids[0], partners_to_notify=partner_ids, context=context)
 
-    def message_auto_subscribe(self, cr, uid, ids, updated_fields, context=None, values=None):
+    def message_auto_subscribe(self, cr, uid, ids, updated_fields, values=None, context=None):
         """ Handle auto subscription. Two methods for auto subscription exist:
 
          - tracked res.users relational fields, such as user_id fields. Those fields
@@ -1841,16 +1867,6 @@ class mail_thread(osv.AbstractModel):
         relation_fields = set([subtype.relation_field for subtype in subtypes if subtype.relation_field is not False])
         if not any(relation in updated_fields for relation in relation_fields) and not user_field_lst:
             return True
-
-        # legacy behavior: if values is not given, compute the values by browsing
-        # @TDENOTE: remove me in 8.0
-        if values is None:
-            record = self.browse(cr, uid, ids[0], context=context)
-            for updated_field in updated_fields:
-                field_value = getattr(record, updated_field)
-                if isinstance(field_value, BaseModel):
-                    field_value = field_value.id
-                values[updated_field] = field_value
 
         # find followers of headers, update structure for new followers
         headers = set()
