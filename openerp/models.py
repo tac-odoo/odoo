@@ -2942,8 +2942,8 @@ class BaseModel(object):
                 cls._inherits[field.comodel_name] = field.name
 
     @api.model
-    def _prepare_setup_fields(self):
-        """ Prepare the setup of fields once the models have been loaded. """
+    def _prepare_setup(self):
+        """ Prepare the setup of the model and its fields. """
         type(self)._setup_done = False
         for name, field in self._fields.items():
             if field.inherited:
@@ -2952,16 +2952,16 @@ class BaseModel(object):
                 field.reset()
 
     @api.model
-    def _setup_fields(self):
-        """ Setup the fields (dependency triggers, etc). """
+    def _setup_base(self):
+        """ Determine inherited and custom fields of the model. """
         cls = type(self)
         if cls._setup_done:
             return
         cls._setup_done = True
 
         # first make sure that parent models are all set up
-        for parent in self._inherits:
-            self.env[parent]._setup_fields()
+        for parent in cls._inherits:
+            self.env[parent]._setup_base()
 
         # retrieve custom fields
         if not self._context.get('_setup_fields_partial'):
@@ -2970,6 +2970,11 @@ class BaseModel(object):
         # retrieve inherited fields
         cls._inherits_check()
         cls._inherits_reload()
+
+    @api.model
+    def _setup_fields(self):
+        """ Setup the fields, except for recomputation triggers. """
+        cls = type(self)
 
         # set up fields
         for field in cls._fields.itervalues():
@@ -2988,6 +2993,24 @@ class BaseModel(object):
                 field.computed_fields.append(field)
             else:
                 field.computed_fields = []
+
+    @api.model
+    def _setup_complete(self):
+        """ Setup recomputation triggers, and complete the model setup. """
+        cls = type(self)
+
+        # set up field triggers
+        for field in cls._fields.itervalues():
+            field.setup_triggers(self.env)
+
+        # add invalidation triggers on model dependencies
+        if cls._depends:
+            triggers = [(field, None) for field in cls._fields.itervalues()]
+            for model_name, field_names in cls._depends.iteritems():
+                model = self.env[model_name]
+                for field_name in field_names:
+                    field = model._fields[field_name]
+                    field._triggers.update(triggers)
 
         # check constraints
         for func in cls._constraint_methods:

@@ -160,13 +160,19 @@ class Registry(Mapping):
         """
         # prepare the setup on all models
         for model in self.models.itervalues():
-            model._prepare_setup_fields(cr, SUPERUSER_ID)
+            model._prepare_setup(cr, SUPERUSER_ID)
 
         # do the actual setup from a clean state
         self._m2m = {}
         context = {'_setup_fields_partial': partial}
         for model in self.models.itervalues():
+            model._setup_base(cr, SUPERUSER_ID, context=context)
+
+        for model in self.models.itervalues():
             model._setup_fields(cr, SUPERUSER_ID, context=context)
+
+        for model in self.models.itervalues():
+            model._setup_complete(cr, SUPERUSER_ID, context=context)
 
     def clear_caches(self):
         """ Clear the caches
