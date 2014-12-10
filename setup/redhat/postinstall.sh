@@ -36,21 +36,56 @@ chmod 0750 $ODOO_LOG_DIR
 mkdir -p $ODOO_DATA_DIR
 chown $ODOO_USER:$ODOO_GROUP $ODOO_DATA_DIR
 
-INIT_FILE=/lib/systemd/system/odoo.service
-touch $INIT_FILE
-chmod 0700 $INIT_FILE
-cat << 'EOF' > $INIT_FILE
-[Unit]
-Description=Odoo Open Source ERP and CRM
-After=network.target
-
-[Service]
-Type=simple
-User=odoo
-Group=odoo
-ExecStart=/usr/bin/odoo.py --config=/etc/odoo/openerp-server.conf
-
-[Install]
-WantedBy=multi-user.target
-EOF
-easy_install pyPdf vatnumber pydot
+echo '#!/bin/sh
+### BEGIN INIT INFO
+# Provides:     openerp-server
+# Required-Start:   $remote_fs $syslog
+# Required-Stop:    $remote_fs $syslog
+# Should-Start:     $network
+# Should-Stop:      $network
+# Default-Start:    2 3 4 5
+# Default-Stop:     0 1 6
+# Short-Description:    Enterprise Resource Management software
+# Description:      Open ERP is a complete ERP and CRM software.
+### END INIT INFO
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+DAEMON=/usr/bin/openerp-server
+NAME=openerp-server
+DESC=openerp-server
+CONFIG=/etc/openerp/openerp-server.conf
+LOGFILE=/var/log/openerp/openerp-server.log
+USER=openerp
+test -x ${DAEMON} || exit 0
+set -e
+do_start () {
+    echo -n "Starting ${DESC}: "
+    start-stop-daemon --start --quiet --pidfile /var/run/${NAME}.pid --chuid ${USER} --background --make-pidfile --exec ${DAEMON} -- --config=${CONFIG} --logfile=${LOGFILE}
+    echo "${NAME}."
+}
+do_stop () {
+    echo -n "Stopping ${DESC}: "
+    start-stop-daemon --stop --quiet --pidfile /var/run/${NAME}.pid --oknodo
+    echo "${NAME}."
+}
+case "${1}" in
+    start)
+        do_start
+        ;;
+    stop)
+        do_stop
+        ;;
+    restart|force-reload)
+        echo -n "Restarting ${DESC}: "
+        do_stop
+        sleep 1
+        do_start
+        ;;
+    *)
+        N=/etc/init.d/${NAME}
+        echo "Usage: ${NAME} {start|stop|restart|force-reload}" >&2
+        exit 1
+        ;;
+esac
+exit 0
+' > /etc/init.d/openerp
+chmod 700 /etc/init.d/openerp
