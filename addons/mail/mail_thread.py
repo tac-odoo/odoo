@@ -1444,7 +1444,7 @@ class mail_thread(osv.AbstractModel):
             # second try: check in partners that are also users
             if not partner_id:
                 ids = partner_obj.search(cr, SUPERUSER_ID, [
-                                                ('email', 'ilike', email_address),
+                                                ('email', '=', email_address),
                                                 ('user_ids', '!=', False)
                                             ], limit=1, context=context)
                 if ids:
@@ -1452,7 +1452,7 @@ class mail_thread(osv.AbstractModel):
             # third try: check in partners
             if not partner_id:
                 ids = partner_obj.search(cr, SUPERUSER_ID, [
-                                                ('email', 'ilike', email_address)
+                                                ('email', '=', email_address)
                                             ], limit=1, context=context)
                 if ids:
                     partner_id = ids[0]

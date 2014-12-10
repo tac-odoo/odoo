@@ -225,7 +225,7 @@ class TestMailgateway(TestMail):
         cr, uid, user_raoul = self.cr, self.uid, self.user_raoul
 
         def format_and_process(template, to='groups@example.com, other@gmail.com', subject='Frogs',
-                               extra='', email_from='Sylvie Lelitre <test.sylvie.lelitre@agrolait.com>',
+                               extra='', email_from='Sylvie Lelitre <sylvie.lelitre@agrolait.com>',
                                msg_id='<1198923581.41972151344608186760.JavaMail@agrolait.com>',
                                model=None):
             self.assertEqual(self.mail_group.search(cr, uid, [('name', '=', subject)]), [])
@@ -276,7 +276,7 @@ class TestMailgateway(TestMail):
         # Test: message: unknown email address -> message has email_from, not author_id
         self.assertFalse(msg.author_id,
                          'message_process: message on created group should not have an author_id')
-        self.assertIn('test.sylvie.lelitre@agrolait.com', msg.email_from,
+        self.assertIn('sylvie.lelitre@agrolait.com', msg.email_from,
                       'message_process: message on created group should have an email_from')
         # Test: followers: nobody
         self.assertEqual(len(frog_group.message_follower_ids), 0, 'message_process: newly create group should not have any follower')
@@ -298,7 +298,7 @@ class TestMailgateway(TestMail):
                          'message_process: incoming email on Partners alias should send a bounce email')
         self.assertIn('Frogs', sent_emails[0].get('subject'),
                       'message_process: bounce email on Partners alias should contain the original subject')
-        self.assertIn('test.sylvie.lelitre@agrolait.com', sent_emails[0].get('email_to'),
+        self.assertIn('sylvie.lelitre@agrolait.com', sent_emails[0].get('email_to'),
                       'message_process: bounce email on Partners alias should have original email sender as recipient')
 
         # Do: incoming email from an unknown partner on a Followers only alias -> bounce
@@ -313,12 +313,12 @@ class TestMailgateway(TestMail):
                          'message_process: incoming email on Followers alias should send a bounce email')
         self.assertIn('Frogs', sent_emails[0].get('subject'),
                       'message_process: bounce email on Followers alias should contain the original subject')
-        self.assertIn('test.sylvie.lelitre@agrolait.com', sent_emails[0].get('email_to'),
+        self.assertIn('sylvie.lelitre@agrolait.com', sent_emails[0].get('email_to'),
                       'message_process: bounce email on Followers alias should have original email sender as recipient')
 
         # Do: incoming email from a known partner on a Partners alias -> ok (+ test on alias.user_id)
         self.mail_alias.write(cr, uid, [alias_id], {'alias_user_id': self.user_raoul_id, 'alias_contact': 'partners'})
-        p1id = self.res_partner.create(cr, uid, {'name': 'Sylvie Lelitre', 'email': 'test.sylvie.lelitre@agrolait.com'})
+        p1id = self.res_partner.create(cr, uid, {'name': 'Sylvie Lelitre', 'email': 'sylvie.lelitre@agrolait.com'})
         p2id = self.res_partner.create(cr, uid, {'name': 'Other Poilvache', 'email': 'other4@gmail.com'})
         self._init_mock_build_email()
         frog_groups = format_and_process(MAIL_TEMPLATE, to='groups@example.com, other4@gmail.com')
@@ -336,7 +336,7 @@ class TestMailgateway(TestMail):
         # Test: message: author found
         self.assertEqual(p1id, msg.author_id.id,
                          'message_process: message on created group should have Sylvie as author_id')
-        self.assertIn('Sylvie Lelitre <test.sylvie.lelitre@agrolait.com>', msg.email_from,
+        self.assertIn('Sylvie Lelitre <sylvie.lelitre@agrolait.com>', msg.email_from,
                       'message_process: message on created group should have have an email_from')
         # Test: author (not recipient and not Raoul (as alias owner)) added as follower
         frog_follower_ids = set([p.id for p in frog_group.message_follower_ids])
@@ -422,7 +422,7 @@ class TestMailgateway(TestMail):
         sent_emails = self._build_email_kwargs_list
         self.assertEqual(len(sent_emails), 1,
                          'message_process: one email should have been generated')
-        self.assertIn('test.sylvie.lelitre@agrolait.com', sent_emails[0].get('email_to')[0],
+        self.assertIn('sylvie.lelitre@agrolait.com', sent_emails[0].get('email_to')[0],
                       'message_process: email should be sent to Sylvie')
         self.mail_group.message_unsubscribe(cr, uid, [frog_group.id], [p2id])
 
@@ -599,7 +599,7 @@ class TestMailgateway(TestMail):
         cr, uid = self.cr, self.uid
 
         def format(template, to='Pretty Pigs <group+pigs@example.com>, other@gmail.com', subject='Re: 1',
-                                extra='', email_from='Sylvie Lelitre <test.sylvie.lelitre@agrolait.com>',
+                                extra='', email_from='Sylvie Lelitre <sylvie.lelitre@agrolait.com>',
                                 msg_id='<1198923581.41972151344608186760.JavaMail@agrolait.com>'):
             return template.format(to=to, subject=subject, extra=extra, email_from=email_from, msg_id=msg_id)
 
@@ -644,7 +644,7 @@ class TestMailgateway(TestMail):
         cr, uid = self.cr, self.uid
 
         def format(template, to='Pretty Pigs <group+pigs@example.com>, other@gmail.com', subject='Re: 1',
-                                extra='', email_from='Sylvie Lelitre <test.sylvie.lelitre@agrolait.com>',
+                                extra='', email_from='Sylvie Lelitre <sylvie.lelitre@agrolait.com>',
                                 msg_id='<1198923581.41972151344608186760.JavaMail@agrolait.com>'):
             return template.format(to=to, subject=subject, extra=extra, email_from=email_from, msg_id=msg_id)
 
