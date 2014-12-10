@@ -28,9 +28,10 @@
     display: block;
     position: relative;
     margin: 0px;
+    background: #f0eeee;
 }
 .openerp .oe_mail .oe_thread{
-    margin-left: 32px;
+    margin-left: 0px;
 }
 .openerp .oe_mail > .oe_thread{
     margin-left: 0px;
@@ -43,20 +44,22 @@
 
 .openerp .oe_mail .oe_msg{
     position: relative;
-    background: #EDEDF6;
+    background: #F8F8F8;
     border-radius: 2px;
     margin-bottom: 2px;
     min-height: 42px;
     border: solid 1px rgba(0,0,0,0.03);
+    padding-right: 5px;
+    padding-left: 5px;
 }
 .openerp .oe_mail .oe_msg.oe_msg_nobody{
     background: #E4E4E4;
 }
 .openerp .oe_mail .oe_msg.oe_msg_notification{
-    background: #F8F8F8;
+    background: #f0eeee;
 }
 .openerp .oe_mail .oe_msg .oe_msg_left{
-    position: absolute;
+    float: left; 								/* ********* */
     left:0; top: 0; bottom: 0; width: 40px;
     overflow: hidden;
 }
@@ -72,7 +75,7 @@
 .openerp .oe_mail .oe_msg .oe_msg_center{
     position: relative;
     display: block;
-    margin-left: 40px;
+    margin-left:25%;
 }
 .openerp .oe_mail .oe_msg .oe_msg_footer{
     margin-left: 4px;
@@ -218,9 +221,20 @@
     
     padding: 4px;
 }
+.openerp .oe_mail .oe_msg.oe_msg_composer
+{
+     background: #f0eeee;
+     border-style: none;
+}
 .openerp .oe_mail .oe_msg.oe_msg_composer_compact, .openerp .oe_mail .oe_msg.oe_msg_expandable{
     padding:4px;
     min-height:0px;
+}
+.openerp .oe_mail .oe_msg.oe_msg_composer_compact
+{
+     background: #f0eeee;
+     padding-left: 25%;
+     border-style: none;
 }
 .openerp .oe_mail .oe_msg.oe_msg_composer_compact textarea{
     height: 24px;
@@ -231,16 +245,20 @@
     margin-left: 8px;
 }
 .openerp .oe_mail .oe_msg.oe_msg_composer_compact .oe_compact{
-    height: 24px;
     width: 100%;
     padding: 2px 4px;
     color: #AAA;
     cursor: text;
 }
 .openerp .oe_mail .oe_msg.oe_msg_composer_compact .oe_compact_record {
-    font-size: 13px;
     font-style: bold;
-    text-align: center;
+    text-align: left;
+    
+}
+.openerp .oe_mail .oe_msg.oe_msg_composer_compact .oe_compact_record .oe_compose_log {
+    padding-left: 0px;
+    padding-right: 0px;
+    font-weight: bold;
 }
 .openerp .oe_mail .oe_msg.oe_msg_composer_compact .oe_compact_inbox {
     border: 1px solid #CCC;
@@ -471,6 +489,7 @@
 .openerp .oe_mail .oe_hidden_input_file, .openerp .oe_mail .oe_hidden_input_file form{
     display:inline;
 }
+
 .openerp .oe_mail .oe_msg_center button.oe_full{
     width: 24px;
     height: 22px;
@@ -545,7 +564,7 @@
 /* ---------------- FOLLOWERS ------------------ */
 
 .openerp .oe_followers{
-    position: relative;
+    /*position: relative;*/
     display: inline-block;
     padding-top: 5px;
     width: 160px;

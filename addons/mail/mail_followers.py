@@ -244,3 +244,7 @@ class mail_notification(osv.Model):
 
         # browse as SUPERUSER_ID because of access to res_partner not necessarily allowed
         self._notify_email(cr, SUPERUSER_ID, new_notif_ids, message_id, force_send, user_signature, context=context)
+
+    def create(self, cr, uid, vals, context=None):
+        res = super(mail_notification, self).create(cr, uid, vals, context=context)
+        return res

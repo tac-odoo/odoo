@@ -2021,7 +2021,7 @@ msgstr ""
 #: view:mail.group:mail.view_group_kanban
 #, python-format
 msgid "Unfollow"
-msgstr "Ne plus suivre"
+msgstr "Désabonner"
 
 #. module: mail
 #: sql_constraint:mail.alias:0
