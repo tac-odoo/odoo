@@ -104,6 +104,107 @@
         <attribute name="name">Parallax Slider</attribute>
     </xpath>
 
+    <!-- Add class names on snippets and remove margins classes -->
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Banner']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body carousel slide o_block_banner</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Text-Image']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body o_block_text_image</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Image-Text']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body o_block_image_text</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Image-Floating']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body para_large o_block_image_floating</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Big Message']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body jumbotron o_block_big_message</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Text Block']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body o_block_text_block</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Title']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body o_block_title</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Features']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body o_block_features</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Big Picture']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body oe_dark o_block_big_picture</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Three Columns']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body o_block_three_columns</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Well']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body well o_block_well</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Quote']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body o_block_quote</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Panel']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body panel panel-default o_block_panel</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Image Floating']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body o_image_floating o_margin_l pull-right o_block_image_floating</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Separator']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body o_block_separator</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Share']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body oe_share o_block_share</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Image Gallery']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body o_block_image_gallery</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Comparisons']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body o_block_comparisons</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Button']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body jumbotron o_block_button</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='FAQ']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body o_block_faq</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='References']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body o_block_references</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Quotes Slider']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body carousel quotecarousel slide o_block_quotes_slider</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Feature Grid']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body o_block_feature_grid</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Parallax']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body parallax o_block_parallax</attribute>
+    </xpath>
+
+    <xpath expr="//div[span[@class='oe_snippet_thumbnail_title']][span='Parallax Slider']/following-sibling::*[1]" position="attributes">
+        <attribute name="class">oe_snippet_body parallax o_block_parallax_slider</attribute>
+    </xpath>
+
 </template>
 
 <template id="website_less.snippet_options" inherit_id="website.snippet_options">
