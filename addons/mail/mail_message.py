@@ -604,7 +604,6 @@ class mail_message(osv.Model):
             :return list: list of message structure for the Chatter widget
         """
 
-        print "!!!!!!!!!!!!!!! \n read message \n!!!!!!!!!!!!!!!!!!!"
         assert thread_level in [0, 1], 'message_read() thread_level should be 0 (flat) or 1 (1 level of thread); given %s.' % thread_level
         domain = domain if domain is not None else []
         message_unload_ids = message_unload_ids if message_unload_ids is not None else []
@@ -891,7 +890,6 @@ class mail_message(osv.Model):
             values['record_name'] = self._get_record_name(cr, uid, values, context=context)
 
         newid = super(mail_message, self).create(cr, uid, values, context)
-        print "id message : ", newid
 
         #pdb.set_trace()
 
