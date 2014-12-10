@@ -72,6 +72,7 @@ class product_product(osv.osv):
         warehouse_obj = self.pool.get('stock.warehouse')
 
         location_ids = []
+        operator = context.get('compute_child', True) and 'child_of' or 'in'
         if context.get('location', False):
             if type(context['location']) == type(1):
                 location_ids = [context['location']]
@@ -88,10 +89,14 @@ class product_product(osv.osv):
             else:
                 wids = warehouse_obj.search(cr, uid, [], context=context)
 
-            for w in warehouse_obj.browse(cr, uid, wids, context=context):
-                location_ids.append(w.view_location_id.id)
+            if len(wids) > 100:
+                locs = [x.view_location_id.id for x in warehouse_obj.browse(cr, uid, wids, context=context)]
+                location_ids = location_obj.search(cr, uid, [('location', operator, locs)], context=context)
+                operator = 'in'
+            else:
+                for w in warehouse_obj.browse(cr, uid, wids, context=context):
+                    location_ids.append(w.view_location_id.id)
 
-        operator = context.get('compute_child', True) and 'child_of' or 'in'
         domain = context.get('force_company', False) and ['&', ('company_id', '=', context['force_company'])] or []
         return (
             domain + [('location_id', operator, location_ids)],
