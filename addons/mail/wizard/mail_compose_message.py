@@ -384,3 +384,8 @@ class mail_compose_message(osv.TransientModel):
 
     def render_message(self, cr, uid, wizard, res_id, context=None):
         return self.render_message_batch(cr, uid, wizard, [res_id], context)[res_id]
+
+    # Get mention user list (@ Functionality)
+    def get_mention_users(self, cr, uid, word, context=None):
+        if self.pool.get('res.users').has_group(cr, uid, 'base.group_user'):
+            return self.pool.get('res.users').search_read(cr, uid, ['|',('login','ilike', word), ('name','ilike', word)], ['partner_id', "login"], limit=8, context=context)

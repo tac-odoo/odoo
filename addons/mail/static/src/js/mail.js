@@ -333,6 +333,154 @@ openerp.mail = function (session) {
 
     /**
      * ------------------------------------------------------------
+     * mail.Mention widget
+     * ------------------------------------------------------------
+     * 
+     * This widget handles the @ mention functionality.
+     * This widget open dropdown when user mention with @.
+     * Dropdown open with highlight string
+     */
+
+    mail.Mention = session.web.Widget.extend({
+        template: 'mail.mention',
+        init: function(parent) {
+            this._super.apply(this, arguments);
+            this.parent = parent;
+            this.textarea = parent.$el.find(".field_text");
+            this.start_index = 0;
+            this.cache = {};
+            parent.mention_ids = [];
+            this.timer;
+        },
+        start: function() {
+            this._super.apply(this, arguments);
+            this.search = this.$el;
+            this.bind_events();
+            this.call_jquery();
+        },
+        bind_events: function() {
+            this.search.on('focus mouseover', 'li', this.proxy('make_active'));
+            this.textarea.on('keyup', this.proxy('keyup'));
+            this.textarea.on('keydown', this.proxy('keydown'));
+            this.textarea.on('click', this.proxy('close'));
+            this.search.on('click', 'li', this.proxy('onselect'));
+        },
+        keydown: function(e) {
+            if(_.contains([40, 38], e.which)) {
+                var $active = this.search.find("li.active");
+                if($active.length) {
+                    if(e.which == 40)
+                        $active.next().focus();
+                    else
+                        $active.prev().focus();
+                    return false;
+                }
+                return true;
+            }
+            if(e.which == 13) {
+                var $active = this.search.find("li.active");
+                if($active.length) {
+                    this.setText($active.find("span").text(), $active.find("span").attr("id"));
+                    return false;
+                }
+                return true;
+            }
+        },
+        onselect: function(e) {
+            this.setText(this.search.find(e.currentTarget).find("span").text(), this.search.find(e.currentTarget).find("span").attr("id"));
+        },
+        close: function() {
+            this.search.empty();
+        },
+        make_active: function(e) {
+            this.search.find("li").removeClass("active");
+            this.search.find(e.currentTarget).addClass("active");
+        },
+        setText: function(text, id) {
+            var new_index = this.textarea.getCursorPosition();
+            if(!new_index) return;
+            var value = this.textarea.val();
+            this.textarea.val(value.substring(0, start_index) + "@" + text + (value.charAt(new_index) == " " ? "" : " ") + value.substring(new_index, value.length));                
+            this.search.empty();
+            this.textarea.setCursorPosition(start_index + text.length + 2);
+            this.start_index = 0;
+            this.parent.mention_ids.push({"id": parseInt(id), "name": text});
+        },
+        keyup: function(e) {
+            var self = this;
+            clearTimeout(this.timer);
+            if(_.contains([40, 38, 13], e.which)) {return;}
+            this.search.empty();
+            if(_.contains([37, 39, 35, 33, 34], e.which)) {return;}
+            var index = this.textarea.getCursorPosition();
+            var value = this.textarea.val();
+            var left = value.substring(0, index);
+            var right = value.substring(index, value.length);
+            var left_str = left.substring(left.lastIndexOf(" @"), index);
+            if(left.lastIndexOf(" @") < 0 || left_str.split(" ").length > 2 || left_str.split("\n").length > 1 || left_str.split("@").length > 2 || left_str.length < 5)
+                return;
+            var right_str = right.substring(0, right.indexOf(" "));
+            if(right_str.indexOf("@") > -1)
+               return;
+            this.search_str = (left_str.slice(2) + right_str).trim().toLowerCase();
+            if(this.search_str) {
+                this.timer = setTimeout(function() {
+                    start_index = index - self.search_str.length - 1;
+                    if(self.cache[self.search_str]) {
+                        self.render(self.cache[self.search_str]);
+                        return;
+                    }
+                    new openerp.web.Model("mail.compose.message").call("get_mention_users", [self.search_str]).then(function(res) {
+                        if(res.length) {
+                            self.cache[self.search_str] = res;
+                            self.render(res);
+                        }
+                    });
+                }, 1000);
+            }
+        },
+        render: function(res) {
+            var $render = $( session.web.qweb.render('mail.mention', {'widget': this, "data": res}) );
+            this.search.html($render.find("ul")).find("li:first").focus();
+        },
+        highlight: function(detail, find) {
+            return detail.replace(new RegExp(find, "gi"), _.str.sprintf("<b><u>%s</u></b>", detail.match(new RegExp(find, "gi"))));
+        },
+        call_jquery: function() {
+            $.fn.getCursorPosition = function() {
+                var el = $(this).get(0);
+                if(!el) return 0;
+                var pos = 0;
+                if('selectionStart' in el){
+                    pos = el.selectionStart;
+                } else if('selection' in document) {
+                    el.focus();
+                    var Sel = document.selection.createRange();
+                    var SelLength = document.selection.createRange().text.length;
+                    Sel.moveStart('character', -el.value.length);
+                    pos = Sel.text.length - SelLength;
+                }
+                return pos;
+            };
+            $.fn.setCursorPosition = function(pos) {
+              this.each(function(index, elem) {
+                if (elem.setSelectionRange) {
+                  elem.setSelectionRange(pos, pos);
+                } else if (elem.createTextRange) {
+                  var range = elem.createTextRange();
+                  range.collapse(true);
+                  range.moveEnd('character', pos);
+                  range.moveStart('character', pos);
+                  range.select();
+                }
+              });
+              return this;
+            };
+        },
+    }),
+
+    /**
+     * ------------------------------------------------------------
      * ComposeMessage widget
      * ------------------------------------------------------------
      * 
@@ -544,6 +692,10 @@ openerp.mail = function (session) {
             this.$el.remove();
             this.$el = $render;
 
+            // Initialize mail.Mention widget
+            var render = new mail.Mention(this);
+            render.insertAfter(this.$el.find(".field_text"));
+
             this.display_attachments();
             this.bind_events();
         },
@@ -649,6 +801,13 @@ openerp.mail = function (session) {
 
         on_message_post: function (event) {
             var self = this;
+            var textarea = self.$('textarea');
+            var body = textarea.val().replace(new RegExp("\n", "g"), "<br/>");
+            this.mention_ids = _.reject(this.mention_ids, function(p) {
+                if(body.indexOf(_.str.sprintf(" @%s ", p.name)) == -1) return true;
+                body = body.replace(new RegExp(_.str.sprintf(" @%s ", p.name), "gi"), _.str.sprintf(" <a href='/web#model=res.partner&id=%s'>%s</a> ", p.id, p.name));
+            });
+            textarea.attr("data", body);
             if (self.flag_post) {
                 return;
             }
@@ -669,17 +828,18 @@ openerp.mail = function (session) {
         do_send_message_post: function (partner_ids, log) {
             var self = this;
             var values = {
-                'body': this.$('textarea').val(),
+                'body': this.$('textarea').attr("data"),
                 'subject': false,
                 'parent_id': this.context.default_parent_id,
                 'attachment_ids': _.map(this.attachment_ids, function (file) {return file.id;}),
-                'partner_ids': partner_ids,
+                'partner_ids': _.uniq(partner_ids.concat(_.pluck(this.mention_ids, "id"))),
                 'context': _.extend(this.parent_thread.context, {
-                    'mail_post_autofollow': true,
+                    'mail_post_autofollow': false,
                     'mail_post_autofollow_partner_ids': partner_ids,
+                    'original_body': this.$('textarea').val(),
                 }),
                 'type': 'comment',
-                'content_subtype': 'plaintext',
+                'content_subtype': 'html',
             };
             if (log) {
                 values['subtype'] = false;
