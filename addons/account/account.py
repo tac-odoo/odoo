@@ -1504,6 +1504,33 @@ class wizard_multi_charts_accounts(models.TransientModel):
     def onchange_tax_rate(self):
         self.purchase_tax_rate = self.sale_tax_rate or False
 
+    @api.v7
+    def onchange_chart_template_id(self, cr, uid, ids, chart_template_id=False, context=None):
+        res = {}
+        tax_templ_obj = self.pool.get('account.tax.template')
+        res['value'] = {'complete_tax_set': False, 'sale_tax': False, 'purchase_tax': False}
+        if chart_template_id:
+            data = self.pool.get('account.chart.template').browse(cr, uid, chart_template_id, context=context)
+            currency_id = data.currency_id and data.currency_id.id or self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.currency_id.id
+            res['value'].update({'complete_tax_set': data.complete_tax_set, 'currency_id': currency_id})
+            if data.complete_tax_set:
+            # default tax is given by the lowest sequence. For same sequence we will take the latest created as it will be the case for tax created while isntalling the generic chart of account
+                chart_ids = self._get_chart_parent_ids(cr, uid, data, context=context)
+                base_tax_domain = [("chart_template_id", "in", chart_ids), ('parent_id', '=', False)]
+                sale_tax_domain = base_tax_domain + [('type_tax_use', 'in', ('sale', 'all'))]
+                purchase_tax_domain = base_tax_domain + [('type_tax_use', 'in', ('purchase', 'all'))]
+                sale_tax_ids = tax_templ_obj.search(cr, uid, sale_tax_domain, order="sequence, id desc")
+                purchase_tax_ids = tax_templ_obj.search(cr, uid, purchase_tax_domain, order="sequence, id desc")
+                res['value'].update({'sale_tax': sale_tax_ids and sale_tax_ids[0] or False,
+                                     'purchase_tax': purchase_tax_ids and purchase_tax_ids[0] or False})
+                res.setdefault('domain', {})
+                res['domain']['sale_tax'] = repr(sale_tax_domain)
+                res['domain']['purchase_tax'] = repr(purchase_tax_domain)
+            if data.code_digits:
+                res['value'].update({'code_digits': data.code_digits})
+        return res
+
+    @api.v8
     @api.onchange('chart_template_id')
     def onchange_chart_template_id(self):
         res = {}
