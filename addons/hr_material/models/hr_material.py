@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from openerp import models, fields, api, _
+from openerp import models, fields, api, _, tools
 from openerp.exceptions import Warning
-from openerp.tools import html2plaintext
 
 
 class HrMaterialStage(models.Model):
@@ -264,17 +263,15 @@ class HrMaterialRequest(models.Model):
         """
         if custom_values is None:
             custom_values = {}
+        email = tools.email_split(msg.get('from')) and tools.email_split(msg.get('from'))[0] or False
+        user = self.env['res.users'].search([('login', '=', email)])
+        employee = self.env['hr.employee'].search([('user_id', '=', user.id)])
+        custom_values['employee_id'] = employee and employee[0].id
+        result = super(HrMaterialRequest, self).message_new(msg, custom_values=custom_values)
         if 'category_id' in custom_values:
-            custom_values['user_id'] = self.env['hr.material.category'].browse(custom_values['category_id'])['user_id']
-        desc = html2plaintext(msg.get('body')) if msg.get('body') else ''
-
-        defaults = {
-            'name': msg.get('subject') or _("No Subject"),
-            'description': desc,
-            'employee_id': False,
-        }
-        defaults.update(custom_values)
-        return super(HrMaterialRequest, self).message_new(msg, custom_values=defaults)
+            material_request = self.browse(result)
+            material_request.onchange_category_id()
+        return result
 
     @api.model
     def create(self, vals):
