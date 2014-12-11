@@ -148,7 +148,7 @@
                                             <field name="asset_id" invisible="1"/>
                                             <field name="parent_state" invisible="1"/>
                                             <field name="name"/>
-                                            <field name="   " widget="monetary"/>
+                                            <field name="amount" widget="monetary"/>
                                             <field name="move_id"/>
                                             <field name="move_check"/>
                                             <field name="parent_state" invisible="1"/>
