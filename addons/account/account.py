@@ -44,14 +44,13 @@ class account_payment_term(models.Model):
         date_ref = date_ref or datetime.now().strftime('%Y-%m-%d')
         amount = value
         result = []
-        prec = self.env['decimal.precision'].precision_get('Account')
         for line in self.line_ids:
             if line.value == 'fixed':
-                amt = round(line.value_amount, prec)
+                amt = line.value_amount
             elif line.value == 'percent':
-                amt = round(value * (line.value_amount / 100.0), prec)
+                amt = value * (line.value_amount / 100.0)
             elif line.value == 'balance':
-                amt = round(amount, prec)
+                amt = amount
             if amt:
                 next_date = (datetime.strptime(date_ref, '%Y-%m-%d') + relativedelta(days=line.days))
                 if line.days2 < 0:
@@ -63,7 +62,7 @@ class account_payment_term(models.Model):
                 amount -= amt
 
         amount = reduce(lambda x,y: x + y[1], result, 0.0)
-        dist = round(value - amount, prec)
+        dist = value - amount
         if dist:
             last_date = result and result[-1][0] or time.strftime('%Y-%m-%d')
             result.append((last_date, dist))
@@ -591,7 +590,7 @@ class account_tax_code(models.Model):
                 for rec in record.child_ids:
                     amount += _rec_get(rec) * rec.sign
                 return amount
-            amount = round(_rec_get(record), self.env['decimal.precision'].precision_get('Account'))
+            amount = _rec_get(record)
             record.sum = amount
 
     @api.multi
@@ -958,15 +957,13 @@ class account_tax(models.Model):
             tax = {'name':'', 'amount':0.0, 'account_collected_id':1, 'account_paid_id':2}
             one tax for each tax id in IDS and their children
         """
-        if not precision:
-            precision = self.env['decimal.precision'].precision_get('Account')
         res = self._unit_compute(price_unit, product, partner, quantity)
         total = 0.0
         for r in res:
             if r.get('balance', False):
-                r['amount'] = round(r.get('balance', 0.0) * quantity, precision) - total
+                r['amount'] = r.get('balance', 0.0) * quantity - total
             else:
-                r['amount'] = round(r.get('amount', 0.0) * quantity, precision)
+                r['amount'] = r.get('amount', 0.0) * quantity
                 total += r['amount']
         return res
 
@@ -1056,15 +1053,13 @@ class account_tax(models.Model):
             tax = {'name':'', 'amount':0.0, 'account_collected_id':1, 'account_paid_id':2}
             one tax for each tax id in IDS and their children
         """
-        if not precision:
-            precision = self.env['decimal.precision'].precision_get('Account')
         res = self._unit_compute_inv(price_unit, product, partner=None)
         total = 0.0
         for r in res:
             if r.get('balance', False):
-                r['amount'] = round(r['balance'] * quantity, precision) - total
+                r['amount'] = r['balance'] * quantity - total
             else:
-                r['amount'] = round(r['amount'] * quantity, precision)
+                r['amount'] = r['amount'] * quantity
                 total += r['amount']
         return res
 
