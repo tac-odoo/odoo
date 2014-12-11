@@ -91,7 +91,10 @@ class product_product(osv.osv):
 
             if len(wids) > 100:
                 locs = [x.view_location_id.id for x in warehouse_obj.browse(cr, uid, wids, context=context)]
-                location_ids = location_obj.search(cr, uid, [('location', operator, locs)], context=context)
+                dom_loc = [('location_id', operator, locs)]
+                if context.get('force_company', False):
+                    dom_loc += [('company_id', '=', context['force_company'])]
+                location_ids = location_obj.search(cr, uid, dom_loc, context=context)
                 operator = 'in'
             else:
                 for w in warehouse_obj.browse(cr, uid, wids, context=context):
