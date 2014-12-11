@@ -18,50 +18,41 @@
 #################################################################################
 
 import openerp
-from openerp.osv import fields, osv
+from openerp import SUPERUSER_ID
+from openerp import api, fields, models
 
-TAX_CODE_COLUMNS = {
-                    'domain':fields.char('Domain', 
-                                         help="This field is only used if you develop your own module allowing developers to create specific taxes in a custom domain."),
-                    'tax_discount': fields.boolean('Discount this Tax in Prince', 
-                                                   help="Mark it for (ICMS, PIS, COFINS and others taxes included)."),
-                    }
 
-TAX_DEFAULTS = {
-                'base_reduction': 0,
-                'amount_mva': 0,
-                }
-
-class account_tax_code_template(osv.osv):
+class account_tax_code_template(models.Model):
     """ Add fields used to define some brazilian taxes """
     _inherit = 'account.tax.code.template'
-    _columns = TAX_CODE_COLUMNS
+    domain = fields.Char(string='Domain', help="This field is only used if you develop your own module allowing developers to create specific taxes in a custom domain.")
+    tax_discount = fields.Boolean(string='Discount this Tax in Prince', help="Mark it for (ICMS, PIS, COFINS and others taxes included).")
 
-    def generate_tax_code(self, cr, uid, tax_code_root_id, company_id, 
-                         context=None):
-        """This function generates the tax codes from the templates of tax 
-        code that are children of the given one passed in argument. Then it 
-        returns a dictionary with the mappping between the templates and the 
+    @api.one
+    def generate_tax_code(self, company_id):
+        """This function generates the tax codes from the templates of tax
+        code that are children of the given one passed in argument. Then it
+        returns a dictionary with the mappping between the templates and the
         real objects.
 
-        :param tax_code_root_id: id of the root of all the tax code templates 
+        :param tax_code_root_id: id of the root of all the tax code templates
                                  to process.
         :param company_id: id of the company the wizard is running for
-        :returns: dictionary with the mappping between the templates and the 
+        :returns: dictionary with the mappping between the templates and the
                   real objects.
         :rtype: dict
         """
-        obj_tax_code_template = self.pool.get('account.tax.code.template')
-        obj_tax_code = self.pool.get('account.tax.code')
+        obj_tax_code_template = self.env['account.tax.code.template']
+        obj_tax_code = self.env['account.tax.code']
         tax_code_template_ref = {}
-        company = self.pool.get('res.company').browse(cr, uid, company_id, context=context)
+        company = company_id
 
         #find all the children of the tax_code_root_id
-        children_tax_code_template = tax_code_root_id and obj_tax_code_template.search(cr, uid, [('parent_id','child_of',[tax_code_root_id])], order='id') or []
-        for tax_code_template in obj_tax_code_template.browse(cr, uid, children_tax_code_template, context=context):
+        children_tax_code_template = self.tax_code_root_id and obj_tax_code_template.search([('parent_id', 'child_of', [self.tax_code_root_id.id])], order='id') or []
+        for tax_code_template in children_tax_code_template:
             parent_id = tax_code_template.parent_id and ((tax_code_template.parent_id.id in tax_code_template_ref) and tax_code_template_ref[tax_code_template.parent_id.id]) or False
             vals = {
-                'name': (tax_code_root_id == tax_code_template.id) and company.name or tax_code_template.name,
+                'name': (self.tax_code_root_id.id == tax_code_template.id) and company.name or tax_code_template.name,
                 'code': tax_code_template.code,
                 'info': tax_code_template.info,
                 'parent_id': parent_id,
@@ -71,56 +62,49 @@ class account_tax_code_template(osv.osv):
                 'tax_discount': tax_code_template.tax_discount,
             }
             #check if this tax code already exists
-            rec_list = obj_tax_code.search(cr, uid, [('name', '=', vals['name']),
-                                                     ('parent_id','=',parent_id),
-                                                     ('code', '=', vals['code']),
-                                                     ('company_id', '=', vals['company_id'])], context=context)
+            rec_list = obj_tax_code.search([('name', '=', vals['name']),
+                                            ('parent_id', '=', parent_id),
+                                            ('code', '=', vals['code']),
+                                            ('company_id', '=', vals['company_id'])])
             if not rec_list:
                 #if not yet, create it
-                new_tax_code = obj_tax_code.create(cr, uid, vals)
+                new_tax_code = obj_tax_code.create(vals)
                 #recording the new tax code to do the mapping
-                tax_code_template_ref[tax_code_template.id] = new_tax_code
+                tax_code_template_ref[tax_code_template.id] = new_tax_code.id
         return tax_code_template_ref
-    
 
 
-class account_tax_code(osv.osv):
+class account_tax_code(models.Model):
     """ Add fields used to define some brazilian taxes """
     _inherit = 'account.tax.code'
-    _columns = TAX_CODE_COLUMNS
+    domain = fields.Char(string='Domain', help="This field is only used if you develop your own module allowing developers to create specific taxes in a custom domain.")
+    tax_discount = fields.Boolean(string='Discount this Tax in Prince', help="Mark it for (ICMS, PIS, COFINS and others taxes included).")
 
 
 def get_precision_tax():
     def change_digit_tax(cr):
-        decimal_precision = openerp.registry(cr.dbname)['decimal.precision']
-        res = decimal_precision.precision_get(cr, 1, 'Account')
+        res = openerp.registry(cr.dbname)['decimal.precision'].precision_get(cr, SUPERUSER_ID, 'Account')
         return (16, res+2)
     return change_digit_tax
 
-class account_tax_template(osv.osv):
+
+class account_tax_template(models.Model):
     """ Add fields used to define some brazilian taxes """
     _inherit = 'account.tax.template'
-    
-    _columns = {
-               'tax_discount': fields.boolean('Discount this Tax in Prince', 
-                                              help="Mark it for (ICMS, PIS e etc.)."),
-               'base_reduction': fields.float('Redution', required=True, 
-                                              digits_compute=get_precision_tax(), 
-                                              help="Um percentual decimal em % entre 0-1."),
-               'amount_mva': fields.float('MVA Percent', required=True, 
-                                          digits_compute=get_precision_tax(), 
-                                          help="Um percentual decimal em % entre 0-1."),
-               'type': fields.selection([('percent','Percentage'), 
-                                         ('fixed','Fixed Amount'), 
-                                         ('none','None'), 
-                                         ('code','Python Code'), 
-                                         ('balance','Balance'), 
-                                         ('quantity','Quantity')], 'Tax Type', required=True,
-                                        help="The computation method for the tax amount."),
-               }
-    _defaults = TAX_DEFAULTS
-    
-    def _generate_tax(self, cr, uid, tax_templates, tax_code_template_ref, company_id, context=None):
+
+    tax_discount = fields.Boolean(string='Discount this Tax in Prince', help="Mark it for (ICMS, PIS e etc.).")
+    base_reduction = fields.Float(string='Redution', required=True, default=0, digits_compute=get_precision_tax(),  help="Um percentual decimal em % entre 0-1.")
+    amount_mva = fields.Float(string='MVA Percent', required=True, default=0, digits_compute=get_precision_tax(),  help="Um percentual decimal em % entre 0-1.")
+    type = fields.Selection([('percent', 'Percentage'),
+                             ('fixed', 'Fixed Amount'),
+                             ('none', 'None'),
+                             ('code', 'Python Code'),
+                             ('balance', 'Balance'),
+                             ('quantity', 'Quantity')], 'Tax Type', required=True,
+                            help="The computation method for the tax amount.")
+
+    @api.multi
+    def _generate_tax(self, tax_code_template_ref, company_id):
         """
         This method generate taxes from templates.
 
@@ -133,72 +117,56 @@ class account_tax_template(osv.osv):
             'account_dict': dictionary containing a to-do list with all the accounts to assign on new taxes
             }
         """
-        result = super(account_tax_template, self)._generate_tax(cr, uid, 
-                                                                 tax_templates, 
-                                                                 tax_code_template_ref, 
-                                                                 company_id, 
-                                                                 context)
-        tax_templates = self.browse(cr, uid, result['tax_template_to_tax'].keys(), context)   
-        obj_acc_tax = self.pool.get('account.tax')
+        result = super(account_tax_template, self)._generate_tax(tax_code_template_ref, company_id)
+        tax_templates = self.browse(result['tax_template_to_tax'].keys())
         for tax_template in tax_templates:
             if tax_template.tax_code_id:
-                obj_acc_tax.write(cr, uid, result['tax_template_to_tax'][tax_template.id], {'domain': tax_template.tax_code_id.domain,
-                                                                                            'tax_discount': tax_template.tax_code_id.tax_discount})    
+                tax_template.write({'domain': tax_template.tax_code_id.domain, 'tax_discount': tax_template.tax_code_id.tax_discount})
         return result
-    
-    def onchange_tax_code_id(self, cr, uid, ids, tax_code_id, context=None):
 
+    @api.onchange('tax_code_id')
+    def onchange_tax_code_id(self):
         result = {'value': {}}
 
-        if not tax_code_id:
+        if not self.tax_code_id:
             return result
 
-        obj_tax_code = self.pool.get('account.tax.code.template').browse(cr, uid, tax_code_id)     
-
-        if obj_tax_code:
-            result['value']['tax_discount'] = obj_tax_code.tax_discount
-            result['value']['domain'] = obj_tax_code.domain
-
+        if self.tax_code_id:
+            result['value']['tax_discount'] = self.tax_code_id.tax_discount
+            result['value']['domain'] = self.tax_code_id.domain
         return result
 
 
-
-class account_tax(osv.osv):
+class account_tax(models.Model):
     """ Add fields used to define some brazilian taxes """
     _inherit = 'account.tax'
-    
-    _columns = {
-               'tax_discount': fields.boolean('Discount this Tax in Prince', 
-                                              help="Mark it for (ICMS, PIS e etc.)."),
-               'base_reduction': fields.float('Redution', required=True, 
-                                              digits_compute=get_precision_tax(), 
-                                              help="Um percentual decimal em % entre 0-1."),
-               'amount_mva': fields.float('MVA Percent', required=True, 
-                                          digits_compute=get_precision_tax(), 
-                                          help="Um percentual decimal em % entre 0-1."),
-               'type': fields.selection([('percent','Percentage'), 
-                                         ('fixed','Fixed Amount'), 
-                                         ('none','None'), 
-                                         ('code','Python Code'), 
-                                         ('balance','Balance'), 
-                                         ('quantity','Quantity')], 'Tax Type', required=True,
-                                        help="The computation method for the tax amount."),
-               }
-    _defaults = TAX_DEFAULTS
-    
-    def onchange_tax_code_id(self, cr, uid, ids, tax_code_id, context=None):
 
+    tax_discount = fields.Boolean(string='Discount this Tax in Prince',
+                                  help="Mark it for (ICMS, PIS e etc.).")
+    base_reduction = fields.Float(string='Redution', required=True,
+                                  default=0,
+                                  digits_compute=get_precision_tax(),
+                                  help="Um percentual decimal em % entre 0-1.")
+    amount_mva = fields.Float(string='MVA Percent', required=True,
+                              default=0,
+                              digits_compute=get_precision_tax(),
+                              help="Um percentual decimal em % entre 0-1.")
+    type = fields.Selection([('percent', 'Percentage'),
+                             ('fixed', 'Fixed Amount'),
+                             ('none', 'None'),
+                             ('code', 'Python Code'),
+                             ('balance', 'Balance'),
+                             ('quantity', 'Quantity')], string='Tax Type', required=True,
+                            help="The computation method for the tax amount.")
+
+    @api.onchange('tax_code_id')
+    def onchange_tax_code_id(self):
         result = {'value': {}}
 
-        if not tax_code_id:
+        if not self.tax_code_id:
             return result
-        
-        obj_tax_code = self.pool.get('account.tax.code').browse(cr, uid, tax_code_id)      
-    
-        if obj_tax_code:
-            result['value']['tax_discount'] = obj_tax_code.tax_discount
-            result['value']['domain'] = obj_tax_code.domain
+        if self.tax_code_id:
+            result['value']['tax_discount'] = self.tax_code_id.tax_discount
+            result['value']['domain'] = self.tax_code_id.domain
 
         return result
-
-
