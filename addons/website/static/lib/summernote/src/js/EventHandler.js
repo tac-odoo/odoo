@@ -1,8 +1,8 @@
 define([
-  'summernote/core/agent', 'summernote/core/dom', 'summernote/core/async', 'summernote/core/key', 'summernote/core/list',
+  'summernote/core/agent', 'summernote/core/dom', 'summernote/core/async', 'summernote/core/key', 'summernote/core/list', 'summernote/core/range',
   'summernote/editing/Style', 'summernote/editing/Editor', 'summernote/editing/History',
   'summernote/module/Toolbar', 'summernote/module/Popover', 'summernote/module/Handle', 'summernote/module/Dialog'
-], function (agent, dom, async, key, list,
+], function (agent, dom, async, key, list, range,
              Style, Editor, History,
              Toolbar, Popover, Handle, Dialog) {
 
@@ -259,6 +259,7 @@ define([
       //preventDefault Selection for FF, IE8+
       if (dom.isImg(event.target)) {
         event.preventDefault();
+        range.createFromNode(event.target).select();
       }
     };
 
@@ -266,7 +267,11 @@ define([
       // delay for range after mouseup
       setTimeout(function () {
         var layoutInfo = makeLayoutInfo(event.currentTarget || event.target);
-        var styleInfo = editor.currentStyle(event.target);
+        var $editable = layoutInfo.editable();
+        if (!event.isDefaultPrevented()) {
+          editor.saveRange($editable);
+        }
+        var styleInfo = editor.currentStyle();
         if (!styleInfo) { return; }
 
         var isAirMode = layoutInfo.editor().data('options').airMode;
@@ -358,6 +363,7 @@ define([
         event.preventDefault();
       }
     };
+
 
     var hToolbarAndPopoverClick = function (event) {
       var $btn = $(event.target).closest('[data-event]');
