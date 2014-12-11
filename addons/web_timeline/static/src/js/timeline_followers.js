@@ -1,4 +1,4 @@
-openerp_timeline_followers = function(session, mail) {
+openerp.web_timeline.followers = function(session, mail) {
     var _t = session.web._t,
        _lt = session.web._lt;
 

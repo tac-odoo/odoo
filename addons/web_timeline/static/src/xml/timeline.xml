@@ -2,23 +2,23 @@
 
 <templates>
 
-<div t-name="timeline_wall" class="oe_timeline">
+<div t-name="TimelineWall" class="oe_timeline">
     <div class="oe_timeline-placeholder"> </div>
 </div>
 
-<div t-name="timeline_record_thread" class="oe_timeline_record_thread">
+<div t-name="RecordThread" class="oe_timeline_record_thread">
 </div>
 
-<t t-name="timeline_mail_root">
+<t t-name="MailRoot">
     <div class="oe_timeline container-fluid">
     </div>
 </t>
 
-<t t-name="timeline_mail_thread">
+<t t-name="MailThread">
     <div class="oe_thread"/>
 </t>
 
-<t t-name="timeline_compose_message">
+<t t-name="ComposeMessage">
     <div t-if="widget.show_composer and !widget.options.readonly" 
          class="oe_tl_msg oe_tl_msg_composer">
         <div class="oe_tl_msg_left">
@@ -29,7 +29,7 @@
                 <button class="oe_full" title="Open the full mail composer">
                     <span class='oe_e'>&amp;ograve</span>
                 </button>
-                <t t-call="timeline_thread_list_recipients"/>
+                <t t-call="ThreadListRecipients"/>
                 <textarea class="field_text"></textarea>
             </div>
             <div class="oe_tl_msg_footer">
@@ -39,7 +39,7 @@
                         <t t-if="!widget.is_log">Send</t>
                         <t t-if="widget.is_log">Log</t>
                     </button>
-                    <t t-call="timeline_compose_message.add_attachment"/>
+                    <t t-call="ComposeMessage.AddAttachment"/>
                 </div>
             </div>
         </div>
@@ -84,10 +84,10 @@
 </t>
 
 <!--
-    timeline_compose_message.add_attachment template
+    ComposeMessage.AddAttachment template
     Small template to be inserted in the composition for add attachments
     -->
-<t t-name="timeline_compose_message.add_attachment">
+<t t-name="ComposeMessage.AddAttachment">
     <span class="oe_attachment_file">
         <span class="oe_add">
             <!-- uploader of file -->
@@ -108,7 +108,7 @@
     mail.thread.message.attachments template
     Template used to display attachments in a mail.message
     -->
-<t t-name="timeline_thread_message_attachments">
+<t t-name="ThreadMessageAttachments">
     <t t-foreach='widget.attachment_ids' t-as='attachment'>
         <t t-if="attachment.file_type_icon !== 'webimage'">
             <div t-attf-class="oe_attachment #{attachment.upload ? 'oe_uploading' : ''}">
@@ -140,7 +140,7 @@
 <!--
     template to the recipients list
     -->
-<t t-name="timeline_thread_list_recipients">
+<t t-name="ThreadListRecipients">
     <div class="oe_timeline_list_recipients" t-if="!widget.is_log">
         To:
         <t t-if="!widget.is_private">
@@ -197,15 +197,15 @@
     </div>
 </t>
 
-<t t-name="timeline_thread_message">
+<t t-name="ThreadMessage">
     <div> <t t-raw="content"/> </div>
 </t>
 
-<t t-name="timeline_no_message">
+<t t-name="NoMessage">
     <div class="oe_view_nocontent">No messages.</div>
 </t>
 
-<t t-name="timeline_thread_message.tracking_values">
+<t t-name="ThreadMessage.TrackingValues">
     <t t-foreach='widget.tracking_value_ids' t-as='value'>
         <li>
             <t t-esc="value.changed_field"/>
@@ -222,7 +222,7 @@
 <!-- timeline_thread_message_vote
      Template used to display Like/Unlike in a mail.message
 -->
-<t t-name="timeline_thread_message_vote">
+<t t-name="ThreadMessage.Vote">
     <span class="oe_timeline_vote_count" t-if='widget.vote_nb > 0'>
         <t t-esc='widget.vote_nb' />
         <i class="fa fa-thumbs-o-up"></i>
@@ -233,7 +233,7 @@
     </a>
 </t>
 
-<t t-name="timeline_thread_partners_list">
+<t t-name="ThreadMessage.PartnersList">
     <t t-foreach="widget.partner_ids.slice(0, 3)" t-as="partner">
         <span t-attf-class="oe_tl_partner_follower">
             <a t-if="widget.options.show_link" 

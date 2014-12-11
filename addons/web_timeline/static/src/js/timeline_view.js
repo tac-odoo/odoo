@@ -10,14 +10,14 @@ openerp.web_timeline = function (session) {
     var QWeb = openerp.web.qweb;
     var mail = session.mail;
 
-    openerp_timeline_followers(session, mail);          // import timeline_followers.js
+    openerp.web_timeline.followers(session, mail);          // import timeline_followers.js
 
     session.web_timeline = {};
 
     session.web_timeline.TimelineView = session.web.View.extend ({
         display_name: _lt('Timeline'),
         view_type: 'timeline',
-        template: 'timeline_wall',
+        template: 'TimelineWall',
 
         init: function (parent, dataset, view_id, options) {
             this._super(parent, dataset, view_id, options);
@@ -29,18 +29,6 @@ openerp.web_timeline = function (session) {
 
             this.fields_view = {};
             this.fields_keys = [];
-
-            if (!dataset.params) {
-                this.dataset.params = {};
-                this.dataset.params = {
-                    'show_record_name': true,
-                    'show_reply_button': true,
-                    'show_compose_message': false,
-                    'show_compact_message': false, 
-                    'view_inbox': false,
-                    'fetch_limit': 1000, 
-                };
-            }
 
             this.qweb = new QWeb2.Engine();
             this.has_been_loaded = $.Deferred();
@@ -87,7 +75,7 @@ openerp.web_timeline = function (session) {
         add_qweb_template: function () {
             for (var i = 0; i < this.fields_view.arch.children.length; i++) {
                 var child = this.fields_view.arch.children[i];
-                if (child.tag === "templates") {
+                if (child.tag === 'templates') {
                     this.transform_qweb_template(child);
                     this.qweb.add_template(session.web.json_node_to_xml(child));
                     break;
@@ -101,19 +89,19 @@ openerp.web_timeline = function (session) {
                     node.tag = QWeb.prefix;
                     switch (node.attrs['name']) {
                         case 'res_id':
-                            node.attrs[QWeb.prefix + '-raw'] = 'widget.' + 'record_name';
+                            node.attrs[QWeb.prefix + '-raw'] = 'widget.record_name';
                             break;
                         case 'model':
-                            node.attrs[QWeb.prefix + '-raw'] = 'widget.' + 'model_desc';
+                            node.attrs[QWeb.prefix + '-raw'] = 'widget.model_desc';
                             break;
                         case 'author_id':
-                            node.attrs[QWeb.prefix + '-raw'] = 'widget.' + 'author_id[2]';
+                            node.attrs[QWeb.prefix + '-raw'] = 'widget.author_id[2]';
                             break;
                         case 'subtype_id':
-                            node.attrs[QWeb.prefix + '-raw'] = 'widget.' + 'subtype';
+                            node.attrs[QWeb.prefix + '-raw'] = 'widget.subtype';
                             break;
                         default:
-                            node.attrs[QWeb.prefix + '-raw'] = 'widget.' + node.attrs['name'];
+                            node.attrs[QWeb.prefix + '-raw'] = 'widget.' + node.attrs.name;
                             break;
                     }
                 break;
@@ -131,7 +119,7 @@ openerp.web_timeline = function (session) {
     });
 
     openerp.web_timeline.TimelineRecordThread = session.web.form.AbstractField.extend({
-        template: 'timeline_record_thread',
+        template: 'RecordThread',
 
         init: function (parent, node) {
             this._super.apply(this, arguments);
@@ -148,23 +136,12 @@ openerp.web_timeline = function (session) {
                 'read_action': 'unread',
                 'show_record_name': false,
                 'show_compact_message': true,
-                'display_log_button' : true,
-                'show_compose_message': this.view.is_action_enabled('edit'),
+                'readonly': this.node.attrs.readonly || false,
+                'compose_placeholder' : this.node.attrs.placeholder || false,
+                'display_log_button' : this.options.display_log_button || true,
+                'show_compose_message': this.view.is_action_enabled('edit') || false,
+                'show_link': this.parent.is_action_enabled('edit') ||true,
             }, this.node.params);
-
-            if (this.node.attrs.placeholder) {
-                this.node.params.compose_placeholder = this.node.attrs.placeholder;
-            }
-            if (this.node.attrs.readonly) {
-                this.node.params.readonly = this.node.attrs.readonly;
-            }
-            if ('display_log_button' in this.options) {
-                this.node.params.display_log_button = this.options.display_log_button;
-            }
-
-            if (!this.parent.is_action_enabled('edit')) {
-                this.node.params.show_link = false;
-            }
 
             this.dataset.params = this.node.params;
         },
@@ -259,7 +236,6 @@ openerp.web_timeline = function (session) {
 
         /**
          * Replaces textarea text into html text (add <p>, <a>)
-         * TDE note : should be done server-side, in Python -> use mail.compose.message ?
          */
         get_text2html: function (text) {
             return text
@@ -443,7 +419,7 @@ openerp.web_timeline = function (session) {
                 }
             }
             this.$(".oe_tl_msg_attachment_list").html( 
-                    session.web.qweb.render('timeline_thread_message_attachments', {'widget': this}));
+                    session.web.qweb.render('ThreadMessageAttachments', {'widget': this}));
         },
 
         /**
@@ -452,15 +428,7 @@ openerp.web_timeline = function (session) {
         attachments_resize_image: function (id, resize) {
             return openerp.web_timeline.ChatterUtils.get_image(
                         this.session, 'ir.attachment', 'datas', id, resize);
-        },
-
-        /**
-         * Get all child message id linked.
-         * @return array of id
-         */
-        get_child_ids: function () {
-			return _.map(this.get_childs(), function (val) { return val.id; });
-        },    
+        },  
     
         /** 
          * Get all child message linked.
@@ -487,7 +455,7 @@ openerp.web_timeline = function (session) {
     });
   
     openerp.web_timeline.ThreadComposeMessage = openerp.web_timeline.MessageCommon.extend({
-        template: 'timeline_compose_message',
+        template: 'ComposeMessage',
 
         init: function (parent, datasets, options) {
             this._super(parent, datasets, options);
@@ -648,7 +616,7 @@ openerp.web_timeline = function (session) {
         },
 
         reinit: function() {
-            var $render = $(session.web.qweb.render('timeline_compose_message', {'widget': this}));
+            var $render = $(session.web.qweb.render('ComposeMessage', {'widget': this}));
 
             $render.insertAfter(this.$el.last());
             this.$el.remove();
@@ -974,7 +942,7 @@ openerp.web_timeline = function (session) {
     });
 
     openerp.web_timeline.ThreadMessage = openerp.web_timeline.MessageCommon.extend({
-        template: 'timeline_thread_message',
+        template: 'ThreadMessage',
 
         start: function () {
             this.tracking_values = (this.tracking_value_ids.length > 0);
@@ -1012,8 +980,6 @@ openerp.web_timeline = function (session) {
             // header icons bindings
             this.$('.oe_read').on('click', this.on_message_read);
             this.$('.oe_unread').on('click', this.on_message_unread);
-            this.$('.oe_msg_delete').on('click', this.on_message_delete);
-            this.$('.oe_reply').on('click', this.on_message_reply);
             this.$('.oe_star').on('click', this.on_star);
             this.$('.oe_tl_msg_vote').on('click', this.on_vote);
             this.$('.oe_timeline_vote_count').on('mouseenter', this.on_hover);
@@ -1097,19 +1063,11 @@ openerp.web_timeline = function (session) {
             this.do_action(action);
         },
 
-        on_message_reply: function (event) {
-            event.stopPropagation();
-            this.create_thread();
-            this.thread.on_compose_message(event);
-            return false;
-        },
-
         /**
          * Add or remove a vote for a message and display the result
          */
         on_vote: function (event) {
             event.stopPropagation();
-            console.log("on_vote");
             this.ds_message.call('vote_toggle', [[this.id]])
                 .then(
                     _.bind(function (vote) {
@@ -1119,70 +1077,17 @@ openerp.web_timeline = function (session) {
                     }, this));
             return false;
         },
-    
-        /**
-         * Instantiate the thread object of this message.
-         * Each message have only one thread.
-         */
-        create_thread: function () {
-            if (this.thread) return false;
-           
-            // create thread
-            this.thread = new openerp.web_timeline.MailThread(this, this, {
-                    'domain': this.domain,
-                    'context': {
-                        'default_model': this.model,
-                        'default_res_id': this.res_id,
-                        'default_parent_id': this.id
-                    },
-                    'params': this.options
-                });
-
-            // insert thread in parent message
-            this.thread.insertAfter(this.$el);
-        },
 
         /**
          * Display the render of this message's vote
          */
         display_vote: function () {
-            var vote_element = session.web.qweb.render('timeline_thread_message_vote', {'widget': this});
+            var vote_element = session.web.qweb.render('ThreadMessage.Vote', {'widget': this});
 
             this.$(".oe_tl_header:first .oe_timeline_vote_count").remove();
             this.$(".oe_tl_header:first .oe_tl_msg_vote").replaceWith(vote_element);
             this.$('.oe_tl_msg_vote').on('click', this.on_vote);
             this.$('.oe_timeline_vote_count').on('mouseenter', this.on_hover);
-        },
-        
-        /**
-         * Fade out the message and his child thread.
-         * Then this object is destroyed.
-         */
-        animated_destroy: function (fadeTime) {
-            var self=this;
-            this.$el.fadeOut(fadeTime, function () {
-                self.parent_thread.message_to_expandable(self);
-            });
-            if (this.thread) {
-                this.thread.$el.fadeOut(fadeTime);
-            }
-        },
-
-        /**
-         * Wait a confirmation for delete the message on the DB.
-         * Make an animate destroy
-         */
-        on_message_delete: function (event) {
-            event.stopPropagation();
-            if (! confirm(_t("Do you really want to delete this message?"))) {
-                return false; 
-            }
-            
-            this.animated_destroy(150);
-            // delete this message and his childs
-            var ids = [this.id].concat( this.get_child_ids() );
-            this.ds_message.unlink(ids);
-            return false;
         },
 
         /**
@@ -1202,16 +1107,10 @@ openerp.web_timeline = function (session) {
                 .then( function (records) {
                     // remove message not loaded
                     _.map(messages, function (msg) {
-                        if (!_.find(records, function (record) { return record.id == msg.id; })) {
-                            msg.animated_destroy(150);
-                        } 
-                        else {
-                            msg.renderElement();
-                            msg.start();
-                        }
+                        msg.renderElement();
+                        msg.start();
                         self.options.root_thread.MailRoot.do_reload_menu_emails();
                     });
-
                 });
         },
 
@@ -1293,47 +1192,32 @@ openerp.web_timeline = function (session) {
 
         display_votes: function () {
            this.$(".oe_tl_vote")
-               .replaceWith(session.web.qweb.render('timeline_thread_message_vote', 
+               .replaceWith(session.web.qweb.render('ThreadMessage.Vote', 
                                             {'widget': this}));
         },
         
         display_tracking_values: function () {
            this.$(".oe_timeline_tracking_value_list")
-               .html(session.web.qweb.render('timeline_thread_message.tracking_values', 
+               .html(session.web.qweb.render('ThreadMessage.TrackingValues', 
                                             {'widget': this}));
         },
 
         display_partners_recipients: function () {
            this.$(".oe_tl_partners_list")
-               .html(session.web.qweb.render('timeline_thread_partners_list', 
+               .html(session.web.qweb.render('ThreadMessage.PartnersList', 
                                             {'widget': this}));
         },
     });
 
     openerp.web_timeline.MailThread = session.web.Widget.extend({
-        template: 'timeline_mail_thread',
+        template: 'MailThread',
 
-        init: function (parent, msg_data, dataset) {
+        init: function (parent, dataset) {
             this._super(parent, dataset);
 
             this.MailRoot = parent instanceof openerp.web_timeline.MailRoot ? parent : false;
             this.domain = dataset.domain || [];
             this.context = _.extend(dataset.context || {});
-
-            this.id = msg_data.id || false;
-            this.last_id = msg_data.last_id || false;
-            this.parent_id = msg_data.parent_id || false;
-            this.is_private = msg_data.is_private || false;
-            this.author_id = msg_data.author_id || false;
-            this.user_pid = msg_data.user_pid || false;
-            
-            msg_data.partner_ids = msg_data.partner_ids || [];
-            if (msg_data.author_id 
-                && !_.contains(_.flatten(msg_data.partner_ids), msg_data.author_id[0]) 
-                && msg_data.author_id[0]) {
-                    msg_data.partner_ids.push(msg_data.author_id);
-            }
-            this.partner_ids = msg_data.partner_ids;
 
             this.options = dataset.params;
             this.options.root_thread = (this.options.root_thread != undefined ? this.options.root_thread : this);
@@ -1343,44 +1227,16 @@ openerp.web_timeline = function (session) {
             this.parent_message = parent.thread != undefined ? parent : false ;
             this.view = parent.view;
 
+            this.id = false;
+            this.parent_id = false;
+
             this.ds_thread = new session.web.DataSetSearch(this, this.context.default_model || 'mail.thread');
             this.ds_message = new session.web.DataSetSearch(this, 'mail.message');
             this.render_mutex = new $.Mutex();
         },
 
         start: function () {
-            this._super.apply(this, arguments);
-            return $.when();
-        },
-
-        /**
-         * Bind events in the widget. Each event is slightly described
-         * in the function. 
-         */
-        bind_events: function () {
-            var self = this;
-            this.$('.oe_timeline_list_recipients .oe_more').on('click', self.on_show_recipients);
-            this.$('.oe_timeline_compose_textarea .oe_more_hidden').on('click', self.on_hide_recipients);
-        },
-
-        /**
-         * Show all the partner list of this parent message
-         */
-        on_show_recipients: function () {
-            var p = $(this).parent(); 
-            p.find('.oe_more_hidden, .oe_hidden').show(); 
-            p.find('.oe_more').hide(); 
-            return false;
-        },
-
-        /**
-         * Hide a part of the partner list of this parent message
-         */
-        on_hide_recipients: function () {
-            var p = $(this).parent(); 
-            p.find('.oe_more_hidden, .oe_hidden').hide(); 
-            p.find('.oe_more').show(); 
-            return false;
+            return this._super.apply(this, arguments);
         },
 
         /**
@@ -1398,17 +1254,6 @@ openerp.web_timeline = function (session) {
 
                 this.compose_message.insertBefore(this.$el);
             }
-        },
- 
-        /**
-         * If compose_message doesn't exist, instantiate the compose message.
-         * Call the on_toggle_quick_composer method to allow the user to write his message.
-         * (Is call when a user click on "Reply" button)
-         */
-        on_compose_message: function (event) {
-            this.instantiate_compose_message();
-            this.compose_message.on_toggle_quick_composer(event);
-            return false;
         },
 
         /**
@@ -1444,8 +1289,6 @@ openerp.web_timeline = function (session) {
          * @param : {Array} datas from calling RPC to "message_read"
          */
          switch_new_message: function (records, dom_insert_after) {
-            console.log("records", records);
-
             var self = this;
             var dom_insert_after = typeof dom_insert_after == 'object' ? dom_insert_after : false;
 
@@ -1569,7 +1412,7 @@ openerp.web_timeline = function (session) {
          * display the message "there are no message" on the thread
          */
         no_message: function () {           
-            var no_message = $(session.web.qweb.render('timeline_no_message', {}));
+            var no_message = $(session.web.qweb.render('NoMessage', {}));
 
             if (this.options.help) {
                 no_message.html(this.options.help);
@@ -1593,7 +1436,7 @@ openerp.web_timeline = function (session) {
     });
 
     openerp.web_timeline.MailRoot = session.web.Widget.extend({
-        template: 'timeline_mail_root',
+        template: 'MailRoot',
 
         init: function (parent, dataset) {
             this._super(parent, dataset);
@@ -1603,17 +1446,8 @@ openerp.web_timeline = function (session) {
             this.context = this.dataset.context || this.dataset.params.context || {}; 
 
             this.dataset.params = _.extend({
-                'show_reply_button' : false,
-                'show_read_unread_button' : false,
-                'show_record_name' : false,
-                'show_compose_message' : false,
-                'show_compact_message' : false,
-                'compose_placeholder': false,
                 'compose_as_todo' : false,
-                'show_link': true,
                 'view_inbox': false,
-                'message_ids': undefined,
-                'readonly' : false,
                 'emails_from_on_composer': true,
                 'fetch_limit': 30,
             }, this.dataset.params);
@@ -1645,7 +1479,7 @@ openerp.web_timeline = function (session) {
         },
 
         message_render: function (search) {
-            this.thread = new openerp.web_timeline.MailThread(this, {}, {
+            this.thread = new openerp.web_timeline.MailThread(this, {
                 'domain' : this.domain,
                 'context' : this.context,
                 'params' : this.dataset.params,
@@ -1660,10 +1494,8 @@ openerp.web_timeline = function (session) {
 
             this.thread.message_fetch(null, null, this.dataset.params.message_ids);
         },
-
     });
 
     session.web.views.add('timeline', 'session.web_timeline.TimelineView');
     session.web.form.widgets.add('mail_thread', 'openerp.web_timeline.TimelineRecordThread');
 }
-
