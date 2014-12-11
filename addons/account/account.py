@@ -1820,7 +1820,7 @@ class wizard_multi_charts_accounts(models.TransientModel):
         tax_code_ref.update(self.env['account.tax.code.template'].generate_tax_code(template.tax_code_root_id.id, company_id))
 
         # Generate taxes from templates.
-        generated_tax_res = template.tax_template_ids._generate_tax(tax_code_ref, company_id)
+        generated_tax_res = template.tax_template_ids._generate_tax(tax_code_template_ref=tax_code_ref, company_id=company_id)
         taxes_ref.update(generated_tax_res['tax_template_to_tax'])
 
         # Generating Accounts from templates.
