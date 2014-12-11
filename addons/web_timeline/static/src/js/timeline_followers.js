@@ -192,7 +192,7 @@ openerp_timeline_followers = function(session, mail) {
         /** Read on res.partner failed: fall back on a generic case
             - fetch current user partner_id (call because no other smart solution currently) FIXME
             - then display a generic message about followers 
-        */
+         */
         fetch_generic: function (error, event) {
             var self = this;
             event.preventDefault();

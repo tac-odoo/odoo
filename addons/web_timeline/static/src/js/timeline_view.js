@@ -244,7 +244,7 @@ openerp.web_timeline = function (session) {
             id = id || '';
             return session.url('/web/binary/image', {model: model, field: field, id: id, resize: r});
         },
-
+ 
         /** 
          * Get the url of an attachment {'id': id} 
          */
@@ -377,9 +377,9 @@ openerp.web_timeline = function (session) {
             this.parent_thread = parent;
             this.thread = false;
 
-            this.tracking_values = (this.tracking_value_ids.length > 0);
-            this.partners = (this.partner_ids.length > 0);
-            this.attachents = (this.attachment_ids.length > 0);
+            this.tracking_values = false;
+            this.partners = false;
+            this.attachments = false;
         },
 
         /** 
@@ -485,7 +485,7 @@ openerp.web_timeline = function (session) {
             this.parent_thread.on_message_destroy(this);
         },
     });
-
+  
     openerp.web_timeline.ThreadComposeMessage = openerp.web_timeline.MessageCommon.extend({
         template: 'timeline_compose_message',
 
@@ -977,6 +977,10 @@ openerp.web_timeline = function (session) {
         template: 'timeline_thread_message',
 
         start: function () {
+            this.tracking_values = (this.tracking_value_ids.length > 0);
+            this.partners = (this.partner_ids.length > 0);
+            this.attachments = (this.attachment_ids.length > 0);
+
             var qweb_context = {
                 session: session,
                 widget: this,
