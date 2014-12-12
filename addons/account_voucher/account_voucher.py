@@ -275,7 +275,7 @@ class account_voucher(models.Model):
             ctx = self._context.copy()
             ctx['date'] = date
             self.with_context(ctx)
-            prec = self.env['decimal.precision'].precision_get('Account')
+            prec = self.company_id.currency_id.rounding
             for line in voucher.line_ids:
                 #create one move line per voucher line where amount is not 0.0
                 # AND (second part of the clause) only if the original move line was not having debit = credit = 0 (which is a legal value)

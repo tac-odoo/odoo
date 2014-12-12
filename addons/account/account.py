@@ -655,12 +655,6 @@ class account_tax_code(models.Model):
         (models.Model._check_recursion, 'Error!\nYou cannot create recursive accounts.', ['parent_id'])
     ]
 
-def get_precision_tax():
-    def change_digit_tax(cr):
-        res = openerp.registry(cr.dbname)['decimal.precision'].precision_get(cr, SUPERUSER_ID, 'Account')
-        return (16, res+3)
-    return change_digit_tax
-
 
 class account_tax(models.Model):
     """
@@ -689,7 +683,7 @@ class account_tax(models.Model):
     name = fields.Char(string='Tax Name', required=True, translate=True, help="This name will be displayed on reports")
     sequence = fields.Integer(string='Sequence', required=True, default=1,
         help="The sequence field is used to order the tax lines from the lowest sequences to the higher ones. The order is important if you have a tax with several tax children. In this case, the evaluation order is important.")
-    amount = fields.Float(string='Amount', required=True, digits=get_precision_tax(), default=0,
+    amount = fields.Float(string='Amount', required=True, digits=0, default=0,
         help="For taxes of type percentage, enter % ratio between 0-1.")
     active = fields.Boolean(string='Active', default=True,
         help="If the active field is set to False, it will allow you to hide the tax without removing it.")
@@ -722,15 +716,15 @@ class account_tax(models.Model):
     #
     base_code_id = fields.Many2one('account.tax.code', string='Account Base Code', help="Use this code for the tax declaration.")
     tax_code_id = fields.Many2one('account.tax.code', string='Account Tax Code', help="Use this code for the tax declaration.")
-    base_sign = fields.Float(string='Base Code Sign', help="Usually 1 or -1.", digits=get_precision_tax(), default=1)
-    tax_sign = fields.Float(string='Tax Code Sign', help="Usually 1 or -1.", digits=get_precision_tax(), default=1)
+    base_sign = fields.Float(string='Base Code Sign', help="Usually 1 or -1.", digits=0, default=1)
+    tax_sign = fields.Float(string='Tax Code Sign', help="Usually 1 or -1.", digits=0, default=1)
 
     # Same fields for refund invoices
 
     ref_base_code_id = fields.Many2one('account.tax.code', string='Refund Base Code', help="Use this code for the tax declaration.")
     ref_tax_code_id = fields.Many2one('account.tax.code', string='Refund Tax Code', help="Use this code for the tax declaration.")
-    ref_base_sign = fields.Float(string='Refund Base Code Sign', help="Usually 1 or -1.", digits=get_precision_tax(), default=1)
-    ref_tax_sign = fields.Float(string='Refund Tax Code Sign', help="Usually 1 or -1.", digits=get_precision_tax(), default=1)
+    ref_base_sign = fields.Float(string='Refund Base Code Sign', help="Usually 1 or -1.", digits=0, default=1)
+    ref_tax_sign = fields.Float(string='Refund Tax Code Sign', help="Usually 1 or -1.", digits=0, default=1)
     include_base_amount = fields.Boolean(string='Included in base amount', default=False,
         help="Indicates if the amount of tax must be included in the base amount for the computation of the next taxes")
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
@@ -1299,7 +1293,7 @@ class account_tax_template(models.Model):
     name = fields.Char(string='Tax Name', required=True)
     sequence = fields.Integer(string='Sequence', required=True, default=1,
         help="The sequence field is used to order the taxes lines from lower sequences to higher ones. The order is important if you have a tax that has several tax children. In this case, the evaluation order is important.")
-    amount = fields.Float(string='Amount', required=True, digits=get_precision_tax(), default=0, help="For Tax Type percent enter % ratio between 0-1.")
+    amount = fields.Float(string='Amount', required=True, digits=0, default=0, help="For Tax Type percent enter % ratio between 0-1.")
     type = fields.Selection([('percent', 'Percent'), ('fixed', 'Fixed'), ('none', 'None'), ('code', 'Python Code'), ('balance', 'Balance')],
         string='Tax Type', default='percent', required=True)
     applicable_type = fields.Selection([('true', 'True'), ('code', 'Python Code')], string='Applicable Type', required=True,

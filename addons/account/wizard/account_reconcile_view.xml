@@ -12,6 +12,7 @@
                         <newline/>
                         <field name="debit" widget="monetary"/>
                         <field name="credit" widget="monetary"/>
+                        <field name="company_id" invisible="1"/>
                     </group><group string="Write-Off">
                         <field name="writeoff" widget="monetary"/>
                     </group>

@@ -813,7 +813,7 @@
                                 <label for="type"/>
                                 <div>
                                     <field name="type"/>
-                                    <field name="amount" attrs="{'invisible':[('type','in',('none', 'code', 'balance'))]}"/>
+                                    <field name="amount" attrs="{'invisible':[('type','in',('none', 'code', 'balance'))]}" widget="monetary"/>
                                 </div>
                                 <field name="python_compute" attrs="{'invisible':[('type','!=','code')],'required':[('type','=','code')]}"/>
                                 <field name="python_compute_inv" attrs="{'invisible':[('type','!=','code')],'required':[('type','=','code')]}"/>
@@ -829,9 +829,9 @@
                                   <field name="account_analytic_collected_id" domain="[('type', '!=','view'), ('company_id', '=', company_id)]" groups="analytic.group_analytic_accounting"/>
 
                                   <field name="base_code_id"/>
-                                  <field name="base_sign"/>
+                                  <field name="base_sign" widget="monetary"/>
                                   <field name="tax_code_id"/>
-                                  <field name="tax_sign"/>
+                                  <field name="tax_sign" widget="monetary"/>
 
                             </group>
                             <group string="Refunds">
@@ -839,9 +839,9 @@
                                   <field name="account_analytic_paid_id" domain="[('type', '!=', 'view'), ('company_id', '=', company_id)]" groups="analytic.group_analytic_accounting"/>
 
                                   <field name="ref_base_code_id"/>
-                                  <field name="ref_base_sign"/>
+                                  <field name="ref_base_sign" widget="monetary"/>
                                   <field name="ref_tax_code_id"/>
-                                  <field name="ref_tax_sign"/>
+                                  <field name="ref_tax_sign" widget="monetary"/>
                             </group>
                             <group string="Children/Sub Taxes" colspan="2">
                                 <field name="child_ids" nolabel="1" colspan="2">
@@ -1574,7 +1574,7 @@
                         <page string="Tax Definition">
                             <group col="4">
                                 <field name="applicable_type"/>
-                                <field name="amount" attrs="{'readonly':[('type','=','none'),('type','=','code')]}"/>
+                                <field name="amount" attrs="{'readonly':[('type','=','none'),('type','=','code')]}" widget="monetary"/>
                                 <field name="include_base_amount"/>
                                 <field name="domain"/>
                                 <newline/>
