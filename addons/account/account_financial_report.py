@@ -25,6 +25,7 @@ from openerp.tools.misc import formatLang
 from openerp.report import report_sxw
 from datetime import timedelta, datetime
 from xlwt import Workbook, easyxf
+import calendar
 
 
 class FormulaLine(object):
@@ -89,6 +90,11 @@ class report_account_financial_report(models.Model):
     debit_credit = fields.Boolean('Show Credit and Debit Columns')
     line = fields.Many2one('account.financial.report.line', 'First/Top Line')
     offset_level = fields.Integer('Level at which the report starts', default=0)
+    date_filter = fields.Selection([('balance_sheet', 'Balance sheet filters'), ('profit_and_loss', 'Profit and loss filters'),
+                                    ('custom', 'No preset filter')],
+                                   'Type of date filters', default='custom', required=True)
+    no_date_range = fields.Boolean('Not a date range report', default=False, required=True,
+                                   help='For report like the balance sheet that do not work with date ranges')
 
 
 class account_financial_report_line(models.Model):
@@ -173,13 +179,21 @@ class account_financial_report_line(models.Model):
             return self.env['account.account.type'].browse(gb_id).name
         return gb_id
 
+    @api.model
+    def _build_cmp(self, balance, comp):
+        if comp != 0:
+            return str(balance/comp * 100) + '%'
+        if balance >= 0:
+            return '100.0%'
+        return '-100.0%'
+
     @api.one
     def get_lines(self, financial_report_id):
         lines = []
         context = self.env.context
         level = context['level']
         currency_id = self.env.user.company_id.currency_id
-        if self.closing_balance:
+        if self.closing_balance or financial_report_id.no_date_range:
             self = self.with_context(closing_bal=True)
         if self.opening_year_balance:
             self = self.with_context(opening_year_bal=True)
@@ -196,7 +210,7 @@ class account_financial_report_line(models.Model):
 
         # listing the columns
         columns = ['balance']
-        if financial_report_id.debit_credit:
+        if financial_report_id.debit_credit and not context['comparison']:
             if not context.get('cash_basis'):
                 columns += ['credit', 'debit']
             else:
@@ -206,10 +220,13 @@ class account_financial_report_line(models.Model):
         if self.formulas:
             for key, value in self.get_balance(columns)[0].items():
                 vals[key] = self._format(value)
+                if key == 'balance':
+                    balance = value
             if context['comparison']:
                 cmp_line = self.with_context(date_from=context['date_from_cmp'], date_to=context['date_to_cmp'])
                 value = cmp_line.get_balance(['balance'])[0]['balance']
                 vals['comparison'] = self._format(value)
+                vals['comparison_pc'] = self._build_cmp(balance, value)
         if not self.hidden:
             lines.append(vals)
 
@@ -221,7 +238,7 @@ class account_financial_report_line(models.Model):
             if self.groupby:
                 if len(amls) > 0:
                     select = ',COALESCE(SUM(l.debit-l.credit), 0)'
-                    if financial_report_id.debit_credit:
+                    if financial_report_id.debit_credit and not context['comparison']:
                         select += ',SUM(l.credit),SUM(l.debit)'
                     sql = "SELECT l." + self.groupby + "%s FROM account_move_line l WHERE %s AND l.id IN %s GROUP BY l." + self.groupby
                     query = sql % (select, amls._query_get(), str(tuple(amls.ids)))
@@ -244,18 +261,22 @@ class account_financial_report_line(models.Model):
                             vals[columns[column - 1]] = self._format(value)
                             if not currency_id.is_zero(value):
                                 flag = True
-                        if gbs_cmp and gbs_cmp.get(gb[0]):
-                            vals['comparison'] = self._format(gbs_cmp[gb[0]])
-                            if not currency_id.is_zero(gbs_cmp[gb[0]]):
-                                flag = True
-                            del gbs_cmp[gb[0]]
+                        if context['comparison']:
+                            if gbs_cmp.get(gb[0]):
+                                vals['comparison'] = self._format(gbs_cmp[gb[0]])
+                                if not currency_id.is_zero(gbs_cmp[gb[0]]):
+                                    flag = True
+                                del gbs_cmp[gb[0]]
+                            else:
+                                vals['comparison'] = self._format(0)
+                            vals['comparison_pc'] = self._build_cmp(gb[1], gbs_cmp.get(gb[0], 0))
                         if flag:
                             lines.append(vals)
 
                     if gbs_cmp:
                         for gb, value in gbs_cmp.items():
                             vals = {'id': gb, 'name': self._get_gb_name(gb), 'level': level + 2, 'type': self.groupby,
-                                    'comparison': self._format(value), 'balance': self._format(0)}
+                                    'comparison': self._format(value), 'balance': self._format(0), 'comparison_pc': '0%'}
                             if not currency_id.is_zero(gb):
                                 lines.append(vals)
 
@@ -274,6 +295,8 @@ class account_financial_report_line(models.Model):
                             if column in columns:
                                 value = report_safe_eval(formula, c, nocopy=True)
                                 vals[column] = self._format(value)
+                                if column == 'balance':
+                                    balance = value
                                 if not aml.company_id.currency_id.is_zero(value):
                                     flag = True
                             if column == 'balance' and context['comparison']:
@@ -282,6 +305,7 @@ class account_financial_report_line(models.Model):
                                 vals['comparison'] = self._format(value)
                                 if not aml.company_id.currency_id.is_zero(value):
                                     flag = True
+                                vals['comparison_pc'] = self._build_cmp(balance, value)
                     if flag:
                         lines.append(vals)
 
@@ -308,17 +332,10 @@ class account_financial_report_context(models.TransientModel):
             return True
         return False
 
-    @api.onchange('financial_report_id')
-    def _compute_unfolded_lines(self):
-        self.write({'unfolded_lines': [(5)]})
-        for line in self.financial_report_id.line._get_children_by_order():
-            if line.unfolded:
-                self.write({'unfolded_lines': [(4, line.id)]})
-
     name = fields.Char()
-    financial_report_id = fields.Many2one('account.financial.report', 'Linked financial report')
-    date_from = fields.Date("Start date", default=lambda s: datetime.today() + timedelta(days=-30))
-    date_to = fields.Date("End date", default=lambda s: datetime.today())
+    financial_report_id = fields.Many2one('account.financial.report', 'Linked financial report', required=True)
+    date_from = fields.Date("Start date")
+    date_to = fields.Date("End date")
     target_move = fields.Selection([('posted', 'All posted entries'), ('all', 'All entries')],
                                    'Target moves', default='posted', required=True)
     unfolded_lines = fields.Many2many('account.financial.report.line', 'context_to_line', string='Unfolded lines')
@@ -328,6 +345,21 @@ class account_financial_report_context(models.TransientModel):
     cash_basis = fields.Boolean('Enable cash basis columns', default=False)
     multi_company = fields.Boolean('Allow multi-company', compute=_get_multi_company, store=True)
     company_id = fields.Many2one('res.company', 'Company', default=lambda s: s.env.user.company_id)
+    date_filter = fields.Char('Date filter used', default=None)
+    date_filter_cmp = fields.Char('Compare Date filter used', default=None)
+
+    @api.model
+    def create(self, vals):
+        if self.env['account.financial.report'].browse(vals['financial_report_id']).date_filter == 'profit_and_loss':
+            vals.update({'date_from': datetime.today().replace(day=1)})
+        else:
+            vals.update({'date_from': datetime.today()})
+        if self.env['account.financial.report'].browse(vals['financial_report_id']).date_filter == 'profit_and_loss':
+            dt = datetime.today()
+            vals.update({'date_to': dt.replace(day=calendar.monthrange(dt.year, dt.month)[1])})
+        else:
+            vals.update({'date_to': datetime.today()})
+        return super(account_financial_report_context, self).create(vals)
 
     @api.model
     def get_companies(self):
@@ -369,7 +401,7 @@ class account_financial_report_context(models.TransientModel):
 
         balance_y = 1
         sheet.write(0, 0, 'Name', title_style)
-        if report_id.debit_credit:
+        if report_id.debit_credit and not self.comparison:
             sheet.write(0, 1, 'Debit', title_style)
             sheet.write(0, 2, 'Credit', title_style)
             balance_y = 3
@@ -409,7 +441,7 @@ class account_financial_report_context(models.TransientModel):
                 style_left = def_style
                 style_right = def_style
             sheet.write(x + x_offset, 0, lines[x]['name'], style_left)
-            if report_id.debit_credit:
+            if report_id.debit_credit and not self.comparison:
                 sheet.write(x + x_offset, 1, lines[x].get('credit', ''), style)
                 sheet.write(x + x_offset, 2, lines[x].get('debit', ''), style)
             sheet.write(x + x_offset, balance_y, lines[x].get('balance', ''), style_right)

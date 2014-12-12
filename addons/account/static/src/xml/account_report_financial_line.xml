@@ -2,7 +2,7 @@
 
 <templates>
     <t t-name="footNoteTextarea">
-        <div class="row mt32 mb32">
+        <div class="mt32 mb32">
             <label t-att-for="'footnote' + footNoteSeqNum"><t t-esc="footNoteSeqNum"/></label>
             <textarea t-att-name="'footnote' + footNoteSeqNum" rows='4' class="form-control">Insert foot note here</textarea>
             <button class="btn btn-primary saveFootNote">Save</button>
@@ -12,24 +12,30 @@
          <sup><t t-esc="footNoteSeqNum"/></sup>
     </t>
     <t t-name="savedFootNote">
-        <div class="row mt32 mb32"><t t-esc="num+'. '+note"/></div>
+        <div class="mt32 mb32 footnote"><t t-esc="num+'. '+note"/></div>
     </t>
     <t t-name="foldable">
-        <span t-att-class="'foldable '+lineId">&gt;</span>
+        <span t-att-class="'foldable '+lineId"><i class="fa fa-toggle-down"></i></span>
     </t>
     <t t-name="unfoldable">
-        <span t-att-class="'unfoldable '+lineId">^</span>
+        <span t-att-class="'unfoldable '+lineId"><i class="fa fa-toggle-right"></i></span>
+    </t>
+    <t t-name="plusIcon">
+        <i class="fa fa-plus-square"></i> 
+    </t>
+    <t t-name="trashIcon">
+        <i class="fa fa-trash-o"></i> 
     </t>
     <t t-name="report_financial_line">
         <tr>
             <td>
-                <span class="level" style="color: white;">................................</span>
-                <span style="font-style: italic;" t-att-class="l.type + ' ' + l.id"><t t-esc="l.name"/></span>
+                <a t-if="l.type == 'account_id'"><span style="font-style: italic; margin-left: 150px" t-att-class="l.type + ' ' + l.id"><t t-esc="l.name"/></span></a>
+                <t t-if="l.type != 'account_id'"><span style="font-style: italic; margin-left: 150px"><t t-esc="l.name"/></span></t>
             </td>
-            <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
+            <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit and !c.comparison">
                 <span class="annotable" style="font-style: italic;"><t t-esc="l.debit"/></span>
             </td>
-            <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
+            <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit and !c.comparison">
                 <span class="annotable" style="font-style: italic;"><t t-esc="l.credit"/></span>
             </td>
             <td class="text-right" style="white-space: nowrap;">
@@ -37,6 +43,9 @@
             </td>
             <td class="text-right" style="white-space: nowrap;" t-if="c.comparison">
                 <span class="annotable" style="font-style: italic;"><t t-esc="l.comparison"/></span>
+            </td>
+            <td class="text-right" style="white-space: nowrap;" t-if="c.comparison">
+                <span class="annotable" style="font-style: italic;"><t t-esc="l.comparison_pc"/></span>
             </td>
         </tr>
     </t>

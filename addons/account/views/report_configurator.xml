@@ -49,16 +49,58 @@
                     </div>
                 </div>
                 <div class="col-xs-3">
-                    <label for="date_from">Start Date :</label>
-                    <input type="date" class="form-control" name="date_from" t-att-value="context.date_from"></input>
-                    <label for="date_to">End Date :</label>
-                    <input type="date" class="form-control" name="date_to" t-att-value="context.date_to"></input>
+                    <label t-if="o.date_filter != 'custom'" for="date_filter">Date Filter :</label>
+                    <select name="date_filter" t-if="o.date_filter == 'balance_sheet'" class="form-control">
+                        <option selected="selected" t-if="context.date_filter == 'today'" value='today'>Today</option>
+                        <option selected="selected" t-if="context.date_filter == 'last_month'" value='last_month'>End of last month</option>
+                        <option selected="selected" t-if="context.date_filter == 'last_quarter'" value='last_quarter'>End of last quarter</option>
+                        <option selected="selected" t-if="context.date_filter == 'last_year'" value='last_year'>End of last financial year</option>
+                        <option selected="selected" t-if="context.date_filter == 'custom'" value='custom'>Custom</option>
+                        <option t-if="context.date_filter != 'today'" value='today'>Today</option>
+                        <option t-if="context.date_filter != 'last_month'" value='last_month'>End of last month</option>
+                        <option t-if="context.date_filter != 'last_quarter'" value='last_quarter'>End of last quarter</option>
+                        <option t-if="context.date_filter != 'last_year'" value='last_year'>End of last financial year</option>
+                        <option t-if="context.date_filter != 'custom'" value='custom'>Custom</option>
+                    </select>
+                    <select name="date_filter" t-if="o.date_filter == 'profit_and_loss'" class="form-control">
+                        <option selected="selected" t-if="context.date_filter == 'this_month'" value='this_month'>This month</option>
+                        <option selected="selected" t-if="context.date_filter == 'this_year'" value='this_year'>This financial year</option>
+                        <option selected="selected" t-if="context.date_filter == 'last_month'" value='last_month'>Last month</option>
+                        <option selected="selected" t-if="context.date_filter == 'last_quarter'" value='last_quarter'>Last quarter</option>
+                        <option selected="selected" t-if="context.date_filter == 'last_year'" value='last_year'>Last financial year</option>
+                        <option selected="selected" t-if="context.date_filter == 'custom'" value='custom'>Custom</option>
+                        <option t-if="context.date_filter != 'this_month'" value='this_month'>This month</option>
+                        <option t-if="context.date_filter != 'this_year'" value='this_year'>This financial year</option>
+                        <option t-if="context.date_filter != 'last_month'" value='last_month'>Last month</option>
+                        <option t-if="context.date_filter != 'last_quarter'" value='last_quarter'>Last quarter</option>
+                        <option t-if="context.date_filter != 'last_year'" value='last_year'>Last financial year</option>
+                        <option t-if="context.date_filter != 'custom'" value='custom'>Custom</option>
+                    </select>
+                    <t t-set="style" value="''" />
+                    <t t-if="o.date_filter != 'custom' and context.date_filter != 'custom'"><t t-set="style" t-value="'visibility: hidden'" /></t>
+                    <span t-att-style="style">
+                        <label t-if="not o.no_date_range" for="date_from">Start Date :</label>
+                        <input t-if="not o.no_date_range" type="date" class="form-control" name="date_from" t-att-value="context.date_from"></input>
+                        <label for="date_to">End Date :</label>
+                        <input type="date" class="form-control" name="date_to" t-att-value="context.date_to"></input>
+                    </span>
                 </div>
                 <div t-if="context.comparison" class="col-xs-3">
-                    <label for="date_from_cmp">Start Date :</label>
-                    <input type="date" class="form-control" name="date_from_cmp" t-att-value="context.date_from_cmp"></input>
-                    <label for="date_to_cmp">End Date :</label>
-                    <input type="date" class="form-control" name="date_to_cmp" t-att-value="context.date_to_cmp"></input>
+                    <label for="date_filter_cmp">Date Filter :</label>
+                    <select name="date_filter_cmp" class="form-control">
+                        <option selected="selected" t-if="context.date_filter_cmp == 'previous_period'" value='previous_period'>Previous period</option>
+                        <option selected="selected" t-if="context.date_filter_cmp == 'custom'" value='custom'>Custom</option>
+                        <option t-if="context.date_filter_cmp != 'previous_period'" value='previous_period'>Previous period</option>
+                        <option t-if="context.date_filter_cmp != 'custom'" value='custom'>Custom</option>
+                    </select>
+                    <t t-set="style" value="''" />
+                    <t t-if="context.date_filter_cmp != 'custom'"><t t-set="style" t-value="'visibility: hidden'" /></t>
+                    <span t-att-style="style">
+                        <label t-if="not o.no_date_range" for="date_from_cmp">Start Date :</label>
+                        <input t-if="not o.no_date_range" type="date" class="form-control" name="date_from_cmp" t-att-value="context.date_from_cmp"></input>
+                        <label for="date_to_cmp">End Date :</label>
+                        <input type="date" class="form-control" name="date_to_cmp" t-att-value="context.date_to_cmp"></input>
+                    </span>
                 </div>
             </div>
             <div class="mt32">

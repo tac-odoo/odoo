@@ -28,32 +28,30 @@
 <menuitem id="menu_action_account_report_es" name="Executive Summary" action="action_account_report_es" parent="account.menu_finance_legal_statement"/>
 
 <template id="report_financial_line">
-    <t t-if="a.get('level') == 1 or a.get('level') == 0"><tr style="border-width: 2px; border-style: solid; border-left-style: hidden; border-right-style: hidden;"><td height="22"></td><td t-if="o.debit_credit"></td><td t-if="o.debit_credit"></td><td></td><td t-if="context.comparison"></td></tr></t>
+    <t t-if="a.get('level') == 1 or a.get('level') == 0"><tr style="border-width: 2px; border-style: solid; border-left-style: hidden; border-right-style: hidden;"><td height="22"></td><td t-if="o.debit_credit or context.comparison"></td><td t-if="o.debit_credit or context.comparison"></td><td></td></tr></t>
     <t t-set="trstyle" t-value="'border-width: 0; border-style: solid;'"/>
+    <t t-set="style" t-value="'margin-left: 80px'"/>
     <t t-if="a.get('level') == 0"><t t-set="trstyle" t-value="'border-width: 2px; border-style: solid; background-color:#eee; border-left-style: hidden; border-right-style: hidden;'"/></t>
     <t t-if="a.get('level') == 1"><t t-set="trstyle" t-value="'border-width: 2px; border-style: solid; border-left-style: hidden; border-right-style: hidden;'"/></t>
-    <t t-if="a.get('level') == 2"><t t-set="trstyle" t-value="'border-width: 1px; border-style: solid; border-left-style: hidden; border-right-style: hidden;'"/></t>
+    <t t-if="a.get('level') == 2"><t t-set="style" t-value="'font-weight: bold; margin-left: 40px;'"/><t t-set="trstyle" t-value="'border-width: 1px; border-style: solid; border-left-style: hidden; border-right-style: hidden;'"/></t>
+    <t t-if="not a.get('level') &gt; 1"><t t-set="style" t-value="'font-weight: bold;'"/></t>
     <tr t-att-style="trstyle">
-
-        <t t-if="a.get('level') &gt; 2"><t t-set="style" t-value="'font-weight: normal;'"/></t>
-        <t t-if="not a.get('level') &gt; 2"><t t-set="style" t-value="'font-weight: bold;'"/></t>
-        <t t-if="a.get('total')"><t t-set="style" t-value="'font-weight: bold;'"/></t>
 
         <td>
             <t t-if="a.get('unfoldable') and a.get('unfolded')">
-                <span t-att-class="' '.join(['foldable', str(a.get('id'))])">&gt;</span>
+                <span t-att-class="' '.join(['foldable', str(a.get('id'))])"><i class="fa fa-toggle-down"></i></span>
             </t>
             <t t-if="a.get('unfoldable') and not a.get('unfolded')">
-                <span t-att-class="' '.join(['unfoldable', str(a.get('id'))])">^</span>
+                <span t-att-class="' '.join(['unfoldable', str(a.get('id'))])"><i class="fa fa-toggle-right"></i></span>
             </t>
-            <t  t-if="a['type'] != 'line'"><span class="level" style="color: white;" t-esc="'................................'"/><t t-set="style" t-value="'font-style: italic;'"/></t>
-            <t  t-if="a['type'] == 'line'"><span class="level" style="color: white;" t-esc="'........' * max(a.get('level', 0) - 1, 0)"/></t>
-            <span t-att-style="style" t-att-class="' '.join([a['type'], str(a['id'])])" t-esc="a.get('name')"/>
+            <t t-if="a['type'] != 'line'"><t t-set="style" t-value="'font-style: italic; margin-left: 150px'"/></t>
+            <a t-if="a['type'] == 'account_id'"><span t-att-style="style" t-att-class="' '.join(['account_id', str(a['id'])])" t-esc="a.get('name')"/></a>
+            <t t-if="a['type'] != 'account_id'"><span t-att-style="style" t-esc="a.get('name')"/></t>
         </td>
-        <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
+        <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit and not context.comparison">
             <span class="annotable" t-att-style="style" t-esc="a.get('debit')"/> <!-- TODO : FormatLang -->
         </td>
-        <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit">
+        <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit and not context.comparison">
             <span class="annotable" t-att-style="style" t-esc="a.get('credit')"/>
         </td>
         <td class="text-right" style="white-space: nowrap;">
@@ -61,6 +59,9 @@
         </td>
         <td class="text-right" style="white-space: nowrap;" t-if="context.comparison">
             <span class="annotable" t-att-style="style" t-esc="a.get('comparison')"/>
+        </td>
+        <td class="text-right" style="white-space: nowrap;" t-if="context.comparison">
+            <span class="annotable" t-att-style="style" t-esc="a.get('comparison_pc')"/>
         </td>
     </tr>
 </template>
@@ -71,16 +72,18 @@
             <t t-call-assets="web.assets_common" t-css="false" />
             <t t-call-assets="web.assets_backend" t-css="false" />
             <script type="text/javascript" src="/account/static/src/js/account_report_widgets.js"></script>
+            <link rel="stylesheet" href="/account/static/src/css/account_financial_report.css" />
             <div t-att-class="' '.join(['page', 'oe_account_report_widgets', str(context.id)])">
                 <h2 t-esc="o.name"/>
                 <table class="table table-condensed">
                     <thead>
                         <tr>
                             <th>Name</th>
-                            <th class="text-right" t-if="o.debit_credit">Debit</th>
-                            <th class="text-right" t-if="o.debit_credit">Credit</th>
+                            <th class="text-right" t-if="o.debit_credit and not context.comparison">Debit</th>
+                            <th class="text-right" t-if="o.debit_credit and not context.comparison">Credit</th>
                             <th class="text-right">Balance</th>
-                            <th class="text-right" t-if="context.comparison">Comparison</th>
+                            <th class="text-right" t-if="context.comparison">Comparison (value)</th>
+                            <th class="text-right" t-if="context.comparison">Comparison (%)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -91,6 +94,17 @@
                 </table>
             </div>
         </span>
+        <div id="footnote-form" class="form-group">
+            <form role="form">
+                <fieldset>
+                    <label for="note"></label>
+                    <textarea name="note" id="note" rows='4' class="form-control">Insert foot note here</textarea>
+
+                    <!-- Allow form submission with keyboard without duplicating the dialog button -->
+                    <input type="submit" tabindex="-1" class="btn btn-primary" style="position:absolute; top:-1000px" />
+                </fieldset>
+            </form>
+        </div>
     </t>
 </template>
 </data>

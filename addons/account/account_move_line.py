@@ -30,7 +30,7 @@ class account_move_line(models.Model):
 
         if context.get('date_from', False) and context.get('date_to', False):
             if context.get('initial_bal', False):
-                where_move_lines_by_date = obj+".move_id IN (SELECT id FROM account_move WHERE date < '" +context['date_from']+"')"
+                where_move_lines_by_date = obj+".move_id IN (SELECT id FROM account_move WHERE date <= '" +context['date_from']+"')"
             elif context.get('closing_bal', False):
                 where_move_lines_by_date = obj+".move_id IN (SELECT id FROM account_move WHERE date < '" +context['date_to']+"')"
             elif context.get('opening_year_bal', False):

@@ -446,11 +446,14 @@
             <field name="name">Profit and Loss</field>
             <field name="debit_credit" eval="True"/>
             <field name="line" ref="account_financial_report_net_profit0"/>
+            <field name="date_filter">profit_and_loss</field>
         </record>
         <record id="account_financial_report_balancesheet0" model="account.financial.report">
             <field name="name">Balance Sheet</field>
             <field name="debit_credit" eval="True"/>
             <field name="line" ref="account_financial_report_net_assets0"/>
+            <field name="date_filter">balance_sheet</field>
+            <field name="no_date_range" eval="True"/>
         </record>
         <record id="account_financial_report_cashsummary0" model="account.financial.report">
             <field name="name">Cash Summary</field>
