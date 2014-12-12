@@ -5,7 +5,9 @@ from openerp import models, fields, api, _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.tools.translate import _
 
+
 class crm_phonecall(models.Model):
+
     """ Model for CRM phonecalls """
     _name = "crm.phonecall"
     _description = "Phonecall"
@@ -20,10 +22,11 @@ class crm_phonecall(models.Model):
 
     date_action_last = fields.Datetime('Last Action', readonly=True)
     date_action_next = fields.Datetime('Next Action', readonly=True)
-    create_date = fields.Datetime('Creation Date' , readonly=True)
-    team_id = fields.Many2one('crm.team', 'Sales Team', oldname='section_id', 
-                select=True, help='Sales team to which Case belongs to.')
-    user_id = fields.Many2one('res.users', 'Responsible', default=lambda self: self._uid)
+    create_date = fields.Datetime('Creation Date', readonly=True)
+    team_id = fields.Many2one('crm.team', 'Sales Team', oldname='section_id',
+                              select=True, help='Sales team to which Case belongs to.')
+    user_id = fields.Many2one(
+        'res.users', 'Responsible', default=lambda self: self._uid)
     partner_id = fields.Many2one('res.partner', 'Contact')
     company_id = fields.Many2one('res.company', 'Company')
     description = fields.Text('Description')
@@ -37,19 +40,22 @@ class crm_phonecall(models.Model):
              'When the call is over, the status is set to Held.\n'
              'If the callis not applicable anymore, the status can be set to Cancelled.',
         default=lambda self: self._get_default_state())
-    email_from = fields.Char('Email', size=128, help="These people will receive email.")
+    email_from = fields.Char(
+        'Email', size=128, help="These people will receive email.")
     date_open = fields.Datetime('Opened', readonly=True)
     # phonecall fields
     name = fields.Char('Call Summary', required=True)
     active = fields.Boolean('Active', required=False, default=True)
-    duration = fields.Float('Duration', help='Duration in minutes and seconds.')
+    duration = fields.Float(
+        'Duration', help='Duration in minutes and seconds.')
     categ_id = fields.Many2one('crm.phonecall.category', 'Category')
     partner_phone = fields.Char('Phone')
     partner_mobile = fields.Char('Mobile')
-    priority = fields.Selection([('0','Low'), ('1','Normal'), ('2','High')], 'Priority', default='1')
+    priority = fields.Selection(
+        [('0', 'Low'), ('1', 'Normal'), ('2', 'High')], 'Priority', default='1')
     date_closed = fields.Datetime('Closed', readonly=True)
-    date = fields.Datetime('Date',default=fields.datetime.now())
-    opportunity_id = fields.Many2one ('crm.lead', 'Lead/Opportunity')
+    date = fields.Datetime('Date', default=fields.datetime.now())
+    opportunity_id = fields.Many2one('crm.lead', 'Lead/Opportunity')
 
     @api.multi
     def write(self, values):
@@ -67,8 +73,9 @@ class crm_phonecall(models.Model):
     def compute_duration(self):
         for phonecall in self:
             if phonecall.duration <= 0:
-                duration = datetime.now() - datetime.strptime(phonecall.date, DEFAULT_SERVER_DATETIME_FORMAT)
-                values = {'duration': duration.seconds/float(60)}
+                duration = datetime.now() - datetime.strptime(
+                    phonecall.date, DEFAULT_SERVER_DATETIME_FORMAT)
+                values = {'duration': duration.seconds / float(60)}
                 self.write(values)
         return True
 
@@ -93,17 +100,17 @@ class crm_phonecall(models.Model):
             if not schedule_time:
                 schedule_time = call.date
             vals = {
-                    'name' : call_summary,
-                    'user_id' : user_id or False,
-                    'categ_id' : categ_id or False,
-                    'description' : call.description or False,
-                    'date' : schedule_time,
-                    'team_id' : team_id or False,
-                    'partner_id': call.partner_id and call.partner_id.id or False,
-                    'partner_phone' : call.partner_phone,
-                    'partner_mobile' : call.partner_mobile,
-                    'priority': call.priority,
-                    'opportunity_id': call.opportunity_id and call.opportunity_id.id or False,
+                'name': call_summary,
+                'user_id': user_id or False,
+                'categ_id': categ_id or False,
+                'description': call.description or False,
+                'date': schedule_time,
+                'team_id': team_id or False,
+                'partner_id': call.partner_id and call.partner_id.id or False,
+                'partner_phone': call.partner_phone,
+                'partner_mobile': call.partner_mobile,
+                'priority': call.priority,
+                'opportunity_id': call.opportunity_id and call.opportunity_id.id or False,
             }
             new_id = self.create(vals)
             if action == 'log':
@@ -114,11 +121,11 @@ class crm_phonecall(models.Model):
     @api.one
     def _call_create_partner(self):
         partner_id = self.partner_id.create({
-                    'name': self.name,
-                    'user_id': self.user_id.id,
-                    'comment': self.description,
-                    'address': []
-                    })
+            'name': self.name,
+            'user_id': self.user_id.id,
+            'comment': self.description,
+            'address': []
+        })
         return partner_id.id
 
     @api.onchange('partner_id')
@@ -135,14 +142,15 @@ class crm_phonecall(models.Model):
 
     @api.one
     def _call_set_partner(self, partner_id):
-        self.write({'partner_id' : partner_id})
+        self.write({'partner_id': partner_id})
         self._call_set_partner_send_note()
         return write_res
 
     @api.one
     def _call_create_partner_address(self, partner_id):
-        return self.partner_id.create({'parent_id': partner_id,'name': self.name,
-            'phone': self.partner_phone})
+        return self.partner_id.create(
+            {'parent_id': partner_id, 'name': self.name,
+             'phone': self.partner_phone})
 
     @api.multi
     def handle_partner_assignation(self, action='create', partner_id=False):
@@ -156,12 +164,14 @@ class crm_phonecall(models.Model):
         :param int partner_id: partner to assign if any
         :return dict: dictionary organized as followed: {lead_id: partner_assigned_id}
         """
-        #TODO this is a duplication of the handle_partner_assignation method of crm_lead
+        # TODO this is a duplication of the handle_partner_assignation method
+        # of crm_lead
         partner_ids = {}
         # If a partner_id is given, force this partner for all elements
         force_partner_id = partner_id
         for call in self:
-            # If the action is set to 'create' and no partner_id is set, create a new one
+            # If the action is set to 'create' and no partner_id is set, create
+            # a new one
             if action == 'create':
                 partner_id = force_partner_id or call._call_create_partner()
                 call._call_create_partner_address(partner_id)
@@ -176,14 +186,14 @@ class crm_phonecall(models.Model):
         form_view = self.env.ref('crm.crm_case_phone_form_view').id
         search_view = self.env.ref('crm.view_crm_case_phonecalls_filter').id
         value = {
-                'name': _('Phone Call'),
-                'view_type': 'form',
-                'view_mode': 'tree,form',
-                'res_model': 'crm.phonecall',
-                'res_id' : int(phonecall_id),
-                'views': [(form_view, 'form'), (tree_view, 'tree'), (False, 'calendar')],
-                'type': 'ir.actions.act_window',
-                'search_view_id': search_view,
+            'name': _('Phone Call'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'crm.phonecall',
+            'res_id': int(phonecall_id),
+            'views': [(form_view, 'form'), (tree_view, 'tree'), (False, 'calendar')],
+            'type': 'ir.actions.act_window',
+            'search_view_id': search_view,
         }
         return value
 
@@ -200,22 +210,22 @@ class crm_phonecall(models.Model):
                 if address_id:
                     default_contact = partner.browse(address_id)
             opportunity_id = call.opportunity_id.create({
-                            'name': opportunity_summary or call.name,
-                            'planned_revenue': planned_revenue,
-                            'probability': probability,
-                            'partner_id': partner_id or False,
-                            'mobile': default_contact and default_contact.mobile,
-                            'team_id': call.team_id and call.team_id.id or False,
-                            'description': call.description or False,
-                            'priority': call.priority,
-                            'type': 'opportunity',
-                            'phone': call.partner_phone or False,
-                            'email_from': default_contact and default_contact.email})
+                'name': opportunity_summary or call.name,
+                'planned_revenue': planned_revenue,
+                'probability': probability,
+                'partner_id': partner_id or False,
+                'mobile': default_contact and default_contact.mobile,
+                'team_id': call.team_id and call.team_id.id or False,
+                'description': call.description or False,
+                'priority': call.priority,
+                'type': 'opportunity',
+                'phone': call.partner_phone or False,
+                'email_from': default_contact and default_contact.email})
             vals = {
                 'partner_id': partner_id,
                 'opportunity_id': opportunity_id.id,
                 'state': 'done'
-                }
+            }
             call.write(vals)
             opportunity_dict[call.id] = opportunity_id
         return opportunity_dict
@@ -230,7 +240,8 @@ class crm_phonecall(models.Model):
         partner_ids = []
         if self.partner_id and self.partner_id.email:
             partner_ids.append(self.partner_id.id)
-        res = self.env['ir.actions.act_window'].for_xml_id('calendar', 'action_calendar_event')
+        res = self.env['ir.actions.act_window'].for_xml_id(
+            'calendar', 'action_calendar_event')
         res['context'] = {
             'default_phonecall_id': self.id,
             'default_partner_ids': partner_ids,
@@ -249,11 +260,12 @@ class crm_phonecall(models.Model):
         :return dict: containing view information
         """
         if len(self.ids) != 1:
-            raise Warning(('It\'s only possible to convert one phonecall at a time.'))
+            raise Warning(
+                ('It\'s only possible to convert one phonecall at a time.'))
 
         opportunity_dict = self.convert_opportunity()
         return opportunity_dict.values()[0].redirect_opportunity_view()
-       
+
     # ----------------------------------------
     # OpenChatter
     # ----------------------------------------
@@ -261,6 +273,7 @@ class crm_phonecall(models.Model):
     @api.multi
     def _call_set_partner_send_note(self):
         return self.message_post(body=_("Partner has been <b>created</b>."))
+
 
 class crm_phonecall_category(models.Model):
     _name = "crm.phonecall.category"

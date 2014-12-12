@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from openerp.http import request
 from openerp import models, api
 
