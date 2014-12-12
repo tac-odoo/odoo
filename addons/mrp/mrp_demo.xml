@@ -464,7 +464,7 @@
         </record>
 
         <record id="mrp_bom_line_18" model="mrp.bom.line">
-            <field name="product_id" ref="product.product_product_16"/>
+            <field name="product_id" ref="product.product_product_10"/>
             <field name="product_qty">1</field>
             <field name="product_uom" ref="product.product_uom_unit"/>
             <field name="sequence">4</field>            
@@ -482,7 +482,7 @@
         </record>
 
         <record id="mrp_bom_line_20" model="mrp.bom.line">
-            <field name="product_id" ref="product.product_product_8"/>
+            <field name="product_id" ref="product.product_product_7"/>
             <field name="product_qty">1</field>
             <field name="product_uom" ref="product.product_uom_unit"/>
             <field name="sequence">8</field>            
@@ -518,7 +518,7 @@
         </record>
 
         <record id="mrp_bom_line_23" model="mrp.bom.line">
-            <field name="product_id" ref="product.product_product_16"/>
+            <field name="product_id" ref="product.product_product_10"/>
             <field name="product_qty">1</field>
             <field name="product_uom" ref="product.product_uom_unit"/>
             <field name="sequence">4</field>            
@@ -536,7 +536,7 @@
         </record>
 
         <record id="mrp_bom_line_25" model="mrp.bom.line">
-            <field name="product_id" ref="product.product_product_8"/>
+            <field name="product_id" ref="product.product_product_6"/>
             <field name="product_qty">1</field>
             <field name="product_uom" ref="product.product_uom_unit"/>
             <field name="sequence">8</field>            
@@ -545,7 +545,7 @@
         </record>
 
         <record id="mrp_bom_line_26" model="mrp.bom.line">
-            <field name="product_id" ref="product.product_product_13"/>
+            <field name="product_id" ref="product.product_product_15"/>
             <field name="product_qty">1</field>
             <field name="product_uom" ref="product.product_uom_unit"/>
             <field name="sequence">10</field>            
@@ -643,7 +643,7 @@
 
 
     <record id="mrp_production_1" model="mrp.production">
-        <field name="product_id" ref="product.product_product_3"/>
+        <field name="product_id" ref="product.product_product_5"/>
         <field name="product_uom" ref="product.product_uom_unit"/>
         <field name="product_qty">3</field>
         <field name="location_src_id" ref="stock.stock_location_stock"/>

@@ -110,6 +110,7 @@ This installs the module product_expiry."""),
             help='\nCreates the dropship route and add more complex tests'
                  '-This installs the module stock_dropshipping.'),
         'module_stock_picking_wave': fields.boolean('Manage picking wave', help='Install the picking wave module which will help you grouping your pickings and processing them in batch'),
+        'module_stock_negative': fields.boolean('Prohibit negative stock', help='Allows you to prohibit negative stock quantities. - This installs the module stock_negative')
     }
 
     def onchange_adv_location(self, cr, uid, ids, group_stock_adv_location, context=None):

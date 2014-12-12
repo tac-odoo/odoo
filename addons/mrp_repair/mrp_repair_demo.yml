@@ -3,7 +3,7 @@
     address_id: base.res_partner_address_1
     guarantee_limit: !eval datetime.today().strftime("%Y-%m-%d")
     invoice_method: 'none'
-    product_id: product.product_product_3
+    product_id: product.product_product_25
     product_uom: product.product_uom_unit
     partner_invoice_id: base.res_partner_address_1
     location_dest_id: stock.stock_location_14
@@ -28,7 +28,7 @@
     partner_id: base.res_partner_9
 -
   !record {model: mrp.repair, id: mrp_repair_rmrp0}:
-    product_id: product.product_product_5
+    product_id: product.product_product_27
     product_uom: product.product_uom_unit
     address_id: base.res_partner_address_1
     guarantee_limit: !eval datetime.today().strftime("%Y-%m-%d")
