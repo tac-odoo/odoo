@@ -56,6 +56,7 @@ class account_statement_from_invoice_lines(osv.osv_memory):
             #  take the date for computation of currency => use payment date
             ctx['date'] = line_date
             amount = 0.0
+            amount_currency = 0.0
 
             if line.debit > 0:
                 amount = line.debit
@@ -63,10 +64,9 @@ class account_statement_from_invoice_lines(osv.osv_memory):
                 amount = -line.credit
 
             if line.amount_currency:
-                amount = currency_obj.compute(cr, uid, line.currency_id.id,
-                    statement.currency.id, line.amount_currency, context=ctx)
+                amount_currency = line.amount_currency
             elif (line.invoice and line.invoice.currency_id.id != statement.currency.id):
-                amount = currency_obj.compute(cr, uid, line.invoice.currency_id.id,
+                amount_currency = currency_obj.compute(cr, uid, line.invoice.currency_id.id,
                     statement.currency.id, amount, context=ctx)
 
             context.update({'move_line_ids': [line.id],
@@ -75,6 +75,8 @@ class account_statement_from_invoice_lines(osv.osv_memory):
             statement_line_obj.create(cr, uid, {
                 'name': line.name or '?',
                 'amount': amount,
+                'amount_currency': amount_currency,
+                'currency_id': line.currency_id.id,
                 'partner_id': line.partner_id.id,
                 'statement_id': statement_id,
                 'ref': line.ref,
