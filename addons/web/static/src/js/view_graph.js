@@ -191,12 +191,10 @@ instance.web.GraphWidget = instance.web.Widget.extend({
         return value;
     },
     display_graph: function () {
-        console.log('display_graph');
         if (this.to_remove) {
             nv.utils.offWindowResize(this.to_remove);
         }
         this.$el.empty();
-        console.log(this.data);
         if (!this.data.length) {
             this.$el.append(QWeb.render('GraphView.nodata'));
         } else {

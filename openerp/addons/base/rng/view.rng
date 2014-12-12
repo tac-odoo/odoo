@@ -674,6 +674,7 @@
     <rng:define name="pivot">
         <rng:element name="pivot">
             <rng:optional><rng:attribute name="string" /></rng:optional>
+            <rng:optional><rng:attribute name="display_quantity" /></rng:optional>
             <rng:zeroOrMore>
                 <rng:ref name="field"/>
             </rng:zeroOrMore>

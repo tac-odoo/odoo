@@ -30,6 +30,7 @@ instance.web.PivotView = instance.web.View.extend({
         this.model = new instance.web.Model(dataset.model, {group_by_no_leaf: true});
 
         this.$buttons = options.$buttons;
+        this.$sidebar = options.$sidebar;
         this.fields = {};
         this.measures = {};
         this.groupable_fields = {};
@@ -56,18 +57,30 @@ instance.web.PivotView = instance.web.View.extend({
         this.last_header_selected = null;
     },
     start: function () {
+        var self = this;
         this.$table_container = this.$('.o-pivot-table');
 
         var load_fields = this.model.call('fields_get', [])
                 .then(this.prepare_fields.bind(this));
 
+        if (this.$sidebar) {
+            openerp.session.rpc('/web/pivot/check_xlwt').then(function (result) {
+                if (result) {
+                    self.sidebar = new instance.web.Sidebar(self);
+                    self.sidebar.appendTo(self.$sidebar);
+                    self.sidebar.add_items('other', [{
+                        label: _t("Download xls"),
+                        callback: self.dowload_table.bind(self)
+                    }]);
+                }
+            });
+        }
         return $.when(this._super(), load_fields).then(this.render_buttons.bind(this));
     },
     render_buttons: function () {
         var self = this;
         var context = {measures: _.pairs(_.omit(this.measures, '__count__'))};
         this.$buttons.html(QWeb.render('PivotView.buttons', context));
-        this.$buttons.find('.oe-pivot-download').hide();
         this.$buttons.click(this.on_button_click.bind(this));
         context.measures.forEach(function (kv, index) {
             if (_.contains(self.active_measures, kv[0])) {
@@ -79,10 +92,6 @@ instance.web.PivotView = instance.web.View.extend({
         this.$field_selection.html(QWeb.render('PivotView.FieldSelection', another_ctx));
         openerp.web.bus.on('click', self, function () {
             self.$field_selection.find('ul').first().hide();
-        });
-
-        openerp.session.rpc('/web/pivot/check_xlwt').then(function (result) {
-            self.$buttons.find('.oe-pivot-download').show();
         });
         this.$buttons.find('button').tooltip();
     },
@@ -111,7 +120,7 @@ instance.web.PivotView = instance.web.View.extend({
                 self.initial_row_groupby.push(name);
             }
         });
-        if (!self.active_measures.length) {
+        if ((!self.active_measures.length) || fvg.arch.attrs.display_quantity){
             self.active_measures.push('__count__');
         }
     },
