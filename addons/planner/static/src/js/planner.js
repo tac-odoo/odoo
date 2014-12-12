@@ -169,7 +169,6 @@
             }
 
             self.planner_data['progress'] = parseInt((self.get('progress') / self.btn_mark_as_done.length) * 100, 10);
-            self.planner_data['data'] = JSON.stringify(self.values);
             self.planner_launcher.update_progress_value(self.planner_data['progress']);
             //call save_planner_data to store JSON data into database
             self.save_planner_data();
@@ -202,8 +201,10 @@
             });
         },
         save_planner_data: function() {
+            var self = this;
+            self.planner_data['data'] = JSON.stringify(self.values);
             return (new instance.web.DataSet(this, 'planner.planner'))
-                .call('write', [this.planner_data.id, {'data': this.planner_data.data, 'progress': this.planner_data['progress']}]);
+                .call('write', [self.planner_data.id, {'data': self.planner_data.data, 'progress': self.planner_data['progress']}]);
         },
         add_footer: function() {
             var self = this;
@@ -221,7 +222,7 @@
                 $el.append(footer_template);
             });
         },
-        set_all_input_id: function() {
+        _get_default_input: function() {
             var self = this;
             self.values['last_open_page'] = '';
             _.each(self.input_elements, function(element) {
@@ -242,15 +243,9 @@
             this method fill the values of each input element from JSON data
             @param {object} JSON data
         */
-        fill_input_data: function(input_data) {
+        set_input_value: function() {
             var self = this;
-            if (!_.size(input_data)) {
-                //when planner is launch for the first time, we need to store the id of each elements into database.
-                self.set_all_input_id();
-            } else {
-                self.values = _.clone(input_data);
-            }
-            _.each(input_data, function(val, id){
+            _.each(self.values, function(val, id){
                 if ($('#'+id).prop("tagName") == 'BUTTON') {
                     if (val == 'checked') {
                         self.set('progress', self.get('progress') + 1);
@@ -280,9 +275,15 @@
                 self.input_elements = self.$(".oe_planner textarea[id^='input_element'], .oe_planner input[id^='input_element'], select[id^='input_element']");
                 //find 'mark as done' button to calculate the progress bar.
                 self.btn_mark_as_done = self.$(".oe_planner button[id^='input_element'][data-progress^='planner_page']");
-                self.fill_input_data(self.planner_data.data);
+                if (!_.size(self.planner_data.data)) {
+                    //when planner is launch for the first time, we need to store the id of each elements.
+                    self._get_default_input();
+                } else {
+                    self.values = _.clone(self.planner_data.data);
+                    self.set_input_value();
+                }
                 //show last opened page
-                var last_open_page = self.planner_data.data && self.planner_data.data['last_open_page'];
+                var last_open_page = self.values && self.values['last_open_page'];
                 if (last_open_page) {
                     $(".oe_planner li a[href='#"+last_open_page+"']").trigger('click');
                 }
@@ -306,7 +307,6 @@
         },
         hide: function() {
             //store updated input values when modal is close.
-            this.planner_data['data'] = JSON.stringify(this.values);
             this.save_planner_data();
         },
         update_ui_progress_bar: function() {
