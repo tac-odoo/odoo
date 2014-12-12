@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 from openerp.http import request
-from openerp import models, api
+from openerp import models
 
 
 class ir_http(models.AbstractModel):
     _inherit = 'ir.http'
 
-    @api.model
     def get_utm_domain_cookies(self):
         return request.httprequest.host
 
-    @api.v7
     def _dispatch(self):
         response = super(ir_http, self)._dispatch()
         for var, dummy in self.pool['crm.tracking.mixin'].tracking_fields():
