@@ -1,6 +1,9 @@
-from openerp import models, api, fields, _
+# -*- coding: utf-8 -*-
+from openerp import models, api, fields
+
 
 class res_partner(models.Model):
+
     """ Inherits partner and adds CRM information in the partner form """
     _inherit = 'res.partner'
 
@@ -15,20 +18,26 @@ class res_partner(models.Model):
         except:
             pass
         for partner in self:
-            print"**in last for : ",len(partner.phonecall_ids)
             partner.phonecall_count = len(partner.phonecall_ids)
 
     team_id = fields.Many2one('crm.team', 'Sales Team', oldname='section_id')
-    opportunity_ids = fields.One2many('crm.lead', 'partner_id', 'Opportunities', domain=[('type', '=', 'opportunity')])
-    meeting_ids = fields.Many2many('calendar.event', 'calendar_event_res_partner_rel','res_partner_id', 'calendar_event_id', 'Meetings', store=True)
-    phonecall_ids = fields.One2many('crm.phonecall', 'partner_id', string='Phonecalls', store=True)
-    opportunity_count = fields.Integer(compute='_opportunity_meeting_phonecall_count', string="Opportunity")
-    meeting_count = fields.Integer(compute='_opportunity_meeting_phonecall_count', string="# Meetings")
-    phonecall_count = fields.Integer(compute='_opportunity_meeting_phonecall_count', string="Phonecalls")
+    opportunity_ids = fields.One2many(
+        'crm.lead', 'partner_id', 'Opportunities', domain=[('type', '=', 'opportunity')])
+    meeting_ids = fields.Many2many(
+        'calendar.event', 'calendar_event_res_partner_rel', 'res_partner_id', 'calendar_event_id', 'Meetings', store=True)
+    phonecall_ids = fields.One2many(
+        'crm.phonecall', 'partner_id', string='Phonecalls', store=True)
+    opportunity_count = fields.Integer(
+        compute='_opportunity_meeting_phonecall_count', string="Opportunity")
+    meeting_count = fields.Integer(
+        compute='_opportunity_meeting_phonecall_count', string="# Meetings")
+    phonecall_count = fields.Integer(
+        compute='_opportunity_meeting_phonecall_count', string="Phonecalls")
 
     @api.model
     def redirect_partner_form(self, partner_id):
-        search_view = self.env['ir.model.data'].get_object_reference('base', 'view_res_partner_filter')
+        search_view = self.env['ir.model.data'].get_object_reference(
+            'base', 'view_res_partner_filter')
         value = {
             'domain': "[]",
             'view_type': 'form',
@@ -50,22 +59,23 @@ class res_partner(models.Model):
             if not partner_id:
                 partner_id = partner.id
             opportunity_id = partner.opportunity_ids.create({
-                'name' : opportunity_summary,
-                'planned_revenue' : planned_revenue,
-                'probability' : probability,
-                'partner_id' : partner_id,
-                'tag_ids' : tag_ids and tag_ids[0].id or [],
+                'name': opportunity_summary,
+                'planned_revenue': planned_revenue,
+                'probability': probability,
+                'partner_id': partner_id,
+                'tag_ids': tag_ids and tag_ids[0].id or [],
                 'type': 'opportunity'
             })
             opportunity_ids[partner_id] = opportunity_id.id
         return opportunity_ids
 
-
     @api.multi
     def schedule_meeting(self):
         partner_ids = self.ids
-        partner_ids.append(self.env['res.users'].browse(self._uid).partner_id.id)
-        res = self.env['ir.actions.act_window'].for_xml_id('calendar', 'action_calendar_event')
+        partner_ids.append(
+            self.env['res.users'].browse(self._uid).partner_id.id)
+        res = self.env['ir.actions.act_window'].for_xml_id(
+            'calendar', 'action_calendar_event')
         res['context'] = {
             'search_default_partner_ids': self.ids,
             'default_partner_ids': partner_ids,
