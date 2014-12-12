@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import crm
 from datetime import datetime
 from openerp import models, fields, api, _
@@ -122,8 +123,8 @@ class crm_phonecall(models.Model):
 
     @api.onchange('partner_id')
     def on_change_partner_id(self):
-        self.partner_phone = self.partner_id.phone if self.partner_id.phone else False
-        self.partner_mobile = self.partner_id.mobile if self.partner_id.mobile else False
+        self.partner_phone = self.partner_id.phone
+        self.partner_mobile = self.partner_id.mobile
 
     @api.onchange('opportunity_id')
     def on_change_opportunity(self):
@@ -132,16 +133,16 @@ class crm_phonecall(models.Model):
         self.partner_mobile = self.opportunity_id.mobile
         self.partner_id = self.opportunity_id.partner_id and self.opportunity_id.partner_id.id or False
 
-    @api.multi
+    @api.one
     def _call_set_partner(self, partner_id):
         self.write({'partner_id' : partner_id})
         self._call_set_partner_send_note()
-    # return write_res
+        return write_res
 
-    @api.multi
-    def _call_create_partner_address(self, phonecall, partner_id):
-        return self.partner_id.create({'parent_id': partner_id,'name': phonecall.name,
-            'phone': phonecall.partner_phone})
+    @api.one
+    def _call_create_partner_address(self, partner_id):
+        return self.partner_id.create({'parent_id': partner_id,'name': self.name,
+            'phone': self.partner_phone})
 
     @api.multi
     def handle_partner_assignation(self, action='create', partner_id=False):
@@ -163,34 +164,32 @@ class crm_phonecall(models.Model):
             # If the action is set to 'create' and no partner_id is set, create a new one
             if action == 'create':
                 partner_id = force_partner_id or call._call_create_partner()
-                self._call_create_partner_address(call, partner_id)
-            call._call_set_partner([partner_id])
+                call._call_create_partner_address(partner_id)
+            call._call_set_partner(partner_id)
             partner_ids[call.id] = partner_id
         return partner_ids
 
     @api.model
     def redirect_phonecall_view(self, phonecall_id):
-        model_data = self.env['ir.model.data']
         # Select the view
-        tree_view = model_data.get_object_reference('crm', 'crm_case_phone_tree_view')
-        form_view = model_data.get_object_reference('crm', 'crm_case_phone_form_view')
-        search_view = model_data.get_object_reference('crm', 'view_crm_case_phonecalls_filter')
+        tree_view = self.env.ref('crm.crm_case_phone_tree_view').id
+        form_view = self.env.ref('crm.crm_case_phone_form_view').id
+        search_view = self.env.ref('crm.view_crm_case_phonecalls_filter').id
         value = {
                 'name': _('Phone Call'),
                 'view_type': 'form',
                 'view_mode': 'tree,form',
                 'res_model': 'crm.phonecall',
                 'res_id' : int(phonecall_id),
-                'views': [(form_view and form_view[1] or False, 'form'), (tree_view and tree_view[1] or False, 'tree'), (False, 'calendar')],
+                'views': [(form_view, 'form'), (tree_view, 'tree'), (False, 'calendar')],
                 'type': 'ir.actions.act_window',
-                'search_view_id': search_view and search_view[1] or False,
+                'search_view_id': search_view,
         }
         return value
 
     @api.multi
     def convert_opportunity(self, opportunity_summary=False, partner_id=False, planned_revenue=0.0, probability=0.0):
         partner = self.env['res.partner']
-        opportunity = self.env['crm.lead']
         opportunity_dict = {}
         default_contact = False
         for call in self:
@@ -227,6 +226,7 @@ class crm_phonecall(models.Model):
         Open meeting's calendar view to schedule a meeting on current phonecall.
         :return dict: dictionary value for created meeting view
         """
+        self.ensure_one()
         partner_ids = []
         if self.partner_id and self.partner_id.email:
             partner_ids.append(self.partner_id.id)
@@ -248,7 +248,7 @@ class crm_phonecall(models.Model):
         :param list ids: list of calls ids to convert (typically contains a single id)
         :return dict: containing view information
         """
-        if len(self) != 1:
+        if len(self.ids) != 1:
             raise Warning(('It\'s only possible to convert one phonecall at a time.'))
 
         opportunity_dict = self.convert_opportunity()

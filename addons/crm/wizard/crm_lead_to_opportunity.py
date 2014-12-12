@@ -94,9 +94,8 @@ class crm_lead2opportunity_partner(models.TransientModel):
         res = False
         lead_rec = vals.get('lead_ids', [])
         team_id = vals.get('team_id', False)
-        
         for lead in lead_rec:
-            partner_id = self._create_partner(lead, self.action, lead.partner_id)
+            partner_id = self._create_partner(lead, self.action)
             res = lead.convert_opportunity(partner_id, [], False)
         user_ids = vals.get('user_ids', False)
         
@@ -140,7 +139,7 @@ class crm_lead2opportunity_partner(models.TransientModel):
 
 
     @api.multi
-    def _create_partner(self, lead, action, partner):
+    def _create_partner(self, lead, action):
         """
         Create partner based on action.
         :return dict: dictionary organized as followed: {lead_id: partner_assigned_id}
@@ -148,6 +147,7 @@ class crm_lead2opportunity_partner(models.TransientModel):
         #TODO this method in only called by crm_lead2opportunity_partner
         #wizard and would probably diserve to be refactored or at least
         #moved to a better place
+        partner = lead.partner_id
         if self.action == 'each_exist_or_create':
             self = self.with_context(active_id = lead.id)
             partner = self._find_matching_partner()
