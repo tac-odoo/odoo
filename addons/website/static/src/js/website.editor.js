@@ -4,30 +4,20 @@
     var website = openerp.website;
     var _t = openerp._t;
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /* Summernote Lib (neek hack to make accessible: method and object) */
 
-    var agent = $.summernote.objects.agent;
-    var func = $.summernote.objects.func;
-    var list = $.summernote.objects.list;
-    var dom = $.summernote.objects.dom;
-    var settings = $.summernote.objects.settings;
-    var async = $.summernote.objects.async;
-    var key = $.summernote.objects.key;
-    var Style = $.summernote.objects.Style;
-    var range = $.summernote.objects.range;
-    var Table = $.summernote.objects.Table;
-    var Editor = $.summernote.objects.Editor;
-    var History = $.summernote.objects.History;
-    var Button = $.summernote.objects.Button;
-    var Toolbar = $.summernote.objects.Toolbar;
-    var Popover = $.summernote.objects.Popover;
-    var Handle = $.summernote.objects.Handle;
-    var Dialog = $.summernote.objects.Dialog;
-    var EventHandler = $.summernote.objects.EventHandler;
-    var Renderer = $.summernote.objects.Renderer;
-    var eventHandler = $.summernote.objects.eventHandler;
-    var renderer = $.summernote.objects.renderer;
+define(['summernote/summernote'], function () {
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /* Summernote Lib (neek change to make accessible: method and object) */
+    var agent = $.summernote.core.agent;
+    var dom = $.summernote.core.dom;
+    var range = $.summernote.core.range;
+    var list = $.summernote.core.list;
+    var key = $.summernote.core.key;
+    var eventHandler = $.summernote.eventHandler;
+    var renderer = $.summernote.renderer;
+    var options = $.summernote.options;
+function fsdf() {
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
     /* update and change the popovers content, and add history button */
@@ -247,20 +237,22 @@
 
     eventHandler.handle.update = function ($handle, oStyle, isAirMode) {
         $handle.toggle(!!oStyle.image);
-        var $selection = $handle.find('.note-control-selection');
-        var $image = $(oStyle.image);
-        var szImage = {
-          w: $image.outerWidth(true),
-          h: $image.outerHeight(true)
-        };
-        $selection.data('target', oStyle.image); // save current image element.
-        var sSizing = szImage.w + 'x' + szImage.h;
-        $selection.find('.note-control-selection-info').text(szImage.w > 50 ? sSizing : "");
+        if (oStyle.image) {
+            var $selection = $handle.find('.note-control-selection');
+            var $image = $(oStyle.image);
+            var szImage = {
+              w: $image.outerWidth(true),
+              h: $image.outerHeight(true)
+            };
+            $selection.data('target', oStyle.image); // save current image element.
+            var sSizing = szImage.w + 'x' + szImage.h;
+            $selection.find('.note-control-selection-info').text(szImage.w > 50 ? sSizing : "");
 
-        $selection.find('.note-control-sizing').toggleClass('note-control-sizing note-control-holder').css({
-                'border-top': 0,
-                'border-left': 0
-            });
+            $selection.find('.note-control-sizing').toggleClass('note-control-sizing note-control-holder').css({
+                    'border-top': 0,
+                    'border-left': 0
+                });
+        }
     };
 
     $(document).on('click keyup', function () {
@@ -270,51 +262,49 @@
 
     eventHandler.editor.undo = function ($popover) {
         if(!$popover.attr('disabled')) history.undo();
-        return false;
     };
     eventHandler.editor.redo = function ($popover) {
         if(!$popover.attr('disabled')) history.redo();
-        return false;
     };
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
     /* hack for image and link editor */
 
-    eventHandler.editor.padding = function ($editable, sValue, $target) {
+    eventHandler.editor.padding = function ($editable, sValue) {
+        var $target = $(range.create().sc);
         var paddings = "small medium large xl".split(/\s+/);
-        $editable.data('NoteHistory').recordUndo($editable);
+        $editable.data('NoteHistory').recordUndo();
         if (sValue.length) {
             paddings.splice(paddings.indexOf(sValue),1);
             $target.toggleClass('padding-'+sValue);
         }
         $target.removeClass("padding-" + paddings.join(" padding-"));
-        return false;
     };
-    eventHandler.editor.resize = function ($editable, sValue, $target) {
-        $editable.data('NoteHistory').recordUndo($editable);
+    eventHandler.editor.resize = function ($editable, sValue) {
+        var $target = $(range.create().sc);
+        $editable.data('NoteHistory').recordUndo();
         switch (+sValue) {
             case 1: $target.toggleClass('img-responsive').removeClass('img-responsive-50 img-responsive-25'); break;
             case 0.5: $target.toggleClass('img-responsive-50').removeClass('img-responsive img-responsive-25'); break;
             case 0.25: $target.toggleClass('img-responsive-25').removeClass('img-responsive img-responsive-50'); break;
         }
-        return false;
     };
-    eventHandler.editor.resizefa = function ($editable, sValue, $target) {
-        $editable.data('NoteHistory').recordUndo($editable);
+    eventHandler.editor.resizefa = function ($editable, sValue) {
+        var $target = $(range.create().sc);
+        $editable.data('NoteHistory').recordUndo();
         $target.removeClass('fa-1x fa-2x fa-3x fa-4x fa-5x');
         if (+sValue > 1) {
             $target.addClass('fa-'+sValue+'x');
         }
-        return false;
     };
-    eventHandler.editor.floatMe = function ($editable, sValue, $target) {
-        $editable.data('NoteHistory').recordUndo($editable);
+    eventHandler.editor.floatMe = function ($editable, sValue) {
+        var $target = $(range.create().sc);
+        $editable.data('NoteHistory').recordUndo();
         switch (sValue) {
             case 'center': $target.toggleClass('center-block').removeClass('pull-right pull-left'); break;
             case 'left': $target.toggleClass('pull-left').removeClass('pull-right center-block'); break;
             case 'right': $target.toggleClass('pull-right').removeClass('pull-left center-block'); break;
         }
-        return false;
     };
 
     eventHandler.dialog.showLinkDialog = function ($editable, $dialog, linkInfo) {
@@ -336,7 +326,6 @@
     eventHandler.editor.createLink = function ($editable, linkInfo, options) {
         var a = fn_editor_createLink.call(this, $editable, linkInfo, options);
         $(a).attr("class", linkInfo.className);
-        return false;
     };
     eventHandler.dialog.showImageDialog = function ($editable) {
         var r = $editable.data('range');
@@ -542,115 +531,9 @@
     };
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /* Change History to have a global History for all summernote instances */
-
-    var History = function History () {
-        var aUndo = [];
-        var pos = 0;
-
-        this.makeSnap = function ($editable) {
-            var elEditable = $editable[0],
-                rng = range.create();
-            return {
-                editable: elEditable,
-                contents: $editable.html(),
-                bookmark: rng.bookmark(elEditable),
-                scrollTop: $editable.scrollTop()
-            };
-        };
-
-        this.applySnap = function (oSnap) {
-            var $editable = $(oSnap.editable);
-
-            if (!!document.documentMode) {
-                $editable.removeAttr("contentEditable").removeProp("contentEditable");
-            }
-
-            $editable.html(oSnap.contents).scrollTop(oSnap.scrollTop);
-            $(".oe_overlay").remove();
-            $(".note-control-selection").hide();
-
-            var r = range.createFromBookmark(oSnap.editable, oSnap.bookmark);
-            r.select();
-
-            $(document).trigger("click");
-            $(".o_editable *").filter(function () {
-                var $el = $(this);
-                if($el.data('snippet-editor')) {
-                    $el.removeData();
-                }
-            });
-
-            setTimeout(function () {
-                var target = dom.isBR(r.sc) ? r.sc.parentNode : dom.node(r.sc);
-                var evt = document.createEvent("MouseEvents");
-                evt.initMouseEvent("mousedown", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, target);
-                target.dispatchEvent(evt);
-
-                var evt = document.createEvent("MouseEvents");
-                evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, target);
-                target.dispatchEvent(evt);
-            },0);
-        };
-
-        this.undo = function ($editable) {
-            if (!pos) { return; }
-            last = null;
-            if (!aUndo[pos]) aUndo[pos] = this.makeSnap($editable || $('.o_editable.note-editable:first'));
-            if (aUndo[pos-1].jump) pos--;
-            this.applySnap(aUndo[--pos]);
-        };
-        this.hasUndo = function ($editable) {
-            return pos > 0;
-        };
-
-        this.redo = function () {
-            if (aUndo.length <= pos+1) { return; }
-            if (aUndo[pos].jump) pos++;
-            this.applySnap(aUndo[++pos]);
-        };
-        this.hasRedo = function () {
-            return aUndo.length > pos+1;
-        };
-
-        this.popUndo = function () {
-            aUndo.pop();
-        };
-
-        var last;
-        this.recordUndo = function ($editable, event) {
-            if (event) {
-                if (last && aUndo[pos-1] && aUndo[pos-1].editable !== $editable[0]) {
-                    // => make a snap when the user change editable zone (because: don't make snap for each keydown)
-                    aUndo.splice(pos, aUndo.length);
-                    var prev = aUndo[pos-1];
-                    aUndo[pos] = {
-                        editable: prev.editable,
-                        contents: $(prev.editable).html(),
-                        bookmark: prev.bookmark,
-                        scrollTop: prev.scrollTop,
-                        jump: true
-                    };
-                    pos++;
-                }
-                else if (event === last) return;
-            }
-            last = event;
-            aUndo.splice(pos, aUndo.length);
-            aUndo[pos] = this.makeSnap($editable);
-            pos++;
-        };
-
-        this.splitNext = function () {
-            last = false;
-        };
-    };
-    var history = new History();
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
     /* Translation for odoo */
 
-    settings.lang.odoo = {
+    $.summernote.lang.odoo = {
         font: {
           bold: _t('Bold'),
           italic: _t('Italic'),
@@ -752,7 +635,112 @@
           redo: _t('Redo')
         }
     };
+}
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /* Change History to have a global History for all summernote instances */
 
+    var History = function History ($editable) {
+        var aUndo = [];
+        var pos = 0;
+
+        this.makeSnap = function () {
+            var rng = range.create(),
+                elEditable = dom.ancestor(rng.commonAncestor(), dom.isEditable) || $('.o_editable.note-editable:first')[0];
+            return {
+                editable: elEditable,
+                contents: elEditable.innerHTML,
+                bookmark: rng.bookmark(elEditable),
+                scrollTop: $(elEditable).scrollTop()
+            };
+        };
+
+        this.applySnap = function (oSnap) {
+            var $editable = $(oSnap.editable);
+
+            if (!!document.documentMode) {
+                $editable.removeAttr("contentEditable").removeProp("contentEditable");
+            }
+
+            $editable.html(oSnap.contents).scrollTop(oSnap.scrollTop);
+            $(".oe_overlay").remove();
+            $(".note-control-selection").hide();
+
+            var r = range.createFromBookmark(oSnap.editable, oSnap.bookmark);
+            r.select();
+
+            $(document).trigger("click");
+            $(".o_editable *").filter(function () {
+                var $el = $(this);
+                if($el.data('snippet-editor')) {
+                    $el.removeData();
+                }
+            });
+
+            setTimeout(function () {
+                var target = dom.isBR(r.sc) ? r.sc.parentNode : dom.node(r.sc);
+                var evt = document.createEvent("MouseEvents");
+                evt.initMouseEvent("mousedown", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, target);
+                target.dispatchEvent(evt);
+
+                var evt = document.createEvent("MouseEvents");
+                evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, target);
+                target.dispatchEvent(evt);
+            },0);
+        };
+
+        this.undo = function () {
+            if (!pos) { return; }
+            last = null;
+            if (!aUndo[pos]) aUndo[pos] = this.makeSnap();
+            if (aUndo[pos-1].jump) pos--;
+            this.applySnap(aUndo[--pos]);
+        };
+        this.hasUndo = function () {
+            return pos > 0;
+        };
+
+        this.redo = function () {
+            if (aUndo.length <= pos+1) { return; }
+            if (aUndo[pos].jump) pos++;
+            this.applySnap(aUndo[++pos]);
+        };
+        this.hasRedo = function () {
+            return aUndo.length > pos+1;
+        };
+
+        this.popUndo = function () {
+            aUndo.pop();
+        };
+
+        var last;
+        this.recordUndo = function (event) {
+            if (event) {
+                if (last && aUndo[pos-1] && aUndo[pos-1].editable !== $editable[0]) {
+                    // => make a snap when the user change editable zone (because: don't make snap for each keydown)
+                    aUndo.splice(pos, aUndo.length);
+                    var prev = aUndo[pos-1];
+                    aUndo[pos] = {
+                        editable: prev.editable,
+                        contents: $(prev.editable).html(),
+                        bookmark: prev.bookmark,
+                        scrollTop: prev.scrollTop,
+                        jump: true
+                    };
+                    pos++;
+                }
+                else if (event === last) return;
+            }
+            last = event;
+            aUndo.splice(pos, aUndo.length);
+            aUndo[pos] = this.makeSnap();
+            pos++;
+        };
+
+        this.splitNext = function () {
+            last = false;
+        };
+    };
+    var history = new History();
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
     // add focusIn to jQuery to allow to move caret into a div of a contentEditable area
@@ -1079,7 +1067,7 @@
             if (!range.create()) {
                 range.create($target[0],0).select();
             }
-            this.history.recordUndo( $editable );
+            this.history.recordUndo( );
             $target.mousedown();
         },
         /**
@@ -1618,7 +1606,7 @@
         save: function () {
             var self = this;
             range.createFromNode(self.media).select();
-            this.$editable.data('NoteHistory').recordUndo(this.$editable);
+            this.$editable.data('NoteHistory').recordUndo();
             var alt = this.$('#alt').val();
             var title = this.$('#title').val();
             $(this.media).attr('alt', alt ? alt.replace(/"/g, "&quot;") : null).attr('title', title ? title.replace(/"/g, "&quot;") : null);
@@ -1704,7 +1692,7 @@
                 this.close();
                 return;
             }
-            if(this.rte) this.rte.historyRecordUndo(this.$editable);
+            if(this.rte) this.rte.historyRecordUndo();
 
             var self = this;
             if (self.media) {
@@ -2296,5 +2284,9 @@
             this.media.className = this.media.className.replace(/(^|\s)media_iframe_video(\s|$)/g, ' ');
         },
     });
+
+
+});
+
 })();
 

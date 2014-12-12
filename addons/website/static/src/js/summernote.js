@@ -4,30 +4,21 @@
     var website = openerp.website;
     var _t = openerp._t;
 
+
+define(['summernote/summernote'], function () {
+
+
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
     /* Summernote Lib (neek hack to make accessible: method and object) */
-
-    var agent = $.summernote.objects.agent;
-    var func = $.summernote.objects.func;
-    var list = $.summernote.objects.list;
-    var dom = $.summernote.objects.dom;
-    var settings = $.summernote.objects.settings;
-    var async = $.summernote.objects.async;
-    var key = $.summernote.objects.key;
-    var Style = $.summernote.objects.Style;
-    var range = $.summernote.objects.range;
-    var Table = $.summernote.objects.Table;
-    var Editor = $.summernote.objects.Editor;
-    var History = $.summernote.objects.History;
-    var Button = $.summernote.objects.Button;
-    var Toolbar = $.summernote.objects.Toolbar;
-    var Popover = $.summernote.objects.Popover;
-    var Handle = $.summernote.objects.Handle;
-    var Dialog = $.summernote.objects.Dialog;
-    var EventHandler = $.summernote.objects.EventHandler;
-    var Renderer = $.summernote.objects.Renderer;
-    var eventHandler = $.summernote.objects.eventHandler;
-    var renderer = $.summernote.objects.renderer;
+    
+    var agent = $.summernote.core.agent;
+    var dom = $.summernote.core.dom;
+    var range = $.summernote.core.range;
+    var list = $.summernote.core.list;
+    var key = $.summernote.core.key;
+    var eventHandler = $.summernote.eventHandler;
+    var renderer = $.summernote.renderer;
+    var options = $.summernote.options;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
     /* Add method to Summernote*/
@@ -966,15 +957,15 @@
     key.nameFromCode[46] = 'DELETE';
     key.nameFromCode[27] = 'ESCAPE';
 
-    settings.options.keyMap.pc['BACKSPACE'] = 'backspace';
-    settings.options.keyMap.pc['DELETE'] = 'delete';
-    settings.options.keyMap.pc['ENTER'] = 'enter';
-    settings.options.keyMap.pc['ESCAPE'] = 'cancel';
+    options.keyMap.pc['BACKSPACE'] = 'backspace';
+    options.keyMap.pc['DELETE'] = 'delete';
+    options.keyMap.pc['ENTER'] = 'enter';
+    options.keyMap.pc['ESCAPE'] = 'cancel';
 
-    settings.options.keyMap.mac['BACKSPACE'] = 'backspace';
-    settings.options.keyMap.mac['CMD+BACKSPACE'] = 'delete';
-    settings.options.keyMap.mac['ENTER'] = 'enter';
-    settings.options.keyMap.mac['ESCAPE'] = 'cancel';
+    options.keyMap.mac['BACKSPACE'] = 'backspace';
+    options.keyMap.mac['CMD+BACKSPACE'] = 'delete';
+    options.keyMap.mac['ENTER'] = 'enter';
+    options.keyMap.mac['ESCAPE'] = 'cancel';
     
     eventHandler.editor.tab = function ($editable, options, outdent) {
         var r = range.create();
@@ -1428,7 +1419,7 @@
     /* add list command (create a uggly dom for chrome) */
 
     function isFormatNode(node) {
-        return node.tagName && settings.options.styleTags.indexOf(node.tagName.toLowerCase()) !== -1;
+        return node.tagName && options.styleTags.indexOf(node.tagName.toLowerCase()) !== -1;
     }
 
     eventHandler.editor.insertUnorderedList = function ($editable, sorted) {
@@ -1645,7 +1636,7 @@
         if (!$dom.length) {
             $dom = $(dom.ancestor(r.sc, dom.isList));
             if (!$dom.length) {
-                $dom = $(r.sc).closest(settings.options.styleTags.join(','));
+                $dom = $(r.sc).closest(options.styleTags.join(','));
             }
         }
 
@@ -1714,7 +1705,7 @@
         var nodes = dom.listBetween(r.sc, r.ec);
         for (var i=0; i<nodes.length; i++) {
             if (dom.isText(nodes[i]) || dom.isBR(nodes[i])) {
-                if (settings.options.styleTags.indexOf(nodes[i].parentNode.tagName.toLowerCase()) === -1) {
+                if (options.styleTags.indexOf(nodes[i].parentNode.tagName.toLowerCase()) === -1) {
                     dom.wrap(nodes[i], 'p');
                 }
             } else if (nodes[i].childNodes.length === 1 && dom.isBR(nodes[i].firstChild)) {
@@ -1956,5 +1947,8 @@
         oLayoutInfo.editor.off("paste", summernote_paste);
         $editable.off("scroll", summernote_table_scroll);
     };
+
+});
+
 
 })();

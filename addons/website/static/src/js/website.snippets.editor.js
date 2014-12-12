@@ -130,8 +130,8 @@
             });
             this.$el.css('top', this.parent.get('height'));
 
-            var _isNotBreakable = $.summernote.objects.dom.isNotBreakable;
-            $.summernote.objects.dom.isNotBreakable = function (node, sc, so, ec, eo) {
+            var _isNotBreakable = $.summernote.core.dom.isNotBreakable;
+            $.summernote.core.dom.isNotBreakable = function (node, sc, so, ec, eo) {
                 return _isNotBreakable(node, sc, so, ec, eo) || website.snippet.globalSelector.is($(node));
             };
         },
@@ -1942,7 +1942,7 @@
             this.$overlay.remove();
 
             if (node && node.firstChild) {
-                $.summernote.objects.dom.removeSpace(node, node.firstChild, 0, node.lastChild, 1);
+                $.summernote.core.dom.removeSpace(node, node.firstChild, 0, node.lastChild, 1);
                 if (!node.firstChild.tagName && node.firstChild.textContent === " ") {
                     node.firstChild.parentNode.removeChild(node.firstChild);
                 }

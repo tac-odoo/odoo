@@ -6,7 +6,7 @@
     openerp.Tour.register({
         id:   'website_rte',
         name: "Test website RTE",
-        path: '/page/homepage',
+        path: '/page/homepage?debug',
         mode: 'test',
         steps: [
             {
@@ -45,7 +45,8 @@
                         '\n     <p>Et hanc quidem praeter oppida multa duae civitates exornant Seleucia opus Seleuci regis, et Claudiopolis quam deduxit coloniam Claudius Caesar. Isaura enim antehac nimium potens, olim subversa ut rebellatrix.</p>'+
                         '<p>Harum trium sententiarum nulli prorsus assentior.</p>';
                     $el.html(html);
-                    $.summernote.objects.range.create($el.find('h1')[0].firstChild, 0, $el.find('h1')[0], 0).select();
+                    var select = $el.find('h1')[0].firstChild;
+                    $.summernote.core.range.create(select, 0, select, 1).select();
                 }
             },
             {
@@ -54,7 +55,7 @@
                 title:     "simulate triple click and change text bg-color",
                 onload: function () {
                     var $el = $(this.waitFor);
-                    $.summernote.objects.range.create($el.find('h1')[0].firstChild, 0, $el.find('p')[0], 0).select();
+                    $.summernote.core.range.create($el.find('h1')[0].firstChild, 0, $el.find('p')[0], 0).select();
                 }
             },
             {
@@ -67,7 +68,7 @@
                 title:     "change text color",
                 onload: function () {
                     var $el = $('#wrapwrap > main > div > section .row > div:first:not(:has(p font)) h1 font');
-                    $.summernote.objects.range.create($el[0].firstChild, 5, $el[0].firstChild, 10).select();
+                    $.summernote.core.range.create($el[0].firstChild, 5, $el[0].firstChild, 10).select();
                 }
             },
             {
@@ -80,7 +81,7 @@
                 title:     "change text color again",
                 onload: function () {
                     var $el = $('#wrapwrap > main > div > section .row > div:first h1 font:eq(2)');
-                    $.summernote.objects.range.create($el.prev()[0].firstChild, 3, $el[0].firstChild, 10).select();
+                    $.summernote.core.range.create($el.prev()[0].firstChild, 3, $el[0].firstChild, 10).select();
                 }
             },
             {
@@ -93,7 +94,7 @@
                 title:     "change text color again",
                 onload: function () {
                     var $el = $('#wrapwrap > main > div > section .row > div:first h1 font:eq(4)');
-                    $.summernote.objects.range.create($el.prev()[0].firstChild, 3, $el.parent("h1").next("p")[0].firstChild, 30).select();
+                    $.summernote.core.range.create($el.prev()[0].firstChild, 3, $el.parent("h1").next("p")[0].firstChild, 30).select();
                 }
             },
             {
@@ -108,8 +109,8 @@
                 title:     "clean and delete (backspace) an other selection",
                 onload: function () {
                     var $el = $(this.waitFor);
-                    $.summernote.objects.range.createFromNode($el.next("p")[0]).clean();
-                    $.summernote.objects.range.create($el.find('font:last')[0].firstChild, 1, $el.next("p")[0].firstChild, 2).select();
+                    $.summernote.core.range.createFromNode($el.next("p")[0]).clean();
+                    $.summernote.core.range.create($el.find('font:last')[0].firstChild, 1, $el.next("p")[0].firstChild, 2).select();
                 },
                 keydown:   8 // backspace
             },
@@ -119,7 +120,7 @@
                 title:     "delete an other selection",
                 onload: function () {
                     var $el = $(this.waitFor);
-                    $.summernote.objects.range.create($el.find('font:first')[0].firstChild, 3, $el.next("p")[0].childNodes[2], 8).select();
+                    $.summernote.core.range.create($el.find('font:first')[0].firstChild, 3, $el.next("p")[0].childNodes[2], 8).select();
                 },
                 keydown:   46
             },
@@ -255,7 +256,7 @@
                 keydown:   [66, 13, 66, 13, 13, 8, 8],
                 onload: function () {
                     var p = $(this.element)[0].firstChild;
-                    $.summernote.objects.range.create(p, p.textContent.length, p, p.textContent.length).select();
+                    $.summernote.core.range.create(p, p.textContent.length, p, p.textContent.length).select();
                 },
             },
             {
@@ -271,7 +272,7 @@
                         '\n    </ul>';
                     $el.append(html);
                     var node = $el.find('ul li:first p')[0].firstChild;
-                    $.summernote.objects.range.create(node, 6).select();
+                    $.summernote.core.range.create(node, 6).select();
                 }
             },
             {
@@ -289,7 +290,7 @@
                 title:     "select h3",
                 onload: function () {
                     var node = $('#wrapwrap > main > div > section .row > div:first ul li p:eq(1)')[0].firstChild;
-                    $.summernote.objects.range.create(node, 0).select();
+                    $.summernote.core.range.create(node, 0).select();
                 }
             },
             {
@@ -308,7 +309,7 @@
                 title:     "enter in list",
                 keydown:   13,
                 onload: function () {
-                    $.summernote.objects.range.create($(this.element)[0].firstChild, 7).select();
+                    $.summernote.core.range.create($(this.element)[0].firstChild, 7).select();
                 }
             },
             {
@@ -318,7 +319,7 @@
                 keydown:   8,
                 onload: function () {
                     console.log($(this.element)[0].firstChild);
-                    $.summernote.objects.range.create($(this.element)[0].firstChild, 0).select();
+                    $.summernote.core.range.create($(this.element)[0].firstChild, 0).select();
                 }
             },
             {
