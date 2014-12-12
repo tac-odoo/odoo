@@ -361,42 +361,36 @@ openerp.mail = function (session) {
             this.call_jquery();
         },
         bind_events: function() {
-            this.search.on('focus mouseover', 'li', this.proxy('make_active'));
+            var self = this;
+            this.search.on('focus mouseover', 'li', function(e){
+                self.search.find("li").removeClass("active");
+                self.search.find(e.currentTarget).addClass("active");
+            });
             this.textarea.on('keyup', this.proxy('keyup'));
             this.textarea.on('keydown', this.proxy('keydown'));
             this.textarea.on('click', this.proxy('close'));
-            this.search.on('click', 'li', this.proxy('onselect'));
+            this.search.on('click', 'li', function(e) {
+                var span = self.search.find(e.currentTarget).find("span");
+                self.setText(span.text(), span.attr("id"));
+            });
         },
         keydown: function(e) {
-            if(_.contains([40, 38], e.which)) {
-                var $active = this.search.find("li.active");
-                if($active.length) {
-                    if(e.which == 40)
-                        $active.next().focus();
-                    else
-                        $active.prev().focus();
-                    return false;
-                }
-                return true;
+            var $active = this.search.find("li.active");
+            if(_.contains([40, 38], e.which) && $active.length) {
+                if(e.which == 40)
+                    $active.next().focus();
+                else
+                    $active.prev().focus();
+                return false;
             }
-            if(e.which == 13) {
-                var $active = this.search.find("li.active");
-                if($active.length) {
-                    this.setText($active.find("span").text(), $active.find("span").attr("id"));
-                    return false;
-                }
-                return true;
+            if(e.which == 13 && $active.length) {
+                this.setText($active.find("span").text(), $active.find("span").attr("id"));
+                return false;
             }
-        },
-        onselect: function(e) {
-            this.setText(this.search.find(e.currentTarget).find("span").text(), this.search.find(e.currentTarget).find("span").attr("id"));
+            return true;
         },
         close: function() {
             this.search.empty();
-        },
-        make_active: function(e) {
-            this.search.find("li").removeClass("active");
-            this.search.find(e.currentTarget).addClass("active");
         },
         setText: function(text, id) {
             var new_index = this.textarea.getCursorPosition();
@@ -412,35 +406,32 @@ openerp.mail = function (session) {
             var self = this;
             clearTimeout(this.timer);
             if(_.contains([40, 38, 13], e.which)) { return; }
-            this.search.empty();
+            this.close();
             if(_.contains([37, 39, 35, 33, 34], e.which)) { return; }
             var index = this.textarea.getCursorPosition();
-            var value = this.textarea.val();
-            var left = value.substring(0, index);
+            var left = this.textarea.val().substring(0, index);
             var last_ind = left.lastIndexOf("@");
             var left_str = left.substring(last_ind, index);
             if(left_str.split(" ").length > 1 || // Word not have space
                 left_str.split("\n").length > 1 || // Word not have new line
                 left_str.length < 4 || // Word length must greater than 3
                 left.charCodeAt(last_ind - 1) != 10 && // @ mention start at new line
-                (last_ind != 0 &&
-                left.charAt(last_ind - 1) != " ")) return; // @ mention work if there is before space
+                (last_ind != 0 && left.charAt(last_ind - 1) != " ")) return; // @ mention work if there is before space
             this.search_str = left_str.slice(1);
             if(this.search_str) {
                 this.timer = setTimeout(function() {
                     start_index = index - self.search_str.length - 1;
                     new openerp.web.Model("mail.compose.message").call("get_mention_users", [self.search_str]).then(function(res) {
-                        if(res.length) { self.render(res); }
+                        if(res.length) {
+                            self.result = res;
+                            self.search.html($(session.web.qweb.render('mail.mention', {'widget': self})).find("ul")).find("li:first").focus();
+                        }
                     });
                 }, 1000);
             }
         },
-        render: function(res) {
-            var $render = $( session.web.qweb.render('mail.mention', {'widget': this, "data": res}) );
-            this.search.html($render.find("ul")).find("li:first").focus();
-        },
         highlight: function(detail, find) {
-            return detail.replace(new RegExp(find, "gi"), _.str.sprintf("<b><u>%s</u></b>", detail.match(new RegExp(find, "gi"))));
+            return detail.replace(new RegExp(find, "i"), _.str.sprintf("<b><u>%s</u></b>", detail.match(new RegExp(find, "i"))));
         },
         call_jquery: function() {
             $.fn.getCursorPosition = function() {
@@ -460,15 +451,10 @@ openerp.mail = function (session) {
             };
             $.fn.setCursorPosition = function(pos) {
               this.each(function(index, elem) {
-                if (elem.setSelectionRange) {
+                if (elem.setSelectionRange)
                   elem.setSelectionRange(pos, pos);
-                } else if (elem.createTextRange) {
-                  var range = elem.createTextRange();
-                  range.collapse(true);
-                  range.moveEnd('character', pos);
-                  range.moveStart('character', pos);
-                  range.select();
-                }
+                else if (elem.createTextRange)
+                  elem.createTextRange().collapse(true).moveEnd('character', pos).moveStart('character', pos).select();
               });
               return this;
             };
@@ -689,8 +675,7 @@ openerp.mail = function (session) {
             this.$el = $render;
 
             // Initialize mail.Mention widget
-            var render = new mail.Mention(this);
-            render.insertAfter(this.$el.find(".field_text"));
+            new mail.Mention(this).insertAfter(this.$el.find(".field_text"));
 
             this.display_attachments();
             this.bind_events();

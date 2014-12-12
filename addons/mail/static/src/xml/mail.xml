@@ -69,8 +69,8 @@
     <t t-name="mail.mention">
         <div class="mention">
             <ul>
-                <t t-if="data">
-                    <t t-foreach="data" t-as='res'>
+                <t t-if="widget.result">
+                    <t t-foreach="widget.result" t-as='res'>
                         <li><img height='25' width='25' t-attf-src='/web/binary/image?model=res.partner&amp;field=image_small&amp;id=#{res.partner_id[0]}' /> <span t-attf-id='#{res.partner_id[0]}'><t t-raw='widget.highlight(res.partner_id[1], widget.search_str)' /></span> (<i><t t-raw='widget.highlight(res.login, widget.search_str)' /></i>)</li>
                     </t>
                 </t>
