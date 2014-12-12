@@ -30,23 +30,23 @@
 <template id="report_financial_line">
     <t t-if="a.get('level') == 1 or a.get('level') == 0"><tr style="border-width: 2px; border-style: solid; border-left-style: hidden; border-right-style: hidden;"><td height="22"></td><td t-if="o.debit_credit or context.comparison"></td><td t-if="o.debit_credit or context.comparison"></td><td></td></tr></t>
     <t t-set="trstyle" t-value="'border-width: 0; border-style: solid;'"/>
-    <t t-set="style" t-value="'margin-left: 80px'"/>
+    <t t-set="style" t-value="'margin-left: 60px'"/>
     <t t-if="a.get('level') == 0"><t t-set="trstyle" t-value="'border-width: 2px; border-style: solid; background-color:#eee; border-left-style: hidden; border-right-style: hidden;'"/></t>
     <t t-if="a.get('level') == 1"><t t-set="trstyle" t-value="'border-width: 2px; border-style: solid; border-left-style: hidden; border-right-style: hidden;'"/></t>
-    <t t-if="a.get('level') == 2"><t t-set="style" t-value="'font-weight: bold; margin-left: 40px;'"/><t t-set="trstyle" t-value="'border-width: 1px; border-style: solid; border-left-style: hidden; border-right-style: hidden;'"/></t>
+    <t t-if="a.get('level') == 2"><t t-set="style" t-value="'font-weight: bold; margin-left: 30px;'"/><t t-set="trstyle" t-value="'border-width: 1px; border-style: solid; border-left-style: hidden; border-right-style: hidden;'"/></t>
     <t t-if="not a.get('level') &gt; 1"><t t-set="style" t-value="'font-weight: bold;'"/></t>
     <tr t-att-style="trstyle">
 
         <td>
             <t t-if="a.get('unfoldable') and a.get('unfolded')">
-                <span t-att-class="' '.join(['foldable', str(a.get('id'))])"><i class="fa fa-toggle-down"></i></span>
+                <span style="position: absolute;" t-att-class="' '.join(['foldable', str(a.get('id'))])"><i class="fa fa-toggle-down"></i></span>
             </t>
             <t t-if="a.get('unfoldable') and not a.get('unfolded')">
-                <span t-att-class="' '.join(['unfoldable', str(a.get('id'))])"><i class="fa fa-toggle-right"></i></span>
+                <span style="position: absolute;" t-att-class="' '.join(['unfoldable', str(a.get('id'))])"><i class="fa fa-toggle-right"></i></span>
             </t>
-            <t t-if="a['type'] != 'line'"><t t-set="style" t-value="'font-style: italic; margin-left: 150px'"/></t>
+            <t t-if="a['type'] != 'line'"><t t-set="style" t-value="'font-style: italic; margin-left: 100px'"/></t>
             <a t-if="a['type'] == 'account_id'"><span t-att-style="style" t-att-class="' '.join(['account_id', str(a['id'])])" t-esc="a.get('name')"/></a>
-            <t t-if="a['type'] != 'account_id'"><span t-att-style="style" t-esc="a.get('name')"/></t>
+            <t t-if="a['type'] != 'account_id'"><span t-att-style="style" t-att-class="a.get('type')" t-esc="a.get('name')"/></t>
         </td>
         <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit and not context.comparison">
             <span class="annotable" t-att-style="style" t-esc="a.get('debit')"/> <!-- TODO : FormatLang -->
@@ -81,8 +81,8 @@
                             <th>Name</th>
                             <th class="text-right" t-if="o.debit_credit and not context.comparison">Debit</th>
                             <th class="text-right" t-if="o.debit_credit and not context.comparison">Credit</th>
-                            <th class="text-right">Balance</th>
-                            <th class="text-right" t-if="context.comparison">Comparison (value)</th>
+                            <th class="text-right">Balance<br /><t t-raw="context.get_balance_date()" /></th>
+                            <th class="text-right" t-if="context.comparison">Comparison (value)<br /><t t-raw="context.get_cmp_date()" /></th>
                             <th class="text-right" t-if="context.comparison">Comparison (%)</th>
                         </tr>
                     </thead>

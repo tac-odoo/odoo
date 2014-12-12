@@ -182,10 +182,67 @@ class account_financial_report_line(models.Model):
     @api.model
     def _build_cmp(self, balance, comp):
         if comp != 0:
-            return str(balance/comp * 100) + '%'
+            return str(round(balance/comp * 100, 1)) + '%'
         if balance >= 0:
             return '100.0%'
         return '-100.0%'
+
+    def _get_unfold(self, financial_report_id):
+        currency_id = self.env.user.company_id.currency_id
+        context = self.env.context
+        unfolded = self.id in context['unfolded_lines']
+        if unfolded:
+            unfoldable = True
+        elif not (self.domain and self.show_domain):
+            unfoldable = False
+        else:
+            aml_obj = self.env['account.move.line']
+            amls = aml_obj.search(report_safe_eval(self.domain))
+            unfoldable = False
+            if self.groupby and amls:
+                select = ',COALESCE(SUM(l.debit-l.credit), 0)'
+                if financial_report_id.debit_credit and not context['comparison']:
+                    select += ',SUM(l.credit),SUM(l.debit)'
+                sql = "SELECT l." + self.groupby + "%s FROM account_move_line l WHERE %s AND l.id IN %s GROUP BY l." + self.groupby
+                query = sql % (select, amls._query_get(), str(tuple(amls.ids)))
+                self.env.cr.execute(query)
+                gbs = self.env.cr.fetchall()
+                for gb in gbs:
+                    for k in gb[1:]:
+                        if not currency_id.is_zero(k):
+                            unfoldable = True
+                if context['comparison']:
+                    aml_cmp_obj = aml_obj.with_context(date_from=context['date_from_cmp'], date_to=context['date_to_cmp'])
+                    aml_cmp_ids = aml_cmp_obj.search(report_safe_eval(self.domain))
+                    if aml_cmp_ids:
+                        select = ',COALESCE(SUM(l.debit-l.credit), 0)'
+                        query = sql % (select, aml_cmp_ids._query_get(), str(tuple(aml_cmp_ids.ids)))
+                        self.env.cr.execute(query)
+                        gbs_cmp = self.env.cr.fetchall()
+                        for gb_cmp in gbs_cmp:
+                            if not currency_id.is_zero(gb_cmp[1]):
+                                unfoldable = True
+            else:
+                columns = ['balance']
+                if financial_report_id.debit_credit and not context['comparison']:
+                    if not context.get('cash_basis'):
+                        columns += ['credit', 'debit']
+                    else:
+                        columns += ['credit_cash_basis', 'debit_cash_basis']
+                results = amls.compute_fields(columns)
+                for res in results:
+                    for field in res:
+                        if not currency_id.is_zero(field):
+                            unfoldable = True
+                if context['comparison']:
+                    aml_cmp_obj = aml_obj.with_context(date_from=context['date_from_cmp'], date_to=context['date_to_cmp'])
+                    aml_cmp_ids = aml_cmp_obj.search(report_safe_eval(self.domain))
+                    results = aml_cmp_ids.compute_fields(columns)
+                    for res in results:
+                        for field in res:
+                            if not currency_id.is_zero(field):
+                                unfoldable = True
+        return [unfolded, unfoldable]
 
     @api.one
     def get_lines(self, financial_report_id):
@@ -207,6 +264,7 @@ class account_financial_report_line(models.Model):
             'unfolded': not 'unfolded_lines' in context or self.id in context['unfolded_lines'],
             'unfoldable': self.domain and self.show_domain or False,
         }
+        [vals['unfolded'], vals['unfoldable']] = self._get_unfold(financial_report_id);
 
         # listing the columns
         columns = ['balance']
@@ -372,6 +430,20 @@ class account_financial_report_context(models.TransientModel):
     @api.multi
     def add_line(self, line_id):
         self.write({'unfolded_lines': [(4, line_id)]})
+
+    def get_balance_date(self):
+        dt_to = datetime.strptime(self.date_to, "%Y-%m-%d")
+        if self.financial_report_id.no_date_range:
+            return dt_to.strftime('(as at %d %b %Y)')
+        dt_from = datetime.strptime(self.date_from, "%Y-%m-%d")
+        return dt_from.strftime('(From %d %b %Y <br />') + dt_to.strftime('to %d %b %Y)')
+
+    def get_cmp_date(self):
+        dt_to = datetime.strptime(self.date_to_cmp, "%Y-%m-%d")
+        if self.financial_report_id.no_date_range:
+            return dt_to.strftime('(as at %d %b %Y)')
+        dt_from = datetime.strptime(self.date_from_cmp, "%Y-%m-%d")
+        return dt_from.strftime('(From %d %b %Y <br />') + dt_to.strftime('to %d %b %Y)')
 
     def get_csv(self, response):
         book = Workbook()

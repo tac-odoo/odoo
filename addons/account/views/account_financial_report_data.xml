@@ -459,10 +459,12 @@
             <field name="name">Cash Summary</field>
             <field name="line" ref="account_financial_report_cashsummary_line0"/>
             <field name="offset_level" eval="1"/>
+            <field name="date_filter">profit_and_loss</field>
         </record>
         <record id="account_financial_report_executivesummary0" model="account.financial.report">
             <field name="name">Executive Summary</field>
             <field name="line" ref="account_financial_report_executivesummary_line0"/>
+            <field name="date_filter">profit_and_loss</field>
         </record>
     </data>
 </openerp>

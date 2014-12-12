@@ -13,6 +13,7 @@
         function saveFootNote() {
             $("table").after(openerp.qweb.render("savedFootNote", {num: footNoteSeqNum, note: $("#note").val()}));
             footNoteSeqNum++;
+            $(this).dialog("close");
         }
 
         dialog = $("#footnote-form").dialog({
@@ -49,25 +50,38 @@
 
         openerp.reportWidgets = openerp.Widget.extend({
             events: {
-                'click .fa-plus-square': 'addFootNote',
+                'click .fa-pencil-square': 'addFootNote',
                 'click .foldable': 'fold',
                 'click .unfoldable': 'unfold',
                 'click .saveFootNote': 'saveFootNote',
                 'click .account_id': 'displayMoveLines',
                 'click .aml': 'displayMoveLine',
-                'mouseenter .annotable': 'addPlus',
-                'mouseleave .annotable': 'rmPlus',
+                'mouseenter .annotable': 'addPencil',
+                'mouseleave .annotable': 'rmPencil',
+                'mouseenter .line': 'addPencil',
+                'mouseleave .line': 'rmPencil',
                 'mouseenter .footnote': 'addTrash',
                 'mouseleave .footnote': 'rmTrash',
                 'click .fa-trash-o': 'rmFootNote',
                 "change *[name='date_filter']": 'onChangeDateFilter',
                 "change *[name='date_filter_cmp']": 'onChangeCmpDateFilter',
+                "change *[name='comparison']": 'onChangeComparison',
             },
             start: function() {
                 openerp.qweb.add_template("/account/static/src/xml/account_report_financial_line.xml");
                 var res = this._super();
                 this.onChangeCmpDateFilter();
                 return res;
+            },
+            onChangeComparison: function(e) {
+                debugger;
+                var checkbox = $(e.target).is(":checked")
+                if (checkbox) {
+                    this.$("label[for='date_filter_cmp']").parent().attr('style', '')
+                }
+                else {
+                    this.$("label[for='date_filter_cmp']").parent().attr('style', 'visibility: hidden');
+                }
             },
             onChangeDateFilter: function(e) {
                 e.preventDefault();
@@ -162,10 +176,17 @@
                             dtFrom.setFullYear(dtFrom.getFullYear() - 1);
                         }
                     }
-                    else if (date_filter.search("month") > -1 || no_date_range) {
+                    else if (date_filter.search("month") > -1) {
                         dtTo.setDate(0);
                         if (!no_date_range) {
                             dtFrom.setMonth(dtFrom.getMonth() - 1);
+                        }
+                    }
+                    else if (no_date_range) {
+                        var month = dtTo.getMonth()
+                        dtTo.setMonth(month - 1);
+                        if (dtTo.getMonth() == month) {
+                            dtTo.setDate(0);
                         }
                     }
                     else {
@@ -203,7 +224,7 @@
                 var $el;
                 var $nextEls = $(e.target).parent().parent().parent().nextAll();
                 for (el in $nextEls) {
-                    $el = $($nextEls[el]).find("td span[style='font-style: italic; margin-left: 150px']");
+                    $el = $($nextEls[el]).find("td span[style='font-style: italic; margin-left: 100px']");
                     if ($el.length == 0)
                         break;
                     else {
@@ -226,7 +247,7 @@
                     var $nextEls = $(e.target).parent().parent().parent().nextAll();
                     var isLoaded = false;
                     for (el in $nextEls) {
-                        $el = $($nextEls[el]).find("td span[style='font-style: italic; margin-left: 150px']");
+                        $el = $($nextEls[el]).find("td span[style='font-style: italic; margin-left: 100px']");
                         if ($el.length == 0)
                             break;
                         else{
@@ -268,15 +289,15 @@
                 var active_id = $(e.target).attr("class").split(/\s+/)[1];
                 window.open("/web?#id=" + active_id + "&view_type=form&model=account.move.line", "_self");
             },
-            addPlus: function(e) {
+            addPencil: function(e) {
                 e.preventDefault();
                 if ($(e.target).parent().find("sup").length == 0) {
-                    $(e.target).prepend(openerp.qweb.render("plusIcon"));
+                    $(e.target).prepend(openerp.qweb.render("pencilIcon"));
                 }
             },
-            rmPlus: function(e) {
+            rmPencil: function(e) {
                 e.preventDefault();
-                this.$("i.fa-plus-square").remove();
+                this.$("i.fa-pencil-square").remove();
             },
             addTrash: function(e) {
                 e.preventDefault();

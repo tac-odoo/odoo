@@ -4,8 +4,8 @@ import time
 from datetime import datetime
 
 from openerp import workflow
-from openerp import api, fields, models, _
-from openerp.exceptions import RedirectWarning, Warning
+from openerp import models, fields, api, _
+from openerp.exceptions import Warning, RedirectWarning
 import openerp.addons.decimal_precision as dp
 from openerp import tools
 from openerp.report import report_sxw
