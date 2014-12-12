@@ -681,7 +681,6 @@ class account_invoice(models.Model):
                 account_invoice_tax.create(tax)
         else:
             tax_key = []
-            precision = self.env['decimal.precision'].precision_get('Account')
             for tax in self.tax_line:
                 if tax.manual:
                     continue
@@ -690,7 +689,7 @@ class account_invoice(models.Model):
                 if key not in compute_taxes:
                     raise except_orm(_('Warning!'), _('Global taxes defined, but they are not in invoice lines !'))
                 base = compute_taxes[key]['base']
-                if float_compare(abs(base - tax.base), company_currency.rounding, precision_digits=precision) == 1:
+                if float_compare(abs(base - tax.base), company_currency.rounding, precision_digits=0) == 1:
                     raise except_orm(_('Warning!'), _('Tax base different!\nClick on compute to update the tax base.'))
             for key in compute_taxes:
                 if key not in tax_key:
@@ -1135,7 +1134,7 @@ class account_invoice(models.Model):
                 total += (line.debit or 0.0) - (line.credit or 0.0)
 
         inv_id, name = self.name_get()[0]
-        if not round(total, self.env['decimal.precision'].precision_get('Account')) or writeoff_acc_id:
+        if not total or writeoff_acc_id:
             lines2rec.reconcile(writeoff_acc_id, fields.Date.context_today(self), writeoff_journal_id)
         else:
             code = self.currency_id.symbol
