@@ -1134,7 +1134,7 @@ class account_invoice(models.Model):
                 total += (line.debit or 0.0) - (line.credit or 0.0)
 
         inv_id, name = self.name_get()[0]
-        if not total or writeoff_acc_id:
+        if not round(total, self.company_id.currency_id.rounding) or writeoff_acc_id:
             lines2rec.reconcile(writeoff_acc_id, fields.Date.context_today(self), writeoff_journal_id)
         else:
             code = self.currency_id.symbol
