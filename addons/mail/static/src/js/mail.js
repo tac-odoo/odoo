@@ -337,8 +337,11 @@ openerp.mail = function (session) {
      * ------------------------------------------------------------
      * 
      * This widget handles the @ mention functionality.
-     * This widget open dropdown when user mention with @.
+     * Open dropdown when user mention with @
      * Dropdown open with highlight string
+     * Start search if word minimum length is 3
+     * wait for at least 1 second without typing any new letter
+     * Maximum 8 user in dropdown list
      */
 
     mail.Mention = session.web.Widget.extend({
@@ -348,7 +351,6 @@ openerp.mail = function (session) {
             this.parent = parent;
             this.textarea = parent.$el.find(".field_text");
             this.start_index = 0;
-            this.cache = {};
             parent.mention_ids = [];
             this.timer;
         },
@@ -409,32 +411,26 @@ openerp.mail = function (session) {
         keyup: function(e) {
             var self = this;
             clearTimeout(this.timer);
-            if(_.contains([40, 38, 13], e.which)) {return;}
+            if(_.contains([40, 38, 13], e.which)) { return; }
             this.search.empty();
-            if(_.contains([37, 39, 35, 33, 34], e.which)) {return;}
+            if(_.contains([37, 39, 35, 33, 34], e.which)) { return; }
             var index = this.textarea.getCursorPosition();
             var value = this.textarea.val();
             var left = value.substring(0, index);
-            var right = value.substring(index, value.length);
-            var left_str = left.substring(left.lastIndexOf(" @"), index);
-            if(left.lastIndexOf(" @") < 0 || left_str.split(" ").length > 2 || left_str.split("\n").length > 1 || left_str.split("@").length > 2 || left_str.length < 5)
-                return;
-            var right_str = right.substring(0, right.indexOf(" "));
-            if(right_str.indexOf("@") > -1)
-               return;
-            this.search_str = (left_str.slice(2) + right_str).trim().toLowerCase();
+            var last_ind = left.lastIndexOf("@");
+            var left_str = left.substring(last_ind, index);
+            if(left_str.split(" ").length > 1 || // Word not have space
+                left_str.split("\n").length > 1 || // Word not have new line
+                left_str.length < 4 || // Word length must greater than 3
+                left.charCodeAt(last_ind - 1) != 10 && // @ mention start at new line
+                (last_ind != 0 &&
+                left.charAt(last_ind - 1) != " ")) return; // @ mention work if there is before space
+            this.search_str = left_str.slice(1);
             if(this.search_str) {
                 this.timer = setTimeout(function() {
                     start_index = index - self.search_str.length - 1;
-                    if(self.cache[self.search_str]) {
-                        self.render(self.cache[self.search_str]);
-                        return;
-                    }
                     new openerp.web.Model("mail.compose.message").call("get_mention_users", [self.search_str]).then(function(res) {
-                        if(res.length) {
-                            self.cache[self.search_str] = res;
-                            self.render(res);
-                        }
+                        if(res.length) { self.render(res); }
                     });
                 }, 1000);
             }
@@ -804,8 +800,8 @@ openerp.mail = function (session) {
             var textarea = self.$('textarea');
             var body = textarea.val().replace(new RegExp("\n", "g"), "<br/>");
             this.mention_ids = _.reject(this.mention_ids, function(p) {
-                if(body.indexOf(_.str.sprintf(" @%s ", p.name)) == -1) return true;
-                body = body.replace(new RegExp(_.str.sprintf(" @%s ", p.name), "gi"), _.str.sprintf(" <a href='/web#model=res.partner&id=%s'>%s</a> ", p.id, p.name));
+                if(body.indexOf(_.str.sprintf("@%s ", p.name)) == -1) return true;
+                body = body.replace(new RegExp(_.str.sprintf("@%s ", p.name), "gi"), _.str.sprintf(" <a href='/web#model=res.partner&id=%s'>@%s</a> ", p.id, p.name));
             });
             textarea.attr("data", body);
             if (self.flag_post) {
