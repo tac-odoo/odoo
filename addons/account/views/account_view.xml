@@ -1374,6 +1374,7 @@
                     <group col="4">
                         <field name="name"/>
                         <field name="active"/>
+                        <field name="company_id" invisible="1"/>
                     </group>
                     <label for="note"/>
                     <field name="note" placeholder="Payment term explanation for the customer..."/>

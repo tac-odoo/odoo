@@ -38,19 +38,21 @@ class account_payment_term(models.Model):
         help="If the active field is set to False, it will allow you to hide the payment term without removing it.")
     note = fields.Text(string='Description', translate=True)
     line_ids = fields.One2many('account.payment.term.line', 'payment_id', string='Terms', copy=True)
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
 
     @api.one
     def compute(self, value, date_ref=False):
         date_ref = date_ref or datetime.now().strftime('%Y-%m-%d')
         amount = value
         result = []
+        company_currency = self.company_id.currency_id
         for line in self.line_ids:
             if line.value == 'fixed':
-                amt = line.value_amount
+                amt = round(line.value_amount, company_currency.rounding)
             elif line.value == 'percent':
-                amt = value * (line.value_amount / 100.0)
+                amt = round(value * (line.value_amount / 100.0), company_currency.rounding)
             elif line.value == 'balance':
-                amt = amount
+                amt = round(amount, company_currency.rounding)
             if amt:
                 next_date = (datetime.strptime(date_ref, '%Y-%m-%d') + relativedelta(days=line.days))
                 if line.days2 < 0:
@@ -62,7 +64,7 @@ class account_payment_term(models.Model):
                 amount -= amt
 
         amount = reduce(lambda x,y: x + y[1], result, 0.0)
-        dist = value - amount
+        dist = round(value - amount, company_currency.rounding)
         if dist:
             last_date = result and result[-1][0] or time.strftime('%Y-%m-%d')
             result.append((last_date, dist))
@@ -590,7 +592,7 @@ class account_tax_code(models.Model):
                 for rec in record.child_ids:
                     amount += _rec_get(rec) * rec.sign
                 return amount
-            amount = _rec_get(record)
+            amount = round(_rec_get(record), self.company_id.currency_id.rounding)
             record.sum = amount
 
     @api.multi
@@ -957,13 +959,15 @@ class account_tax(models.Model):
             tax = {'name':'', 'amount':0.0, 'account_collected_id':1, 'account_paid_id':2}
             one tax for each tax id in IDS and their children
         """
+        if not precision:
+            precision = self.company_id.currency_id.rounding
         res = self._unit_compute(price_unit, product, partner, quantity)
         total = 0.0
         for r in res:
             if r.get('balance', False):
-                r['amount'] = r.get('balance', 0.0) * quantity - total
+                r['amount'] = round(r.get('balance', 0.0) * quantity, precision) - total
             else:
-                r['amount'] = r.get('amount', 0.0) * quantity
+                r['amount'] = round(r.get('amount', 0.0) * quantity, precision)
                 total += r['amount']
         return res
 
@@ -1053,13 +1057,15 @@ class account_tax(models.Model):
             tax = {'name':'', 'amount':0.0, 'account_collected_id':1, 'account_paid_id':2}
             one tax for each tax id in IDS and their children
         """
+        if not precision:
+            precision = self.company_id.currency_id.rounding
         res = self._unit_compute_inv(price_unit, product, partner=None)
         total = 0.0
         for r in res:
             if r.get('balance', False):
-                r['amount'] = r['balance'] * quantity - total
+                r['amount'] = round(r['balance'] * quantity, precision) - total
             else:
-                r['amount'] = r['amount'] * quantity
+                r['amount'] = round(r['amount'] * quantity, precision)
                 total += r['amount']
         return res
 
