@@ -12,83 +12,108 @@ _logger = logging.getLogger(__name__)
 
 
 class website_slides(http.Controller):
-
     _slides_per_page = 12
+    _slides_per_list = 20
 
-    def _is_viewed_slide(self, slide, key):
-        slide_session = '%s_%s' % (key, request.session_id)
-        request.session[slide_session] = request.session.get(slide_session, [])
-        if slide.id not in request.session[slide_session]:
-            return False
+    def _set_viewed_slide(self, slide, view_mode):
+        slide_key = '%s_%s' % (view_mode, request.session_id)
+        viewed_slides = request.session.setdefault(slide_key, list())
+        if slide.id not in viewed_slides:
+            if view_mode == 'website':
+                slide.slide_views = slide.slide_views + 1
+            elif view_mode == 'embed':
+                slide.embed_views = slide.embed_views + 1
+            viewed_slides.append(slide.id)
         return True
 
+    def _get_slide_detail(self, slide):
+        most_viewed_slides = slide.get_most_viewed_slides(self._slides_per_list)
+        related_slides = slide.get_related_slides(self._slides_per_list)
+        values = {
+            'slide': slide,
+            'most_viewed_slides': most_viewed_slides,
+            'related_slides': related_slides,
+            'user': request.env.user,
+            'is_public_user': request.env.user == request.website.user_id,
+        }
+        if slide.channel_id.visibility == 'partial' and not set(slide.channel_id.group_ids.ids) <= set(request.env.user.groups_id.ids):
+            values.update({
+                'private': True,
+            })
+            return values
+        values.update({
+            'private': False,
+            'comments': slide.website_message_ids,
+        })
+        return values
+
+    # --------------------------------------------------
+    # MAIN / SEARCH
+    # --------------------------------------------------
+
     @http.route('/slides', type='http', auth="public", website=True)
-    def index(self, *args, **post):
+    def slides_index(self, *args, **post):
         """ Returns a list of available channels: if only one is available,
             redirects directly to its slides
         """
-        Channel = request.env['slide.channel']
-        user = request.env.user
-        channels = Channel.search([], order='sequence, id')
-
+        channels = request.env['slide.channel'].search([], order='sequence, id')
         if not channels:
             return request.website.render("website_slides.channel_not_found")
-
-        if len(channels) == 1:
+        elif len(channels) == 1:
             return request.redirect("/slides/%s" % channels.id)
-
-        vals = {
+        return request.website.render('website_slides.channels', {
             'channels': channels,
-            'user': user,
-            'is_public_user': user == request.website.user_id
-        }
-        return request.website.render('website_slides.channels', vals)
+            'user': request.env.user,
+            'is_public_user': request.env.user == request.website.user_id
+        })
 
-    @http.route(['/slides/<model("slide.channel"):channel>',
-                '/slides/<model("slide.channel"):channel>/page/<int:page>',
+    @http.route([
+        '/slides/<model("slide.channel"):channel>',
+        '/slides/<model("slide.channel"):channel>/page/<int:page>',
 
-                '/slides/<model("slide.channel"):channel>/<slide_type>',
-                '/slides/<model("slide.channel"):channel>/<slide_type>/page/<int:page>',
+        '/slides/<model("slide.channel"):channel>/<string:slide_type>',
+        '/slides/<model("slide.channel"):channel>/<string:slide_type>/page/<int:page>',
 
-                '/slides/<model("slide.channel"):channel>/tag/<model("slide.tag"):tag>',
-                '/slides/<model("slide.channel"):channel>/tag/<model("slide.tag"):tag>/page/<int:page>',
+        '/slides/<model("slide.channel"):channel>/tag/<model("slide.tag"):tag>',
+        '/slides/<model("slide.channel"):channel>/tag/<model("slide.tag"):tag>/page/<int:page>',
 
-                '/slides/<model("slide.channel"):channel>/category/<model("slide.category"):category>',
-                '/slides/<model("slide.channel"):channel>/category/<model("slide.category"):category>/page/<int:page>',
+        '/slides/<model("slide.channel"):channel>/category/<model("slide.category"):category>',
+        '/slides/<model("slide.channel"):channel>/category/<model("slide.category"):category>/page/<int:page>',
 
-                '/slides/<model("slide.channel"):channel>/category/<model("slide.category"):category>/<slide_type>',
-                '/slides/<model("slide.channel"):channel>/category/<model("slide.category"):category>/<slide_type>/page/<int:page>',
-                ], type='http', auth="public", website=True)
-    def slides(self, channel, category=None, page=1, slide_type='', tag='', sorting='creation', *args, **kw):
+        '/slides/<model("slide.channel"):channel>/category/<model("slide.category"):category>/<string:slide_type>',
+        '/slides/<model("slide.channel"):channel>/category/<model("slide.category"):category>/<string:slide_type>/page/<int:page>'],
+        type='http', auth="public", website=True)
+    def channel(self, channel, category=None, tag=None, page=1, slide_type=None, sorting='creation', search=None, **kw):
         user = request.env.user
         Slide = request.env['slide.slide']
         domain = [('channel_id', '=', channel.id)]
+        pager_url = "/slides/%s" % (channel.id)
+        pager_args = {}
 
-        url = "/slides/%s" % (channel.id)
-        if category:
-            domain += [('category_id', '=', category.id)]
-            url = "/slides/%s/category/%s" % (channel.id, category.id)
-
-        if slide_type:
-            domain += [('slide_type', '=', slide_type)]
-            url = "/slides/%s/%s" % (channel.id, slide_type)
-
-        if tag:
-            domain += [('tag_ids.id', '=', tag.id)]
-            url = "/slides/%s/tag/%s" % (channel.id, tag.name)
-
-        if category and slide_type:
-            url = "/slides/%s/category/%s/%s" % (channel.id, category.id, slide_type)
+        if search:
+            domain += ['|', '|', ('name', 'ilike', search), ('description', 'ilike', search), ('index_content', 'ilike', search)]
+            pager_args['search'] = search
+        else:
+            if category:
+                domain += [('category_id', '=', category.id)]
+                pager_url += "/category/%s" % category.id
+            elif tag:
+                domain += [('tag_ids.id', '=', tag.id)]
+                pager_url += "/tag/%s" % tag.id
+            if slide_type:
+                domain += [('slide_type', '=', slide_type)]
+                pager_url += "/%s" % slide_type
 
         if sorting == 'date':
-            order = 'date_publish desc'
+            order = 'date_published desc'
         elif sorting == 'view':
             order = 'total_views desc'
         elif sorting == 'vote':
             order = 'likes desc'
         else:
             sorting = 'date'
-            order = 'date_publish desc'
+            order = 'date_published desc'
+        pager_args['sorting'] = sorting
 
         access_group = channel.group_ids
         upload_group = channel.upload_group_ids
@@ -102,12 +127,12 @@ class website_slides(http.Controller):
         upload_access = len(upload_group & user_group) if upload_group else True
 
         pager_count = Slide.search_count(domain)
-        pager = request.website.pager(url=url, total=pager_count, page=page,
+        pager = request.website.pager(url=pager_url, total=pager_count, page=page,
                                       step=self._slides_per_page, scope=self._slides_per_page,
-                                      url_args={'sorting': sorting})
+                                      url_args=pager_args)
 
         slides = Slide.search(domain, limit=self._slides_per_page, offset=pager['offset'], order=order)
-        famous = channel.get_promoted_slide()
+
         values = {
             'channel': channel,
             'slides': slides,
@@ -118,10 +143,14 @@ class website_slides(http.Controller):
             'slide_type': slide_type,
             'sorting': sorting,
             'category': category,
-            'famous': famous,
+
             'is_public_user': user == request.website.user_id,
             'can_upload': channel_access and upload_access
         }
+
+        if search:
+            values['search'] = search
+            return request.website.render('website_slides.slides_search', values)
 
         # Display uncategorized slides
         if not slide_type and not category:
@@ -139,25 +168,24 @@ class website_slides(http.Controller):
             })
         return request.website.render('website_slides.home', values)
 
-    @http.route('/slides/detail_view/<model("slide.slide"):slide>', type='http', auth="public", website=True)
-    def slide_detail_view(self, slide):
-        values = slide.get_slide_detail()
-        key = 'slide'
-        if not self._is_viewed_slide(slide, key) and not values.get('private'):
-            slide.slide_views += 1
-            slide_session = '%s_%s' % (key, request.session_id)
-            request.session[slide_session].append(slide.id)
-        return request.website.render('website_slides.slide_detail_view', values)
+    # --------------------------------------------------
+    # SLIDE.SLIDE CONTOLLERS
+    # --------------------------------------------------
 
-    @http.route('/slides/pdf_content/<model("slide.slide"):slide>', type='http', auth="public", website=True)
-    def slide_view_content(self, slide):
+    @http.route('/slides/slide/<model("slide.slide"):slide>', type='http', auth="public", website=True)
+    def slide_view(self, slide):
+        self._set_viewed_slide(slide, 'slide')
+        return request.website.render('website_slides.slide_detail_view', self._get_slide_detail(slide))
+
+    @http.route('/slides/slide/<model("slide.slide"):slide>/pdf_content', type='http', auth="public", website=True)
+    def slide_get_pdf_content(self, slide):
         response = werkzeug.wrappers.Response()
         response.data = slide.datas.decode('base64')
         response.mimetype = 'application/pdf'
         return response
 
-    @http.route('/slides/comment/<model("slide.slide"):slide>', type='http', auth="public", methods=['POST'], website=True)
-    def slides_comment(self, slide, **post):
+    @http.route('/slides/slide/<model("slide.slide"):slide>/comment', type='http', auth="public", methods=['POST'], website=True)
+    def slide_comment(self, slide, **post):
         Partner = request.env['res.partner']
         partner_ids = False
 
@@ -188,64 +216,23 @@ class website_slides(http.Controller):
 
         return werkzeug.utils.redirect(request.httprequest.referrer + "#discuss")
 
-    @http.route('/slides/like/<model("slide.slide"):slide>', type='json', auth="public", website=True)
+    @http.route('/slides/slide/<model("slide.slide"):slide>/like', type='json', auth="public", website=True)
     def slide_like(self, slide, **post):
         slide.likes += 1
         return slide.likes
 
-    @http.route('/slides/dislike/<model("slide.slide"):slide>', type='json', auth="public", website=True)
+    @http.route('/slides/slide/<model("slide.slide"):slide>/dislike', type='json', auth="public", website=True)
     def slide_dislike(self, slide, **post):
         slide.dislikes += 1
         return slide.dislikes
 
-    @http.route(['/slides/send_share_email/<model("slide.slide"):slide>'], type='json', auth='user', methods=['POST'], website=True)
-    def send_share_email(self, slide, email):
+    @http.route(['/slides/slide/<model("slide.slide"):slide>/send_share_email'], type='json', auth='user', methods=['POST'], website=True)
+    def slide_send_share_email(self, slide, email):
         result = slide.send_share_email(email)
         return result
 
-    @http.route(['/slides/dialog_preview'], type='json', auth='user', methods=['POST'], website=True)
-    def dialog_preview(self, **data):
-        Slide = request.env['slide.slide']
-        document, id = Slide._parse_url(data['url'])
-        preview = {}
-        if not document:
-            preview['error'] = _('Please enter valid youtube or google doc url')
-            return preview
-        avalilable = Slide.check_unique_slide(data['channel_id'], False, id)
-        if avalilable:
-            preview['error'] = _('This video already exists in this channel <a target="_blank" href="%s">click here to view it </a>' % avalilable)
-            return preview
-        values = Slide.get_resource_detail({document: id}, only_preview_fields=True)
-        if not values:
-            preview['error'] = _('Could not fetch data from url. Document or access right not available')
-            return preview
-        return values
-
-    @http.route(['/slides/add_slide'], type='json', auth='user', methods=['POST'], website=True)
-    def create_slide(self, *args, **post):
-        Slide = request.env['slide.slide']
-        payload = request.httprequest.content_length
-        # payload is total request content size so it's not exact size of file.
-        # already add client validation this is for double check if client alter.
-        if (payload / 1024 / 1024 > 17):
-            return {'error': _('File is too big.')}
-
-        if Slide.search([('name', '=', post['name']), ('channel_id', '=', post['channel_id'])]):
-            return {
-                'error': _('This title already exists in the channel, rename and try again.')
-            }
-        # handle exception during creation of slide and sent error notification to the client
-        # otherwise client slide create dialog box continue processing even server fail to create a slide.
-        try:
-            values = Slide.prepare_create_values(post)
-            slide_id = Slide.create(values)
-        except Exception as e:
-            _logger.error(e)
-            return {'error': _('Internal server error, please try again later or contact administrator.')}
-        return {'url': "/slides/detail_view/%s" % (slide_id.id)}
-
-    @http.route('/slides/overlay/<model("slide.slide"):slide>', type='json', auth="public", website=True)
-    def get_next_slides(self, slide):
+    @http.route('/slides/slide/<model("slide.slide"):slide>/overlay', type='json', auth="public", website=True)
+    def slide_get_next_slides(self, slide):
         slides_to_suggest = 9
         suggested_slides = slide.get_related_slides(slides_to_suggest)
         if len(suggested_slides) < slides_to_suggest:
@@ -263,56 +250,94 @@ class website_slides(http.Controller):
 
         return vals
 
-    @http.route('/slides/download/<model("slide.slide"):slide>', type='http', auth="public", website=True)
-    def download_slide(self, slide):
-        if slide.downloadable == 'not_downloadable':
-            return request.website.render("website.403")
-        if not request.session.uid and slide.downloadable == 'with_login':
-            login_redirect = '/web?redirect=/slides/detail_view/%s' % (slide.id)
-            return werkzeug.utils.redirect(login_redirect)
-        filecontent = base64.b64decode(slide.datas)
-        # TODO not sure convert filename to utf-8 and quote, check with IE if it required
-        disposition = 'attachment; filename=%s.pdf' % slide.name
-        return request.make_response(filecontent,
+    @http.route('/slides/slide/<model("slide.slide"):slide>/download', type='http', auth="public", website=True)
+    def slide_download(self, slide):
+        if slide.download_security == 'public' or (slide.download_security == 'user' and request.session.uid):
+            filecontent = base64.b64decode(slide.datas)
+            # TODO not sure convert filename to utf-8 and quote, check with IE if it required
+            disposition = 'attachment; filename=%s.pdf' % slide.name
+            return request.make_response(
+                filecontent,
                 [('Content-Type', 'application/pdf'),
                  ('Content-Disposition', disposition)])
+        elif not request.session.uid and slide.download_security == 'user':
+            return werkzeug.utils.redirect('/web?redirect=/slides/%s' % (slide.id))
+        return request.website.render("website.403")
 
-    @http.route(['/slides/<model("slide.channel"):channel>/search',
-                '/slides/<model("slide.channel"):channel>/search/page/<int:page>'
-                ], type='http', auth="public", website=True)
-    def search(self, channel=0, query=False, page=1, order=False):
-        Slide = request.env['slide.slide']
-
-        domain = [('channel_id', '=', channel.id)]
-
-        if request.env.user == request.website.user_id:
-            domain += [('website_published', '=', True)]
-
-        if query:
-            domain += ['|', '|', ('name', 'ilike', query), ('description', 'ilike', query), ('index_content', 'ilike', query)]
-
-        url = "/slides/%s/search" % (channel.id)
-        url_args = {}
-        if query:
-            url_args['query'] = query
-
-        pager_count = Slide.search_count(domain)
-        pager = request.website.pager(url=url, total=pager_count, page=page,
-                                      step=self._slides_per_page, scope=self._slides_per_page,
-                                      url_args=url_args)
-
-        slides = Slide.search(domain, limit=self._slides_per_page, offset=pager['offset'], order=order)
-
-        values = {
-            'channel': channel,
-            'pager': pager,
-            'slides': slides,
-            'query': query,
-            'order': order
-        }
-        return request.website.render('website_slides.search_result', values)
-
-    @http.route('/slides/promote/<model("slide.slide"):slide>', type='http', auth='public', website=True)
-    def set_promoted_slide(self, slide):
+    @http.route('/slides/slide/<model("slide.slide"):slide>/promote', type='http', auth='public', website=True)
+    def slide_set_promoted(self, slide):
         slide.channel_id.promoted_slide_id = slide.id
         return request.redirect("/slides/%s" % slide.channel_id.id)
+
+    # --------------------------------------------------
+    # TOOLS
+    # --------------------------------------------------
+
+    @http.route(['/slides/dialog_preview'], type='json', auth='user', methods=['POST'], website=True)
+    def dialog_preview(self, **data):
+        Slide = request.env['slide.slide']
+        document_type, document_id = Slide._parse_document_url(data['url'])
+        preview = {}
+        if not document_id:
+            preview['error'] = _('Please enter valid youtube or google doc url')
+            return preview
+        existing_slide = Slide.search_count([('channel_id', '=', int(data['channel_id'])), ('document_id', '=', document_id)], limit=1)
+        if existing_slide:
+            preview['error'] = _('This video already exists in this channel <a target="_blank" href="%s">click here to view it </a>' % existing_slide)
+            return preview
+        values = Slide.get_resource_detail({document_type: document_id}, only_preview_fields=True)
+        if not values:
+            preview['error'] = _('Could not fetch data from url. Document or access right not available')
+            return preview
+        return values
+
+    @http.route(['/slides/add_slide'], type='json', auth='user', methods=['POST'], website=True)
+    def create_slide(self, *args, **post):
+        payload = request.httprequest.content_length
+        # payload is total request content size so it's not exact size of file.
+        # already add client validation this is for double check if client alter.
+        if (payload / 1024 / 1024 > 17):
+            return {'error': _('File is too big.')}
+
+        # TDE FIXME: move as a constraint
+        # if request.env['slide.slide'].search([('name', '=', post['name']), ('channel_id', '=', post['channel_id'])]):
+        #     return {
+        #         'error': _('This title already exists in the channel, rename and try again.')
+        #     }
+
+        values = dict((fname, post[fname]) for fname in ['name', 'url', 'tag_ids', 'slide_type', 'channel_id', 'mime_type', 'datas', 'description'] if post.get(fname))
+        if post.get('category_id'):
+            if post['category_id'][0] == 0:
+                values['category_id'] = request.env['slide.category'].create({
+                    'name': post['category_id'][1]['name'],
+                    'channel_id': values.get('channel_id')}).id
+            else:
+                values['category_id'] = post['category_id'][0]
+
+        # Do not publish slide if user has not publisher rights
+        # if not self.user_has_groups('base.group_website_publisher'):
+            # values['website_published'] = False
+
+        # handle exception during creation of slide and sent error notification to the client
+        # otherwise client slide create dialog box continue processing even server fail to create a slide.
+        try:
+            slide_id = request.env['slide.slide'].create(values)
+        except Exception as e:
+            _logger.error(e)
+            return {'error': _('Internal server error, please try again later or contact administrator.')}
+        return {'url': "/slides/slide/%s" % (slide_id.id)}
+
+    # --------------------------------------------------
+    # EMBED IN THIRD PARTY WEBSITES
+    # --------------------------------------------------
+
+    @http.route('/slides/embed/count', type='http', methods=['POST'], auth='public', website=True)
+    def slides_embed_count(self, slide, url):
+        request.env['slide.embed'].sudo().add_embed_url(slide, url)
+
+    @http.route('/slides/embed/<model("slide.slide"):slide>', type='http', auth='public', website=True)
+    def slides_embed(self, slide, page="1"):
+        self._set_viewed_slide(slide, 'embed')
+        values = self._get_slide_detail(slide)
+        values['page'] = page
+        return request.website.render('website_slides.embed_slide', values)

@@ -239,7 +239,7 @@ if($('#pdfcanvas').get(0)){
         $.ajax({
             type: "POST",
             dataType: 'json',
-            url: '/slides/send_share_email/' + $(this).attr('slide-id'),
+            url: '/slides/' + $(this).attr('slide-id') + '/send_share_email',
             async: false,
             contentType: "application/json; charset=utf-8",
             data: JSON.stringify({email: $input.val()}),

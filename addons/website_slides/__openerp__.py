@@ -19,9 +19,9 @@ You can upload presentations, videos, documents and infographic and moderate and
     'website': 'http://www.odoo.com',
     'depends': ['website', 'website_mail'],
     'data': [
-        'view/slides_website.xml',
-        'view/slides_embed.xml',
-        'view/slides_backend.xml',
+        'view/website_slides.xml',
+        'view/website_slides_embed.xml',
+        'view/website_slides_backend.xml',
         'data/website_slides_data.xml',
         'security/ir.model.access.csv',
         'security/website_slides_security.xml'

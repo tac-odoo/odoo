@@ -76,7 +76,7 @@
 
         <record model="slide.channel" id="dir_public">
             <field name="name">Public Channel</field>
-            <field name="promote_strategy">mostview</field>
+            <field name="promote_strategy">most_viewed</field>
             <field name="template_id" ref="website_slides.slide_email_notification"/>
             <field name="website_published" eval="True"/>
             <field name="visibility">public</field>

@@ -45,7 +45,9 @@
                                     <b class="toggle-slide-option slide-cursor slide-color" data-slide-option-id="#slide_embed"><i class="fa fa-code"></i> Embed</b>
                                 </div>
                                 <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2 text-right">
-                                    <a id="like" class="slide-like slide-cursor slide-color" data-count-el='.count-likes' t-att-user-id="user.id" t-att-slide-id="slide.id" t-attf-data-href="/slides/like/#{slug(slide)}">
+                                    <a id="like" class="slide-like slide-cursor slide-color"
+                                        data-count-el='.count-likes' t-att-user-id="user.id"
+                                        t-att-slide-id="slide.id" t-attf-data-href="/slides/#{slug(slide)}/like">
                                         <i class="fa fa-thumbs-up"></i> <span class="count-likes"><t t-esc="slide.likes"/></span> Like
                                     </a>
                                 </div>
@@ -118,7 +120,7 @@
                             </div>
                         </div>
                     </div>
-                    <input type="hidden" id="pdf_file" t-attf-value="/slides/pdf_content/#{slide.id}"/>
+                    <input type="hidden" id="pdf_file" t-attf-value="/slides/slide/#{slide.id}/pdf_content"/>
                     <input type="hidden" id="pdf_page" t-att-value="page"/>
                     <input type="hidden" id="pdf_id" t-att-value="slide.id"/>
                  <!-- End of body -->

@@ -2,7 +2,7 @@
 <openerp>
     <data>
         <menuitem name="Marketing" id="base.marketing_menu" sequence="85" groups="base.group_user"/>
-        <menuitem id="main_slides" parent="base.marketing_menu" name="Slides"/>
+        <menuitem id="menu_slides" parent="base.marketing_menu" name="Slides"/>
 
         <record id="view_slides_slide_form" model="ir.ui.view">
             <field name="model">slide.slide</field>
@@ -23,7 +23,7 @@
                             <field name="website_published" class="pull-right" widget="website_button"/>
                         </div>
                         <group>
-                            <field name="downloadable"/>
+                            <field name="download_security"/>
                             <field name="channel_id" string="Channel"/>
                             <field name="category_id" domain="[('channel_id','=',channel_id)]"/>
                             <field name="url"/>
@@ -66,7 +66,7 @@
                     <field name="slide_type"/>
                     <field name="channel_id"/>
                     <field name="category_id"/>
-                    <field name="date_publish"/>
+                    <field name="date_published"/>
                 </tree>
             </field>
         </record>
@@ -77,29 +77,29 @@
             <field name="arch" type="xml">
                 <search string="Search Slides">
                     <field name="name" string="Slide Name"/>
-                    <filter name="published" string="Published" domain="[('website_published','=', True)]"/>
-                    <filter name="published" string="Waiting for validation" domain="[('website_published','=', False)]"/>
+                    <filter name="published" string="Published" domain="[('website_published', '=', True)]"/>
+                    <filter name="published" string="Waiting for validation" domain="[('website_published', '=', False)]"/>
                     <group expand="0" string="Group By">
-                        <filter string="Channel" domain="[]" context="{'group_by':'channel_id'}"/>
-                        <filter string="Category" domain="[]" context="{'group_by':'category_id'}"/>
-                        <filter string="Type" domain="[]" context="{'group_by':'slide_type'}"/>
+                        <filter string="Channel" domain="[]" context="{'group_by': 'channel_id'}"/>
+                        <filter string="Category" domain="[]" context="{'group_by': 'category_id'}"/>
+                        <filter string="Type" domain="[]" context="{'group_by': 'slide_type'}"/>
                     </group>
                 </search>
             </field>
         </record>
 
         <record id="action_slides_slides" model="ir.actions.act_window">
-            <field name="name">Slide</field>
+            <field name="name">Slides</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">slide.slide</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" eval="False"/>
-            <field name="context">{'default_slide_type':'presentation'}</field>
+            <field name="context">{'default_slide_type': 'presentation'}</field>
         </record>
-        <menuitem action="action_slides_slides" id="submenu_action_slides_slides" parent="main_slides" sequence="10"/>
+        <menuitem action="action_slides_slides" id="submenu_action_slides_slides" parent="menu_slides" sequence="3"/>
 
-        <!-- category view -->
+        <!-- SLIDE.CATEGORY -->
         <record model="ir.ui.view" id="view_slides_category_form">
             <field name="name">slide.category.form</field>
             <field name="model">slide.category</field>
@@ -107,12 +107,8 @@
                 <form string="Category">
                     <sheet>
                         <group>
-                            <group>
-                                <field name="name"/>
-                            </group>
-                            <group>
-                                <field name="channel_id"/>
-                            </group>
+                            <field name="name"/>
+                            <field name="channel_id"/>
                         </group>
                     </sheet>
                 </form>
@@ -132,16 +128,16 @@
         </record>
 
         <record id="action_ir_slide_category" model="ir.actions.act_window">
-            <field name="name">Category</field>
+            <field name="name">Categories</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">slide.category</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" eval="False"/>
         </record>
-        <menuitem action="action_ir_slide_category" id="menu_action_ir_slide_category" parent="main_slides" sequence="15"/>
+        <menuitem action="action_ir_slide_category" id="menu_action_ir_slide_category" parent="menu_slides" sequence="2"/>
 
-
+        <!-- SLIDE.CHANNEL VIEWS -->
         <record model="ir.ui.view" id="view_slide_channel_form">
             <field name="name">slide.channel.form</field>
             <field name="model">slide.channel</field>
@@ -164,11 +160,13 @@
                             <page string="General">
                                 <group>
                                     <group>
-                                        <field name="template_id" domain="[('model','=','slide.slide')]"/>
                                         <field name="promote_strategy" widget="radio"/>
+                                        <field name="custom_slide_id" attrs="{'invisible': [('promote_strategy', '!=', 'custom')]}"
+                                             domain="[('channel_id','=',id), ('website_published','=',True)]"/>
+                                        <field name="promoted_slide_id"/>
                                     </group>
                                     <group>
-                                        <field name="promoted_slide_id" attrs="{'invisible':[('promote_strategy','!=','custom')]}" domain="[('channel_id','=',id), ('website_published','=',True)]"/>
+                                        <field name="template_id" domain="[('model','=','slide.slide')]"/>
                                     </group>
                                 </group>
                                 <label for="description"/>
@@ -221,14 +219,14 @@
         </record>
 
         <record id="action_slide_channels" model="ir.actions.act_window">
-            <field name="name">Channel</field>
+            <field name="name">Channels</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">slide.channel</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" eval="False"/>
         </record>
-        <menuitem action="action_slide_channels" id="menu_action_slide_channels" parent="main_slides" sequence="20"/>
+        <menuitem action="action_slide_channels" id="menu_action_slide_channels" parent="menu_slides" sequence="1"/>
 
 
     </data>
