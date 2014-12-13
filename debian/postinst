@@ -13,8 +13,8 @@ case "${1}" in
         if ! getent passwd | grep -q "^openerp:"; then
             adduser --system --home $ODOO_DATA_DIR --quiet --group $ODOO_USER
         fi
-        # Register "openerp" as a postgres superuser 
-        su - postgres -c "createuser -s openerp" 2> /dev/null || true
+        # Register "openerp" as a postgres user with "Create DB" role attribute
+        su - postgres -c "createuser -d -R -S openerp" 2> /dev/null || true
         # Configuration file
         chown $ODOO_USER:$ODOO_GROUP $ODOO_CONFIGURATION_FILE
         chmod 0640 $ODOO_CONFIGURATION_FILE
