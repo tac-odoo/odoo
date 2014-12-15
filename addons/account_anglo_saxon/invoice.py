@@ -71,7 +71,7 @@ class account_invoice_line(osv.osv):
                 price = cur_obj.compute(cr, uid, company_currency, inv.currency_id.id, price_unit * i_line.quantity, context={'date': inv.date_invoice})
             else:
                 price = price_unit * i_line.quantity
-            return round(price, decimal_precision.precision_get(cr, uid, 'Account'))
+            return round(price, inv.currency_id.rounding)
 
     def _anglo_saxon_sale_move_lines(self, cr, uid, i_line, res, context=None):
         """Return the additional move lines for sales invoices and refunds.
@@ -152,8 +152,7 @@ class account_invoice_line(osv.osv):
                     fpos = i_line.invoice_id.fiscal_position or False
                     a = self.pool.get('account.fiscal.position').map_account(cr, uid, fpos, oa)
                 diff_res = []
-                decimal_precision = self.pool.get('decimal.precision')
-                account_prec = decimal_precision.precision_get(cr, uid, 'Account')
+                account_prec = inv.company_id.currency_id.rounding
                 # calculate and write down the possible price difference between invoice price and product price
                 for line in res:
                     if line.get('invl_id', 0) == i_line.id and a == line['account_id']:

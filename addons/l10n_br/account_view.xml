@@ -40,8 +40,8 @@
 					<field name="tax_code_id" on_change="onchange_tax_code_id(tax_code_id)" />
 			    </field>
    				<field position="after" name="amount">
-					<field groups="base.group_extended" name="base_reduction"/>
-					<field groups="base.group_extended" name="amount_mva"/>
+					<field groups="base.group_extended" name="base_reduction" widget="monetary"/>
+					<field groups="base.group_extended" name="amount_mva" widget="monetary"/>
 			    </field>
 			</field>
 		</record>
@@ -58,8 +58,8 @@
 					<field name="tax_code_id" on_change="onchange_tax_code_id(tax_code_id)" />
 			    </field>
 			    <field position="after" name="amount">
-					<field groups="base.group_extended" name="base_reduction"/>
-					<field groups="base.group_extended" name="amount_mva"/>
+					<field groups="base.group_extended" name="base_reduction" widget="monetary"/>
+					<field groups="base.group_extended" name="amount_mva" widget="monetary"/>
 			    </field>
 			</field>
 		</record>

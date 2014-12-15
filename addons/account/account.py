@@ -903,7 +903,7 @@ class account_tax(models.Model):
         # precision when we round the tax amount for each line (we use
         # the 'Account' decimal precision + 5), and that way it's like
         # rounding after the sum of the tax amounts of each line
-        precision = self.pool.get('decimal.precision').precision_get(cr, uid, 'Account')
+        precision = taxes[0].company_id.currency_id.rounding
         tax_compute_precision = precision
         if taxes and taxes[0].company_id.tax_calculation_rounding_method == 'round_globally':
             tax_compute_precision += 5
