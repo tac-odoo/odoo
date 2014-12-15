@@ -75,6 +75,9 @@
             <link rel="stylesheet" href="/account/static/src/css/account_financial_report.css" />
             <div t-att-class="' '.join(['page', 'oe_account_report_widgets', str(context.id)])">
                 <h2 t-esc="o.name"/>
+                <div class="summary">
+                    <input type="submit" name="summary" class="btn btn-primary" value="Add summary" />
+                </div>
                 <table class="table table-condensed">
                     <thead>
                         <tr>

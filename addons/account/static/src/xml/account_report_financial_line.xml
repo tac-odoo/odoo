@@ -26,6 +26,17 @@
     <t t-name="trashIcon">
         <i class="fa fa-trash-o"></i> 
     </t>
+    <t t-name="addSummary">
+        <input type="submit" name="summary" class="btn btn-primary" value="Add summary" />
+    </t>
+    <t t-name="editSummary">
+        <label for="summary">Edit summary :</label>
+        <textarea name="summary" rows='4' class="form-control"></textarea>
+        <button class="btn btn-primary saveSummary">Save</button>
+    </t>
+    <t t-name="savedSummary">
+        <span class="savedSummary"><t t-esc="summary" /></span>
+    </t>
     <t t-name="report_financial_line">
         <tr>
             <td>

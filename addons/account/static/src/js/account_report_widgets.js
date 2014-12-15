@@ -62,10 +62,14 @@
                 'mouseleave .line': 'rmPencil',
                 'mouseenter .footnote': 'addTrash',
                 'mouseleave .footnote': 'rmTrash',
-                'click .fa-trash-o': 'rmFootNote',
+                'click .fa-trash-o': 'rmContent',
                 "change *[name='date_filter']": 'onChangeDateFilter',
                 "change *[name='date_filter_cmp']": 'onChangeCmpDateFilter',
                 "change *[name='comparison']": 'onChangeComparison',
+                "click input[name='summary']": 'onClickSummary',
+                "click button.saveSummary": 'saveSummary',
+                'mouseenter .savedSummary': 'addTrash',
+                'mouseleave .savedSummary': 'rmTrash',
             },
             start: function() {
                 openerp.qweb.add_template("/account/static/src/xml/account_report_financial_line.xml");
@@ -73,8 +77,17 @@
                 this.onChangeCmpDateFilter();
                 return res;
             },
+            onClickSummary: function(e) {
+                e.stopPropagation();
+                this.$("div.summary").html(openerp.qweb.render("editSummary"));
+            },
+            saveSummary: function(e) {
+                e.stopPropagation();
+                var summary = this.$("textarea[name='summary']").val();
+                this.$("div.summary").html(openerp.qweb.render("savedSummary", {summary : summary}));
+            },
             onChangeComparison: function(e) {
-                debugger;
+                e.stopPropagation();
                 var checkbox = $(e.target).is(":checked")
                 if (checkbox) {
                     this.$("label[for='date_filter_cmp']").parent().attr('style', '')
@@ -84,6 +97,7 @@
                 }
             },
             onChangeDateFilter: function(e) {
+                e.stopPropagation();
                 e.preventDefault();
                 var filter = $(e.target).val();
                 var no_date_range = this.$("input[name='date_from']").length == 0;
@@ -203,6 +217,7 @@
                 }
             },
             addFootNote: function(e) {
+                e.stopPropagation();
                 e.preventDefault();
                 if ($(e.target).parent().find("sup").length == 0) {
                     $(e.target).parent().append(' <sup>' + footNoteSeqNum + '</sup>');
@@ -211,13 +226,20 @@
                     dialog.dialog("open");
                 }
             },
-            rmFootNote: function(e) {
+            rmContent: function(e) {
+                e.stopPropagation();
                 e.preventDefault();
-                var num = $(e.target).parent().text().split('.')[0];
-                $(e.target).parent().remove();
-                this.$("sup:contains('" + num + "')").remove()
+                if ($(e.target).parents("div.summary").length > 0) {
+                    $(e.target).parent().replaceWith(openerp.qweb.render("addSummary"));
+                }
+                else {
+                    var num = $(e.target).parent().text().split('.')[0];
+                    this.$("sup:contains('" + num + "')").remove();
+                    $(e.target).parent().remove();
+                }
             },
             fold: function(e) {
+                e.stopPropagation();
                 e.preventDefault();
                 var context_id = window.$("div.page").attr("class").split(/\s+/)[2];
                 var el;
@@ -237,6 +259,7 @@
                 model.call('remove_line', [[parseInt(context_id)], parseInt(active_id)]);
             },
             unfold: function(e) {
+                e.stopPropagation();
                 e.preventDefault();
                 var context_id = window.$("div.page").attr("class").split(/\s+/)[2];
                 var active_id = $(e.target).parent().attr("class").split(/\s+/)[1];
@@ -279,6 +302,7 @@
                 });
             },
             displayMoveLines: function(e) {
+                e.stopPropagation();
                 var active_id = $(e.target).attr("class").split(/\s+/)[1];
                 var model = new openerp.Model('ir.model.data');
                 model.call('get_object_reference', ['account', 'action_move_line_select']).then(function (result) {
@@ -286,25 +310,29 @@
                 });
             },
             displayMoveLine: function(e) {
+                e.stopPropagation();
                 var active_id = $(e.target).attr("class").split(/\s+/)[1];
                 window.open("/web?#id=" + active_id + "&view_type=form&model=account.move.line", "_self");
             },
             addPencil: function(e) {
+                e.stopPropagation();
                 e.preventDefault();
                 if ($(e.target).parent().find("sup").length == 0) {
                     $(e.target).prepend(openerp.qweb.render("pencilIcon"));
                 }
             },
             rmPencil: function(e) {
+                e.stopPropagation();
                 e.preventDefault();
                 this.$("i.fa-pencil-square").remove();
             },
             addTrash: function(e) {
+                e.stopPropagation();
                 e.preventDefault();
-                debugger;
                 $(e.target).append(openerp.qweb.render("trashIcon"));
             },
             rmTrash: function(e) {
+                e.stopPropagation();
                 e.preventDefault();
                 this.$("i.fa-trash-o").remove();
             },

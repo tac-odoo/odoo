@@ -433,11 +433,6 @@
             <field name="formulas">balance = TA.balance / L.balance</field>
             <field name="figure_type">no_unit</field>
         </record>
-        <record id="account_financial_report_executivesummary_ta_to_l0" model="account.financial.report.line">
-            <field name="name">Term assets to liabilities</field>
-            <field name="sequence" eval="1"/>
-            <field name="parent_ids" eval="[(6, 0, [ref('account_financial_report_executivesummary_position0')])]"/>
-        </record>
 
         <!-- 
             Financial Reports
