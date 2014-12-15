@@ -805,9 +805,10 @@ openerp.mail = function (session) {
                 'attachment_ids': _.map(this.attachment_ids, function (file) {return file.id;}),
                 'partner_ids': _.uniq(partner_ids.concat(_.pluck(this.mention_ids, "id"))),
                 'context': _.extend(this.parent_thread.context, {
-                    'mail_post_autofollow': false,
+                    'mail_post_autofollow': true,
                     'mail_post_autofollow_partner_ids': partner_ids,
-                    'original_body': this.$('textarea').val(),
+                    'mail_mention': this.mention_ids ? true : false,
+                    'mail_body': this.$('textarea').val(),
                 }),
                 'type': 'comment',
                 'content_subtype': 'html',

@@ -188,7 +188,7 @@ class mail_notification(osv.Model):
             return True
 
         # compute email body (signature, company data)
-        body_html = context['original_body'] if 'original_body' in context else message.body
+        body_html = context['mail_body'] if 'mail_body' in context else message.body
         # add user signature except for mail groups, where users are usually adding their own signatures already
         user_id = message.author_id and message.author_id.user_ids and message.author_id.user_ids[0] and message.author_id.user_ids[0].id or None
         signature_company = self.get_signature_footer(cr, uid, user_id, res_model=message.model, res_id=message.res_id, context=context, user_signature=(user_signature and message.model != 'mail.group'))
