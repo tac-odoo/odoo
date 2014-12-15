@@ -9,7 +9,4 @@ class sale_report(models.Model):
     margin = fields.Float('#Margin')
 
     def _select(self):
-        return super(sale_report, self)._select() + ", l.margin as margin"
-
-    def _group_by(self):
-        return super(sale_report, self)._group_by() + ", l.margin"
+        return super(sale_report, self)._select() + ", sum(l.margin) as margin"
