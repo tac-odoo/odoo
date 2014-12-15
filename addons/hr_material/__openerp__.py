@@ -10,6 +10,7 @@
         'security/ir.model.access.csv',
         'security/ir_rule.xml',
         'data/hr_material_data.xml',
+        'views/res_config_view.xml',
         'views/hr_material_view.xml',
         'views/hr_material.xml',
     ],

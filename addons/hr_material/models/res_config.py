@@ -1,28 +1,14 @@
 # -*- coding: utf-8 -*-
 import urlparse
-from openerp import api, models
+from openerp import api, fields, models
 
 
 class HrConfigSettings(models.TransientModel):
     _inherit = 'hr.config.settings'
 
-    @api.multi
-    def get_default_alias_material(self):
-        alias_name = False
-        alias_id = self.env.ref('hr_material.mail_alias_material')
-        if alias_id:
-            alias_name = alias_id.alias_name
-        return {'material_alias_prefix': alias_name}
-
-    @api.multi
-    def set_default_alias_material(self):
-        for record in self:
-            default_material_alias_prefix = record.get_default_alias_material()['material_alias_prefix']
-            if record.material_alias_prefix != default_material_alias_prefix:
-                alias_id = self.env.ref('hr_material.mail_alias_material')
-                if alias_id:
-                    alias_id.write({'alias_name': record.material_alias_prefix})
-        return True
+    alias_manage = fields.Boolean('Alias Manage')
+    material_alias_prefix = fields.Char('Use alias to report internal material issue')
+    alias_domain = fields.Char("Alias Domain")
 
     @api.multi
     def get_default_alias_domain(self):
@@ -34,5 +20,15 @@ class HrConfigSettings(models.TransientModel):
             except Exception:
                 pass
         return {'alias_domain': alias_domain}
+
+    @api.multi
+    def set_default_alias_manage(self):
+        config_value = self.alias_manage
+        self.env['ir.values'].set_default('hr.config.settings', 'alias_manage', config_value)
+
+    @api.onchange('alias_manage')
+    def onchange_alias_manage(self):
+        if not self.alias_manage:
+            self.material_alias_prefix = False
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

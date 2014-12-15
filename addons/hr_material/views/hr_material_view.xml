@@ -160,7 +160,7 @@
             <field name="view_id" ref="hr_material_maintenance_request_view_kanban"/>
             <field name="help" type="html">
                 <p class="oe_view_nocontent_create">
-                    Click to add a new maintenance request or send an email to *alias*.
+                    Click to add a new maintenance request.
                 </p><p>
                     Follow the process of the request and communicate with the collaborator.
                 </p>
@@ -178,7 +178,7 @@
             <field name="view_id" ref="hr_material_maintenance_request_view_kanban"/>
             <field name="help" type="html">
                 <p class="oe_view_nocontent_create">
-                    Click to add a new maintenance request or send an email to *alias*.
+                    Click to add a new maintenance request.
                 </p><p>
                     Follow the process of the request and communicate with the collaborator.
                 </p>
@@ -197,13 +197,12 @@
             <field name="view_id" ref="hr_material_maintenance_request_view_kanban"/>
             <field name="help" type="html">
                 <p class="oe_view_nocontent_create">
-                    Click to add a new maintenance request or send an email to *alias*.
+                    Click to add a new maintenance request.
                 </p><p>
                     Follow the process of the request and communicate with the collaborator.
                 </p>
             </field>
         </record>
-
         <menuitem name="Maintenance Requests" 
             groups="base.group_hr_manager,base.group_hr_user,base.group_user"
             parent="menu_material_title"

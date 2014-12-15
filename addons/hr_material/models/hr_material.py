@@ -220,39 +220,18 @@ class HrMaterialRequest(models.Model):
         default='normal',
         track_visibility='onchange')
 
-    @api.multi
-    def _read_group_stage_ids(self, domain, read_group_order=None, access_rights_uid=None):
-        """ Read group customization in order to display all the stages in the
-        kanban view, even if they are empty """
-        stage_obj = self.env['hr.material.stage']
-        order = stage_obj._order
-        access_rights_uid = access_rights_uid or self._uid
-
-        if read_group_order == 'stage_id desc':
-            order = '%s desc' % order
-
-        stage_ids = stage_obj._search([], order=order, access_rights_uid=access_rights_uid)
-        result = [stage.name_get()[0] for stage in stage_obj.browse(stage_ids)]
-
-        # restore order of the search
-        result.sort(lambda x, y: cmp(stage_ids.index(x[0]), stage_ids.index(y[0])))
-
-        fold = {}
-        for stage in stage_obj.browse(stage_ids):
-            fold[stage.id] = stage.fold or False
-        return result, fold
-
-    _group_by_full = {
-        'stage_id': _read_group_stage_ids
-    }
-
     @api.model
     def get_empty_list_help(self, help):
         res = super(HrMaterialRequest, self).get_empty_list_help(help)
         alias_record = self.env.ref('hr_material.mail_alias_material')
         if alias_record.alias_domain and alias_record.alias_name and res:
-            alias_name = '<a>' + alias_record.alias_name + '@' + alias_record.alias_domain + '</a>'
-            res = res.replace('*alias*', alias_name)
+            return _("""<p class="oe_view_nocontent_create">
+                            Click to add a new maintenance request or send an email to: <a>%(alias_name)s</a>
+                        </p>
+                        <p>
+                            Follow the process of the request and communicate with the collaborator.
+                        </p>"""
+                     ) % {'alias_name': alias_record.alias_name + '@' + alias_record.alias_domain}
         return res
 
     @api.model

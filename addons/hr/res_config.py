@@ -50,8 +50,6 @@ class hr_config_settings(osv.osv_memory):
             help ="""This installs the module hr_payroll."""),
         'module_hr_material': fields.boolean('Manage several material categories like IT, Office material, Engine, ...',
             help ="""This installs the module hr_material."""),
-        'material_alias_prefix': fields.char('Use default alias to report internal material issue'),
-        'alias_domain': fields.char("Alias Domain"),
     }
 
     def onchange_hr_timesheet(self, cr, uid, ids, timesheet, context=None):
