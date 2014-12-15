@@ -1,4 +1,5 @@
-from openerp import models, fields, api, _
+# -*- coding: utf-8 -*-
+from openerp import models, fields, api
 
 class crm_phonecall2meeting(models.TransientModel):
     """ Phonecall to Meeting """

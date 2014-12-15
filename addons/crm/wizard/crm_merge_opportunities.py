@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from openerp import models, api, fields, _
 
 class crm_merge_opportunity(models.TransientModel):
@@ -19,6 +20,7 @@ class crm_merge_opportunity(models.TransientModel):
 
     @api.multi
     def action_merge(self):
+        self.ensure_one()
         opportunity2merge_ids = self.opportunity_ids
         #TODO: why is this passed through the context ?
         self = self.with_context(lead_ids = [opportunity2merge_ids[0].id])

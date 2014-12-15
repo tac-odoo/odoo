@@ -1,18 +1,21 @@
+# -*- coding: utf-8 -*-
 from openerp import models, api, fields, _
 import time
+
 
 class crm_phonecall2phonecall(models.TransientModel):
     _name = 'crm.phonecall2phonecall'
     _description = 'Phonecall To Phonecall'
 
     name = fields.Char('Call summary', required=True, select=1)
-    user_id = fields.Many2one('res.users',"Assign To")
+    user_id = fields.Many2one('res.users', "Assign To")
     contact_name = fields.Char('Contact')
     phone = fields.Char('Phone')
     categ_id = fields.Many2one('crm.phonecall.category', 'Category')
     date = fields.Datetime('Date')
-    team_id = fields.Many2one('crm.team','Sales Team')
-    action = fields.Selection([('schedule','Schedule a call'), ('log','Log a call')], 'Action', required=True)
+    team_id = fields.Many2one('crm.team', 'Sales Team')
+    action = fields.Selection(
+        [('schedule', 'Schedule a call'), ('log', 'Log a call')], 'Action', required=True)
     partner_id = fields.Many2one('res.partner', "Partner")
     note = fields.Text('Note')
 
@@ -21,20 +24,21 @@ class crm_phonecall2phonecall(models.TransientModel):
         """
         Closes Phonecall to Phonecall form
         """
-        return {'type':'ir.actions.act_window_close'}
+        return {'type': 'ir.actions.act_window_close'}
 
     @api.multi
     def action_schedule(self):
-        phonecall = self.env['crm.phonecall'].browse(self._context.get('active_ids',[]))
+        phonecall = self.env['crm.phonecall'].browse(
+            self._context.get('active_ids', []))
         for this in self:
             phonecall_ids = phonecall.schedule_another_phonecall(
-                                this.date, this.name,
-                                this.user_id and this.user_id.id or False,
-                                this.team_id and this.team_id.id or False,
-                                this.categ_id and this.categ_id.id or False, 
-                                action=this.action)
+                this.date, this.name,
+                this.user_id and this.user_id.id or False,
+                this.team_id and this.team_id.id or False,
+                this.categ_id and this.categ_id.id or False,
+                action=this.action)
         return phonecall.redirect_phonecall_view(phonecall_ids[phonecall[0].id])
-    
+
     @api.model
     def default_get(self, fields):
         """
@@ -42,7 +46,8 @@ class crm_phonecall2phonecall(models.TransientModel):
         """
         res = super(crm_phonecall2phonecall, self).default_get(fields)
         record_id = self._context.get('active_id', False)
-        res.update({'action': 'schedule', 'date': time.strftime('%Y-%m-%d %H:%M:%S')})
+        res.update(
+            {'action': 'schedule', 'date': time.strftime('%Y-%m-%d %H:%M:%S')})
         if record_id:
             phonecall = self.env['crm.phonecall'].browse(record_id)
             categ_id = False
