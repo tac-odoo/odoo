@@ -36,8 +36,7 @@ class res_partner(models.Model):
 
     @api.model
     def redirect_partner_form(self, partner_id):
-        search_view = self.env['ir.model.data'].get_object_reference(
-            'base', 'view_res_partner_filter')
+        search_view = self.env.ref('base.view_res_partner_filter').id
         value = {
             'domain': "[]",
             'view_type': 'form',
@@ -47,7 +46,7 @@ class res_partner(models.Model):
             'view_id': False,
             'context': self._context,
             'type': 'ir.actions.act_window',
-            'search_view_id': search_view and search_view[1] or False
+            'search_view_id': search_view
         }
         return value
 
