@@ -336,10 +336,10 @@ openerp.mail = function (session) {
      * mail.Mention widget
      * ------------------------------------------------------------
      * 
-     * This widget handles the @ mention functionality.
+     * This widget handles @ mention functionality.
      * Open dropdown when user mention with @
      * Dropdown open with highlight string
-     * Start search if word minimum length is 3
+     * Start search if word have minimum length is 3
      * wait for at least 1 second without typing any new letter
      * Maximum 8 user in dropdown list
      */
@@ -352,13 +352,12 @@ openerp.mail = function (session) {
             this.textarea = parent.$el.find(".field_text");
             this.start_index = 0;
             parent.mention_ids = [];
-            this.timer;
         },
         start: function() {
             this._super.apply(this, arguments);
             this.search = this.$el;
             this.bind_events();
-            this.call_jquery();
+            this.jquery_fn();
         },
         bind_events: function() {
             var self = this;
@@ -368,7 +367,7 @@ openerp.mail = function (session) {
             });
             this.textarea.on('keyup', this.proxy('keyup'));
             this.textarea.on('keydown', this.proxy('keydown'));
-            this.textarea.on('click', this.proxy('close'));
+            this.textarea.on('click', function(){ self.search.empty(); });
             this.search.on('click', 'li', function(e) {
                 var span = self.search.find(e.currentTarget).find("span");
                 self.setText(span.text(), span.attr("id"));
@@ -387,14 +386,11 @@ openerp.mail = function (session) {
                 this.setText($active.find("span").text(), $active.find("span").attr("id"));
                 return false;
             }
-            return true;
-        },
-        close: function() {
             this.search.empty();
+            return true;
         },
         setText: function(text, id) {
             var new_index = this.textarea.getCursorPosition();
-            if(!new_index) return;
             var value = this.textarea.val();
             this.textarea.val(value.substring(0, start_index) + "@" + text + (value.charAt(new_index) == " " ? "" : " ") + value.substring(new_index, value.length));                
             this.search.empty();
@@ -405,9 +401,7 @@ openerp.mail = function (session) {
         keyup: function(e) {
             var self = this;
             clearTimeout(this.timer);
-            if(_.contains([40, 38, 13], e.which)) { return; }
-            this.close();
-            if(_.contains([37, 39, 35, 33, 34], e.which)) { return; }
+            if(_.contains([40, 38, 13, 37, 39, 35, 33, 34], e.which)) { return; }
             var index = this.textarea.getCursorPosition();
             var left = this.textarea.val().substring(0, index);
             var last_ind = left.lastIndexOf("@");
@@ -433,7 +427,7 @@ openerp.mail = function (session) {
         highlight: function(detail, find) {
             return detail.replace(new RegExp(find, "i"), _.str.sprintf("<b><u>%s</u></b>", detail.match(new RegExp(find, "i"))));
         },
-        call_jquery: function() {
+        jquery_fn: function() {
             $.fn.getCursorPosition = function() {
                 var el = $(this).get(0);
                 if(!el) return 0;
@@ -441,11 +435,8 @@ openerp.mail = function (session) {
                 if('selectionStart' in el){
                     pos = el.selectionStart;
                 } else if('selection' in document) {
-                    el.focus();
-                    var Sel = document.selection.createRange();
-                    var SelLength = document.selection.createRange().text.length;
-                    Sel.moveStart('character', -el.value.length);
-                    pos = Sel.text.length - SelLength;
+                    var cr = document.selection.createRange();
+                    pos = cr.moveStart('character', -el.focus().value.length).text.length - cr.text.length;
                 }
                 return pos;
             };
