@@ -369,8 +369,7 @@ openerp.mail = function (session) {
             this.textarea.on('keydown', this.proxy('keydown'));
             this.textarea.on('click', function(){ self.search.empty(); });
             this.search.on('click', 'li', function(e) {
-                var span = self.search.find(e.currentTarget).find("span");
-                self.setText(span.text(), span.attr("id"));
+                self.setText(self.search.find(e.currentTarget));
             });
         },
         keydown: function(e) {
@@ -383,20 +382,21 @@ openerp.mail = function (session) {
                 return false;
             }
             if(e.which == 13 && $active.length) {
-                this.setText($active.find("span").text(), $active.find("span").attr("id"));
+                this.setText($active);
                 return false;
             }
             this.search.empty();
             return true;
         },
-        setText: function(text, id) {
+        setText: function(el) {
             var new_index = this.textarea.getCursorPosition();
             var value = this.textarea.val();
+            var text = el.text().trim();
             this.textarea.val(value.substring(0, start_index) + "@" + text + (value.charAt(new_index) == " " ? "" : " ") + value.substring(new_index, value.length));                
             this.search.empty();
             this.textarea.setCursorPosition(start_index + text.length + 2);
             this.start_index = 0;
-            this.parent.mention_ids.push({"id": parseInt(id), "name": text});
+            this.parent.mention_ids.push({"id": parseInt(el.find("span").attr("id")), "text": text, "name": el.find("span").text()});
         },
         keyup: function(e) {
             var self = this;
@@ -431,14 +431,13 @@ openerp.mail = function (session) {
             $.fn.getCursorPosition = function() {
                 var el = $(this).get(0);
                 if(!el) return 0;
-                var pos = 0;
                 if('selectionStart' in el){
-                    pos = el.selectionStart;
+                    return el.selectionStart;
                 } else if('selection' in document) {
                     var cr = document.selection.createRange();
-                    pos = cr.moveStart('character', -el.focus().value.length).text.length - cr.text.length;
+                    return cr.moveStart('character', -el.focus().value.length).text.length - cr.text.length;
                 }
-                return pos;
+                return 0;
             };
             $.fn.setCursorPosition = function(pos) {
               this.each(function(index, elem) {
@@ -776,8 +775,8 @@ openerp.mail = function (session) {
             var textarea = self.$('textarea');
             var body = textarea.val().replace(new RegExp("\n", "g"), "<br/>");
             this.mention_ids = _.reject(this.mention_ids, function(p) {
-                if(body.indexOf(_.str.sprintf("@%s ", p.name)) == -1) return true;
-                body = body.replace(new RegExp(_.str.sprintf("@%s ", p.name), "gi"), _.str.sprintf(" <a href='/web#model=res.partner&id=%s'>@%s</a> ", p.id, p.name));
+                if(body.indexOf(_.str.sprintf("@%s ", p.text)) == -1) return true;
+                body = body.replace(_.str.sprintf("@%s ", p.text), _.str.sprintf(" <a href='/web#model=res.partner&id=%s'>@%s</a> ", p.id, p.name));
             });
             textarea.attr("data", body);
             if (self.flag_post) {
