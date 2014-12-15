@@ -23,6 +23,7 @@ instance.web.PivotView = instance.web.View.extend({
         'click .oe-closed': 'on_closed_header_click',
         'click .o-field-menu': 'on_field_menu_selection',
         'click td': 'on_cell_click',
+        'click .measure-row': 'on_measure_row_click',
     },
 
     init: function(parent, dataset, view_id, options) {
@@ -55,6 +56,7 @@ instance.web.PivotView = instance.web.View.extend({
         this.has_data = false;
 
         this.last_header_selected = null;
+        this.sorted_column = {};
     },
     start: function () {
         var self = this;
@@ -98,6 +100,8 @@ instance.web.PivotView = instance.web.View.extend({
     view_loading: function (fvg) {
         var self = this;
         this.title = this.title || fvg.arch.attrs.string;
+        this.enable_linking = !fvg.arch.attrs.disable_linking;
+        this.$el.toggleClass('oe-enable-linking', this.enable_linking);
         fvg.arch.children.forEach(function (field) {
             var name = field.attrs.name;
             if (field.attrs.interval) {
@@ -219,7 +223,12 @@ instance.web.PivotView = instance.web.View.extend({
     },
     on_cell_click: function (event) {
         var $target = $(event.target);
-        if ($target.hasClass('oe-closed') || $target.hasClass('oe-opened') || $target.hasClass('oe-empty')) return;
+        if ($target.hasClass('oe-closed') 
+            || $target.hasClass('oe-opened') 
+            || $target.hasClass('oe-empty')
+            || !this.enable_linking) {
+            return;
+        }
         var row_id = $target.data('id'),
             col_id = $target.data('col_id'),
             row_domain = this.headers[row_id].domain,
@@ -237,6 +246,34 @@ instance.web.PivotView = instance.web.View.extend({
             context: context,
             domain: this.domain.concat(row_domain, col_domain),
         });
+    },
+    on_measure_row_click: function (event) {
+        var $target = $(event.target),
+            col_id = $target.data('id'),
+            measure = $target.data('measure');
+
+        this.sort_rows(col_id, measure, !$target.hasClass('o-sorted-asc'));
+        this.display_table();
+    },
+    sort_rows: function (col_id, measure, asc) {
+        console.log('order', asc);
+        var self = this;
+        traverse_tree(this.main_row.root, function (header) { 
+            header.children.sort(compare);
+        });
+        this.sorted_column = {
+            id: col_id,
+            measure: measure,
+            order: asc ? 'asc' : 'desc',
+        };
+
+        function compare (row1, row2) {
+            var values1 = self.get_value(row1.id, col_id),
+                values2 = self.get_value(row2.id, col_id),
+                value1 = values1 ? values1[measure] : 0,
+                value2 = values2 ? values2[measure] : 0;
+            return asc ? value1 - value2 : value2 - value1;
+        }
     },
     on_field_menu_selection: function (event) {
         var self = this;
@@ -320,6 +357,7 @@ instance.web.PivotView = instance.web.View.extend({
                 .filter(self.domain)
                 .context(self.context)
                 .lazy(false)
+                // .order_by(['probable_revenue'])
                 .group_by(groupby);
         })).then(function () {
             var data = Array.prototype.slice.call(arguments);
@@ -512,8 +550,12 @@ instance.web.PivotView = instance.web.View.extend({
                 }
                 if (cell.measure) {
                     $cell.addClass('measure-row text-muted')
-                        .text(cell.measure)
+                        .text(this.measures[cell.measure].string)
                         .toggleClass('oe-total', cell.is_bold);
+                    $cell.data('id', cell.id).data('measure', cell.measure);
+                    if (cell.id === this.sorted_column.id && cell.measure === this.sorted_column.measure) {
+                        $cell.addClass('o-sorted o-sorted-' + this.sorted_column.order);
+                    }
                 }
                 $row.append($cell);
             }
@@ -563,7 +605,8 @@ instance.web.PivotView = instance.web.View.extend({
             depth = main_col_dims.depth,
             width = main_col_dims.width,
             nbr_measures = this.active_measures.length,
-            result = [[{width:1, height: nbr_measures > 1 ? depth + 1: depth}]];
+            result = [[{width:1, height: nbr_measures > 1 ? depth + 1: depth}]],
+            col_ids = [];
         this.main_col.width = width;
         traverse_tree(this.main_col.root, function (header) {
             var index = header.path.length - 1,
@@ -574,9 +617,11 @@ instance.web.PivotView = instance.web.View.extend({
                     id: header.id,
                     expanded: header.expanded,
                 };
+            if (!header.expanded) col_ids.push(header.id);
             if (result[index]) result[index].push(cell);
             else result[index] = [cell];
         });
+        col_ids.push(this.main_col.root.id);
         this.main_col.width = width;
         if (width > 1) {
             var total_cell = {width:nbr_measures, height: depth, title:""};
@@ -591,8 +636,9 @@ instance.web.PivotView = instance.web.View.extend({
             for (var i = 0, measure_row = [], measure; i < nbr_cols; i++) {
                 measure = this.active_measures[i % nbr_measures];
                 measure_row.push({
-                    measure: this.measures[measure].string,
-                    is_bold: (width > 1) && (i >= nbr_measures*width)
+                    measure: measure,
+                    is_bold: (width > 1) && (i >= nbr_measures*width),
+                    id: col_ids[Math.floor(i / nbr_measures)],
                 });
             }
             result.push(measure_row);
@@ -684,9 +730,15 @@ instance.web.PivotView = instance.web.View.extend({
         var nbr_measures = this.active_measures.length,
             headers = this.compute_headers(),
             measure_row = nbr_measures > 1 ? _.last(headers) : [],
-            rows = this.compute_rows();
+            rows = this.compute_rows(),
+            i, j, value;
         headers[0].splice(0,1);
-        for (var i =0, j, value; i < rows.length; i++) {
+        // process measure_row
+        for (i = 0; i < measure_row.length; i++) {
+            measure_row[i].measure = this.measures[measure_row[i].measure].string;
+        }
+        // process all rows
+        for (i =0, j, value; i < rows.length; i++) {
             for (j = 0; j < rows[i].values.length; j++) {
                 value = rows[i].values[j];
                 rows[i].values[j] = {

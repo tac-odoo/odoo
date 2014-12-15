@@ -6,7 +6,7 @@
             <field name="name">project.task.history.cumulative.pivot</field>
             <field name="model">project.task.history.cumulative</field>
             <field name="arch" type="xml">
-                <pivot string="Project Tasks">
+                <pivot string="Project Tasks" disable_linking="True">
                     <field name="type_id" type="row"/>
                     <field name="kanban_state" type="row"/>
                     <field name="nbr_tasks" type="measure"/>

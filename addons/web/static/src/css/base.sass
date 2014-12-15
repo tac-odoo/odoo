@@ -1313,7 +1313,7 @@ $sheet-padding: 16px
         td
             border: 1px solid #bfbfb6
             text-align: right
-        td:not(.oe-empty)
+        td.oe-closed,td.oe-opened
             cursor: pointer
         .oe-closed, .oe-opened
             cursor: pointer
@@ -1322,8 +1322,11 @@ $sheet-padding: 16px
             text-align: left
             &:hover
                 background-color: #e6e6e6
-        td:not(.oe-closed):not(.oe-opened):hover
-            color: #428bca
+        &.oe-enable-linking 
+            td:not(.oe-closed):not(.oe-opened):not(.oe-empty)
+                cursor: pointer
+                &:hover
+                    color: #428bca
         .oe-closed:before
             font-family: FontAwesome
             margin-right: 5px
@@ -1335,6 +1338,14 @@ $sheet-padding: 16px
             text-align: left
         .measure-row
             background-color: #f0eeee
+            cursor: pointer
+        .o-sorted:after
+            font-family: FontAwesome
+            margin-left: 5px
+        .o-sorted-asc:after
+            content: "\f0d7"
+        .o-sorted-desc:after
+            content: "\f0d8"
         .dropdown-menu
             a
                 color: black
