@@ -375,10 +375,7 @@ openerp.mail = function (session) {
         keydown: function(e) {
             var $active = this.search.find("li.active");
             if(_.contains([40, 38], e.which) && $active.length) {
-                if(e.which == 40)
-                    $active.next().focus();
-                else
-                    $active.prev().focus();
+                if(e.which == 40) { $active.next().focus(); } else { $active.prev().focus(); }
                 return false;
             }
             if(e.which == 13 && $active.length) {
@@ -807,8 +804,7 @@ openerp.mail = function (session) {
                 'context': _.extend(this.parent_thread.context, {
                     'mail_post_autofollow': true,
                     'mail_post_autofollow_partner_ids': partner_ids,
-                    'mail_mention': this.mention_ids ? true : false,
-                    'mail_body': this.$('textarea').val(),
+                    'mail_body': this.mention_ids.length ? this.$('textarea').val() : false,
                 }),
                 'type': 'comment',
                 'content_subtype': 'html',
