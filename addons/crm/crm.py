@@ -64,33 +64,40 @@ class crm_tracking_mixin(models.AbstractModel):
     """Mixin class for objects which can be tracked by marketing. """
     _name = 'crm.tracking.mixin'
 
+    @api.v7
     def tracking_fields(self):
         return [('utm_campaign', 'campaign_id'), ('utm_source', 'source_id'), ('utm_medium', 'medium_id')]
 
-    @api.model
-    def tracking_get_values(self, vals):
+    @api.v7
+    def tracking_get_values(self, cr, uid, vals, context=None):
         for key, fname in self.tracking_fields():
             field = self._fields[fname]
             value = vals.get(fname) or (request and request.httprequest.cookies.get(key))  # params.get should be always in session by the dispatch from ir_http
             if field.type == 'many2one' and isinstance(value, basestring):
                 # if we receive a string for a many2one, we search/create the id
                 if value:
-                    Model = self.env[field.comodel_name]
-                    rel_id = Model.name_search(value)
+                    Model = self.pool[field.comodel_name]
+                    rel_id = Model.name_search(cr, uid, value, context=context)
                     if rel_id:
                         rel_id = rel_id[0][0]
                     else:
-                        rel_id = Model.create({'name': value})
+                        rel_id = Model.create(cr, uid, {'name': value}, context=context)
                 vals[fname] = rel_id
             else:
                 # Here the code for others cases that many2one
                 vals[fname] = value
         return vals
 
-    @api.model
-    def _get_default_track(self, field):
-        return self.tracking_get_values({}).get(field)
+    @api.v7
+    def _get_default_track(self, cr, uid, field, context=None):
+        return self.tracking_get_values(cr, uid, {}, context=context).get(field)
 
-    campaign_id = fields.Many2one('crm.tracking.campaign', 'Campaign',  help = "This is a name that helps you keep track of your different campaign efforts Ex: Fall_Drive, Christmas_Special", default=lambda self: self._get_default_track('campaign_id'))
-    source_id = fields.Many2one('crm.tracking.source', 'Source', help="This is the source of the link Ex: Search Engine, another domain, or name of email list", default= lambda self: self._get_default_track('source_id'))
-    medium_id = fields.Many2one('crm.tracking.medium', 'Channel', help="This is the method of delivery. Ex: Postcard, Email, or Banner Ad", default =lambda self: self._get_default_track('medium_id'))
+    campaign_id = fields.Many2one('crm.tracking.campaign', 'Campaign',  help = "This is a name that helps you keep track of your different campaign efforts Ex: Fall_Drive, Christmas_Special")
+    source_id = fields.Many2one('crm.tracking.source', 'Source', help="This is the source of the link Ex: Search Engine, another domain, or name of email list")
+    medium_id = fields.Many2one('crm.tracking.medium', 'Channel', help="This is the method of delivery. Ex: Postcard, Email, or Banner Ad")
+
+    _defaults = {
+        'source_id': lambda self, cr, uid, ctx: self._get_default_track(cr, uid, 'source_id', ctx),
+        'campaign_id': lambda self, cr, uid, ctx: self._get_default_track(cr, uid, 'campaign_id', ctx),
+        'medium_id': lambda self, cr, uid, ctx: self._get_default_track(cr, uid, 'medium_id', ctx),
+    }
