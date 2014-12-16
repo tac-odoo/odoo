@@ -933,13 +933,10 @@
     </div>
 </t>
 
-<div t-name="GraphView.nodata" class="oe_view_nocontent" >
+<div t-name="GraphView.error" class="oe_view_nocontent" >
     <div class="oe_empty_custom_dashboard">
-        <p><b>No data to display.</b></p>
-        <p>
-                No data available for this chart.  Try to add some records, or make sure
-                that there is no active filter in the search bar.
-        </p>
+        <p><b><t t-esc="title"/></b></p>
+        <p><t t-esc="description"/></p>
     </div>
 </div>
 

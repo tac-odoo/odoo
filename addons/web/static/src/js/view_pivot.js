@@ -84,11 +84,10 @@ instance.web.PivotView = instance.web.View.extend({
         var context = {measures: _.pairs(_.omit(this.measures, '__count__'))};
         this.$buttons.html(QWeb.render('PivotView.buttons', context));
         this.$buttons.click(this.on_button_click.bind(this));
-        context.measures.forEach(function (kv, index) {
-            if (_.contains(self.active_measures, kv[0])) {
-                self.$buttons.find('.oe-measure-list li').eq(index).addClass('selected');
-            }
+        this.active_measures.forEach(function (measure) {
+            self.$buttons.find('li[data-field="' + measure + '"]').addClass('selected');
         });
+
         var another_ctx = {fields: _.pairs(this.groupable_fields)};
         this.$field_selection = this.$('.o-field-selection');
         this.$field_selection.html(QWeb.render('PivotView.FieldSelection', another_ctx));
@@ -252,11 +251,11 @@ instance.web.PivotView = instance.web.View.extend({
             col_id = $target.data('id'),
             measure = $target.data('measure');
 
-        this.sort_rows(col_id, measure, !$target.hasClass('o-sorted-asc'));
+        this.sort_rows(col_id, measure, $target.hasClass('o-sorted-asc'));
         this.display_table();
     },
-    sort_rows: function (col_id, measure, asc) {
-        console.log('order', asc);
+    sort_rows: function (col_id, measure, descending) {
+        console.log('order', descending);
         var self = this;
         traverse_tree(this.main_row.root, function (header) { 
             header.children.sort(compare);
@@ -264,7 +263,7 @@ instance.web.PivotView = instance.web.View.extend({
         this.sorted_column = {
             id: col_id,
             measure: measure,
-            order: asc ? 'asc' : 'desc',
+            order: descending ? 'desc' : 'asc',
         };
 
         function compare (row1, row2) {
@@ -272,7 +271,7 @@ instance.web.PivotView = instance.web.View.extend({
                 values2 = self.get_value(row2.id, col_id),
                 value1 = values1 ? values1[measure] : 0,
                 value2 = values2 ? values2[measure] : 0;
-            return asc ? value1 - value2 : value2 - value1;
+            return descending ? value1 - value2 : value2 - value1;
         }
     },
     on_field_menu_selection: function (event) {
@@ -605,7 +604,7 @@ instance.web.PivotView = instance.web.View.extend({
             depth = main_col_dims.depth,
             width = main_col_dims.width,
             nbr_measures = this.active_measures.length,
-            result = [[{width:1, height: nbr_measures > 1 ? depth + 1: depth}]],
+            result = [[{width:1, height: depth + 1}]],
             col_ids = [];
         this.main_col.width = width;
         traverse_tree(this.main_col.root, function (header) {
@@ -631,18 +630,16 @@ instance.web.PivotView = instance.web.View.extend({
             }
             result[0].push(total_cell);
         }
-        if (nbr_measures > 1) {
-            var nbr_cols = width === 1 ? nbr_measures : (width + 1)*nbr_measures;
-            for (var i = 0, measure_row = [], measure; i < nbr_cols; i++) {
-                measure = this.active_measures[i % nbr_measures];
-                measure_row.push({
-                    measure: measure,
-                    is_bold: (width > 1) && (i >= nbr_measures*width),
-                    id: col_ids[Math.floor(i / nbr_measures)],
-                });
-            }
-            result.push(measure_row);
+        var nbr_cols = width === 1 ? nbr_measures : (width + 1)*nbr_measures;
+        for (var i = 0, measure_row = [], measure; i < nbr_cols; i++) {
+            measure = this.active_measures[i % nbr_measures];
+            measure_row.push({
+                measure: measure,
+                is_bold: (width > 1) && (i >= nbr_measures*width),
+                id: col_ids[Math.floor(i / nbr_measures)],
+            });
         }
+        result.push(measure_row);
         return result;
     },
     get_header_width: function (header) {

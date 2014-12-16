@@ -81,6 +81,7 @@ instance.web.GraphView = instance.web.View.extend({
     },
     do_search: function (domain, context, group_by) {
         if (!this.widget) {
+            this.initial_groupbys = context.graph_groupbys || this.initial_groupbys;
             this.widget = new instance.web.GraphWidget(this, this.dataset.model, {
                 measure: context.graph_measure || this.active_measure,
                 mode: context.graph_mode || this.active_mode,
@@ -101,6 +102,7 @@ instance.web.GraphView = instance.web.View.extend({
         return !this.widget ? {} : {
             graph_mode: this.widget.mode,
             graph_measure: this.widget.measure,
+            graph_groupbys: this.widget.groupbys
         };
     },
     on_button_click: function (event) {
@@ -196,7 +198,12 @@ instance.web.GraphWidget = instance.web.Widget.extend({
         }
         this.$el.empty();
         if (!this.data.length) {
-            this.$el.append(QWeb.render('GraphView.nodata'));
+            this.$el.append(QWeb.render('GraphView.error', {
+                title: _t("No data to display"),
+                description: _t("No data available for this chart.  " +
+                    "Try to add some records, or make sure that" +
+                    "there is no active filter in the search bar."),
+            }));
         } else {
             this['display_' + this.mode]();
         }
@@ -284,6 +291,15 @@ instance.web.GraphWidget = instance.web.Widget.extend({
             tickValues,
             tickFormat,
             measure = this.fields[this.measure].string;
+        if (_.some(this.data, function (datapt) {
+            return datapt.value < 0;
+        })) {
+            return this.$el.append(QWeb.render('GraphView.error', {
+                title: _t("Invalid data"),
+                description: _t("Pie chart cannot represent negative numbers. " +
+                    "Try to change your domain to only display positive results"),
+            }));
+        }
         if (this.groupbys.length) {
             data = this.data.map(function (datapt) {
                 return {x:datapt.labels.join("/"), y: datapt.value};
@@ -306,6 +322,13 @@ instance.web.GraphWidget = instance.web.Widget.extend({
         nv.utils.onWindowResize(chart.update);
     },
     display_line: function () {
+        if (this.data.length < 2) {
+            this.$el.append(QWeb.render('GraphView.error', {
+                title: _t("Not enough data points"),
+                description: "You need at least two data points to display a line chart."
+            }));
+            return;
+        }
         var self = this,
             data = [],
             tickValues,
@@ -397,5 +420,12 @@ nv.utils.offWindowResize = function(fun) {
     if (fun === null) return;
     window.removeEventListener('resize', fun);
 };
+
+// monkey patch nvd3 to prevent crashes when user changes view and nvd3 tries
+// to remove tooltips after 500 ms...  seriously nvd3, what were you thinking?
+nv.tooltip.cleanup = function () {
+    $('.nvtooltip').remove();
+};
+
 
 })();
