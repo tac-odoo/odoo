@@ -3,4 +3,13 @@
     min-height:550px;
     background: #F8F8F8;
     border-right: 1px solid #afafb6;
+    float: left;
+}
+
+.oe_webclient {
+    width: 100%;
+}
+
+.oe_application {
+    float: right;
 }

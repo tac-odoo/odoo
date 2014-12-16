@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <template id="website.portal" name="Portal" page="True">
-            <t t-call="website.layout">
+        <template id="portal.assets_portal" inherit_id="website.layout">
+            <xpath expr="//body" position="inside">
                 <t t-call-assets="web.assets_backend"/>
-                <link rel='stylesheet' href='/website_portal/static/src/css/website_portal.css'/>
                 <script type="text/javascript">
-                    $(function() {
+                    (function() {
                         var s = new openerp.init();
                         <t t-if="init">
                            <t t-raw="init"/>
@@ -16,22 +15,24 @@
                             wc.setElement($(".openerp_webclient_container"));
                             wc.start();
                         </t>
-                    });
+                    })();
                 </script>
+            </xpath>
+        </template>
+        <template id="website.portal" name="Portal" page="True">
+            <t t-call="website.layout">
+                
+                <link rel='stylesheet' href='/website_portal/static/src/css/website_portal.css'/>
                 <div id="wrap" t-ignore="true">
                     <div class="oe_structure">
                         <div class="openerp openerp_webclient_container">
                             <div id="oe_main_menu_navbar" style="display:none"></div>
-                            <table class="oe_webclient">
-                                <tr>
-                                    <td>
+                            <div class="oe_webclient">
                                         <div class="oe_application_menu_placeholder">
                                            <t t-call="portal.menu_secondary"/>
                                         </div>
-                                    </td>
-                                    <td class="oe_application"></td>
-                                </tr>
-                            </table>
+                                    <div class="oe_application"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
