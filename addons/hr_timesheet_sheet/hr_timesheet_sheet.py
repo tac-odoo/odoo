@@ -67,7 +67,7 @@ class hr_timesheet_sheet(osv.osv):
         ids_signout = self.pool.get('hr.attendance').search(cr,uid,[('sheet_id', '=', sheet_id),('action','=','sign_out')])
 
         if len(ids_signin) != len(ids_signout):
-            raise UserError(('Warning!'),_('The timesheet cannot be validated as it does not contain an equal number of sign ins and sign outs.'))
+            raise UserError(_('The timesheet cannot be validated as it does not contain an equal number of sign ins and sign outs.'))
         return True
 
     def copy(self, cr, uid, ids, *args, **argv):

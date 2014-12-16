@@ -48,7 +48,7 @@ class pad_common(osv.osv_memory):
             try:
                 myPad.createPad(path)
             except urllib2.URLError:
-                raise UserError(_("Error"), _("Pad creation failed, \
+                raise UserError(_("Pad creation failed, \
                 either there is a problem with your pad server URL or with your connection."))
 
             #get attr on the field model

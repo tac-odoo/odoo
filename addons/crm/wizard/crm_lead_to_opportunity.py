@@ -103,7 +103,7 @@ class crm_lead2opportunity_partner(osv.osv_memory):
         lead_obj = self.pool.get('crm.lead')
         for lead in lead_obj.browse(cr, uid, context.get('active_ids', []), context=context):
             if lead.probability == 100:
-                raise UserError(_("Warning!"), _("Closed/Dead leads cannot be converted into opportunities."))
+                raise UserError(_("Closed/Dead leads cannot be converted into opportunities."))
         return False
 
     def _convert_opportunity(self, cr, uid, ids, vals, context=None):

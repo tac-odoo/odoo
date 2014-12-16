@@ -995,7 +995,7 @@ class task(osv.osv):
             if task.child_ids:
                 for child in task.child_ids:
                     if child.stage_id and not child.stage_id.fold:
-                        raise UserError(_("Warning!"), _("Child task still open.\nPlease cancel or complete child task first."))
+                        raise UserError(_("Child task still open.\nPlease cancel or complete child task first."))
         return True
 
     def _delegate_task_attachments(self, cr, uid, task_id, delegated_task_id, context=None):

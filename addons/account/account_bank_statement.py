@@ -433,8 +433,8 @@ class account_bank_statement_line(osv.osv):
         for item in self.browse(cr, uid, ids, context=context):
             if item.journal_entry_id:
                 raise UserError(
-                    _('Invalid Action!'), 
-                    _('In order to delete a bank statement line, you must first cancel it to delete related journal items.')
+                    _("""Invalid Action!
+                    In order to delete a bank statement line, you must first cancel it to delete related journal items.""")
                 )
         return super(account_bank_statement_line, self).unlink(cr, uid, ids, context=context)
 

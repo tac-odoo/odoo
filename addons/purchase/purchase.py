@@ -596,7 +596,6 @@ class purchase_order(osv.osv):
                             limit=1)
         if not journal_ids:
             raise UserError(
-                _('Error!'),
                 _('Define purchase journal for this company: "%s" (id:%d).') % \
                     (order.company_id.name, order.company_id.id))
         return {
@@ -692,14 +691,14 @@ class purchase_order(osv.osv):
                 for move in pick.move_lines:
                     if pick.state == 'done':
                         raise UserError(
-                            _('Unable to cancel the purchase order %s.') % (purchase.name),
-                            _('You have already received some goods for it.  '))
+                            _("""Unable to cancel the purchase order %s.
+                            You have already received some goods for it.""")% (purchase.name))
             self.pool.get('stock.picking').action_cancel(cr, uid, [x.id for x in purchase.picking_ids if x.state != 'cancel'], context=context)
             for inv in purchase.invoice_ids:
                 if inv and inv.state not in ('cancel', 'draft'):
                     raise UserError(
-                        _('Unable to cancel this purchase order.'),
-                        _('You must first cancel all invoices related to this purchase order.'))
+                        _("""Unable to cancel this purchase order.
+                        You must first cancel all invoices related to this purchase order."""))
             self.pool.get('account.invoice') \
                 .signal_workflow(cr, uid, map(attrgetter('id'), purchase.invoice_ids), 'invoice_cancel')
         self.signal_workflow(cr, uid, ids, 'purchase_cancel')

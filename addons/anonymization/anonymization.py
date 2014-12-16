@@ -91,7 +91,7 @@ class ir_model_fields_anonymization(osv.osv):
             elif global_state == 'unstable':
                 msg = _("The database anonymization is currently in an unstable state. Some fields are anonymized," + \
                       " while some fields are not anonymized. You should try to solve this problem before trying to create, write or delete fields.")
-                raise UserError('Error!', msg)
+                raise UserError(msg)
 
         return True
 
@@ -358,7 +358,7 @@ class ir_model_fields_anonymize_wizard(osv.osv_memory):
             else:
                 msg = _("The database anonymization is currently in an unstable state. Some fields are anonymized," + \
                   " while some fields are not anonymized. You should try to solve this problem before trying to do anything else.")
-                raise UserError('Error!', msg)
+                raise UserError(msg)
 
             res['arch'] = etree.tostring(eview)
 
@@ -369,7 +369,7 @@ class ir_model_fields_anonymize_wizard(osv.osv_memory):
             'state': 'in_exception',
             'msg': error_msg,
         })
-        raise UserError(error_type, error_msg)
+        raise UserError(error_type+' , '+error_msg)
 
     def anonymize_database(self, cr, uid, ids, context=None):
         """Sets the 'anonymized' state to defined fields"""
@@ -526,7 +526,7 @@ class ir_model_fields_anonymize_wizard(osv.osv_memory):
         elif state == 'unstable':
             msg = _("The database anonymization is currently in an unstable state. Some fields are anonymized," + \
                   " while some fields are not anonymized. You should try to solve this problem before trying to do anything.")
-            raise UserError('Error!', msg)
+            raise UserError(msg)
 
         wizards = self.browse(cr, uid, ids, context=context)
         for wizard in wizards:

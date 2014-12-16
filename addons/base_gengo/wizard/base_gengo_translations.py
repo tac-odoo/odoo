@@ -105,12 +105,12 @@ class base_gengo_translations(osv.osv_memory):
             supported_langs = self.pool.get('ir.translation')._get_all_supported_languages(cr, uid, context=context)
             language = self.pool.get('ir.translation')._get_gengo_corresponding_language(wizard.lang_id.code)
             if language not in supported_langs:
-                raise UserError(_("Warning"), _('This language is not supported by the Gengo translation services.'))
+                raise UserError(_('This language is not supported by the Gengo translation services.'))
 
             ctx = context.copy()
             ctx['gengo_language'] = wizard.lang_id.id
             if wizard.sync_limit > 200 or wizard.sync_limit < 1:
-                raise UserError(_("Warning"), _('Sync limit should between 1 to 200 for Gengo translation services.'))
+                raise UserError(_('Sync limit should between 1 to 200 for Gengo translation services.'))
             if wizard.sync_type in ['send', 'both']:
                 self._sync_request(cr, uid, wizard.sync_limit, context=ctx)
             if wizard.sync_type in ['receive', 'both']:

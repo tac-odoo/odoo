@@ -763,7 +763,6 @@ class crm_lead(format_address, osv.osv):
             partner_id = self._lead_create_contact(cr, uid, lead, contact_name, False, context=context)
         else:
             raise UserError(
-                _('Warning!'),
                 _('No customer name defined. Please fill one of the following fields: Company Name, Contact Name or Email ("Name <email@address>")')
             )
         return partner_id

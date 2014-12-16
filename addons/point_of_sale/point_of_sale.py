@@ -402,8 +402,7 @@ class pos_session(osv.osv):
         context = dict(context or {})
         config_id = values.get('config_id', False) or context.get('default_config_id', False)
         if not config_id:
-            raise UserError( _('Error!'),
-                _("You should assign a Point of Sale to your session."))
+            raise UserError(_("You should assign a Point of Sale to your session."))
 
         # journal_id is not required on the pos_config because it does not
         # exists at the installation. If nothing is configured at the
@@ -417,8 +416,7 @@ class pos_session(osv.osv):
             if jid:
                 jobj.write(cr, uid, [pos_config.id], {'journal_id': jid}, context=context)
             else:
-                raise UserError( _('error!'),
-                    _("Unable to open the session. You have to assign a sale journal to your point of sale."))
+                raise UserError(_("Unable to open the session. You have to assign a sale journal to your point of sale."))
 
         # define some cash journal if no payment method exists
         if not pos_config.journal_ids:
@@ -515,8 +513,7 @@ class pos_session(osv.osv):
                 if abs(st.difference) > st.journal_id.amount_authorized_diff:
                     # The pos manager can close statements with maximums.
                     if not self.pool.get('ir.model.access').check_groups(cr, uid, "point_of_sale.group_pos_manager"):
-                        raise UserError( _('Error!'),
-                            _("Your ending balance is too different from the theoretical cash closing (%.2f), the maximum allowed is: %.2f. You can contact your manager to force it.") % (st.difference, st.journal_id.amount_authorized_diff))
+                        raise UserError(_("Your ending balance is too different from the theoretical cash closing (%.2f), the maximum allowed is: %.2f. You can contact your manager to force it.") % (st.difference, st.journal_id.amount_authorized_diff))
                 if (st.journal_id.type not in ['bank', 'cash']):
                     raise UserError( 
                         _("The type of the journal for your payment method should be bank or cash "))
@@ -547,9 +544,7 @@ class pos_session(osv.osv):
                 if order.state == 'done':
                     continue
                 if order.state not in ('paid', 'invoiced'):
-                    raise UserError(
-                        _('Error!'),
-                        _("You cannot confirm all orders of this session, because they have not the 'paid' status"))
+                    raise UserError(_("You cannot confirm all orders of this session, because they have not the 'paid' status"))
                 else:
                     pos_order_obj.signal_workflow(cr, uid, [order.id], 'done')
 
@@ -563,7 +558,6 @@ class pos_session(osv.osv):
         for session in self.browse(cr, uid, ids, context=context):
             if session.user_id.id != uid:
                 raise UserError(
-                        _('Error!'),
                         _("You cannot use the session of another users. This session is owned by %s. Please first close this one to use this point of sale." % session.user_id.name))
         context.update({'active_id': ids[0]})
         return {
@@ -651,7 +645,7 @@ class pos_order(osv.osv):
         if 'partner_id' in vals:
             for posorder in self.browse(cr, uid, ids, context=context):
                 if posorder.invoice_id:
-                    raise UserError( _('Error!'), _("You cannot change the partner of a POS order for which an invoice has already been issued."))
+                    raise UserError(_("You cannot change the partner of a POS order for which an invoice has already been issued."))
                 if vals['partner_id']:
                     p_id = partner_obj.browse(cr, uid, vals['partner_id'], context=context)
                     part_id = partner_obj._find_accounting_partner(p_id).id

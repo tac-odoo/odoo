@@ -538,7 +538,7 @@ class res_partner(osv.Model, format_address):
                 if partner.user_ids:
                     companies = set(user.company_id for user in partner.user_ids)
                     if len(companies) > 1 or company not in companies:
-                        raise UserError(_("Warning"),_("You can not change the company as the partner/user has multiple user linked with different companies."))
+                        raise UserError(_("You can not change the company as the partner/user has multiple user linked with different companies."))
 
         result = super(res_partner, self).write(vals)
         for partner in self:

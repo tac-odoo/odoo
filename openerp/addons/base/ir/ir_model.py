@@ -83,7 +83,7 @@ class ir_model(osv.osv):
             return []
         __, operator, value = domain[0]
         if operator not in ['=', '!=']:
-            raise UserError(_("Invalid Search Criteria"), _('The osv_memory field can only be compared with = and != operator.'))
+            raise UserError(_("Invalid Search Criteria :The osv_memory field can only be compared with = and != operator."))
         value = bool(value) if operator == '=' else not bool(value)
         all_model_ids = self.search(cr, uid, [], context=context)
         is_osv_mem = self._is_osv_memory(cr, uid, all_model_ids, 'osv_memory', arg=None, context=context)
@@ -467,10 +467,10 @@ class ir_model_fields(osv.osv):
                     final_name = vals['name']
 
                 if 'model_id' in vals and vals['model_id'] != item.model_id.id:
-                    raise UserError(_("Error!"), _("Changing the model of a field is forbidden!"))
+                    raise UserError(_("Changing the model of a field is forbidden!"))
 
                 if 'ttype' in vals and vals['ttype'] != item.ttype:
-                    raise UserError(_("Error!"), _("Changing the type of a column is not yet supported. "
+                    raise UserError(_("Changing the type of a column is not yet supported. "
                                 "Please drop it and create it again!"))
 
                 # We don't check the 'state', because it might come from the context

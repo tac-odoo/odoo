@@ -572,8 +572,8 @@ class account_invoice(models.Model):
                         line = self.env['account.account'].browse(line_cmd[2]['account_id'])
                         if line.company_id.id != company_id:
                             raise UserError(
-                                _('Configuration Error!'),
-                                _("Invoice line account's company and invoice's company does not match.")
+                                _("""Configuration Error!
+                                Invoice line account's company and invoice's company does not match.""")
                             )
 
         if company_id and type:

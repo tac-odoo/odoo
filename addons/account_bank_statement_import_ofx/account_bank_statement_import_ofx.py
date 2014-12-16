@@ -26,7 +26,7 @@ class account_bank_statement_import(osv.TransientModel):
     def process_ofx(self, cr, uid, data_file, journal_id=False, context=None):
         """ Import a file in the .OFX format"""
         if ofxparser is None:
-            raise UserError(_("Error"), _("OFX parser unavailable because the `ofxparse` Python library cannot be found."
+            raise UserError(_("OFX parser unavailable because the `ofxparse` Python library cannot be found."
                     "It can be downloaded and installed from `https://pypi.python.org/pypi/ofxparse`."))
         try:
             tempfile = open("temp.ofx", "w+")

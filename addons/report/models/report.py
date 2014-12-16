@@ -293,8 +293,8 @@ class Report(osv.Model):
             report = report_obj.browse(cr, uid, idreport[0], context=context)
         except IndexError:
             raise UserError(
-                _('Bad Report Reference'),
-                _('This report is not loaded into the database: %s.' % report_name)
+                _("""Bad Report Reference
+                This report is not loaded into the database: %s.""") % report_name
             )
 
         return {

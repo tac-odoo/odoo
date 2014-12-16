@@ -109,7 +109,7 @@ Normal - the campaign runs normally and automatically sends all emails and repor
         campaign = self.browse(cr, uid, ids[0])
 
         if not campaign.activity_ids:
-            raise UserError(_("Error"), _("The campaign cannot be started. There are no activities in it."))
+            raise UserError( _("The campaign cannot be started. There are no activities in it."))
 
         has_start = False
         has_signal_without_from = False
@@ -121,7 +121,7 @@ Normal - the campaign runs normally and automatically sends all emails and repor
                 has_signal_without_from = True
 
         if not has_start and not has_signal_without_from:
-            raise UserError(_("Error"), _("The campaign cannot be started. It does not have any starting activity. Modify campaign's activities to mark one as the starting point."))
+            raise UserError(_("The campaign cannot be started. It does not have any starting activity. Modify campaign's activities to mark one as the starting point."))
 
         return self.write(cr, uid, ids, {'state': 'running'})
 
@@ -131,7 +131,7 @@ Normal - the campaign runs normally and automatically sends all emails and repor
                                             [('campaign_id', 'in', ids),
                                             ('state', '=', 'running')])
         if segment_ids :
-            raise UserError(_("Error"), _("The campaign cannot be marked as done before all segments are closed."))
+            raise UserError(_("The campaign cannot be marked as done before all segments are closed."))
         self.write(cr, uid, ids, {'state': 'done'})
         return True
 
@@ -187,7 +187,7 @@ Normal - the campaign runs normally and automatically sends all emails and repor
 
     # prevent duplication until the server properly duplicates several levels of nested o2m
     def copy(self, cr, uid, id, default=None, context=None):
-        raise UserError(_("Operation not supported"), _("You cannot duplicate a campaign, Not supported yet."))
+        raise UserError(_("Operation not supported : You cannot duplicate a campaign, Not supported yet."))
 
     def _find_duplicate_workitems(self, cr, uid, record, campaign_rec, context=None):
         """Finds possible duplicates workitems for a record in this campaign, based on a uniqueness

@@ -354,7 +354,7 @@ class email_template(osv.osv):
                     ir_values_obj = self.pool.get('ir.values')
                     ir_values_obj.unlink(cr, SUPERUSER_ID, template.ref_ir_value.id, context)
             except Exception:
-                raise UserError(_("Warning"), _("Deletion of the action record failed."))
+                raise UserError(_("Deletion of the action record failed."))
         return True
 
     def unlink(self, cr, uid, ids, context=None):

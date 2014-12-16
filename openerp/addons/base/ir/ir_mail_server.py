@@ -207,14 +207,14 @@ class ir_mail_server(osv.osv):
                                     password=smtp_server.smtp_pass, encryption=smtp_server.smtp_encryption,
                                     smtp_debug=smtp_server.smtp_debug)
             except Exception, e:
-                raise UserError(_("Connection Test Failed!"), _("Here is what we got instead:\n %s") % tools.ustr(e))
+                raise UserError(_("Connection Test Failed! Here is what we got instead:\n %s") % tools.ustr(e))
             finally:
                 try:
                     if smtp: smtp.quit()
                 except Exception:
                     # ignored, just a consequence of the previous exception
                     pass
-        raise UserError(_("Connection Test Succeeded!"), _("Everything seems properly set up!"))
+        raise UserError(_("Connection Test Succeeded! Everything seems properly set up!"))
 
     def connect(self, host, port, user=None, password=None, encryption=False, smtp_debug=False):
         """Returns a new SMTP connection to the give SMTP server, authenticated

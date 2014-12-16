@@ -161,7 +161,7 @@ openerp_mailgate: "|/path/to/openerp-mailgate.py --host=localhost -u %(uid)d -p 
                 server.write({'state':'done'})
             except Exception, e:
                 _logger.info("Failed to connect to %s server %s.", server.type, server.name, exc_info=True)
-                raise UserError(_("Connection test failed!"), _("Here is what we got instead:\n %s.") % tools.ustr(e))
+                raise UserError(_("Connection test failed! Here is what we got instead:\n %s.") % tools.ustr(e))
             finally:
                 try:
                     if connection:
@@ -207,7 +207,7 @@ openerp_mailgate: "|/path/to/openerp-mailgate.py --host=localhost -u %(uid)d -p 
                                                                  strip_attachments=(not server.attach),
                                                                  context=context)
                         except Exception:
-                            _logger.info('Failed to process mail from %s server %s.', server.type, server.name)
+                            _logger.info('Failed to process mail from %s server %s.', server.type, server.name, exc_info=True)
                             failed += 1
                         if res_id and server.action_id:
                             action_pool.run(cr, uid, [server.action_id.id], {'active_id': res_id, 'active_ids': [res_id], 'active_model': context.get("thread_model", server.object_id.model)})
@@ -216,7 +216,7 @@ openerp_mailgate: "|/path/to/openerp-mailgate.py --host=localhost -u %(uid)d -p 
                         count += 1
                     _logger.info("Fetched %d email(s) on %s server %s; %d succeeded, %d failed.", count, server.type, server.name, (count - failed), failed)
                 except Exception:
-                    _logger.info("General failure when trying to fetch mail from %s server %s.", server.type, server.name)
+                    _logger.info("General failure when trying to fetch mail from %s server %s.", server.type, server.name, exc_info=True)
                 finally:
                     if imap_server:
                         imap_server.close()
@@ -238,14 +238,14 @@ openerp_mailgate: "|/path/to/openerp-mailgate.py --host=localhost -u %(uid)d -p 
                                                                  context=context)
                             pop_server.dele(num)
                         except Exception:
-                            _logger.info('Failed to process mail from %s server %s.', server.type, server.name)
+                            _logger.info('Failed to process mail from %s server %s.', server.type, server.name, exc_info=True)
                             failed += 1
                         if res_id and server.action_id:
                             action_pool.run(cr, uid, [server.action_id.id], {'active_id': res_id, 'active_ids': [res_id], 'active_model': context.get("thread_model", server.object_id.model)})
                         cr.commit()
                     _logger.info("Fetched %d email(s) on %s server %s; %d succeeded, %d failed.", numMsgs, server.type, server.name, (numMsgs - failed), failed)
                 except Exception:
-                    _logger.info("General failure when trying to fetch mail from %s server %s.", server.type, server.name)
+                    _logger.info("General failure when trying to fetch mail from %s server %s.", server.type, server.name, exc_info=True)
                 finally:
                     if pop_server:
                         pop_server.quit()

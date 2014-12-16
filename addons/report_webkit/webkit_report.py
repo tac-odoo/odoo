@@ -215,8 +215,7 @@ class WebKitParser(report_sxw):
             else:
                 error_message = _('The following diagnosis message was provided:\n') + error_message
             if status :
-                raise UserError(_('Webkit error' ),
-                                 _("The command 'wkhtmltopdf' failed with error code = %s. Message: %s") % (status, error_message))
+                raise UserError(_("The command 'wkhtmltopdf' failed with error code = %s. Message: %s") % (status, error_message))
             with open(out_filename, 'rb') as pdf_file:
                 pdf = pdf_file.read()
             os.close(fd)
