@@ -30,13 +30,20 @@ If you consider introducing new exceptions, check out the test_exceptions addon.
 
 # kept for backward compatibility
 class except_orm(Exception):
-    def __init__(self, name, value):
+    def __init__(self, name, value=None):
         self.name = name
         self.value = value
         self.args = (name, value)
 
-class Warning(Exception):
+class Warning(except_orm):
     pass
+
+class UserError(except_orm):
+    def __init__(self, msg):
+        super(UserError, self).__init__('Warning', msg)
+
+# deprecated due to collision with builtins, kept for compatibility
+#UserError=Warning
 
 class RedirectWarning(Exception):
     """ Warning with a possibility to redirect the user instead of simply
@@ -49,22 +56,27 @@ class RedirectWarning(Exception):
     """
 
 class AccessDenied(Exception):
-    """ Login/password error. No message, no traceback. """
+    """ Login/password error. No message, no traceback.
+    Example: When you try to log with a wrong password."""
     def __init__(self):
         super(AccessDenied, self).__init__('Access denied.')
         self.traceback = ('', '', '')
 
 class AccessError(except_orm):
-    """ Access rights error. """
+    """ Access rights error. 
+    Example: When you try to read a record that you are not allowed to."""
     def __init__(self, msg):
         super(AccessError, self).__init__('AccessError', msg)
 
 class MissingError(except_orm):
-    """ Missing record(s). """
+    """ Missing record(s).
+    Example: When you try to write on a deleted record."""
     def __init__(self, msg):
         super(MissingError, self).__init__('MissingError', msg)
 
 class ValidationError(except_orm):
+    """ Violation of python constraints 
+    Example: When you try to create a new user with a login which already exist in the db."""
     def __init__(self, msg):
         super(ValidationError, self).__init__('ValidateError', msg)
 

@@ -66,7 +66,7 @@ class TransferPaymentTransaction(osv.Model):
                 error_msg += '; no order found'
             else:
                 error_msg += '; multiple order found'
-            _logger.error(error_msg)
+            _logger.info(error_msg)
             raise ValidationError(error_msg)
 
         return self.browse(cr, uid, tx_ids[0], context=context)

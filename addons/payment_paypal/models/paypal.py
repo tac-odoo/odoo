@@ -186,7 +186,7 @@ class TxPaypal(osv.Model):
         reference, txn_id = data.get('item_number'), data.get('txn_id')
         if not reference or not txn_id:
             error_msg = 'Paypal: received data with missing reference (%s) or txn_id (%s)' % (reference, txn_id)
-            _logger.error(error_msg)
+            _logger.info(error_msg)
             raise ValidationError(error_msg)
 
         # find tx -> @TDENOTE use txn_id ?
@@ -197,7 +197,7 @@ class TxPaypal(osv.Model):
                 error_msg += '; no order found'
             else:
                 error_msg += '; multiple order found'
-            _logger.error(error_msg)
+            _logger.info(error_msg)
             raise ValidationError(error_msg)
         return self.browse(cr, uid, tx_ids[0], context=context)
 

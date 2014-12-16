@@ -124,7 +124,7 @@ class TxBuckaroo(osv.Model):
         reference, pay_id, shasign = data.get('BRQ_INVOICENUMBER'), data.get('BRQ_PAYMENT'), data.get('BRQ_SIGNATURE')
         if not reference or not pay_id or not shasign:
             error_msg = 'Buckaroo: received data with missing reference (%s) or pay_id (%s) or shashign (%s)' % (reference, pay_id, shasign)
-            _logger.error(error_msg)
+            _logger.info(error_msg)
             raise ValidationError(error_msg)
 
         tx_ids = self.search(cr, uid, [('reference', '=', reference)], context=context)
@@ -134,7 +134,7 @@ class TxBuckaroo(osv.Model):
                 error_msg += '; no order found'
             else:
                 error_msg += '; multiple order found'
-            _logger.error(error_msg)
+            _logger.info(error_msg)
             raise ValidationError(error_msg)
         tx = self.pool['payment.transaction'].browse(cr, uid, tx_ids[0], context=context)
 
@@ -142,7 +142,7 @@ class TxBuckaroo(osv.Model):
         shasign_check = self.pool['payment.acquirer']._buckaroo_generate_digital_sign(tx.acquirer_id, 'out' ,data)
         if shasign_check.upper() != shasign.upper():
             error_msg = 'Buckaroo: invalid shasign, received %s, computed %s, for data %s' % (shasign, shasign_check, data)
-            _logger.error(error_msg)
+            _logger.info(error_msg)
             raise ValidationError(error_msg)
 
         return tx 

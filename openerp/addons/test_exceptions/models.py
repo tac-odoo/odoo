@@ -3,6 +3,8 @@ import openerp.exceptions
 import openerp.osv.orm
 import openerp.osv.osv
 import openerp.tools.safe_eval
+from openerp.exceptions import UserError
+from openerp.exceptions import except_orm
 
 class m(openerp.osv.osv.Model):
     """ This model exposes a few methods that will raise the different
@@ -17,7 +19,8 @@ class m(openerp.osv.osv.Model):
 
     def generate_except_orm(self, cr, uid, ids, context=None):
         # title is ignored in the new (6.1) exceptions
-        raise openerp.osv.orm.except_orm('title', 'description')
+        #from pudb import set_trace; set_trace()
+        raise except_orm('title', 'description')
 
     def generate_warning(self, cr, uid, ids, context=None):
         raise openerp.exceptions.Warning('description')
@@ -37,6 +40,15 @@ class m(openerp.osv.osv.Model):
 
     def generate_undefined(self, cr, uid, ids, context=None):
         self.surely_undefined_symbol
+
+    def generate_user_error(self, cr, uid, ids, context=None):
+        raise UserError('description')
+
+    def generate_missing_error(self, cr, uid, ids, context=None):
+        raise openerp.exceptions.MissingError('description')
+
+    def generate_validation_error(self, cr, uid, ids, context=None):
+        raise openerp.exceptions.ValidationError('description')
 
 
     def generate_except_osv_safe_eval(self, cr, uid, ids, context=None):
@@ -62,6 +74,15 @@ class m(openerp.osv.osv.Model):
 
     def generate_undefined_safe_eval(self, cr, uid, ids, context=None):
         self.generate_safe_eval(cr, uid, ids, self.generate_undefined, context)
+
+    def generate_user_error_safe_eval(self, cr, uid, ids, context=None):
+        self.generate_safe_eval(cr, uid, ids, self.generate_user_error, context)
+
+    def generate_missing_error_safe_eval(self, cr, uid, ids, context=None):
+        self.generate_safe_eval(cr, uid, ids, self.generate_missing_error, context)
+
+    def generate_validation_error_safe_eval(self, cr, uid, ids, context=None):
+        self.generate_safe_eval(cr, uid, ids, self.generate_validation_error, context)
 
 
     def generate_safe_eval(self, cr, uid, ids, f, context):

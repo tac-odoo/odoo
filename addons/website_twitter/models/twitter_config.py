@@ -2,6 +2,7 @@ import logging
 
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
+from openerp.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -32,8 +33,8 @@ class twitter_config_settings(osv.osv_memory):
         try:
             website_obj.fetch_favorite_tweets(cr, uid, [website_config.website_id.id], context=context)
         except Exception:
-            _logger.warning('Failed to verify twitter API authorization', exc_info=True)
-            raise osv.except_osv(_('Twitter authorization error!'), _('Please double-check your Twitter API Key and Secret'))
+            _logger.info('Failed to verify twitter API authorization', exc_info=True)
+            raise UserError( _('Please double-check your Twitter API Key and Secret'))
 
     def create(self, cr, uid, vals, context=None):
         res_id = super(twitter_config_settings, self).create(cr, uid, vals, context=context)

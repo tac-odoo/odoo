@@ -24,9 +24,9 @@ import time
 from openerp import tools
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
-from openerp.exceptions import except_orm
 
 import openerp.addons.decimal_precision as dp
+from openerp.exceptions import UserError
 
 
 class price_type(osv.osv):
@@ -212,7 +212,7 @@ class product_pricelist(osv.osv):
                 version = v
                 break
         if not version:
-            raise osv.except_osv(_('Warning!'), _("At least one pricelist has no active version !\nPlease create or activate one."))
+            raise UserError( _("At least one pricelist has no active version !\nPlease create or activate one."))
         categ_ids = {}
         for p in products:
             categ = p.categ_id
@@ -255,7 +255,8 @@ class product_pricelist(osv.osv):
                 if 'uom' in context and product.uom_id and context['uom'] != product.uom_id.id:
                     try:
                         qty_in_product_uom = product_uom_obj._compute_qty(cr, uid, context['uom'], qty, product.uom_id.id, dict(context.items() + [('raise-exception', False)]))
-                    except except_orm:
+                    except UserError:
+                        #Conversion from Product UoM A to Default UoM B is not possible as they both belong to different Category!
                         qty_in_product_uom = qty
                 else:
                     qty_in_product_uom = qty

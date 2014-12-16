@@ -197,7 +197,7 @@ class PaymentTxOgone(osv.Model):
         reference, pay_id, shasign = data.get('orderID'), data.get('PAYID'), data.get('SHASIGN')
         if not reference or not pay_id or not shasign:
             error_msg = 'Ogone: received data with missing reference (%s) or pay_id (%s) or shashign (%s)' % (reference, pay_id, shasign)
-            _logger.error(error_msg)
+            _logger.info(error_msg)
             raise ValidationError(error_msg)
 
         # find tx -> @TDENOTE use paytid ?
@@ -208,7 +208,7 @@ class PaymentTxOgone(osv.Model):
                 error_msg += '; no order found'
             else:
                 error_msg += '; multiple order found'
-            _logger.error(error_msg)
+            _logger.info(error_msg)
             raise ValidationError(error_msg)
         tx = self.pool['payment.transaction'].browse(cr, uid, tx_ids[0], context=context)
 
@@ -216,7 +216,7 @@ class PaymentTxOgone(osv.Model):
         shasign_check = self.pool['payment.acquirer']._ogone_generate_shasign(tx.acquirer_id, 'out', data)
         if shasign_check.upper() != shasign.upper():
             error_msg = 'Ogone: invalid shasign, received %s, computed %s, for data %s' % (shasign, shasign_check, data)
-            _logger.error(error_msg)
+            _logger.info(error_msg)
             raise ValidationError(error_msg)
 
         return tx
@@ -237,7 +237,7 @@ class PaymentTxOgone(osv.Model):
 
     def _ogone_form_validate(self, cr, uid, tx, data, context=None):
         if tx.state == 'done':
-            _logger.warning('Ogone: trying to validate an already validated tx (ref %s)' % tx.reference)
+            _logger.info('Ogone: trying to validate an already validated tx (ref %s)', tx.reference)
             return True
 
         status = int(data.get('STATUS', '0'))
@@ -330,7 +330,7 @@ class PaymentTxOgone(osv.Model):
         if error_code:
             error_msg = ogone.OGONE_ERROR_MAP.get(error_code)
             error = '%s\n\n%s: %s' % (error_str, error_code, error_msg)
-            _logger.error(error)
+            _logger.info(error)
             raise Exception(error)      # TODO specific exception
 
         tx.write({'partner_reference': alias})

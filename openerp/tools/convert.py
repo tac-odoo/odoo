@@ -34,6 +34,7 @@ import openerp
 import openerp.release
 import openerp.workflow
 from yaml_import import convert_yaml_import
+from openerp.exceptions import UserError
 
 import assertion_report
 
@@ -912,7 +913,7 @@ def convert_file(cr, module, filename, idref, mode='update', noupdate=False, kin
         elif ext == '.js':
             pass # .js files are valid but ignored here.
         else:
-            _logger.warning("Can't load unknown file type %s.", filename)
+            raise ValueError('ValueError',"Can't load unknown file type %s.",filename)
     finally:
         fp.close()
 
@@ -987,8 +988,8 @@ def convert_xml_import(cr, module, xmlfile, idref=None, mode='init', noupdate=Fa
     try:
         relaxng.assert_(doc)
     except Exception:
-        _logger.error('The XML file does not fit the required schema !')
-        _logger.error(misc.ustr(relaxng.error_log.last_error))
+        _logger.info('The XML file does not fit the required schema !',exc_info=True)
+        _logger.info(misc.ustr(relaxng.error_log.last_error))
         raise
 
     if idref is None:

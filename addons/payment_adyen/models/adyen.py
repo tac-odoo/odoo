@@ -115,7 +115,7 @@ class TxAdyen(osv.Model):
         reference, pspReference = data.get('merchantReference'), data.get('pspReference')
         if not reference or not pspReference:
             error_msg = 'Adyen: received data with missing reference (%s) or missing pspReference (%s)' % (reference, pspReference)
-            _logger.error(error_msg)
+            _logger.info(error_msg)
             raise ValidationError(error_msg)
 
         # find tx -> @TDENOTE use pspReference ?
@@ -126,7 +126,7 @@ class TxAdyen(osv.Model):
                 error_msg += '; no order found'
             else:
                 error_msg += '; multiple order found'
-            _logger.error(error_msg)
+            _logger.info(error_msg)
             raise ValidationError(error_msg)
         tx = self.pool['payment.transaction'].browse(cr, uid, tx_ids[0], context=context)
 
