@@ -22,10 +22,17 @@
     <field name="url" eval="'/account/financial_report/'+str(ref('account_financial_report_executivesummary0'))"/>
     <field name="target">self</field>
 </record>
+<record model="ir.actions.act_url" id="action_account_report_ts">
+    <field name="name">Sales Tax Summary</field>
+    <field name="url" eval="'/account/financial_report/'+str(ref('account_financial_report_executivesummary0'))"/>
+    <field name="target">self</field>
+</record>
+
 <menuitem id="menu_action_account_report_pnl" name="Profit And Loss" action="action_account_report_pnl" parent="account.menu_finance_legal_statement"/>
 <menuitem id="menu_action_account_report_bs" name="Balance Sheet" action="action_account_report_bs" parent="account.menu_finance_legal_statement"/>
 <menuitem id="menu_action_account_report_cs" name="Cash Summary" action="action_account_report_cs" parent="account.menu_finance_legal_statement"/>
 <menuitem id="menu_action_account_report_es" name="Executive Summary" action="action_account_report_es" parent="account.menu_finance_legal_statement"/>
+<menuitem id="menu_action_account_report_ts" name="Sales Tax Summary" action="action_account_report_ts" parent="account.menu_finance_legal_statement"/>
 
 <template id="report_financial_line">
     <t t-if="a.get('level') == 1 or a.get('level') == 0"><tr style="border-width: 2px; border-style: solid; border-left-style: hidden; border-right-style: hidden;"><td height="22"></td><td t-if="o.debit_credit or context.comparison"></td><td t-if="o.debit_credit or context.comparison"></td><td></td></tr></t>
