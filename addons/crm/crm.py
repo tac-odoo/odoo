@@ -64,12 +64,11 @@ class crm_tracking_mixin(models.AbstractModel):
     """Mixin class for objects which can be tracked by marketing. """
     _name = 'crm.tracking.mixin'
 
-    @api.v7
     def tracking_fields(self):
         return [('utm_campaign', 'campaign_id'), ('utm_source', 'source_id'), ('utm_medium', 'medium_id')]
 
     @api.model
-    def tracking_get_values(vals):
+    def tracking_get_values(self, vals):
         for key, fname in self.tracking_fields():
             field = self._fields[fname]
             value = vals.get(fname) or (request and request.httprequest.cookies.get(key))  # params.get should be always in session by the dispatch from ir_http
@@ -89,9 +88,9 @@ class crm_tracking_mixin(models.AbstractModel):
         return vals
 
     @api.model
-    def _get_default_track(field):
+    def _get_default_track(self, field):
         return self.tracking_get_values({}).get(field)
 
-    campaign_id = fields.Many2one('crm.tracking.campaign', 'Campaign',  help = "This is a name that helps you keep track of your different campaign efforts Ex: Fall_Drive, Christmas_Special", _default=lambda self: self._get_default_track('campaign_id'))
-    source_id = fields.Many2one('crm.tracking.source', 'Source', help="This is the source of the link Ex: Search Engine, another domain, or name of email list", _default= lambda self: self._get_default_track('source_id'))
-    medium_id = fields.Many2one('crm.tracking.medium', 'Channel', help="This is the method of delivery. Ex: Postcard, Email, or Banner Ad", _default =lambda self: self._get_default_track('medium_id'))
+    campaign_id = fields.Many2one('crm.tracking.campaign', 'Campaign',  help = "This is a name that helps you keep track of your different campaign efforts Ex: Fall_Drive, Christmas_Special", default=lambda self: self._get_default_track('campaign_id'))
+    source_id = fields.Many2one('crm.tracking.source', 'Source', help="This is the source of the link Ex: Search Engine, another domain, or name of email list", default= lambda self: self._get_default_track('source_id'))
+    medium_id = fields.Many2one('crm.tracking.medium', 'Channel', help="This is the method of delivery. Ex: Postcard, Email, or Banner Ad", default =lambda self: self._get_default_track('medium_id'))
