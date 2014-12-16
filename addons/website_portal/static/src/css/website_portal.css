@@ -1,6 +1,6 @@
 .oe_application_menu_placeholder{
     width: 220px;
-    min-height:550px;
+    min-height:400px;
     background: #F8F8F8;
     border-right: 1px solid #afafb6;
     float: left;
@@ -8,8 +8,16 @@
 
 .oe_webclient {
     width: 100%;
+    display: flex;
+    position: relative;
+    height: 800px;
 }
 
 .oe_application {
     float: right;
+    position:absolute;
+}
+
+body {
+    overflow: auto;
 }

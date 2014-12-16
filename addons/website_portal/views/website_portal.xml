@@ -2,8 +2,10 @@
 <openerp>
     <data>
         <template id="portal.assets_portal" inherit_id="website.layout">
-            <xpath expr="//body" position="inside">
+            <xpath expr="//head" position="inside">
                 <t t-call-assets="web.assets_backend"/>
+            </xpath>
+            <xpath expr="//body" position="inside">
                 <script type="text/javascript">
                     (function() {
                         var s = new openerp.init();
