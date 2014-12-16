@@ -58,13 +58,13 @@
 <template id="report_financial">
     <t t-call="report.html_container">
         <span class="oe_account_report_widgets">
-            <h2 t-esc="o.name"/>
+            <h2 t-esc="o.get_title()"/>
             <t t-call="account.report_configurator"/>
             <t t-call-assets="web.assets_common" t-css="false" />
             <t t-call-assets="web.assets_backend" t-css="false" />
             <script type="text/javascript" src="/account/static/src/js/account_report_widgets.js"></script>
             <link rel="stylesheet" href="/account/static/src/css/account_financial_report.css" />
-            <div style="margin-bottom: 250px;" t-att-class="' '.join(['page', 'oe_account_report_widgets', str(context.id)])">
+            <div style="margin-bottom: 250px;" t-att-class="' '.join(['page', 'oe_account_report_widgets', str(o.get_name()), str(context.id)])">
                 <div class="summary">
                     <input type="submit" name="summary" class="btn btn-link" value="Add summary" />
                 </div>

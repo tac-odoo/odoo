@@ -114,6 +114,12 @@ class report_account_financial_report(models.Model):
             level=self.offset_level,
         ).get_lines(self)[0]
 
+    def get_title(self):
+        return self.name
+
+    def get_name(self):
+        return 'financial_report'
+
 
 class account_financial_report_line(models.Model):
     _name = "account.financial.report.line"

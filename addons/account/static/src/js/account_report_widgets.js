@@ -249,7 +249,8 @@
             fold: function(e) {
                 e.stopPropagation();
                 e.preventDefault();
-                var context_id = window.$("div.page").attr("class").split(/\s+/)[2];
+                var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
+                var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
                 var el;
                 var $el;
                 var $nextEls = $(e.target).parent().parent().parent().nextAll();
@@ -263,50 +264,61 @@
                 }
                 var active_id = $(e.target).parent().attr("class").split(/\s+/)[1];
                 $(e.target).parent().replaceWith(openerp.qweb.render("unfoldable", {lineId: active_id}));
-                var model = new openerp.Model('account.financial.report.context');
-                model.call('remove_line', [[parseInt(context_id)], parseInt(active_id)]);
+                var model = new openerp.Model('account.report.context.common');
+                model.call('get_context_name_by_report_name', [report_name]).then(function (result) {
+                    var contextModel = new openerp.Model(result);
+                    contextModel.call('remove_line', [[parseInt(context_id)], parseInt(active_id)]);
+                });
             },
             unfold: function(e) {
                 e.stopPropagation();
                 e.preventDefault();
-                var context_id = window.$("div.page").attr("class").split(/\s+/)[2];
+                var report_name = window.$("div.page").attr("class").split(/\s+/)[2];
+                var context_id = window.$("div.page").attr("class").split(/\s+/)[3];
                 var active_id = $(e.target).parent().attr("class").split(/\s+/)[1];
-                var contextObj = new openerp.Model('account.financial.report.context');
-                contextObj.call('add_line', [[parseInt(context_id)], parseInt(active_id)]).then(function (result) {
-                    var el;
-                    var $el;
-                    var $nextEls = $(e.target).parent().parent().parent().nextAll();
-                    var isLoaded = false;
-                    for (el in $nextEls) {
-                        $el = $($nextEls[el]).find("td span[style='font-style: italic; margin-left: 100px']");
-                        if ($el.length == 0)
-                            break;
-                        else{
-                            $($el[0]).parents("tr").show();
-                            isLoaded = true;
+                debugger;
+                var commonContext = new openerp.Model('account.report.context.common');
+                commonContext.call('get_context_name_by_report_name', [report_name]).then(function (result) {
+                    var contextObj = new openerp.Model(result);
+                    contextObj.call('add_line', [[parseInt(context_id)], parseInt(active_id)]).then(function (result) {
+                        var el;
+                        var $el;
+                        var $nextEls = $(e.target).parent().parent().parent().nextAll();
+                        var isLoaded = false;
+                        for (el in $nextEls) {
+                            $el = $($nextEls[el]).find("td span[style='font-style: italic; margin-left: 100px']");
+                            if ($el.length == 0)
+                                break;
+                            else{
+                                $($el[0]).parents("tr").show();
+                                isLoaded = true;
+                            }
                         }
-                    }
-                    if (!isLoaded) {
-                        var $cursor = $(e.target).parent().parent().parent();
-                        var reportObj = new openerp.Model('account.financial.report');
-                        var reportLineObj = new openerp.Model('account.financial.report.line');
-                        contextObj.query(['report_id', 'comparison'])
-                        .filter([['id', '=', context_id]]).first().then(function (context) {
-                            reportObj.query(['debit_credit'])
-                            .filter([['id', '=', context.report_id[0]]]).first().then(function (report) {
-                                reportObj.call('get_lines', [[parseInt(context.report_id[0])], parseInt(context_id), parseInt(active_id)])
-                                .then(function (lines) {
+                        if (!isLoaded) {
+                            var $cursor = $(e.target).parent().parent().parent();
+                            commonContext.call('get_full_report_name_by_report_name', [report_name]).then(function (result) {
+                                var reportObj = new openerp.Model(result);
+                                var f = function (lines) {
                                     var line;
                                     lines.shift();
                                     for (line in lines) {
-                                        $cursor.after(openerp.qweb.render("report_financial_line", {l: lines[line], o: report, c: context}));
+                                        $cursor.after(openerp.qweb.render("report_financial_line", {l: lines[line]}));
                                         $cursor = $cursor.next();
                                     }
-                                });
+                                };
+                                if (report_name == 'financial_report') {
+                                    contextObj.query(['report_id'])
+                                    .filter([['id', '=', context_id]]).first().then(function (context) {
+                                        reportObj.call('get_lines', [[parseInt(context.report_id[0])], parseInt(context_id), parseInt(active_id)]).then(f);
+                                    });
+                                }
+                                else {
+                                    reportObj.call('get_lines', [parseInt(context_id), parseInt(active_id)]).then(f);
+                                }
                             });
-                        });
-                    }
-                    $(e.target).parent().replaceWith(openerp.qweb.render("foldable", {lineId: active_id}));
+                        }
+                        $(e.target).parent().replaceWith(openerp.qweb.render("foldable", {lineId: active_id}));
+                    });
                 });
             },
             displayMoveLines: function(e) {

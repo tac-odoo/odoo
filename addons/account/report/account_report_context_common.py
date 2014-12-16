@@ -29,9 +29,18 @@ class account_report_context_common(models.TransientModel):
     _description = "A particular context for a financial report"
 
     @api.model
-    def _get_context_by_report_name(self, name):
+    def get_context_by_report_name(self, name):
+        return self.env[self.get_context_name_by_report_name(name)]
+
+    @api.model
+    def get_context_name_by_report_name(self, name):
         if name == 'financial_report':
-            return self.env['account.financial.report.context']
+            return 'account.financial.report.context'
+
+    @api.model
+    def get_full_report_name_by_report_name(self, name):
+        if name == 'financial_report':
+            return 'account.financial.report'
 
     @api.depends('create_uid')
     @api.one

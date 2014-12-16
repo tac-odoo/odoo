@@ -17,7 +17,7 @@ class FinancialReportController(http.Controller):
             report_id = int(report_id)
             domain.append(('report_id', '=', report_id))
             report_obj = report_obj.sudo(uid).browse(report_id)
-        context_obj = request.env['account.report.context.common']._get_context_by_report_name(report_name)
+        context_obj = request.env['account.report.context.common'].get_context_by_report_name(report_name)
         context_id = context_obj.sudo(uid).search(domain, limit=1)
         if not context_id:
             create_vals = {}
