@@ -24,6 +24,8 @@ class crm_team(models.Model):
             monthly_open_leads: number of open lead during the last months
             monthly_planned_revenue: planned revenu of opportunities during the last months
         """
+        # TODO: __get_bar_values not migrate into new api so i must have to pass obj with self.pool
+        # FIXME after migrate __get_bar_values method
         obj = self.pool['crm.lead']
         month_begin = date.today().replace(day=1)
         date_begin = month_begin - \
