@@ -134,10 +134,11 @@ class crm_phonecall(models.Model):
 
     @api.onchange('opportunity_id')
     def on_change_opportunity(self):
-        self.team_id = self.opportunity_id.team_id and self.opportunity_id.team_id.id or False
-        self.partner_phone = self.opportunity_id.phone
-        self.partner_mobile = self.opportunity_id.mobile
-        self.partner_id = self.opportunity_id.partner_id and self.opportunity_id.partner_id.id or False
+        if self.opportunity_id:
+            self.team_id = self.opportunity_id.team_id and self.opportunity_id.team_id.id or False
+            self.partner_phone = self.opportunity_id.phone
+            self.partner_mobile = self.opportunity_id.mobile
+            self.partner_id = self.opportunity_id.partner_id and self.opportunity_id.partner_id.id or False
 
     @api.one
     def _call_set_partner(self, partner_id):

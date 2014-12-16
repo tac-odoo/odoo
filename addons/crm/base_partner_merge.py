@@ -460,6 +460,7 @@ class MergePartnerAutomatic(models.TransientModel):
 
     @api.one
     def _next_screen(self):
+        self.invalidate_cache()
         values = {}
         if self.line_ids:
             # in this case, we try to find the next record.
@@ -568,6 +569,7 @@ class MergePartnerAutomatic(models.TransientModel):
     def automatic_process_cb(self):
         self.ensure_one()
         self.start_process_cb()
+        self.invalidate_cache()
         for line in self.line_ids:
             partner_ids = literal_eval(line.aggr_ids)
             self._merge(partner_ids)
