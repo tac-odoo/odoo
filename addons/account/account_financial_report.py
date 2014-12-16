@@ -22,7 +22,6 @@
 from openerp import models, fields, api
 from openerp.tools.safe_eval import safe_eval
 from openerp.tools.misc import formatLang
-from openerp.report import report_sxw
 from datetime import timedelta, datetime
 from xlwt import Workbook, easyxf
 import calendar
@@ -261,8 +260,6 @@ class account_financial_report_line(models.Model):
             'name': self.name,
             'type': 'line',
             'level': level,
-            'unfolded': not 'unfolded_lines' in context or self.id in context['unfolded_lines'],
-            'unfoldable': self.domain and self.show_domain or False,
         }
         [vals['unfolded'], vals['unfoldable']] = self._get_unfold(financial_report_id);
 
@@ -373,7 +370,7 @@ class account_financial_report_line(models.Model):
             result += lines
         for new_line in new_lines:
             result += new_line
-        if level == 0:
+        if level <= 0:
             result += lines
         return result
 
@@ -391,7 +388,8 @@ class account_financial_report_context(models.TransientModel):
         return False
 
     name = fields.Char()
-    financial_report_id = fields.Many2one('account.financial.report', 'Linked financial report', required=True)
+    report_name = fields.Char('Report name', required=True)
+    report_id = fields.Many2one('account.financial.report', 'Linked financial report', help='Only if financial report')
     date_from = fields.Date("Start date")
     date_to = fields.Date("End date")
     target_move = fields.Selection([('posted', 'All posted entries'), ('all', 'All entries')],
@@ -405,18 +403,26 @@ class account_financial_report_context(models.TransientModel):
     company_id = fields.Many2one('res.company', 'Company', default=lambda s: s.env.user.company_id)
     date_filter = fields.Char('Date filter used', default=None)
     date_filter_cmp = fields.Char('Compare Date filter used', default=None)
+    periods_number = fields.Integer('Number of periods', default=1)
+
+    # def _get_cmp_periods(self):
+    #     for k in xrange(0, periods_number):
 
     @api.model
     def create(self, vals):
         if self.env['account.financial.report'].browse(vals['financial_report_id']).date_filter == 'profit_and_loss':
-            vals.update({'date_from': datetime.today().replace(day=1)})
-        else:
-            vals.update({'date_from': datetime.today()})
-        if self.env['account.financial.report'].browse(vals['financial_report_id']).date_filter == 'profit_and_loss':
             dt = datetime.today()
-            vals.update({'date_to': dt.replace(day=calendar.monthrange(dt.year, dt.month)[1])})
+            vals.update({
+                'date_from': datetime.today().replace(day=1),
+                'date_to': dt.replace(day=calendar.monthrange(dt.year, dt.month)[1]),
+                'date_filter': 'this_month',
+            })
         else:
-            vals.update({'date_to': datetime.today()})
+            vals.update({
+                'date_from': datetime.today(),
+                'date_to': datetime.today(),
+                'date_filter': 'today',
+            })
         return super(account_financial_report_context, self).create(vals)
 
     @api.model
@@ -433,9 +439,17 @@ class account_financial_report_context(models.TransientModel):
 
     def get_balance_date(self):
         dt_to = datetime.strptime(self.date_to, "%Y-%m-%d")
+        if not self.financial_report_id.no_date_range:
+            dt_from = datetime.strptime(self.date_from, "%Y-%m-%d")
+        if 'month' in self.date_filter:
+            return dt_to.strftime('%b %Y')
+        if 'quarter' in self.date_filter:
+            quarter = dt_to.month / 3 + 1
+            return dt_to.strftime('Quarter #' + str(quarter) + ' %Y')
+        if 'year' in self.date_filter:
+            return dt_to.strftime('%Y')
         if self.financial_report_id.no_date_range:
             return dt_to.strftime('(as at %d %b %Y)')
-        dt_from = datetime.strptime(self.date_from, "%Y-%m-%d")
         return dt_from.strftime('(From %d %b %Y <br />') + dt_to.strftime('to %d %b %Y)')
 
     def get_cmp_date(self):

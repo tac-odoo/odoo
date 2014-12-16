@@ -5,52 +5,11 @@
         openerp.footnote = {};
         var _t = openerp._t;
 
-        var footNoteSeqNum = 1
-
-        var dialog, popupform,
-        allFields = $([]).add($("#note"))
-
-        function saveFootNote() {
-            $("table").after(openerp.qweb.render("savedFootNote", {num: footNoteSeqNum, note: $("#note").val()}));
-            footNoteSeqNum++;
-            $(this).dialog("close");
-        }
-
-        dialog = $("#footnote-form").dialog({
-                dialogClass: "form-group",
-                autoOpen: false,
-                height: 150,
-                width: 400,
-                modal: true,
-                buttons: [
-                    {
-                        text: "Add footnote",
-                        class: "btn btn-default btn-sm",
-                        click: saveFootNote,
-                    },
-                    {
-                        text: "Cancel",
-                        class: "btn btn-default btn-sm",
-                        click: function() {
-                            $(this).dialog("close");
-                        },
-                    },
-                ],
-                close: function() {
-                    popupform[0].reset();
-                    allFields.removeClass("ui-state-error");
-                    $("sup:contains('" + footNoteSeqNum + "')").remove()
-                }
-            });
-
-        popupform = dialog.find("form").on("submit", function(e) {
-            e.preventDefault();
-            saveFootNote();
-        });
+        var footNoteSeqNum = 1;
 
         openerp.reportWidgets = openerp.Widget.extend({
             events: {
-                'click .fa-pencil-square': 'addFootNote',
+                'click .fa-pencil-square': 'clickPencil',
                 'click .foldable': 'fold',
                 'click .unfoldable': 'unfold',
                 'click .saveFootNote': 'saveFootNote',
@@ -60,22 +19,45 @@
                 'mouseleave .annotable': 'rmPencil',
                 'mouseenter .line': 'addPencil',
                 'mouseleave .line': 'rmPencil',
-                'mouseenter .footnote': 'addTrash',
-                'mouseleave .footnote': 'rmTrash',
+                'mouseenter .account_id': 'addPencil',
+                'mouseleave .account_id': 'rmPencil',
+                'mouseenter .footnote': 'addTrashAndPencil',
+                'mouseleave .footnote': 'rmTrashAndPencil',
                 'click .fa-trash-o': 'rmContent',
                 "change *[name='date_filter']": 'onChangeDateFilter',
                 "change *[name='date_filter_cmp']": 'onChangeCmpDateFilter',
                 "change *[name='comparison']": 'onChangeComparison',
                 "click input[name='summary']": 'onClickSummary',
                 "click button.saveSummary": 'saveSummary',
-                'mouseenter .savedSummary': 'addTrash',
-                'mouseleave .savedSummary': 'rmTrash',
+                'mouseenter .savedSummary': 'addTrashAndPencil',
+                'mouseleave .savedSummary': 'rmTrashAndPencil',
+                'click button.saveContent': 'saveContent',
+                'click button#saveFootNote': 'saveFootNote',
+            },
+            saveFootNote: function() {
+                this.$("div.page").append(openerp.qweb.render("savedFootNote", {num: footNoteSeqNum, note: $("#note").val()}));
+                footNoteSeqNum++;
+                this.$('#footnoteModal').modal('hide');
+                this.$('#footnoteModal').find('form')[0].reset();
             },
             start: function() {
                 openerp.qweb.add_template("/account/static/src/xml/account_report_financial_line.xml");
                 var res = this._super();
                 this.onChangeCmpDateFilter();
                 return res;
+            },
+            addTrashAndPencil: function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                if ($(e.target).children("textarea").length == 0 && $(e.target).siblings("textarea").length == 0) {
+                    $(e.target).append(openerp.qweb.render("trashAndPencilIcon"));
+                }
+            },
+            rmTrashAndPencil: function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                this.$("i.fa-trash-o").remove();
+                this.$("i.fa-pencil-square").remove();
             },
             onClickSummary: function(e) {
                 e.stopPropagation();
@@ -91,9 +73,11 @@
                 var checkbox = $(e.target).is(":checked")
                 if (checkbox) {
                     this.$("label[for='date_filter_cmp']").parent().attr('style', '')
+                    this.$("label[for='date_to_cmp']").parent().parent().attr('style', '');
                 }
                 else {
                     this.$("label[for='date_filter_cmp']").parent().attr('style', 'visibility: hidden');
+                    this.$("label[for='date_to_cmp']").parent().parent().attr('style', 'visibility: hidden');
                 }
             },
             onChangeDateFilter: function(e) {
@@ -169,6 +153,7 @@
                 var no_date_range = this.$("input[name='date_from']").length == 0;
                 if (cmp_filter == 'custom') {
                     this.$("label[for='date_to_cmp']").parent().attr('style', '');
+                    // this.$("input[name='periods_number']").parent().attr('style', 'visibility: hidden');
                 }
                 else {
                     var dtTo = this.$("input[name='date_to']").val(); 
@@ -214,28 +199,51 @@
                     }
                     this.$("input[name='date_to_cmp']").val(dtTo.toISOString().substr(0, 10)); 
                     this.$("label[for='date_to_cmp']").parent().attr('style', 'visibility: hidden');
+                    // this.$("input[name='periods_number']").parent().attr('style', '');
                 }
             },
-            addFootNote: function(e) {
+            clickPencil: function(e) {
                 e.stopPropagation();
                 e.preventDefault();
-                if ($(e.target).parent().find("sup").length == 0) {
-                    $(e.target).parent().append(' <sup>' + footNoteSeqNum + '</sup>');
-                    this.$("#footnote-form label").text(footNoteSeqNum);
-                    dialog.dialog("option", "position", {my: "top", at: "bottom", of: $(e.target)});
-                    dialog.dialog("open");
+                if ($(e.target).parents("div.summary, p.footnote").length > 0) {
+                    var $el = $(e.target).parent().parent();
+                    this.rmTrashAndPencil(e);
+                    var text = $el.text();
+                    var num = 0;
+                    if ($el.attr('class').search('footnote') > -1) {
+                        text = text.split('.');
+                        var num = text[0];
+                        text = text[1];
+                    }
+                    $el.html(openerp.qweb.render("editContent", {num: num, text: text}));
                 }
+                else if ($(e.target).parent().parent().find("sup").length == 0) {
+                    $(e.target).parent().parent().append(openerp.qweb.render("supFootNoteSeqNum", {footNoteSeqNum: footNoteSeqNum}));
+                    $("#footnoteModal label").text(footNoteSeqNum);
+                    $('#footnoteModal').on('hidden.bs.modal', function (e) {
+                        $(this).find('form')[0].reset();
+                        $("sup:contains('" + footNoteSeqNum + "')").remove();
+                    });
+                    $('#footnoteModal').modal('show');
+                }
+            },
+            saveContent: function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                var text = $(e.target).siblings('textarea').val();
+                $(e.target).siblings('textarea').replaceWith(text);
+                $(e.target).remove();
             },
             rmContent: function(e) {
                 e.stopPropagation();
                 e.preventDefault();
                 if ($(e.target).parents("div.summary").length > 0) {
-                    $(e.target).parent().replaceWith(openerp.qweb.render("addSummary"));
+                    $(e.target).parent().parent().replaceWith(openerp.qweb.render("addSummary"));
                 }
                 else {
-                    var num = $(e.target).parent().text().split('.')[0];
+                    var num = $(e.target).parent().parent().text().split('.')[0];
                     this.$("sup:contains('" + num + "')").remove();
-                    $(e.target).parent().remove();
+                    $(e.target).parent().parent().remove();
                 }
             },
             fold: function(e) {
@@ -246,7 +254,7 @@
                 var $el;
                 var $nextEls = $(e.target).parent().parent().parent().nextAll();
                 for (el in $nextEls) {
-                    $el = $($nextEls[el]).find("td span[style='font-style: italic; margin-left: 100px']");
+                    $el = $($nextEls[el]).find("td span[style='font-style: italic; margin-left: 70px']");
                     if ($el.length == 0)
                         break;
                     else {
@@ -317,24 +325,14 @@
             addPencil: function(e) {
                 e.stopPropagation();
                 e.preventDefault();
-                if ($(e.target).parent().find("sup").length == 0) {
-                    $(e.target).prepend(openerp.qweb.render("pencilIcon"));
+                if ($(e.target).parent().find("sup").length == 0 && $(e.target).parents("sup").length == 0) {
+                    $(e.target).append(openerp.qweb.render("pencilIcon"));
                 }
             },
             rmPencil: function(e) {
                 e.stopPropagation();
                 e.preventDefault();
-                this.$("i.fa-pencil-square").remove();
-            },
-            addTrash: function(e) {
-                e.stopPropagation();
-                e.preventDefault();
-                $(e.target).append(openerp.qweb.render("trashIcon"));
-            },
-            rmTrash: function(e) {
-                e.stopPropagation();
-                e.preventDefault();
-                this.$("i.fa-trash-o").remove();
+                this.$("i.fa-pencil-square").parent().remove();
             },
         });
         var reportWidgets = new openerp.reportWidgets();

@@ -30,26 +30,26 @@
 <template id="report_financial_line">
     <t t-if="a.get('level') == 1 or a.get('level') == 0"><tr style="border-width: 2px; border-style: solid; border-left-style: hidden; border-right-style: hidden;"><td height="22"></td><td t-if="o.debit_credit or context.comparison"></td><td t-if="o.debit_credit or context.comparison"></td><td></td></tr></t>
     <t t-set="trstyle" t-value="'border-width: 0; border-style: solid;'"/>
-    <t t-set="style" t-value="'margin-left: 60px'"/>
+    <t t-set="style" t-value="'margin-left: 40px'"/>
     <t t-if="a.get('level') == 0"><t t-set="trstyle" t-value="'border-width: 2px; border-style: solid; background-color:#eee; border-left-style: hidden; border-right-style: hidden;'"/></t>
     <t t-if="a.get('level') == 1"><t t-set="trstyle" t-value="'border-width: 2px; border-style: solid; border-left-style: hidden; border-right-style: hidden;'"/></t>
-    <t t-if="a.get('level') == 2"><t t-set="style" t-value="'font-weight: bold; margin-left: 30px;'"/><t t-set="trstyle" t-value="'border-width: 1px; border-style: solid; border-left-style: hidden; border-right-style: hidden;'"/></t>
+    <t t-if="a.get('level') == 2"><t t-set="style" t-value="'font-weight: bold; margin-left: 20px;'"/><t t-set="trstyle" t-value="'border-width: 1px; border-style: solid; border-left-style: hidden; border-right-style: hidden;'"/></t>
     <t t-if="not a.get('level') &gt; 1"><t t-set="style" t-value="'font-weight: bold;'"/></t>
     <tr t-att-style="trstyle">
 
         <td>
             <t t-if="a.get('unfoldable') and a.get('unfolded')">
-                <span style="position: absolute;" t-att-class="' '.join(['foldable', str(a.get('id'))])"><i class="fa fa-toggle-down"></i></span>
+                <span style="position: absolute;" t-att-class="' '.join(['foldable', str(a.get('id'))])"><i class="fa fa-caret-down"></i></span>
             </t>
             <t t-if="a.get('unfoldable') and not a.get('unfolded')">
-                <span style="position: absolute;" t-att-class="' '.join(['unfoldable', str(a.get('id'))])"><i class="fa fa-toggle-right"></i></span>
+                <span style="position: absolute;" t-att-class="' '.join(['unfoldable', str(a.get('id'))])"><i class="fa fa-caret-right"></i></span>
             </t>
-            <t t-if="a['type'] != 'line'"><t t-set="style" t-value="'font-style: italic; margin-left: 100px'"/></t>
+            <t t-if="a['type'] != 'line'"><t t-set="style" t-value="'font-style: italic; margin-left: 70px'"/></t>
             <a t-if="a['type'] == 'account_id'"><span t-att-style="style" t-att-class="' '.join(['account_id', str(a['id'])])" t-esc="a.get('name')"/></a>
             <t t-if="a['type'] != 'account_id'"><span t-att-style="style" t-att-class="a.get('type')" t-esc="a.get('name')"/></t>
         </td>
         <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit and not context.comparison">
-            <span class="annotable" t-att-style="style" t-esc="a.get('debit')"/> <!-- TODO : FormatLang -->
+            <span class="annotable" t-att-style="style" t-esc="a.get('debit')"/>
         </td>
         <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit and not context.comparison">
             <span class="annotable" t-att-style="style" t-esc="a.get('credit')"/>
@@ -68,25 +68,25 @@
 <template id="report_financial">
     <t t-call="report.html_container">
         <span class="oe_account_report_widgets">
+            <h2 t-esc="o.name"/>
             <t t-call="account.report_configurator"/>
             <t t-call-assets="web.assets_common" t-css="false" />
             <t t-call-assets="web.assets_backend" t-css="false" />
             <script type="text/javascript" src="/account/static/src/js/account_report_widgets.js"></script>
             <link rel="stylesheet" href="/account/static/src/css/account_financial_report.css" />
-            <div t-att-class="' '.join(['page', 'oe_account_report_widgets', str(context.id)])">
-                <h2 t-esc="o.name"/>
+            <div style="margin-bottom: 250px;" t-att-class="' '.join(['page', 'oe_account_report_widgets', str(context.id)])">
                 <div class="summary">
-                    <input type="submit" name="summary" class="btn btn-primary" value="Add summary" />
+                    <input type="submit" name="summary" class="btn btn-link" value="Add summary" />
                 </div>
                 <table class="table table-condensed">
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            <th></th>
                             <th class="text-right" t-if="o.debit_credit and not context.comparison">Debit</th>
                             <th class="text-right" t-if="o.debit_credit and not context.comparison">Credit</th>
                             <th class="text-right">Balance<br /><t t-raw="context.get_balance_date()" /></th>
-                            <th class="text-right" t-if="context.comparison">Comparison (value)<br /><t t-raw="context.get_cmp_date()" /></th>
-                            <th class="text-right" t-if="context.comparison">Comparison (%)</th>
+                            <th class="text-right" t-if="context.comparison">Comparison<br /><t t-raw="context.get_cmp_date()" /></th>
+                            <th class="text-right" t-if="context.comparison">%</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -96,18 +96,27 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Modal -->
+            <div class="modal fade" id="footnoteModal" tabindex="-1" role="dialog" aria-labelledby="footnoteLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&amp;times;</span><span class="sr-only">Close</span></button>
+                            <h4 class="modal-title" id="footnoteLabel">Add footnote</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form role="form">
+                                <label for="note"></label>
+                                <textarea name="note" id="note" rows='4' class="form-control" placeholder="Insert foot note here"></textarea>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" id="saveFootNote">Save changes</button> or <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </span>
-        <div id="footnote-form" class="form-group">
-            <form role="form">
-                <fieldset>
-                    <label for="note"></label>
-                    <textarea name="note" id="note" rows='4' class="form-control">Insert foot note here</textarea>
-
-                    <!-- Allow form submission with keyboard without duplicating the dialog button -->
-                    <input type="submit" tabindex="-1" class="btn btn-primary" style="position:absolute; top:-1000px" />
-                </fieldset>
-            </form>
-        </div>
     </t>
 </template>
 </data>

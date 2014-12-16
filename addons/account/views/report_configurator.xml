@@ -31,22 +31,6 @@
                             <option selected="selected" value="all">All Entries</option>
                         </t>
                     </select>
-                    <div class="checkbox">
-                        <label> 
-                            <input t-if="context.comparison == False" type="checkbox" name="comparison" value="True" />
-                            <input t-if="context.comparison == True" type="checkbox" name="comparison" value="True" checked="checked" />
-                            Enable Comparison
-                        </label>
-                    </div>
-                    <div class="checkbox" t-if="o.debit_credit">
-                        <label> 
-                            <input t-if="context.cash_basis == False" type="checkbox" name="cash_basis" value="True" />
-                            <input t-if="context.cash_basis == True" type="checkbox" name="cash_basis" value="True" checked="checked" />
-                            Enable Cash Basis Method
-                        </label>
-                    </div>
-                </div>
-                <div class="col-xs-3">
                     <label t-if="o.date_filter != 'custom'" for="date_filter">Date Filter :</label>
                     <select name="date_filter" t-if="o.date_filter == 'balance_sheet'" class="form-control">
                         <option selected="selected" t-if="context.date_filter == 'today'" value='today'>Today</option>
@@ -75,6 +59,33 @@
                         <option t-if="context.date_filter != 'custom'" value='custom'>Custom</option>
                     </select>
                     <t t-set="style" value="''" />
+                    <t t-if="not context.comparison"><t t-set="style" t-value="'visibility: hidden'" /></t>
+                    <span t-att-style="style">
+                        <label for="date_filter_cmp">Comparison Date Filter :</label>
+                        <select name="date_filter_cmp" class="form-control">
+                            <option selected="selected" t-if="context.date_filter_cmp == 'previous_period'" value='previous_period'>Previous Period</option>
+                            <option selected="selected" t-if="context.date_filter_cmp == 'custom'" value='custom'>Custom</option>
+                            <option t-if="context.date_filter_cmp != 'previous_period'" value='previous_period'>Previous Period</option>
+                            <option t-if="context.date_filter_cmp != 'custom'" value='custom'>Custom</option>
+                        </select>
+                    </span>
+                    <div class="checkbox">
+                        <label> 
+                            <input t-if="context.comparison == False" type="checkbox" name="comparison" value="True" />
+                            <input t-if="context.comparison == True" type="checkbox" name="comparison" value="True" checked="checked" />
+                            Enable Comparison
+                        </label>
+                    </div>
+                    <div class="checkbox" t-if="o.debit_credit">
+                        <label> 
+                            <input t-if="context.cash_basis == False" type="checkbox" name="cash_basis" value="True" />
+                            <input t-if="context.cash_basis == True" type="checkbox" name="cash_basis" value="True" checked="checked" />
+                            Enable Cash Basis Method
+                        </label>
+                    </div>
+                </div>
+                <div class="col-xs-3">
+                    <t t-set="style" value="''" />
                     <t t-if="o.date_filter != 'custom' and context.date_filter != 'custom'"><t t-set="style" t-value="'visibility: hidden'" /></t>
                     <span t-att-style="style">
                         <label t-if="not o.no_date_range" for="date_from">Start Date :</label>
@@ -85,14 +96,7 @@
                 </div>
                 <t t-set="style" value="''" />
                 <t t-if="not context.comparison"><t t-set="style" t-value="'visibility: hidden'" /></t>
-                <div t-att-style="style" class="col-xs-3">
-                    <label for="date_filter_cmp">Comparison Date Filter :</label>
-                    <select name="date_filter_cmp" class="form-control">
-                        <option selected="selected" t-if="context.date_filter_cmp == 'previous_period'" value='previous_period'>Previous Period</option>
-                        <option selected="selected" t-if="context.date_filter_cmp == 'custom'" value='custom'>Custom</option>
-                        <option t-if="context.date_filter_cmp != 'previous_period'" value='previous_period'>Previous Period</option>
-                        <option t-if="context.date_filter_cmp != 'custom'" value='custom'>Custom</option>
-                    </select>
+                <div class="col-xs-3" t-att-style="style">
                     <t t-set="style" value="''" />
                     <t t-if="context.date_filter_cmp != 'custom'"><t t-set="style" t-value="'visibility: hidden'" /></t>
                     <span t-att-style="style">
@@ -101,11 +105,14 @@
                         <label for="date_to_cmp">Comparison End Date :</label>
                         <input type="date" class="form-control" name="date_to_cmp" t-att-value="context.date_to_cmp"></input>
                     </span>
+<!--                     <t t-set="style" value="''" />
+                    <t t-if="context.date_filter_cmp == 'custom'"><t t-set="style" t-value="'visibility: hidden'" /></t>
+                    <input t-att-style="style" type="number" name="periods_number" t-att-value="context.periods_number"/> -->
                 </div>
             </div>
             <div class="mt32">
                 <input type="submit" class="btn btn-primary" value="Update" />
-                <input type="submit" name="print" class="btn btn-primary" value="CSV" />
+                <span style="float: right;"><input type="submit" name="print" class="btn btn-link" value="CSV" /></span>
             </div>
         </div>
     </form>

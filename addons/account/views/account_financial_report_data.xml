@@ -106,10 +106,16 @@
         <!-- BALANCE SHEET -->
 
 
+        <record id="account_financial_report_balancesheet_line0" model="account.financial.report.line">
+            <field name="name">Balance Sheet</field>
+            <field name="sequence" eval="4"/>
+            <field name="hidden" eval="True"/>
+        </record>
         <record id="account_financial_report_net_assets0" model="account.financial.report.line">
             <field name="name">NET ASSETS</field>
             <field name="code">NA</field>
             <field name="formulas">balance = TA.balance - L.balance; credit = TA.credit - L.credit; debit = TA.debit - L.debit</field>
+            <field name="parent_ids" eval="[(6, 0, [ref('account_financial_report_balancesheet_line0')])]"/>
             <field name="sequence" eval="4"/>
         </record>
         <record id="account_financial_report_total_assets0" model="account.financial.report.line">
@@ -221,6 +227,12 @@
             <field name="groupby">account_id</field>
             <field name="formulas">balance = sum.balance; credit = sum.credit; debit = sum.debit</field>
             <field name="sequence" eval="6"/>
+        </record>
+        <record id="account_financial_current_year_earnings0" model="account.financial.report.line">
+            <field name="name">CURRENT YEAR EARNINGS</field>
+            <field name="formulas">balance = GRP.balance - LEX.balance; debit = GRP.debit - LEX.debit; credit = GRP.credit - LEX.credit</field>
+            <field name="sequence" eval="6"/>
+            <field name="parent_ids" eval="[(6, 0, [ref('account_financial_report_balancesheet_line0')])]"/>
         </record>
 
 
@@ -446,9 +458,10 @@
         <record id="account_financial_report_balancesheet0" model="account.financial.report">
             <field name="name">Balance Sheet</field>
             <field name="debit_credit" eval="True"/>
-            <field name="line" ref="account_financial_report_net_assets0"/>
+            <field name="line" ref="account_financial_report_balancesheet_line0"/>
             <field name="date_filter">balance_sheet</field>
             <field name="no_date_range" eval="True"/>
+            <field name="offset_level" eval="-1"/>
         </record>
         <record id="account_financial_report_cashsummary0" model="account.financial.report">
             <field name="name">Cash Summary</field>
