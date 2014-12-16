@@ -367,7 +367,7 @@ class resource_calendar(osv.osv):
 
         # filter according to leaves
         for interval in working_intervals:
-            work_intervals = self.interval_remove_leaves(interval, leaves)
+            work_intervals = self.interval_remove_leaves_group(cr, uid, interval, leaves, context=context)
             intervals += work_intervals
 
         return intervals

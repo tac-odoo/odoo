@@ -4,6 +4,12 @@ from openerp.osv import fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 
 
+class resource_calendar_leaves(osv.osv):
+    _inherit = "resource.calendar.leaves"
+    _columns = {
+        'group_id': fields.many2one('procurement.group', string="Procurement Group"),
+    }
+
 class resource_calendar(osv.osv):
     _inherit = "resource.calendar"
 
@@ -57,8 +63,51 @@ class resource_calendar(osv.osv):
             if start_datetime and date_to < start_datetime:
                 continue
 
-            leaves.append((date_from, date_to))
+            leaves.append((date_from, date_to, leave.group_id.id))
         return leaves
+
+    # --------------------------------------------------
+    # Utility methods
+    # --------------------------------------------------
+
+    def interval_remove_leaves_group(self, cr, uid, interval, leave_intervals, context=None):
+        """
+            The same as interval_remove_leaves, but take into account the group
+        """
+        if not interval:
+            return interval
+        if leave_intervals is None:
+            leave_intervals = []
+        intervals = []
+        #leave_intervals = self.interval_clean(leave_intervals) NOT NECESSARY TO CLEAN HERE AS IT WOULD REMOVE GROUP INFO
+        current_interval = list(interval)
+        for leave in leave_intervals:
+            if len(leave) > 2:
+                current_group = False
+                att_obj = self.pool.get("resource.calendar.attendance")
+                if leave[2]:
+                    if len(current_interval) > 2:
+                        current_group = current_interval[2] and att_obj.browse(cr, uid, current_interval[2], context=context).group_id.id or False
+                    if leave[2] != current_group:
+                        continue
+            if leave[1] <= current_interval[0]:
+                continue
+            if leave[0] >= current_interval[1]:
+                break
+
+            if current_interval[0] < leave[0] < current_interval[1]:
+                current_interval[1] = leave[0]
+                intervals.append((current_interval[0], current_interval[1]))
+                current_interval = [leave[1], interval[1]]
+            # if current_interval[0] <= leave[1] <= current_interval[1]:
+            if current_interval[0] <= leave[1]:
+                current_interval[0] = leave[1]
+        if current_interval and current_interval[0] < interval[1]:  # remove intervals moved outside base interval due to leaves
+            if len(interval) > 2:
+                intervals.append((current_interval[0], current_interval[1], interval[2]))
+            else:
+                intervals.append((current_interval[0], current_interval[1],))
+        return intervals
 
     def interval_remove_leaves(self, interval, leave_intervals):
         """ Utility method that remove leave intervals from a base interval:
