@@ -4,25 +4,26 @@ from openerp.http import request
 
 class FinancialReportController(http.Controller):
 
-    def get_report_obj_from_name(self, name):
+    def get_report_obj_from_name(self, name, id=None):
         if name == 'financial_report':
             return request.env['account.financial.report']
 
-    @http.route('/account/<string:report_obj>/<string:report_id>', type='http', auth='none')
-    def financial_report(self, report_name, report_id, **kw):
+    @http.route('/account/<string:report_name>/<string:report_id>', type='http', auth='none')
+    def report(self, report_name, report_id=None, **kw):
         uid = request.session.uid
+        domain = [('create_uid', '=', uid)]
         report_obj = self.get_report_obj_from_name(report_name)
-        domain = [('report_name', '=', report_name), ('create_uid', '=', uid)]
         if report_name == 'financial_report':
             report_id = int(report_id)
             domain.append(('report_id', '=', report_id))
-            report_obj = report_obj.sudo(uid).browse(report_id).line
-        context_id = request.env['account.financial.report.context'].sudo(uid).search(domain, limit=1)
+            report_obj = report_obj.sudo(uid).browse(report_id)
+        context_obj = request.env['account.report.context.common']._get_context_by_report_name(report_name)
+        context_id = context_obj.sudo(uid).search(domain, limit=1)
         if not context_id:
-            create_vals = {'report_name': report_name}
+            create_vals = {}
             if report_name == 'financial_report':
-                create_vals['financial_report_id'] = report_id
-            context_id = request.env['account.financial.report.context'].sudo(uid).create(create_vals)
+                create_vals['report_id'] = report_id
+            context_id = context_obj.sudo(uid).create(create_vals)
         if 'print' in kw:
             response = request.make_response(None,
                 headers=[('Content-Type', 'application/vnd.ms-excel'),
@@ -37,7 +38,7 @@ class FinancialReportController(http.Controller):
                 elif field in ['cash_basis', 'comparison']:
                     update[field] = False
             context_id.write(update)
-        lines = report_obj.get_lines_with_context(context_id)
+        lines = report_obj.get_lines(context_id)
         rcontext = {
             'context': context_id,
             'o': report_obj,

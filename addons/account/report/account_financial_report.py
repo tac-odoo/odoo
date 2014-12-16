@@ -95,6 +95,25 @@ class report_account_financial_report(models.Model):
     no_date_range = fields.Boolean('Not a date range report', default=False, required=True,
                                    help='For report like the balance sheet that do not work with date ranges')
 
+    @api.multi
+    def get_lines(self, context_id, line_id=None):
+        if isinstance(context_id, int):
+            context_id = self.env['account.financial.report.context'].browse(context_id)
+        line_obj = self.line
+        if line_id:
+            line_obj = self.env['account.financial.report.line'].search([('id', '=', line_id)])
+        return line_obj.with_context(
+            date_from=context_id.date_from,
+            date_to=context_id.date_to,
+            target_move=context_id.target_move,
+            unfolded_lines=context_id.unfolded_lines.ids,
+            comparison=context_id.comparison,
+            date_from_cmp=context_id.date_from_cmp,
+            date_to_cmp=context_id.date_to_cmp,
+            cash_basis=context_id.cash_basis,
+            level=self.offset_level,
+        ).get_lines(self)[0]
+
 
 class account_financial_report_line(models.Model):
     _name = "account.financial.report.line"
@@ -144,24 +163,6 @@ class account_financial_report_line(models.Model):
                 if field in field_names:
                     res[field] = report_safe_eval(formula, c, nocopy=True)
         return res
-
-    @api.multi
-    def get_lines_with_context(self, context_id, level=None):
-        if isinstance(context_id, int):
-            context_id = self.env['account.financial.report.context'].browse(context_id)
-        if not level:
-            level = context_id.financial_report_id.offset_level
-        return self.with_context(
-            date_from=context_id.date_from,
-            date_to=context_id.date_to,
-            target_move=context_id.target_move,
-            unfolded_lines=context_id.unfolded_lines.ids,
-            comparison=context_id.comparison,
-            date_from_cmp=context_id.date_from_cmp,
-            date_to_cmp=context_id.date_to_cmp,
-            cash_basis=context_id.cash_basis,
-            level=level,
-        ).get_lines(context_id.financial_report_id)[0]
 
     def _format(self, value):
         if self.figure_type == 'float':
@@ -243,8 +244,22 @@ class account_financial_report_line(models.Model):
                                 unfoldable = True
         return [unfolded, unfoldable]
 
+    def _put_columns_together(self, vals):
+        columns = []
+        if 'debit' in vals and 'credit' in vals:
+            columns += [vals['debit'], vals['credit']]
+        if 'balance' in vals:
+            columns += [vals['balance']]
+        else:
+            columns += ['']
+        if 'comparison' in vals:
+            columns += [vals['comparison'], vals['comparison_pc']]
+        vals['columns'] = columns
+        return vals
+
     @api.one
     def get_lines(self, financial_report_id):
+
         lines = []
         context = self.env.context
         level = context['level']
@@ -283,6 +298,7 @@ class account_financial_report_line(models.Model):
                 vals['comparison'] = self._format(value)
                 vals['comparison_pc'] = self._build_cmp(balance, value)
         if not self.hidden:
+            vals = self._put_columns_together(vals)
             lines.append(vals)
 
         # if the line has a domain, computing its values
@@ -326,6 +342,7 @@ class account_financial_report_line(models.Model):
                                 vals['comparison'] = self._format(0)
                             vals['comparison_pc'] = self._build_cmp(gb[1], gbs_cmp.get(gb[0], 0))
                         if flag:
+                            vals = self._put_columns_together(vals)
                             lines.append(vals)
 
                     if gbs_cmp:
@@ -333,6 +350,7 @@ class account_financial_report_line(models.Model):
                             vals = {'id': gb, 'name': self._get_gb_name(gb), 'level': level + 2, 'type': self.groupby,
                                     'comparison': self._format(value), 'balance': self._format(0), 'comparison_pc': '0%'}
                             if not currency_id.is_zero(gb):
+                                vals = self._put_columns_together(vals)
                                 lines.append(vals)
 
             else:
@@ -362,6 +380,7 @@ class account_financial_report_line(models.Model):
                                     flag = True
                                 vals['comparison_pc'] = self._build_cmp(balance, value)
                     if flag:
+                        vals = self._put_columns_together(vals)
                         lines.append(vals)
 
         new_lines = self.children_ids.with_context(level=level+1).get_lines(financial_report_id)
@@ -378,31 +397,15 @@ class account_financial_report_line(models.Model):
 class account_financial_report_context(models.TransientModel):
     _name = "account.financial.report.context"
     _description = "A particular context for a financial report"
+    _inherit = "account.report.context.common"
 
-    @api.depends('create_uid')
-    @api.one
-    def _get_multi_company(self):
-        group_multi_company = self.env['ir.model.data'].xmlid_to_object('base.group_multi_company')
-        if self.create_uid in group_multi_company.users.ids:
-            return True
-        return False
-
-    name = fields.Char()
-    report_name = fields.Char('Report name', required=True)
     report_id = fields.Many2one('account.financial.report', 'Linked financial report', help='Only if financial report')
-    date_from = fields.Date("Start date")
-    date_to = fields.Date("End date")
-    target_move = fields.Selection([('posted', 'All posted entries'), ('all', 'All entries')],
-                                   'Target moves', default='posted', required=True)
     unfolded_lines = fields.Many2many('account.financial.report.line', 'context_to_line', string='Unfolded lines')
     comparison = fields.Boolean('Enable comparison', default=False)
     date_from_cmp = fields.Date("Start date for comparison", default=lambda s: datetime.today() + timedelta(days=-395))
     date_to_cmp = fields.Date("End date for comparison", default=lambda s: datetime.today() + timedelta(days=-365))
     cash_basis = fields.Boolean('Enable cash basis columns', default=False)
-    multi_company = fields.Boolean('Allow multi-company', compute=_get_multi_company, store=True)
-    company_id = fields.Many2one('res.company', 'Company', default=lambda s: s.env.user.company_id)
-    date_filter = fields.Char('Date filter used', default=None)
-    date_filter_cmp = fields.Char('Compare Date filter used', default=None)
+    date_filter_cmp = fields.Char('Comparison date filter used', default=None)
     periods_number = fields.Integer('Number of periods', default=1)
 
     # def _get_cmp_periods(self):
@@ -410,7 +413,7 @@ class account_financial_report_context(models.TransientModel):
 
     @api.model
     def create(self, vals):
-        if self.env['account.financial.report'].browse(vals['financial_report_id']).date_filter == 'profit_and_loss':
+        if self.env['account.financial.report'].browse(vals['report_id']).date_filter == 'profit_and_loss':
             dt = datetime.today()
             vals.update({
                 'date_from': datetime.today().replace(day=1),
@@ -425,10 +428,6 @@ class account_financial_report_context(models.TransientModel):
             })
         return super(account_financial_report_context, self).create(vals)
 
-    @api.model
-    def get_companies(self):
-        return self.env['res.company'].search([])
-
     @api.multi
     def remove_line(self, line_id):
         self.write({'unfolded_lines': [(3, line_id)]})
@@ -439,7 +438,7 @@ class account_financial_report_context(models.TransientModel):
 
     def get_balance_date(self):
         dt_to = datetime.strptime(self.date_to, "%Y-%m-%d")
-        if not self.financial_report_id.no_date_range:
+        if not self.report_id.no_date_range:
             dt_from = datetime.strptime(self.date_from, "%Y-%m-%d")
         if 'month' in self.date_filter:
             return dt_to.strftime('%b %Y')
@@ -448,91 +447,101 @@ class account_financial_report_context(models.TransientModel):
             return dt_to.strftime('Quarter #' + str(quarter) + ' %Y')
         if 'year' in self.date_filter:
             return dt_to.strftime('%Y')
-        if self.financial_report_id.no_date_range:
+        if self.report_id.no_date_range:
             return dt_to.strftime('(as at %d %b %Y)')
         return dt_from.strftime('(From %d %b %Y <br />') + dt_to.strftime('to %d %b %Y)')
 
     def get_cmp_date(self):
         dt_to = datetime.strptime(self.date_to_cmp, "%Y-%m-%d")
-        if self.financial_report_id.no_date_range:
+        if self.report_id.no_date_range:
             return dt_to.strftime('(as at %d %b %Y)')
         dt_from = datetime.strptime(self.date_from_cmp, "%Y-%m-%d")
         return dt_from.strftime('(From %d %b %Y <br />') + dt_to.strftime('to %d %b %Y)')
 
-    def get_csv(self, response):
-        book = Workbook()
-        report_id = self.financial_report_id
-        sheet = book.add_sheet(report_id.name)
+    def get_columns_names(self):
+        columns = []
+        if self.report_id.debit_credit and not self.comparison:
+            columns += ['Debit', 'Credit']
+        columns += ['Balance<br />' + self.get_balance_date()]
+        if self.comparison:
+            columns += ['Comparison<br />' + self.get_cmp_date(), '%']
+        return columns
 
-        title_style = easyxf('font: bold true; borders: bottom medium;')
-        level_0_style = easyxf('font: bold true; borders: bottom medium, top medium; pattern: pattern solid;')
-        level_0_style_left = easyxf('font: bold true; borders: bottom medium, top medium, left medium; pattern: pattern solid;')
-        level_0_style_right = easyxf('font: bold true; borders: bottom medium, top medium, right medium; pattern: pattern solid;')
-        level_1_style = easyxf('font: bold true; borders: bottom medium, top medium;')
-        level_1_style_left = easyxf('font: bold true; borders: bottom medium, top medium, left medium;')
-        level_1_style_right = easyxf('font: bold true; borders: bottom medium, top medium, right medium;')
-        level_2_style = easyxf('font: bold true; borders: top medium;')
-        level_2_style_left = easyxf('font: bold true; borders: top medium, left medium;')
-        level_2_style_right = easyxf('font: bold true; borders: top medium, right medium;')
-        level_3_style = easyxf()
-        level_3_style_left = easyxf('borders: left medium;')
-        level_3_style_right = easyxf('borders: right medium;')
-        account_style = easyxf('font: italic true;')
-        account_style_left = easyxf('font: italic true; borders: left medium;')
-        account_style_right = easyxf('font: italic true; borders: right medium;')
-        upper_line_style = easyxf('borders: top medium;')
-        def_style = easyxf()
 
-        sheet.col(0).width = 10000
+    # def get_csv(self, response):
+    #     book = Workbook()
+    #     report_id = self.financial_report_id
+    #     sheet = book.add_sheet(report_id.name)
 
-        balance_y = 1
-        sheet.write(0, 0, 'Name', title_style)
-        if report_id.debit_credit and not self.comparison:
-            sheet.write(0, 1, 'Debit', title_style)
-            sheet.write(0, 2, 'Credit', title_style)
-            balance_y = 3
-        sheet.write(0, balance_y, 'Balance', title_style)
+    #     title_style = easyxf('font: bold true; borders: bottom medium;')
+    #     level_0_style = easyxf('font: bold true; borders: bottom medium, top medium; pattern: pattern solid;')
+    #     level_0_style_left = easyxf('font: bold true; borders: bottom medium, top medium, left medium; pattern: pattern solid;')
+    #     level_0_style_right = easyxf('font: bold true; borders: bottom medium, top medium, right medium; pattern: pattern solid;')
+    #     level_1_style = easyxf('font: bold true; borders: bottom medium, top medium;')
+    #     level_1_style_left = easyxf('font: bold true; borders: bottom medium, top medium, left medium;')
+    #     level_1_style_right = easyxf('font: bold true; borders: bottom medium, top medium, right medium;')
+    #     level_2_style = easyxf('font: bold true; borders: top medium;')
+    #     level_2_style_left = easyxf('font: bold true; borders: top medium, left medium;')
+    #     level_2_style_right = easyxf('font: bold true; borders: top medium, right medium;')
+    #     level_3_style = easyxf()
+    #     level_3_style_left = easyxf('borders: left medium;')
+    #     level_3_style_right = easyxf('borders: right medium;')
+    #     account_style = easyxf('font: italic true;')
+    #     account_style_left = easyxf('font: italic true; borders: left medium;')
+    #     account_style_right = easyxf('font: italic true; borders: right medium;')
+    #     upper_line_style = easyxf('borders: top medium;')
+    #     def_style = easyxf()
 
-        x_offset = 1
-        lines = report_id.line.get_lines_with_context(self)
-        for x in range(0, len(lines)):
-            if lines[x].get('level') == 0:
-                for y in range(0, balance_y + 1):
-                    sheet.write(x + x_offset, y, None, upper_line_style)
-                x_offset += 1
-                style_left = level_0_style_left
-                style_right = level_0_style_right
-                style = level_0_style
-            elif lines[x].get('level') == 1:
-                for y in range(0, balance_y + 1):
-                    sheet.write(x + x_offset, y, None, upper_line_style)
-                x_offset += 1
-                style_left = level_1_style_left
-                style_right = level_1_style_right
-                style = level_1_style
-            elif lines[x].get('level') == 2:
-                style_left = level_2_style_left
-                style_right = level_2_style_right
-                style = level_2_style
-            elif lines[x].get('level') == 3:
-                style_left = level_3_style_left
-                style_right = level_3_style_right
-                style = level_3_style
-            elif lines[x].get('type') == 'account_id':
-                style_left = account_style_left
-                style_right = account_style_right
-                style = account_style
-            else:
-                style = def_style
-                style_left = def_style
-                style_right = def_style
-            sheet.write(x + x_offset, 0, lines[x]['name'], style_left)
-            if report_id.debit_credit and not self.comparison:
-                sheet.write(x + x_offset, 1, lines[x].get('credit', ''), style)
-                sheet.write(x + x_offset, 2, lines[x].get('debit', ''), style)
-            sheet.write(x + x_offset, balance_y, lines[x].get('balance', ''), style_right)
+    #     sheet.col(0).width = 10000
 
-        for y in range(0, balance_y + 1):
-            sheet.write(len(lines) + x_offset, y, None, upper_line_style)
+    #     balance_y = 1
+    #     sheet.write(0, 0, 'Name', title_style)
+    #     if report_id.debit_credit and not self.comparison:
+    #         sheet.write(0, 1, 'Debit', title_style)
+    #         sheet.write(0, 2, 'Credit', title_style)
+    #         balance_y = 3
+    #     sheet.write(0, balance_y, 'Balance', title_style)
 
-        book.save(response.stream)
+    #     x_offset = 1
+    #     lines = report_id.line.get_lines_with_context(self)
+    #     for x in range(0, len(lines)):
+    #         if lines[x].get('level') == 0:
+    #             for y in range(0, balance_y + 1):
+    #                 sheet.write(x + x_offset, y, None, upper_line_style)
+    #             x_offset += 1
+    #             style_left = level_0_style_left
+    #             style_right = level_0_style_right
+    #             style = level_0_style
+    #         elif lines[x].get('level') == 1:
+    #             for y in range(0, balance_y + 1):
+    #                 sheet.write(x + x_offset, y, None, upper_line_style)
+    #             x_offset += 1
+    #             style_left = level_1_style_left
+    #             style_right = level_1_style_right
+    #             style = level_1_style
+    #         elif lines[x].get('level') == 2:
+    #             style_left = level_2_style_left
+    #             style_right = level_2_style_right
+    #             style = level_2_style
+    #         elif lines[x].get('level') == 3:
+    #             style_left = level_3_style_left
+    #             style_right = level_3_style_right
+    #             style = level_3_style
+    #         elif lines[x].get('type') == 'account_id':
+    #             style_left = account_style_left
+    #             style_right = account_style_right
+    #             style = account_style
+    #         else:
+    #             style = def_style
+    #             style_left = def_style
+    #             style_right = def_style
+    #         sheet.write(x + x_offset, 0, lines[x]['name'], style_left)
+    #         if report_id.debit_credit and not self.comparison:
+    #             sheet.write(x + x_offset, 1, lines[x].get('credit', ''), style)
+    #             sheet.write(x + x_offset, 2, lines[x].get('debit', ''), style)
+    #         sheet.write(x + x_offset, balance_y, lines[x].get('balance', ''), style_right)
+
+    #     for y in range(0, balance_y + 1):
+    #         sheet.write(len(lines) + x_offset, y, None, upper_line_style)
+
+    #     book.save(response.stream)

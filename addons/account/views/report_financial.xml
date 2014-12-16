@@ -48,21 +48,11 @@
             <a t-if="a['type'] == 'account_id'"><span t-att-style="style" t-att-class="' '.join(['account_id', str(a['id'])])" t-esc="a.get('name')"/></a>
             <t t-if="a['type'] != 'account_id'"><span t-att-style="style" t-att-class="a.get('type')" t-esc="a.get('name')"/></t>
         </td>
-        <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit and not context.comparison">
-            <span class="annotable" t-att-style="style" t-esc="a.get('debit')"/>
-        </td>
-        <td class="text-right" style="white-space: nowrap;" t-if="o.debit_credit and not context.comparison">
-            <span class="annotable" t-att-style="style" t-esc="a.get('credit')"/>
-        </td>
-        <td class="text-right" style="white-space: nowrap;">
-            <span class="annotable" t-att-style="style" t-esc="a.get('balance')"/>
-        </td>
-        <td class="text-right" style="white-space: nowrap;" t-if="context.comparison">
-            <span class="annotable" t-att-style="style" t-esc="a.get('comparison')"/>
-        </td>
-        <td class="text-right" style="white-space: nowrap;" t-if="context.comparison">
-            <span class="annotable" t-att-style="style" t-esc="a.get('comparison_pc')"/>
-        </td>
+        <t t-foreach="a['columns']" t-as="c">
+            <td class="text-right" style="white-space: nowrap;">
+                <span class="annotable" t-att-style="style" t-esc="c"/>
+            </td>
+        </t>
     </tr>
 </template>
 <template id="report_financial">
@@ -82,11 +72,9 @@
                     <thead>
                         <tr>
                             <th></th>
-                            <th class="text-right" t-if="o.debit_credit and not context.comparison">Debit</th>
-                            <th class="text-right" t-if="o.debit_credit and not context.comparison">Credit</th>
-                            <th class="text-right">Balance<br /><t t-raw="context.get_balance_date()" /></th>
-                            <th class="text-right" t-if="context.comparison">Comparison<br /><t t-raw="context.get_cmp_date()" /></th>
-                            <th class="text-right" t-if="context.comparison">%</th>
+                            <t t-foreach="context.get_columns_names()" t-as="column_name">
+                                <th class="text-right" t-raw="column_name" />
+                            </t>
                         </tr>
                     </thead>
                     <tbody>

@@ -290,11 +290,11 @@
                         var $cursor = $(e.target).parent().parent().parent();
                         var reportObj = new openerp.Model('account.financial.report');
                         var reportLineObj = new openerp.Model('account.financial.report.line');
-                        contextObj.query(['financial_report_id', 'comparison'])
+                        contextObj.query(['report_id', 'comparison'])
                         .filter([['id', '=', context_id]]).first().then(function (context) {
                             reportObj.query(['debit_credit'])
-                            .filter([['id', '=', context.financial_report_id[0]]]).first().then(function (report) {
-                                reportLineObj.call('get_lines_with_context', [[parseInt(active_id)], parseInt(context_id)])
+                            .filter([['id', '=', context.report_id[0]]]).first().then(function (report) {
+                                reportObj.call('get_lines', [[parseInt(context.report_id[0])], parseInt(context_id), parseInt(active_id)])
                                 .then(function (lines) {
                                     var line;
                                     lines.shift();
