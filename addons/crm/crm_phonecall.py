@@ -3,7 +3,6 @@ import crm
 from datetime import datetime
 from openerp import models, fields, api, _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
-from openerp.tools.translate import _
 
 
 class crm_phonecall(models.Model):

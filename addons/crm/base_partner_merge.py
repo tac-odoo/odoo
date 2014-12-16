@@ -17,7 +17,6 @@ from .validate_email import validate_email
 
 from openerp import models, fields, api, _
 from openerp.osv.orm import browse_record
-from openerp.tools.translate import _
 
 pattern = re.compile("&(\w+?);")
 

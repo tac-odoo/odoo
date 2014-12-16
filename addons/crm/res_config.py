@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp import SUPERUSER_ID
-from openerp import models, api, fields, _
+from openerp import models, api, fields
 
 
 class crm_configuration(models.TransientModel):

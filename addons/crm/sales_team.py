@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import calendar
 from datetime import date
 from dateutil import relativedelta
@@ -23,6 +24,7 @@ class crm_team(models.Model):
             monthly_open_leads: number of open lead during the last months
             monthly_planned_revenue: planned revenu of opportunities during the last months
         """
+        obj = self.pool['crm.lead']
         month_begin = date.today().replace(day=1)
         date_begin = month_begin - \
             relativedelta.relativedelta(months=self._period_number - 1)
@@ -38,28 +40,27 @@ class crm_team(models.Model):
             ('date_deadline', '<=', date_end.strftime(
              tools.DEFAULT_SERVER_DATETIME_FORMAT)),
             ('type', '=', 'opportunity')]
+
         for team in self:
             lead_domain = lead_pre_domain + [('team_id', '=', team.id)]
             opp_domain = opp_pre_domain + [('team_id', '=', team.id)]
-            team.monthly_open_leads = json.dumps(self.__get_bar_values(
-                lead_domain, ['create_date'], 'create_date_count', 'create_date'))
-            team.monthly_planned_revenue = json.dumps(self.__get_bar_values(
-                opp_domain, ['planned_revenue', 'date_deadline'], 'planned_revenue', 'date_deadline'))
-            print "team.monthly_open_leads....", team.monthly_open_leads
+            team.monthly_open_leads = json.dumps(team.__get_bar_values(
+                obj, domain=lead_domain, read_fields=['create_date'], value_field='create_date_count', groupby_field='create_date'))
+            team.monthly_planned_revenue = json.dumps(team.__get_bar_values(obj, domain=opp_domain, read_fields=[
+                                                      'planned_revenue', 'date_deadline'], value_field='planned_revenue', groupby_field='date_deadline'))
+
     resource_calendar_id = fields.Many2one(
         'resource.calendar', "Working Time", help="Used to compute open days")
     stage_ids = fields.Many2many(
         'crm.stage', 'crm_team_stage_rel', 'team_id', 'stage_id', 'Stages', default=_get_stage_common)
-    use_leads = fields.Boolean('Leads', default=True,
-                               help="The first contact you get with a potential customer is a lead you qualify before converting it into a real business opportunity. Check this box to manage leads in this sales team.")
+    use_leads = fields.Boolean(
+        'Leads', default=True, help="The first contact you get with a potential customer is a lead you qualify before converting it into a real business opportunity. Check this box to manage leads in this sales team.")
     use_opportunities = fields.Boolean(
         'Opportunities', default=True, help="Check this box to manage opportunities in this sales team.")
-    monthly_open_leads = fields.Char(compute='_get_opportunities_data',
-                                     readonly=True, store=True,
-                                     string='Open Leads per Month')
-    monthly_planned_revenue = fields.Char(compute='_get_opportunities_data',
-                                          readonly=True, store=True,
-                                          string='Planned Revenue per Month')
+    monthly_open_leads = fields.Char(
+        compute='_get_opportunities_data', readonly=True, string='Open Leads per Month')
+    monthly_planned_revenue = fields.Char(
+        compute='_get_opportunities_data', readonly=True, string='Planned Revenue per Month')
     alias_id = fields.Many2one(
         'mail.alias', 'Alias', ondelete="restrict", required=True,
         help="The email address associated with this team. New emails received will automatically create new leads assigned to the team.")
