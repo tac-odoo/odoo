@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-
 import datetime
+import time
 from dateutil.relativedelta import relativedelta
+
 from openerp import models, fields, api
 from openerp import tools
-from openerp.osv.orm import except_orm
 from openerp.tools.translate import _
-import time
+from openerp.exceptions import Warning
 
 
 class fleet_vehicle_cost(models.Model):
@@ -17,17 +17,23 @@ class fleet_vehicle_cost(models.Model):
     @api.one
     @api.depends('odometer_id')
     def _get_odometer(self):
-        self.odometer = self.odometer_id and self.odometer_id.value or 0.0
+        self.odometer = self.odometer_id and self.odometer_id.value
 
     @api.one
     def _set_odometer(self):
         if not self.odometer:
-            raise except_orm(_('Operation not allowed!'), _('Emptying the odometer value of a vehicle is not allowed.'))
+            raise Warning(_('Emptying the odometer value of a vehicle is not allowed.'))
         odometer_id = self.env['fleet.vehicle.odometer'].create({
             'value': self.odometer,
             'date': self.date or fields.Date.today(),
             'vehicle_id': self.vehicle_id.id})
         return self.write({'odometer_id': odometer_id.id})
+
+    @api.onchange('parent_id')
+    def on_change_partner_id(self):
+        self.vehicle_id = self.parent_id.vehicle_id.id
+        self.date = self.parent_id.date
+        self.cost_type = self.parent_id.cost_type
 
     name = fields.Char(related='vehicle_id.name', string='Name', store=True)
     vehicle_id = fields.Many2one('fleet.vehicle', string='Vehicle', required=True,
@@ -54,11 +60,6 @@ class fleet_vehicle_cost(models.Model):
     @api.model
     def create(self, data):
         # make sure that the data are consistent with values of parent and contract records given
-        if data.get('parent_id'):
-            parent = self.browse(data['parent_id'])
-            data['vehicle_id'] = parent.vehicle_id.id
-            data['date'] = parent.date
-            data['cost_type'] = parent.cost_type
         if data.get('contract_id'):
             contract = self.env['fleet.vehicle.log.contract'].browse(data['contract_id'])
             data['vehicle_id'] = contract.vehicle_id.id
@@ -81,22 +82,10 @@ class fleet_vehicle_stage(models.Model):
     _name = 'fleet.vehicle.stage'
     _order = 'sequence asc, id asc'
 
-    @api.multi
-    def _check_unique_stage(self):
-        # Case-Sensitive validation
-        # If 'Active' is already exists, Now if user add 'active' then it throws error-'Stage name already exists'
-        stage_ids = self.search([])
-        lst = [stage.name.lower() for stage in stage_ids if stage.name and stage.id not in self.ids]
-        for new_stage in self:
-            if new_stage.name and new_stage.name.lower() in lst:
-                return False
-        return True
-
     name = fields.Char(string='Name', required=True)
     sequence = fields.Integer('Sequence', help="Used to order the note stages")
 
     _sql_constraints = [('fleet_stage_name_unique', 'unique(name)', _('Stage name already exists'))]
-    _constraints = [(_check_unique_stage, 'Stage name already exists', ['name'])]
 
 
 class fleet_vehicle_model(models.Model):
@@ -119,7 +108,7 @@ class fleet_vehicle_model(models.Model):
 
     name = fields.Char(compute='_model_name_get_fnc', string='Name', store=True)
     modelname = fields.Char('Model name', required=True)
-    make_id = fields.Many2one('fleet.make', string='Make', required=True, help='Make of the vehicle')
+    make_id = fields.Many2one('fleet.make', string='Make', oldname='brand_id', required=True, help='Make of the vehicle')
     vendors = fields.Many2many('res.partner', 'fleet_vehicle_model_vendors', 'model_id', 'partner_id', string='Vendors')
     image = fields.Binary(related='make_id.image', string="Logo", store=True)
     image_medium = fields.Binary(related='make_id.image_medium', string="Logo (medium)", store=True)
@@ -321,7 +310,7 @@ class fleet_vehicle(models.Model):
     odometer_count = fields.Integer(compute='_count_all', string='Odometer')
     acquisition_date = fields.Date('Acquisition Date', help='Date when the vehicle has been bought')
     color = fields.Char(string='Color', help='Color of the vehicle')
-    stage_id = fields.Many2one('fleet.vehicle.stage', string='Stage', track_visibility='onchange',
+    stage_id = fields.Many2one('fleet.vehicle.stage', string='Stage', oldname='state_id', track_visibility='onchange',
                                help='Current state of the vehicle', default=_get_default_state)
     location = fields.Char(string='Location', help='Location of the vehicle (garage, ...)')
     seats = fields.Integer('Seats Number', help='Number of seats of the vehicle')
