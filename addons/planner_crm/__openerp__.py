@@ -12,4 +12,5 @@
         'views/planner_crm.xml'
     ],
     'installable': True,
+    'auto_install': True,
 }

@@ -118,7 +118,6 @@
             $(window).on('resize', function() {
                 self.resize_dialog();
             });
-           
             return this._super.apply(this, arguments);
         },
         onclick_menu: function(ev) {
@@ -137,6 +136,12 @@
             this.$(".oe_planner div[id^='planner_page']").removeClass('in');
             this.$(".oe_planner div[id="+planner_page_id+"]").addClass('in');
             this.values['last_open_page'] = planner_page_id;
+            /*
+                used cookie to get the last opened page in case when someone
+                clicked on the link that redirects to backend from planner page that opens a new tab,
+                and in new tab if again open the planner then it should open the last visited planner page
+            */
+            instance.session.set_cookie('last_open_page', planner_page_id);
         },
         mark_as_done: function(ev) {
             var self = this;
@@ -283,7 +288,7 @@
                     self.set_input_value();
                 }
                 //show last opened page
-                var last_open_page = self.values && self.values['last_open_page'];
+                var last_open_page = instance.session.get_cookie('last_open_page') || self.values && self.values['last_open_page'];
                 if (last_open_page) {
                     $(".oe_planner li a[href='#"+last_open_page+"']").trigger('click');
                 }
