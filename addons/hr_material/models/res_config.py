@@ -11,6 +11,24 @@ class HrConfigSettings(models.TransientModel):
     alias_domain = fields.Char("Alias Domain")
 
     @api.multi
+    def get_default_alias_material(self):
+        alias_name = False
+        alias_id = self.env.ref('hr_material.mail_alias_material')
+        if alias_id:
+            alias_name = alias_id.alias_name
+        return {'material_alias_prefix': alias_name}
+
+    @api.multi
+    def set_default_alias_material(self):
+        for record in self:
+            default_material_alias_prefix = record.get_default_alias_material()['material_alias_prefix']
+            if record.material_alias_prefix != default_material_alias_prefix:
+                alias_id = self.env.ref('hr_material.mail_alias_material')
+                if alias_id:
+                    alias_id.write({'alias_name': record.material_alias_prefix})
+        return True
+
+    @api.multi
     def get_default_alias_domain(self):
         alias_domain = self.env['ir.config_parameter'].get_param("mail.catchall.domain")
         if not alias_domain:
