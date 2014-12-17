@@ -463,8 +463,8 @@ class crm_lead(format_address, models.Model):
 
         return 'lead'
 
-    @api.model
-    def _merge_data(self, oldest, fields):
+    @api.multi
+    def _merge_data(self, fields):
         """
         Prepare lead/opp data into a dictionary for merging.  Different types
         of fields are processed in different ways:
@@ -473,12 +473,11 @@ class crm_lead(format_address, models.Model):
         - m2o: the first not null value prevails (the other are dropped)
         - any other type of field: same as m2o
 
-        :param list ids: list of ids of the leads to process
         :param list fields: list of leads' fields to process
         :return dict data: contains the merged values
         """
         def _get_first_not_null(attr):
-            for opp in oldest:
+            for opp in self:
                 if hasattr(opp, attr) and bool(getattr(opp, attr)):
                     return getattr(opp, attr)
             return False
@@ -504,7 +503,7 @@ class crm_lead(format_address, models.Model):
             else:
                 data[field_name] = _get_first_not_null(field_name)  # not lost
         # Define the resulting type ('lead' or 'opportunity')
-        data['type'] = self._merge_get_result_type(oldest)
+        data['type'] = self._merge_get_result_type(self)
         return data
 
     def _mail_body(self, fields, title=False):
@@ -666,7 +665,7 @@ class crm_lead(format_address, models.Model):
         tail_opportunities = opportunities_rest
 
         fields = list(CRM_LEAD_FIELDS_TO_MERGE)
-        merged_data = self._merge_data(opportunities, fields)
+        merged_data = self._merge_data(fields)
         if user_id:
             merged_data['user_id'] = user_id
         if team_id:
@@ -693,7 +692,7 @@ class crm_lead(format_address, models.Model):
         # We use the SUPERUSER to avoid access rights issues because as the
         # user had the rights to see the records it should be safe to do so
         for x in tail_opportunities:
-            x.unlink()
+            x.sudo().unlink()
         return highest
 
     @api.one

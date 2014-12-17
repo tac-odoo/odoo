@@ -232,7 +232,7 @@ class MergePartnerAutomatic(models.TransientModel):
             update_records('ir.model.data', src=partner)
         proxy = self.env['ir.model.fields']
         domain = [('ttype', '=', 'reference')]
-        record_data = proxy.search(domain)
+        record_data = proxy.sudo().search(domain)
 
         for record in record_data:
             try:
@@ -249,11 +249,11 @@ class MergePartnerAutomatic(models.TransientModel):
                 domain = [
                     (record.name, '=', 'res.partner,%d' % partner.id)
                 ]
-                model_res = proxy_model.search(domain)
+                model_res = proxy_model.sudo().search(domain)
                 values = {
                     record.name: 'res.partner,%d' % dst_partner.id,
                 }
-                model_res.write(values)
+                model_res.sudo().write(values)
 
     @api.multi
     def _update_values(self, src_partners, dst_partner):
