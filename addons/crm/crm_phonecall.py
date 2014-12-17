@@ -159,7 +159,6 @@ class crm_phonecall(models.Model):
         if action is 'create', create new partner with contact and assign lead to new partner_id.
         otherwise assign lead to specified partner_id
 
-        :param list ids: phonecalls ids to process
         :param string action: what has to be done regarding partners (create it, assign an existing one, or nothing)
         :param int partner_id: partner to assign if any
         :return dict: dictionary organized as followed: {lead_id: partner_assigned_id}
@@ -256,7 +255,6 @@ class crm_phonecall(models.Model):
         """
         Convert a phonecall into an opp and then redirect to the opp view.
 
-        :param list ids: list of calls ids to convert (typically contains a single id)
         :return dict: containing view information
         """
         if len(self.ids) != 1:

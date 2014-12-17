@@ -638,7 +638,6 @@ class crm_lead(format_address, models.Model):
         - merge leads together = 1 new lead
         - merge at least 1 opp with anything else (lead or opp) = 1 new opp
 
-        :param list ids: leads/opportunities ids to merge
         :return int id: id of the resulting lead/opp
         """
         if len(self) <= 1:
@@ -786,7 +785,6 @@ class crm_lead(format_address, models.Model):
         if action is 'create', create new partner with contact and assign lead to new partner_id.
         otherwise assign lead to the specified partner_id
 
-        :param list ids: leads/opportunities ids to process
         :param string action: what has to be done regarding partners (create it, assign an existing one, or nothing)
         :param int partner_id: partner to assign if any
         :return dict: dictionary organized as followed: {lead_id: partner_assigned_id}
@@ -818,7 +816,6 @@ class crm_lead(format_address, models.Model):
         will be assigned as followed: L1 - S1, L2 - S2, L3 - S3, L4 - S4,
         L5 - S1, L6 - S2.
 
-        :param list ids: leads/opportunities ids to process
         :param list user_ids: salesmen to assign
         :param int team_id: salesteam to assign
         :return bool

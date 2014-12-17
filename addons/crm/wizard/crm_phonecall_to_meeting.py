@@ -12,10 +12,6 @@ class crm_phonecall2meeting(models.TransientModel):
         """
         Closes Phonecall to Meeting form
         @param self: The object pointer
-        @param cr: the current row, from the database cursor,
-        @param uid: the current user’s ID for security checks,
-        @param ids: List of Phonecall to Meeting IDs
-        @param context: A standard dictionary for contextual values
 
         """
         return {'type':'ir.actions.act_window_close'}
