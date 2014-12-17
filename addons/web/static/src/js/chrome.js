@@ -261,6 +261,14 @@ instance.web.CrashManager = instance.web.Class.extend({
             return;
         }
         if (error.data.exception_type === "user_error" || error.data.exception_type === "warning" || error.data.exception_type === "access_error" || error.data.exception_type === "missing_error") {
+            error = _.extend({}, error,
+                        {
+                            data: _.extend({}, error.data, 
+                                {
+                                    message: error.data.arguments[1],
+                                    title: error.data.arguments[0] !== 'Warning' ? (" - " + error.data.arguments[0]) : '',
+                                })
+                        });
             this.show_warning(error);
         //InternalError
         } else {
@@ -271,12 +279,10 @@ instance.web.CrashManager = instance.web.Class.extend({
         if (!this.active) {
             return;
         }
-        if (error.data.exception_type === "user_error" && error.data.arguments.length > 1){
-            error = _.extend({}, error, {data: _.extend({}, error.data, {message: error.data.arguments[0] + "\n\n" + error.data.arguments[1]})});
-        }
         new instance.web.Dialog(this, {
             size: 'medium',
-            title: "Odoo " + (_.str.capitalize(error.type) || "Warning"),
+            title: "Odoo " + (_.str.capitalize(error.type) || _t("Warning")),
+            subtitle: error.data.title,
             buttons: [
                 {text: _t("Ok"), click: function() { this.parents('.modal').modal('hide'); }}
             ],

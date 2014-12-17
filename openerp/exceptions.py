@@ -35,15 +35,14 @@ class except_orm(Exception):
         self.value = value
         self.args = (name, value)
 
-class Warning(except_orm):
-    pass
-
 class UserError(except_orm):
     def __init__(self, msg):
         super(UserError, self).__init__('Warning', msg)
 
+
 # deprecated due to collision with builtins, kept for compatibility
-#UserError=Warning
+Warning = UserError
+
 
 class RedirectWarning(Exception):
     """ Warning with a possibility to redirect the user instead of simply
@@ -59,26 +58,26 @@ class AccessDenied(Exception):
     """ Login/password error. No message, no traceback.
     Example: When you try to log with a wrong password."""
     def __init__(self):
-        super(AccessDenied, self).__init__('Access denied.')
+        super(AccessDenied, self).__init__('Access denied')
         self.traceback = ('', '', '')
 
 class AccessError(except_orm):
     """ Access rights error. 
     Example: When you try to read a record that you are not allowed to."""
     def __init__(self, msg):
-        super(AccessError, self).__init__('AccessError', msg)
+        super(AccessError, self).__init__('Access Error', msg)
 
 class MissingError(except_orm):
     """ Missing record(s).
     Example: When you try to write on a deleted record."""
     def __init__(self, msg):
-        super(MissingError, self).__init__('MissingError', msg)
+        super(MissingError, self).__init__('Missing Record', msg)
 
 class ValidationError(except_orm):
     """ Violation of python constraints 
     Example: When you try to create a new user with a login which already exist in the db."""
     def __init__(self, msg):
-        super(ValidationError, self).__init__('ValidateError', msg)
+        super(ValidationError, self).__init__('Validation Error', msg)
 
 class DeferredException(Exception):
     """ Exception object holding a traceback for asynchronous reporting.
