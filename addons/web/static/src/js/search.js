@@ -1645,6 +1645,13 @@ instance.web.search.FavoriteMenu = instance.web.Widget.extend({
             this.$inputs.first().focus();
             return;
         }
+        if (_.chain(this.filters)
+                .pluck('name')
+                .contains(filter_name).value()) {
+            this.do_warn(_t("Error"), _t("Filter with same name already exists."));
+            this.$inputs.first().focus();
+            return;            
+        }
         var search = this.searchview.build_search_data(),
             view_manager = this.findAncestor(function (a) {
                 return a instanceof instance.web.ViewManager
@@ -1652,7 +1659,7 @@ instance.web.search.FavoriteMenu = instance.web.Widget.extend({
             view_context = view_manager ? view_manager.active_view.controller.get_context() : {},
             results = instance.web.pyeval.sync_eval_domains_and_contexts({
                 domains: search.domains,
-                contexts: [search.contexts, view_context],
+                contexts: search.contexts.concat(view_context || []),
                 group_by_seq: search.groupbys || [],
             });
         if (!_.isEmpty(results.group_by)) {

@@ -805,6 +805,7 @@ instance.web.ViewManager =  instance.web.Widget.extend({
             group_by_seq: groupbys || []
         }).done(function (results) {
             if (results.error) {
+                self.active_search.resolve();
                 throw new Error(
                         _.str.sprintf(_t("Failed to evaluate search criterions")+": \n%s",
                                       JSON.stringify(results.error)));
