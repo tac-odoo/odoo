@@ -51,6 +51,7 @@
                 (new instance.web.Model('planner.planner')).query().all().then(function(res) {
                     _(res).each(function(planner) {
                         self.planner_bymenu[planner.menu_id[0]] = planner;
+                        self.planner_bymenu[planner.menu_id[0]].data = jQuery.parseJSON(self.planner_bymenu[planner.menu_id[0]].data) || {};
                     });
                     def.resolve(self.planner_bymenu);
                 }).fail(function() {def.reject();});
@@ -101,14 +102,13 @@
             'hide.bs.modal': 'hide',
             'click .oe_planner div[id^="planner_page"] a[href^="#planner_page"]': 'next_page',
             'click .oe_planner li a[href^="#planner_page"]': 'onclick_menu',
-            'click .oe_planner div[id^="planner_page"] button[data-progress^="planner_page"]': 'mark_as_done'
+            'click .oe_planner div[id^="planner_page"] button[data-pageid^="planner_page"]': 'mark_as_done'
         },
 
         init: function(parent) {
             this._super(parent);
             this.planner_launcher = parent;
             this.planner_data = this.planner_launcher.planner_data;
-            this.values = {}; // to store values and id of all input elements
             this.set('progress', 0);
         },
         start: function() {
@@ -135,7 +135,7 @@
             this.$(".oe_planner li a[href=#"+planner_page_id+"]").parent().addClass('active');
             this.$(".oe_planner div[id^='planner_page']").removeClass('in');
             this.$(".oe_planner div[id="+planner_page_id+"]").addClass('in');
-            this.values['last_open_page'] = planner_page_id;
+            this.planner_data.data['last_open_page'] = planner_page_id;
             /*
                 used cookie to get the last opened page in case when someone
                 clicked on the link that redirects to backend from planner page that opens a new tab,
@@ -146,12 +146,12 @@
         mark_as_done: function(ev) {
             var self = this;
             var btn = $(ev.currentTarget);
-            var active_menu = self.$(".oe_planner li a[href=#"+btn.attr('data-progress')+"] span");
+            var active_menu = self.$(".oe_planner li a[href=#"+btn.attr('data-pageid')+"] span");
             var active_page = self.$(".oe_planner div[id^='planner_page'].panel-collapse.collapse.in");
 
             //find all inputs elements of current page
-            var input_element = self.$(".oe_planner div[id="+btn.attr('data-progress')+"] textarea[id^='input_element'], .oe_planner div[id="+btn.attr('data-progress')+"] input[id^='input_element'], select[id^='input_element']");
-            var next_button = self.$(".oe_planner a[data-parent="+btn.attr('data-progress')+"]");
+            var input_element = self.$(".oe_planner div[id="+btn.attr('data-pageid')+"] textarea[id^='input_element'], .oe_planner div[id="+btn.attr('data-pageid')+"] input[id^='input_element'], select[id^='input_element']");
+            var next_button = self.$(".oe_planner a[data-parent="+btn.attr('data-pageid')+"]");
             if (!btn.hasClass('fa-check-square-o')) {
                 //find menu element and marked as check
                 active_menu.addClass('fa-check');
@@ -159,7 +159,7 @@
                 btn.addClass('fa-check-square-o btn-default').removeClass('fa-square-o btn-primary');
                 next_button.addClass('btn-primary').removeClass('btn-default');
                 self.update_input_value(input_element, true);
-                self.values[btn.attr('id')] = 'checked';
+                self.planner_data.data[btn.attr('id')] = 'checked';
                 self.set('progress', self.get('progress') + 1);
                 active_page.addClass('marked');
                 setTimeout(function() { active_page.removeClass('marked'); }, 1000);
@@ -168,7 +168,7 @@
                 btn.removeClass('fa-check-square-o btn-default').addClass('fa fa-square-o btn-primary');
                 next_button.addClass('btn-default').removeClass('btn-primary');
                 active_menu.removeClass('fa-check');
-                self.values[btn.attr('id')] = '';
+                self.planner_data.data[btn.attr('id')] = '';
                 self.update_input_value(input_element, false);
                 self.set('progress', self.get('progress') - 1);
             }
@@ -189,27 +189,26 @@
                 var $el = $(element);
                 if ($el.attr('type') == 'checkbox' || $el.attr('type') == 'radio') {
                     if ($el.is(':checked') && save) {
-                        self.values[$el.attr("id")] = 'checked';
+                        self.planner_data.data[$el.attr("id")] = 'checked';
                         $el.attr('checked', 'checked');
                     } else {
-                        self.values[$el.attr("id")] = "";
+                        self.planner_data.data[$el.attr("id")] = "";
                     }
                 } else { 
                     if (save) {
-                        self.values[$el.attr("id")] = $el.val();
+                        self.planner_data.data[$el.attr("id")] = $el.val();
                         //set value to input element, to get those value when printing report
                         $el.attr('value', $el.val());
                     } else {
-                        self.values[$el.attr("id")] = "";
+                        self.planner_data.data[$el.attr("id")] = "";
                     }
                 }
             });
         },
         save_planner_data: function() {
             var self = this;
-            self.planner_data['data'] = JSON.stringify(self.values);
             return (new instance.web.DataSet(this, 'planner.planner'))
-                .call('write', [self.planner_data.id, {'data': self.planner_data.data, 'progress': self.planner_data['progress']}]);
+                .call('write', [self.planner_data.id, {'data': JSON.stringify(self.planner_data.data), 'progress': self.planner_data['progress']}]);
         },
         add_footer: function() {
             var self = this;
@@ -229,18 +228,18 @@
         },
         _get_default_input: function() {
             var self = this;
-            self.values['last_open_page'] = '';
+            self.planner_data.data['last_open_page'] = '';
             _.each(self.input_elements, function(element) {
                 var $el = $(element);
                 if ($el.attr('type') == 'checkbox' || $el.attr('type') == 'radio') {
-                    self.values[$el.attr("id")] = '';
+                    self.planner_data.data[$el.attr("id")] = '';
                 } else {
-                    self.values[$el.attr("id")] = $el.val();
+                    self.planner_data.data[$el.attr("id")] = $el.val();
                 }
             });
             _.each(self.btn_mark_as_done, function(element) {
                 var $el = $(element);
-                self.values[$el.attr("id")] = '';
+                self.planner_data.data[$el.attr("id")] = '';
             });
         },
 
@@ -250,13 +249,13 @@
         */
         set_input_value: function() {
             var self = this;
-            _.each(self.values, function(val, id){
+            _.each(self.planner_data.data, function(val, id){
                 if ($('#'+id).prop("tagName") == 'BUTTON') {
                     if (val == 'checked') {
                         self.set('progress', self.get('progress') + 1);
                         //find those menu which are all ready marked as done and checked them
-                        self.$("li a[href=#"+$('#'+id).attr('data-progress')+"] > span").addClass('fa-check');
-                        var page_id = self.$('#'+id).addClass('fa-check-square-o btn-default').removeClass('fa-square-o btn-primary').attr('data-progress');
+                        self.$("li a[href=#"+$('#'+id).attr('data-pageid')+"] > span").addClass('fa-check');
+                        var page_id = self.$('#'+id).addClass('fa-check-square-o btn-default').removeClass('fa-square-o btn-primary').attr('data-pageid');
                         self.$(".oe_planner .planner_footer a[data-parent="+page_id+"]").addClass('btn-primary').removeClass('btn-default');
                     }
                 } else if ($('#'+id).prop("tagName") == 'INPUT' && ($('#'+id).attr('type') == 'checkbox' || $('#'+id).attr('type') == 'radio')) {
@@ -273,22 +272,20 @@
             var self = this;
             (new instance.web.DataSet(this, 'planner.planner')).call('render', [self.planner_data.view_id[0], self.planner_data.planner_application]).then(function(res) {
                 self.$('.content_page').html(res);
-                self.planner_data.data = jQuery.parseJSON(self.planner_data.data) || {};
                 //add footer to each page
                 self.add_footer();
                 //find all input elements having id start with 'input_element'
                 self.input_elements = self.$(".oe_planner textarea[id^='input_element'], .oe_planner input[id^='input_element'], select[id^='input_element']");
                 //find 'mark as done' button to calculate the progress bar.
-                self.btn_mark_as_done = self.$(".oe_planner button[id^='input_element'][data-progress^='planner_page']");
+                self.btn_mark_as_done = self.$(".oe_planner button[id^='input_element'][data-pageid^='planner_page']");
                 if (!_.size(self.planner_data.data)) {
                     //when planner is launch for the first time, we need to store the id of each elements.
                     self._get_default_input();
                 } else {
-                    self.values = _.clone(self.planner_data.data);
                     self.set_input_value();
                 }
                 //show last opened page
-                var last_open_page = instance.session.get_cookie('last_open_page') || self.values && self.values['last_open_page'];
+                var last_open_page = instance.session.get_cookie('last_open_page') || self.planner_data.data['last_open_page'];
                 if (last_open_page) {
                     $(".oe_planner li a[href='#"+last_open_page+"']").trigger('click');
                 }

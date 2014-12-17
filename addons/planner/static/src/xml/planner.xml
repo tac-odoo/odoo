@@ -20,7 +20,7 @@
             <div class="col-xs-6 text-left mark-block">
                 <t t-if="!start and !end">
                     <button t-attf-id='input_element_btn_#{current_page_id}' 
-                        t-attf-data-progress='#{current_page_id}'
+                        t-attf-data-pageid='#{current_page_id}'
                         class='fa fa-square-o btn btn-primary mark_as_done'><i /> <span>Mark As Done</span>
                     </button>
                 </t>
