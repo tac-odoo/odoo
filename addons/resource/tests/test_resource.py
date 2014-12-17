@@ -65,7 +65,7 @@ class TestResource(TestResourceCommon):
 
         # Test: disjoint removal
         working_interval = (datetime.strptime('2013-02-04 08:00:00', '%Y-%m-%d %H:%M:%S'), datetime.strptime('2013-02-04 18:00:00', '%Y-%m-%d %H:%M:%S'))
-        result = self.resource_calendar.interval_remove_leaves(working_interval, intervals)
+        result = self.resource_calendar.interval_remove_leaves(cr, uid, working_interval, intervals)
         self.assertEqual(len(result), 1, 'resource_calendar: wrong leave removal from interval')
         # First interval: 04, 14-17
         self.assertEqual(result[0][0], datetime.strptime('2013-02-04 14:00:00', '%Y-%m-%d %H:%M:%S'), 'resource_calendar: wrong leave removal from interval')

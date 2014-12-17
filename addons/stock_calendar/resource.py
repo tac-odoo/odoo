@@ -70,10 +70,31 @@ class resource_calendar(osv.osv):
     # Utility methods
     # --------------------------------------------------
 
-    def interval_remove_leaves_group(self, cr, uid, interval, leave_intervals, context=None):
-        """
-            The same as interval_remove_leaves, but take into account the group
-        """
+    def interval_remove_leaves(self, cr, uid, interval, leave_intervals, context=None):
+        """ Utility method that remove leave intervals from a base interval:
+
+         - clean the leave intervals, to have an ordered list of not-overlapping
+           intervals
+         - initiate the current interval to be the base interval
+         - for each leave interval:
+
+          - finishing before the current interval: skip, go to next
+          - beginning after the current interval: skip and get out of the loop
+            because we are outside range (leaves are ordered)
+          - beginning within the current interval: close the current interval
+            and begin a new current interval that begins at the end of the leave
+            interval
+          - ending within the current interval: update the current interval begin
+            to match the leave interval ending
+          - take into account the procurement group when needed
+
+        :param tuple interval: a tuple (beginning datetime, ending datetime) that
+                               is the base interval from which the leave intervals
+                               will be removed
+        :param list leave_intervals: a list of tuples (beginning datetime, ending datetime)
+                                    that are intervals to remove from the base interval
+        :return list intervals: a list of tuples (begin datetime, end datetime)
+                                that are the remaining valid intervals """
         if not interval:
             return interval
         if leave_intervals is None:
@@ -108,57 +129,6 @@ class resource_calendar(osv.osv):
             else:
                 intervals.append((current_interval[0], current_interval[1],))
         return intervals
-
-    def interval_remove_leaves(self, interval, leave_intervals):
-        """ Utility method that remove leave intervals from a base interval:
-
-         - clean the leave intervals, to have an ordered list of not-overlapping
-           intervals
-         - initiate the current interval to be the base interval
-         - for each leave interval:
-
-          - finishing before the current interval: skip, go to next
-          - beginning after the current interval: skip and get out of the loop
-            because we are outside range (leaves are ordered)
-          - beginning within the current interval: close the current interval
-            and begin a new current interval that begins at the end of the leave
-            interval
-          - ending within the current interval: update the current interval begin
-            to match the leave interval ending
-
-        :param tuple interval: a tuple (beginning datetime, ending datetime) that
-                               is the base interval from which the leave intervals
-                               will be removed
-        :param list leave_intervals: a list of tuples (beginning datetime, ending datetime)
-                                    that are intervals to remove from the base interval
-        :return list intervals: a list of tuples (begin datetime, end datetime)
-                                that are the remaining valid intervals """
-        if not interval:
-            return interval
-        if leave_intervals is None:
-            leave_intervals = []
-        intervals = []
-        leave_intervals = self.interval_clean(leave_intervals)
-        current_interval = [interval[0], interval[1]]
-        for leave in leave_intervals:
-            if leave[1] <= current_interval[0]:
-                continue
-            if leave[0] >= current_interval[1]:
-                break
-            if current_interval[0] < leave[0] < current_interval[1]:
-                current_interval[1] = leave[0]
-                intervals.append((current_interval[0], current_interval[1]))
-                current_interval = [leave[1], interval[1]]
-            # if current_interval[0] <= leave[1] <= current_interval[1]:
-            if current_interval[0] <= leave[1]:
-                current_interval[0] = leave[1]
-        if current_interval and current_interval[0] < interval[1]:  # remove intervals moved outside base interval due to leaves
-            if len(interval) > 2:
-                intervals.append((current_interval[0], current_interval[1], interval[2]))
-            else:
-                intervals.append((current_interval[0], current_interval[1],))
-        return intervals
-
 
 
 class resource_calendar_attendance(osv.osv):
