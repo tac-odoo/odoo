@@ -1,4 +1,5 @@
 import werkzeug
+import openerp
 from openerp.http import request
 from openerp.addons.web import http
 from openerp.addons.website.controllers.main import Website
@@ -142,3 +143,21 @@ class Website_less(Website):
         response = werkzeug.wrappers.Response()
         return request.registry['website']._image(
                     request.cr, request.uid, model, id, field, response, max_width, max_height)
+
+    @http.route([
+        '/website/attachment/<xmlid>',
+    ], auth="public", website=True)
+    def website_resource(self, xmlid):
+        record = request.env['ir.model.data'].xmlid_to_object(xmlid)
+        if record and record._name == 'ir.attachment' and record.type == 'url' and record.website_url:
+            try:
+                # Check that we serve a file from within the module
+                path = record.website_url.strip('/').split('/')
+                dir_path = '/'.join(path[:-1])
+                module_name = xmlid.split('.', 1)[0]
+                openerp.modules.module.get_module_filetree(module_name, dir_path)
+                return http.send_file(openerp.modules.get_module_resource(module_name, *path))
+            except Exception:
+                return werkzeug.exceptions.NotFound()
+        else:
+            return werkzeug.exceptions.NotFound()
