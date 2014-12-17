@@ -17,7 +17,9 @@ define(['summernote/summernote'], function () {
     var eventHandler = $.summernote.eventHandler;
     var renderer = $.summernote.renderer;
     var options = $.summernote.options;
-function fsdf() {
+
+    var tplButton = renderer.getTemplate().button;
+    var tplIconButton = renderer.getTemplate().iconButton;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
     /* update and change the popovers content, and add history button */
@@ -47,7 +49,7 @@ function fsdf() {
         //////////////// image popover
 
         // add center button for images
-        var $centerbutton = $(renderer.tplIconButton('fa fa-align-center', {
+        var $centerbutton = $(tplIconButton('fa fa-align-center', {
                 title: _t('Center'),
                 event: 'floatMe',
                 value: 'center'
@@ -62,7 +64,7 @@ function fsdf() {
         // padding button
         var $padding = $('<div class="btn-group"/>');
         $padding.insertBefore($imagePopover.find('.btn-group:first'));
-        var $button = $(renderer.tplIconButton('fa fa-plus-square-o', {
+        var $button = $(tplIconButton('fa fa-plus-square-o', {
                 title: _t('Padding'),
                 dropdown: true
             })).appendTo($padding);
@@ -76,27 +78,27 @@ function fsdf() {
         // resize for fa
         var $resizefa = $('<div class="btn-group hidden"/>')
             .insertAfter($imagePopover.find('.btn-group:has([data-event="resize"])'));
-        $(renderer.tplButton('<span class="note-fontsize-10">1x</span>', {
+        $(tplButton('<span class="note-fontsize-10">1x</span>', {
           title: "1x",
           event: 'resizefa',
           value: '1'
         })).appendTo($resizefa);
-        $(renderer.tplButton('<span class="note-fontsize-10">2x</span>', {
+        $(tplButton('<span class="note-fontsize-10">2x</span>', {
           title: "2x",
           event: 'resizefa',
           value: '2'
         })).appendTo($resizefa);
-        $(renderer.tplButton('<span class="note-fontsize-10">3x</span>', {
+        $(tplButton('<span class="note-fontsize-10">3x</span>', {
           title: "3x",
           event: 'resizefa',
           value: '3'
         })).appendTo($resizefa);
-        $(renderer.tplButton('<span class="note-fontsize-10">4x</span>', {
+        $(tplButton('<span class="note-fontsize-10">4x</span>', {
           title: "4x",
           event: 'resizefa',
           value: '4'
         })).appendTo($resizefa);
-        $(renderer.tplButton('<span class="note-fontsize-10">5x</span>', {
+        $(tplButton('<span class="note-fontsize-10">5x</span>', {
           title: "5x",
           event: 'resizefa',
           value: '5'
@@ -105,11 +107,11 @@ function fsdf() {
         // show dialog box and delete
         var $imageprop = $('<div class="btn-group"/>');
         $imageprop.appendTo($imagePopover.find('.popover-content'));
-        $(renderer.tplIconButton('fa fa-picture-o', {
+        $(tplIconButton('fa fa-picture-o', {
                 title: _t('Edit'),
                 event: 'showImageDialog'
             })).appendTo($imageprop);
-        $(renderer.tplIconButton('fa fa-trash-o', {
+        $(tplIconButton('fa fa-trash-o', {
                 title: _t('Remove'),
                 event: 'delete'
             })).appendTo($imageprop);
@@ -270,8 +272,13 @@ function fsdf() {
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
     /* hack for image and link editor */
 
+    function getImgTarget () {
+      var rng = range.create();
+      var target = rng.sc.childNodes.length && rng.sc.childNodes[rng.so] || rng.sc;
+      return target;
+    }
     eventHandler.editor.padding = function ($editable, sValue) {
-        var $target = $(range.create().sc);
+        var $target = $(getImgTarget());
         var paddings = "small medium large xl".split(/\s+/);
         $editable.data('NoteHistory').recordUndo();
         if (sValue.length) {
@@ -281,7 +288,7 @@ function fsdf() {
         $target.removeClass("padding-" + paddings.join(" padding-"));
     };
     eventHandler.editor.resize = function ($editable, sValue) {
-        var $target = $(range.create().sc);
+        var $target = $(getImgTarget());
         $editable.data('NoteHistory').recordUndo();
         switch (+sValue) {
             case 1: $target.toggleClass('img-responsive').removeClass('img-responsive-50 img-responsive-25'); break;
@@ -290,7 +297,7 @@ function fsdf() {
         }
     };
     eventHandler.editor.resizefa = function ($editable, sValue) {
-        var $target = $(range.create().sc);
+        var $target = $(getImgTarget());
         $editable.data('NoteHistory').recordUndo();
         $target.removeClass('fa-1x fa-2x fa-3x fa-4x fa-5x');
         if (+sValue > 1) {
@@ -298,7 +305,7 @@ function fsdf() {
         }
     };
     eventHandler.editor.floatMe = function ($editable, sValue) {
-        var $target = $(range.create().sc);
+        var $target = $(getImgTarget());
         $editable.data('NoteHistory').recordUndo();
         switch (sValue) {
             case 'center': $target.toggleClass('center-block').removeClass('pull-right pull-left'); break;
@@ -315,17 +322,9 @@ function fsdf() {
         editor.on("save", this, function (linkInfo) {
             def.resolve(linkInfo);
             $('.note-popover .note-link-popover').show();
-            setTimeout(function () {
-                $(dom.node(linkInfo.range.sc)).trigger('keyup');
-            },0);
         });
         editor.on("cancel", this, function () { def.reject(); });
         return def;
-    };
-    var fn_editor_createLink = eventHandler.editor.createLink;
-    eventHandler.editor.createLink = function ($editable, linkInfo, options) {
-        var a = fn_editor_createLink.call(this, $editable, linkInfo, options);
-        $(a).attr("class", linkInfo.className);
     };
     eventHandler.dialog.showImageDialog = function ($editable) {
         var r = $editable.data('range');
@@ -635,7 +634,7 @@ function fsdf() {
           redo: _t('Redo')
         }
     };
-}
+
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
     /* Change History to have a global History for all summernote instances */
 
@@ -645,11 +644,11 @@ function fsdf() {
 
         this.makeSnap = function () {
             var rng = range.create(),
-                elEditable = dom.ancestor(rng.commonAncestor(), dom.isEditable) || $('.o_editable.note-editable:first')[0];
+                elEditable = dom.ancestor(rng && rng.commonAncestor(), dom.isEditable) || $('.o_editable.note-editable:first')[0];
             return {
                 editable: elEditable,
                 contents: elEditable.innerHTML,
-                bookmark: rng.bookmark(elEditable),
+                bookmark: rng && rng.bookmark(elEditable),
                 scrollTop: $(elEditable).scrollTop()
             };
         };
@@ -664,6 +663,10 @@ function fsdf() {
             $editable.html(oSnap.contents).scrollTop(oSnap.scrollTop);
             $(".oe_overlay").remove();
             $(".note-control-selection").hide();
+
+            if (!oSnap.bookmark) {
+                return;
+            }
 
             var r = range.createFromBookmark(oSnap.editable, oSnap.bookmark);
             r.select();
@@ -713,7 +716,7 @@ function fsdf() {
         };
 
         var last;
-        this.recordUndo = function (event) {
+        this.recordUndo = function ($editable, event) {
             if (event) {
                 if (last && aUndo[pos-1] && aUndo[pos-1].editable !== $editable[0]) {
                     // => make a snap when the user change editable zone (because: don't make snap for each keydown)
@@ -1062,11 +1065,14 @@ function fsdf() {
          * @param {DOM} target where the dom is changed is editable zone
          */
         historyRecordUndo: function ($target) {
+            var rng = range.create();
+            if (!rng && $target.length) {
+                rng = range.create($target[0],0);
+                rng.select();
+            }
+            $target = $(rng.sc);
             var $editable = $target.is('[data-oe-model], .o_editable') ? $target : $target.closest('[data-oe-model], .o_editable');
             $target.mousedown();
-            if (!range.create()) {
-                range.create($target[0],0).select();
-            }
             this.history.recordUndo( );
             $target.mousedown();
         },
@@ -1131,7 +1137,7 @@ function fsdf() {
                     document.body.addEventListener('dragstart', function (evt) {evt.preventDefault(); return false;});
 
                     if (!range.create()) {
-                        range.create(dom.firstChild($editable[0]),0).select();
+                        range.create($editable[0],0).select();
                     }
 
                     $target.trigger('mousedown'); // for activate selection on picture
@@ -1368,7 +1374,28 @@ function fsdf() {
                             r.eo = 0;
                         }
                     }
-                    this.data.range = range.create(r.sc, r.so, r.ec, r.eo).select();
+
+                    var sc = r.sc;
+                    var so = r.so;
+                    var ec = r.ec;
+                    var eo = r.eo;
+
+                    // browsers can't target a picture or void node
+                    if (dom.isVoid(sc) || dom.isImg(sc)) {
+                      so = dom.listPrev(sc).length-1;
+                      sc = sc.parentNode;
+                    }
+                    if (dom.isBR(ec)) {
+                      eo = dom.listPrev(ec).length-1;
+                      ec = ec.parentNode;
+                    } else if (dom.isVoid(ec) || dom.isImg(sc)) {
+                      eo = dom.listPrev(ec).length;
+                      ec = ec.parentNode;
+                    }
+
+                    this.data.range = range.create(sc, so, ec, eo);
+                    this.data.range.select();
+
                     nodes = dom.listBetween(r.sc, r.ec);
                 } else {
                     nodes = dom.ancestor(r.sc, dom.isAnchor).childNodes;
@@ -1611,11 +1638,17 @@ function fsdf() {
             var title = this.$('#title').val();
             $(this.media).attr('alt', alt ? alt.replace(/"/g, "&quot;") : null).attr('title', title ? title.replace(/"/g, "&quot;") : null);
             setTimeout(function () {
-                $(self.media).trigger("mouseup");
+                click_event(self.media, "mouseup");
             },0);
             return this._super();
         },
     });
+
+    var click_event = function(el, type) {
+        var evt = document.createEvent("MouseEvents");
+        evt.initMouseEvent(type, true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, el);
+        el.dispatchEvent(evt);
+    };
 
     /**
      * MediaDialog widget. Lets users change a media, including uploading a
@@ -1717,12 +1750,11 @@ function fsdf() {
             self.trigger("saved", self.active.media, self.media);
             setTimeout(function () {
                 range.createFromNode(self.active.media).select();
-                $(self.active.media).trigger("mousedown");
+                click_event(self.active.media, "mousedown");
                 if (!this.only_images) {
                     setTimeout(function () {
-                        var e = jQuery.Event( "click", { srcElement: self.active.media } );
-                        $(self.active.media).trigger(e);
-                        $(self.active.media).trigger("mouseup");
+                        click_event(self.active.media, "click");
+                        click_event(self.active.media, "mouseup");
                     },0);
                 }
             },0);

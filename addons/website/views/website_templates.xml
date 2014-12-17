@@ -187,9 +187,8 @@
 <template id="assets_common" inherit_id="web.assets_common" name="Website common assets">
     <xpath expr='.' position="inside">
         <script type="text/javascript" src="/website/static/src/js/openerp.define.js"></script>
-        <script type="text/javascript" src="/website/static/lib/summernote/src/js/summernote.js"></script>
         <!--link rel="stylesheet" href="/website/static/lib/summernote/src/less/summernote.less"/-->
-        <!--script type="text/javascript" src="/website/static/src/js/summernote.js"></script-->
+        <script type="text/javascript" src="/website/static/src/js/summernote.js"></script>
         <link rel="stylesheet" href="/website/static/lib/summernote/summernote.css"/>
     </xpath>
 </template>

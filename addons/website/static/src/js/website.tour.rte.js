@@ -3,6 +3,12 @@
 
     var _t = openerp._t;
 
+    var click_event = function(el, type) {
+        var evt = document.createEvent("MouseEvents");
+        evt.initMouseEvent(type, true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, el);
+        el.dispatchEvent(evt);
+    };
+
     openerp.Tour.register({
         id:   'website_rte',
         name: "Test website RTE",
@@ -45,57 +51,64 @@
                         '\n     <p>Et hanc quidem praeter oppida multa duae civitates exornant Seleucia opus Seleuci regis, et Claudiopolis quam deduxit coloniam Claudius Caesar. Isaura enim antehac nimium potens, olim subversa ut rebellatrix.</p>'+
                         '<p>Harum trium sententiarum nulli prorsus assentior.</p>';
                     $el.html(html);
-                    var select = $el.find('h1')[0].firstChild;
-                    $.summernote.core.range.create(select, 0, select, 1).select();
+                }
+            },
+            {
+                element:   '#wrapwrap > main > div > section .row > div:first',
+                title:     "simulate triple click and change text bg-color",
+                onload: function () {
+                    var $el = $(this.element);
+                    var $h1 = $('h1', $el);
+                    $.summernote.core.range.create($h1[0].firstChild, 0, $('p', $el)[0], 0).select();
+                    click_event($h1[0], 'mouseup');
                 }
             },
             {
                 waitFor:   '#wrapwrap > main > div > section .row > div:first',
                 element:   '.note-popover button[data-event="color"]',
-                title:     "simulate triple click and change text bg-color",
-                onload: function () {
-                    var $el = $(this.waitFor);
-                    $.summernote.core.range.create($el.find('h1')[0].firstChild, 0, $el.find('p')[0], 0).select();
-                }
+                title:     "change text bg-color after triple click",
             },
             {
                 waitFor:   '#wrapwrap > main > div > section .row > div:first:not(:has(p font)) h1 font',
                 element:   '.note-color button.dropdown-toggle',
                 title:     "change selection to change text color",
+                onload: function () {
+                    var $el = $('#wrapwrap > main > div > section .row > div:first:not(:has(p font)) h1 font');
+                    $.summernote.core.range.create($el[0].firstChild, 5, $el[0].firstChild, 10).select();
+                    click_event($el[0], 'mouseup');
+                }
             },
             {
                 element:   'div[data-target-event="foreColor"] .note-color-row:eq(1) button[data-event="foreColor"]:first',
                 title:     "change text color",
-                onload: function () {
-                    var $el = $('#wrapwrap > main > div > section .row > div:first:not(:has(p font)) h1 font');
-                    $.summernote.core.range.create($el[0].firstChild, 5, $el[0].firstChild, 10).select();
-                }
             },
             {
                 waitFor:   '#wrapwrap > main > div > section .row > div:first h1 font:eq(2)',
                 element:   '.note-color button.dropdown-toggle',
                 title:     "change selection to change text bg-color again",
-            },
-            {
-                element:   'div[data-target-event="backColor"] .colorpicker button[data-event="backColor"]:first',
-                title:     "change text color again",
                 onload: function () {
                     var $el = $('#wrapwrap > main > div > section .row > div:first h1 font:eq(2)');
                     $.summernote.core.range.create($el.prev()[0].firstChild, 3, $el[0].firstChild, 10).select();
+                    click_event($el.prev()[0], 'mouseup');
                 }
+            },
+            {
+                element:   'div[data-target-event="backColor"] .colorpicker button[data-event="backColor"]:first',
+                title:     "change text backColor again",
             },
             {
                 waitFor:   '#wrapwrap > main > div > section .row > div:first h1 font:eq(4)',
                 element:   '.note-color button.dropdown-toggle',
                 title:     "change selection (h1 and p) to change text color with class",
-            },
-            {
-                element:   'div[data-target-event="foreColor"] button[data-event="foreColor"][data-value^="text-"]:first',
-                title:     "change text color again",
                 onload: function () {
                     var $el = $('#wrapwrap > main > div > section .row > div:first h1 font:eq(4)');
                     $.summernote.core.range.create($el.prev()[0].firstChild, 3, $el.parent("h1").next("p")[0].firstChild, 30).select();
+                    click_event($el.prev()[0], 'mouseup');
                 }
+            },
+            {
+                element:   'div[data-target-event="foreColor"] button[data-event="foreColor"][data-value^="text-"]:first',
+                title:     "change text foreColor again",
             },
             {
                 waitFor:   '#wrapwrap > main > div > section .row > div:first p font',
@@ -110,7 +123,8 @@
                 onload: function () {
                     var $el = $(this.waitFor);
                     $.summernote.core.range.createFromNode($el.next("p")[0]).clean();
-                    $.summernote.core.range.create($el.find('font:last')[0].firstChild, 1, $el.next("p")[0].firstChild, 2).select();
+                    $.summernote.core.range.create($el.find('font:last')[0].firstChild, 1, $el.next().next()[0].firstChild, 5).select();
+                    click_event($el.find('font:last')[0], 'mouseup');
                 },
                 keydown:   8 // backspace
             },
@@ -121,6 +135,7 @@
                 onload: function () {
                     var $el = $(this.waitFor);
                     $.summernote.core.range.create($el.find('font:first')[0].firstChild, 3, $el.next("p")[0].childNodes[2], 8).select();
+                    click_event($el.find('font:first')[0], 'mouseup');
                 },
                 keydown:   46
             },
@@ -257,6 +272,7 @@
                 onload: function () {
                     var p = $(this.element)[0].firstChild;
                     $.summernote.core.range.create(p, p.textContent.length, p, p.textContent.length).select();
+                    click_event(p, 'mouseup');
                 },
             },
             {
@@ -273,6 +289,7 @@
                     $el.append(html);
                     var node = $el.find('ul li:first p')[0].firstChild;
                     $.summernote.core.range.create(node, 6).select();
+                    click_event(node, 'mouseup');
                 }
             },
             {
@@ -291,6 +308,7 @@
                 onload: function () {
                     var node = $('#wrapwrap > main > div > section .row > div:first ul li p:eq(1)')[0].firstChild;
                     $.summernote.core.range.create(node, 0).select();
+                    click_event(node, 'mouseup');
                 }
             },
             {
@@ -310,6 +328,7 @@
                 keydown:   13,
                 onload: function () {
                     $.summernote.core.range.create($(this.element)[0].firstChild, 7).select();
+                    click_event($(this.element)[0], 'mouseup');
                 }
             },
             {
@@ -320,6 +339,7 @@
                 onload: function () {
                     console.log($(this.element)[0].firstChild);
                     $.summernote.core.range.create($(this.element)[0].firstChild, 0).select();
+                    click_event($(this.element)[0], 'mouseup');
                 }
             },
             {
