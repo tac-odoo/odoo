@@ -96,8 +96,6 @@ class MailMail(osv.Model):
             link_to_replace =  base_url+'/unsubscribe_from_list'
             if link_to_replace in res['body']:
                 res['body'] = res['body'].replace(link_to_replace, unsubscribe_url if unsubscribe_url else '#')
-            else:
-                res['body'] = tools.append_content_to_html(res['body'], '<small><a href="%s">%s</a></small>' % (unsubscribe_url, msg or 'Click to unsubscribe'), plaintext=False, container_tag='p')
         return res
 
     def _postprocess_sent_message(self, cr, uid, mail, context=None, mail_sent=True):

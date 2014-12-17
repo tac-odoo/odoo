@@ -384,7 +384,7 @@
         <div id="snippet_email_extra" class="tab-pane">
 
             <div name="Separator" class="o_mail_block_footer_seprator">
-                <div style="padding:0px;width:600px;margin:auto;color:#777777;background-color:#FFFFFF" class="row">
+                <div style="padding:0px;width:600px;margin:auto;color:#777777;background-color:#FFFFFF">
                     <table cellspacing="0" cellpadding="0" style="margin:15px auto;vertical-align:top;padding:0px;font-family:arial;font-size:12px;border-collapse:collapse;background:inherit;color:inherit">
                         <tbody>
                             <tr>
