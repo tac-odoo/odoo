@@ -165,11 +165,11 @@ class account_account(models.Model):
         help="Forces all moves for this account to have this secondary currency.")
     code = fields.Char(size=64, required=True, index=True)
     deprecated = fields.Boolean(index=True, default=False)
-    user_type = fields.Many2one('account.account.type', string='Type', required=True,
+    user_type = fields.Many2one('account.account.type', string='Account Type', required=True,
         help="Account Type is used for information purpose, to generate "\
         "country-specific legal reports, and set the rules to close a fiscal year and generate opening entries.")
     child_consol_ids = fields.Many2many('account.account', 'account_account_consol_rel', 'child_id', 'parent_id', string='Consolidated Children', domain=[('deprecated', '=', False)])
-    last_time_entries_checked = fields.Datetime(string='Latest Manual Reconciliation Date', readonly=True, copy=False,
+    last_time_entries_checked = fields.Datetime(string='Reconciliation Date', readonly=True, copy=False,
         help='Last time the manual reconciliation was performed on this account. It is set either if there\'s not at least '\
         'an unreconciled debit and an unreconciled credit Or if you click the "Done" button.')
 
