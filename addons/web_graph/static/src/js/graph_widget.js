@@ -353,9 +353,9 @@ openerp.web_graph.Graph = openerp.web.Widget.extend({
             return;
         }
 
-        var fields = _.map(this.groupby_fields, function (field) {
+        var fields = _.chain(this.groupby_fields).map(function (field) {
                 return {id: field.field, value: field.string, type:self.fields[field.field.split(':')[0]].type};
-        });
+        }).sortBy("value").value();
         if (this.dropdown) {
             this.dropdown.remove();
         }
