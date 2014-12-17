@@ -28,6 +28,7 @@ from openerp.addons.resource.tests.common import TestResourceCommon
 class TestResource(TestResourceCommon):
 
     def test_00_intervals(self):
+        cr, uid = self.cr, self.uid
         intervals = [
             (
                 datetime.strptime('2013-02-04 09:00:00', '%Y-%m-%d %H:%M:%S'),
