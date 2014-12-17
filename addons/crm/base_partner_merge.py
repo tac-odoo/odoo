@@ -456,6 +456,7 @@ class MergePartnerAutomatic(models.TransientModel):
             [('id', 'in', partner_ids)], order='create_date')
         ordered_partners = sorted(sorted(partners, key=operator.attrgetter(
             'create_date'), reverse=True), key=operator.attrgetter('active'), reverse=True)
+        print "ordered_partners",ordered_partners
         return ordered_partners
 
     @api.one
@@ -546,7 +547,6 @@ class MergePartnerAutomatic(models.TransientModel):
             'state': 'selection',
             'number_group': counter,
         }
-
         self.write(values)
 
         _logger.info("counter: %s", counter)

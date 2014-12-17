@@ -1,31 +1,34 @@
-from openerp.tests.common import TransactionCase
+from openerp.tests import common
 
-class testBasePartnerMerge(TransactionCase):
-	""" Tests for Merge Partner """
-		
-	def setUp(self):
-		super(testBasePartnerMerge, self).setUp()
-		self.base_partner_merge = self.env['base.partner.merge.automatic.wizard']
-		self.res_partner = self.env['res.partner']
+class testBasePartnerMerge(common.TransactionCase):
+    def setUp(self):
+        super(testBasePartnerMerge, self).setUp()
 
-		self.partner1 = self.res_partner.create(
-			dict(
-			name = "Jusab Sida",
-			city = "Junagadh",
-			email = "jsi@openerp.com",
-			phone = "+01 23 456 789",
-			))
+    def test_partner_merge(self):
+        """ Tests for Merge Partner """
+        base_partner_merge = self.env[
+            'base.partner.merge.automatic.wizard']
+        res_partner = self.env['res.partner']
 
-		self.partner2 = self.res_partner.create(
-			dict(
-			name = "Mitesh P.",
-			city = "Gandhinagar",
-			email = "mpr@openerp.com",
-			phone = "+10 23 456 789",
-			))
+        partner_test_merge1 = res_partner.create(
+            dict(
+                name="Armande Crm_User",
+                city="Belgium",
+                email="admin@openerp.com",
+            ))
 
-	def test_partner_merge(self):
-		self.base_partner_merge._merge(set([self.partner1.id, self.partner2.id]))
-		# After merge, only one partner exist.
-		result = self.res_partner.search([('name','ilike','Jusab Sida'),('name','ilike','Mitesh P.')])
-		self.assertEqual(str(result),'res.partner()','There are sume problem with _merge mwthod')
+        partner_test_merge2 = res_partner.create(
+            dict(
+                name="Armande Crm_User",
+                city="Belgium",
+                email="demo@openerp.com",
+            ))
+
+        base_partner_obj = base_partner_merge.create(
+            vals={'group_by_name': True})
+        base_partner_obj.start_process_cb()
+        base_partner_obj.merge_cb()
+        partner_count = base_partner_obj.dst_partner_id.search_count(
+            [('name', 'ilike', 'Armande Crm_User')])
+        self.assertEqual(
+            partner_count, 1, 'Crm: Partners which name have same are not succesfully merged')
