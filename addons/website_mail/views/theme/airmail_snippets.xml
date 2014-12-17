@@ -15,7 +15,7 @@
         <div id="snippet_email_headers" class="tab-pane active">
 
             <div name="Center Logo" class="o_mail_block_header_center_logo">
-                <div class="snippet_row" style="padding:0px;width:600px;margin:auto;background-color:#f9f8f8">
+                <div class="snippet_row" style="padding:0px;width:600px;margin:auto;background: #f9f8f8 repeat top /100%">
                     <div t-att-style="' width:600px; background-image: url(' + base_url + '/website_mail/static/src/img/theme_imgs/airmail.png); background-repeat: repeat-x; background-size: contain; height: 7px; background-position:-2% 0%; display:block'"/>
                     <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse">
                         <tbody>
@@ -32,7 +32,7 @@
             </div>
 
             <div name="Center Text" class="o_mail_block_header_center_text">
-                <div class="snippet_row" style="padding:0px;width:600px;margin:auto;background-color:#f9f8f8;color: #464646">
+                <div class="snippet_row" style="padding:0px;width:600px;margin:auto;background: #f9f8f8 repeat top /100%;color: #464646">
                     <div t-att-style="' width:600px; background-image: url(' + base_url + '/website_mail/static/src/img/theme_imgs/airmail.png); background-repeat: repeat-x; background-size: contain; height: 7px; background-position:-2% 0%; display:block'"/>
                     <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse">
                         <tbody>
@@ -49,7 +49,7 @@
             </div>
 
             <div name="Logo - Social" class="o_mail_block_header_social">
-                <div class="snippet_row pictogram_colorpicker" style="padding:0px;width:600px;margin:auto;background-color:#f9f8f8;color: rgb(70,70,70)">
+                <div class="snippet_row pictogram_colorpicker" style="padding:0px;width:600px;margin:auto;background: #f9f8f8 repeat top /100%;color: rgb(70,70,70)">
                     <div t-att-style="' width:600px; background-image: url(' + base_url + '/website_mail/static/src/img/theme_imgs/airmail.png); background-repeat: repeat-x; background-size: contain; height: 7px; background-position:-2% 0%; display:block'"/>
                     <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse">
                         <tr>
@@ -90,7 +90,7 @@
             </div>
 
             <div name="Text - Social" class="o_mail_block_header_text_social">
-                <div class="snippet_row pictogram_colorpicker" style="padding:0px;width:600px;margin:auto;background-color:#f9f8f8;color:#464646">
+                <div class="snippet_row pictogram_colorpicker" style="padding:0px;width:600px;margin:auto;background: #f9f8f8 repeat top /100%;color:#464646">
                     <div t-att-style="' width:600px; background-image: url(' + base_url + '/website_mail/static/src/img/theme_imgs/airmail.png); background-repeat: repeat-x; background-size: contain; height: 7px;color: rgb(70,70,70); background-position:-2% 0%; display:block '"/>
                     <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse">
                         <tr>
@@ -135,7 +135,7 @@
         <div id="snippet_email_structure" class="tab-pane">
 
             <div name="Title Content" class="o_mail_block_title_text">
-                <div class="snippet_row" style="padding:0px;width:600px;margin:auto;background-color:#FFFFFF">
+                <div class="snippet_row" style="padding:0px;width:600px;margin:auto;background: #FFFFFF repeat top /100%">
                     <div style="padding:10px 30px">
                         <span style="font-size:30px;margin-top:20px;margin-bottom:10px;color:#464646">Your order has been shipped!</span>
                         <div style="text-align:left;color:#464646;font-size:14px">
@@ -150,7 +150,7 @@
             </div>
 
             <div name="Title - Subtitle" class="o_mail_block_title_sub">
-                <div class="snippet_row" style="padding:0px;width:600px;margin:auto;color:#464646;background-color:#FFFFFF">
+                <div class="snippet_row" style="padding:0px;width:600px;margin:auto;color:#464646;background: #FFFFFF repeat top /100%">
                     <table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;color:inherit">
                         <tbody>
                             <tr>
@@ -170,7 +170,7 @@
             </div>
 
             <div name="Discount Coupon" class="o_mail_block_discount2">
-                <div class="snippet_row" style="padding:0;width:600px;margin:auto;background-color:#fff;color:#464646">
+                <div class="snippet_row" style="padding:0;width:600px;margin:auto;background: #fff repeat top /100%;color:#464646">
                     <div style="padding:10px 70px">
                         <div style="text-align:center;font-size:30px;margin-top:20px;margin-bottom:30px">
                             Upgrade to Premium Account!
@@ -183,7 +183,7 @@
             </div>
 
             <div name="Discount Offer" class="o_mail_block_discount1">
-                <div class="snippet_row" style="padding:0px;width:600px;margin:auto;color:#464646;background-color:#FFFFFF">
+                <div class="snippet_row" style="padding:0px;width:600px;margin:auto;color:#464646;background: #FFFFFF repeat top /100%">
                     <table cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse">
                         <tbody>
                             <tr>
@@ -265,7 +265,7 @@
             </div>
 
             <div name="User Profile" class="o_mail_block_profile">
-                <div class="snippet_row" style="padding:0px;width:600px;margin:auto;background-color:#fff;color:#464646">
+                <div class="snippet_row" style="padding:0px;width:600px;margin:auto;background: #fff repeat top /100%;color:#464646">
                     <table style="padding:30px 15px;border-collapse:collapse;color:inherit">
                         <tr>
                             <td style="float:left;padding: 0 30px 0 20px;text-align: center;font-size:14px" class="pictogram_colorpicker col_mv">
@@ -289,7 +289,7 @@
             </div>
 
             <div name="Content Table" class="o_mail_block_table_content">
-                <div class="snippet_row" style="padding:0px;width:600px;margin:auto;background-color:#FFFFFF;color:#464646">
+                <div class="snippet_row" style="padding:0px;width:600px;margin:auto;background: #FFFFFF repeat top /100%;color:#464646">
                     <table cellspacing="0" cellpadding="0" style="margin: 0 auto;width:100%;border-collapse:collapse;color:inherit">
                         <tbody>
                             <tr>
@@ -400,7 +400,7 @@
             </div>
 
             <div name="Image" class="o_mail_block_image">
-                <div class="snippet_row color_picker" style="width:600px;margin:auto;background-color:#FFFFFF">
+                <div class="snippet_row color_picker" style="width:600px;margin:auto;background: #FFFFFF repeat top /100%">
                     <table cellspacing="0" cellpadding="0" style="width:100%;border-collapse:collapse">
                         <tbody>
                             <tr>
@@ -419,7 +419,7 @@
             </div>
 
             <div name="Button" class="o_mail_block_button">
-                <div class="snippet_row" style="padding:0;width:600px;max-width:600px;margin:0 auto;background-color:#fff">
+                <div class="snippet_row" style="padding:0;width:600px;max-width:600px;margin:0 auto;background: #fff repeat top /100%">
                     <table style="width:90%;text-align:center;margin:0 auto;border-collapse:collapse">
                         <tr>
                             <td class="row" style="padding:10px 0;text-align:center">
@@ -431,7 +431,7 @@
             </div>
 
             <div name="Text Block" class="o_mail_block_simple_text">
-                <div class="snippet_row" style="padding:0;width:600px;max-width:600px;margin:0 auto;background-color:#fff;color:#464646">
+                <div class="snippet_row" style="padding:0;width:600px;max-width:600px;margin:0 auto;background:#fff repeat top /100%;color:#464646">
                     <table style="width:100%;text-align:justify;margin:0 auto;border-collapse:collapse;color:inherit">
                         <tr>
                             <td style="padding:10px 0;font-size:14px">
@@ -451,7 +451,7 @@
             </div>
 
             <div name="Text With Background Image" class="o_mail_block_text_on_img">
-                <div class="snippet_row bg_color_picker" t-att-style="'padding:0px;width:600px;margin:auto;background-image:url(' + base_url + '/website_mail/static/src/img/theme_imgs/skyline_bg.gif);background-repeat:no-repeat;background-size:cover;color:#fff'">
+                <div class="snippet_row bg_color_picker" t-att-style="'padding:0px;width:600px;margin:auto;background: url(' + base_url + '/website_mail/static/src/img/theme_imgs/skyline_bg.gif) top /cover;background-repeat:no-repeat;color:#fff'">
                     <table cellspacing="0" cellpadding="0" style="width:100%;border-collapse:collapse;color:inherit">
                         <tbody>
                             <tr>
@@ -525,7 +525,7 @@
         <div id="snippet_email_footers" class="tab-pane">
 
             <div name="Social + Text" class="o_mail_block_footer_social">
-                <div class="snippet_row pictogram_colorpicker" style="padding:0px;width:600px;margin:auto;background-color:#E5E5E5;color:#464646">
+                <div class="snippet_row pictogram_colorpicker" style="padding:0px;width:600px;margin:auto;background: #E5E5E5 repeat top /100%;color:#464646">
                     <div style="padding:10px">
                         <table cellspacing="0" cellpadding="0" style="margin: 0 auto;width:100%;border-collapse:collapse;color:inherit">
                             <tbody>
@@ -557,7 +557,7 @@
             </div>
 
             <div name="Text + Copyright" class="o_mail_block_footer_copyright">
-                <div class="snippet_row bg_color_picker" style="padding:0px;width:600px;margin:auto;background-color:#E5E5E5">
+                <div class="snippet_row bg_color_picker" style="padding:0px;width:600px;margin:auto;background: #E5E5E5 repeat top /100%">
                     <table cellspacing="0" cellpadding="0" style="margin: 0 auto;width:100%;border-collapse:collapse;color:inherit">
                         <tbody>
                             <tr>
@@ -576,7 +576,7 @@
             </div>
 
             <div name="Text Only" class="o_mail_block_footer_text">
-                <div class="snippet_row bg_color_picker" style="padding:0px;width:600px;margin:auto;background-color:#E5E5E5;color:#464646">
+                <div class="snippet_row bg_color_picker" style="padding:0px;width:600px;margin:auto;background: #E5E5E5 repeat top /100%;color:#464646">
                     <center>
                         <table width="600" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto;width:100%;border-collapse:collapse;color:inherit">
                             <tbody>
