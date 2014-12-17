@@ -545,6 +545,9 @@ define([
     };
   
     return {
+
+      WrappedRange: WrappedRange, // odoo change for overwrite
+
       /**
        * create Range Object From arguments or Browser Selection
        *
