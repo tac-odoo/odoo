@@ -44,6 +44,9 @@
     .jumbotron, .panel, .carousel{
         page-break-inside:avoid;
     }
+    .hidden-print{
+        display:none;
+    }
 </template>
 
 <template id="external_layout">
