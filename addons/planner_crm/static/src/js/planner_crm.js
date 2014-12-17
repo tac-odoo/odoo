@@ -30,9 +30,10 @@
         $('#input_element_pipeline').change(function(ev) {
             var option = $(ev.target).find(":selected").val();
             if (_.has(stages, option)) {
+                
                 var values = stages[option];
-                for(var i=0; i<14; i++) {
-                    $('#input_element_stage_'+i+'').val(values[i]);
+                for(var i=0; i<values.length; i++) {
+                    $('#input_element_stage_'+i).val(values[i]);
                 }
             }
         });
